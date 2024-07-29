@@ -1,0 +1,36 @@
+package_name: sigewinne
+genshin_id: 90000003
+key: sigewinne
+action_param_keys:
+  attack:
+    - param: "travel"
+  aim:
+    - param: "hold"
+    - param: "travel"
+    - param: "weakspot"
+skill_data_mapping:
+  attack:
+    aim:
+      - 3 # Aimed Shot|{param3:F1P}
+    attack_1:
+      - 0 # 1-Hit DMG|{param0:F1P}
+    attack_2:
+      - 1 # 2-Hit DMG|{param1:F1P}
+    attack_3:
+      - 2 # 3-Hit DMG|{param2:F1P}
+    ministration:
+      - 4 # Mini-Stration Bubble DMG|{param4:F1P}
+    fullaim:
+      - 5 # Fully-Charged Aimed Shot|{param5:F1P}
+  skill:
+    skill:
+      - 0 # Bolstering Bubblebalm DMG|{param0:F1P}
+    skillheal:
+      - 1 # Bolstering Bubblebalm Healing|{param1:F1P}
+    skillbonus:
+      - 2 # Bolstering Bubblebalm Healing|{param2:F1P}
+    skillaligned:
+      - 3 # Surging Blade DMG|{param3:F1P}
+  burst:
+    burst:
+      - 0 # Skill DMG|{param0:F1P}
