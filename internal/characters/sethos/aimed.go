@@ -155,10 +155,10 @@ func (c *char) ShadowpiercingAimed(p map[string]int) (action.Info, error) {
 		Durability:           50,
 		Mult:                 shadowpiercing[c.TalentLvlAttack()],
 		FlatDmg:              shadowpiercingem[c.TalentLvlAttack()]*c.Stat(attributes.EM) + c.a4buff,
-		HitWeakPoint:         weakspot == 1,
+		HitWeakPoint:         weakspot == 0,
 		HitlagHaltFrames:     0.12 * 60,
 		HitlagFactor:         0.01,
-		HitlagOnHeadshotOnly: true,
+		HitlagOnHeadshotOnly: false,
 		IsDeployable:         true,
 	}
 	c.Core.QueueAttack(
@@ -171,7 +171,7 @@ func (c *char) ShadowpiercingAimed(p map[string]int) (action.Info, error) {
 			1,
 		),
 		ShadowpiercingHitmark-skip,
-		ShadowpiercingHitmark+travel-skip,
+		ShadowpiercingHitmark+travel-travel-skip,
 		c.c4cb(),
 	)
 

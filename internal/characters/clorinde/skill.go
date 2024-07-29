@@ -76,7 +76,7 @@ func (c *char) onExitField() {
 		// queue up a4
 		c.Core.Tasks.Add(c.a4, 60)
 		return false
-	}, "ayato-exit")
+	}, "clorinde-exit")
 }
 
 func (c *char) skillAligned() {

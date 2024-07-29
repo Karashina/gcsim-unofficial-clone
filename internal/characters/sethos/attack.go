@@ -57,6 +57,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			Element:    attributes.Physical,
 			Durability: 25,
 		}
+		travel = 0
 	}
 
 	for i, mult := range attack[c.NormalCounter] {
