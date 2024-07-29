@@ -32,7 +32,7 @@ type char struct {
 }
 
 const (
-	particleICDKey = "ayato-particle-icd"
+	particleICDKey = "crorinde-particle-icd"
 )
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
