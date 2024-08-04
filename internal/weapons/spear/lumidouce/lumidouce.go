@@ -24,7 +24,6 @@ type Weapon struct {
 	core   *core.Core
 	char   *character.CharWrapper
 	refine int
-	buff   []float64
 }
 
 const (
@@ -53,24 +52,32 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	})
 
 	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		trg, ok := args[0].(*enemy.Enemy)
-		atk := args[1].(*combat.AttackEvent)
-
+		t, ok := args[0].(*enemy.Enemy)
+		ae := args[1].(*combat.AttackEvent)
 		if !ok {
 			return false
 		}
-
-		if atk.Info.ActorIndex != char.Index {
+		if ae.Info.ActorIndex != char.Index {
 			return false
 		}
-
-		if !trg.IsBurning() && atk.Info.Element != attributes.Dendro {
+		if !t.IsBurning() || ae.Info.Element != attributes.Dendro {
 			return false
 		}
 
 		w.StackHandle()
 		return false
 	}, fmt.Sprintf("lumidouce-onstack-%v", char.Base.Key.String()))
+
+	c.Events.Subscribe(event.OnBurning, func(args ...interface{}) bool {
+		ae := args[1].(*combat.AttackEvent)
+		if ae.Info.ActorIndex != char.Index {
+			return false
+		}
+
+		w.StackHandle()
+		return false
+	}, fmt.Sprintf("lumidouce-onstack-%v", char.Base.Key.String()))
+
 	return w, nil
 }
 
@@ -82,13 +89,16 @@ func (w *Weapon) StackHandle() {
 		w.stacks++
 	}
 
-	w.char.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBaseWithHitlag(buffKey, 8*60),
-		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			w.buff[attributes.DmgP] = (0.18 + 0*float64(w.refine)) * float64(w.stacks)
-			return w.buff, true
+	m := make([]float64, attributes.EndStatType)
+	m[attributes.DmgP] = (0.18 + float64(w.refine)*0) * float64(w.stacks)
+	w.char.AddStatMod(character.StatMod{
+		Base:         modifier.NewBase("lumidouce elegy", 8*60),
+		AffectedStat: attributes.NoStat,
+		Amount: func() ([]float64, bool) {
+			return m, true
 		},
 	})
+
 	if w.stacks == 2 && !w.char.StatusIsActive(buffIcd) {
 		w.char.AddEnergy("lumidouce-energy", 12*float64(w.refine))
 		w.char.AddStatus(buffIcd, 12*60, true)
