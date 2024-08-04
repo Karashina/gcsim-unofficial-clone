@@ -189,6 +189,7 @@ import (
 	_ "github.com/genshinsim/gcsim/internal/weapons/spear/ironpoint"
 	_ "github.com/genshinsim/gcsim/internal/weapons/spear/kitain"
 	_ "github.com/genshinsim/gcsim/internal/weapons/spear/lithic"
+	_ "github.com/genshinsim/gcsim/internal/weapons/spear/lumidouce"
 	_ "github.com/genshinsim/gcsim/internal/weapons/spear/missive"
 	_ "github.com/genshinsim/gcsim/internal/weapons/spear/moonpiercer"
 	_ "github.com/genshinsim/gcsim/internal/weapons/spear/primordial"
