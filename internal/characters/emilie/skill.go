@@ -11,13 +11,12 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/reactions"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/genshinsim/gcsim/pkg/enemy"
 )
 
 var (
-	skillFrames       []int
-	skillRecastFrames []int
+	skillFrames []int
 )
 
 const (
@@ -38,9 +37,9 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	if c.LCActive {
-		return c.skillRecast(), nil
-	}
+	c.RemoveLumidouceCase(c.LCSource)
+	c.LCLevel = 0
+
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Fragrance Extraction (E)",
@@ -59,10 +58,12 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), geometry.Point{Y: 1}, radius),
 		skillLCSpawn,
 		skillLCHitmark,
-		c.c6cb,
 	)
 
 	c.SetCD(action.ActionSkill, 25*60+15)
+	if c.Base.Cons >= 6 {
+		c.c6init()
+	}
 
 	if !c.StatusIsActive(burstKey) {
 		c.LCActive = true
@@ -86,22 +87,6 @@ func (c *char) particleCB(a combat.AttackCB) {
 	}
 	c.AddStatus(particleICDKey, 2.5*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Dendro, c.ParticleDelay)
-}
-
-func (c *char) skillRecast() action.Info {
-	c.Core.Tasks.Add(func() {
-		c.LCTickSrc = c.Core.F // reset attack timer
-		c.Core.Tasks.Add(c.LumidouceCaseTick(c.LCTickSrc), 89)
-		c.LCSnapshot.Snapshot = c.Snapshot(&c.LCSnapshot.Info)
-		c.Core.Log.NewEvent("Recasting Lumidouce Case", glog.LogCharacterEvent, c.Index).
-			Write("next expected tick", c.Core.F+89)
-	}, 2) // 2f delay
-	return action.Info{
-		Frames:          frames.NewAbilFunc(skillRecastFrames),
-		AnimationLength: skillRecastFrames[action.InvalidAction],
-		CanQueueAfter:   skillRecastFrames[action.ActionDash], // earliest cancel
-		State:           action.SkillState,
-	}
 }
 
 func (c *char) queueLumidouceCase(src string, LCSpawn, firstTick int) {
@@ -212,31 +197,40 @@ func (c *char) RemoveLumidouceCase(src int) func() {
 }
 
 func (c *char) ScentsCheck() {
-	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
+	c.Core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
 
 		if c.StatusIsActive(scentsICDKey) {
 			return false
 		}
 
-		if ae.Info.Abil == string(reactions.Burning) {
-			if !c.LCActive {
-				c.Scents = 0
-				c.LCLevel = 0
+		enemies := c.Core.Combat.EnemiesWithinArea(
+			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10),
+			nil,
+		)
+
+		for _, x := range enemies {
+			t, ok := x.(*enemy.Enemy)
+			if !ok {
+				continue
 			}
-			if c.Scents < 2 {
-				c.Scents++
-				c.AddStatus(scentsICDKey, 120, false)
-			}
-			if c.Scents >= 2 && c.LCLevel != 1 {
-				c.LCLevel = 1
-			}
-			if c.Scents >= 2 {
-				c.a1()
-				c.Scents = 0
+			if t.IsBurning() {
+				if !c.LCActive {
+					c.Scents = 0
+					c.LCLevel = 0
+				}
+				if c.Scents < 2 {
+					c.Scents++
+					c.AddStatus(scentsICDKey, 120, false)
+				}
+				if c.Scents >= 2 && c.LCLevel != 1 {
+					c.LCLevel = 1
+				}
+				if c.Scents >= 2 {
+					c.a1()
+					c.Scents = 0
+				}
 			}
 		}
-
 		return false
 	}, "emilie-scents-check")
 }

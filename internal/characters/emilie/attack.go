@@ -38,7 +38,7 @@ func init() {
 	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][0], 35)
 	attackFrames[2][action.ActionCharge] = 40
 
-	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 77)
+	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][0], 77)
 	attackFrames[3][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
 }
 
@@ -57,6 +57,11 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			HitlagFactor:       0.01,
 			HitlagHaltFrames:   attackHitlagHaltFrame[c.NormalCounter][i] * 60,
 			CanBeDefenseHalted: true,
+		}
+		if c.Base.Cons >= 6 && c.StatusIsActive(c6Key) {
+			ai.Element = attributes.Dendro
+			ai.FlatDmg += c.TotalAtk() * 3
+			c.c6handle()
 		}
 		ap := combat.NewBoxHitOnTarget(
 			c.Core.Combat.Player(),

@@ -36,6 +36,11 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		CanBeDefenseHalted: true,
 		Mult:               charge[c.TalentLvlAttack()],
 	}
+	if c.Base.Cons >= 6 && c.StatusIsActive(c6Key) {
+		ai.Element = attributes.Dendro
+		ai.FlatDmg += c.TotalAtk() * 3
+		c.c6handle()
+	}
 
 	c.Core.QueueAttack(
 		ai,

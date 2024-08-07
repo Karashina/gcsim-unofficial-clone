@@ -68,7 +68,6 @@ func (c *char) Init() error {
 	c.c1dendro()
 	c.c1burn()
 	c.c2()
-	c.c6()
 	return nil
 }
 

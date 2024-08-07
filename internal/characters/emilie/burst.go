@@ -46,7 +46,10 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Mult:       burst[c.TalentLvlBurst()],
 	}
 
-	c.Core.Status.Add(burstKey, 15*60+127)
+	c.Core.Status.Add(burstKey, duration+127)
+	if c.Base.Cons >= 6 {
+		c.c6init()
+	}
 
 	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10)
 	for i := 0; i < 2.8*60; i += 18 {
@@ -70,7 +73,6 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				combat.NewCircleHitOnTarget(pos, nil, 2.5),
 				burstHitmark,
 				burstHitmark,
-				c.c6cb,
 			)
 		}, i+127)
 	}
