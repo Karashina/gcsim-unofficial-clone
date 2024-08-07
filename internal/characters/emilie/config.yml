@@ -1,0 +1,38 @@
+package_name: emilie
+genshin_id: 90000004
+key: emilie
+action_param_keys:
+    low_plunge:
+        - param: "collision"
+    high_plunge:
+        - param: "collision"
+skill_data_mapping:
+    attack:
+        attack_1:
+            - 0 # 1-Hit DMG|{param0:F1P}
+        attack_2:
+            - 1 # 2-Hit DMG|{param1:F1P}
+        attack_3:
+            - 2 # 3-Hit DMG|{param2:F1P}
+        attack_4:
+            - 3 # 4-Hit DMG|{param3:F1P}
+        charge:
+            - 4 # Charged Attack DMG|{param5:P}
+        collision:
+            - 5 # Plunge DMG|{param6:F1P}
+        lowPlunge:
+            - 6 # Low/High Plunge DMG|{param7:P}/{param8:P}
+        highPlunge:
+            - 7 # Low/High Plunge DMG|{param7:P}/{param8:P}
+    skill:
+        skill:
+            - 0 # Skill DMG|{param0:P}
+        skillTickL1:
+            - 1 # Level 1 Lumidouce Case Attack DMG|{param1:P}
+        skillTickL2:
+            - 2 # Level 2 Lumidouce Case Attack DMG|{param1:P}
+        arkhe:
+            - 3 # Spiritbreath Thorn DMG|{param0:P}
+    burst:
+        burst:
+            - 0 # Level 3 Lumidouce Case Attack DMG|{param0:P}
