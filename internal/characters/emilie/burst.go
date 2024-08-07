@@ -52,7 +52,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 
 	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10)
-	for i := 0; i < 2.8*60; i += 18 {
+	for i := 0; i < duration; i += targetinterval {
 		c.Core.Tasks.Add(func() {
 			// burst tick
 			enemy := c.Core.Combat.RandomEnemyWithinArea(
