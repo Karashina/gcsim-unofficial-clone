@@ -57,7 +57,7 @@ func (c *char) a1() {
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 2.5),
 		0,
-		0,
+		68,
 	)
 }
 

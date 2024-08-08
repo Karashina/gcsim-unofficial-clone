@@ -219,11 +219,12 @@ func (c *char) ScentsCheck() {
 					c.LCLevel = 0
 				}
 				if c.Scents < 2 {
-					c.Scents++
+					c.QueueCharTask(c.AddScents, 90)
 					c.AddStatus(scentsICDKey, 120, false)
 				}
 				if c.Scents >= 2 && c.LCLevel != 1 {
 					c.LCLevel = 1
+					c.Scents = 0
 				}
 				if c.Scents >= 2 {
 					c.a1()
@@ -233,4 +234,8 @@ func (c *char) ScentsCheck() {
 		}
 		return false
 	}, "emilie-scents-check")
+}
+
+func (c *char) AddScents() {
+	c.Scents++
 }

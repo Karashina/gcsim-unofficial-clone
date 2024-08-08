@@ -72,11 +72,12 @@ func (c *char) c1handle() {
 		c.LCLevel = 0
 	}
 	if c.Scents < 2 {
-		c.Scents++
+		c.QueueCharTask(c.AddScents, 90)
 		c.AddStatus(c1scentsICDKey, 2.9*60, false)
 	}
 	if c.Scents >= 2 && c.LCLevel != 1 {
 		c.LCLevel = 1
+		c.Scents = 0
 	}
 	if c.Scents >= 2 {
 		c.a1()
@@ -135,7 +136,7 @@ func (c *char) c6handle() {
 		c.LCLevel = 0
 	}
 	if c.Scents < 2 {
-		c.Scents++
+		c.QueueCharTask(c.AddScents, 90)
 		c.AddStatus(c1scentsICDKey, 2.9*60, false)
 		c.c6Count += 1
 		if c.c6Count == 4 {
@@ -145,6 +146,7 @@ func (c *char) c6handle() {
 	}
 	if c.Scents >= 2 && c.LCLevel != 1 {
 		c.LCLevel = 1
+		c.Scents = 0
 	}
 	if c.Scents >= 2 {
 		c.a1()
