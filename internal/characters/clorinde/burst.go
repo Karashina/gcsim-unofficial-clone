@@ -6,53 +6,68 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
-var burstFramesNormal []int
+var (
+	burstFrames           []int
+	burstSkillStateFrames []int
+	burstHitmarks         = []int{97, 103, 109, 115, 121}
+)
+
+const (
+	burstCD = 15 * 60
+)
 
 func init() {
-	burstFramesNormal = frames.InitAbilSlice(136)
+	burstFrames = frames.InitAbilSlice(128) // Q - N1/E/Jump/Walk
+	burstFrames[action.ActionDash] = 127
+	burstFrames[action.ActionSwap] = 127
+
+	burstSkillStateFrames = frames.InitAbilSlice(128) // Q - Jump/Walk
+	burstSkillStateFrames[action.ActionAttack] = 127
+	burstSkillStateFrames[action.ActionSkill] = 127
+	burstSkillStateFrames[action.ActionDash] = 127
+	burstSkillStateFrames[action.ActionSwap] = 127
 }
 
-// First Hitmark
-const burstHitmark = 100
-
-// Delay between each additional hit
-const burstHitmarkDelay = 6
-
-// Frames until snapshot stage is reached
-// TODO: Determine correct Frame
-const burstSnapshotDelay = 100
-
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-
 	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Last Lightfall",
-		AttackTag:  attacks.AttackTagElementalBurst,
-		ICDTag:     attacks.ICDTagElementalBurst,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Electro,
-		Durability: 25,
-		Mult:       burst[c.TalentLvlBurst()],
-		FlatDmg:    c.a1buff,
+		ActorIndex:       c.Index,
+		Abil:             "Burst",
+		AttackTag:        attacks.AttackTagElementalBurst,
+		ICDTag:           attacks.ICDTagElementalBurst,
+		ICDGroup:         attacks.ICDGroupDefault,
+		StrikeType:       attacks.StrikeTypeSlash,
+		Element:          attributes.Electro,
+		Durability:       25,
+		Mult:             burstDamage[c.TalentLvlBurst()],
+		HitlagHaltFrames: 0.1,
+	}
+	for _, v := range burstHitmarks {
+		// TODO: what's the size of this??
+		ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: -1}, 11.2, 9)
+		c.Core.QueueAttack(ai, ap, v, v)
 	}
 
-	c.ModifyHPDebtByAmount(burstbol[c.TalentLvlBurst()] * c.MaxHP())
+	c.SetCD(action.ActionBurst, burstCD)
+	c.ConsumeEnergy(14)
+	c.QueueCharTask(func() {
+		c.ModifyHPDebtByRatio(burstBOL[c.TalentLvlBurst()])
+	}, 13)
 
-	for i := 0; i < 5; i++ {
-		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5),
-			burstSnapshotDelay, burstHitmark+i*burstHitmarkDelay)
+	if c.StatusIsActive(skillStateKey) {
+		return action.Info{
+			Frames:          frames.NewAbilFunc(burstSkillStateFrames),
+			AnimationLength: burstSkillStateFrames[action.InvalidAction],
+			CanQueueAfter:   burstSkillStateFrames[action.ActionSwap], // earliest cancel
+			State:           action.BurstState,
+		}, nil
 	}
-
-	c.SetCD(action.ActionBurst, 15*60)
-	c.ConsumeEnergy(5)
-
 	return action.Info{
-		Frames:          func(next action.Action) int { return burstFramesNormal[next] },
-		AnimationLength: burstFramesNormal[action.InvalidAction],
-		CanQueueAfter:   burstFramesNormal[action.ActionAttack],
+		Frames:          frames.NewAbilFunc(burstFrames),
+		AnimationLength: burstFrames[action.InvalidAction],
+		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
 		State:           action.BurstState,
 	}, nil
 }

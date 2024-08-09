@@ -1,8 +1,6 @@
 package clorinde
 
 import (
-	"errors"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -10,41 +8,36 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 )
 
-var chargeFrames []int
-
-const chargeHitmark = 36
+var (
+	chargeFrames  []int
+	chargeHitmark = 38
+	chargeRadius  = 4.1
+)
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(45)
-	chargeFrames[action.ActionDash] = chargeHitmark
-	chargeFrames[action.ActionJump] = chargeHitmark
+	chargeFrames = frames.InitAbilSlice(44) // CA -> E
+	chargeFrames[action.ActionAttack] = 66
+	chargeFrames[action.ActionBurst] = 67
 	chargeFrames[action.ActionSwap] = 45
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	if c.StatusIsActive(skillBuffKey) {
-		return action.Info{}, errors.New("charged attack called in skill state")
-	}
 	ai := combat.AttackInfo{
-		Abil:       "Charge",
-		ActorIndex: c.Index,
-		AttackTag:  attacks.AttackTagExtra,
-		ICDTag:     attacks.ICDTagExtraAttack,
-		ICDGroup:   attacks.ICDGroupPoleExtraAttack,
-		StrikeType: attacks.StrikeTypeSlash,
-		Element:    attributes.Physical,
-		Durability: 25,
-		Mult:       ca[c.TalentLvlAttack()],
+		ActorIndex:   c.Index,
+		Abil:         "Charge",
+		AttackTag:    attacks.AttackTagExtra,
+		ICDTag:       attacks.ICDTagNormalAttack,
+		ICDGroup:     attacks.ICDGroupDefault,
+		StrikeType:   attacks.StrikeTypeDefault,
+		Element:      attributes.Physical,
+		Durability:   25,
+		Mult:         charge[c.TalentLvlAttack()],
+		HitlagFactor: 0.02,
 	}
 
 	c.Core.QueueAttack(
 		ai,
-		combat.NewCircleHit(
-			c.Core.Combat.Player(),
-			c.Core.Combat.PrimaryTarget(),
-			nil,
-			0.8,
-		),
+		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, chargeRadius),
 		chargeHitmark,
 		chargeHitmark,
 	)

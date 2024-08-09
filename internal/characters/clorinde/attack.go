@@ -9,52 +9,74 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
 var (
-	swiftFrames           []int
-	impaleFrames          []int
 	attackFrames          [][]int
-	attackHitmarks        = [][]int{{20}, {11}, {34, 38}, {13, 21, 28}, {25}}
-	attackHitlagHaltFrame = [][]float64{{0.03}, {0.03}, {0, 0.03}, {0, 0, 0.03}, {0.08}}
-	attackDefHalt         = [][]bool{{true}, {true}, {false, true}, {false, false, true}, {true}}
-	attackHitboxes        = [][]float64{{1.7}, {1.7}, {1.6, 2.8}, {2, 2, 2.6}, {6, 2}}
-	attackOffsets         = []float64{0.6, 0.8, 0.3, -0.2, 0.6}
+	attackHitmarks        = [][]int{{18}, {12}, {23, 32}, {12, 18, 23}, {21}}
+	attackHitlagHaltFrame = [][]float64{{0.03}, {0.03}, {0.03, 0.03}, {0.02, 0.02, 0.02}, {0.03}}
+	attackHitlagFactor    = [][]float64{{0.01}, {0.01}, {0.01, 0.01}, {0.05, 0.05, 0.05}, {0.05}}
+	attackDefHalt         = [][]bool{{true}, {true}, {true, true}, {true, true, true}, {true}}
+	attackHitboxes        = [][][]float64{{{1.7}}, {{1.9}}, {{2.1}, {2.1}}, {{2, 3.5}, {2, 3}, {2, 3}}, {{2.5}}} // n4 is a box
+	attackOffsets         = []float64{1.1, 1.3, 1.2, 1.3, 1.4}
 )
 
-const normalHitNum = 5
-const swiftHitmark = 5
+var (
+	skillAttackFrames   [][]int
+	skillAttackHitmarks = []int{10, 10, 11}
+)
+
+const (
+	normalHitNum = 5
+	skillHitNum  = 3
+
+	arkheHitmark = 42
+	arkheICDKey  = "clorinde-arkhe-icd"
+)
 
 func init() {
-	// NA cancels
+	// Normal attack
 	attackFrames = make([][]int, normalHitNum)
 
-	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 30) // N1 -> CA
-	attackFrames[0][action.ActionAttack] = 27                                // N1 -> N2
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 24) // N1 -> CA
+	attackFrames[0][action.ActionAttack] = 19
 
-	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 14) // N2 -> N3
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 27)
+	attackFrames[1][action.ActionAttack] = 12
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][1], 45) // N3 -> N4
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][1], 42)
+	attackFrames[2][action.ActionAttack] = 40
 
-	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][2], 34) // N4 -> N5
+	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][2], 35)
+	attackFrames[3][action.ActionAttack] = 32
 
-	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 70) // N5 -> N1
-	attackFrames[4][action.ActionCharge] = 500                               // N5 -> CA, TODO: this action is illegal; need better way to handle it
+	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 60)
 
-	// NA (in skill) -> x
-	swiftFrames = frames.InitNormalCancelSlice(swiftHitmark, 17)
+	// Skill attack
+	skillAttackFrames = make([][]int, skillHitNum)
+
+	skillAttackFrames[0] = frames.InitNormalCancelSlice(skillAttackHitmarks[0], 19)
+	skillAttackFrames[0][action.ActionSkill] = 11
+	skillAttackFrames[0][action.ActionBurst] = 10
+
+	skillAttackFrames[1] = frames.InitNormalCancelSlice(skillAttackHitmarks[1], 17)
+	skillAttackFrames[1][action.ActionSkill] = 10
+	skillAttackFrames[1][action.ActionBurst] = 10
+
+	skillAttackFrames[2] = frames.InitNormalCancelSlice(skillAttackHitmarks[2], 20)
+	skillAttackFrames[2][action.ActionSkill] = 11
+	skillAttackFrames[2][action.ActionBurst] = 11
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	if c.StatusIsActive(skillBuffKey) {
-		return c.SwiftHunt(p)
+	if c.StatusIsActive(skillStateKey) {
+		return c.skillAttack(p)
 	}
 
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{
-			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
 			ActorIndex:         c.Index,
+			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
 			AttackTag:          attacks.AttackTagNormal,
 			ICDTag:             attacks.ICDTagNormalAttack,
 			ICDGroup:           attacks.ICDGroupDefault,
@@ -62,31 +84,30 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			Element:            attributes.Physical,
 			Durability:         25,
 			Mult:               mult[c.TalentLvlAttack()],
-			HitlagFactor:       0.01,
+			HitlagFactor:       attackHitlagFactor[c.NormalCounter][i],
 			HitlagHaltFrames:   attackHitlagHaltFrame[c.NormalCounter][i] * 60,
 			CanBeDefenseHalted: attackDefHalt[c.NormalCounter][i],
 		}
+
 		ap := combat.NewCircleHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: attackOffsets[c.NormalCounter]},
-			attackHitboxes[c.NormalCounter][0],
+			attackHitboxes[c.NormalCounter][i][0],
 		)
-		if c.NormalCounter >= 2 {
+		if c.NormalCounter == 3 {
 			ap = combat.NewBoxHitOnTarget(
 				c.Core.Combat.Player(),
 				geometry.Point{Y: attackOffsets[c.NormalCounter]},
-				attackHitboxes[c.NormalCounter][0],
-				attackHitboxes[c.NormalCounter][1],
+				attackHitboxes[c.NormalCounter][i][0],
+				attackHitboxes[c.NormalCounter][i][1],
 			)
 		}
-		c.QueueCharTask(func() {
-			c.Core.QueueAttack(ai, ap, 0, 0)
-		}, attackHitmarks[c.NormalCounter][i])
+
+		c.Core.QueueAttack(ai, ap, attackHitmarks[c.NormalCounter][i], attackHitmarks[c.NormalCounter][i])
 	}
 
 	defer c.AdvanceNormalIndex()
 
-	// normal state
 	return action.Info{
 		Frames:          frames.NewAttackFunc(c.Character, attackFrames),
 		AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],
@@ -95,142 +116,69 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-func (c *char) SwiftHunt(p map[string]int) (action.Info, error) {
-
-	bolswift := c.bollevel - 1
-	if bolswift <= 0 {
-		bolswift = 0
-	}
-
+func (c *char) skillAttack(_ map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
-		Abil:               fmt.Sprintf("Swift Hunt %v", c.NormalCounter),
-		ActorIndex:         c.Index,
-		AttackTag:          attacks.AttackTagNormal,
-		ICDTag:             attacks.ICDTagNormalAttack,
-		ICDGroup:           attacks.ICDGroupDefault,
-		StrikeType:         attacks.StrikeTypePierce,
-		Element:            attributes.Electro,
-		Durability:         25,
-		Mult:               swift[bolswift][c.TalentLvlSkill()],
-		FlatDmg:            c.a1buff,
-		HitlagFactor:       0,
-		HitlagHaltFrames:   0,
-		CanBeDefenseHalted: false,
-	}
-	c.Core.QueueAttack(
-		ai,
-		combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 8, 7),
-		0,
-		swiftHitmark,
-		c.particleCB,
-	)
-
-	if c.CurrentHPDebt() < c.MaxHP() {
-		c.ModifyHPDebtByAmount(0.35 * c.MaxHP())
+		ActorIndex:     c.Index,
+		Abil:           fmt.Sprintf("Swift Hunt (Piercing Shot) %d", c.normalSCounter),
+		AttackTag:      attacks.AttackTagNormal,
+		ICDTag:         attacks.ICDTagNormalAttack,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Electro,
+		Durability:     25,
+		Mult:           skillEnhancedNA[c.TalentLvlSkill()],
+		IgnoreInfusion: true,
 	}
 
-	c.skillAligned()
+	t := c.Core.Combat.PrimaryTarget()
+	gainBOL := true
+	var ap combat.AttackPattern
+	if c.currentHPDebtRatio() < 1 {
+		// TODO: assume this is just a big rectangle center on target
+		ap = combat.NewBoxHitOnTarget(t, nil, 2, 14)
+	} else {
+		ai.Abil = fmt.Sprintf("Swift Hunt (Normal shot) %d", c.normalSCounter)
+		ai.Mult = skillNA[c.TalentLvlSkill()]
+		ap = combat.NewCircleHitOnTarget(t, nil, 0.6)
+		gainBOL = false
+	}
+
+	// TODO: assume no snapshotting on this
+	c.QueueCharTask(func() {
+		c.Core.QueueAttack(ai, ap, 0, 0, c.particleCB)
+		c.arkheAttack()
+		if gainBOL {
+			c.gainBOLOnAttack() // Bond of Life timing is ping dependent
+		}
+	}, skillAttackHitmarks[c.normalSCounter])
+
 	defer c.AdvanceNormalIndex()
-	atkspd := c.Stat(attributes.AtkSpd)
-	c.c1()
 
 	return action.Info{
-		Frames: func(next action.Action) int {
-			return frames.AtkSpdAdjust(swiftFrames[next], atkspd)
-		},
-		AnimationLength: swiftFrames[action.InvalidAction],
-		CanQueueAfter:   swiftHitmark,
+		Frames:          frames.NewAbilFunc(skillAttackFrames[c.normalSCounter]),
+		AnimationLength: skillAttackFrames[c.normalSCounter][action.InvalidAction],
+		CanQueueAfter:   skillAttackFrames[c.normalSCounter][action.ActionBurst],
 		State:           action.NormalAttackState,
 	}, nil
 }
 
-func (c *char) ImpaletheNight(p map[string]int) (action.Info, error) {
-
-	bolimpale := c.bollevel
-
-	impaleHitmark := 8
-	impaleFrames = frames.InitNormalCancelSlice(impaleHitmark, 24)
-
-	if bolimpale >= 2 {
-		impaleHitmark = 7
-		impaleFrames = frames.InitNormalCancelSlice(impaleHitmark, 19)
+func (c *char) arkheAttack() {
+	if c.StatusIsActive(arkheICDKey) {
+		return
 	}
-
 	ai := combat.AttackInfo{
-		Abil:               fmt.Sprintf("Impale the Night %v", c.NormalCounter),
 		ActorIndex:         c.Index,
-		AttackTag:          attacks.AttackTagNormal,
-		ICDTag:             attacks.ICDTagNormalAttack,
+		Abil:               "Surging Blade",
+		AttackTag:          attacks.AttackTagElementalArt,
+		ICDTag:             attacks.ICDTagNone,
 		ICDGroup:           attacks.ICDGroupDefault,
-		StrikeType:         attacks.StrikeTypeSlash,
+		StrikeType:         attacks.StrikeTypeSpear,
 		Element:            attributes.Electro,
-		Durability:         25,
-		Mult:               impale[bolimpale][c.TalentLvlSkill()],
-		FlatDmg:            c.a1buff,
-		HitlagFactor:       0,
-		HitlagHaltFrames:   0,
-		CanBeDefenseHalted: false,
+		Durability:         0,
+		Mult:               arkheDamage[c.TalentLvlSkill()],
+		HitlagFactor:       0.01,
+		CanBeDefenseHalted: true,
 	}
-	c.Core.QueueAttack(
-		ai,
-		combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 8, 7),
-		0,
-		impaleHitmark,
-		c.particleCB,
-	)
-	c.c1()
-	if bolimpale >= 2 {
-		if c.Base.Cons >= 6 {
-			c.c6()
-		}
-		c.Core.QueueAttack(
-			ai,
-			combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 8, 7),
-			0,
-			impaleHitmark+7,
-			c.particleCB,
-		)
-		c.Core.QueueAttack(
-			ai,
-			combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 8, 7),
-			0,
-			impaleHitmark+12,
-			c.particleCB,
-		)
-	}
-
-	if c.CurrentHPDebt() < c.MaxHP() && c.CurrentHPDebt() > 0 {
-		amt := 1.04 * c.CurrentHPDebt()
-		// call the template healing method directly to bypass Heal override
-		c.Character.Heal(&info.HealInfo{
-			Caller:  c.Index,
-			Target:  c.Index,
-			Message: "clorinde-skill-heal",
-			Src:     amt,
-			Bonus:   c.Stat(attributes.Heal),
-		})
-	}
-	if c.CurrentHPDebt() >= c.MaxHP() {
-		amt := 1.10 * c.CurrentHPDebt()
-		c.Character.Heal(&info.HealInfo{
-			Caller:  c.Index,
-			Target:  c.Index,
-			Message: "clorinde-skill-heal",
-			Src:     amt,
-			Bonus:   c.Stat(attributes.Heal),
-		})
-	}
-	c.skillAligned()
-
-	defer c.AdvanceNormalIndex()
-	atkspd := c.Stat(attributes.AtkSpd)
-
-	return action.Info{
-		Frames: func(next action.Action) int {
-			return frames.AtkSpdAdjust(impaleFrames[next], atkspd)
-		},
-		AnimationLength: impaleFrames[action.InvalidAction],
-		CanQueueAfter:   impaleHitmark,
-		State:           action.NormalAttackState,
-	}, nil
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 4.5), arkheHitmark, arkheHitmark)
+	c.AddStatus(arkheICDKey, int(arkheCD[c.TalentLvlSkill()]*60), true)
 }
