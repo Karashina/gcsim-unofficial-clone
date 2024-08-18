@@ -3,7 +3,6 @@ package emilie
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
@@ -17,43 +16,25 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	// field use for calculating oz damage
-	L1ai            combat.AttackInfo
-	L2ai            combat.AttackInfo
-	LCPos           geometry.Point
-	LCSnapshot      combat.AttackEvent
-	LCLevel         int
-	LCSource        int  // keep tracks of source for resets
-	LCActive        bool // purely used for gscl conditional purposes
-	LCActiveUntil   int  // used for LC ticks
-	LCTickSrc       int  // used for LC recast
-	LCTravel        int
-	Scents          int
-	burstLCSpawnSrc int // prevent double LC spawn from burst
-	c6Count         int
+
+	caseTravel   int
+	lumidouceSrc int
+	lumidoucePos geometry.Point
+
+	prevLumidouceLvl  int
+	burstMarkDuration int
+
+	c6Scents int
 }
 
-func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) error {
+func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := char{}
 	c.Character = tmpl.NewWithWrapper(s, w)
 
 	c.EnergyMax = 50
 	c.NormalHitNum = normalHitNum
-	c.SkillCon = 3
 	c.BurstCon = 5
-
-	c.LCSource = -1
-	c.LCActive = false
-	c.LCActiveUntil = -1
-	c.LCTickSrc = -1
-	c.LCLevel = 0
-	c.Scents = 0
-
-	c.LCTravel = 10
-	travel, ok := p.Params["lc_travel"]
-	if ok {
-		c.LCTravel = travel
-	}
+	c.SkillCon = 3
 
 	w.Character = &c
 
@@ -61,36 +42,19 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	c.ScentsCheck()
 	c.a4()
-	c.a0()
 	c.c1()
-	c.c1dendro()
-	c.c1burn()
-	c.c2()
+
 	return nil
 }
 
-func (c *char) Condition(fields []string) (any, error) {
-	switch fields[0] {
-	case "lc":
-		return c.LCActive, nil
-	case "lc-source":
-		return c.LCSource, nil
-	case "lc-duration":
-		duration := c.LCActiveUntil - c.Core.F
-		if duration < 0 {
-			duration = 0
-		}
-		return duration, nil
-	default:
-		return c.Character.Condition(fields)
-	}
-}
-
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
-	if k == model.AnimationXingqiuN0StartDelay {
-		return 9
+	switch k {
+	case model.AnimationXingqiuN0StartDelay:
+		return 15
+	case model.AnimationYelanN0StartDelay:
+		return 6
+	default:
+		return c.Character.AnimationStartDelay(k)
 	}
-	return c.Character.AnimationStartDelay(k)
 }

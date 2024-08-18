@@ -23,6 +23,7 @@ const (
 	Chevreuse
 	Chiori
 	Chongyun
+	Clorinde
 	Collei
 	Cyno
 	Dehya
@@ -70,6 +71,7 @@ const (
 	Sayu
 	Sethos
 	Shenhe
+	Sigewinne
 	Sucrose
 	Tartaglia
 	Thoma
@@ -89,8 +91,6 @@ const (
 	Yoimiya
 	Yunjin
 	Zhongli
-	Clorinde
-	Sigewinne
 	EndCharKeys
 )
 
@@ -158,6 +158,10 @@ func init() {
 	charNames[Chongyun] = "chongyun"
 	charPrettyName[Chongyun] = "Chongyun"
 	CharKeyToEle[Chongyun] = attributes.Cryo
+
+	charNames[Clorinde] = "clorinde"
+	charPrettyName[Clorinde] = "Clorinde"
+	CharKeyToEle[Clorinde] = attributes.Electro
 
 	charNames[Collei] = "collei"
 	charPrettyName[Collei] = "Collei"
@@ -339,10 +343,18 @@ func init() {
 	charPrettyName[Sayu] = "Sayu"
 	CharKeyToEle[Sayu] = attributes.Anemo
 
+	charNames[Sethos] = "sethos"
+	charPrettyName[Sethos] = "Sethos"
+	CharKeyToEle[Sethos] = attributes.Electro
+
 	charNames[Shenhe] = "shenhe"
 	charPrettyName[Shenhe] = "Shenhe"
 	CharKeyToEle[Shenhe] = attributes.Cryo
-
+	
+	charNames[Sigewinne] = "sigewinne"
+	charPrettyName[Sigewinne] = "Sigewinne"
+	CharKeyToEle[Sigewinne] = attributes.Hydro
+	
 	charNames[Sucrose] = "sucrose"
 	charPrettyName[Sucrose] = "Sucrose"
 	CharKeyToEle[Sucrose] = attributes.Anemo
@@ -418,16 +430,4 @@ func init() {
 	charNames[Zhongli] = "zhongli"
 	charPrettyName[Zhongli] = "Zhongli"
 	CharKeyToEle[Zhongli] = attributes.Geo
-
-	charNames[Clorinde] = "clorinde"
-	charPrettyName[Clorinde] = "Clorinde"
-	CharKeyToEle[Clorinde] = attributes.Electro
-
-	charNames[Sethos] = "sethos"
-	charPrettyName[Sethos] = "Sethos"
-	CharKeyToEle[Sethos] = attributes.Electro
-
-	charNames[Sigewinne] = "sigewinne"
-	charPrettyName[Sigewinne] = "Sigewinne"
-	CharKeyToEle[Sigewinne] = attributes.Hydro
 }

@@ -15,8 +15,8 @@ import (
 var highPlungeFrames []int
 var lowPlungeFrames []int
 
-const lowPlungeHitmark = 42 + 3
-const highPlungeHitmark = 43 + 3
+const lowPlungeHitmark = 44 + 3
+const highPlungeHitmark = 46 + 3
 const collisionHitmark = lowPlungeHitmark - 6
 
 const lowPlungePoiseDMG = 100.0
@@ -27,21 +27,21 @@ const highPlungeRadius = 5.0
 
 func init() {
 	// low_plunge -> x
-	lowPlungeFrames = frames.InitAbilSlice(77)
-	lowPlungeFrames[action.ActionAttack] = 59
-	lowPlungeFrames[action.ActionSkill] = 59
-	lowPlungeFrames[action.ActionBurst] = 58
-	lowPlungeFrames[action.ActionDash] = 75
-	lowPlungeFrames[action.ActionWalk] = 74
-	lowPlungeFrames[action.ActionSwap] = 62
+	lowPlungeFrames = frames.InitAbilSlice(78)
+	lowPlungeFrames[action.ActionAttack] = 61
+	lowPlungeFrames[action.ActionSkill] = 60
+	lowPlungeFrames[action.ActionBurst] = 60
+	lowPlungeFrames[action.ActionDash] = 76
+	lowPlungeFrames[action.ActionWalk] = 75
+	lowPlungeFrames[action.ActionSwap] = 73
 
 	// high_plunge -> x
-	highPlungeFrames = frames.InitAbilSlice(77)
-	highPlungeFrames[action.ActionAttack] = 58
-	highPlungeFrames[action.ActionSkill] = 60
-	highPlungeFrames[action.ActionBurst] = 60
-	highPlungeFrames[action.ActionWalk] = 76
-	highPlungeFrames[action.ActionSwap] = 63
+	highPlungeFrames = frames.InitAbilSlice(79)
+	highPlungeFrames[action.ActionAttack] = 63
+	highPlungeFrames[action.ActionSkill] = 64
+	highPlungeFrames[action.ActionBurst] = 61
+	highPlungeFrames[action.ActionWalk] = 78
+	highPlungeFrames[action.ActionSwap] = 74
 }
 
 // Low Plunge attack damage queue generator
@@ -79,6 +79,7 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 		Durability: 25,
 		Mult:       lowPlunge[c.TalentLvlAttack()],
 	}
+
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, lowPlungeRadius),
@@ -129,6 +130,7 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 		Durability: 25,
 		Mult:       highPlunge[c.TalentLvlAttack()],
 	}
+
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, highPlungeRadius),
@@ -158,5 +160,6 @@ func (c *char) plungeCollision(delay int) {
 		Durability: 0,
 		Mult:       collision[c.TalentLvlAttack()],
 	}
+
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 1), delay, delay)
 }

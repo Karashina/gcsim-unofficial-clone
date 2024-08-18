@@ -36,6 +36,7 @@ const (
 	ICDTagBloomDamage
 	ICDTagBurgeonDamage
 	ICDTagHyperbloomDamage
+
 	EndDefaultICDTags
 )
 
@@ -50,10 +51,8 @@ const (
 	ICDGroupBurning
 	ICDGroupTravelerDewdrop
 	ICDGroupTravelerBurst
-	ICDGroupClorindeCons
 	ICDGroupSigewinneGeneral
 	ICDGroupSigewinneBurst
-	ICDGroupEmilieSkill
 	EndDefaultICDGroups
 )
 
@@ -70,10 +69,8 @@ func init() {
 	ICDGroupResetTimer[ICDGroupBurning] = 120
 	ICDGroupResetTimer[ICDGroupTravelerDewdrop] = 90
 	ICDGroupResetTimer[ICDGroupTravelerBurst] = 480
-	ICDGroupResetTimer[ICDGroupClorindeCons] = 60
 	ICDGroupResetTimer[ICDGroupSigewinneGeneral] = 120
 	ICDGroupResetTimer[ICDGroupSigewinneBurst] = 114
-	ICDGroupResetTimer[ICDGroupEmilieSkill] = 120
 
 	ICDGroupEleApplicationSequence = make([][]float64, ICDGroupLength)
 	ICDGroupEleApplicationSequence[ICDGroupDefault] = []float64{1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0}
@@ -83,10 +80,8 @@ func init() {
 	ICDGroupEleApplicationSequence[ICDGroupBurning] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupTravelerDewdrop] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupTravelerBurst] = []float64{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0}
-	ICDGroupEleApplicationSequence[ICDGroupClorindeCons] = []float64{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupSigewinneGeneral] = []float64{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupSigewinneBurst] = []float64{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	ICDGroupEleApplicationSequence[ICDGroupEmilieSkill] = []float64{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	ICDGroupDamageSequence = make([][]float64, ICDGroupLength)
 	ICDGroupDamageSequence[ICDGroupDefault] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
@@ -98,8 +93,6 @@ func init() {
 	ICDGroupDamageSequence[ICDGroupBurning] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupTravelerDewdrop] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupTravelerBurst] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-	ICDGroupDamageSequence[ICDGroupClorindeCons] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupSigewinneGeneral] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupSigewinneBurst] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-	ICDGroupDamageSequence[ICDGroupEmilieSkill] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 }

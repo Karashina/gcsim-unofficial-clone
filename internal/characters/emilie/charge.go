@@ -11,42 +11,39 @@ import (
 
 var chargeFrames []int
 
-const chargeHitmark = 27
+const chargeHitmark = 26
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(53)
-	chargeFrames[action.ActionDash] = chargeHitmark
-	chargeFrames[action.ActionJump] = chargeHitmark
-	chargeFrames[action.ActionSwap] = chargeHitmark
+	chargeFrames = frames.InitAbilSlice(50) // CA -> Walk
+	chargeFrames[action.ActionAttack] = 39
+	chargeFrames[action.ActionSkill] = 42
+	chargeFrames[action.ActionBurst] = 39
+	chargeFrames[action.ActionSwap] = 47
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
-		Abil:               "Charge Attack",
+		Abil:               "Charge",
 		AttackTag:          attacks.AttackTagExtra,
 		ICDTag:             attacks.ICDTagExtraAttack,
 		ICDGroup:           attacks.ICDGroupDefault,
 		StrikeType:         attacks.StrikeTypeSlash,
 		Element:            attributes.Physical,
 		Durability:         25,
-		HitlagHaltFrames:   0.02 * 60,
+		Mult:               charge[c.TalentLvlAttack()],
+		HitlagHaltFrames:   0.09 * 60,
 		HitlagFactor:       0.01,
 		CanBeDefenseHalted: true,
-		Mult:               charge[c.TalentLvlAttack()],
 	}
-	if c.Base.Cons >= 6 && c.StatusIsActive(c6Key) {
-		ai.Element = attributes.Dendro
-		ai.FlatDmg += c.TotalAtk() * 3
-		c.c6handle()
-	}
+	c.applyC6Bonus(&ai)
 
 	c.Core.QueueAttack(
 		ai,
-		combat.NewBoxHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: -0.1}, 2.8, 4.8),
+		combat.NewBoxHitOnTarget(c.Core.Combat.PrimaryTarget(), geometry.Point{Y: -1.2}, 3.3, 3.5),
 		chargeHitmark,
 		chargeHitmark,
+		c.c6ScentCB(),
 	)
 
 	return action.Info{

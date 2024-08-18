@@ -9,98 +9,121 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
-var burstFrames []int
-
 const (
-	burstHitmark     = 1
-	burstLCSpawn     = 316
-	burstLCFirstTick = 89
-	burstKey         = "emilie-burst"
+	burstMarkKey = "emilie-burst-mark"
+
+	burstSpawn          = 96
+	burstResetLumidouce = 306
+
+	burstRadius       = 12
+	burstHitmark      = 12
+	burstTickInterval = 0.3 * 60
+	burstMarkDuration = 0.7 * 60
 )
 
+var burstFrames []int
+
 func init() {
-	burstFrames = frames.InitAbilSlice(103)
-	burstFrames[action.ActionDash] = 103
-	burstFrames[action.ActionJump] = 103
-	burstFrames[action.ActionSwap] = 103
+	burstFrames = frames.InitAbilSlice(111) // Q -> E
+	burstFrames[action.ActionAttack] = 108
+	burstFrames[action.ActionDash] = 97
+	burstFrames[action.ActionJump] = 98
+	burstFrames[action.ActionWalk] = 96
+	burstFrames[action.ActionSwap] = 105
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
+	var ok bool
+	c.caseTravel, ok = p["travel"]
+	if !ok {
+		c.caseTravel = lumidouceAttackTravel
+	}
 
-	duration := 168
-	targetinterval := 42
+	c.QueueCharTask(func() {
+		c.prevLumidouceLvl = 1
+		if c.StatusIsActive(lumidouceStatus) {
+			c.prevLumidouceLvl = c.Tag(lumidouceLevel)
+		}
+
+		c.spawnBurstLumidouceCase()
+		c.c6()
+	}, burstSpawn)
+	c.QueueCharTask(func() {
+		c.spawnLumidouceCase(c.prevLumidouceLvl, c.lumidoucePos, true)
+	}, burstResetLumidouce)
+
+	duration := int(burstCD[c.TalentLvlBurst()] * 60)
+	c.burstMarkDuration = burstMarkDuration
 	if c.Base.Cons >= 4 {
-		duration += 120
-		targetinterval -= 18
-	}
-	// initial damage; part of the burst tag
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Level 3 Lumidouce Case Attack DMG (Q)",
-		AttackTag:  attacks.AttackTagElementalBurst,
-		ICDTag:     attacks.ICDTagElementalBurst,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypePierce,
-		Element:    attributes.Dendro,
-		Durability: 25,
-		Mult:       burst[c.TalentLvlBurst()],
+		duration += 2 * 60
+		c.burstMarkDuration -= 0.3 * 60
 	}
 
-	c.Core.Status.Add(burstKey, duration+127)
-	if c.Base.Cons >= 6 {
-		c.c6init()
-	}
-
-	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10)
-	for i := 0; i < duration; i += targetinterval {
-		c.Core.Tasks.Add(func() {
-			// burst tick
-			enemy := c.Core.Combat.RandomEnemyWithinArea(
-				burstArea,
-				func(e combat.Enemy) bool {
-					return !e.StatusIsActive("emilie-burst-mark")
-				},
-			)
-			var pos geometry.Point
-			if enemy != nil {
-				pos = enemy.Pos()
-				enemy.AddStatus("emilie-burst-mark", 0.7*60, true) // same enemy can't be targeted again for 0.7s
-			} else {
-				pos = geometry.CalcRandomPointFromCenter(burstArea.Shape.Pos(), 0.5, 9.5, c.Core.Rand)
-			}
-			c.Core.QueueAttack(
-				ai,
-				combat.NewCircleHitOnTarget(pos, nil, 2.5),
-				burstHitmark,
-				burstHitmark,
-			)
-		}, i+127)
-	}
-
-	c.ConsumeEnergy(12)
-	c.SetCD(action.ActionBurst, 13.5*60)
-
-	c.LCActive = true
-	c.burstLCSpawnSrc = c.Core.F
-	burstLCFunc := c.burstLCSpawn(c.Core.F, 0, burstLCFirstTick)
-
-	c.Core.Tasks.Add(burstLCFunc, burstLCSpawn)
+	c.ConsumeEnergy(107)
+	c.SetCDWithDelay(action.ActionBurst, duration, 97)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionWalk], // earliest cancel
 		State:           action.BurstState,
-		OnRemoved:       func(next action.AnimationState) { burstLCFunc() },
 	}, nil
 }
 
-func (c *char) burstLCSpawn(src, LCSpawn, firstTick int) func() {
+func (c *char) spawnBurstLumidouceCase() {
+	player := c.Core.Combat.Player()
+
+	c.lumidouceSrc = c.Core.F
+	c.lumidoucePos = geometry.CalcOffsetPoint(player.Pos(), geometry.Point{Y: 2.1}, player.Direction())
+	c.SetTag(lumidouceLevel, 3)
+	c.AddStatus(lumidouceStatus, int(burstDuration[c.TalentLvlBurst()]*60), true)
+	c.AddStatus(lumidouceScentResetKey, lumidouceScentResetInterval, true)
+	c.QueueCharTask(c.lumidouceBurstAttack(c.lumidouceSrc), burstTickInterval)
+}
+
+func (c *char) lumidouceBurstAttack(src int) func() {
 	return func() {
-		if src != c.burstLCSpawnSrc {
+		if c.lumidouceSrc != src {
 			return
 		}
-		c.burstLCSpawnSrc = -1
-		c.queueLumidouceCase("Burst", LCSpawn, firstTick)
+		if !c.StatusIsActive(lumidouceStatus) {
+			return
+		}
+
+		burstArea := combat.NewCircleHitOnTarget(c.lumidoucePos, nil, burstRadius)
+		pos := c.getRandomEnemyPosition(burstArea)
+
+		ai := combat.AttackInfo{
+			ActorIndex: c.Index,
+			Abil:       "Lumidouce Case (Level 3)",
+			AttackTag:  attacks.AttackTagElementalBurst,
+			ICDTag:     attacks.ICDTagElementalBurst,
+			ICDGroup:   attacks.ICDGroupDefault,
+			StrikeType: attacks.StrikeTypeDefault,
+			Element:    attributes.Dendro,
+			Durability: 25,
+			Mult:       burstDMG[c.TalentLvlBurst()],
+		}
+		ap := combat.NewCircleHitOnTarget(pos, nil, 2.5)
+		c.Core.QueueAttack(ai, ap, burstHitmark, burstHitmark, c.particleCB, c.c2)
+
+		c.QueueCharTask(c.lumidouceBurstAttack(src), burstTickInterval)
 	}
+}
+
+func (c *char) getRandomEnemyPosition(area combat.AttackPattern) geometry.Point {
+	enemy := c.Core.Combat.RandomEnemyWithinArea(
+		area,
+		func(e combat.Enemy) bool {
+			return !e.StatusIsActive(burstMarkKey)
+		},
+	)
+	var pos geometry.Point
+	if enemy != nil {
+		pos = enemy.Pos()
+		enemy.AddStatus(burstMarkKey, c.burstMarkDuration, true) // same enemy can't be targeted again for 0.7s
+	} else {
+		pos = geometry.CalcRandomPointFromCenter(area.Shape.Pos(), 0.5, burstRadius, c.Core.Rand)
+	}
+	return pos
 }
