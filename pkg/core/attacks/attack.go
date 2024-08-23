@@ -38,3 +38,12 @@ const (
 	StrikeTypeSlash
 	StrikeTypeSpear
 )
+
+type AlignmentType int
+
+const (
+	AlignmentDefault AlignmentType = iota
+	AlignmentArkhePneuma
+	AlignmentArkheOusia
+	AlignmentNightsoul
+)

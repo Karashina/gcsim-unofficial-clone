@@ -89,15 +89,16 @@ type CharWrapper struct {
 	tasks  task.Tasker
 
 	// base characteristics
-	Base      info.CharacterBase
-	Weapon    info.WeaponProfile
-	Talents   info.TalentProfile
-	CharZone  info.ZoneType
-	CharBody  info.BodyType
-	NormalCon int
-	SkillCon  int
-	BurstCon  int
-	HasArkhe  bool
+	Base         info.CharacterBase
+	Weapon       info.WeaponProfile
+	Talents      info.TalentProfile
+	CharZone     info.ZoneType
+	CharBody     info.BodyType
+	NormalCon    int
+	SkillCon     int
+	BurstCon     int
+	HasArkhe     bool
+	HasNightsoul bool
 
 	Equip struct {
 		Weapon info.Weapon
@@ -108,6 +109,10 @@ type CharWrapper struct {
 	ParticleDelay int // character custom particle delay
 	Energy        float64
 	EnergyMax     float64
+
+	NightsoulPoint    float64
+	NightsoulPointMax float64
+
 	// needed so that start hp is not influenced by hp mods added during team initialization
 	StartHP      int
 	StartHPRatio int
