@@ -64,6 +64,9 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if c.Player.Active() != index {
 			return false
 		}
+		if char.Index != index {
+			return false
+		}
 		if e != action.ActionSkill {
 			return false
 		}
@@ -74,7 +77,10 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
-		if c.Player.Active() != atk.Info.ActorIndex {
+		if atk.Info.ActorIndex != char.Index {
+			return false
+		}
+		if c.Player.Active() != char.Index {
 			return false
 		}
 		if atk.Info.AttackTag != attacks.AttackTagNormal {
@@ -87,7 +93,10 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	c.Events.Subscribe(event.OnVaporize, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
-		if c.Player.Active() != atk.Info.ActorIndex {
+		if atk.Info.ActorIndex != char.Index {
+			return false
+		}
+		if c.Player.Active() != char.Index {
 			return false
 		}
 		w.onVape()

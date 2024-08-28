@@ -10,6 +10,7 @@ func (c *CharWrapper) ConsumeNightsoul(amt float64) {
 		return
 	}
 
+	c.events.Emit(event.OnNightsoulChange, c.Index, -1*amt, "Nightsoul-Drain")
 	c.log.NewEvent("draining nightsoul", glog.LogEnergyEvent, c.Index).
 		Write("pre_drain", c.Energy).
 		Write("post_drain", 0).
@@ -25,7 +26,7 @@ func (c *CharWrapper) AddNightsoul(src string, amt float64) {
 
 	preNightsoul := c.NightsoulPoint
 	c.NightsoulPoint += amt
-	if c.NightsoulPoint > c.NightsoulPoint {
+	if c.NightsoulPoint > c.NightsoulPointMax {
 		c.NightsoulPoint = c.NightsoulPointMax
 	}
 	if c.NightsoulPoint < 0 {

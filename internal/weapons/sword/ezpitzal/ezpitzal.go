@@ -37,6 +37,9 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if c.Player.Active() != index {
 			return false
 		}
+		if char.Index != index {
+			return false
+		}
 		if e != action.ActionSkill {
 			return false
 		}

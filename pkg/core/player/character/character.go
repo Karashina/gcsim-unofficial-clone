@@ -110,6 +110,7 @@ type CharWrapper struct {
 	Energy        float64
 	EnergyMax     float64
 
+	OnNightsoul       bool
 	NightsoulPoint    float64
 	NightsoulPointMax float64
 
