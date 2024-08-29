@@ -2,7 +2,7 @@ id: 90000001
 key: "mualani"
 rarity: QUALITY_ORANGE
 body: BODY_GIRL
-region: ASSOC_TYPE_NATLAN
+region: ASSOC_TYPE_RANGER
 element: Water
 weapon_class: WEAPON_CATALYST
 icon_name: "UI_AvatarIcon_Ambor"

@@ -410,6 +410,7 @@ export enum ZoneType {
   /** ASSOC_TYPE_MAINACTOR - traveler is cool */
   ASSOC_TYPE_MAINACTOR = 8,
   ASSOC_TYPE_FONTAINE = 9,
+  ASSOC_TYPE_NATLAN = 10,
   UNRECOGNIZED = -1,
 }
 
@@ -445,6 +446,9 @@ export function zoneTypeFromJSON(object: any): ZoneType {
     case 9:
     case "ASSOC_TYPE_FONTAINE":
       return ZoneType.ASSOC_TYPE_FONTAINE;
+    case 10:
+    case "ASSOC_TYPE_NATLAN":
+      return ZoneType.ASSOC_TYPE_NATLAN;
     case -1:
     case "UNRECOGNIZED":
     default:

@@ -8,17 +8,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-func (c *char) c1() {
-	if c.Base.Cons < 1 {
-		return
-	}
-	if c.c1count <= 1 || c.Base.Cons >= 6 {
-		c.c1buff = 0.66 * c.MaxHP()
-	} else {
-		c.c1buff = 0
-	}
-}
-
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
@@ -30,6 +19,7 @@ func (c *char) c2Puffer() {
 	if c.Base.Cons < 2 {
 		return
 	}
+	c.WaveMomentum++
 	if c.pufferCount == 2 {
 		c.AddNightsoul("mualani-c2", 12)
 	}

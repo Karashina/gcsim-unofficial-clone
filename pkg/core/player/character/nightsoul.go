@@ -9,13 +9,13 @@ func (c *CharWrapper) ConsumeNightsoul(amt float64) {
 	if !c.HasNightsoul {
 		return
 	}
-
+	preNightsoul := c.NightsoulPoint
 	c.events.Emit(event.OnNightsoulChange, c.Index, -1*amt, "Nightsoul-Drain")
 	c.log.NewEvent("draining nightsoul", glog.LogEnergyEvent, c.Index).
-		Write("pre_drain", c.Energy).
-		Write("post_drain", 0).
+		Write("pre_drain", preNightsoul).
+		Write("post_drain", c.NightsoulPoint).
 		Write("source", c.Base.Key.String()+"-nightsoul-drain").
-		Write("max_nightsoul", c.EnergyMax)
+		Write("max_nightsoul", c.NightsoulPointMax)
 	c.NightsoulPoint -= amt
 }
 

@@ -96,6 +96,16 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 }
 
 func (c *char) AttackSharkysBite(p map[string]int) (action.Info, error) {
+	c.c1buff = 0
+	if c.Base.Cons >= 1 {
+		if c.c1count < 1 {
+			c.c1buff = 0.66 * c.MaxHP()
+			c.c1count++
+		}
+		if c.Base.Cons >= 6 {
+			c.c1buff = 0.66 * c.MaxHP()
+		}
+	}
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Sharky's Bite DMG",
@@ -121,26 +131,41 @@ func (c *char) AttackSharkysBite(p map[string]int) (action.Info, error) {
 		Alignment:  attacks.AlignmentNightsoul,
 	}
 
+	enemycount := 0
+	area := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{X: 0.0, Y: 0.0}, 5)
+	enemies := c.Core.Combat.EnemiesWithinArea(area, nil)
+	for _, e := range enemies {
+		if enemycount < 5 {
+			if e.StatusIsActive(skillMarkKey) {
+				enemycount++
+			}
+		}
+	}
+
 	hitmark := 9
 	SSBframe := 0
 
 	if c.WaveMomentum > 0 {
 		ai.FlatDmg += c.MaxHP() * skillWMBonus[c.TalentLvlSkill()] * float64(c.WaveMomentum)
-		aimissiles.FlatDmg += c.MaxHP() * skillWMBonus[c.TalentLvlSkill()] * float64(c.WaveMomentum)
+		aimissiles.FlatDmg = ai.FlatDmg
 	}
 
 	if c.WaveMomentum >= 3 {
 		ai.FlatDmg += c.MaxHP() * skillSSBBonus[c.TalentLvlSkill()]
-		aimissiles.FlatDmg += c.MaxHP() * skillSSBBonus[c.TalentLvlSkill()]
+		aimissiles.FlatDmg = ai.FlatDmg
 		ai.Abil = "Sharky's Surging Bite DMG"
 		aimissiles.Abil = "Surging Shark Missile DMG"
 		hitmark = 45
 		SSBframe = 36
 	}
+	ai.FlatDmg = ai.FlatDmg * max(0.72, 1-(float64(enemycount)-1)*0.14)
+	aimissiles.FlatDmg = ai.FlatDmg
+
+	ptarget := c.Core.Combat.PrimaryTarget()
 
 	c.Core.QueueAttack(
 		ai,
-		combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key()),
+		combat.NewSingleTargetHit(ptarget.Key()),
 		hitmark,
 		hitmark,
 		c.particleCB,
@@ -148,25 +173,24 @@ func (c *char) AttackSharkysBite(p map[string]int) (action.Info, error) {
 		c.a1cb,
 	)
 
-	enemycount := 0
-	area := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{X: 0.0, Y: 0.0}, 2)
-	enemies := c.Core.Combat.EnemiesWithinArea(area, nil)
+	enemyhit := 0
 	for _, e := range enemies {
-		if enemycount < 5 {
+		if enemyhit < 5 {
 			if e.StatusIsActive(skillMarkKey) {
-				aimissiles.FlatDmg = aimissiles.FlatDmg * max(0.72, 1-(float64(enemycount)-1)*0.14)
-				c.Core.QueueAttack(
-					aimissiles,
-					combat.NewSingleTargetHit(e.Key()),
-					hitmark+60,
-					hitmark+60,
-					c.removemarkCB,
-				)
-				enemycount++
+				if e.Key() != ptarget.Key() {
+					c.Core.QueueAttack(
+						aimissiles,
+						combat.NewSingleTargetHit(e.Key()),
+						hitmark+60,
+						hitmark+60,
+						c.removemarkCB,
+					)
+					enemyhit++
+				}
 			}
 		}
 	}
-	c.c1count++
+	c.WaveMomentum = 0
 	return action.Info{
 		Frames:          func(next action.Action) int { return attackFramesE },
 		AnimationLength: attackFramesE + SSBframe,

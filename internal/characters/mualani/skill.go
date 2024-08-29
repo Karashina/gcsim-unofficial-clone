@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 )
 
@@ -18,17 +19,20 @@ const (
 )
 
 var skillFramesNormal []int
+var skillFramesEnd []int
 
 func init() {
 	skillFramesNormal = frames.InitAbilSlice(16)
+	skillFramesEnd = frames.InitAbilSlice(25)
 }
 
 func (c *char) skillActivate() action.Info {
-	c.NightsoulPoint = 60
+	c.AddNightsoul("kachina-skill-init", 60)
 	c.AddStatus(skillKey, -1, true)
 	c.pufferCount = 0
 	c.OnNightsoul = true
 	c.Core.Tasks.Add(c.depleteNightsoulPoints, 6)
+	c.skillMarkTargets()
 	c.c2()
 
 	// Return ActionInfo
@@ -43,11 +47,10 @@ func (c *char) skillActivate() action.Info {
 func (c *char) skillDeactivate() action.Info {
 	c.skillEndRoutine()
 	delay := 25
+	c.SetCD(action.ActionSkill, 6*60)
 
 	return action.Info{
-		Frames: func(next action.Action) int {
-			return delay
-		},
+		Frames:          frames.NewAbilFunc(skillFramesEnd),
 		AnimationLength: delay,
 		CanQueueAfter:   delay,
 		State:           action.Idle,
@@ -59,8 +62,8 @@ func (c *char) skillEndRoutine() {
 	c.DeleteStatus(particleICDKey)
 	c.Core.Player.SwapCD = 25
 	c.NightsoulPoint = 0
+	c.c1count = 0
 	c.OnNightsoul = false
-	c.SetCD(action.ActionSkill, 6*60)
 }
 
 func (c *char) depleteNightsoulPoints() {
@@ -103,14 +106,20 @@ func (c *char) skillMarkTargets() {
 	if !c.StatusIsActive(skillKey) {
 		return
 	}
-	a := c.Core.Combat.RandomEnemyWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{X: 0.0, Y: 0.0}, 2), nil)
-	if a.Type() != targets.TargettableEnemy {
-		return
+	enemycount := 0
+	area := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{X: 0.0, Y: 0.0}, 2)
+	enemies := c.Core.Combat.EnemiesWithinArea(area, nil)
+	for _, e := range enemies {
+		if enemycount < 5 {
+			if !e.StatusIsActive(markICDKey) {
+				e.AddStatus(skillMarkKey, 600, true)
+				e.AddStatus(markICDKey, 0.7*60, true)
+				enemycount++
+				c.WaveMomentum++
+				c.Core.Log.NewEvent("wave momentum added", glog.LogCharacterEvent, c.Index).
+					Write("stacks:", c.WaveMomentum)
+			}
+		}
 	}
-	a.AddStatus(skillMarkKey, 600, true)
-	a.AddStatus(markICDKey, 0.7*60, true)
-	c.markCount++
-	if c.WaveMomentum < 3 && !a.StatusIsActive(markICDKey) {
-		c.WaveMomentum++
-	}
+	c.Core.Tasks.Add(c.skillMarkTargets, 10)
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/glog"
 )
 
 var burstFramesNormal []int
@@ -40,6 +41,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstHitmark, burstHitmark)
 
 	c.SetCD(action.ActionBurst, 15*60)
+	c.Core.Log.NewEvent("burst a4 buff", glog.LogCharacterEvent, c.Index).
+		Write("a4 count", c.a4stacks)
 	c.ConsumeEnergy(7)
 
 	return action.Info{

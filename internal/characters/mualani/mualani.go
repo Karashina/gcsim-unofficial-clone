@@ -3,6 +3,7 @@ package mualani
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/pkg/core"
+	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
@@ -20,7 +21,6 @@ func init() {
 type char struct {
 	*tmpl.Character
 	WaveMomentum int
-	markCount    int
 	pufferCount  int
 	a4stacks     int
 	a4buff       float64
@@ -32,6 +32,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c := char{}
 	c.Character = tmpl.NewWithWrapper(s, w)
 
+	c.CharZone = info.ZoneNatlan
 	c.EnergyMax = 60
 	c.NormalHitNum = normalHitNum
 	c.SkillCon = 3
@@ -46,18 +47,25 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.a4buff = 0
 	c.c1buff = 0
 
+	c.SetNumCharges(action.ActionSkill, 1)
+
 	w.Character = &c
 
 	return nil
 }
 
 func (c *char) Init() error {
-	c.skillMarkTargets()
 	c.NightsoulBurst()
 	c.a4()
-	c.c1()
 	c.c4()
 	return nil
+}
+
+func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
+	if a == action.ActionSkill && c.StatusIsActive(skillKey) {
+		return true, action.NoFailure
+	}
+	return c.Character.ActionReady(a, p)
 }
 
 func (c *char) Condition(fields []string) (any, error) {
