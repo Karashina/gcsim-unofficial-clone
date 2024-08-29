@@ -55,6 +55,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
+	c.onExitField()
 	c.NightsoulBurst()
 	c.a4()
 	c.c4()
@@ -78,6 +79,15 @@ func (c *char) Condition(fields []string) (any, error) {
 	default:
 		return c.Character.Condition(fields)
 	}
+}
+
+func (c *char) onExitField() {
+	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
+		if c.StatModIsActive(skillKey) {
+			c.skillEndRoutine()
+		}
+		return false
+	}, "mualani-exit")
 }
 
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {

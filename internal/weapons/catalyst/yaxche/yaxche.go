@@ -54,11 +54,13 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if e != action.ActionSkill {
 			return false
 		}
+		maxval := 0.12 + 0.04*float64(w.refine)
+		buff := w.char.MaxHP() / 1000 * (0.005 + 0.001*float64(w.refine))
 
 		w.char.AddAttackMod(character.AttackMod{
-			Base: modifier.NewBaseWithHitlag(buffKey, -1),
+			Base: modifier.NewBaseWithHitlag(buffKey, 10*60),
 			Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-				w.buffNA[attributes.DmgP] = min(0.16, w.char.MaxHP()/1000*0.006) // todo:refine
+				w.buffNA[attributes.DmgP] = min(maxval, buff)
 				switch atk.Info.AttackTag {
 				case attacks.AttackTagNormal:
 					return w.buffNA, true

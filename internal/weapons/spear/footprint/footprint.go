@@ -28,7 +28,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	w := &Weapon{}
 	r := p.Refine
 
-	defp := 0.16 + float64(r)*0 //todo: refines
+	defp := 0.12 + float64(r)*0.04
 	val := make([]float64, attributes.EndStatType)
 
 	c.Events.Subscribe(event.OnActionExec, func(args ...interface{}) bool {

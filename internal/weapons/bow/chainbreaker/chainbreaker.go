@@ -1,11 +1,8 @@
 package chainbreaker
 
 import (
-	"fmt"
-
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
@@ -17,44 +14,57 @@ func init() {
 }
 
 type Weapon struct {
-	Index int
-	char  *character.CharWrapper
+	Index    int
+	c        *core.Core
+	self     *character.CharWrapper
+	atkStack float64
+	emBuff   float64
 }
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
-func (w *Weapon) Init() error      { return nil }
 
-func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	w := &Weapon{}
-	r := p.Refine
-
+func (w *Weapon) Init() error {
 	stacks := 0
-	val := make([]float64, attributes.EndStatType)
-
-	c.Events.Subscribe(event.OnInitialize, func(args ...interface{}) bool {
-		for _, x := range c.Player.Chars() {
-			if x.CharZone == info.ZoneNatlan {
-				stacks++
-			} else if x.Base.Element != w.char.Base.Element {
-				stacks++
-			}
+	for _, char := range w.c.Player.Chars() {
+		if char.Base.Element != w.self.Base.Element || char.CharZone == info.ZoneNatlan {
+			stacks++
 		}
+	}
 
-		val[attributes.ATKP] = (0.048 + float64(r)*0) * float64(stacks) //todo:refine
-
-		if stacks >= 3 {
-			val[attributes.EM] = (24 + float64(r)*0) //todo:refine
-		}
-
-		return true
-	}, fmt.Sprintf("chainbreaker-%v", char.Base.Key.String()))
-	char.AddStatMod(character.StatMod{
-		Base:         modifier.NewBase("chainbreaker", -1),
-		AffectedStat: attributes.NoStat,
+	mAtk := make([]float64, attributes.EndStatType)
+	mAtk[attributes.ATKP] = w.atkStack * float64(stacks)
+	w.self.AddStatMod(character.StatMod{
+		Base:         modifier.NewBase("chain-breaker-atk", -1),
+		AffectedStat: attributes.ATKP,
 		Amount: func() ([]float64, bool) {
-			return val, true
+			return mAtk, true
 		},
 	})
+
+	if stacks >= 3 {
+		mEm := make([]float64, attributes.EndStatType)
+		mEm[attributes.EM] = float64(w.emBuff)
+		w.self.AddStatMod(character.StatMod{
+			Base:         modifier.NewBase("chain-breaker-em", -1),
+			AffectedStat: attributes.EM,
+			Amount: func() ([]float64, bool) {
+				return mEm, true
+			},
+		})
+	}
+
+	return nil
+}
+
+func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
+	w := &Weapon{
+		c:    c,
+		self: char,
+	}
+	r := p.Refine
+
+	w.atkStack = 0.036 + float64(r)*0.012
+	w.emBuff = 18 + float64(r)*6
 
 	return w, nil
 }

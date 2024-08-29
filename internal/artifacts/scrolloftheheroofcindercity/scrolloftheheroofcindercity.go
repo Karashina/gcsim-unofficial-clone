@@ -5,73 +5,16 @@ import (
 
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/core/reactions"
-	"github.com/genshinsim/gcsim/pkg/enemy"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-var reactionElementsArr map[reactions.ReactionType][]attributes.Element
-var elementToReactionsArr [][]reactions.ReactionType
-var buffArrs [][]float64
-var buffArrsNightsoul [][]float64
-
 func init() {
-	reactionElementsArr = map[reactions.ReactionType][]attributes.Element{
-		reactions.Overload:           {attributes.Electro, attributes.Pyro},
-		reactions.Superconduct:       {attributes.Electro, attributes.Cryo},
-		reactions.Melt:               {attributes.Pyro, attributes.Cryo},
-		reactions.Vaporize:           {attributes.Pyro, attributes.Hydro},
-		reactions.Freeze:             {attributes.Cryo, attributes.Hydro},
-		reactions.ElectroCharged:     {attributes.Electro, attributes.Hydro},
-		reactions.SwirlHydro:         {attributes.Anemo, attributes.Hydro},
-		reactions.SwirlCryo:          {attributes.Anemo, attributes.Cryo},
-		reactions.SwirlElectro:       {attributes.Anemo, attributes.Electro},
-		reactions.SwirlPyro:          {attributes.Anemo, attributes.Pyro},
-		reactions.CrystallizeHydro:   {attributes.Geo, attributes.Hydro},
-		reactions.CrystallizeCryo:    {attributes.Geo, attributes.Cryo},
-		reactions.CrystallizeElectro: {attributes.Geo, attributes.Electro},
-		reactions.CrystallizePyro:    {attributes.Geo, attributes.Pyro},
-		reactions.Aggravate:          {attributes.Dendro, attributes.Electro},
-		reactions.Spread:             {attributes.Dendro},
-		reactions.Quicken:            {attributes.Dendro, attributes.Electro},
-		reactions.Bloom:              {attributes.Dendro, attributes.Hydro},
-		reactions.Hyperbloom:         {attributes.Dendro, attributes.Electro},
-		reactions.Burgeon:            {attributes.Dendro, attributes.Pyro},
-		reactions.Burning:            {attributes.Dendro, attributes.Pyro},
-	}
-
-	elementToReactionsArr = make([][]reactions.ReactionType, attributes.EndEleType)
-	for i, j := range reactionElementsArr {
-		for _, elem := range j {
-			elementToReactionsArr[elem] = append(elementToReactionsArr[elem], i)
-		}
-	}
-
-	buffArrs = make([][]float64, attributes.EndEleType)
-	for i := range buffArrs {
-		ele := attributes.Element(i)
-		buffArrs[ele] = make([]float64, attributes.EndStatType)
-		stat := attributes.EleToDmgP(ele)
-		if stat >= 0 {
-			buffArrs[ele][stat] = 0.12
-		}
-	}
-
-	buffArrsNightsoul = make([][]float64, attributes.EndEleType)
-	for i := range buffArrs {
-		ele := attributes.Element(i)
-		buffArrsNightsoul[ele] = make([]float64, attributes.EndStatType)
-		stat := attributes.EleToDmgP(ele)
-		if stat >= 0 {
-			buffArrsNightsoul[ele][stat] = 0.28
-		}
-	}
-
 	core.RegisterSetFunc(keys.ScrollOfTheHeroOfCinderCity, NewSet)
 }
 
@@ -82,199 +25,366 @@ type Set struct {
 
 func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
-
-func (s *Set) Init() error {
-	return nil
-}
-
-func reactionElements(r reactions.ReactionType) []attributes.Element {
-	return reactionElementsArr[r]
-}
-
-func elementToReactions(e attributes.Element) []reactions.ReactionType {
-	return elementToReactionsArr[e]
-}
-
-func reactionToEvent(r reactions.ReactionType) event.Event {
-	switch r {
-	case reactions.Overload:
-		return event.OnOverload
-	case reactions.Superconduct:
-		return event.OnSuperconduct
-	case reactions.Melt:
-		return event.OnMelt
-	case reactions.Vaporize:
-		return event.OnVaporize
-	case reactions.Freeze:
-		return event.OnFrozen
-	case reactions.ElectroCharged:
-		return event.OnElectroCharged
-	case reactions.SwirlHydro:
-		return event.OnSwirlHydro
-	case reactions.SwirlCryo:
-		return event.OnSwirlCryo
-	case reactions.SwirlElectro:
-		return event.OnSwirlElectro
-	case reactions.SwirlPyro:
-		return event.OnSwirlPyro
-	case reactions.CrystallizeHydro:
-		return event.OnCrystallizeHydro
-	case reactions.CrystallizeCryo:
-		return event.OnCrystallizeCryo
-	case reactions.CrystallizeElectro:
-		return event.OnCrystallizeElectro
-	case reactions.CrystallizePyro:
-		return event.OnCrystallizePyro
-	case reactions.Aggravate:
-		return event.OnAggravate
-	case reactions.Spread:
-		return event.OnSpread
-	case reactions.Quicken:
-		return event.OnQuicken
-	case reactions.Bloom:
-		return event.OnBloom
-	case reactions.Hyperbloom:
-		return event.OnHyperbloom
-	case reactions.Burgeon:
-		return event.OnBurgeon
-	case reactions.Burning:
-		return event.OnBurning
-	case reactions.Shatter:
-		return event.OnShatter
-	default:
-		return event.ReactionEventEndDelim
-	}
-}
-
-func reactionEventToReaction(e event.Event) reactions.ReactionType {
-	switch e {
-	case event.OnOverload:
-		return reactions.Overload
-	case event.OnSuperconduct:
-		return reactions.Superconduct
-	case event.OnMelt:
-		return reactions.Melt
-	case event.OnVaporize:
-		return reactions.Vaporize
-	case event.OnFrozen:
-		return reactions.Freeze
-	case event.OnElectroCharged:
-		return reactions.ElectroCharged
-	case event.OnSwirlHydro:
-		return reactions.SwirlHydro
-	case event.OnSwirlCryo:
-		return reactions.SwirlCryo
-	case event.OnSwirlElectro:
-		return reactions.SwirlElectro
-	case event.OnSwirlPyro:
-		return reactions.SwirlPyro
-	case event.OnCrystallizeHydro:
-		return reactions.CrystallizeHydro
-	case event.OnCrystallizeCryo:
-		return reactions.CrystallizeCryo
-	case event.OnCrystallizeElectro:
-		return reactions.CrystallizeElectro
-	case event.OnCrystallizePyro:
-		return reactions.CrystallizePyro
-	case event.OnAggravate:
-		return reactions.Aggravate
-	case event.OnSpread:
-		return reactions.Spread
-	case event.OnQuicken:
-		return reactions.Quicken
-	case event.OnBloom:
-		return reactions.Bloom
-	case event.OnHyperbloom:
-		return reactions.Hyperbloom
-	case event.OnBurgeon:
-		return reactions.Burgeon
-	case event.OnBurning:
-		return reactions.Burning
-	case event.OnShatter:
-		return reactions.Shatter
-	default:
-		return reactions.NoReaction
-	}
-}
-
-func Map[T, V any](ts []T, fn func(T) V) []V {
-	result := make([]V, len(ts))
-	for i, t := range ts {
-		result[i] = fn(t)
-	}
-	return result
-}
-
-func make4pcCB(c *core.Core, char *character.CharWrapper, react reactions.ReactionType) func(args ...interface{}) bool {
-	return func(args ...interface{}) bool {
-		_, ok := args[0].(*enemy.Enemy)
-
-		// Hyperbloom and Burgeon do not do enemy check
-		if !ok && react != reactions.Hyperbloom && react != reactions.Burgeon {
-			return false
-		}
-		c.Log.NewEvent("scroll 4pc proc'd", glog.LogArtifactEvent, char.Index).
-			Write("react", react)
-
-		for _, ele := range reactionElements(react) {
-			// Apply mod to all characters
-			for _, c := range c.Player.Chars() {
-				c.AddStatMod(character.StatMod{
-					Base:         modifier.NewBaseWithHitlag(fmt.Sprintf("scroll-4pc-%s", attributes.ElementString[ele]), 15*60),
-					AffectedStat: attributes.EleToDmgP(ele),
-					Amount: func() ([]float64, bool) {
-						return buffArrs[ele], true
-					},
-				})
-			}
-		}
-
-		if !char.OnNightsoul {
-			return false
-		}
-
-		for _, ele := range reactionElements(react) {
-			// Apply mod to all characters
-			for _, c := range c.Player.Chars() {
-				c.AddStatMod(character.StatMod{
-					Base:         modifier.NewBaseWithHitlag(fmt.Sprintf("scroll-4pc-nightsoul-%s", attributes.ElementString[ele]), 20*60),
-					AffectedStat: attributes.EleToDmgP(ele),
-					Amount: func() ([]float64, bool) {
-						return buffArrsNightsoul[ele], true
-					},
-				})
-			}
-		}
-		return false
-	}
-}
+func (s *Set) Init() error      { return nil }
 
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
-	// 2 Piece: When a nearby party member triggers a Nightsoul Burst, the equipping
-	// character regenerates 6 Elemental Energy.
+	nanemo := make([]float64, attributes.EndStatType)
+	ncryo := make([]float64, attributes.EndStatType)
+	ndendro := make([]float64, attributes.EndStatType)
+	nelectro := make([]float64, attributes.EndStatType)
+	ngeo := make([]float64, attributes.EndStatType)
+	nhydro := make([]float64, attributes.EndStatType)
+	npyro := make([]float64, attributes.EndStatType)
+	anemo := make([]float64, attributes.EndStatType)
+	cryo := make([]float64, attributes.EndStatType)
+	dendro := make([]float64, attributes.EndStatType)
+	electro := make([]float64, attributes.EndStatType)
+	geo := make([]float64, attributes.EndStatType)
+	hydro := make([]float64, attributes.EndStatType)
+	pyro := make([]float64, attributes.EndStatType)
+
+	dmg := 0.12
+	dmgnightsoul := 0.28
+
 	if count >= 2 {
-		c.Combat.Events.Subscribe(event.OnNightsoulBurst, func(args ...interface{}) bool {
-			char.AddEnergy("scroll-2pc", 6)
+		c.Events.Subscribe(event.OnNightsoulBurst, func(args ...interface{}) bool {
+			char.AddEnergy("scrolloftheheroofcindercity", 6)
 			return false
-		}, fmt.Sprintf("scroll-2pc-%v", char.Base.Key.String()))
+		}, "scroll-2pc")
 	}
-	// 4 Piece: After the equipping character triggers a reaction related to their
-	// Elemental Type, all nearby party members gain a 12% Elemental DMG Bonus for
-	// the Elemental Types involved in the elemental reaction for 15s. If the
-	// equipping character is in the Nightsoul's Blessing state when triggering this
-	// effect, all nearby party members gain an additional 28% Elemental DMG Bonus
-	// for the Elemental Types involved in the elemental reaction for 20s. The
-	// equipping character can trigger this effect while off-field, and the DMG bonus
-	// from Artifact Sets with the same name do not stack.
 	if count >= 4 {
-		reactionList := elementToReactions(char.Base.Element)
-		eventList := Map(reactionList, reactionToEvent)
-		for _, evt := range eventList {
-			react := reactionEventToReaction(evt)
-			c.Combat.Events.Subscribe(evt, make4pcCB(c, char, react), fmt.Sprintf("scroll-4pc-%v-%v", react, char.Base.Key.String()))
+		scrollfunc := func(ele1 attributes.Element, ele2 attributes.Element, key string) func(args ...interface{}) bool {
+			return func(args ...interface{}) bool {
+
+				ae := args[1].(*combat.AttackEvent)
+
+				if ae.Info.ActorIndex != char.Index {
+					return false
+				}
+
+				for _, x := range c.Player.Chars() {
+					if char.OnNightsoul {
+						switch ele1 {
+						case attributes.Electro:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-electro", 20*60),
+								AffectedStat: attributes.ElectroP,
+								Amount: func() ([]float64, bool) {
+									nelectro[attributes.ElectroP] = dmgnightsoul
+									return nelectro, true
+								},
+							})
+						case attributes.Pyro:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-pyro", 20*60),
+								AffectedStat: attributes.PyroP,
+								Amount: func() ([]float64, bool) {
+									npyro[attributes.PyroP] = dmgnightsoul
+									return npyro, true
+								},
+							})
+						case attributes.Cryo:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-cryo", 20*60),
+								AffectedStat: attributes.CryoP,
+								Amount: func() ([]float64, bool) {
+									ncryo[attributes.CryoP] = dmgnightsoul
+									return ncryo, true
+								},
+							})
+						case attributes.Hydro:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-hydro", 20*60),
+								AffectedStat: attributes.HydroP,
+								Amount: func() ([]float64, bool) {
+									nhydro[attributes.HydroP] = dmgnightsoul
+									return nhydro, true
+								},
+							})
+						case attributes.Dendro:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-dendro", 20*60),
+								AffectedStat: attributes.DendroP,
+								Amount: func() ([]float64, bool) {
+									ndendro[attributes.DendroP] = dmgnightsoul
+									return ndendro, true
+								},
+							})
+						case attributes.Anemo:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-anemo", 20*60),
+								AffectedStat: attributes.AnemoP,
+								Amount: func() ([]float64, bool) {
+									nanemo[attributes.AnemoP] = dmgnightsoul
+									return nanemo, true
+								},
+							})
+						case attributes.Geo:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-geo", 20*60),
+								AffectedStat: attributes.GeoP,
+								Amount: func() ([]float64, bool) {
+									ngeo[attributes.GeoP] = dmgnightsoul
+									return ngeo, true
+								},
+							})
+						default:
+						}
+						switch ele2 {
+						case attributes.Electro:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-electro", 20*60),
+								AffectedStat: attributes.ElectroP,
+								Amount: func() ([]float64, bool) {
+									nelectro[attributes.ElectroP] = dmgnightsoul
+									return nelectro, true
+								},
+							})
+						case attributes.Pyro:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-pyro", 20*60),
+								AffectedStat: attributes.PyroP,
+								Amount: func() ([]float64, bool) {
+									npyro[attributes.PyroP] = dmgnightsoul
+									return npyro, true
+								},
+							})
+						case attributes.Cryo:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-cryo", 20*60),
+								AffectedStat: attributes.CryoP,
+								Amount: func() ([]float64, bool) {
+									ncryo[attributes.CryoP] = dmgnightsoul
+									return ncryo, true
+								},
+							})
+						case attributes.Hydro:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-hydro", 20*60),
+								AffectedStat: attributes.HydroP,
+								Amount: func() ([]float64, bool) {
+									nhydro[attributes.HydroP] = dmgnightsoul
+									return nhydro, true
+								},
+							})
+						case attributes.Dendro:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-dendro", 20*60),
+								AffectedStat: attributes.DendroP,
+								Amount: func() ([]float64, bool) {
+									ndendro[attributes.DendroP] = dmgnightsoul
+									return ndendro, true
+								},
+							})
+						case attributes.Anemo:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-anemo", 20*60),
+								AffectedStat: attributes.AnemoP,
+								Amount: func() ([]float64, bool) {
+									nanemo[attributes.AnemoP] = dmgnightsoul
+									return nanemo, true
+								},
+							})
+						case attributes.Geo:
+							x.AddStatMod(character.StatMod{
+								Base:         modifier.NewBaseWithHitlag("scroll-4pc-nightsoul-geo", 20*60),
+								AffectedStat: attributes.GeoP,
+								Amount: func() ([]float64, bool) {
+									ngeo[attributes.GeoP] = dmgnightsoul
+									return ngeo, true
+								},
+							})
+						default:
+						}
+					}
+					switch ele1 {
+					case attributes.Electro:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-electro", 20*60),
+							AffectedStat: attributes.ElectroP,
+							Amount: func() ([]float64, bool) {
+								electro[attributes.ElectroP] = dmg
+								return electro, true
+							},
+						})
+					case attributes.Pyro:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-pyro", 20*60),
+							AffectedStat: attributes.PyroP,
+							Amount: func() ([]float64, bool) {
+								pyro[attributes.PyroP] = dmg
+								return pyro, true
+							},
+						})
+					case attributes.Cryo:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-cryo", 20*60),
+							AffectedStat: attributes.CryoP,
+							Amount: func() ([]float64, bool) {
+								cryo[attributes.CryoP] = dmg
+								return cryo, true
+							},
+						})
+					case attributes.Hydro:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-hydro", 20*60),
+							AffectedStat: attributes.HydroP,
+							Amount: func() ([]float64, bool) {
+								hydro[attributes.HydroP] = dmg
+								return hydro, true
+							},
+						})
+					case attributes.Dendro:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-dendro", 20*60),
+							AffectedStat: attributes.DendroP,
+							Amount: func() ([]float64, bool) {
+								dendro[attributes.DendroP] = dmg
+								return dendro, true
+							},
+						})
+					case attributes.Anemo:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-anemo", 20*60),
+							AffectedStat: attributes.AnemoP,
+							Amount: func() ([]float64, bool) {
+								anemo[attributes.AnemoP] = dmg
+								return anemo, true
+							},
+						})
+					case attributes.Geo:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-geo", 20*60),
+							AffectedStat: attributes.GeoP,
+							Amount: func() ([]float64, bool) {
+								geo[attributes.GeoP] = dmg
+								return geo, true
+							},
+						})
+					default:
+					}
+					switch ele2 {
+					case attributes.Electro:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-electro", 20*60),
+							AffectedStat: attributes.ElectroP,
+							Amount: func() ([]float64, bool) {
+								electro[attributes.ElectroP] = dmg
+								return electro, true
+							},
+						})
+					case attributes.Pyro:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-pyro", 20*60),
+							AffectedStat: attributes.PyroP,
+							Amount: func() ([]float64, bool) {
+								pyro[attributes.PyroP] = dmg
+								return pyro, true
+							},
+						})
+					case attributes.Cryo:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-cryo", 20*60),
+							AffectedStat: attributes.CryoP,
+							Amount: func() ([]float64, bool) {
+								cryo[attributes.CryoP] = dmg
+								return cryo, true
+							},
+						})
+					case attributes.Hydro:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-hydro", 20*60),
+							AffectedStat: attributes.HydroP,
+							Amount: func() ([]float64, bool) {
+								hydro[attributes.HydroP] = dmg
+								return hydro, true
+							},
+						})
+					case attributes.Dendro:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-dendro", 20*60),
+							AffectedStat: attributes.DendroP,
+							Amount: func() ([]float64, bool) {
+								dendro[attributes.DendroP] = dmg
+								return dendro, true
+							},
+						})
+					case attributes.Anemo:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-anemo", 20*60),
+							AffectedStat: attributes.AnemoP,
+							Amount: func() ([]float64, bool) {
+								anemo[attributes.AnemoP] = dmg
+								return anemo, true
+							},
+						})
+					case attributes.Geo:
+						x.AddStatMod(character.StatMod{
+							Base:         modifier.NewBaseWithHitlag("scroll-4pc-geo", 20*60),
+							AffectedStat: attributes.GeoP,
+							Amount: func() ([]float64, bool) {
+								geo[attributes.GeoP] = dmg
+								return geo, true
+							},
+						})
+					default:
+					}
+				}
+				c.Log.NewEvent("scroll 4pc proc'd", glog.LogWeaponEvent, char.Index).
+					Write("trigger", key)
+				return false
+			}
+		}
+
+		switch char.Base.Element {
+		case attributes.Anemo:
+			c.Events.Subscribe(event.OnSwirlCryo, scrollfunc(attributes.Anemo, attributes.Cryo, "scroll-swirlcryo"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnSwirlElectro, scrollfunc(attributes.Anemo, attributes.Electro, "scroll-swirlelectro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnSwirlHydro, scrollfunc(attributes.Anemo, attributes.Hydro, "scroll-swirlhydro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnSwirlPyro, scrollfunc(attributes.Anemo, attributes.Pyro, "scroll-swirlpyro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+		case attributes.Cryo:
+			c.Events.Subscribe(event.OnSwirlCryo, scrollfunc(attributes.Anemo, attributes.Cryo, "scroll-swirlcryo"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnSuperconduct, scrollfunc(attributes.Electro, attributes.Cryo, "scroll-superconduct"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnCrystallizeCryo, scrollfunc(attributes.Geo, attributes.Cryo, "scroll-crystallizecryo"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnFrozen, scrollfunc(attributes.Hydro, attributes.Cryo, "scroll-frozen"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnMelt, scrollfunc(attributes.Pyro, attributes.Cryo, "scroll-melt"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+		case attributes.Dendro:
+			c.Events.Subscribe(event.OnQuicken, scrollfunc(attributes.Dendro, attributes.Electro, "scroll-quicken"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnSpread, scrollfunc(attributes.Dendro, attributes.NoElement, "scroll-spread"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnBloom, scrollfunc(attributes.Dendro, attributes.Hydro, "scroll-bloom"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnBurning, scrollfunc(attributes.Dendro, attributes.Pyro, "scroll-burning"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+		case attributes.Electro:
+			c.Events.Subscribe(event.OnSwirlElectro, scrollfunc(attributes.Anemo, attributes.Electro, "scroll-swirlelectro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnSuperconduct, scrollfunc(attributes.Electro, attributes.Cryo, "scroll-superconduct"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnQuicken, scrollfunc(attributes.Dendro, attributes.Electro, "scroll-quicken"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnAggravate, scrollfunc(attributes.Electro, attributes.NoElement, "scroll-aggravate"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnHyperbloom, scrollfunc(attributes.Electro, attributes.NoElement, "scroll-hyperbloom"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnCrystallizeElectro, scrollfunc(attributes.Geo, attributes.Electro, "scroll-crystallizeelectro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnElectroCharged, scrollfunc(attributes.Hydro, attributes.Electro, "scroll-electrocharged"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnOverload, scrollfunc(attributes.Pyro, attributes.Electro, "scroll-overload"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+		case attributes.Geo:
+			c.Events.Subscribe(event.OnCrystallizeCryo, scrollfunc(attributes.Geo, attributes.Cryo, "scroll-crystallizecryo"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnCrystallizeElectro, scrollfunc(attributes.Geo, attributes.Electro, "scroll-crystallizeelectro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnCrystallizeHydro, scrollfunc(attributes.Geo, attributes.Hydro, "scroll-crystallizehydro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnCrystallizePyro, scrollfunc(attributes.Geo, attributes.Pyro, "scroll-crystallizepyro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+		case attributes.Hydro:
+			c.Events.Subscribe(event.OnSwirlHydro, scrollfunc(attributes.Anemo, attributes.Hydro, "scroll-swirlelhydro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnFrozen, scrollfunc(attributes.Hydro, attributes.Cryo, "scroll-frozen"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnBloom, scrollfunc(attributes.Dendro, attributes.Hydro, "scroll-bloom"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnElectroCharged, scrollfunc(attributes.Hydro, attributes.Electro, "scroll-electrocharged"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnCrystallizeHydro, scrollfunc(attributes.Geo, attributes.Hydro, "scroll-crystallizehydro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnVaporize, scrollfunc(attributes.Hydro, attributes.Pyro, "scroll-vaporize"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+		case attributes.Pyro:
+			c.Events.Subscribe(event.OnSwirlPyro, scrollfunc(attributes.Anemo, attributes.Pyro, "scroll-swirlpyro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnMelt, scrollfunc(attributes.Pyro, attributes.Cryo, "scroll-melt"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnBurning, scrollfunc(attributes.Dendro, attributes.Pyro, "scroll-burning"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnBurgeon, scrollfunc(attributes.Pyro, attributes.NoElement, "scroll-burgeon"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnOverload, scrollfunc(attributes.Pyro, attributes.Electro, "scroll-overload"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnCrystallizePyro, scrollfunc(attributes.Geo, attributes.Pyro, "scroll-crystallizepyro"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+			c.Events.Subscribe(event.OnVaporize, scrollfunc(attributes.Hydro, attributes.Pyro, "scroll-vaporize"), fmt.Sprintf("scroll-4pc-%v", char.Base.Key.String()))
+		default:
 		}
 	}
-
 	return &s, nil
 }

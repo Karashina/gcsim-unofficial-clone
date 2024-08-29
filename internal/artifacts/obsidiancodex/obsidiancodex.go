@@ -74,14 +74,14 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			if char.Index != index {
 				return false
 			}
-			if amount < 1 {
+			if amount > 0 {
 				return false
 			}
 
 			char.AddAttackMod(character.AttackMod{
 				Base: modifier.NewBaseWithHitlag("obsidiancodex-4pc", 6*60),
 				Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-					return m, true
+					return n, true
 				},
 			})
 			char.AddStatus(buffIcdKey, 60, true)

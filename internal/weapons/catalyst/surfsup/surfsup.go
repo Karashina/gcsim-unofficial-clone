@@ -47,7 +47,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		buffNA: make([]float64, attributes.EndStatType),
 	}
 
-	hpp := 0.20 + float64(p.Refine)*0 //todo: refines
+	hpp := 0.15 + float64(p.Refine)*0.05
 	val := make([]float64, attributes.EndStatType)
 	val[attributes.HPP] = hpp
 	char.AddStatMod(character.StatMod{
@@ -110,7 +110,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	w.char.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBaseWithHitlag(buffKey, -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			w.buffNA[attributes.DmgP] = 0.12 * float64(w.stacks) // todo:refine
+			w.buffNA[attributes.DmgP] = (0.09 + float64(p.Refine)*0.03) * float64(w.stacks)
 			switch atk.Info.AttackTag {
 			case attacks.AttackTagNormal:
 				return w.buffNA, true

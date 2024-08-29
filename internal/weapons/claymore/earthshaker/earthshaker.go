@@ -45,16 +45,10 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		atk := args[1].(*combat.AttackEvent)
-		// don't proc if dmg not from weapon holder
-		if atk.Info.ActorIndex != char.Index {
-			return false
-		}
-
 		w.char.AddAttackMod(character.AttackMod{
-			Base: modifier.NewBaseWithHitlag(buffKey, -1),
+			Base: modifier.NewBaseWithHitlag(buffKey, 8*60),
 			Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-				w.buffE[attributes.DmgP] = 0.16 // todo:refine
+				w.buffE[attributes.DmgP] = 0.12 + 0.04*float64(w.refine)
 				switch atk.Info.AttackTag {
 				case attacks.AttackTagElementalArt:
 					return w.buffE, true

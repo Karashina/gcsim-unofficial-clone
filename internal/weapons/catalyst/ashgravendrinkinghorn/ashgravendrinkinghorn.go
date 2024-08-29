@@ -30,7 +30,23 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	w := &Weapon{}
 	r := p.Refine
 
-	Dmg := char.MaxHP()*0.4 + float64(r)*0
+	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+		ae := args[1].(*combat.AttackEvent)
+
+		if ae.Info.ActorIndex != char.Index {
+			return false
+		}
+
+		if ae.Info.Abil != "Ash Graven Drinking Horn Proc" {
+			return false
+		}
+
+		snap := char.Snapshot(&ae.Info)
+		ae.Snapshot.Stats[attributes.CR] = snap.Stats[attributes.CR]
+		ae.Snapshot.Stats[attributes.CD] = snap.Stats[attributes.CD]
+
+		return false
+	}, "ashgraven-crit")
 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
@@ -53,9 +69,10 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			StrikeType: attacks.StrikeTypeDefault,
 			Element:    attributes.Physical,
 			Durability: 100,
-			FlatDmg:    Dmg,
+			FlatDmg:    char.MaxHP() * (0.3 + float64(r)*0.1),
 		}
 		trg := args[0].(combat.Target)
+
 		c.QueueAttack(ai, combat.NewCircleHitOnTarget(trg, nil, 3), 0, 1)
 
 		return false
