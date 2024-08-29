@@ -57,6 +57,7 @@ const (
 	Lyney
 	Mika
 	Mona
+	Mualani
 	Nahida
 	Navia
 	Neuvillette
@@ -294,6 +295,10 @@ func init() {
 	charNames[Mona] = "mona"
 	charPrettyName[Mona] = "Mona"
 	CharKeyToEle[Mona] = attributes.Hydro
+
+	charNames[Mualani] = "mualani"
+	charPrettyName[Mualani] = "Mualani"
+	CharKeyToEle[Mualani] = attributes.Hydro
 
 	charNames[Nahida] = "nahida"
 	charPrettyName[Nahida] = "Nahida"

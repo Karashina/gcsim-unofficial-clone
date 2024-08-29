@@ -1,0 +1,26 @@
+package_name: mualani
+genshin_id: 90000001
+key: mualani
+action_param_keys:
+  attack:
+    - param: "travel"
+skill_data_mapping:
+  attack:
+    attack_1:
+      - 0 # 1-Hit DMG|{param0:F1P}
+    attack_2:
+      - 1 # 2-Hit DMG|{param1:F1P}
+    attack_3:
+      - 2 # 3-Hit DMG|{param2:F1P}
+    charge:
+      - 4 # Charged Attack DMG|{param3:F1P}
+  skill:
+    skillBase:
+      - 0 # Sharky's Bite Base DMG |{param0:F1P}
+    skillWMBonus:
+      - 2 # Wave Momentum DMG Bonus|{param1:F1P}
+    skillSSBBonus:
+      - 1 # Sharky's Surging Bite Additional DMG Bonus|{param2:F1P}
+  burst:
+    burst:
+      - 0 # Skill DMG|{param0:F1P}
