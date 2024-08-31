@@ -1,0 +1,151 @@
+id: 90000004
+key: "kachina"
+rarity: QUALITY_PURPLE
+body: BODY_LOLI
+region: ASSOC_TYPE_RANGER
+element: Rock
+weapon_class: WEAPON_POLE
+icon_name: "UI_AvatarIcon_Ambor"
+stats: {
+   base_hp: 989
+   base_atk: 18
+   base_def: 66
+   hp_curve: GROW_CURVE_HP_S4
+   atk_curve: GROW_CURVE_ATTACK_S5
+   def_cruve: GROW_CURVE_HP_S5
+   promo_data: {
+      max_level: 20
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ROCK_ADD_HURT
+      }
+   }
+   promo_data: {
+      max_level: 40
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 989
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 66
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ROCK_ADD_HURT
+         value: 18
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ROCK_ADD_HURT
+      }
+   }
+   promo_data: {
+      max_level: 50
+add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 1691.71052631579
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 112.894736842105
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 30.7894736842105
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ROCK_ADD_HURT
+         value: 0.072
+      }
+   }
+   promo_data: {
+      max_level: 60
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 2628.65789473684
+      }
+add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 175.421052631579
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 47.8421052631579
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ROCK_ADD_HURT
+         value: 0.144
+      }
+   }
+   promo_data: {
+      max_level: 70
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 3331.36807535106
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 222.31576640361
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 60.6315726555299
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ROCK_ADD_HURT
+         value: 0.144
+      }
+   }
+   promo_data: {
+      max_level: 80
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 4034.07877451763
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 269.210514780752
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 73.4210494856597
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ROCK_ADD_HURT
+         value: 0.216
+      }
+   }
+   promo_data: {
+      max_level: 90
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 4736.78947368421
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 316.105263157895
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 86.2105263157895
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ROCK_ADD_HURT
+         value: 0.288
+      }
+   }
+}
+skill_details: {
+   skill: 10262
+   burst: 10265
+   attack: 10261
+   burst_energy_cost: 70
+}
+name_text_hash_map: 1021947691

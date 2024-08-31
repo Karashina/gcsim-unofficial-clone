@@ -43,6 +43,7 @@ const (
 	Hutao
 	Itto
 	Jean
+	Kachina
 	Kaeya
 	Kaveh
 	Kazuha
@@ -239,6 +240,10 @@ func init() {
 	charNames[Jean] = "jean"
 	charPrettyName[Jean] = "Jean"
 	CharKeyToEle[Jean] = attributes.Anemo
+
+	charNames[Kachina] = "kachina"
+	charPrettyName[Kachina] = "Kachina"
+	CharKeyToEle[Kachina] = attributes.Geo
 
 	charNames[Kaeya] = "kaeya"
 	charPrettyName[Kaeya] = "Kaeya"
