@@ -55,8 +55,15 @@ func (c *char) Init() error {
 	c.NightsoulBurst()
 	c.a1()
 	c.a4()
-	c.c1()
-	c.c6()
+	if c.Base.Cons >= 1 {
+		c.c1()
+	}
+	if c.Base.Cons >= 4 {
+		c.c4()
+	}
+	if c.Base.Cons >= 6 {
+		c.c6()
+	}
 	return nil
 }
 

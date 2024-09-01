@@ -6,8 +6,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
 var burstFramesNormal []int
@@ -42,7 +40,6 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c.AddStatus(burstKey, 12*60, true)
 	c.SetCD(action.ActionBurst, 18*60)
-	c.BurstBuffField()
 	c.c2()
 	c.ConsumeEnergy(6)
 
@@ -52,41 +49,4 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		CanQueueAfter:   burstFramesNormal[action.ActionAttack],
 		State:           action.BurstState,
 	}, nil
-}
-
-func (c *char) BurstBuffField() func() {
-	return func() {
-		area := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 10)
-		if c.StatusIsActive(burstKey) && !c.Core.Combat.Player().IsWithinArea(area) {
-			return
-		}
-
-		if c.Base.Cons >= 4 {
-			buff := make([]float64, attributes.EndStatType)
-
-			switch min(4, c.Core.Combat.EnemyCount()) {
-			case 1:
-				buff[attributes.DEFP] = 0.08
-			case 2:
-				buff[attributes.DEFP] = 0.12
-			case 3:
-				buff[attributes.DEFP] = 0.16
-			case 4:
-				buff[attributes.DEFP] = 0.20
-			default:
-				buff[attributes.DEFP] = 0.00
-			}
-
-			active := c.Core.Player.ActiveChar()
-			active.AddStatMod(character.StatMod{
-				Base:         modifier.NewBaseWithHitlag("kachina-c4", 120),
-				AffectedStat: attributes.DEFP,
-				Amount: func() ([]float64, bool) {
-					return buff, true
-				},
-			})
-		}
-		// tick every 0.3s
-		c.Core.Tasks.Add(c.BurstBuffField(), 18)
-	}
 }

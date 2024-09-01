@@ -8,7 +8,9 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/genshinsim/gcsim/pkg/modifier"
 	"github.com/genshinsim/gcsim/pkg/reactable"
 )
 
@@ -80,7 +82,51 @@ func (c *char) c2() {
 	}
 }
 
+func (c *char) c4() {
+	if c.Base.Cons < 4 {
+		return
+	}
+
+	area := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 10)
+	count := len(c.Core.Combat.EnemiesWithinArea(area, nil))
+	amt := 0.08
+
+	switch min(4, count) {
+	case 1:
+		amt = 0.08
+	case 2:
+		amt = 0.12
+	case 3:
+		amt = 0.16
+	case 4:
+		amt = 0.20
+	default:
+	}
+
+	m := make([]float64, attributes.EndStatType)
+	m[attributes.DEFP] = amt
+
+	for i, char := range c.Core.Player.Chars() {
+		idx := i
+		char.AddStatMod(character.StatMod{
+			Base:         modifier.NewBase("kachina-c4", -1),
+			AffectedStat: attributes.DEFP,
+			Extra:        true,
+			Amount: func() ([]float64, bool) {
+				if c.StatusIsActive(burstKey) && c.Core.Player.Active() == idx {
+					return m, true
+				}
+				return nil, false
+			},
+		})
+	}
+}
+
 func (c *char) c6() {
+	if c.Base.Cons < 6 {
+		return
+	}
+
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "This Time, I've Gotta Win (C6)",

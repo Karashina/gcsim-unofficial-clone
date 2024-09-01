@@ -20,7 +20,7 @@ func init() {
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(skillKey) {
-		c.rideTwirly()
+		return c.rideTwirly(), nil
 	}
 	h := p["hold"]
 	if h > 0 {
@@ -44,6 +44,7 @@ func (c *char) skillPress() action.Info {
 func (c *char) skillHold() action.Info {
 	c.skillInit()
 	c.SetCD(action.ActionSkill, 20*60)
+	c.AddStatus(skillRideKey, -1, true)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames),
@@ -68,13 +69,19 @@ func (c *char) skillEndRoutine() {
 	c.removeTwirly()
 }
 
-func (c *char) rideTwirly() {
+func (c *char) rideTwirly() action.Info {
 	c.c1shard()
 	if c.StatusIsActive(skillRideKey) {
 		c.DeleteStatus(skillRideKey)
 		c.newTwirly()
 	} else {
 		c.AddStatus(skillRideKey, -1, true)
+	}
+	return action.Info{
+		Frames:          frames.NewAbilFunc(skillPressFrames),
+		AnimationLength: skillPressFrames[action.InvalidAction],
+		CanQueueAfter:   skillPressFrames[action.ActionDash], // earliest cancel
+		State:           action.SkillState,
 	}
 }
 
