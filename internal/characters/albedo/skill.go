@@ -43,7 +43,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Mult:       skill[c.TalentLvlSkill()],
 	}
 	// TODO: damage frame
-	c.bloomSnapshot = c.Snapshot(&ai)
+	c.Core.Tasks.Add(func() { c.Snapshot(&ai) }, 23)
 
 	player := c.Core.Combat.Player()
 	skillDir := player.Direction()
@@ -59,7 +59,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ai.Mult = skillTick[c.TalentLvlSkill()]
 	ai.UseDef = true
 	c.skillAttackInfo = ai
-	c.skillSnapshot = c.Snapshot(&c.skillAttackInfo)
+	c.Core.Tasks.Add(func() { c.skillSnapshot = c.Snapshot(&c.skillAttackInfo) }, 23)
 
 	// create a construct
 	// Construct is not fully formed until after the hit lands (exact timing unknown)
