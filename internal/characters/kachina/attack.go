@@ -16,7 +16,7 @@ var (
 	attackHitmarks        = [][]int{{15}, {9, 35}, {21}, {16}}
 	attackHitlagHaltFrame = [][]float64{{0.03}, {0, 0.03}, {0.03}, {0.04}}
 	attackDefHalt         = [][]bool{{true}, {false, true}, {false}, {true}}
-	attackHitboxes        = [][]float64{{2}, {2, 2}, {2}, {2.5}}
+	attackHitboxes        = []float64{2, 2, 2, 2.5}
 	attackOffsets         = []float64{0.8, 0.8, 0.8, 1.1}
 	attackFanAngles       = []float64{360, 220, 220, 90}
 )
@@ -58,15 +58,15 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		ap := combat.NewCircleHitOnTargetFanAngle(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: attackOffsets[c.NormalCounter]},
-			attackHitboxes[c.NormalCounter][0],
+			attackHitboxes[c.NormalCounter],
 			attackFanAngles[c.NormalCounter],
 		)
 		if c.NormalCounter == 3 {
 			ap = combat.NewBoxHitOnTarget(
 				c.Core.Combat.Player(),
 				geometry.Point{Y: attackOffsets[c.NormalCounter]},
-				attackHitboxes[c.NormalCounter][0],
-				attackHitboxes[c.NormalCounter][1],
+				attackHitboxes[c.NormalCounter],
+				attackHitboxes[c.NormalCounter],
 			)
 		}
 		c.QueueCharTask(func() {
