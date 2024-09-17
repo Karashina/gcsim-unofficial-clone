@@ -54,10 +54,20 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
-		if w.char.StatusIsActive(buffIcdSkill) {
+		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		if atk.Info.ActorIndex != char.Index {
+
+		count := 0
+		for _, v := range stackKey {
+			if char.StatusIsActive(v) {
+				count++
+			}
+		}
+		w.buff[attributes.DmgP] = (0.10 + float64(w.refine)*0) * float64(count)
+		w.applybuff()
+
+		if w.char.StatusIsActive(buffIcdSkill) {
 			return false
 		}
 		if atk.Info.AttackTag != attacks.AttackTagElementalArt && atk.Info.AttackTag != attacks.AttackTagElementalArtHold {
@@ -70,15 +80,6 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			stackindex = 0
 		}
 		w.char.AddStatus(buffIcdSkill, 0.5*60, true)
-
-		count := 0
-		for _, v := range stackKey {
-			if char.StatusIsActive(v) {
-				count++
-			}
-		}
-		w.buff[attributes.DmgP] = (0.10 + float64(w.refine)*0) * float64(count)
-		w.applybuff()
 
 		return false
 	}, fmt.Sprintf("mountainking-skill-%v", char.Base.Key.String()))
@@ -97,15 +98,6 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 		w.char.AddStatus(buffIcdReact, 2*60, true)
 
-		count := 0
-		for _, v := range stackKey {
-			if char.StatusIsActive(v) {
-				count++
-			}
-		}
-		w.buff[attributes.DmgP] = (0.10 + float64(w.refine)*0) * float64(count)
-		w.applybuff()
-
 		return false
 	}, fmt.Sprintf("mountainking-burning-%v", char.Base.Key.String()))
 
@@ -122,15 +114,6 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			}
 		}
 		w.char.AddStatus(buffIcdReact, 2*60, true)
-
-		count := 0
-		for _, v := range stackKey {
-			if char.StatusIsActive(v) {
-				count++
-			}
-		}
-		w.buff[attributes.DmgP] = (0.10 + float64(w.refine)*0) * float64(count)
-		w.applybuff()
 
 		return false
 	}, fmt.Sprintf("mountainking-burgeon-%v", char.Base.Key.String()))
