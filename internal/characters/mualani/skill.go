@@ -27,7 +27,7 @@ func init() {
 }
 
 func (c *char) skillActivate() action.Info {
-	c.AddNightsoul("kachina-skill-init", 60)
+	c.AddNightsoul("mualani-skill-init", 60)
 	c.AddStatus(skillKey, -1, true)
 	c.pufferCount = 0
 	c.OnNightsoul = true

@@ -14,6 +14,8 @@ const (
 	ICDTagEmilieLumidouce
 	ICDTagFurinaChevalmarin
 	ICDTagFurinaUsher
+	ICDTagKinichSKill
+	ICDTagKinichSkillSSC
 	ICDTagKleeFireDamage
 	ICDTagLisaElectro
 	ICDTagLyneyEndBoom

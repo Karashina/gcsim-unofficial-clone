@@ -21,6 +21,8 @@ const (
 	ICDGroupEmilieLumidouce
 	ICDGroupFischl
 	ICDGroupFurinaSalonSolitaire
+	ICDGroupKinichSkill
+	ICDGroupKinichSkillSSC
 	ICDGroupLayla
 	ICDGroupLyneyExtra
 	ICDGroupNahidaSkill
@@ -112,6 +114,14 @@ func init() {
 	ICDGroupEleApplicationSequence[ICDGroupFurinaSalonSolitaire] = []float64{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0}
 	ICDGroupDamageSequence[ICDGroupFurinaSalonSolitaire] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 
+	ICDGroupResetTimer[ICDGroupKinichSkill] = 120
+	ICDGroupEleApplicationSequence[ICDGroupKinichSkill] = []float64{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	ICDGroupDamageSequence[ICDGroupKinichSkill] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+
+	ICDGroupResetTimer[ICDGroupKinichSkillSSC] = 72
+	ICDGroupEleApplicationSequence[ICDGroupKinichSkillSSC] = []float64{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	ICDGroupDamageSequence[ICDGroupKinichSkillSSC] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+	
 	ICDGroupResetTimer[ICDGroupLayla] = 180
 	ICDGroupEleApplicationSequence[ICDGroupLayla] = []float64{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0}
 	ICDGroupDamageSequence[ICDGroupLayla] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}

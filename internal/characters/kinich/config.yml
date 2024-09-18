@@ -1,0 +1,41 @@
+package_name: kinich
+genshin_id: 90000005
+key: kinich
+icd_tags:
+  - ICDTagKinichSKill
+	- ICDTagKinichSkillSSC
+icd_groups:
+  - group_name: ICDGroupKinichSkill
+    reset_timer: 120
+    ele_app_sequence:
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    damage_sequence: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+  - group_name: ICDGroupKinichSkillSSC
+    reset_timer: 72
+    ele_app_sequence:
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    damage_sequence: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+action_param_keys:
+  attack:
+    - param: "blindspot"
+  skill:
+    - param: "travel"
+    - param: "hold"
+skill_data_mapping:
+  attack:
+    attack_1:
+      - 0 # 1-Hit DMG|{param0:F1P}
+    attack_2:
+      - 1 # 2-Hit DMG|{param1:F1P}
+    attack_3:
+      - 2 # 3-Hit DMG|{param2:F1P}
+  skill:
+    skillNA:
+      - 0 # Loop Shot DMG |{param0:F1P}
+    skillSSC:
+      - 1 # Scalespiker Cannon DMG |{param1:F1P}
+  burst:
+    burst:
+      - 0 # Skill DMG |{param0:F1P}
+    burstDot:
+      - 0 # Dragon Breath DMG |{param1:F1P}
