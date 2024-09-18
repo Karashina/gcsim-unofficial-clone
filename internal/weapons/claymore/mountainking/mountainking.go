@@ -64,7 +64,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 				count++
 			}
 		}
-		w.buff[attributes.DmgP] = (0.10 + float64(w.refine)*0) * float64(count)
+		w.buff[attributes.DmgP] = (0.075 + float64(w.refine)*0.025) * float64(count)
 		w.applybuff()
 
 		if w.char.StatusIsActive(buffIcdSkill) {

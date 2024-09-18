@@ -17,15 +17,19 @@ const (
 	particleICDKey = "kinich-particle-icd"
 	blindspotKey   = "kinich-blindspot"
 	c2buffKey      = "kinich-c2-buff"
-	SSCrelease     = 42
 )
 
-var skillFrames []int
-var skillFramesSSC []int
+var (
+	skillFrames        []int
+	skillFramesSSC     []int
+	skillFramesSSCHold []int
+)
 
 func init() {
 	skillFrames = frames.InitAbilSlice(46)
-	skillFramesSSC = frames.InitAbilSlice(73)
+	skillFramesSSC = frames.InitAbilSlice(70)
+	skillFramesSSCHold = frames.InitAbilSlice(60)
+	attackFramesE[action.ActionAttack] = 63
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
@@ -39,8 +43,10 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	hold, ok := p["hold"]
 	if !ok {
 		c.skillhold = 0
+		c.isSSCHeld = false
 	} else {
-		c.skillhold = hold
+		c.skillhold = 30 + hold
+		c.isSSCHeld = true
 	}
 
 	if !c.StatusIsActive(skillKey) {
@@ -71,6 +77,18 @@ func (c *char) skillActivate() action.Info {
 }
 
 func (c *char) skillSSC() action.Info {
+
+	SSCrelease := 42
+	frame := frames.NewAbilFunc(skillFramesSSC)
+	anim := skillFramesSSC[action.InvalidAction]
+	cqa := skillFramesSSC[action.ActionSwap]
+
+	if c.isSSCHeld {
+		SSCrelease = c.skillhold
+		frame = frames.NewAbilFunc(skillFramesSSCHold)
+		anim = skillFramesSSCHold[action.InvalidAction]
+		cqa = skillFramesSSCHold[action.ActionSwap]
+	}
 
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -119,9 +137,9 @@ func (c *char) skillSSC() action.Info {
 
 	// Return ActionInfo
 	return action.Info{
-		Frames:          frames.NewAbilFunc(skillFramesSSC),
-		AnimationLength: skillFramesSSC[action.InvalidAction],
-		CanQueueAfter:   skillFramesSSC[action.ActionSwap], // earliest cancel
+		Frames:          frame,
+		AnimationLength: anim,
+		CanQueueAfter:   cqa, // earliest cancel
 		State:           action.SkillState,
 	}
 }

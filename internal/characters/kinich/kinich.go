@@ -22,6 +22,7 @@ type char struct {
 	*tmpl.Character
 	skilltravel int
 	skillhold   int
+	isSSCHeld   bool
 	sscradius   float64
 	a4stacks    int
 	a4buff      float64
@@ -77,6 +78,11 @@ func (c *char) Condition(fields []string) (any, error) {
 			return 0, nil
 		}
 		return c.NightsoulPoint, nil
+	case "onnightsoul":
+		if !c.OnNightsoul {
+			return 0, nil
+		}
+		return 1, nil
 	default:
 		return c.Character.Condition(fields)
 	}
