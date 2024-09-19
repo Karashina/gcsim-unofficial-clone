@@ -61,6 +61,34 @@ func (c *char) Init() error {
 	return nil
 }
 
+func (c *char) Condition(fields []string) (any, error) {
+	t := c.Core.Combat.PrimaryTarget().(core.Reactable)
+	switch fields[0] {
+	case "kazuhaeye-pyro":
+		if t.AuraContains(attributes.Pyro) {
+			return 1, nil
+		}
+		return 0, nil
+	case "kazuhaeye-hydro":
+		if t.AuraContains(attributes.Hydro) {
+			return 1, nil
+		}
+		return 0, nil
+	case "kazuhaeye-electro":
+		if t.AuraContains(attributes.Electro) {
+			return 1, nil
+		}
+		return 0, nil
+	case "kazuhaeye-cryo":
+		if t.AuraContains(attributes.Cryo) {
+			return 1, nil
+		}
+		return 0, nil
+	default:
+		return c.Character.Condition(fields)
+	}
+}
+
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	if k == model.AnimationXingqiuN0StartDelay {
 		return 10
