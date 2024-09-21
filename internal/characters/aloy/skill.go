@@ -157,6 +157,7 @@ func (c *char) coilStacks(a combat.AttackCB) {
 func (c *char) rushingIce() {
 	c.AddStatus(rushingIceKey, rushingIceDuration, true)
 	c.Core.Player.AddWeaponInfuse(c.Index, "aloy-rushing-ice", attributes.Cryo, 600, true, attacks.AttackTagNormal)
+	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Cryo, 600)
 
 	// Rushing ice NA bonus
 	val := make([]float64, attributes.EndStatType)

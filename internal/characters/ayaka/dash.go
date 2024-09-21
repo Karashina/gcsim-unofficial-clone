@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
@@ -58,6 +59,7 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 			attacks.AttackTagNormal, attacks.AttackTagExtra, attacks.AttackTagPlunge,
 		)
 	}, dashHitmark+f)
+	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Cryo, 300)
 
 	// handle stamina usage, avoid default dash implementation since dont want CD
 	c.QueueDashStaminaConsumption(p)

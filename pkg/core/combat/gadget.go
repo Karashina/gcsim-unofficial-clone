@@ -23,6 +23,7 @@ const (
 	GadgetTypSourcewaterDropletHydroTrav
 	GadgetTypSourcewaterDropletNeuv
 	GadgetTypCrystallizeShard
+	GadgetTypReactableweapon
 	GadgetTypTest
 	EndGadgetTyp
 )
@@ -39,6 +40,7 @@ func init() {
 	gadgetLimits[GadgetTypSourcewaterDropletHydroTrav] = 12
 	gadgetLimits[GadgetTypSourcewaterDropletNeuv] = 12
 	gadgetLimits[GadgetTypCrystallizeShard] = 3
+	gadgetLimits[GadgetTypReactableweapon] = 4
 }
 
 type Gadget interface {

@@ -96,6 +96,7 @@ func (c *char) burstInfuseFn(char *character.CharWrapper, src int) {
 			true,
 			attacks.AttackTagNormal, attacks.AttackTagExtra, attacks.AttackTagPlunge,
 		)
+		c.Core.Events.Emit(event.OnInfusion, char.Index, attributes.Hydro, 60)
 	}
 	c.QueueCharTask(func() { c.burstInfuseFn(char, src) }, 30)
 }

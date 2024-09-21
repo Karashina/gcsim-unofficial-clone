@@ -3,6 +3,7 @@ package keqing
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
@@ -26,6 +27,8 @@ func (c *char) a1() {
 		true,
 		attacks.AttackTagNormal, attacks.AttackTagExtra, attacks.AttackTagPlunge,
 	)
+	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Electro, dur)
+
 }
 
 // When casting Starward Sword, Keqing's CRIT Rate is increased by 15%, and her Energy Recharge is increased by 15%. This effect lasts for 8s.

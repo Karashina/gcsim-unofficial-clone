@@ -75,6 +75,7 @@ const (
 	OnTick
 	OnNightsoulBurst       // nil
 	OnNightsoulChange      // index, amount, source
+	OnInfusion             //index, ele, duration
 	OnSimEndedSuccessfully // nil
 	EndEventTypes          // elim
 )

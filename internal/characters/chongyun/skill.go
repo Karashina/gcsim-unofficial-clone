@@ -154,6 +154,8 @@ func (c *char) infuse(active *character.CharWrapper) {
 			true,
 			attacks.AttackTagNormal, attacks.AttackTagExtra, attacks.AttackTagPlunge,
 		)
+		c.Core.Events.Emit(event.OnInfusion, active.Index, attributes.Cryo, dur)
+
 		c.Core.Log.NewEvent("chongyun adding infusion", glog.LogCharacterEvent, c.Index).
 			Write("expiry", c.Core.F+dur)
 		// A1:

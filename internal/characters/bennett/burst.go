@@ -7,6 +7,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
@@ -142,6 +143,7 @@ func (c *char) applyBennettField(stats [attributes.EndStatType]float64, firstTic
 						attacks.AttackTagNormal, attacks.AttackTagExtra, attacks.AttackTagPlunge,
 					)
 				}
+				c.Core.Events.Emit(event.OnInfusion, active.Index, attributes.Pyro, burstBuffDuration)
 			}
 
 			active.AddStatMod(character.StatMod{

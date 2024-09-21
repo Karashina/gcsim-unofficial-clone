@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
@@ -36,6 +37,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	// infusion starts when burst starts and ends when burst comes off CD - check any diluc video
 	c.AddStatus(burstBuffKey, duration, true)
+	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Pyro, duration)
 
 	// A4:
 	// Additionally, Diluc gains 20% Pyro DMG Bonus during the duration of this effect.

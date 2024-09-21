@@ -5,6 +5,8 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
@@ -17,6 +19,7 @@ func init() {
 
 type char struct {
 	*tmpl.Character
+	wp     *ReactableWeapon
 	a4buff []float64
 	c4buff []float64
 	c6buff []float64
@@ -50,6 +53,7 @@ func (c *char) Init() error {
 		c.c6buff = make([]float64, attributes.EndStatType)
 		c.c6buff[attributes.ElectroP] = 0.06
 	}
+	c.WeaponReactionHandler()
 	return nil
 }
 
@@ -73,4 +77,37 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 		return 8
 	}
 	return c.Character.AnimationStartDelay(k)
+}
+
+func (c *char) WeaponReactionHandler() {
+	c.Core.Events.Subscribe(event.OnInitialize, func(args ...interface{}) bool {
+		c.wp = c.newReactableWeapons()
+		return false
+	}, "keqing-weaponreactionhandler-init")
+
+	c.Core.Events.Subscribe(event.OnInfusion, func(args ...interface{}) bool {
+		index := args[0].(int)
+		ele := args[1].(attributes.Element)
+		dur := args[2].(int)
+		if c.Core.Player.ActiveChar().Index != c.Index {
+			return false
+		}
+		if index != c.Index {
+			return false
+		}
+		infai := combat.AttackInfo{
+			ActorIndex: index,
+			Abil:       "Weapon Infusion",
+			Element:    ele,
+			Durability: 25,
+		}
+		infae := combat.AttackEvent{
+			Info:        infai,
+			Pattern:     combat.NewSingleTargetHit(0),
+			SourceFrame: c.Core.F,
+		}
+		c.wp.weaponreact(&infae)
+		c.QueueCharTask(c.wp.resetgauge, dur)
+		return false
+	}, "keqing-infusion")
 }

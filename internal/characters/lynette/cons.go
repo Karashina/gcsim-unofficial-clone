@@ -4,6 +4,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
@@ -42,6 +43,7 @@ func (c *char) c6() {
 		true,
 		attacks.AttackTagNormal, attacks.AttackTagExtra, attacks.AttackTagPlunge,
 	)
+	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Anemo, duration)
 
 	// add anemo% buff
 	m := make([]float64, attributes.EndStatType)

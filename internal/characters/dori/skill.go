@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 )
 
@@ -53,6 +54,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			attacks.AttackTagPlunge,
 		)
 	}
+	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Electro, 228)
 
 	c.Core.QueueAttack(
 		ai,

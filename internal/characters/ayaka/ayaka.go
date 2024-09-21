@@ -4,6 +4,9 @@ import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"
+	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
@@ -16,6 +19,7 @@ func init() {
 
 type char struct {
 	*tmpl.Character
+	wp             *ReactableWeapon
 	c6CDTimerAvail bool // Flag that controls whether the 0.5 C6 CD timer is available to be started
 }
 
@@ -45,6 +49,7 @@ func (c *char) Init() error {
 	if c.Base.Cons >= 6 {
 		c.c6AddBuff()
 	}
+	c.WeaponReactionHandler()
 	return nil
 }
 
@@ -66,4 +71,37 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 		return 7
 	}
 	return c.Character.AnimationStartDelay(k)
+}
+
+func (c *char) WeaponReactionHandler() {
+	c.Core.Events.Subscribe(event.OnInitialize, func(args ...interface{}) bool {
+		c.wp = c.newReactableWeapons()
+		return false
+	}, "ayaka-weaponreactionhandler-init")
+
+	c.Core.Events.Subscribe(event.OnInfusion, func(args ...interface{}) bool {
+		index := args[0].(int)
+		ele := args[1].(attributes.Element)
+		dur := args[2].(int)
+		if c.Core.Player.ActiveChar().Index != c.Index {
+			return false
+		}
+		if index != c.Index {
+			return false
+		}
+		infai := combat.AttackInfo{
+			ActorIndex: index,
+			Abil:       "Weapon Infusion",
+			Element:    ele,
+			Durability: 25,
+		}
+		infae := combat.AttackEvent{
+			Info:        infai,
+			Pattern:     combat.NewSingleTargetHit(0),
+			SourceFrame: c.Core.F,
+		}
+		c.wp.weaponreact(&infae)
+		c.QueueCharTask(c.wp.resetgauge, dur)
+		return false
+	}, "ayaka-infusion")
 }
