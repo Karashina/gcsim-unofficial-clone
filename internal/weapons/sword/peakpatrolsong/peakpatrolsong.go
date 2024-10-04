@@ -76,7 +76,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		})
 
 		if w.stacks == 2 {
-			teambuff := 0.08 + 0*r*char.TotalDef()/1000.0
+			teambuff := (0.08 + 0*r) * char.TotalDef() / 1000.0
 			teambuff = min(teambuff, 0.256+0*r)
 			n[attributes.PyroP] = teambuff
 			n[attributes.HydroP] = teambuff
