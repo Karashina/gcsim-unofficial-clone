@@ -1,17 +1,17 @@
-id: 90005
-key: "fluteofezpitzal"
+id: 14427
+key: "ashgravendrinkinghorn"
 rarity: 4
-weapon_class: WEAPON_SWORD_ONE_HAND
-image_name: "UI_EquipIcon_Sword_Proto"
+weapon_class: WEAPON_CATALYST
+image_name: "UI_EquipIcon_Catalyst_ConchSprayer"
 base_stats: {
    base_props: {
       prop_type: FIGHT_PROP_BASE_ATTACK
-      initial_value: 41.0671
-      curve: GROW_CURVE_ATTACK_204
+      initial_value: 42.401
+      curve: GROW_CURVE_ATTACK_201
    }
    base_props: {
-      prop_type: FIGHT_PROP_DEFENSE_PERCENT
-      initial_value: 0.150133
+      prop_type: FIGHT_PROP_HP_PERCENT
+      initial_value: 0.09
       curve: GROW_CURVE_CRITICAL_201
    }
    promo_data: {
@@ -60,4 +60,4 @@ base_stats: {
       }
    }
 }
-name_text_hash_map: 9000000005
+name_text_hash_map: 422144187

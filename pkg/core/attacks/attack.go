@@ -39,11 +39,9 @@ const (
 	StrikeTypeSpear
 )
 
-type AlignmentType int
+type AdditionalTag int
 
 const (
-	AlignmentDefault AlignmentType = iota
-	AlignmentArkhePneuma
-	AlignmentArkheOusia
-	AlignmentNightsoul
+	AdditionalTagNone AdditionalTag = iota
+	AdditionalTagNightsoul
 )

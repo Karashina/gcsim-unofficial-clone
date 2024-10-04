@@ -53,7 +53,7 @@ func (c *char) newTwirly() {
 		UseDef:     true,
 		Mult:       skillIndependent[c.TalentLvlSkill()],
 		FlatDmg:    c.a4flat,
-		Alignment:  attacks.AlignmentNightsoul,
+		Alignment:  attacks.AdditionalTagNightsoul,
 	}
 	c.Core.Tasks.Add(c.Twirlytick(c.Core.F), 150)
 }
@@ -110,7 +110,7 @@ func (c *char) TwirlyRideAttack() func() {
 			UseDef:     true,
 			Mult:       skillRide[c.TalentLvlSkill()],
 			FlatDmg:    c.a4flat,
-			Alignment:  attacks.AlignmentNightsoul,
+			Alignment:  attacks.AdditionalTagNightsoul,
 		}
 		if c.StatusIsActive(burstKey) {
 			radius = 5.2

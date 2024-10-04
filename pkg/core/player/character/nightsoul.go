@@ -11,6 +11,7 @@ func (c *CharWrapper) ConsumeNightsoul(amt float64) {
 	}
 	preNightsoul := c.NightsoulPoint
 	c.events.Emit(event.OnNightsoulChange, c.Index, -1*amt, "Nightsoul-Drain")
+	c.events.Emit(event.OnNightsoulConsume, c.Index, amt)
 	c.NightsoulPoint -= amt
 	c.log.NewEvent("draining nightsoul", glog.LogEnergyEvent, c.Index).
 		Write("pre_drain", preNightsoul).
@@ -34,6 +35,7 @@ func (c *CharWrapper) AddNightsoul(src string, amt float64) {
 	}
 
 	c.events.Emit(event.OnNightsoulChange, c.Index, amt, src)
+	c.events.Emit(event.OnNightsoulGenerate, c.Index, amt)
 	c.log.NewEvent("adding nightsoul", glog.LogEnergyEvent, c.Index).
 		Write("rec'd", amt).
 		Write("pre_recovery", preNightsoul).

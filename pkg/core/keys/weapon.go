@@ -91,8 +91,8 @@ var weaponNames = []string{
 	"filletblade",
 	"finaleofthedeep",
 	"fleuvecendreferryman",
-	"flowingpurity",
 	"fluteofezpitzal",
+	"flowingpurity",
 	"footprintoftherainbow",
 	"forestregalia",
 	"freedomsworn",
@@ -289,8 +289,8 @@ const (
 	FilletBlade
 	FinaleOfTheDeep
 	FleuveCendreFerryman
-	FlowingPurity
 	FluteOfEzpitzal
+	FlowingPurity
 	FootprintOfTheRainbow
 	ForestRegalia
 	FreedomSworn

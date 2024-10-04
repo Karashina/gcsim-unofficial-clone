@@ -1,4 +1,4 @@
-package ashgravendrinkinghorn
+package ashgraven
 
 import (
 	"fmt"
@@ -11,13 +11,14 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/enemy"
 )
+
+const icdKey = "ash-graven-drinking-horn-icd"
 
 func init() {
 	core.RegisterWeaponFunc(keys.AshGravenDrinkingHorn, NewWeapon)
 }
-
-const icdKey = "drinkinghorn-icd"
 
 type Weapon struct {
 	Index int
@@ -30,27 +31,15 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	w := &Weapon{}
 	r := p.Refine
 
-	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
-
-		if ae.Info.ActorIndex != char.Index {
-			return false
-		}
-
-		if ae.Info.Abil != "Ash Graven Drinking Horn Proc" {
-			return false
-		}
-
-		snap := char.Snapshot(&ae.Info)
-		ae.Snapshot.Stats[attributes.CR] = snap.Stats[attributes.CR]
-		ae.Snapshot.Stats[attributes.CD] = snap.Stats[attributes.CD]
-
-		return false
-	}, "ashgraven-crit")
+	hp := 0.3 + float64(r)*0.1
 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		atk := args[1].(*combat.AttackEvent)
-		if atk.Info.ActorIndex != char.Index {
+		t, ok := args[0].(*enemy.Enemy)
+		if !ok {
+			return false
+		}
+		ae := args[1].(*combat.AttackEvent)
+		if ae.Info.ActorIndex != char.Index {
 			return false
 		}
 		if c.Player.Active() != char.Index {
@@ -62,20 +51,17 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		char.AddStatus(icdKey, 15*60, true)
 		ai := combat.AttackInfo{
 			ActorIndex: char.Index,
-			Abil:       "Ash Graven Drinking Horn Proc",
+			Abil:       "Ash-Graven Drinking Horn Proc",
 			AttackTag:  attacks.AttackTagWeaponSkill,
 			ICDTag:     attacks.ICDTagNone,
 			ICDGroup:   attacks.ICDGroupDefault,
 			StrikeType: attacks.StrikeTypeDefault,
 			Element:    attributes.Physical,
 			Durability: 100,
-			FlatDmg:    char.MaxHP() * (0.3 + float64(r)*0.1),
+			FlatDmg:    char.MaxHP() * hp,
 		}
-		trg := args[0].(combat.Target)
-
-		c.QueueAttack(ai, combat.NewCircleHitOnTarget(trg, nil, 3), 0, 1)
-
+		c.QueueAttack(ai, combat.NewCircleHitOnTarget(t, nil, 3), 0, 1)
 		return false
-	}, fmt.Sprintf("ashgravendrinkinghorn-%v", char.Base.Key.String()))
+	}, fmt.Sprintf("ashgraven-%v", char.Base.Key.String()))
 	return w, nil
 }
