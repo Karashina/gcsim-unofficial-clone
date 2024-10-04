@@ -97,6 +97,7 @@ var weaponNames = []string{
 	"forestregalia",
 	"freedomsworn",
 	"frostbearer",
+	"fruitfulhook",
 	"fruitoffulfillment",
 	"hakushinring",
 	"halberd",
@@ -132,10 +133,12 @@ var weaponNames = []string{
 	"mistsplitterreforged",
 	"mitternachtswaltz",
 	"moonpiercer",
+	"mountainbracingbolt",
 	"mouunsmoon",
 	"oathsworneye",
 	"oldmercspal",
 	"otherworldlystory",
+	"peakpatrolsong",
 	"pocketgrimoire",
 	"polarstar",
 	"portablepowersaw",
@@ -188,6 +191,7 @@ var weaponNames = []string{
 	"splendoroftranquilwaters",
 	"staffofhoma",
 	"staffofthescarletsands",
+	"sturdybone",
 	"summitshaper",
 	"surfsup",
 	"swordofdescension",
@@ -295,6 +299,7 @@ const (
 	ForestRegalia
 	FreedomSworn
 	Frostbearer
+	FruitfulHook
 	FruitOfFulfillment
 	HakushinRing
 	Halberd
@@ -330,10 +335,12 @@ const (
 	MistsplitterReforged
 	MitternachtsWaltz
 	Moonpiercer
+	MountainBracingBolt
 	MouunsMoon
 	OathswornEye
 	OldMercsPal
 	OtherworldlyStory
+	PeakPatrolSong
 	PocketGrimoire
 	PolarStar
 	PortablePowerSaw
@@ -386,6 +393,7 @@ const (
 	SplendorOfTranquilWaters
 	StaffOfHoma
 	StaffOfTheScarletSands
+	SturdyBone
 	SummitShaper
 	SurfsUp
 	SwordOfDescension
