@@ -1,10 +1,9 @@
-package ezpitzal
+package fluteofezpitzal
 
 import (
 	"fmt"
 
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
@@ -24,36 +23,33 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
+// Using an Elemental Skill increases DEF by 16/20/24/28/32% for 15s.
+
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	defp := 0.12 + float64(r)*0.04
-	val := make([]float64, attributes.EndStatType)
+	def := 0.12 + float64(r)*0.04
+	duration := 15 * 60
 
-	c.Events.Subscribe(event.OnActionExec, func(args ...interface{}) bool {
-		index := args[0].(int)
-		e := args[1].(action.Action)
-		if c.Player.Active() != index {
-			return false
-		}
-		if char.Index != index {
-			return false
-		}
-		if e != action.ActionSkill {
+	m := make([]float64, attributes.EndStatType)
+	m[attributes.DEFP] = def
+
+	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
+		if c.Player.Active() != char.Index {
 			return false
 		}
 
-		val[attributes.DEFP] = defp
 		char.AddStatMod(character.StatMod{
-			Base:         modifier.NewBase("ezpitzal-defp", 15*60),
+			Base:         modifier.NewBaseWithHitlag("flute-of-ezpitzal-def-boost", duration),
 			AffectedStat: attributes.DEFP,
 			Amount: func() ([]float64, bool) {
-				return val, true
+				return m, true
 			},
 		})
+
 		return false
-	}, fmt.Sprintf("ezpitzal-skill-%v", char.Base.Key.String()))
+	}, fmt.Sprintf("flute-of-ezpitzal-def%v", char.Base.Key.String()))
 
 	return w, nil
 }

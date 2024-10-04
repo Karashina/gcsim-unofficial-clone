@@ -31,6 +31,7 @@ type AttackInfo struct {
 	DamageSrc        targets.TargetKey // source of this attack; should be a unique key identifying the target
 	Abil             string            // name of ability triggering the damage
 	AttackTag        attacks.AttackTag
+	AdditionalTags   []attacks.AdditionalTag
 	PoiseDMG         float64 // only needed on blunt attacks for frozen consumption before shatter for now
 	ICDTag           attacks.ICDTag
 	ICDGroup         attacks.ICDGroup
@@ -55,12 +56,12 @@ type AttackInfo struct {
 	SourceIsSim bool
 	DoNotLog    bool
 	// hitlag stuff
+	Alignment            attacks.AdditionalTag // this to to track Arkhe/Nightsoul trigger
 	HitlagHaltFrames     float64               // this is the number of frames to pause by
 	HitlagFactor         float64               // this is factor to slow clock by
 	CanBeDefenseHalted   bool                  // for whacking ruin gaurds
 	IsDeployable         bool                  // if this is true, then hitlag does not affect owner
 	HitlagOnHeadshotOnly bool                  // if this is true, will only apply if HitWeakpoint is also true
-	Alignment            attacks.AlignmentType // this to to track Arkhe/Nightsoul trigger
 }
 
 type Snapshot struct {

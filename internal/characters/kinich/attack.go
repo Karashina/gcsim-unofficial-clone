@@ -102,7 +102,7 @@ func (c *char) AttackLoopShot(p map[string]int) (action.Info, error) {
 		Element:    attributes.Dendro,
 		Durability: 25,
 		Mult:       skillNA[c.TalentLvlSkill()],
-		Alignment:  attacks.AlignmentNightsoul,
+		Alignment:  attacks.AdditionalTagNightsoul,
 	}
 	ap := combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key())
 

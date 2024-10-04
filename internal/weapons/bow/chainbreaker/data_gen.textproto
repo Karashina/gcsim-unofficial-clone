@@ -1,8 +1,8 @@
-id: 90006
+id: 15431
 key: "chainbreaker"
 rarity: 4
 weapon_class: WEAPON_BOW
-image_name: "UI_EquipIcon_Bow_Proto"
+image_name: "UI_EquipIcon_Bow_Isikhulu"
 base_stats: {
    base_props: {
       prop_type: FIGHT_PROP_BASE_ATTACK
@@ -60,4 +60,4 @@ base_stats: {
       }
    }
 }
-name_text_hash_map: 9000000006
+name_text_hash_map: 565052971

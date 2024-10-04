@@ -101,7 +101,7 @@ func (c *char) skillSSC() action.Info {
 		Durability: 25,
 		Mult:       skillSSC[c.TalentLvlSkill()],
 		FlatDmg:    c.TotalAtk() * c.a4buff,
-		Alignment:  attacks.AlignmentNightsoul,
+		Alignment:  attacks.AdditionalTagNightsoul,
 	}
 
 	ap := combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, c.sscradius)
@@ -123,7 +123,7 @@ func (c *char) skillSSC() action.Info {
 			Durability: 25,
 			Mult:       7,
 			FlatDmg:    c.TotalAtk() * c.a4buff,
-			Alignment:  attacks.AlignmentNightsoul,
+			Alignment:  attacks.AdditionalTagNightsoul,
 		}
 		c.Core.QueueAttack(c6ai, ap, SSCrelease+c.skillhold+c.skilltravel+10, SSCrelease+c.skillhold+c.skilltravel+30, c.particleCB, c.c2CB())
 	}

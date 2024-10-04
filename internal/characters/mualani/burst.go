@@ -34,7 +34,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Element:    attributes.Hydro,
 		Durability: 25,
 		FlatDmg:    c.MaxHP()*burst[c.TalentLvlBurst()] + c.a4buff,
-		Alignment:  attacks.AlignmentNightsoul,
+		Alignment:  attacks.AdditionalTagNightsoul,
 	}
 
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5),

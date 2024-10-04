@@ -116,7 +116,7 @@ func (c *char) AttackSharkysBite(p map[string]int) (action.Info, error) {
 		Element:    attributes.Hydro,
 		Durability: 25,
 		FlatDmg:    c.MaxHP()*skillBase[c.TalentLvlSkill()] + c.c1buff,
-		Alignment:  attacks.AlignmentNightsoul,
+		Alignment:  attacks.AdditionalTagNightsoul,
 	}
 	aimissiles := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -128,7 +128,7 @@ func (c *char) AttackSharkysBite(p map[string]int) (action.Info, error) {
 		Element:    attributes.Hydro,
 		Durability: 25,
 		FlatDmg:    c.MaxHP()*skillBase[c.TalentLvlSkill()] + c.c1buff,
-		Alignment:  attacks.AlignmentNightsoul,
+		Alignment:  attacks.AdditionalTagNightsoul,
 	}
 
 	enemycount := 0

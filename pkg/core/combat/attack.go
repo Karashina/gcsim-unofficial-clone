@@ -28,13 +28,11 @@ func (h *Handler) attack(t Target, a *AttackEvent) (float64, bool) {
 	// make a copy first
 	cpy := *a
 	dmg := t.HandleAttack(&cpy)
-
 	return dmg, true
 }
 
 func (h *Handler) ApplyAttack(a *AttackEvent) float64 {
 	h.Events.Emit(event.OnApplyAttack, a)
-
 	// died := false
 	var total float64
 	var landed bool

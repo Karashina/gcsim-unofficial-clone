@@ -4,23 +4,23 @@ import (
 	"fmt"
 
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/enemy"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
 const (
-	buffDurKey = "surfsup-duration"
-	buffKey    = "surfsup-buff"
-	buffIcd    = "surfsup-icd"
-	naICD      = "surfsup-na-hit-icd"
-	vapeICD    = "surfsup-Vape-icd"
+	icdKey       = "surfs-up-icd"
+	buffKey      = "surfs-up-buff"
+	loseStackIcd = "surfs-up-stack-loss-icd"
+	gainStackIcd = "surfs-up-stack-gain-icd"
 )
 
 func init() {
@@ -28,70 +28,67 @@ func init() {
 }
 
 type Weapon struct {
-	stacks int
-	core   *core.Core
-	char   *character.CharWrapper
-	refine int
-	buffNA []float64
-	Index  int
+	Index int
 }
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
+// Max HP increased by 40%.
+// Once every 15s, for the 14s after using an Elemental Skill:
+// Gain 4 Scorching Summer stacks.
+// Each stack increases Normal Attack DMG by 24%.
+// For the duration of the effect,
+// once every 1.5s, lose 1 stack after a Normal Attack hits an opponent;
+// once every 1.5s, gain 1 stack after triggering a Vaporize reaction on an opponent.
+// Max 4 Scorching Summer stacks.
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	w := &Weapon{
-		core:   c,
-		char:   char,
-		refine: p.Refine,
-		buffNA: make([]float64, attributes.EndStatType),
-	}
+	w := &Weapon{}
+	r := p.Refine
 
-	hpp := 0.15 + float64(p.Refine)*0.05
-	val := make([]float64, attributes.EndStatType)
-	val[attributes.HPP] = hpp
+	dmgPerStack := 0.09 + float64(r)*0.03
+
+	mHP := make([]float64, attributes.EndStatType)
+	mHP[attributes.HPP] = 0.15 + float64(r)*0.05
 	char.AddStatMod(character.StatMod{
-		Base:         modifier.NewBase("surfsup-hpp", -1),
+		Base:         modifier.NewBase("surfs-up-hp%", -1),
 		AffectedStat: attributes.HPP,
 		Amount: func() ([]float64, bool) {
-			return val, true
+			return mHP, true
 		},
 	})
 
-	c.Events.Subscribe(event.OnActionExec, func(args ...interface{}) bool {
-		index := args[0].(int)
-		e := args[1].(action.Action)
-		if c.Player.Active() != index {
-			return false
-		}
-		if char.Index != index {
-			return false
-		}
-		if e != action.ActionSkill {
-			return false
-		}
-
-		w.onSkill()
-		return false
-	}, fmt.Sprintf("surfsup-skill-%v", char.Base.Key.String()))
-
-	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		atk := args[1].(*combat.AttackEvent)
-		if atk.Info.ActorIndex != char.Index {
-			return false
-		}
+	scorchingSummerStacks := 0
+	mNA := make([]float64, attributes.EndStatType)
+	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		if atk.Info.AttackTag != attacks.AttackTagNormal {
+		if char.StatusIsActive(icdKey) {
 			return false
 		}
+		char.AddStatus(icdKey, 15*60, true)
+		scorchingSummerStacks = 4
 
-		w.onNAHit()
+		char.AddAttackMod(character.AttackMod{
+			Base: modifier.NewBaseWithHitlag(buffKey, 14*60),
+			Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+				if atk.Info.AttackTag == attacks.AttackTagNormal {
+					mNA[attributes.DmgP] = dmgPerStack * float64(scorchingSummerStacks)
+					return mNA, true
+				}
+				return nil, false
+			},
+		})
+
 		return false
-	}, fmt.Sprintf("surfsup-na-%v", char.Base.Key.String()))
+	}, fmt.Sprintf("surfs-up-skill-%v", char.Base.Key.String()))
 
 	c.Events.Subscribe(event.OnVaporize, func(args ...interface{}) bool {
+		if _, ok := args[0].(*enemy.Enemy); !ok {
+			return false
+		}
+
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != char.Index {
 			return false
@@ -99,70 +96,47 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		w.onVape()
+
+		if !char.StatModIsActive(buffKey) {
+			return false
+		}
+		if char.StatusIsActive(gainStackIcd) {
+			return false
+		}
+
+		scorchingSummerStacks = min(4, scorchingSummerStacks+1)
+		c.Log.NewEvent("Surf's Up gained stack", glog.LogWeaponEvent, char.Index)
+		char.AddStatus(gainStackIcd, 1.5*60, true)
+
 		return false
-	}, fmt.Sprintf("surfsup-vape-%v", char.Base.Key.String()))
+	}, fmt.Sprintf("surfs-up-vape-%v", char.Base.Key.String()))
 
-	if !w.char.StatModIsActive(buffDurKey) {
-		w.stacks = 0
-	}
+	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		if _, ok := args[0].(*enemy.Enemy); !ok {
+			return false
+		}
 
-	w.char.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBaseWithHitlag(buffKey, -1),
-		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			w.buffNA[attributes.DmgP] = (0.09 + float64(p.Refine)*0.03) * float64(w.stacks)
-			switch atk.Info.AttackTag {
-			case attacks.AttackTagNormal:
-				return w.buffNA, true
-			default:
-				return nil, false
-			}
-		},
-	})
+		atk := args[1].(*combat.AttackEvent)
+		if atk.Info.ActorIndex != char.Index {
+			return false
+		}
+		if c.Player.Active() != char.Index {
+			return false
+		}
+
+		if !char.StatModIsActive(buffKey) {
+			return false
+		}
+		if char.StatusIsActive(loseStackIcd) {
+			return false
+		}
+
+		scorchingSummerStacks = max(0, scorchingSummerStacks-1)
+		c.Log.NewEvent("Surf's Up lost stack", glog.LogWeaponEvent, char.Index)
+		char.AddStatus(loseStackIcd, 1.5*60, true)
+
+		return false
+	}, fmt.Sprintf("surfs-up-dmg-%v", char.Base.Key.String()))
 
 	return w, nil
-}
-
-func (w *Weapon) onSkill() {
-	if w.char.StatusIsActive(buffIcd) {
-		return
-	}
-
-	w.stacks = 4
-	w.char.AddStatus(buffDurKey, 14*60, true)
-	w.char.AddStatus(buffIcd, 15*60, true)
-}
-
-func (w *Weapon) onNAHit() {
-	if w.char.StatusIsActive(naICD) {
-		return
-	}
-	if w.stacks > 0 {
-		w.stacks--
-	}
-	if w.stacks <= 0 {
-		w.stacks = 0
-	}
-	if !w.char.StatModIsActive(buffDurKey) {
-		w.stacks = 0
-	}
-
-	w.char.AddStatus(naICD, 1.5*60, true)
-}
-
-func (w *Weapon) onVape() {
-	if w.char.StatusIsActive(vapeICD) {
-		return
-	}
-	if w.stacks < 4 {
-		w.stacks++
-	}
-	if w.stacks >= 4 {
-		w.stacks = 4
-	}
-	if !w.char.StatModIsActive(buffDurKey) {
-		w.stacks = 0
-	}
-
-	w.char.AddStatus(vapeICD, 1.5*60, true)
 }

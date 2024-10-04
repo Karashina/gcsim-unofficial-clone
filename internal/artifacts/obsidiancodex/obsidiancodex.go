@@ -1,9 +1,11 @@
 package obsidiancodex
 
 import (
+	"fmt"
+
+	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
@@ -11,17 +13,14 @@ import (
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-const (
-	buffIcdKey = "obsidian-icd"
-)
-
 func init() {
 	core.RegisterSetFunc(keys.ObsidianCodex, NewSet)
 }
 
 type Set struct {
-	Index int
-	Count int
+	Index        int
+	Count        int
+	consumeCount float64
 }
 
 func (s *Set) SetIndex(idx int) { s.Index = idx }
@@ -31,63 +30,52 @@ func (s *Set) Init() error      { return nil }
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
-	m := make([]float64, attributes.EndStatType)
-	m[attributes.DmgP] = 0.15
-
 	if count >= 2 {
-		c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-			atk := args[1].(*combat.AttackEvent)
-			if c.Player.Active() != char.Index {
-				return false
-			}
-			if char.Index != atk.Info.ActorIndex {
-				return false
-			}
-
-			char.AddAttackMod(character.AttackMod{
-				Base: modifier.NewBaseWithHitlag("obsidiancodex-2pc", -1),
-				Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-					switch char.OnNightsoul {
-					case true:
-						return m, true
-					default:
-						return nil, false
-					}
-				},
-			})
-
-			return false
-		}, "obsidiancodex-2pc")
+		m := make([]float64, attributes.EndStatType)
+		m[attributes.DmgP] = 0.15
+		char.AddStatMod(character.StatMod{
+			Base: modifier.NewBase("obsidiancodex-2pc", -1),
+			Amount: func() ([]float64, bool) {
+				if !char.StatusIsActive(nightsoul.NightsoulBlessingStatus) && !char.OnNightsoul {
+					return nil, false
+				}
+				if c.Player.Active() != char.Index {
+					return nil, false
+				}
+				return m, true
+			},
+		})
 	}
+
 	if count >= 4 {
-		n := make([]float64, attributes.EndStatType)
-		n[attributes.CR] = 0.4
-		c.Events.Subscribe(event.OnNightsoulChange, func(args ...interface{}) bool {
-			index := args[0].(int)
+		const icdKey = "obsidiancodex-4pc-icd"
+		m := make([]float64, attributes.EndStatType)
+		m[attributes.CR] = 0.4
+		c.Events.Subscribe(event.OnNightsoulConsume, func(args ...interface{}) bool {
+			idx := args[0].(int)
 			amount := args[1].(float64)
-			if char.StatusIsActive(buffIcdKey) {
+			if char.Index != idx {
 				return false
 			}
 			if c.Player.Active() != char.Index {
 				return false
 			}
-			if char.Index != index {
+			if char.StatusIsActive(icdKey) {
 				return false
 			}
-			if amount > 0 {
-				return false
+			char.AddStatus(icdKey, 60, true)
+			s.consumeCount += amount
+			if s.consumeCount >= 1 {
+				s.consumeCount = 0
+				char.AddStatMod(character.StatMod{
+					Base: modifier.NewBaseWithHitlag("obsidiancodex-4pc", 6*60),
+					Amount: func() ([]float64, bool) {
+						return m, true
+					},
+				})
 			}
-
-			char.AddAttackMod(character.AttackMod{
-				Base: modifier.NewBaseWithHitlag("obsidiancodex-4pc", 6*60),
-				Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-					return n, true
-				},
-			})
-			char.AddStatus(buffIcdKey, 60, true)
-
 			return false
-		}, "obsidiancodex-4pc")
+		}, fmt.Sprintf("obsidiancodex-4pc-%v", char.Base.Key.String()))
 	}
 
 	return &s, nil
