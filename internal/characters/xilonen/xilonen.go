@@ -19,6 +19,7 @@ func init() {
 
 type char struct {
 	*tmpl.Character
+	NormalSCounter int
 	SoundScapeSlot []attributes.Element
 	isSlotActive   []bool
 	A1Mode         int
@@ -64,6 +65,20 @@ func (c *char) Init() error {
 	}
 	c.onExitField()
 	return nil
+}
+
+func (c *char) AdvanceNormalIndex() {
+	if c.StatusIsActive(skillKey) {
+		c.NormalSCounter++
+		if c.NormalSCounter == 4 {
+			c.NormalSCounter = 0
+		}
+		return
+	}
+	c.NormalCounter++
+	if c.NormalCounter == c.NormalHitNum {
+		c.NormalCounter = 0
+	}
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {

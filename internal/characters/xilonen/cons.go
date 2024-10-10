@@ -35,16 +35,7 @@ func (c *char) c2() {
 		i++
 	}
 	if geocount > 0 {
-		c.Core.Tasks.Add(func() {
-			enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7.5), nil)
-			for _, e := range enemies {
-				e.AddResistMod(combat.ResistMod{
-					Base:  modifier.NewBaseWithHitlag("xilonen-Geo", -1),
-					Ele:   attributes.Geo,
-					Value: skillRes[c.TalentLvlSkill()],
-				})
-			}
-		}, 0)
+		c.Core.Tasks.Add(c.c2res, 1)
 	}
 	chars := c.Core.Player.Chars()
 	for _, this := range chars {
@@ -111,6 +102,18 @@ func (c *char) c2() {
 			continue
 		}
 	}
+}
+
+func (c *char) c2res() {
+	enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7.5), nil)
+	for _, e := range enemies {
+		e.AddResistMod(combat.ResistMod{
+			Base:  modifier.NewBaseWithHitlag("xilonen-Geo", 60),
+			Ele:   attributes.Geo,
+			Value: skillRes[c.TalentLvlSkill()] * -1,
+		})
+	}
+	c.Core.Tasks.Add(c.c2res, 18)
 }
 
 func (c *char) c4() {

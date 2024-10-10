@@ -102,16 +102,16 @@ func (c *char) BladeRoller(p map[string]int) (action.Info, error) {
 
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
-		Abil:             fmt.Sprintf("Normal: Blade Roller %v", c.NormalCounter),
+		Abil:             fmt.Sprintf("Normal: Blade Roller %v", c.NormalSCounter),
 		AttackTag:        attacks.AttackTagNormal,
 		ICDTag:           attacks.ICDTagNormalAttack,
 		ICDGroup:         attacks.ICDGroupDefault,
 		StrikeType:       attacks.StrikeTypeSlash,
 		Element:          attributes.Geo,
 		Durability:       25,
-		Mult:             bladeroller[c.NormalCounter][c.TalentLvlAttack()],
+		Mult:             bladeroller[c.NormalSCounter][c.TalentLvlAttack()],
 		HitlagFactor:     0.01,
-		HitlagHaltFrames: attackHitlagHaltFrameBR[c.NormalCounter] * 60,
+		HitlagHaltFrames: attackHitlagHaltFrameBR[c.NormalSCounter] * 60,
 		UseDef:           true,
 		Alignment:        attacks.AdditionalTagNightsoul,
 	}
@@ -119,20 +119,20 @@ func (c *char) BladeRoller(p map[string]int) (action.Info, error) {
 		ai,
 		combat.NewCircleHitOnTargetFanAngle(
 			c.Core.Combat.Player(),
-			geometry.Point{Y: attackOffsetsBR[c.NormalCounter]},
-			attackRadiusBR[c.NormalCounter],
-			attackFanAnglesBR[c.NormalCounter],
+			geometry.Point{Y: attackOffsetsBR[c.NormalSCounter]},
+			attackRadiusBR[c.NormalSCounter],
+			attackFanAnglesBR[c.NormalSCounter],
 		),
-		attackHitmarksBR[c.NormalCounter],
-		attackHitmarksBR[c.NormalCounter],
+		attackHitmarksBR[c.NormalSCounter],
+		attackHitmarksBR[c.NormalSCounter],
 	)
 
 	defer c.AdvanceNormalIndex()
 
 	return action.Info{
 		Frames:          frames.NewAttackFunc(c.Character, attackFramesBR),
-		AnimationLength: attackFramesBR[c.NormalCounter][action.InvalidAction],
-		CanQueueAfter:   attackHitmarksBR[c.NormalCounter],
+		AnimationLength: attackFramesBR[c.NormalSCounter][action.InvalidAction],
+		CanQueueAfter:   attackHitmarksBR[c.NormalSCounter],
 		State:           action.NormalAttackState,
 	}, nil
 }
