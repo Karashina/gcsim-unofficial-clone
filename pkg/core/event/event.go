@@ -76,7 +76,6 @@ const (
 	OnStateChange // prev, next
 	OnEnemyAdded  // t
 	OnTick
-	OnNightsoulChange      // index, amount, source
 	OnInfusion             //index, ele, duration
 	OnSimEndedSuccessfully // nil
 	EndEventTypes          // elim

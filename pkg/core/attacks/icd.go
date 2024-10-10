@@ -22,6 +22,7 @@ const (
 	ICDTagDash
 	ICDTagTravelerWakeOfEarth
 	ICDTagTravelerDewdrop
+	ICDTagBladeRoller
 
 	ICDReactionDamageDelim
 	ICDTagOverloadDamage
