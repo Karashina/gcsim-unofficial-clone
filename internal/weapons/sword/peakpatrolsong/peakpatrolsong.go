@@ -59,8 +59,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 
 		stacks := float64(w.stacks)
-		m[attributes.DEFP] = (0.08 + 0*r) * stacks
-		selfbuff := (0.1 + 0*r) * stacks
+		m[attributes.DEFP] = (0.06 + 0.02*r) * stacks
+		selfbuff := (0.075 + 0.025*r) * stacks
 		m[attributes.PyroP] = selfbuff
 		m[attributes.HydroP] = selfbuff
 		m[attributes.CryoP] = selfbuff
@@ -76,8 +76,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		})
 
 		if w.stacks == 2 {
-			teambuff := (0.08 + 0*r) * char.TotalDef() / 1000.0
-			teambuff = min(teambuff, 0.256+0*r)
+			teambuff := (0.06 + 0.02*r) * char.TotalDef() / 1000.0
+			teambuff = min(teambuff, 0.192+0.064*r)
 			n[attributes.PyroP] = teambuff
 			n[attributes.HydroP] = teambuff
 			n[attributes.CryoP] = teambuff

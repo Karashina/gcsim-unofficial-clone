@@ -32,15 +32,15 @@ stats: {
       max_level: 40
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1039
+         value: 891
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 39
+         value: 33
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
-         value: 15
+         value: 13
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -50,15 +50,15 @@ stats: {
       max_level: 50
 add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1777.23684210526
+         value: 1524.0555
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 66.7105263157895
+         value: 56.4465
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 25.6578947368421
+         value: 22.2365
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -69,15 +69,15 @@ add_props: {
       max_level: 60
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2761.55263157895
+         value: 2368.1889
       }
 add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 103.657894736842
+         value: 87.7107
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 39.8684210526316
+         value: 34.5527
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -88,15 +88,15 @@ add_props: {
       max_level: 70
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3499.78911050531
+         value: 3001.2444
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 131.368407420315
+         value: 111.1572
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 50.5263105462749
+         value: 43.7892
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -107,15 +107,15 @@ add_props: {
       max_level: 80
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 4238.02613420002
+         value: 3634.2999
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 159.078940552263
+         value: 134.6037
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 61.1842079047164
+         value: 53.0257
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -126,15 +126,15 @@ add_props: {
       max_level: 90
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 4976.26315789474
+         value: 4267.4445
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 186.789473684211
+         value: 158.0535
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 71.8421052631579
+         value: 62.2635
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT

@@ -2,7 +2,7 @@ id: 90000005
 key: "kinich"
 rarity: QUALITY_ORANGE
 body: BODY_BOY
-region: ASSOC_TYPE_RANGER
+region: ASSOC_TYPE_NATLAN
 element: Grass
 weapon_class: WEAPON_CLAYMORE
 icon_name: "UI_AvatarIcon_Ambor"
@@ -32,15 +32,15 @@ stats: {
       max_level: 40
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1001
+         value: 858
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 62
+         value: 53
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
-         value: 26
+         value: 22
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -50,15 +50,15 @@ stats: {
       max_level: 50
 add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1712.23684210526
+         value: 1467.609
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 106.052631578947
+         value: 90.6565
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 44.4736842105263
+         value: 37.631
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -69,15 +69,15 @@ add_props: {
       max_level: 60
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2660.55263157895
+         value: 2280.4782
       }
 add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 164.789473684211
+         value: 140.8687
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 69.1052631578947
+         value: 58.4738
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -88,15 +88,15 @@ add_props: {
       max_level: 70
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3371.78912378808
+         value: 2890.0872
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 208.84208359127
+         value: 178.5252
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 87.5789382802098
+         value: 74.1048
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -107,15 +107,15 @@ add_props: {
       max_level: 80
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 4083.02614084141
+         value: 3499.6962
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 252.894726006161
+         value: 216.1817
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 106.052627034842
+         value: 89.7358
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -126,15 +126,15 @@ add_props: {
       max_level: 90
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 4794.26315789474
+         value: 4109.391
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 296.947368421053
+         value: 253.8435
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 124.526315789474
+         value: 105.369
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
