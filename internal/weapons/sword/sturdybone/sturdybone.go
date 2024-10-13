@@ -65,7 +65,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if !char.StatusIsActive(durationKey) {
 			return false
 		}
-		damageAdd := char.TotalAtk() * (0.16 + float64(r)*0)
+		damageAdd := char.TotalAtk() * (0.12 + float64(r)*0.04)
 		atk.Info.FlatDmg += damageAdd
 		c.Log.NewEvent("Sturdy Bone proc dmg add", glog.LogPreDamageMod, char.Index).
 			Write("damage_added", damageAdd)

@@ -37,7 +37,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 		m := make([]float64, attributes.EndStatType)
-		m[attributes.DmgP] = 0.12 + 0*float64(r)
+		m[attributes.DmgP] = 0.09 + 0.03*float64(r)
 		char.AddAttackMod(character.AttackMod{
 			Base: modifier.NewBase("mountainbracingbolt-additional", 8*60),
 			Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
@@ -52,7 +52,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, "mountainbracingbolt-skill")
 
 	n := make([]float64, attributes.EndStatType)
-	n[attributes.DmgP] = 0.12 + 0*float64(r)
+	n[attributes.DmgP] = 0.09 + 0.03*float64(r)
 	char.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("mountainbracingbolt-base", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
