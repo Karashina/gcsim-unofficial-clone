@@ -25,8 +25,11 @@ type Weapon struct {
 
 const (
 	buffKey     = "peakpatrolsong-buff"
+	buffDur     = 6 * 60
 	teamBuffKey = "peakpatrolsong-team-buff"
+	teamBuffDur = 15 * 60
 	icdKey      = "peakpatrolsong-buff-icd"
+	icdDur      = 0.1 * 60
 )
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
@@ -37,7 +40,12 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	r := float64(p.Refine)
 
 	m := make([]float64, attributes.EndStatType)
-	n := make([]float64, attributes.EndStatType)
+	t := make([]float64, attributes.EndStatType)
+
+	selfDef := 0.06 + 0.02*r
+	selfBonus := 0.075 + 0.025*r
+	teamBonus := 0.06 + 0.02*r
+	maxTeamBonus := 0.192 + 0.064*r
 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
@@ -59,45 +67,37 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 
 		stacks := float64(w.stacks)
-		m[attributes.DEFP] = (0.06 + 0.02*r) * stacks
-		selfbuff := (0.075 + 0.025*r) * stacks
-		m[attributes.PyroP] = selfbuff
-		m[attributes.HydroP] = selfbuff
-		m[attributes.CryoP] = selfbuff
-		m[attributes.ElectroP] = selfbuff
-		m[attributes.AnemoP] = selfbuff
-		m[attributes.GeoP] = selfbuff
-		m[attributes.DendroP] = selfbuff
+		m[attributes.DEFP] = selfDef * stacks
+		bonus := selfBonus * stacks
+		for i := attributes.PyroP; i <= attributes.DendroP; i++ {
+			m[i] = bonus
+		}
 		char.AddStatMod(character.StatMod{
-			Base: modifier.NewBaseWithHitlag(buffKey, 6*60),
+			Base: modifier.NewBaseWithHitlag(buffKey, buffDur),
 			Amount: func() ([]float64, bool) {
 				return m, true
 			},
 		})
 
 		if w.stacks == 2 {
-			teambuff := (0.06 + 0.02*r) * char.TotalDef() / 1000.0
-			teambuff = min(teambuff, 0.192+0.064*r)
-			n[attributes.PyroP] = teambuff
-			n[attributes.HydroP] = teambuff
-			n[attributes.CryoP] = teambuff
-			n[attributes.ElectroP] = teambuff
-			n[attributes.AnemoP] = teambuff
-			n[attributes.GeoP] = teambuff
-			n[attributes.DendroP] = teambuff
+			bonus := teamBonus * char.TotalDef() / 1000.0
+			bonus = min(bonus, maxTeamBonus)
+			for i := attributes.PyroP; i <= attributes.DendroP; i++ {
+				t[i] = bonus
+			}
 			for _, this := range c.Player.Chars() {
 				this.AddStatMod(character.StatMod{
-					Base: modifier.NewBaseWithHitlag(teamBuffKey, 15*60),
+					Base: modifier.NewBaseWithHitlag(teamBuffKey, teamBuffDur),
 					Amount: func() ([]float64, bool) {
-						return n, true
+						return t, true
 					},
 				})
 			}
 		}
 
-		char.AddStatus(icdKey, 0.1*60, true)
+		char.AddStatus(icdKey, icdDur, true)
 		return false
-	}, fmt.Sprintf("peakpatrolsong-%v", char.Base.Key.String()))
+	}, fmt.Sprintf("peakpatrolsong-hit-%v", char.Base.Key.String()))
 
 	return w, nil
 }

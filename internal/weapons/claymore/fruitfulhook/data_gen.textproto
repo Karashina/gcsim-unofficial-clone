@@ -1,8 +1,8 @@
-id: 90004
+id: 12430
 key: "fruitfulhook"
 rarity: 4
 weapon_class: WEAPON_CLAYMORE
-image_name: "UI_EquipIcon_Claymore_Isikhulu"
+image_name: "UI_EquipIcon_Claymore_Umpakati"
 base_stats: {
    base_props: {
       prop_type: FIGHT_PROP_BASE_ATTACK
@@ -60,4 +60,4 @@ base_stats: {
       }
    }
 }
-name_text_hash_map: 2481464075
+name_text_hash_map: 688237043

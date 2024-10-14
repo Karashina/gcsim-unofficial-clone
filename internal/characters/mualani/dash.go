@@ -5,44 +5,38 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/action"
 )
 
-var (
-	dashFramesE []int
-)
+var skillDashFrames []int
 
 func init() {
-	dashFramesE = frames.InitAbilSlice(65)
-	dashFramesE[action.ActionAttack] = 65
-	dashFramesE[action.ActionCharge] = 65
-	dashFramesE[action.ActionSkill] = 65
-	dashFramesE[action.ActionDash] = 65
-	dashFramesE[action.ActionJump] = 65
-	dashFramesE[action.ActionWalk] = 65
+	skillDashFrames = frames.InitAbilSlice(24) // dash
+	skillDashFrames[action.ActionAttack] = 3
+	skillDashFrames[action.ActionSkill] = 2
+	skillDashFrames[action.ActionBurst] = 4
+	skillDashFrames[action.ActionJump] = 2
+	skillDashFrames[action.ActionWalk] = 3
+	skillDashFrames[action.ActionSwap] = 1
 }
 
 func (c *char) Dash(p map[string]int) (action.Info, error) {
-	if c.StatusIsActive(skillKey) {
-		return c.NightsoulDash(p)
+	if c.nightsoulState.HasBlessing() {
+		c.reduceNightsoulPoints(10)
+
+		switch c.Core.Player.AnimationHandler.CurrentState() {
+		case action.DashState, action.JumpState, action.WalkState:
+			// use the previous momentum gain tasks
+		default:
+			// queue a new momentum gain task
+			c.momentumSrc = c.Core.F
+			c.QueueCharTask(c.momentumStackGain(c.momentumSrc), momentumDelay)
+		}
+
+		// assuming doesn't contribute to dash CD
+		return action.Info{
+			Frames:          frames.NewAbilFunc(skillDashFrames),
+			AnimationLength: skillDashFrames[action.InvalidAction],
+			CanQueueAfter:   skillDashFrames[action.ActionSwap],
+			State:           action.DashState,
+		}, nil
 	}
-
-	c.ApplyDashCD()
-	c.QueueDashStaminaConsumption(p)
-	length := c.DashLength()
-	return action.Info{
-		Frames:          func(action.Action) int { return length },
-		AnimationLength: length,
-		CanQueueAfter:   length,
-		State:           action.DashState,
-	}, nil
-}
-
-func (c *char) NightsoulDash(p map[string]int) (action.Info, error) {
-	ai := action.Info{
-		Frames:          func(next action.Action) int { return dashFramesE[next] },
-		AnimationLength: dashFramesE[action.InvalidAction],
-		CanQueueAfter:   dashFramesE[action.ActionSkill],
-		State:           action.DashState,
-	}
-	c.ConsumeNightsoul(10)
-
-	return ai, nil
+	return c.Character.Dash(p)
 }

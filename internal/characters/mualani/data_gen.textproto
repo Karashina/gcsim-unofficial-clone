@@ -1,15 +1,15 @@
-id: 90000001
+id: 10000102
 key: "mualani"
 rarity: QUALITY_ORANGE
 body: BODY_GIRL
 region: ASSOC_TYPE_NATLAN
 element: Water
 weapon_class: WEAPON_CATALYST
-icon_name: "UI_AvatarIcon_Ambor"
+icon_name: "UI_AvatarIcon_Mualani"
 stats: {
-   base_hp: 1182
-   base_atk: 14
-   base_def: 44
+   base_hp: 1182.1168
+   base_atk: 14.1512
+   base_def: 44.39386
    hp_curve: GROW_CURVE_HP_S5
    atk_curve: GROW_CURVE_ATTACK_S5
    def_cruve: GROW_CURVE_HP_S5
@@ -32,15 +32,15 @@ stats: {
       max_level: 40
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1014
+         value: 1013.5583
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 38
+         value: 38.0646
       }
       add_props: {
-         prop_type: FIGHT_PROP_CRITICAL
-         value: 22
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 12.132488
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -48,17 +48,17 @@ stats: {
    }
    promo_data: {
       max_level: 50
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1734.447
+         value: 1733.7181
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 64.999
+         value: 65.1105
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 37.631
+         value: 20.75294
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -69,15 +69,15 @@ add_props: {
       max_level: 60
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2695.1106
+         value: 2693.9312
       }
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 101.0002
+         value: 101.1717
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 58.4738
+         value: 32.246876
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -88,15 +88,15 @@ add_props: {
       max_level: 70
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3415.5576
+         value: 3414.091
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 127.9992
+         value: 128.2176
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 74.1048
+         value: 40.86733
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -107,15 +107,15 @@ add_props: {
       max_level: 80
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 4136.0046
+         value: 4134.251
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 154.9982
+         value: 155.2635
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 89.7358
+         value: 49.48778
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -126,15 +126,15 @@ add_props: {
       max_level: 90
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 4856.553
+         value: 4854.4106
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 182.001
+         value: 182.3094
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 105.369
+         value: 58.10823
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -143,9 +143,9 @@ add_props: {
    }
 }
 skill_details: {
-   skill: 10262
-   burst: 10265
-   attack: 10261
+   skill: 30002
+   burst: 30007
+   attack: 30000
    burst_energy_cost: 60
 }
-name_text_hash_map: 1021947691
+name_text_hash_map: 3949670506

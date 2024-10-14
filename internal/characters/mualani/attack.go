@@ -8,58 +8,75 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
 	"github.com/genshinsim/gcsim/pkg/enemy"
 )
 
+const normalHitNum = 3
+
 var (
-	attackFramesNormal  [][]int
-	attackReleaseNormal = []int{22, 12, 35}
+	attackFrames   [][]int
+	attackHitmarks = []int{11, 9, 31}
+
+	sharkBiteFrames      [][]int
+	sharkBiteHitmarks    = []int{7, 7, 7, 42}
+	sharkMissileHitboxes = 5.0
 )
 
-const normalHitNum = 3
-const attackFramesE = 46
-
 func init() {
-	attackFramesNormal = make([][]int, normalHitNum)
+	attackFrames = make([][]int, normalHitNum)
 
-	attackFramesNormal[0] = frames.InitNormalCancelSlice(attackReleaseNormal[0], 32)
-	attackFramesNormal[0][action.ActionAttack] = 32
-	attackFramesNormal[0][action.ActionCharge] = 32
-	attackFramesNormal[0][action.ActionSkill] = 32
-	attackFramesNormal[0][action.ActionBurst] = 32
-	attackFramesNormal[0][action.ActionDash] = 22
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 33) // walk
+	attackFrames[0][action.ActionAttack] = 23
+	attackFrames[0][action.ActionCharge] = 22
+	attackFrames[0][action.ActionSkill] = 13
+	attackFrames[0][action.ActionBurst] = 11
+	attackFrames[0][action.ActionDash] = 12
+	attackFrames[0][action.ActionJump] = 13
+	attackFrames[0][action.ActionSwap] = 11
 
-	attackFramesNormal[1] = frames.InitNormalCancelSlice(attackReleaseNormal[1], 24)
-	attackFramesNormal[1][action.ActionAttack] = 24
-	attackFramesNormal[1][action.ActionCharge] = 24
-	attackFramesNormal[1][action.ActionSkill] = 24
-	attackFramesNormal[1][action.ActionBurst] = 24
-	attackFramesNormal[1][action.ActionDash] = 12
-	attackFramesNormal[1][action.ActionJump] = 12
-	attackFramesNormal[1][action.ActionSwap] = 12
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 32) // walk
+	attackFrames[1][action.ActionAttack] = 22
+	attackFrames[1][action.ActionCharge] = 24
+	attackFrames[1][action.ActionSkill] = 11
+	attackFrames[1][action.ActionBurst] = 11
+	attackFrames[1][action.ActionDash] = 10
+	attackFrames[1][action.ActionJump] = 10
+	attackFrames[1][action.ActionSwap] = 8
 
-	attackFramesNormal[2] = frames.InitNormalCancelSlice(attackReleaseNormal[2], 55)
-	attackFramesNormal[2][action.ActionAttack] = 55
-	attackFramesNormal[2][action.ActionCharge] = 55
-	attackFramesNormal[2][action.ActionSkill] = 55
-	attackFramesNormal[2][action.ActionBurst] = 55
-	attackFramesNormal[2][action.ActionDash] = 35
-	attackFramesNormal[2][action.ActionJump] = 35
-	attackFramesNormal[2][action.ActionSwap] = 35
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 67) // walk
+	attackFrames[2][action.ActionAttack] = 54
+	attackFrames[2][action.ActionCharge] = 52
+	attackFrames[2][action.ActionSkill] = 32
+	attackFrames[2][action.ActionBurst] = 33
+	attackFrames[2][action.ActionDash] = 32
+	attackFrames[2][action.ActionJump] = 34
+	attackFrames[2][action.ActionSwap] = 32
+
+	sharkBiteFrames = make([][]int, 4)
+
+	sharkBiteFrames[0] = frames.InitAbilSlice(215) // swap
+	sharkBiteFrames[0][action.ActionAttack] = 109
+	sharkBiteFrames[0][action.ActionSkill] = 39
+	sharkBiteFrames[0][action.ActionBurst] = 40
+	sharkBiteFrames[0][action.ActionDash] = 40
+	sharkBiteFrames[0][action.ActionJump] = 40
+	sharkBiteFrames[0][action.ActionWalk] = 39
+
+	sharkBiteFrames[1] = sharkBiteFrames[0]
+	sharkBiteFrames[2] = sharkBiteFrames[0]
+
+	sharkBiteFrames[3] = frames.InitAbilSlice(258) // swap
+	sharkBiteFrames[3][action.ActionAttack] = 144
+	sharkBiteFrames[3][action.ActionSkill] = 79
+	sharkBiteFrames[3][action.ActionBurst] = 82
+	sharkBiteFrames[3][action.ActionDash] = 78
+	sharkBiteFrames[3][action.ActionJump] = 81
+	sharkBiteFrames[3][action.ActionWalk] = 81
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	if c.StatusIsActive(skillKey) {
-		return c.AttackSharkysBite(p)
-	}
-
-	currentNormalCounter := c.NormalCounter
-
-	travel, ok := p["travel"]
-	if !ok {
-		travel = 10
+	if c.nightsoulState.HasBlessing() {
+		return c.sharkBite(p), nil
 	}
 
 	ai := combat.AttackInfo{
@@ -74,138 +91,113 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		Mult:       attack[c.NormalCounter][c.TalentLvlAttack()],
 	}
 
-	release := attackReleaseNormal[c.NormalCounter]
-
 	c.Core.QueueAttack(
 		ai,
-		combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 0.5),
-		release,
-		release+travel,
+		combat.NewCircleHitOnTarget(
+			c.Core.Combat.PrimaryTarget(),
+			nil,
+			0.7,
+		),
+		attackHitmarks[c.NormalCounter],
+		attackHitmarks[c.NormalCounter],
 	)
 
 	defer c.AdvanceNormalIndex()
-	atkspd := c.Stat(attributes.AtkSpd)
+
 	return action.Info{
-		Frames: func(next action.Action) int {
-			return frames.AtkSpdAdjust(attackFramesNormal[currentNormalCounter][next], atkspd)
-		},
-		AnimationLength: attackFramesNormal[c.NormalCounter][action.InvalidAction],
-		CanQueueAfter:   attackReleaseNormal[c.NormalCounter],
+		Frames:          frames.NewAttackFunc(c.Character, attackFrames),
+		AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],
+		CanQueueAfter:   attackFrames[c.NormalCounter][action.ActionSwap],
 		State:           action.NormalAttackState,
 	}, nil
 }
 
-func (c *char) AttackSharkysBite(p map[string]int) (action.Info, error) {
-	c.c1buff = 0
-	if c.Base.Cons >= 1 {
-		if c.c1count < 1 {
-			c.c1buff = 0.66 * c.MaxHP()
-			c.c1count++
+func (c *char) sharkBite(p map[string]int) action.Info {
+	travel, ok := p["travel"]
+	if !ok {
+		travel = 10
+	}
+
+	c.NormalCounter = 0
+	c.momentumSrc = c.Core.F
+	momentumStacks := c.momentumStacks
+
+	c.QueueCharTask(func() {
+		c.momentumStacks = 0
+		mult := bite[c.TalentLvlSkill()] + momentumBonus[c.TalentLvlSkill()]*float64(momentumStacks) + c.c1()
+		ai := combat.AttackInfo{
+			ActorIndex:     c.Index,
+			Abil:           fmt.Sprintf("Sharky's Bite (%v momentum)", momentumStacks),
+			AttackTag:      attacks.AttackTagNormal,
+			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+			ICDTag:         attacks.ICDTagNone,
+			ICDGroup:       attacks.ICDGroupDefault,
+			StrikeType:     attacks.StrikeTypeDefault,
+			Element:        attributes.Hydro,
+			Durability:     25,
 		}
-		if c.Base.Cons >= 6 {
-			c.c1buff = 0.66 * c.MaxHP()
+
+		if momentumStacks >= 3 {
+			ai.Abil = "Sharky's Surging Bite"
+			mult += surgingBite[c.TalentLvlSkill()]
 		}
-	}
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Sharky's Bite DMG",
-		AttackTag:  attacks.AttackTagNormal,
-		ICDTag:     attacks.ICDTagNone,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Hydro,
-		Durability: 25,
-		FlatDmg:    c.MaxHP()*skillBase[c.TalentLvlSkill()] + c.c1buff,
-		Alignment:  attacks.AdditionalTagNightsoul,
-	}
-	aimissiles := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Shark Missile DMG",
-		AttackTag:  attacks.AttackTagNormal,
-		ICDTag:     attacks.ICDTagNone,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Hydro,
-		Durability: 25,
-		FlatDmg:    c.MaxHP()*skillBase[c.TalentLvlSkill()] + c.c1buff,
-		Alignment:  attacks.AdditionalTagNightsoul,
-	}
 
-	enemycount := 0
-	area := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{X: 0.0, Y: 0.0}, 5)
-	enemies := c.Core.Combat.EnemiesWithinArea(area, nil)
-	for _, e := range enemies {
-		if enemycount < 5 {
-			if e.StatusIsActive(skillMarkKey) {
-				enemycount++
-			}
+		primaryEnemy, ok := c.Core.Combat.PrimaryTarget().(combat.Enemy)
+		if !ok {
+			return
 		}
-	}
-
-	hitmark := 9
-	SSBframe := 0
-
-	if c.WaveMomentum > 0 {
-		ai.FlatDmg += c.MaxHP() * skillWMBonus[c.TalentLvlSkill()] * float64(c.WaveMomentum)
-		aimissiles.FlatDmg = ai.FlatDmg
-	}
-
-	if c.WaveMomentum >= 3 {
-		ai.FlatDmg += c.MaxHP() * skillSSBBonus[c.TalentLvlSkill()]
-		aimissiles.FlatDmg = ai.FlatDmg
-		ai.Abil = "Sharky's Surging Bite DMG"
-		aimissiles.Abil = "Surging Shark Missile DMG"
-		hitmark = 45
-		SSBframe = 36
-	}
-	ai.FlatDmg = ai.FlatDmg * max(0.72, 1-(float64(enemycount)-1)*0.14)
-	aimissiles.FlatDmg = ai.FlatDmg
-
-	ptarget := c.Core.Combat.PrimaryTarget()
-
-	c.Core.QueueAttack(
-		ai,
-		combat.NewSingleTargetHit(ptarget.Key()),
-		hitmark,
-		hitmark,
-		c.particleCB,
-		c.removemarkCB,
-		c.a1cb,
-	)
-
-	enemyhit := 0
-	for _, e := range enemies {
-		if enemyhit < 5 {
-			if e.StatusIsActive(skillMarkKey) {
-				if e.Key() != ptarget.Key() {
-					c.Core.QueueAttack(
-						aimissiles,
-						combat.NewSingleTargetHit(e.Key()),
-						hitmark+60,
-						hitmark+60,
-						c.removemarkCB,
-					)
-					enemyhit++
-				}
-			}
+		var enemiesMissile []combat.Enemy
+		if primaryEnemy.StatusIsActive(markedAsPreyKey) {
+			ap := combat.NewCircleHitOnTarget(primaryEnemy, nil, sharkMissileHitboxes)
+			enemiesMissile = c.Core.Combat.EnemiesWithinArea(
+				ap,
+				func(e combat.Enemy) bool { return e.StatusIsActive(markedAsPreyKey) && e != primaryEnemy },
+			)
+			neighbours := len(enemiesMissile)
+			mult *= max(1.00-0.14*float64(neighbours), 0.72)
 		}
+
+		ai.FlatDmg = mult * c.MaxHP()
+		c.Core.QueueAttack(
+			ai,
+			combat.NewSingleTargetHit(primaryEnemy.Key()),
+			0,
+			0,
+			c.particleCB,
+			c.removeEnemyMarkCB,
+			c.a1cb(),
+		)
+
+		ai.Abil = "Shark Missile"
+		for _, e := range enemiesMissile {
+			c.Core.QueueAttack(
+				ai,
+				combat.NewSingleTargetHit(e.Key()),
+				0,
+				travel,
+				c.removeEnemyMarkCB,
+			)
+		}
+
+		c.SetCDWithDelay(action.ActionAttack, 1.8*60, 0)
+	}, sharkBiteHitmarks[momentumStacks])
+
+	minAction := action.ActionWalk
+	if momentumStacks >= 3 {
+		minAction = action.ActionDash
 	}
-	c.WaveMomentum = 0
 	return action.Info{
-		Frames:          func(next action.Action) int { return attackFramesE },
-		AnimationLength: attackFramesE + SSBframe,
-		CanQueueAfter:   attackFramesE + SSBframe,
+		Frames:          frames.NewAbilFunc(sharkBiteFrames[momentumStacks]),
+		AnimationLength: sharkBiteFrames[momentumStacks][action.WalkState], // shorter animation state so that a single bite doesn't make 3 yelan/xq waves. In game it only does 1.
+		CanQueueAfter:   sharkBiteFrames[momentumStacks][minAction],
 		State:           action.NormalAttackState,
-	}, nil
+	}
 }
 
-func (c *char) removemarkCB(a combat.AttackCB) {
-	e := a.Target.(*enemy.Enemy)
-	if a.Target.Type() != targets.TargettableEnemy {
+func (c *char) removeEnemyMarkCB(a combat.AttackCB) {
+	enemy, ok := a.Target.(*enemy.Enemy)
+	if !ok {
 		return
 	}
-	if !e.StatusIsActive(skillMarkKey) {
-		return
-	}
-	e.DeleteStatus(skillMarkKey)
+	enemy.DeleteStatus(markedAsPreyKey)
 }

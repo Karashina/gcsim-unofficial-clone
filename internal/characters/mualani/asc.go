@@ -6,33 +6,33 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 )
 
-func (c *char) a1cb(a combat.AttackCB) {
-	if c.Base.Ascension < 1 {
-		return
-	}
-	if a.AttackEvent.Info.Abil != "Sharky's Surging Bite DMG" {
-		return
-	}
-	if a.Target.Type() != targets.TargettableEnemy {
-		return
-	}
-	if !c.StatusIsActive(skillKey) {
-		return
-	}
-	if c.pufferCount >= 2 {
-		return
-	}
-	c.QueueCharTask(c.a1, 117)
-	c.pufferCount++
-}
+const a1Delay = 20
 
-func (c *char) a1() {
-	c.c4energy()
-	if !c.StatusIsActive(skillKey) {
-		return
+func (c *char) a1cb() combat.AttackCBFunc {
+	if c.Base.Ascension < 1 {
+		return nil
 	}
-	c.AddNightsoul("mualani-a1", 20)
-	c.c2Puffer()
+	done := false
+	return func(a combat.AttackCB) {
+		if c.a1Count >= 2 {
+			return
+		}
+		if done {
+			return
+		}
+		if a.Target.Type() != targets.TargettableEnemy {
+			return
+		}
+		done = true
+		c.a1Count++
+		c.QueueCharTask(func() {
+			if c.nightsoulState.HasBlessing() {
+				c.nightsoulState.GeneratePoints(20)
+				c.c2puffer()
+				c.c4puffer()
+			}
+		}, a1Delay)
+	}
 }
 
 func (c *char) a4() {
@@ -40,10 +40,15 @@ func (c *char) a4() {
 		return
 	}
 	c.Core.Events.Subscribe(event.OnNightsoulBurst, func(args ...interface{}) bool {
-		if c.a4stacks < 3 {
-			c.a4stacks++
-		}
-		c.a4buff = c.MaxHP() * 0.15 * float64(c.a4stacks)
+		c.a4Stacks = min(c.a4Stacks+1, 3)
 		return false
-	}, "mualani-a4")
+	}, "maulani-a4")
+}
+func (c *char) a4amount() float64 {
+	if c.Base.Ascension < 1 {
+		return 0.0
+	}
+	s := c.a4Stacks
+	c.a4Stacks = 0
+	return 0.15 * float64(s) * c.MaxHP()
 }

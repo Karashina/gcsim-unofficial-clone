@@ -1,18 +1,18 @@
-id: 90000002
+id: 10000097
 key: "sethos"
 rarity: QUALITY_PURPLE
 body: BODY_BOY
 region: ASSOC_TYPE_SUMERU
 element: Electric
 weapon_class: WEAPON_BOW
-icon_name: "UI_AvatarIcon_Ambor"
+icon_name: "UI_AvatarIcon_Sethos"
 stats: {
-   base_hp: 821
-   base_atk: 19
-   base_def: 47
+   base_hp: 820.6119
+   base_atk: 19.05456
+   base_def: 46.9245
    hp_curve: GROW_CURVE_HP_S4
-   atk_curve: GROW_CURVE_ATTACK_S5
-   def_cruve: GROW_CURVE_HP_S5
+   atk_curve: GROW_CURVE_ATTACK_S4
+   def_cruve: GROW_CURVE_HP_S4
    promo_data: {
       max_level: 20
       add_props: {
@@ -32,15 +32,15 @@ stats: {
       max_level: 40
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 613
+         value: 613.0391
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 35
+         value: 35.055
       }
       add_props: {
-         prop_type: FIGHT_PROP_ELEMENT_MASTERY
-         value: 14
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 14.235066
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -48,17 +48,17 @@ stats: {
    }
    promo_data: {
       max_level: 50
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1048.5365
+         value: 1048.6195
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 59.8675
+         value: 59.9625
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 23.947
+         value: 24.349455
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -69,15 +69,15 @@ add_props: {
       max_level: 60
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1629.2927
+         value: 1629.3934
       }
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 93.0265
+         value: 93.1725
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 37.2106
+         value: 37.835308
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -88,15 +88,15 @@ add_props: {
       max_level: 70
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2064.8292
+         value: 2064.9739
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 117.894
+         value: 118.08
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 47.1576
+         value: 47.949696
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -107,15 +107,15 @@ add_props: {
       max_level: 80
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2500.3657
+         value: 2500.5542
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 142.7615
+         value: 142.9875
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 57.1046
+         value: 58.064083
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -126,15 +126,15 @@ add_props: {
       max_level: 90
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2935.9635
+         value: 2936.1348
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 167.6325
+         value: 167.895
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 67.053
+         value: 68.178474
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -143,9 +143,9 @@ add_props: {
    }
 }
 skill_details: {
-   skill: 10262
-   burst: 10265
-   attack: 10261
+   skill: 10972
+   burst: 10975
+   attack: 10971
    burst_energy_cost: 60
 }
-name_text_hash_map: 1021947691
+name_text_hash_map: 1431322346

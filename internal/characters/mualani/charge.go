@@ -6,25 +6,31 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
-var chargeFramesNormal []int
+var chargeFrames []int
 
-const chargeHitmarkNormal = 70
+const shortChargeHitmark = 71
 
 func init() {
-	chargeFramesNormal = frames.InitAbilSlice(74)
-	chargeFramesNormal[action.ActionAttack] = 74
-	chargeFramesNormal[action.ActionCharge] = 74
-	chargeFramesNormal[action.ActionSkill] = 74
-	chargeFramesNormal[action.ActionBurst] = 74
-	chargeFramesNormal[action.ActionDash] = 70
-	chargeFramesNormal[action.ActionJump] = 70
-	chargeFramesNormal[action.ActionSwap] = 70
+	chargeFrames = frames.InitAbilSlice(100) // walk
+	chargeFrames[action.ActionAttack] = 73
+	chargeFrames[action.ActionCharge] = 85
+	chargeFrames[action.ActionSkill] = 72
+	chargeFrames[action.ActionBurst] = 73
+	chargeFrames[action.ActionDash] = 72
+	chargeFrames[action.ActionJump] = 73
+	chargeFrames[action.ActionSwap] = 71
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-
+	// there is a windup out of dash/jump/walk/swap. Otherwise it is rolled into the Q/E/CA/NA -> CA frames
+	windup := 0
+	switch c.Core.Player.CurrentState() {
+	case action.Idle, action.DashState, action.JumpState, action.WalkState, action.SwapState:
+		windup = 13
+	}
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Charge Attack",
@@ -36,20 +42,19 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Durability: 25,
 		Mult:       charge[c.TalentLvlAttack()],
 	}
-
+	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 3.5)
+	// TODO: Not sure of snapshot timing
 	c.Core.QueueAttack(
 		ai,
-		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 3),
-		chargeHitmarkNormal,
-		chargeHitmarkNormal,
+		ap,
+		shortChargeHitmark+windup,
+		shortChargeHitmark+windup,
 	)
-	atkspd := c.Stat(attributes.AtkSpd)
+
 	return action.Info{
-		Frames: func(next action.Action) int {
-			return frames.AtkSpdAdjust(chargeFramesNormal[next], atkspd)
-		},
-		AnimationLength: chargeFramesNormal[action.InvalidAction],
-		CanQueueAfter:   chargeFramesNormal[action.ActionDash],
+		Frames:          func(next action.Action) int { return windup + chargeFrames[next] },
+		AnimationLength: windup + chargeFrames[action.InvalidAction],
+		CanQueueAfter:   windup + chargeFrames[action.ActionDash],
 		State:           action.ChargeAttackState,
 	}, nil
 }

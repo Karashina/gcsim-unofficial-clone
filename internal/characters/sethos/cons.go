@@ -4,26 +4,40 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
 const (
-	c2aimkey    = "sethos-c2-aim"
-	c2energykey = "sethos-c2-energy"
-	c2burstkey  = "sethos-c2-energy"
-	c6icdkey    = "sethos-c6-icd"
+	c2Key          = "sethos-c2"
+	c2ConsumingKey = "sethos-c2-consuming"
+	c2RegainingKey = "sethos-c2-regaining"
+	c2BurstKey     = "sethos-c2-burst"
+
+	c2Dur = 10 * 60
 )
 
+const c4Key = "sethos-c4"
+const c4Dur = 10 * 60
+
+const c6Key = "sethos-c6"
+const c6IcdKey = "sethos-c6-icd"
+const c6IcdDur = 15 * 60
+
 func (c *char) c1() {
+	if c.Base.Cons < 1 {
+		return
+	}
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CR] = 0.15
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("sethos-c1", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			if atk.Info.Abil != "Shadowpiercing Shot DMG" {
+			if atk.Info.AttackTag != attacks.AttackTagExtra {
+				return nil, false
+			}
+			if atk.Info.Abil != shadowPierceShotAil {
 				return nil, false
 			}
 			return m, true
@@ -32,62 +46,100 @@ func (c *char) c1() {
 }
 
 func (c *char) c2() {
-
-	c.c2stacks = nTrue(c.StatusIsActive(c2aimkey), c.StatusIsActive(c2energykey), c.StatusIsActive(c2burstkey))
-
-	if c.c2stacks >= 2 {
-		c.c2stacks = 2
+	if c.Base.Cons < 2 {
+		return
 	}
-	m := make([]float64, attributes.EndStatType)
-
-	m[attributes.DmgP] = 0.3
-	c.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBase("sethos-c2", -1),
-		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			if atk.Info.ActorIndex != c.Index {
+	mElectro := make([]float64, attributes.EndStatType)
+	c.AddStatMod(character.StatMod{
+		Base: modifier.NewBase(c2Key, -1),
+		Amount: func() ([]float64, bool) {
+			stackCount := c.c2Stacks()
+			if stackCount == 0 {
 				return nil, false
 			}
-			return m, true
+			mElectro[attributes.ElectroP] = 0.15 * float64(stackCount)
+			return mElectro, true
 		},
 	})
 }
 
-func (c *char) c4cb() combat.AttackCBFunc {
+func (c *char) c2AddStack(name string) {
+	if c.Base.Cons < 2 {
+		return
+	}
+	c.AddStatus(name, c2Dur, true)
+}
+
+func (c *char) c2Stacks() int {
+	stacks := 0
+	if c.StatusIsActive(c2ConsumingKey) {
+		stacks++
+	}
+	if c.StatusIsActive(c2RegainingKey) {
+		stacks++
+	}
+	if c.StatusIsActive(c2BurstKey) {
+		stacks++
+	}
+	return min(stacks, 2)
+}
+
+func (c *char) c4() {
+	if c.Base.Cons < 4 {
+		return
+	}
+	c.c4Buff = make([]float64, attributes.EndStatType)
+	c.c4Buff[attributes.EM] = 80
+}
+
+func (c *char) makeC4cb() combat.AttackCBFunc {
 	if c.Base.Cons < 4 {
 		return nil
 	}
-	c.c4count = 0
+	count := 0
 	return func(a combat.AttackCB) {
 		if a.Target.Type() != targets.TargettableEnemy {
 			return
 		}
-		if a.AttackEvent.Info.AttackTag != attacks.AttackTagExtra {
+		if count >= 2 {
 			return
 		}
-		c.c4count++
-		if c.c4count == 2 {
-			dur := 10 * 60
+		count += 1
+		if count == 2 {
 			for _, char := range c.Core.Player.Chars() {
 				char.AddStatMod(character.StatMod{
-					Base:         modifier.NewBaseWithHitlag("sethos-c4", dur),
+					Base:         modifier.NewBaseWithHitlag(c4Key, c4Dur),
 					AffectedStat: attributes.EM,
 					Amount: func() ([]float64, bool) {
 						return c.c4Buff, true
 					},
 				})
 			}
-			c.Core.Log.NewEvent("sethos c4 triggered", glog.LogCharacterEvent, c.Index).Write("em snapshot", c.c4Buff[attributes.EM]).Write("expiry", c.Core.F+dur)
-			c.c4count = 0
 		}
 	}
 }
 
-func nTrue(b ...bool) int {
-	n := 0
-	for _, v := range b {
-		if v {
-			n++
-		}
+func (c *char) makeC6cb(energy float64) combat.AttackCBFunc {
+	if c.Base.Cons < 6 {
+		return nil
 	}
-	return n
+	if c.Base.Ascension < 1 {
+		return nil
+	}
+
+	done := false
+	return func(a combat.AttackCB) {
+		if a.Target.Type() != targets.TargettableEnemy {
+			return
+		}
+		if done {
+			return
+		}
+		if c.StatusIsActive(c6IcdKey) {
+			return
+		}
+		done = true
+		c.AddStatus(c6IcdKey, c6IcdDur, true)
+		c.AddEnergy(c6Key, energy)
+	}
 }

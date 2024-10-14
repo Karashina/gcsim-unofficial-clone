@@ -5,39 +5,41 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/action"
 )
 
-var EJumpFrames []int
+var skillJumpFrames []int
 
 func init() {
-	EJumpFrames = frames.InitAbilSlice(53)
-	EJumpFrames[action.ActionAttack] = 53
-	EJumpFrames[action.ActionCharge] = 53
-	EJumpFrames[action.ActionSkill] = 53
-	EJumpFrames[action.ActionBurst] = 53
-	EJumpFrames[action.ActionDash] = 53
-	EJumpFrames[action.ActionWalk] = 53
+	skillJumpFrames = frames.InitAbilSlice(54) // skill
+	skillJumpFrames[action.ActionAttack] = 4
+	skillJumpFrames[action.ActionBurst] = 50
+	skillJumpFrames[action.ActionDash] = 49
+	skillJumpFrames[action.ActionJump] = 50
+	skillJumpFrames[action.ActionWalk] = 47
+	skillJumpFrames[action.ActionSwap] = 48
 }
 
 func (c *char) Jump(p map[string]int) (action.Info, error) {
-	if c.StatusIsActive(skillKey) {
-		return c.WindfavoredJump(p)
+	if c.nightsoulState.HasBlessing() {
+		if c.Core.Player.LastAction.Type == action.ActionDash {
+			c.reduceNightsoulPoints(14) // total 24, 10 from dash, 14 from dash jump
+		} else {
+			c.reduceNightsoulPoints(2)
+		}
+
+		switch c.Core.Player.AnimationHandler.CurrentState() {
+		case action.DashState, action.JumpState, action.WalkState:
+			// use the previous momentum gain tasks
+		default:
+			// queue a new momentum gain task
+			c.momentumSrc = c.Core.F
+			c.QueueCharTask(c.momentumStackGain(c.momentumSrc), momentumDelay)
+		}
+
+		return action.Info{
+			Frames:          frames.NewAbilFunc(skillJumpFrames),
+			AnimationLength: skillJumpFrames[action.InvalidAction],
+			CanQueueAfter:   skillJumpFrames[action.ActionWalk],
+			State:           action.JumpState,
+		}, nil
 	}
-
-	ai, err := c.Character.Jump(p)
-
-	f := ai.AnimationLength
-	ai.Frames = func(action.Action) int { return f }
-	ai.AnimationLength = f
-	ai.CanQueueAfter = f
-
-	return ai, err
-}
-
-func (c *char) WindfavoredJump(p map[string]int) (action.Info, error) {
-	c.ConsumeNightsoul(2)
-	return action.Info{
-		Frames:          frames.NewAbilFunc(EJumpFrames),
-		AnimationLength: EJumpFrames[action.ActionJump],
-		CanQueueAfter:   EJumpFrames[action.ActionSkill], // earliest cancel
-		State:           action.JumpState,
-	}, nil
+	return c.Character.Jump(p)
 }
