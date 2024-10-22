@@ -13,52 +13,56 @@ import (
 
 var (
 	attackFrames           [][]int
-	attackHitmarks         = [][]int{{19}, {13, 35}, {24}}
+	attackHitmarks         = [][]int{{18}, {16, 32}, {22}}
 	attackHitlagHaltFrames = []float64{0.03, 0.03, 0.06}
-	attackHitboxes         = []float64{0.5, 1.5, 2}
-	attackOffsets          = [][]float64{{0.8}, {0.6, 0.6}, {0}}
+	attackHitboxes         = [][]float64{{2.1}, {2.5, 2.7}, {3.2}}
+	attackFanAngles        = [][]float64{{360}, {150, 150}, {160}}
+	attackOffsets          = [][]float64{{1.0}, {-0.5, -0.5}, {-0.5}}
 
-	attackFramesBR          [][]int
-	attackHitmarksBR        = []int{19, 16, 24, 31}
-	attackHitlagHaltFrameBR = []float64{0.03, 0.03, 0.03, 0.06}
-	attackRadiusBR          = []float64{3, 3, 2, 4}
-	attackOffsetsBR         = []float64{0, 0, 2, 0}
-	attackFanAnglesBR       = []float64{270, 180, 90, 270}
+	rollerFrames           [][]int
+	rollerHitmarks         = []int{17, 17, 22, 32}
+	rollerHitlagHaltFrames = []float64{0.03, 0.03, 0.03, 0.06}
+	rollerHitboxes         = [][]float64{{2.7, 270}, {5, 3.7}, {3.5, 4.5}, {3.5, 270}}
+	rollerOffsets          = []float64{0.7, -0.5, -0.5, 0.6}
+	rollerPoiseDMG         = []float64{52.8, 51.9, 62.1, 81.1}
 )
 
 const normalHitNum = 3
-const normalHitNumBR = 4
+const rollerHitNum = 4
 
 func init() {
 	attackFrames = make([][]int, normalHitNum)
 
-	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 30)
-	attackFrames[0][action.ActionAttack] = 30
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 34)
+	attackFrames[0][action.ActionAttack] = 20
+	attackFrames[0][action.ActionCharge] = 26
 
-	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][1], 52)
-	attackFrames[1][action.ActionAttack] = 52
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][1], 57)
+	attackFrames[1][action.ActionAttack] = 46
+	attackFrames[1][action.ActionCharge] = 39
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][0], 61)
-	attackFrames[2][action.ActionCharge] = 500 // Illegal action
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][0], 70)
+	attackFrames[2][action.ActionAttack] = 57
+	attackFrames[2][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
 
-	attackFramesBR = make([][]int, normalHitNumBR)
+	rollerFrames = make([][]int, rollerHitNum)
 
-	attackFramesBR[0] = frames.InitNormalCancelSlice(attackHitmarksBR[0], 27)
-	attackFramesBR[0][action.ActionAttack] = 27
+	rollerFrames[0] = frames.InitNormalCancelSlice(rollerHitmarks[0], 44)
+	rollerFrames[0][action.ActionAttack] = 20
 
-	attackFramesBR[1] = frames.InitNormalCancelSlice(attackHitmarksBR[1], 30)
-	attackFramesBR[1][action.ActionAttack] = 30
+	rollerFrames[1] = frames.InitNormalCancelSlice(rollerHitmarks[1], 48)
+	rollerFrames[1][action.ActionAttack] = 28
 
-	attackFramesBR[2] = frames.InitNormalCancelSlice(attackHitmarksBR[2], 36)
-	attackFramesBR[2][action.ActionAttack] = 36
+	rollerFrames[2] = frames.InitNormalCancelSlice(rollerHitmarks[2], 50)
+	rollerFrames[2][action.ActionAttack] = 30
 
-	attackFramesBR[3] = frames.InitNormalCancelSlice(attackHitmarksBR[3], 72)
-	attackFramesBR[3][action.ActionAttack] = 72
+	rollerFrames[3] = frames.InitNormalCancelSlice(rollerHitmarks[3], 69)
+	rollerFrames[3][action.ActionAttack] = 68
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	if c.StatusIsActive(skillKey) {
-		return c.BladeRoller(p)
+	if c.canUseNightsoul() {
+		return c.nightsoulAttack(), nil
 	}
 
 	ai := combat.AttackInfo{
@@ -78,14 +82,15 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		ax := ai
 		ax.Abil = fmt.Sprintf("Normal %v", c.NormalCounter)
 		ax.Mult = mult[c.TalentLvlAttack()]
-		ap := combat.NewCircleHitOnTarget(
+
+		ap := combat.NewCircleHitOnTargetFanAngle(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: attackOffsets[c.NormalCounter][i]},
-			attackHitboxes[c.NormalCounter],
+			attackHitboxes[c.NormalCounter][i],
+			attackFanAngles[c.NormalCounter][i],
 		)
-		c.QueueCharTask(func() {
-			c.Core.QueueAttack(ax, ap, 0, 0)
-		}, attackHitmarks[c.NormalCounter][i])
+
+		c.Core.QueueAttack(ax, ap, attackHitmarks[c.NormalCounter][i], attackHitmarks[c.NormalCounter][i])
 	}
 
 	defer c.AdvanceNormalIndex()
@@ -98,41 +103,56 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-func (c *char) BladeRoller(p map[string]int) (action.Info, error) {
-
+func (c *char) nightsoulAttack() action.Info {
 	ai := combat.AttackInfo{
-		ActorIndex:       c.Index,
-		Abil:             fmt.Sprintf("Normal: Blade Roller %v", c.NormalSCounter),
-		AttackTag:        attacks.AttackTagNormal,
-		ICDTag:           attacks.ICDTagNormalAttack,
-		ICDGroup:         attacks.ICDGroupDefault,
-		StrikeType:       attacks.StrikeTypeSlash,
-		Element:          attributes.Geo,
-		Durability:       25,
-		Mult:             bladeroller[c.NormalSCounter][c.TalentLvlAttack()],
-		HitlagFactor:     0.01,
-		HitlagHaltFrames: attackHitlagHaltFrameBR[c.NormalSCounter] * 60,
-		UseDef:           true,
-		Alignment:        attacks.AdditionalTagNightsoul,
+		ActorIndex:         c.Index,
+		Abil:               fmt.Sprintf("Blade Roller %v", c.NormalCounter),
+		AttackTag:          attacks.AttackTagNormal,
+		AdditionalTags:     []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:             attacks.ICDTagXilonenSkate,
+		ICDGroup:           attacks.ICDGroupDefault,
+		StrikeType:         attacks.StrikeTypeBlunt,
+		PoiseDMG:           rollerPoiseDMG[c.NormalCounter],
+		Element:            attributes.Geo,
+		Durability:         25,
+		Mult:               attackE[c.NormalCounter][c.TalentLvlAttack()],
+		HitlagHaltFrames:   rollerHitlagHaltFrames[c.NormalCounter] * 60,
+		HitlagFactor:       0.01,
+		CanBeDefenseHalted: c.NormalCounter == 0, // only N1 can be defhalted
+		UseDef:             true,
+		IgnoreInfusion:     true,
 	}
-	c.Core.QueueAttack(
-		ai,
-		combat.NewCircleHitOnTargetFanAngle(
+
+	var ap combat.AttackPattern
+	if c.NormalCounter == 0 || c.NormalCounter == 3 {
+		ap = combat.NewCircleHitOnTargetFanAngle(
 			c.Core.Combat.Player(),
-			geometry.Point{Y: attackOffsetsBR[c.NormalSCounter]},
-			attackRadiusBR[c.NormalSCounter],
-			attackFanAnglesBR[c.NormalSCounter],
-		),
-		attackHitmarksBR[c.NormalSCounter],
-		attackHitmarksBR[c.NormalSCounter],
-	)
+			geometry.Point{Y: rollerOffsets[c.NormalCounter]},
+			rollerHitboxes[c.NormalCounter][0],
+			rollerHitboxes[c.NormalCounter][1],
+		)
+	} else {
+		ap = combat.NewBoxHitOnTarget(
+			c.Core.Combat.Player(),
+			geometry.Point{Y: rollerOffsets[c.NormalCounter]},
+			rollerHitboxes[c.NormalCounter][0],
+			rollerHitboxes[c.NormalCounter][1],
+		)
+	}
+
+	c.Core.QueueAttack(ai, ap, rollerHitmarks[c.NormalCounter], rollerHitmarks[c.NormalCounter], c.a1cb)
 
 	defer c.AdvanceNormalIndex()
 
 	return action.Info{
-		Frames:          frames.NewAttackFunc(c.Character, attackFramesBR),
-		AnimationLength: attackFramesBR[c.NormalSCounter][action.InvalidAction],
-		CanQueueAfter:   attackHitmarksBR[c.NormalSCounter],
+		Frames:          frames.NewAttackFunc(c.Character, rollerFrames),
+		AnimationLength: rollerFrames[c.NormalCounter][action.InvalidAction],
+		CanQueueAfter:   rollerHitmarks[c.NormalCounter],
 		State:           action.NormalAttackState,
-	}, nil
+		OnRemoved: func(next action.AnimationState) {
+			if !c.canUseNightsoul() {
+				c.exitNightsoul()
+			}
+		},
+	}
 }

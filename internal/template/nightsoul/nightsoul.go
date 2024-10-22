@@ -31,19 +31,17 @@ func New(c *core.Core, char *character.CharWrapper) *State {
 func (s *State) EnterBlessing(amount float64) {
 	s.nightsoulPoints = amount
 	s.char.AddStatus(NightsoulBlessingStatus, -1, true)
-	s.char.OnNightsoul = true
 	s.c.Log.NewEvent("enter nightsoul blessing", glog.LogCharacterEvent, s.char.Index).
 		Write("points", s.nightsoulPoints)
 }
 
 func (s *State) ExitBlessing() {
 	s.char.DeleteStatus(NightsoulBlessingStatus)
-	s.char.OnNightsoul = false
 	s.c.Log.NewEvent("exit nightsoul blessing", glog.LogCharacterEvent, s.char.Index)
 }
 
 func (s *State) HasBlessing() bool {
-	return s.char.StatusIsActive(NightsoulBlessingStatus) || s.char.OnNightsoul
+	return s.char.StatusIsActive(NightsoulBlessingStatus)
 }
 
 func (s *State) GeneratePoints(amount float64) {
@@ -66,6 +64,14 @@ func (s *State) ConsumePoints(amount float64) {
 		Write("previous points", prevPoints).
 		Write("amount", amount).
 		Write("final", s.nightsoulPoints)
+}
+
+func (s *State) ClearPoints() {
+	amt := s.nightsoulPoints
+	s.nightsoulPoints = 0
+	s.c.Events.Emit(event.OnNightsoulConsume, s.char.Index, amt)
+	s.c.Log.NewEvent("clear nightsoul points", glog.LogCharacterEvent, s.char.Index).
+		Write("previous points", amt)
 }
 
 func (s *State) clampPoints() {

@@ -12,12 +12,16 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/player"
 )
 
-var highPlungeFrames []int
 var lowPlungeFrames []int
+var highPlungeFrames []int
+var skillHighPlungeFrames []int
 
-const lowPlungeHitmark = 36
-const highPlungeHitmark = 38
+const lowPlungeHitmark = 47
+const highPlungeHitmark = 50
 const collisionHitmark = lowPlungeHitmark - 6
+
+const skillHighPlungeHitmark = 39
+const skillCollisionHitmark = skillHighPlungeHitmark - 6
 
 const lowPlungePoiseDMG = 100.0
 const lowPlungeRadius = 3.0
@@ -27,22 +31,30 @@ const highPlungeRadius = 5.0
 
 func init() {
 	// low_plunge -> x
-	lowPlungeFrames = frames.InitAbilSlice(67)
-	lowPlungeFrames[action.ActionAttack] = 45
-	lowPlungeFrames[action.ActionSkill] = 46
-	lowPlungeFrames[action.ActionBurst] = 46
+	lowPlungeFrames = frames.InitAbilSlice(75)
+	lowPlungeFrames[action.ActionAttack] = 59
+	lowPlungeFrames[action.ActionSkill] = 59
+	lowPlungeFrames[action.ActionBurst] = 58
 	lowPlungeFrames[action.ActionDash] = lowPlungeHitmark
-	lowPlungeFrames[action.ActionWalk] = 66
-	lowPlungeFrames[action.ActionSwap] = 53
+	lowPlungeFrames[action.ActionSwap] = 60
+	lowPlungeFrames[action.ActionWalk] = 74
 
 	// high_plunge -> x
-	highPlungeFrames = frames.InitAbilSlice(68)
-	highPlungeFrames[action.ActionAttack] = 47
-	highPlungeFrames[action.ActionSkill] = 46
-	highPlungeFrames[action.ActionBurst] = 47
+	highPlungeFrames = frames.InitAbilSlice(75)
+	highPlungeFrames[action.ActionAttack] = 62
+	highPlungeFrames[action.ActionSkill] = 60
+	highPlungeFrames[action.ActionBurst] = 61
 	highPlungeFrames[action.ActionDash] = highPlungeHitmark
-	highPlungeFrames[action.ActionWalk] = 67
-	highPlungeFrames[action.ActionSwap] = 54
+	highPlungeFrames[action.ActionJump] = 74
+	highPlungeFrames[action.ActionSwap] = 61
+
+	skillHighPlungeFrames = frames.InitAbilSlice(77)
+	skillHighPlungeFrames[action.ActionAttack] = 55
+	skillHighPlungeFrames[action.ActionSkill] = 56
+	skillHighPlungeFrames[action.ActionBurst] = 55
+	skillHighPlungeFrames[action.ActionDash] = skillHighPlungeHitmark
+	skillHighPlungeFrames[action.ActionSwap] = 57
+	skillHighPlungeFrames[action.ActionWalk] = 66
 }
 
 // Low Plunge attack damage queue generator
@@ -52,6 +64,9 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
 	case player.AirborneXianyun:
+		if c.canUseNightsoul() {
+			return action.Info{}, errors.New("xilonen cannot low_plunge while in nightsoul blessing")
+		}
 		return c.lowPlungeXY(p), nil
 	default:
 		return action.Info{}, errors.New("low_plunge can only be used while airborne")
@@ -69,22 +84,17 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	}
 
 	ai := combat.AttackInfo{
-		ActorIndex:         c.Index,
-		Abil:               "Low Plunge",
-		AttackTag:          attacks.AttackTagPlunge,
-		ICDTag:             attacks.ICDTagNone,
-		ICDGroup:           attacks.ICDGroupDefault,
-		StrikeType:         attacks.StrikeTypeBlunt,
-		PoiseDMG:           lowPlungePoiseDMG,
-		Element:            attributes.Physical,
-		Durability:         25,
-		Mult:               lowPlunge[c.TalentLvlAttack()],
-		UseDef:             true,
-		CanBeDefenseHalted: true,
-	}
-	if c.StatusIsActive(skillKey) {
-		ai.Element = attributes.Geo
-		ai.Alignment = attacks.AdditionalTagNightsoul
+		ActorIndex: c.Index,
+		Abil:       "Low Plunge",
+		AttackTag:  attacks.AttackTagPlunge,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeBlunt,
+		PoiseDMG:   lowPlungePoiseDMG,
+		Element:    attributes.Physical,
+		Durability: 25,
+		Mult:       lowPlunge[c.TalentLvlAttack()],
+		UseDef:     true,
 	}
 	c.Core.QueueAttack(
 		ai,
@@ -92,6 +102,12 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 		lowPlungeHitmark,
 		lowPlungeHitmark,
 	)
+
+	c.Core.Tasks.Add(func() {
+		if !c.canUseNightsoul() {
+			c.exitNightsoul()
+		}
+	}, lowPlungeHitmark)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(lowPlungeFrames),
@@ -120,34 +136,49 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 		collision = 0 // Whether or not collision hit
 	}
 
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "High Plunge",
+		AttackTag:  attacks.AttackTagPlunge,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeBlunt,
+		PoiseDMG:   highPlungePoiseDMG,
+		Element:    attributes.Physical,
+		Durability: 25,
+		Mult:       highPlunge[c.TalentLvlAttack()],
+		UseDef:     true,
+	}
+	highPlungeFrames := highPlungeFrames
+	collisionHitmark := collisionHitmark
+	var a1cb combat.AttackCBFunc
+	if c.canUseNightsoul() {
+		ai.Element = attributes.Geo
+		ai.IgnoreInfusion = true
+		ai.AdditionalTags = []attacks.AdditionalTag{attacks.AdditionalTagNightsoul}
+
+		highPlungeFrames = skillHighPlungeFrames
+		collisionHitmark = skillCollisionHitmark
+		a1cb = c.a1cb
+	}
+
 	if collision > 0 {
 		c.plungeCollision(collisionHitmark)
 	}
 
-	ai := combat.AttackInfo{
-		ActorIndex:         c.Index,
-		Abil:               "High Plunge",
-		AttackTag:          attacks.AttackTagPlunge,
-		ICDTag:             attacks.ICDTagNone,
-		ICDGroup:           attacks.ICDGroupDefault,
-		StrikeType:         attacks.StrikeTypeBlunt,
-		PoiseDMG:           highPlungePoiseDMG,
-		Element:            attributes.Physical,
-		Durability:         25,
-		Mult:               highPlunge[c.TalentLvlAttack()],
-		UseDef:             true,
-		CanBeDefenseHalted: true,
-	}
-	if c.StatusIsActive(skillKey) {
-		ai.Element = attributes.Geo
-		ai.Alignment = attacks.AdditionalTagNightsoul
-	}
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, highPlungeRadius),
 		highPlungeHitmark,
 		highPlungeHitmark,
+		a1cb,
 	)
+
+	c.Core.Tasks.Add(func() {
+		if !c.canUseNightsoul() {
+			c.exitNightsoul()
+		}
+	}, highPlungeHitmark)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(highPlungeFrames),
@@ -161,21 +192,23 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 // Standard - Always part of high/low plunge attacks
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
-		ActorIndex:         c.Index,
-		Abil:               "Plunge Collision",
-		AttackTag:          attacks.AttackTagPlunge,
-		ICDTag:             attacks.ICDTagNone,
-		ICDGroup:           attacks.ICDGroupDefault,
-		StrikeType:         attacks.StrikeTypeSlash,
-		Element:            attributes.Physical,
-		Durability:         0,
-		Mult:               collision[c.TalentLvlAttack()],
-		UseDef:             true,
-		CanBeDefenseHalted: true,
+		ActorIndex: c.Index,
+		Abil:       "Plunge Collision",
+		AttackTag:  attacks.AttackTagPlunge,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeSlash,
+		Element:    attributes.Physical,
+		Durability: 0,
+		Mult:       collision[c.TalentLvlAttack()],
+		UseDef:     true,
 	}
-	if c.StatusIsActive(skillKey) {
+	var a1cb combat.AttackCBFunc
+	if c.canUseNightsoul() {
 		ai.Element = attributes.Geo
-		ai.Alignment = attacks.AdditionalTagNightsoul
+		ai.IgnoreInfusion = true
+		ai.AdditionalTags = []attacks.AdditionalTag{attacks.AdditionalTagNightsoul}
+		a1cb = c.a1cb
 	}
-	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 1), delay, delay)
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 1), delay, delay, a1cb)
 }

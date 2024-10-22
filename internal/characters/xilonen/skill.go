@@ -2,243 +2,238 @@ package xilonen
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-const (
-	skillKey           = "Nightsoul's Blessing: Xilonen"
-	SampleActiveDurKey = "xilonen-elemental-samples"
-	SampleActiveKey    = "xilonen-elemental-samples-active"
-	c6BypassKey        = "xilonen-c6-bypass"
-	skillHitmark       = 8
-)
+var skillFrames []int
 
-var (
-	skillFramesNormal []int
-	skillFramesEnd    []int
+const (
+	skillHitmarks   = 6
+	samplerInterval = 0.3 * 60
+
+	skilRecastCD     = "xilonen-e-recast-cd"
+	skillMaxDurKey   = "xilonen-e-limit"
+	particleICDKey   = "xilonen-particle-icd"
+	samplerShredKey  = "xilonen-e-shred"
+	activeSamplerKey = "xilonen-samplers-activated"
 )
 
 func init() {
-	skillFramesNormal = frames.InitAbilSlice(23)
-	skillFramesEnd = frames.InitAbilSlice(5)
+	skillFrames = frames.InitAbilSlice(20)
+	skillFrames[action.ActionAttack] = 19
+	skillFrames[action.ActionDash] = 15
+	skillFrames[action.ActionJump] = 15
+	skillFrames[action.ActionSwap] = 19
+}
+
+func (c *char) reduceNightsoulPoints(val float64) {
+	if c.StatusIsActive(c6key) {
+		return
+	}
+
+	c.nightsoulState.ConsumePoints(val * c.nightsoulConsumptionMul())
+
+	// don't exit nightsoul while in NA/Plunge
+	switch c.Core.Player.CurrentState() {
+	case action.NormalAttackState, action.PlungeAttackState:
+		return
+	}
+
+	if c.nightsoulState.Points() < 0.001 {
+		c.exitNightsoul()
+	}
+}
+
+func (c *char) canUseNightsoul() bool {
+	return c.nightsoulState.Points() >= 0.001 || c.StatusIsActive(c6key)
+}
+
+func (c *char) enterNightsoul() {
+	c.nightsoulState.EnterBlessing(45)
+	c.nightsoulSrc = c.Core.F
+	c.Core.Tasks.Add(c.nightsoulPointReduceFunc(c.nightsoulSrc), 6)
+	c.NormalHitNum = rollerHitNum
+	c.NormalCounter = 0
+
+	duration := int(9 * 60 * c.nightsoulDurationMul())
+	c.setNightsoulExitTimer(duration)
+	c.skillLastStamF = c.Core.Player.LastStamUse
+	c.Core.Player.LastStamUse = math.MaxInt
+	// Don't queue the task if C2 or higher
+	if c.Base.Cons < 2 {
+		c.activeGeoSampler(c.nightsoulSrc)()
+	}
+}
+
+func (c *char) exitNightsoul() {
+	if !c.nightsoulState.HasBlessing() {
+		return
+	}
+	c.nightsoulState.ExitBlessing()
+	c.nightsoulState.ClearPoints()
+	c.nightsoulSrc = -1
+	c.exitStateSrc = -1
+	c.SetCD(action.ActionSkill, 7*60)
+	c.NormalHitNum = normalHitNum
+	c.NormalCounter = 0
+	c.Core.Player.LastStamUse = c.skillLastStamF
+	c.DeleteStatus(c6key)
+}
+
+func (c *char) nightsoulPointReduceFunc(src int) func() {
+	return func() {
+		if c.nightsoulSrc != src {
+			return
+		}
+		c.reduceNightsoulPoints(0.5)
+		// reduce 0.5 point per 6, which is 5 per second
+		c.Core.Tasks.Add(c.nightsoulPointReduceFunc(src), 6)
+	}
+}
+
+func (c *char) applySamplerShred(ele attributes.Element, enemies []combat.Enemy) {
+	for _, e := range enemies {
+		e.AddResistMod(combat.ResistMod{
+			Base:  modifier.NewBaseWithHitlag(fmt.Sprintf("%v-%v", samplerShredKey, ele.String()), 60),
+			Ele:   ele,
+			Value: -skillShred[c.TalentLvlSkill()],
+		})
+	}
+}
+
+func (c *char) activeGeoSampler(src int) func() {
+	return func() {
+		if c.Base.Cons < 2 {
+			if c.nightsoulSrc != src {
+				return
+			}
+			if !c.nightsoulState.HasBlessing() {
+				return
+			}
+			if c.StatusIsActive(activeSamplerKey) {
+				// move to activeSamplers
+				return
+			}
+		}
+		enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10), nil)
+		c.applySamplerShred(attributes.Geo, enemies)
+		c.QueueCharTask(c.activeGeoSampler(src), samplerInterval)
+	}
+}
+
+func (c *char) activeSamplers(src int) func() {
+	return func() {
+		if c.sampleSrc != src {
+			return
+		}
+		if !c.StatusIsActive(activeSamplerKey) {
+			return
+		}
+
+		enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10), nil)
+		for ele := range c.shredElements {
+			// skip geo when C2 or above since it's always active
+			if ele == attributes.Geo && c.Base.Cons >= 2 {
+				continue
+			}
+			c.applySamplerShred(ele, enemies)
+		}
+
+		// QueueCharTask needs to be called on the active char
+		active := c.Core.Player.ActiveChar()
+		active.QueueCharTask(c.activeSamplers(src), samplerInterval)
+	}
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	if !c.StatusIsActive(skillKey) {
-		return c.skillActivate(), nil
+	if c.nightsoulState.HasBlessing() { // don't use canUseNightsoul
+		c.exitNightsoul()
+		return action.Info{
+			Frames:          func(_ action.Action) int { return 1 },
+			AnimationLength: 1,
+			CanQueueAfter:   1, // earliest cancel
+			State:           action.SkillState,
+		}, nil
 	}
-	return c.skillDeactivate(), nil
-}
 
-func (c *char) skillActivate() action.Info {
-	c.Core.Tasks.Add(c.skillStartRoutine, 3)
-
-	// Initial Skill Damage
 	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Yohual's Scratch: Rush DMG",
-		AttackTag:  attacks.AttackTagElementalArt,
-		ICDTag:     attacks.ICDTagElementalArt,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeBlunt,
-		Element:    attributes.Geo,
-		Durability: 25,
-		Mult:       skill[c.TalentLvlSkill()],
-		UseDef:     true,
-		Alignment:  attacks.AdditionalTagNightsoul,
+		ActorIndex:         c.Index,
+		Abil:               "Yohual's Scratch",
+		AttackTag:          attacks.AttackTagElementalArt,
+		ICDTag:             attacks.ICDTagElementalArt,
+		AdditionalTags:     []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDGroup:           attacks.ICDGroupDefault,
+		StrikeType:         attacks.StrikeTypePierce,
+		Element:            attributes.Geo,
+		Durability:         25,
+		HitlagFactor:       0.01,
+		Mult:               skillDMG[c.TalentLvlSkill()],
+		UseDef:             true,
+		CanBeDefenseHalted: true,
+		IsDeployable:       true,
 	}
-
-	c.Core.QueueAttack(
-		ai,
-		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1),
-		skillHitmark,
-		skillHitmark,
-		c.particleCB,
+	ap := combat.NewCircleHitOnTarget(
+		c.Core.Combat.Player(),
+		geometry.Point{Y: 1.0},
+		0.8,
 	)
+	c.Core.QueueAttack(ai, ap, skillHitmarks, skillHitmarks, c.particleCB)
+	c.AddStatus(skilRecastCD, 60, true)
 
-	if c.Base.Cons >= 4 {
-		for _, char := range c.Core.Player.Chars() {
-			char.SetTag(c4buffkey, 6)
-			char.AddStatus(c4buffkey, 15*60, true)
-		}
+	if c.Core.Player.Stam >= 15 {
+		c.Core.Player.RestoreStam(5)
+	} else {
+		// align to 15
+		c.Core.Player.RestoreStam(15 - c.Core.Player.Stam)
 	}
 
-	// Return ActionInfo
+	c.enterNightsoul()
+	c.c4()
+
 	return action.Info{
-		Frames:          frames.NewAbilFunc(skillFramesNormal),
-		AnimationLength: skillFramesNormal[action.InvalidAction],
-		CanQueueAfter:   skillFramesNormal[action.ActionSwap], // earliest cancel
+		Frames:          frames.NewAbilFunc(skillFrames),
+		AnimationLength: skillFrames[action.InvalidAction],
+		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
 		State:           action.SkillState,
-	}
-}
-
-func (c *char) skillStartRoutine() {
-	c.AddNightsoul("xilonen-skill-init", 45)
-	if c.Base.Cons < 1 {
-		c.AddStatus(skillKey, 540, true)
-	} else {
-		c.AddStatus(skillKey, 780, true)
-	}
-	c.OnNightsoul = true
-	c.Activatesample("geo")
-	c.Core.Tasks.Add(c.depleteNightsoulPoints, 12)
-}
-
-func (c *char) skillDeactivate() action.Info {
-	c.skillEndRoutine()
-
-	return action.Info{
-		Frames:          frames.NewAbilFunc(skillFramesEnd),
-		AnimationLength: 5,
-		CanQueueAfter:   5,
-		State:           action.Idle,
-	}
-}
-
-func (c *char) skillEndRoutine() {
-	if c.StatusIsActive(skillKey) {
-		c.DeleteStatus(skillKey)
-		c.Core.Log.NewEvent("Skill Deactivated by Nightsoul Depletion", glog.LogCharacterEvent, c.Index)
-	}
-
-	c.Core.Player.SwapCD = 5
-	c.NightsoulPoint = 0
-	c.OnNightsoul = false
-	c.SetCD(action.ActionSkill, 7*60)
-}
-
-func (c *char) depleteNightsoulPoints() {
-	if !c.StatusIsActive(skillKey) {
-		return
-	}
-	if !c.StatusIsActive(c6buffKey) {
-		if c.Base.Cons < 1 {
-			c.ConsumeNightsoul(1)
-		} else {
-			c.ConsumeNightsoul(0.7)
-		}
-	} else {
-		c.Core.Log.NewEvent("Skill Nightsoul consumption Bypassed by C6", glog.LogCharacterEvent, c.Index)
-	}
-	c.Core.Tasks.Add(c.depleteNightsoulPoints, 12)
-}
-
-func (c *char) NightsoulWatcher() {
-	c.Core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
-		if c.OnNightsoul && !c.StatusIsActive(skillKey) {
-			c.Core.Log.NewEvent("Skill Duration Ended", glog.LogCharacterEvent, c.Index)
-			c.skillEndRoutine()
-		}
-		if c.StatusIsActive(SampleActiveKey) && !c.StatusIsActive(SampleActiveDurKey) {
-			c.Core.Log.NewEvent("Sample Duration Ended", glog.LogCharacterEvent, c.Index)
-			c.ResetSoundscapes()
-			c.DeleteStatus(SampleActiveKey)
-		}
-		return false
-	}, "xilonen-nightsoul-tick")
-
-	c.Core.Events.Subscribe(event.OnNightsoulConsume, func(args ...interface{}) bool {
-		idx := args[0].(int)
-		if idx != c.Index {
-			return false
-		}
-		if c.NightsoulPoint <= 0 {
-			c.skillEndRoutine()
-			c.Core.Log.NewEvent("Nightsoul Depleted", glog.LogCharacterEvent, c.Index)
-		}
-		return false
-	}, "xilonen-nightsoul-watcher-consume")
-
-	c.Core.Events.Subscribe(event.OnNightsoulGenerate, func(args ...interface{}) bool {
-		idx := args[0].(int)
-		if idx != c.Index {
-			return false
-		}
-		if c.NightsoulPoint >= c.NightsoulPointMax {
-			if !c.StatusIsActive(c6BypassKey) {
-				c.Core.Log.NewEvent("Nightsoul Point Reaced Max", glog.LogCharacterEvent, c.Index)
-				c.a4AdditionalNsB()
-				c.Activatesample("ele")
-			}
-			if !c.StatusIsActive(c6buffKey) {
-				c.ConsumeNightsoul(90)
-			} else {
-				c.AddStatus(c6BypassKey, c.StatusDuration(c6buffKey), true)
-				c.Core.Log.NewEvent("Max Nightsoul Check Bypassed by C6", glog.LogCharacterEvent, c.Index)
-			}
-		}
-		return false
-	}, "xilonen-nightsoul-watcher-generate")
+	}, nil
 }
 
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
+	if c.StatusIsActive(particleICDKey) {
+		return
+	}
+	c.AddStatus(particleICDKey, 0.5*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Geo, c.ParticleDelay)
 }
 
-func (c *char) Activatesample(mode string) {
-
-	if c.Base.Cons >= 2 && mode == "geo" {
-		return // because Geo sample is always active
-	}
-
-	switch mode {
-	case "geo":
-		i := 0
-		for _, e := range c.SoundScapeSlot {
-			if e == attributes.Geo {
-				c.ActivateRES(attributes.Geo)
-				c.isSlotActive[i] = true
-				c.Core.Log.NewEvent("Xilonen Geo Sample Activation from Skill init", glog.LogCharacterEvent, c.Index).
-					Write("activated slot", i).
-					Write("activated element", e)
-			}
-			i++
+func (c *char) setNightsoulExitTimer(duration int) {
+	c.exitStateSrc = c.Core.F
+	src := c.exitStateSrc
+	c.QueueCharTask(func() {
+		if c.exitStateSrc != src {
+			return
 		}
-	case "ele":
-		i := 0
-		for _, e := range c.SoundScapeSlot {
-			c.ActivateRES(e)
-			c.isSlotActive[i] = true
-			c.Core.Log.NewEvent("Xilonen Elem Sample Activation from Nightsoul Points", glog.LogCharacterEvent, c.Index).
-				Write("activated slot", i).
-				Write("activated element", e)
-			c.AddStatus(SampleActiveDurKey, 15*60, true)
-			c.AddStatus(SampleActiveKey, -1, false)
-			i++
-		}
-	}
-}
-
-func (c *char) ActivateRES(element attributes.Element) {
-
-	if c.Base.Cons >= 2 && element == attributes.Geo {
-		return // because RES buff is always active
-	}
-
-	// stole code from zhongli but 900f(15s) duration
-	for i := 0; i <= 900; i += 18 {
-		c.Core.Tasks.Add(func() {
-			enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7.5), nil)
-			key := fmt.Sprintf("xilonen-%v", element.String())
-			for _, e := range enemies {
-				e.AddResistMod(combat.ResistMod{
-					Base:  modifier.NewBaseWithHitlag(key, 60),
-					Ele:   element,
-					Value: skillRes[c.TalentLvlSkill()] * -1,
-				})
+		c.nightsoulState.ClearPoints()
+		if !c.canUseNightsoul() {
+			// don't exit nightsoul while in NA/Plunge
+			switch c.Core.Player.CurrentState() {
+			case action.NormalAttackState, action.PlungeAttackState:
+				return
 			}
-		}, i)
-	}
+			c.exitNightsoul()
+		}
+	}, duration)
+	c.AddStatus(skillMaxDurKey, duration, true)
 }

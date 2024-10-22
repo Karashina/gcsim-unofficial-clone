@@ -1,47 +1,44 @@
 package_name: xilonen
-genshin_id: 90000006
+genshin_id: 10000103
 key: xilonen
 icd_tags:
-  - ICDTagBladeRoller
-action_param_keys:
-    low_plunge:
-        - param: "collision"
-    high_plunge:
-        - param: "collision"
+    - ICDTagXilonenSkate
 skill_data_mapping:
-  attack:
-    attack_1:
-      - 0 # 1-Hit DMG|{param0:F1P}
-    attack_2:
-      - 1 # 2-Hit DMG 1|{param1:F1P}
-      - 2 # 2-Hit DMG 2|{param2:F1P}
-    attack_3:
-      - 3 # 3-Hit DMG|{param3:F1P}
-    charge:
-      - 4 # Charged Attack DMG|{param4:F1P}
-    bladeroller_1:
-      - 5 # Blade Roller 1-Hit DMG|{param5:F1P}
-    bladeroller_2:
-      - 6 # Blade Roller 2-Hit DMG|{param6:F1P}
-    bladeroller_3:
-      - 7 # Blade Roller 3-Hit DMG|{param7:F1P}
-    bladeroller_4:
-      - 8 # Blade Roller 4-Hit DMG|{param8:F1P}
-    lowPlunge:
-      - 9 # Low Plunge DMG|{param9:F1P}
-    highPlunge:
-      - 10 # High Plunge DMG|{param10:F1P}
-    collision:
-      - 11 # Plunge Collision DMG|{param11:F1P}
-  skill:
+    attack:
+        attack_1:
+            - 0 # 1-Hit DMG|{param0:F1P}
+        attack_2:
+            - 1 # 2-Hit DMG|{param1:F1P}+{param2:F1P}
+            - 2 # 2-Hit DMG|{param1:F1P}+{param2:F1P}
+        attack_3:
+            - 3 # 3-Hit DMG|{param3:F1P}
+        ca:
+            - 4 # Charged Attack DMG|{param4:F1P}
+        collision:
+            - 6 # Plunge DMG|{param6:F1P}
+        highPlunge:
+            - 8 # Low/High Plunge DMG|{param7:P}/{param8:P}
+        lowPlunge:
+            - 7 # Low/High Plunge DMG|{param7:P}/{param8:P}
+        attackE_1:
+            - 9
+        attackE_2:
+            - 10
+        attackE_3:
+            - 11
+        attackE_4:
+            - 12
     skill:
-      - 0 # Rush DMG|{param0:F1P}
-    skillRes:
-      - 1 # Elemental RES Decrease|{param1:F1P}
-  burst:
+        skillDMG:
+            - 0 # Skill DMG|{param0:P}+{param1:P}
+        skillShred:
+            - 1
     burst:
-      - 0 # Skill DMG|{param0:F1P}
-    burstheal:
-      - 1 # Continuous Healing (DEF%)|{param1:F1P}
-    bursthealconst:
-      - 2 # Continuous Healing (Constant)|{param2:F1P}
+        burstDMG:
+            - 0 # Skill DMG|{param0:F1P}
+        burstHealPer:
+            - 1 # Continuous Healing|{param1:F1P} DEF+{param2:I}
+        burstHealBase:
+            - 2 # Continuous Healing|{param1:F1P} DEF+{param2:I}
+        burstFollowDMG:
+            - 4 # Follow-Up Beat DMG|{param4:F1P} DEF

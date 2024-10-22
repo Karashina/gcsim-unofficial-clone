@@ -1,12 +1,14 @@
 package xilonen
 
 import (
+	"errors"
+
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
+	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
@@ -19,156 +21,111 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	NormalSCounter int
-	SoundScapeSlot []attributes.Element
-	isSlotActive   []bool
-	A1Mode         int
-	a1buff         []float64
-	a4buff         []float64
+
+	nightsoulState    *nightsoul.State
+	nightsoulSrc      int
+	sampleSrc         int
+	c2Src             int
+	exitStateSrc      int
+	samplersConverted int
+	shredElements     map[attributes.Element]bool
+	skillLastStamF    int
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := char{}
 	c.Character = tmpl.NewWithWrapper(s, w)
+	c.nightsoulState = nightsoul.New(c.Core, c.CharWrapper)
 
-	c.CharZone = info.ZoneNatlan
 	c.EnergyMax = 60
-	c.NormalHitNum = normalHitNum
-	c.SkillCon = 3
 	c.BurstCon = 5
-
-	c.NightsoulPointMax = 90
-	c.NightsoulPoint = 0
-	c.HasNightsoul = true
-	c.OnNightsoul = false
+	c.SkillCon = 3
+	c.NormalHitNum = normalHitNum
+	c.shredElements = map[attributes.Element]bool{}
 
 	w.Character = &c
+	c.nightsoulState.MaxPoints = 90
 
 	return nil
 }
 
 func (c *char) Init() error {
-	c.SoundScapeSlot = make([]attributes.Element, 3)
-	c.isSlotActive = make([]bool, 3)
-	c.CheckSoundscapes()
-	c.NightsoulWatcher()
+	for _, other := range c.Core.Player.Chars() {
+		if other.Index == c.Index {
+			// skip Xilonen herself
+			continue
+		}
+		switch ele := other.Base.Element; ele {
+		case attributes.Pyro, attributes.Hydro, attributes.Cryo, attributes.Electro:
+			c.samplersConverted++
+			c.shredElements[ele] = true
+		default:
+			c.shredElements[attributes.Geo] = true
+		}
+	}
+	if len(c.Core.Player.Chars()) < 4 {
+		c.shredElements[attributes.Geo] = true
+	}
+
 	c.a1()
 	c.a4()
-	if c.Base.Cons >= 2 {
-		c.c2()
-	}
-	if c.Base.Cons >= 4 {
-		c.c4()
-	}
-	if c.Base.Cons >= 6 {
-		c.c6()
-	}
+
+	c.c2()
+	c.c4Init()
+	c.c6()
+
 	c.onExitField()
 	return nil
 }
 
-func (c *char) AdvanceNormalIndex() {
-	if c.StatusIsActive(skillKey) {
-		c.NormalSCounter++
-		if c.NormalSCounter == 4 {
-			c.NormalSCounter = 0
+func (c *char) onExitField() {
+	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
+		prev := args[0].(int)
+		if prev == c.Index {
+			c.exitNightsoul()
 		}
-		return
+		return false
+	}, "xilonen-exit")
+}
+
+func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]int) error {
+	if a == action.ActionCharge && c.canUseNightsoul() {
+		return errors.New("xilonen cannot charge in nightsoul blessing")
 	}
-	c.NormalCounter++
-	if c.NormalCounter == c.NormalHitNum {
-		c.NormalCounter = 0
-	}
+	return c.Character.NextQueueItemIsValid(k, a, p)
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	if a == action.ActionSkill && c.StatusIsActive(skillKey) {
-		return true, action.NoFailure
+	// check if a1 window is active is on-field
+	if a == action.ActionSkill && c.StatusIsActive(skilRecastCD) {
+		return false, action.NoFailure
 	}
 	return c.Character.ActionReady(a, p)
-}
-
-func (c *char) Condition(fields []string) (any, error) {
-	switch fields[0] {
-	case "nightsoul-points":
-		if c.NightsoulPoint <= 0 {
-			return 0, nil
-		}
-		return c.NightsoulPoint, nil
-	default:
-		return c.Character.Condition(fields)
-	}
-}
-
-func (c *char) onExitField() {
-	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
-		if c.StatModIsActive(skillKey) {
-			c.skillEndRoutine()
-		}
-		c.Core.Log.NewEvent("Xilonen onExitField", glog.LogCharacterEvent, c.Index)
-		return false
-	}, "xilonen-exit")
 }
 
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	switch k {
 	case model.AnimationXingqiuN0StartDelay:
-		if c.StatusIsActive(skillKey) {
-			return 12
-		}
-		return 0
+		return 12
+	case model.AnimationYelanN0StartDelay:
+		return 4
 	default:
 		return c.Character.AnimationStartDelay(k)
 	}
 }
 
-func (c *char) CheckSoundscapes() {
-	chars := c.Core.Player.Chars()
-	i := 0
-	a1count := 0
-	for _, this := range chars {
-		if this.Index == c.Index {
-			continue
-		}
-		switch this.Base.Element {
-		case attributes.Pyro:
-			c.SoundScapeSlot[i] = attributes.Pyro
-			a1count++
-		case attributes.Hydro:
-			c.SoundScapeSlot[i] = attributes.Hydro
-			a1count++
-		case attributes.Cryo:
-			c.SoundScapeSlot[i] = attributes.Cryo
-			a1count++
-		case attributes.Electro:
-			c.SoundScapeSlot[i] = attributes.Electro
-			a1count++
-		default:
-			c.SoundScapeSlot[i] = attributes.Geo
-		}
-		c.isSlotActive[i] = false
-		i++
+func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
+	if c.canUseNightsoul() {
+		return 0
 	}
-	if a1count < 2 {
-		c.A1Mode = 1
-		c.Core.Log.NewEvent("Sample A1 is on mode 1", glog.LogCharacterEvent, c.Index)
-	} else {
-		c.A1Mode = 2
-		c.Core.Log.NewEvent("Sample A1 is on mode 2", glog.LogCharacterEvent, c.Index)
-	}
-	c.Core.Log.NewEvent("Xilonen Samples Init", glog.LogCharacterEvent, c.Index).
-		Write("Slot-0", c.SoundScapeSlot[0]).
-		Write("Slot-1", c.SoundScapeSlot[1]).
-		Write("Slot-2", c.SoundScapeSlot[2])
+	return c.Character.ActionStam(a, p)
 }
 
-func (c *char) ResetSoundscapes() {
-	for i := 0; i < 3; i++ {
-		if c.SoundScapeSlot[i] == attributes.Geo && c.Base.Cons < 2 {
-			c.isSlotActive[i] = false
-		} else {
-			c.isSlotActive[i] = false
-		}
+func (c *char) Condition(fields []string) (any, error) {
+	switch fields[0] {
+	case "nightsoul":
+		return c.nightsoulState.Condition(fields)
+	default:
+		return c.Character.Condition(fields)
 	}
-	c.Core.Log.NewEvent("Xilonen Samples Reset", glog.LogCharacterEvent, c.Index)
 }

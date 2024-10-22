@@ -28,6 +28,7 @@ const (
 	ICDTagTartagliaRiptideFlash
 	ICDTagWandererC6
 	ICDTagWandererA4
+	ICDTagXilonenSkate
 	ICDTagYanfeiFire
 	ICDTagYelanBreakthrough
 	ICDTagYelanBurst

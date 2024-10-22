@@ -1,50 +1,48 @@
 package xilonen
 
 import (
-	"errors"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
 var chargeFrames []int
 
-const chargeHitmark = 25
+const chargeHitmark = 23
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(50) // CA -> N1
+	chargeFrames = frames.InitAbilSlice(42)
+	chargeFrames[action.ActionBurst] = 40
+	chargeFrames[action.ActionDash] = chargeHitmark
+	chargeFrames[action.ActionJump] = chargeHitmark
+	chargeFrames[action.ActionSwap] = 27
+	chargeFrames[action.ActionWalk] = 42
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-
-	if c.StatusIsActive(skillKey) {
-		return action.Info{}, errors.New("you can't use charge while on nightsoul")
-	}
-
 	ai := combat.AttackInfo{
-		ActorIndex:         c.Index,
-		Abil:               "Charge",
-		AttackTag:          attacks.AttackTagExtra,
-		ICDTag:             attacks.ICDTagNormalAttack,
-		ICDGroup:           attacks.ICDGroupDefault,
-		StrikeType:         attacks.StrikeTypeSlash,
-		Element:            attributes.Physical,
-		Durability:         25,
-		Mult:               charge[c.TalentLvlAttack()],
-		HitlagFactor:       0.01,
-		CanBeDefenseHalted: true,
+		ActorIndex: c.Index,
+		Abil:       "Charge",
+		AttackTag:  attacks.AttackTagExtra,
+		ICDTag:     attacks.ICDTagNormalAttack,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeBlunt,
+		PoiseDMG:   120.0,
+		Element:    attributes.Physical,
+		Durability: 25,
+		Mult:       ca[c.TalentLvlAttack()],
 	}
+
 	c.Core.QueueAttack(
 		ai,
-		combat.NewBoxHit(
+		combat.NewBoxHitOnTarget(
 			c.Core.Combat.Player(),
-			c.Core.Combat.PrimaryTarget(),
-			nil,
-			3,
-			5,
+			geometry.Point{Y: -1.8},
+			2,
+			4.5,
 		),
 		chargeHitmark,
 		chargeHitmark,
@@ -53,7 +51,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(chargeFrames),
 		AnimationLength: chargeFrames[action.InvalidAction],
-		CanQueueAfter:   chargeFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   chargeHitmark,
 		State:           action.ChargeAttackState,
 	}, nil
 }
