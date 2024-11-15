@@ -42,6 +42,7 @@ var weaponNames = []string{
 	"aquasimulacra",
 	"aquilafavonia",
 	"ashgravendrinkinghorn",
+	"astralvulturescrimsonplumage",
 	"athousandfloatingdreams",
 	"balladoftheboundlessblue",
 	"balladofthefjords",
@@ -54,6 +55,7 @@ var weaponNames = []string{
 	"blackcliffwarbow",
 	"blacktassel",
 	"bloodtaintedgreatsword",
+	"calamityofeshu",
 	"calamityqueller",
 	"cashflowsupervision",
 	"chainbreaker",
@@ -92,6 +94,7 @@ var weaponNames = []string{
 	"finaleofthedeep",
 	"fleuvecendreferryman",
 	"fluteofezpitzal",
+	"flowerwreathedfeathers",
 	"flowingpurity",
 	"footprintoftherainbow",
 	"forestregalia",
@@ -223,6 +226,7 @@ var weaponNames = []string{
 	"wanderingevenstar",
 	"wastergreatsword",
 	"wavebreakersfin",
+	"waveridingwhirl",
 	"whiteblind",
 	"whiteirongreatsword",
 	"whitetassel",
@@ -244,6 +248,7 @@ const (
 	AquaSimulacra
 	AquilaFavonia
 	AshGravenDrinkingHorn
+	AstralVulturesCrimsonPlumage
 	AThousandFloatingDreams
 	BalladOfTheBoundlessBlue
 	BalladOfTheFjords
@@ -256,6 +261,7 @@ const (
 	BlackcliffWarbow
 	BlackTassel
 	BloodtaintedGreatsword
+	CalamityOfEshu
 	CalamityQueller
 	CashflowSupervision
 	ChainBreaker
@@ -294,6 +300,7 @@ const (
 	FinaleOfTheDeep
 	FleuveCendreFerryman
 	FluteOfEzpitzal
+	FlowerWreathedFeathers
 	FlowingPurity
 	FootprintOfTheRainbow
 	ForestRegalia
@@ -425,6 +432,7 @@ const (
 	WanderingEvenstar
 	WasterGreatsword
 	WavebreakersFin
+	WaveRidingWhirl
 	Whiteblind
 	WhiteIronGreatsword
 	WhiteTassel
