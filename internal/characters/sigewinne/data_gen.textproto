@@ -1,15 +1,15 @@
-id: 90000003
+id: 10000095
 key: "sigewinne"
 rarity: QUALITY_ORANGE
 body: BODY_LOLI
 region: ASSOC_TYPE_FONTAINE
 element: Water
 weapon_class: WEAPON_BOW
-icon_name: "UI_AvatarIcon_Ambor"
+icon_name: "UI_AvatarIcon_Sigewinne"
 stats: {
-   base_hp: 1039
-   base_atk: 15
-   base_def: 39
+   base_hp: 1039.1188
+   base_atk: 14.9891
+   base_def: 38.8895
    hp_curve: GROW_CURVE_HP_S5
    atk_curve: GROW_CURVE_ATTACK_S5
    def_cruve: GROW_CURVE_HP_S5
@@ -32,15 +32,15 @@ stats: {
       max_level: 40
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 891
+         value: 890.95044
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 33
+         value: 33.345
       }
       add_props: {
-         prop_type: FIGHT_PROP_HP_PERCENT
-         value: 13
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 12.850859
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -48,17 +48,17 @@ stats: {
    }
    promo_data: {
       max_level: 50
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1524.0555
+         value: 1523.9941
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 56.4465
+         value: 57.0375
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 22.2365
+         value: 21.981731
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -69,15 +69,15 @@ add_props: {
       max_level: 60
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2368.1889
+         value: 2368.0525
       }
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 87.7107
+         value: 88.6275
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 34.5527
+         value: 34.15623
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -88,15 +88,15 @@ add_props: {
       max_level: 70
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3001.2444
+         value: 3001.0962
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 111.1572
+         value: 112.32
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 43.7892
+         value: 43.287106
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -107,15 +107,15 @@ add_props: {
       max_level: 80
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3634.2999
+         value: 3634.14
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 134.6037
+         value: 136.0125
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 53.0257
+         value: 52.417976
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -126,15 +126,15 @@ add_props: {
       max_level: 90
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 4267.4445
+         value: 4267.1836
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 158.0535
+         value: 159.705
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 62.2635
+         value: 61.54885
       }
       add_props: {
          prop_type: FIGHT_PROP_HP_PERCENT
@@ -143,9 +143,9 @@ add_props: {
    }
 }
 skill_details: {
-   skill: 10262
-   burst: 10265
-   attack: 10261
+   skill: 10952
+   burst: 10955
+   attack: 10951
    burst_energy_cost: 70
 }
-name_text_hash_map: 1021947691
+name_text_hash_map: 781488962

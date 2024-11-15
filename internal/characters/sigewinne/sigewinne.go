@@ -2,11 +2,15 @@ package sigewinne
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
+	"github.com/genshinsim/gcsim/internal/template/sourcewaterdroplet"
 	"github.com/genshinsim/gcsim/pkg/core"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/model"
 )
 
 func init() {
@@ -15,11 +19,26 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	skillsize    int
-	c2skillsize  int
-	skillHitmark int
-	burstHitSrc  int
-	burstCounter int
+
+	// skill
+	skillAttackInfo combat.AttackInfo
+	skillSnapshot   combat.Snapshot
+
+	particleGenerated bool
+	lastSummonSrc     int
+	bubbleHitLimit    int
+	currentBubbleTier int
+	collectedHpDebt   float32
+
+	// burst
+	burstEarlyCancelled bool
+	tickAnimLength      int
+	burstMaxDuration    int
+	burstStartF         int
+	lastSwap            int
+
+	// cons
+	c2Shield *shd
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -28,27 +47,85 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 	c.EnergyMax = 70
 	c.NormalHitNum = normalHitNum
-	c.SkillCon = 3
 	c.BurstCon = 5
+	c.SkillCon = 3
+	c.HasArkhe = true
 
+	c.bubbleHitLimit = 5
+	c.burstMaxDuration = 241 - chargeBurstDur
 	w.Character = &c
 
 	return nil
 }
 
 func (c *char) Init() error {
-	c.onExitField()
-	c.skillbuff()
-	c.bolmanager()
-	c.a1Proc()
-	c.a4()
-	c.c6()
+	if c.Base.Ascension >= 1 {
+		c.a1()
+	}
+	if c.Base.Ascension >= 4 {
+		c.a4()
+	}
+
+	if c.Base.Cons >= 1 {
+		c.bubbleHitLimit += 3
+	}
+	if c.Base.Cons >= 4 {
+		c.burstMaxDuration = 425 - chargeBurstDur
+	}
+
+	c.bubbleTierDamageMod()
+	c.energyBondClearMod()
+	c.onSwap()
 	return nil
 }
 
-func (c *char) onExitField() {
-	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
-		c.DeleteStatus(burstkey)
+func (c *char) getSourcewaterDroplets() []*sourcewaterdroplet.Gadget {
+	player := c.Core.Combat.Player()
+
+	// Used Neuvillette's droplet tracking
+	// TODO: check if true for Sigewinne
+	segment := combat.NewCircleHitOnTargetFanAngle(player, nil, 14, 80)
+	rect := combat.NewBoxHitOnTarget(player, geometry.Point{Y: -7}, 8, 18)
+
+	droplets := make([]*sourcewaterdroplet.Gadget, 0)
+	for _, g := range c.Core.Combat.Gadgets() {
+		droplet, ok := g.(*sourcewaterdroplet.Gadget)
+		if !ok {
+			continue
+		}
+		if !droplet.IsWithinArea(rect) && !droplet.IsWithinArea(segment) {
+			continue
+		}
+		droplets = append(droplets, droplet)
+	}
+
+	return droplets
+}
+
+// used for early Burst cancel swap cd calculation
+func (c *char) onSwap() {
+	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
+		next := args[1].(int)
+		if next != c.Index {
+			return false
+		}
+		c.lastSwap = c.Core.F
 		return false
-	}, "sigewinne-exit")
+	}, "sigewinne-swap")
+}
+
+func (c *char) consumeDroplet(g *sourcewaterdroplet.Gadget) {
+	g.Kill()
+	c.ModifyHPDebtByAmount(c.MaxHP() * BoLPctPerDroplet)
+}
+
+func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
+	switch k {
+	case model.AnimationXingqiuN0StartDelay:
+		return 13
+	case model.AnimationYelanN0StartDelay:
+		return 5
+	default:
+		return c.Character.AnimationStartDelay(k)
+	}
 }

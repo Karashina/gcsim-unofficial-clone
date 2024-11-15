@@ -1,22 +1,35 @@
 package sigewinne
 
 import (
+	"fmt"
+
 	"github.com/genshinsim/gcsim/pkg/core/action"
+	"github.com/genshinsim/gcsim/pkg/core/glog"
+)
+
+const (
+	BoLPctPerDroplet = 0.1
 )
 
 func (c *char) Dash(p map[string]int) (action.Info, error) {
-	// if burst is active at time of dash
-	if c.StatusIsActive(burstkey) {
-		c.burstHitSrc = -1       // invalidate any other tasks
-		c.DeleteStatus(burstkey) // delete burst
+	c.burstEarlyCancelled = false
+	dropletsToPickup, ok := p["pickup_droplets"]
+	if !ok {
+		return c.Character.Dash(p)
 	}
-
-	count := 0
-	if p["pickup_droplets"] > 0 {
-		count = p["pickup_droplets"]
+	if dropletsToPickup == 0 {
+		return c.Character.Dash(p)
 	}
-	c.dropletPickUp(count)
+	droplets := c.getSourcewaterDroplets()
+	dropletsToPickup = min(dropletsToPickup, len(droplets))
 
-	// call default implementation to handle stamina
+	// TODO: additional delay if >2 droplets picked up
+	indices := c.Core.Combat.Rand.Perm(dropletsToPickup)
+	for _, ind := range indices {
+		g := droplets[ind]
+		c.consumeDroplet(g)
+	}
+	c.Core.Combat.Log.NewEvent(fmt.Sprint("Picked up ", dropletsToPickup, " droplets"), glog.LogCharacterEvent, c.Index)
+
 	return c.Character.Dash(p)
 }

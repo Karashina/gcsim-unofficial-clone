@@ -1,8 +1,8 @@
-id: 90002
+id: 11430
 key: "sturdybone"
 rarity: 4
 weapon_class: WEAPON_SWORD_ONE_HAND
-image_name: "UI_EquipIcon_Sword_Vorpal"
+image_name: "UI_EquipIcon_Sword_Umpakati"
 base_stats: {
    base_props: {
       prop_type: FIGHT_PROP_BASE_ATTACK
@@ -60,4 +60,4 @@ base_stats: {
       }
    }
 }
-name_text_hash_map: 800766043
+name_text_hash_map: 495182275

@@ -13,10 +13,11 @@ import (
 
 var aimedFrames [][]int
 
-var aimedHitmarks = []int{15, 86}
+var aimedHitmarks = []int{14, 86, 103}
 
 func init() {
-	aimedFrames = make([][]int, 2)
+	// outside of E status
+	aimedFrames = make([][]int, 3)
 
 	// Aimed Shot
 	aimedFrames[0] = frames.InitAbilSlice(23)
@@ -27,9 +28,17 @@ func init() {
 	aimedFrames[1] = frames.InitAbilSlice(94)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
+
+	// Fully-Charged Aimed Shot with Mini-Bubble
+	aimedFrames[2] = frames.InitAbilSlice(112)
+	aimedFrames[2][action.ActionDash] = aimedHitmarks[2]
+	aimedFrames[2][action.ActionJump] = aimedHitmarks[2]
 }
 
 func (c *char) Aimed(p map[string]int) (action.Info, error) {
+	if c.burstEarlyCancelled {
+		return action.Info{}, fmt.Errorf("%v: Cannot early cancel Super Saturated Syringing with Aimed shot", c.Base.Key)
+	}
 	hold, ok := p["hold"]
 	if !ok {
 		hold = attacks.AimParamLv1
@@ -37,6 +46,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	switch hold {
 	case attacks.AimParamPhys:
 	case attacks.AimParamLv1:
+	case attacks.AimParamLv2:
 	default:
 		return action.Info{}, fmt.Errorf("invalid hold param supplied, got %v", hold)
 	}
@@ -51,7 +61,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		Abil:                 "Fully-Charged Aimed Shot",
 		AttackTag:            attacks.AttackTagExtra,
 		ICDTag:               attacks.ICDTagExtraAttack,
-		ICDGroup:             attacks.ICDGroupDefault,
+		ICDGroup:             attacks.ICDGroupSigewinne,
 		StrikeType:           attacks.StrikeTypePierce,
 		Element:              attributes.Hydro,
 		Durability:           25,
@@ -67,12 +77,6 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		ai.Element = attributes.Physical
 		ai.Mult = aim[c.TalentLvlAttack()]
 	}
-	a := action.Info{
-		Frames:          frames.NewAbilFunc(aimedFrames[hold]),
-		AnimationLength: aimedFrames[hold][action.InvalidAction],
-		CanQueueAfter:   aimedHitmarks[hold],
-		State:           action.AimState,
-	}
 
 	c.Core.QueueAttack(
 		ai,
@@ -83,9 +87,41 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 			0.1,
 			1,
 		),
-		a.CanQueueAfter,
-		a.CanQueueAfter+travel,
+		aimedHitmarks[hold],
+		aimedHitmarks[hold]+travel,
 	)
 
-	return a, nil
+	if hold == attacks.AimParamLv2 {
+		aiMini := combat.AttackInfo{
+			ActorIndex:   c.Index,
+			Abil:         "Mini-Stration Bubble",
+			AttackTag:    attacks.AttackTagExtra,
+			ICDTag:       attacks.ICDTagExtraAttack,
+			ICDGroup:     attacks.ICDGroupSigewinne,
+			StrikeType:   attacks.StrikeTypeDefault,
+			Element:      attributes.Hydro,
+			Durability:   25,
+			Mult:         miniStrationBubbleDMG[c.TalentLvlAttack()],
+			HitlagFactor: 0.01,
+		}
+		c.Core.QueueAttack(
+			aiMini,
+			combat.NewBoxHit(
+				c.Core.Combat.Player(),
+				c.Core.Combat.PrimaryTarget(),
+				nil,
+				0.3,
+				0.3,
+			),
+			aimedHitmarks[hold]+1,
+			aimedHitmarks[hold]+1+7*travel,
+		)
+	}
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(aimedFrames[hold]),
+		AnimationLength: aimedFrames[hold][action.InvalidAction],
+		CanQueueAfter:   aimedHitmarks[hold],
+		State:           action.AimState,
+	}, nil
 }

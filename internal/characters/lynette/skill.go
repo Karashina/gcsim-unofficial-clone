@@ -89,7 +89,6 @@ func (c *char) skillPress() action.Info {
 	}, skillPressHitmark)
 
 	c.QueueCharTask(c.c6, skillPressC6Start)
-	c.AddStatus(weaponoutkey, 20*60, false)
 
 	c.SetCDWithDelay(action.ActionSkill, skillCD, skillPressCDStart)
 

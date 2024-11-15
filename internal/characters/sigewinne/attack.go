@@ -12,24 +12,27 @@ import (
 )
 
 var attackFrames [][]int
-var attackReleases = [][]int{{16}, {12}, {39}}
+var attackHitmarks = []int{12, 14, 38}
 
 const normalHitNum = 3
 
 func init() {
 	attackFrames = make([][]int, normalHitNum)
 
-	attackFrames[0] = frames.InitNormalCancelSlice(attackReleases[0][0], 26)
-	attackFrames[0][action.ActionDash] = 16
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 33) // N1 -> Walk
+	attackFrames[0][action.ActionAttack] = 20
 
-	attackFrames[1] = frames.InitNormalCancelSlice(attackReleases[1][0], 33)
-	attackFrames[1][action.ActionDash] = 12
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 40) // N2 -> Walk
+	attackFrames[1][action.ActionAttack] = 36
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackReleases[2][0], 84)
-	attackFrames[2][action.ActionDash] = 39
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 67) // N3 -> Walk
+	attackFrames[2][action.ActionAttack] = 82
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
+	if c.burstEarlyCancelled {
+		return action.Info{}, fmt.Errorf("%v: Cannot early cancel Super Saturated Syringing with Normal Attack", c.Base.Key)
+	}
 	travel, ok := p["travel"]
 	if !ok {
 		travel = 10
@@ -44,30 +47,27 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		StrikeType: attacks.StrikeTypePierce,
 		Element:    attributes.Physical,
 		Durability: 25,
+		Mult:       attack[c.NormalCounter][c.TalentLvlAttack()],
 	}
-
-	for i, mult := range attack[c.NormalCounter] {
-		ai.Mult = mult[c.TalentLvlAttack()]
-		c.Core.QueueAttack(
-			ai,
-			combat.NewBoxHit(
-				c.Core.Combat.Player(),
-				c.Core.Combat.PrimaryTarget(),
-				geometry.Point{Y: -0.5},
-				0.1,
-				1,
-			),
-			attackReleases[c.NormalCounter][i],
-			attackReleases[c.NormalCounter][i]+travel,
-		)
+	var ap combat.AttackPattern
+	if c.NormalCounter != 0 {
+		ap = combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1)
+	} else {
+		ap = combat.NewBoxHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), geometry.Point{Y: -0.5}, 0.1, 1)
 	}
+	c.Core.QueueAttack(
+		ai,
+		ap,
+		attackHitmarks[c.NormalCounter],
+		attackHitmarks[c.NormalCounter]+travel,
+	)
 
 	defer c.AdvanceNormalIndex()
 
 	return action.Info{
 		Frames:          frames.NewAttackFunc(c.Character, attackFrames),
 		AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],
-		CanQueueAfter:   attackReleases[c.NormalCounter][len(attackReleases[c.NormalCounter])-1],
+		CanQueueAfter:   attackHitmarks[c.NormalCounter],
 		State:           action.NormalAttackState,
 	}, nil
 }
