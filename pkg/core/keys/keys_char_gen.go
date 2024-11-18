@@ -20,6 +20,7 @@ const (
 	Bennett
 	Candace
 	Charlotte
+	Chasca
 	Chevreuse
 	Chiori
 	Chongyun
@@ -66,6 +67,7 @@ const (
 	Nilou
 	Ningguang
 	Noelle
+	Ororon
 	Qiqi
 	Raiden
 	Razor
@@ -150,6 +152,10 @@ func init() {
 	charNames[Charlotte] = "charlotte"
 	charPrettyName[Charlotte] = "Charlotte"
 	CharKeyToEle[Charlotte] = attributes.Cryo
+
+	charNames[Chasca] = "chasca"
+	charPrettyName[Chasca] = "Chasca"
+	CharKeyToEle[Chasca] = attributes.Anemo
 
 	charNames[Chevreuse] = "chevreuse"
 	charPrettyName[Chevreuse] = "Chevreuse"
@@ -334,6 +340,10 @@ func init() {
 	charNames[Noelle] = "noelle"
 	charPrettyName[Noelle] = "Noelle"
 	CharKeyToEle[Noelle] = attributes.Geo
+
+	charNames[Ororon] = "ororon"
+	charPrettyName[Ororon] = "Ororon"
+	CharKeyToEle[Ororon] = attributes.Electro
 
 	charNames[Qiqi] = "qiqi"
 	charPrettyName[Qiqi] = "Qiqi"
