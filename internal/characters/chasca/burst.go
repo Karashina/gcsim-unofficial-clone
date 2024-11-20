@@ -8,50 +8,53 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 )
 
-const burstHitmarks = 185 - 70
-
 var (
-	burstFrames []int
+	burstFrames         []int
+	burstInitialHitmark = 95
+	burstHitmarks       = []int{134, 158, 175, 180, 183, 191}
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(180) // charge
-	burstFrames[action.ActionAttack] = 167
-	burstFrames[action.ActionSkill] = 166
-	burstFrames[action.ActionDash] = 167
-	burstFrames[action.ActionJump] = 167
-	burstFrames[action.ActionWalk] = 167
-	burstFrames[action.ActionSwap] = 108
+	burstFrames = frames.InitAbilSlice(100)
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	travel, ok := p["travel"]
-	if !ok {
-		travel = 70
-	}
+
+	c.DeleteStatus(c4ICDKey)
 
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Boomsharka-laka",
+		Abil:           "Galesplitting Soulseeker Shell DMG (Q)",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		ICDTag:         attacks.ICDTagNone,
 		ICDGroup:       attacks.ICDGroupDefault,
 		StrikeType:     attacks.StrikeTypeDefault,
-		Element:        attributes.Hydro,
+		Element:        attributes.Anemo,
 		Durability:     25,
-		FlatDmg:        burst[c.TalentLvlBurst()] * c.MaxHP(),
+		Mult:           burst[c.TalentLvlBurst()],
 	}
-	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5)
+	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 6)
 
-	c.QueueCharTask(func() {
-		// the A4 stacks can change during the burst
-		ai.FlatDmg += c.a4amount()
-		c.Core.QueueAttack(ai, burstArea, 0, 0)
-	}, burstHitmarks+travel)
+	c.Core.QueueAttack(ai, burstArea, burstInitialHitmark, burstInitialHitmark)
+
+	for i := 0; i < 6; i++ {
+		if i < min(2, c.typeCount) {
+			ai.Abil = "Radiant Soulseeker Shell DMG (Q)"
+			ai.ICDTag = attacks.ICDTagElementalBurst
+			ai.ICDGroup = attacks.ICDGroupChascaConvertedShell
+			ai.Mult = radiantsoulseeker[c.TalentLvlBurst()]
+		} else {
+			ai.Abil = "Soulseeker Shell DMG (Q)"
+			ai.ICDTag = attacks.ICDTagElementalBurst
+			ai.ICDGroup = attacks.ICDGroupChascaConvertedShell
+			ai.Mult = soulseeker[c.TalentLvlBurst()]
+		}
+		c.Core.QueueAttack(ai, combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key()), burstHitmarks[i], burstHitmarks[i], c.c4CB)
+	}
 
 	c.SetCDWithDelay(action.ActionBurst, 15*60, 0)
-	c.ConsumeEnergy(11)
+	c.ConsumeEnergy(4)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),

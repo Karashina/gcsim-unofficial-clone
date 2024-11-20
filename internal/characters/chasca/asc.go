@@ -1,38 +1,63 @@
 package chasca
 
 import (
+	"github.com/genshinsim/gcsim/pkg/core/attacks"
+	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-const a1Delay = 20
-
-func (c *char) a1cb() combat.AttackCBFunc {
+func (c *char) a1() {
 	if c.Base.Ascension < 1 {
-		return nil
+		return
 	}
-	done := false
-	return func(a combat.AttackCB) {
-		if c.a1Count >= 2 {
-			return
+
+	c.a1Prob = 0
+	a4buff := 0.0
+	c1mod := 0.0
+
+	if c.Base.Cons >= 1 {
+		c1mod = 0.333
+	}
+
+	switch c.typeCount {
+	case 0:
+		c.a1Prob = 0 + c1mod
+		if c.Base.Cons >= 2 {
+			a4buff = 0.15
 		}
-		if done {
-			return
+	case 1:
+		c.a1Prob = 0.33 + c1mod
+		a4buff = 0.15
+		if c.Base.Cons >= 2 {
+			a4buff = 0.35
 		}
-		if a.Target.Type() != targets.TargettableEnemy {
-			return
+	case 2:
+		c.a1Prob = 0.667 + c1mod
+		a4buff = 0.35
+		if c.Base.Cons >= 2 {
+			a4buff = 0.65
 		}
-		done = true
-		c.a1Count++
-		c.QueueCharTask(func() {
-			if c.nightsoulState.HasBlessing() {
-				c.nightsoulState.GeneratePoints(20)
-				c.c2puffer()
-				c.c4puffer()
+	case 3:
+		c.a1Prob = 1
+		a4buff = 0.65
+	default:
+		c.a1Prob = 0
+	}
+
+	m := make([]float64, attributes.EndStatType)
+	c.AddAttackMod(character.AttackMod{
+		Base: modifier.NewBaseWithHitlag("Bullet Trick (A1)", -1),
+		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
+			if atk.Info.Abil != "Shining Shadowhunt Shell DMG (E)" {
+				return nil, false
 			}
-		}, a1Delay)
-	}
+			m[attributes.DmgP] = a4buff
+			return m, true
+		},
+	})
 }
 
 func (c *char) a4() {
@@ -40,15 +65,32 @@ func (c *char) a4() {
 		return
 	}
 	c.Core.Events.Subscribe(event.OnNightsoulBurst, func(args ...interface{}) bool {
-		c.a4Stacks = min(c.a4Stacks+1, 3)
+		ai := combat.AttackInfo{
+			ActorIndex:     c.Index,
+			Abil:           "Burning Shadowhunt Shot (A4)",
+			AttackTag:      attacks.AttackTagExtra,
+			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+			ICDTag:         attacks.ICDTagShadowhuntShell,
+			ICDGroup:       attacks.ICDGroupShadowhuntShell,
+			StrikeType:     attacks.StrikeTypeDefault,
+			Mult:           shadowhunt[c.TalentLvlSkill()] * 1.5,
+			Element:        attributes.Anemo,
+			Durability:     25,
+		}
+
+		if c.typeCount >= 1 {
+			ai.Abil = "Converted Burning Shadowhunt Shot (A4)"
+			ai.Mult = shiningshadowhunt[c.TalentLvlSkill()] * 1.5
+			ai.ICDTag = attacks.ICDTagNone
+			ai.ICDGroup = attacks.ICDGroupDefault
+		}
+
+		c.Core.QueueAttack(
+			ai,
+			combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key()),
+			37,
+			37,
+		)
 		return false
-	}, "maulani-a4")
-}
-func (c *char) a4amount() float64 {
-	if c.Base.Ascension < 1 {
-		return 0.0
-	}
-	s := c.a4Stacks
-	c.a4Stacks = 0
-	return 0.15 * float64(s) * c.MaxHP()
+	}, "chasca-a4")
 }
