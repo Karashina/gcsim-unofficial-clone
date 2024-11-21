@@ -38,12 +38,31 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c.Core.QueueAttack(ai, burstArea, burstInitialHitmark, burstInitialHitmark)
 
+	elemcount := len(c.ElementSlot)
+	elementUsage := make(map[attributes.Element]int)
+
 	for i := 0; i < 6; i++ {
-		if i < min(2, c.typeCount) {
+		if elemcount > 0 {
 			ai.Abil = "Radiant Soulseeker Shell DMG (Q)"
 			ai.ICDTag = attacks.ICDTagElementalBurst
 			ai.ICDGroup = attacks.ICDGroupChascaConvertedShell
 			ai.Mult = radiantsoulseeker[c.TalentLvlBurst()]
+
+			var selectedElement attributes.Element
+			found := false
+			for attempts := 0; attempts < elemcount*10; attempts++ {
+				selectedElement = c.ElementSlot[c.Core.Rand.Intn(len(c.ElementSlot))]
+				if elementUsage[selectedElement] < 2 {
+					found = true
+					break
+				}
+			}
+			if !found {
+				elemcount = 0
+				break
+			}
+			ai.Element = selectedElement
+			elementUsage[selectedElement]++
 		} else {
 			ai.Abil = "Soulseeker Shell DMG (Q)"
 			ai.ICDTag = attacks.ICDTagElementalBurst

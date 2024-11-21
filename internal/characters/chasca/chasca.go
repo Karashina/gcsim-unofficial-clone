@@ -20,10 +20,12 @@ func init() {
 
 type char struct {
 	*tmpl.Character
+	lastSwap       int
 	nightsoulState *nightsoul.State
 	nightsoulSrc   int
 	ElementSlot    []attributes.Element
 	Shells         []attributes.Element
+	loadednum      int
 	typeCount      int
 	anemoCount     int
 	anemoremaining int
@@ -56,7 +58,21 @@ func (c *char) Init() error {
 	c.a1()
 	c.a4()
 	c.c6CDbuff()
+	c.onSwap()
 	return nil
+}
+
+// used for early CA cancel swap cd calculation
+func (c *char) onSwap() {
+	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
+		// do nothing if next char isn't chasca
+		next := args[1].(int)
+		if next != c.Index {
+			return false
+		}
+		c.lastSwap = c.Core.F
+		return false
+	}, "chasca-swap")
 }
 
 func (c *char) Condition(fields []string) (any, error) {
@@ -131,6 +147,7 @@ func (c *char) CheckShellElement() {
 			}
 			electroCount++
 		default:
+			c.ElementSlot[i] = attributes.Anemo
 			c.anemoCount++
 		}
 		i++
@@ -139,4 +156,15 @@ func (c *char) CheckShellElement() {
 		Write("Slot-0", c.ElementSlot[0]).
 		Write("Slot-1", c.ElementSlot[1]).
 		Write("Slot-2", c.ElementSlot[2])
+	c.ElementSlot = removeAnemoElement(c.ElementSlot)
+}
+
+func removeAnemoElement(elements []attributes.Element) []attributes.Element {
+	var result []attributes.Element
+	for _, element := range elements {
+		if element != attributes.Anemo {
+			result = append(result, element)
+		}
+	}
+	return result
 }

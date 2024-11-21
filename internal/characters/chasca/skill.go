@@ -26,8 +26,8 @@ const (
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(13)
-	skillFrames[action.ActionAttack] = 13
+	skillFrames = frames.InitAbilSlice(19)
+	skillFrames[action.ActionAim] = 19
 
 	skillCancelFrames = frames.InitAbilSlice(46)
 }

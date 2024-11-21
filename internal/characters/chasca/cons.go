@@ -111,3 +111,10 @@ func (c *char) c6CDbuff() {
 		},
 	})
 }
+
+func (c *char) removec6() {
+	if c.Base.Cons < 6 {
+		return
+	}
+	c.DeleteStatus(c6Key)
+}
