@@ -8,7 +8,12 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 )
 
-const burstHitmarks = 185 - 70
+const (
+	burstInitialHitmarks    = 41
+	burstDoTInitialHitmarks = 63
+	burstDoTInterval        = 59
+	burstDoTIntervalC4      = 39
+)
 
 var (
 	burstFrames []int
@@ -25,33 +30,54 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	travel, ok := p["travel"]
-	if !ok {
-		travel = 70
-	}
 
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Boomsharka-laka",
+		Abil:           "Dark Voices Echo: Ritual DMG (Q)",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		ICDTag:         attacks.ICDTagNone,
 		ICDGroup:       attacks.ICDGroupDefault,
 		StrikeType:     attacks.StrikeTypeDefault,
-		Element:        attributes.Hydro,
+		Element:        attributes.Electro,
 		Durability:     25,
-		FlatDmg:        burst[c.TalentLvlBurst()] * c.MaxHP(),
+		Mult:           burst[c.TalentLvlBurst()],
 	}
-	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5)
+	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 7)
+	c.Core.QueueAttack(ai, burstArea, burstInitialHitmarks, burstInitialHitmarks)
 
-	c.QueueCharTask(func() {
-		// the A4 stacks can change during the burst
-		ai.FlatDmg += c.a4amount()
-		c.Core.QueueAttack(ai, burstArea, 0, 0)
-	}, burstHitmarks+travel)
+	aidot := combat.AttackInfo{
+		ActorIndex:     c.Index,
+		Abil:           "Dark Voices Echo: Soundwave Collision DMG (Q)",
+		AttackTag:      attacks.AttackTagElementalBurst,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:         attacks.ICDTagElementalBurst,
+		ICDGroup:       attacks.ICDGroupDoriBurst,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Electro,
+		Durability:     25,
+		Mult:           burst[c.TalentLvlBurst()],
+	}
 
+	bursthitcount := 9
+	interval := burstDoTInterval
+	if c.Base.Cons >= 4 {
+		bursthitcount = 11
+		interval = burstDoTIntervalC4
+	}
+	for i := 0; i < bursthitcount; i++ {
+		hitmark := burstDoTInitialHitmarks + interval*i
+		c.QueueCharTask(func() {
+			c.Core.QueueAttack(aidot, burstArea, 0, 0)
+		}, hitmark)
+	}
+
+	c.c2Init()
+	c.c6()
 	c.SetCDWithDelay(action.ActionBurst, 15*60, 0)
-	c.ConsumeEnergy(11)
+	c.ConsumeEnergy(7)
+
+	c.QueueCharTask(c.c4Energy, 9)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
@@ -59,4 +85,10 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
 		State:           action.BurstState,
 	}, nil
+}
+
+func (c *char) c4Energy() {
+	if c.Base.Cons >= 4 {
+		c.AddEnergy("ororon-c4", 8)
+	}
 }
