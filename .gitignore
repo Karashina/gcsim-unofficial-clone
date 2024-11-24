@@ -24,6 +24,7 @@ go.work
 # gcsim
 backend/
 pipeline/
+containers/
 cmd/
 protos/
 scripts/
