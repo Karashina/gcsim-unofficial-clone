@@ -56,7 +56,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		StrikeType:     attacks.StrikeTypeDefault,
 		Element:        attributes.Electro,
 		Durability:     25,
-		Mult:           burst[c.TalentLvlBurst()],
+		Mult:           burstdot[c.TalentLvlBurst()],
 	}
 
 	bursthitcount := 9
