@@ -31,7 +31,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	w := &Weapon{}
 	r := p.Refine
 
-	dmgpers := 0.06 + 0*float64(r) //refine placeholder
+	dmgpers := 0.45 + 0.15*float64(r) //refine placeholder
 
 	m := make([]float64, attributes.EndStatType)
 

@@ -55,7 +55,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		char.AddStatus(icdKey, 15*60, true)
 
 		mHP := make([]float64, attributes.EndStatType)
-		mHP[attributes.HPP] = 0.2 + float64(r)*0 + (0.12+float64(r)*0)*float64(w.counter) //refine placeholder
+		mHP[attributes.HPP] = 0.15 + float64(r)*0.05 + (0.09+float64(r)*0.03)*float64(w.counter) //refine placeholder
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBase("waveridingwhirl-hp%", 10*60),
 			AffectedStat: attributes.HPP,

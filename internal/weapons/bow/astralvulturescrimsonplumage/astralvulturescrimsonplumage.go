@@ -42,11 +42,11 @@ func (w *Weapon) Init() error {
 		ca[attributes.DmgP] = 0.0
 		burst[attributes.DmgP] = 0.0
 	case 1:
-		ca[attributes.DmgP] = 0.2 + 0*w.r    //refine placeholder
-		burst[attributes.DmgP] = 0.1 + 0*w.r //refine placeholder
+		ca[attributes.DmgP] = 0.15 + 0.05*w.r      //refine placeholder
+		burst[attributes.DmgP] = 0.075 + 0.025*w.r //refine placeholder
 	case 2:
-		ca[attributes.DmgP] = 0.48 + 0*w.r    //refine placeholder
-		burst[attributes.DmgP] = 0.24 + 0*w.r //refine placeholder
+		ca[attributes.DmgP] = 0.36 + 0.12*w.r    //refine placeholder
+		burst[attributes.DmgP] = 0.18 + 0.06*w.r //refine placeholder
 	default:
 		ca[attributes.DmgP] = 0.0
 		burst[attributes.DmgP] = 0.0
@@ -82,7 +82,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}
 
 	atkp := make([]float64, attributes.EndStatType)
-	atkp[attributes.ATKP] = 0.24 + 0*w.r //refine placeholder
+	atkp[attributes.ATKP] = 0.18 + 0.06*w.r //refine placeholder
 
 	for i := event.OnSwirlHydro; i <= event.OnSwirlPyro; i++ {
 		c.Events.Subscribe(i, func(args ...interface{}) bool {
