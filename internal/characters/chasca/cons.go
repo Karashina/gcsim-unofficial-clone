@@ -46,8 +46,8 @@ func (c *char) c2CB(a combat.AttackCB) {
 	c.Core.QueueAttack(
 		ai,
 		combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key()),
-		37,
-		37,
+		0,
+		0,
 	)
 
 	c.AddStatus(c2ICDKey, particleICD, true)
@@ -85,8 +85,8 @@ func (c *char) c4CB(a combat.AttackCB) {
 	c.Core.QueueAttack(
 		ai,
 		combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key()),
-		37,
-		37,
+		0,
+		0,
 	)
 
 	c.AddStatus(c4ICDKey, particleICD, true)
