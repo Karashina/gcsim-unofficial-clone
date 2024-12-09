@@ -31,8 +31,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	r := p.Refine
 
 	m := make([]float64, attributes.EndStatType)
-	m[attributes.CR] = 0.08 + 0*float64(r)     //refine placeholder
-	m[attributes.DmgP] = 0.20 + 0.0*float64(r) //refine placeholder
+	m[attributes.CR] = 0.06 + 0.02*float64(r)     //refine placeholder
+	m[attributes.DmgP] = 0.15 + 0.05*float64(r) //refine placeholder
 	char.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("calamityofeshu", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
