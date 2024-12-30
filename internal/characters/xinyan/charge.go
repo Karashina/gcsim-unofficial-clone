@@ -59,7 +59,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 func (c *char) ChargeHold(duration int) action.Info {
 	c6Bonus := 0.0
 	if c.Base.Cons >= 6 {
-		c6Bonus = c.TotalDef() * 0.5
+		c6Bonus = c.TotalDef(false) * 0.5
 	}
 
 	ai := combat.AttackInfo{
@@ -113,7 +113,7 @@ func (c *char) ChargeHold(duration int) action.Info {
 func (c *char) ChargePress() action.Info {
 	c6Bonus := 0.0
 	if c.Base.Cons >= 6 {
-		c6Bonus = c.TotalDef() * 0.5
+		c6Bonus = c.TotalDef(false) * 0.5
 	}
 
 	ai := combat.AttackInfo{

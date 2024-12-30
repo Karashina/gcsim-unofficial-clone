@@ -31,6 +31,6 @@ func (c *char) a4() {
 		return
 	}
 	if c.Base.Ascension >= 4 {
-		c.a4flat = c.TotalDef() * 0.2
+		c.a4flat = c.TotalDef(false) * 0.2
 	}
 }

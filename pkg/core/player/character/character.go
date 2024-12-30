@@ -13,7 +13,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/task"
 	"github.com/genshinsim/gcsim/pkg/model"
 	"github.com/genshinsim/gcsim/pkg/modifier"
-	"github.com/genshinsim/gcsim/pkg/queue"
 )
 
 type Character interface {
@@ -90,15 +89,15 @@ type CharWrapper struct {
 
 	// base characteristics
 	HasNightsoul bool
-	Base      info.CharacterBase
-	Weapon    info.WeaponProfile
-	Talents   info.TalentProfile
-	CharZone  info.ZoneType
-	CharBody  info.BodyType
-	NormalCon int
-	SkillCon  int
-	BurstCon  int
-	HasArkhe  bool
+	Base         info.CharacterBase
+	Weapon       info.WeaponProfile
+	Talents      info.TalentProfile
+	CharZone     info.ZoneType
+	CharBody     info.BodyType
+	NormalCon    int
+	SkillCon     int
+	BurstCon     int
+	HasArkhe     bool
 
 	Equip struct {
 		Weapon info.Weapon
