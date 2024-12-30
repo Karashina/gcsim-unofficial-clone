@@ -12,58 +12,60 @@ import (
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-const (
-	icdKey = "waveridingwhirl-icd"
-)
-
 func init() {
-	core.RegisterWeaponFunc(keys.WaveRidingWhirl, NewWeapon)
+	core.RegisterWeaponFunc(keys.WaveridingWhirl, NewWeapon)
 }
 
 type Weapon struct {
-	Index   int
-	core    *core.Core
-	counter int
+	Index int
 }
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
+
 func (w *Weapon) Init() error {
-	w.counter = 0
-	for _, x := range w.core.Player.Chars() {
-		if x.Base.Element == attributes.Hydro {
-			w.counter++
-		}
-	}
-
-	w.counter = min(w.counter, 2)
-
 	return nil
 }
 
+const (
+	buffICD = "waveridingwhirl-icd"
+	ICDDur  = 15 * 60
+	buffDur = 10 * 60
+	buffKey = "waveridingwhirl-buff"
+)
+
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
-	r := p.Refine
+	r := float64(p.Refine)
+
+	stacks := 0
+	val := make([]float64, attributes.EndStatType)
+
+	c.Events.Subscribe(event.OnInitialize, func(args ...interface{}) bool {
+		for _, char := range c.Player.Chars() {
+			if char.Base.Element == attributes.Hydro {
+				stacks++
+			}
+		}
+		val[attributes.HPP] = (0.15 + 0.05*r) + (0.09+0.03*r)*float64(min(2, stacks))
+		return true
+	}, fmt.Sprintf("waveridingwhirl-%v", char.Base.Key.String()))
 
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		if char.StatusIsActive(icdKey) {
+		if char.StatusIsActive(buffICD) {
 			return false
 		}
+		char.AddStatus(buffICD, ICDDur, true)
 
-		char.AddStatus(icdKey, 15*60, true)
-
-		mHP := make([]float64, attributes.EndStatType)
-		mHP[attributes.HPP] = 0.15 + float64(r)*0.05 + (0.09+float64(r)*0.03)*float64(w.counter) //refine placeholder
 		char.AddStatMod(character.StatMod{
-			Base:         modifier.NewBase("waveridingwhirl-hp%", 10*60),
+			Base:         modifier.NewBaseWithHitlag(buffKey, buffDur),
 			AffectedStat: attributes.HPP,
 			Amount: func() ([]float64, bool) {
-				return mHP, true
+				return val, true
 			},
 		})
-
 		return false
 	}, fmt.Sprintf("waveridingwhirl-skill-%v", char.Base.Key.String()))
 

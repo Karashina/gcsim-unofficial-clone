@@ -1,11 +1,12 @@
-id: 90003
+id: 14430
 key: "waveridingwhirl"
 rarity: 4
 weapon_class: WEAPON_CATALYST
-image_name: "UI_EquipIcon_Catalyst_Outlaw"
+image_name: "UI_EquipIcon_Catalyst_Umpakati"
 base_stats: {
    base_props: {
       prop_type: FIGHT_PROP_BASE_ATTACK
+      initial_value: 41.0671
       curve: GROW_CURVE_ATTACK_204
    }
    base_props: {
@@ -59,4 +60,4 @@ base_stats: {
       }
    }
 }
-name_text_hash_map: 2474354867
+name_text_hash_map: 1445287979

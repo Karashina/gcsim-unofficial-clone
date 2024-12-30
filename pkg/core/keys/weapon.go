@@ -82,7 +82,7 @@ var weaponNames = []string{
 	"everlastingmoonglow",
 	"eyeofperception",
 	"fadingtwilight",
-	"fangofthemountainking",
+	"fangofthemontainking",
 	"favoniuscodex",
 	"favoniusgreatsword",
 	"favoniuslance",
@@ -432,7 +432,7 @@ const (
 	WanderingEvenstar
 	WasterGreatsword
 	WavebreakersFin
-	WaveRidingWhirl
+	WaveridingWhirl
 	Whiteblind
 	WhiteIronGreatsword
 	WhiteTassel

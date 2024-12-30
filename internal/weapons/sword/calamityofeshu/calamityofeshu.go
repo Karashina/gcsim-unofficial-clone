@@ -22,27 +22,23 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// While character is protected by a shield,
-// DMG dealt by Normal and Charged Attacks is increased by 20%,
-// and Normal and Charged Attacks CRIT Rate is increased by 8%.
-
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
-	r := p.Refine
+	r := float64(p.Refine)
 
 	m := make([]float64, attributes.EndStatType)
-	m[attributes.CR] = 0.06 + 0.02*float64(r)     //refine placeholder
-	m[attributes.DmgP] = 0.15 + 0.05*float64(r) //refine placeholder
+	m[attributes.DmgP] = 0.15 + 0.05*r
+	m[attributes.CR] = 0.06 + 0.02*r
 	char.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("calamityofeshu", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			if c.Player.Shields.CharacterIsShielded(char.Index, c.Player.Active()) {
-				switch atk.Info.AttackTag {
-				case attacks.AttackTagNormal, attacks.AttackTagExtra:
-					return m, true
-				}
+			if !c.Player.Shields.CharacterIsShielded(char.Index, c.Player.Active()) {
+				return nil, false
 			}
-			return nil, false
+			if atk.Info.AttackTag != attacks.AttackTagNormal && atk.Info.AttackTag != attacks.AttackTagExtra {
+				return nil, false
+			}
+			return m, true
 		},
 	})
 

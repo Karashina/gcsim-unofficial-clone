@@ -31,44 +31,28 @@ func (w *Weapon) Init() error {
 			counter++
 		}
 	}
+	if counter == 0 {
+		return nil
+	}
 
-	counter = min(counter, 2)
-
-	ca := make([]float64, attributes.EndStatType)
-	burst := make([]float64, attributes.EndStatType)
-
-	switch counter {
-	case 0:
-		ca[attributes.DmgP] = 0.0
-		burst[attributes.DmgP] = 0.0
-	case 1:
-		ca[attributes.DmgP] = 0.15 + 0.05*w.r      //refine placeholder
-		burst[attributes.DmgP] = 0.075 + 0.025*w.r //refine placeholder
-	case 2:
-		ca[attributes.DmgP] = 0.36 + 0.12*w.r    //refine placeholder
-		burst[attributes.DmgP] = 0.18 + 0.06*w.r //refine placeholder
-	default:
-		ca[attributes.DmgP] = 0.0
-		burst[attributes.DmgP] = 0.0
+	m := make([]float64, attributes.EndStatType)
+	dmg := 0.025*w.r + 0.075
+	if counter >= 2 {
+		dmg *= 2.4
 	}
 
 	w.char.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBase("astralvulturescrimsonplumage-ca", -1),
+		Base: modifier.NewBase("astralvulturescrimsonplumage-dmg", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			if atk.Info.AttackTag != attacks.AttackTagExtra {
+			switch atk.Info.AttackTag {
+			case attacks.AttackTagExtra:
+				m[attributes.DmgP] = dmg * 2
+			case attacks.AttackTagElementalBurst:
+				m[attributes.DmgP] = dmg
+			default:
 				return nil, false
 			}
-			return ca, true
-		},
-	})
-
-	w.char.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBase("astralvulturescrimsonplumage-burst", -1),
-		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			if atk.Info.AttackTag != attacks.AttackTagElementalBurst {
-				return nil, false
-			}
-			return burst, true
+			return m, true
 		},
 	})
 
@@ -79,15 +63,19 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	w := &Weapon{
 		core: c,
 		char: char,
+		r:    float64(p.Refine),
 	}
 
 	atkp := make([]float64, attributes.EndStatType)
-	atkp[attributes.ATKP] = 0.18 + 0.06*w.r //refine placeholder
+	atkp[attributes.ATKP] = 0.06*float64(p.Refine) + 0.18
 
 	for i := event.OnSwirlHydro; i <= event.OnSwirlPyro; i++ {
 		c.Events.Subscribe(i, func(args ...interface{}) bool {
 			atk := args[1].(*combat.AttackEvent)
 			if atk.Info.ActorIndex != char.Index {
+				return false
+			}
+			if c.Player.Active() != char.Index {
 				return false
 			}
 			char.AddStatMod(character.StatMod{

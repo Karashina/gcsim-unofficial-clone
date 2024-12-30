@@ -3,9 +3,6 @@ package aloy
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/hacks"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
@@ -19,7 +16,6 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	wp            *ReactableWeapon
 	coilICDExpiry int
 	lastFieldExit int
 	// coil related
@@ -46,7 +42,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 func (c *char) Init() error {
 	c.coilMod()
 	c.onExitField()
-	c.WeaponReactionHandler()
+
 	return nil
 }
 
@@ -57,37 +53,4 @@ func (c *char) Condition(fields []string) (any, error) {
 	default:
 		return c.Character.Condition(fields)
 	}
-}
-
-func (c *char) WeaponReactionHandler() {
-	c.Core.Events.Subscribe(event.OnInitialize, func(args ...interface{}) bool {
-		c.wp = c.newReactableWeapons()
-		return false
-	}, "aloy-weaponreactionhandler-init")
-
-	c.Core.Events.Subscribe(event.OnInfusion, func(args ...interface{}) bool {
-		index := args[0].(int)
-		ele := args[1].(attributes.Element)
-		dur := args[2].(int)
-		if c.Core.Player.ActiveChar().Index != c.Index {
-			return false
-		}
-		if index != c.Index {
-			return false
-		}
-		infai := combat.AttackInfo{
-			ActorIndex: index,
-			Abil:       "Weapon Infusion",
-			Element:    ele,
-			Durability: 25,
-		}
-		infae := combat.AttackEvent{
-			Info:        infai,
-			Pattern:     combat.NewSingleTargetHit(0),
-			SourceFrame: c.Core.F,
-		}
-		c.wp.weaponreact(&infae)
-		c.QueueCharTask(c.wp.resetgauge, dur)
-		return false
-	}, "aloy-infusion")
 }
