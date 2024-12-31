@@ -43,6 +43,7 @@ var weaponNames = []string{
 	"aquilafavonia",
 	"ashgravendrinkinghorn",
 	"astralvulturescrimsonplumage",
+	"athousandblazingsuns",
 	"athousandfloatingdreams",
 	"balladoftheboundlessblue",
 	"balladofthefjords",
@@ -194,6 +195,7 @@ var weaponNames = []string{
 	"splendoroftranquilwaters",
 	"staffofhoma",
 	"staffofthescarletsands",
+	"starcallerswatch",
 	"sturdybone",
 	"summitshaper",
 	"surfsup",
@@ -249,6 +251,7 @@ const (
 	AquilaFavonia
 	AshGravenDrinkingHorn
 	AstralVulturesCrimsonPlumage
+	AThousandBlazingSuns
 	AThousandFloatingDreams
 	BalladOfTheBoundlessBlue
 	BalladOfTheFjords
@@ -400,6 +403,7 @@ const (
 	SplendorOfTranquilWaters
 	StaffOfHoma
 	StaffOfTheScarletSands
+	StarcallersWatch
 	SturdyBone
 	SummitShaper
 	SurfsUp
