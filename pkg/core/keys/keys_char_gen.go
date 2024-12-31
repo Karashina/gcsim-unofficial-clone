@@ -24,6 +24,7 @@ const (
 	Chevreuse
 	Chiori
 	Chongyun
+	Citlali
 	Clorinde
 	Collei
 	Cyno
@@ -58,6 +59,7 @@ const (
 	Lisa
 	Lynette
 	Lyney
+	Mavuika
 	Mika
 	Mona
 	Mualani
