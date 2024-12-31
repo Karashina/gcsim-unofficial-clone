@@ -1,5 +1,5 @@
 package_name: kachina
-genshin_id: 90000004
+genshin_id: 90000000
 key: kachina
 action_param_keys:
   skill:

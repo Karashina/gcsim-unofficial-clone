@@ -1,5 +1,5 @@
 package_name: chasca
-genshin_id: 90000000
+genshin_id: 90000002
 key: chasca
 action_param_keys:
   attack:

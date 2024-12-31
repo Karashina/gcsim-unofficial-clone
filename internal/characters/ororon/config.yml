@@ -1,5 +1,5 @@
 package_name: ororon
-genshin_id: 90000001
+genshin_id: 90000003
 key: ororon
 action_param_keys:
     attack:
