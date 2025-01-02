@@ -5,7 +5,6 @@ import (
 
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
@@ -17,9 +16,13 @@ import (
 )
 
 const (
-	SkillIcdKey  = "atbs-skill-icd"
-	AttackIcdKey = "atbs-attack-icd"
-	DurKey       = "atbs-skill-duration"
+	BuffICDKey   = "athousandblazingsuns-buff-icd"
+	ExtendICDKey = "athousandblazingsuns-extend-icd"
+	BuffKey      = "athousandblazingsuns-buff"
+	BuffICDDur   = 10 * 60
+	ExtendICDDur = 60
+	BuffDur      = 6 * 60
+	ExtendDur    = 2 * 60
 )
 
 func init() {
@@ -28,126 +31,112 @@ func init() {
 
 type Weapon struct {
 	Index int
+	core  *core.Core
 	char  *character.CharWrapper
+
+	extended int
+	tickSrc  int
 }
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
+func (w *Weapon) extendOffField(src int) func() {
+	const tickInterval = 60 * .3
+	return func() {
+		if src != w.tickSrc {
+			return
+		}
+		if w.char.StatusIsActive(nightsoul.NightsoulBlessingStatus) {
+			active := w.char.ExtendStatus(BuffKey, tickInterval)
+			if !active {
+				return
+			}
+		}
+		w.core.Tasks.Add(w.extendOffField(src), tickInterval)
+	}
+}
+
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
+		core: c,
 		char: char,
 	}
-	r := p.Refine
+	r := float64(p.Refine)
 
-	c.Events.Subscribe(event.OnActionExec, func(args ...interface{}) bool {
-		chr := args[0].(int)
-		act := args[1].(action.Action)
-
-		if chr != w.char.Index {
-			return false
-		}
-
-		if act != action.ActionSkill && act != action.ActionBurst {
-			return false
-		}
-
-		if char.StatusIsActive(SkillIcdKey) {
-			return false
-		}
-
-		char.AddStatus(SkillIcdKey, 10*60, false)
-		char.AddStatus(DurKey, 6*60, false)
-
-		// buffs
-		nonightsoul := make([]float64, attributes.EndStatType)
-		nonightsoul[attributes.CD] = 0.15 + float64(r)*0.05
-		nonightsoul[attributes.ATKP] = 0.21 + float64(r)*0.07
-
-		hasnightsoul := make([]float64, attributes.EndStatType)
-		hasnightsoul[attributes.CD] = nonightsoul[attributes.CD] * 1.75
-		hasnightsoul[attributes.ATKP] = nonightsoul[attributes.ATKP] * 1.75
-
-		char.AddStatMod(character.StatMod{
-			Base:         modifier.NewBase("athousandblazingsuns", -1),
-			AffectedStat: attributes.NoStat,
-			Amount: func() ([]float64, bool) {
-				if !char.StatusIsActive(DurKey) {
-					return nil, false
-				}
-				if char.StatusIsActive(nightsoul.NightsoulBlessingStatus) {
-					return nonightsoul, true
-				} else {
-					return hasnightsoul, true
-				}
-			},
-		})
-
-		return false
-	}, fmt.Sprintf("athousandblazingsuns-onskillburstuse-%v", char.Base.Key.String()))
-
-	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
-
+	m := make([]float64, attributes.EndStatType)
+	scorchingBrilliance := func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		if ae.Info.ActorIndex != char.Index {
+		if char.StatusIsActive(BuffICDKey) {
 			return false
 		}
-		if ae.Info.AttackTag != attacks.AttackTagNormal && ae.Info.AttackTag != attacks.AttackTagExtra {
-			return false
-		}
-		if char.StatusIsActive(AttackIcdKey) {
-			return false
-		}
-
-		char.AddStatus(AttackIcdKey, 1*60, false)
-		char.ExtendStatus(DurKey, 2*60)
-
-		// buffs
-		nonightsoul := make([]float64, attributes.EndStatType)
-		nonightsoul[attributes.CD] = 0.15 + float64(r)*0.05
-		nonightsoul[attributes.ATKP] = 0.21 + float64(r)*0.07
-
-		hasnightsoul := make([]float64, attributes.EndStatType)
-		hasnightsoul[attributes.CD] = nonightsoul[attributes.CD] * 1.75
-		hasnightsoul[attributes.ATKP] = nonightsoul[attributes.ATKP] * 1.75
+		char.AddStatus(BuffICDKey, BuffICDDur, true)
+		w.extended = 0
 
 		char.AddStatMod(character.StatMod{
-			Base:         modifier.NewBase("athousandblazingsuns", -1),
+			Base:         modifier.NewBaseWithHitlag(BuffKey, BuffDur),
 			AffectedStat: attributes.NoStat,
 			Amount: func() ([]float64, bool) {
-				if !char.StatusIsActive(DurKey) {
-					return nil, false
-				}
+				m[attributes.ATKP] = 0.21 + 0.07*r
+				m[attributes.CD] = 0.15 + 0.05*r
 				if char.StatusIsActive(nightsoul.NightsoulBlessingStatus) {
-					return nonightsoul, true
-				} else {
-					return hasnightsoul, true
+					m[attributes.ATKP] *= 1.75
+					m[attributes.CD] *= 1.75
 				}
+				return m, true
 			},
 		})
 
 		return false
-	}, fmt.Sprintf("athousandblazingsuns-onattack-%v", char.Base.Key.String()))
+	}
+	c.Events.Subscribe(event.OnSkill, scorchingBrilliance, fmt.Sprintf("%v-athousandblazingsuns-skill", char.Base.Key.String()))
+	c.Events.Subscribe(event.OnBurst, scorchingBrilliance, fmt.Sprintf("%v-athousandblazingsuns-burst", char.Base.Key.String()))
 
-	c.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
-
-		if !char.StatusIsActive(DurKey) {
+	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		if c.Player.Active() != char.Index {
 			return false
 		}
-		if c.Player.Active() == char.Index {
+		atk := args[1].(*combat.AttackEvent)
+		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		if !char.StatusIsActive(nightsoul.NightsoulBlessingStatus) {
+		if atk.Info.AttackTag != attacks.AttackTagNormal && atk.Info.AttackTag != attacks.AttackTagExtra {
+			return false
+		}
+		if atk.Info.Element == attributes.Physical || atk.Info.Element == attributes.NoElement {
+			return false
+		}
+		if w.extended >= 3 {
+			return false
+		}
+		if !char.StatModIsActive(BuffKey) {
+			return false
+		}
+		if char.StatusIsActive(ExtendICDKey) {
 			return false
 		}
 
-		char.ExtendStatus(DurKey, 1)
+		w.extended++
+		char.AddStatus(ExtendICDKey, ExtendICDDur, true)
+		char.ExtendStatus(BuffKey, ExtendDur)
 
 		return false
-	}, fmt.Sprintf("athousandblazingsuns-ontick-%v", char.Base.Key.String()))
+	}, fmt.Sprintf("%v-athousandblazingsuns-damage", char.Base.Key.String()))
+
+	c.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
+		prev, next := args[0].(int), args[1].(int)
+		if prev == char.Index && char.StatModIsActive(BuffKey) {
+			// swapping out
+			w.tickSrc = c.F
+			w.extendOffField(w.tickSrc)()
+		} else if next == char.Index {
+			// swapping in
+			w.tickSrc = -1
+		}
+		return false
+	}, fmt.Sprintf("thousand-blazing-suns-%v-swap", char.Base.Key.String()))
 
 	return w, nil
 }

@@ -14,71 +14,84 @@ import (
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
+const (
+	buffKey = "starcallerswatch-buff"
+	ICDKey  = "starcallerswatch-icd"
+	buffDur = 15 * 60
+	ICDDur  = 14 * 60
+)
+
 func init() {
 	core.RegisterWeaponFunc(keys.StarcallersWatch, NewWeapon)
 }
 
-const (
-	IcdKey = "starcallerswatch-icd"
-)
-
 type Weapon struct {
-	Index int
-	core  *core.Core
-	char  *character.CharWrapper
+	Index   int
+	tickSrc int
 }
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
+
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	w := &Weapon{
-		core: c,
-		char: char,
-	}
-	r := p.Refine
+	w := &Weapon{}
+	r := float64(p.Refine)
 
-	em := 100 + float64(r)*0
-
-	//free em
 	m := make([]float64, attributes.EndStatType)
-	w.char.AddStatMod(character.StatMod{
-		Base:         modifier.NewBase("starcallerswatch-self", -1),
-		AffectedStat: attributes.NoStat,
+	m[attributes.EM] = 75.0 + 25.0*r
+
+	char.AddStatMod(character.StatMod{
+		Base: modifier.NewBase("starcallerswatch-em", -1),
 		Amount: func() ([]float64, bool) {
-			m[attributes.EM] = em
 			return m, true
 		},
 	})
 
+	bonus := make([]float64, attributes.EndStatType)
+	bonus[attributes.DmgP] = 0.21 + 0.07*r
+
 	c.Events.Subscribe(event.OnShielded, func(args ...interface{}) bool {
 		shd := args[0].(shield.Shield)
-
 		if shd.ShieldOwner() != char.Index {
 			return false
 		}
-
-		if char.StatusIsActive(IcdKey) {
+		// TODO: Not sure if the character needs to be on the field
+		if c.Player.Active() != char.Index {
+			return false
+		}
+		if char.StatusIsActive(ICDKey) {
 			return false
 		}
 
-		for _, chr := range c.Player.Chars() {
-			n := make([]float64, attributes.EndStatType)
-			chr.AddAttackMod(character.AttackMod{
-				Base: modifier.NewBaseWithHitlag("starcallerswatch-dmg", 15*60),
+		char.AddStatus(ICDKey, ICDDur, true)
+		char.AddStatus("starcallerswatch", buffDur, true)
+
+		src := c.F
+		w.tickSrc = src
+		char.QueueCharTask(func() {
+			if src != w.tickSrc {
+				return
+			}
+			for _, other := range c.Player.Chars() {
+				other.DeleteAttackMod(buffKey)
+			}
+		}, buffDur)
+
+		for _, x := range c.Player.Chars() {
+			this := x
+			this.AddAttackMod(character.AttackMod{
+				Base: modifier.NewBase(buffKey, -1),
 				Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-					if atk.Info.ActorIndex != c.Player.Active() {
+					if c.Player.Active() != this.Index {
 						return nil, false
-					} else {
-						return n, true
 					}
+					return bonus, true
 				},
 			})
 		}
 
-		char.AddStatus(IcdKey, 14*60, true)
-
 		return false
-	}, fmt.Sprintf("starcallerswatch-sheild-%v", char.Base.Key.String()))
+	}, fmt.Sprintf("starcallerswatch-onshielded-%v", char.Base.Key.String()))
 
 	return w, nil
 }
