@@ -6,60 +6,55 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/enemy"
 )
 
 var skillFrames []int
-var skillCancelFrames []int
+var skillHoldFrames []int
+var SkillChangeFrames []int
 
 const (
-	particleICDKey  = "mualani-particle-icd"
-	momentumIcdKey  = "mualani-momentum-icd"
-	surfingKey      = "mualani-surfing"
-	markedAsPreyKey = "marked-as-prey"
-
-	skillDelay      = 2
-	particleICD     = 9999 * 60
-	momentumIcd     = 0.7 * 60
-	markedAsPreyDur = 10 * 60
+	bikeKey  = "mavuika-bike"
+	skillKey = "mavuika-skill"
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(69) // E -> E
-	skillFrames[action.ActionAttack] = 5
-	skillFrames[action.ActionBurst] = 6
-	skillFrames[action.ActionDash] = 15
-	skillFrames[action.ActionJump] = 18
-	skillFrames[action.ActionWalk] = 19
-	skillFrames[action.ActionSwap] = 65
+	skillFrames = frames.InitAbilSlice(31)
 
-	skillCancelFrames = frames.InitAbilSlice(17) // E -> Charge
-	skillCancelFrames[action.ActionAttack] = 7
-	skillCancelFrames[action.ActionBurst] = 4
-	skillCancelFrames[action.ActionDash] = 13
-	skillCancelFrames[action.ActionJump] = 12
-	skillCancelFrames[action.ActionWalk] = 12
-	skillCancelFrames[action.ActionSwap] = 11
+	skillHoldFrames = frames.InitAbilSlice(43)
+
+	SkillChangeFrames = frames.InitAbilSlice(27)
 }
 
 func (c *char) reduceNightsoulPoints(val float64) {
+	if c.StatusIsActive(BurstKey) {
+		return
+	}
 	c.nightsoulState.ConsumePoints(val)
 	if c.nightsoulState.Points() <= 0.00001 {
 		c.cancelNightsoul()
 	}
 }
 
+func (c *char) enterNightsoul(amt float64, pointdelay int) {
+	if !c.nightsoulState.HasBlessing() {
+		c.nightsoulState.EnterBlessing(amt)
+		c.QueueCharTask(func() {
+			c.nightsoulPointReduceFunc(c.nightsoulSrc)()
+		}, pointdelay)
+	} else {
+		c.QueueCharTask(func() {
+			c.nightsoulState.GeneratePoints(amt)
+		}, pointdelay)
+	}
+}
+
 func (c *char) cancelNightsoul() {
 	c.nightsoulState.ExitBlessing()
-	c.SetCD(action.ActionSkill, 6*60)
-	c.ResetActionCooldown(action.ActionAttack)
-	c.DeleteStatus(surfingKey)
-	c.momentumStacks = 0
-	c.momentumSrc = -1
+	c.DeleteStatus(bikeKey)
 	c.nightsoulSrc = -1
+	c.c2DefModRemove()
+	c.c6DefModRemove()
 }
 
 func (c *char) nightsoulPointReduceFunc(src int) func() {
@@ -72,53 +67,92 @@ func (c *char) nightsoulPointReduceFunc(src int) func() {
 			return
 		}
 
-		c.reduceNightsoulPoints(1)
+		if c.StatusIsActive(bikeKey) {
+			if c.StatusIsActive(chargeKey) {
+				c.reduceNightsoulPoints(0.5 * 2.2)
+			} else {
+				c.reduceNightsoulPoints(0.5 * 1.8)
+			}
+		}
 
-		// reduce 1 point per 6f
+		c.reduceNightsoulPoints(0.5)
+
+		// reduce 0.5 point per 6f
 		c.QueueCharTask(c.nightsoulPointReduceFunc(src), 6)
 	}
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	if c.nightsoulState.HasBlessing() {
-		c.cancelNightsoul()
+	if c.StatusIsActive(skillKey) && c.nightsoulState.HasBlessing() {
+		//toggle bike
+		if c.StatusIsActive(bikeKey) {
+			c.DeleteStatus(bikeKey)
+			c.QueueCharTask(c.searingradiance, 120)
+			c.c6DefModRemove()
+			c.c2DefModAdd()
+		} else {
+			c.AddStatus(bikeKey, -1, false)
+			c.c6()
+			c.c6DefModAdd()
+			c.c2DefModRemove()
+		}
 		return action.Info{
-			Frames:          frames.NewAbilFunc(skillCancelFrames),
-			AnimationLength: skillCancelFrames[action.InvalidAction],
-			CanQueueAfter:   skillCancelFrames[action.ActionAttack], // earliest cancel
+			Frames:          frames.NewAbilFunc(SkillChangeFrames),
+			AnimationLength: SkillChangeFrames[action.InvalidAction],
+			CanQueueAfter:   SkillChangeFrames[action.ActionAttack], // earliest cancel
 			State:           action.SkillState,
 		}, nil
 	}
 
-	c.QueueCharTask(func() {
-		c.nightsoulState.EnterBlessing(60)
-		c.DeleteStatus(particleICDKey)
-		c.a1Count = 0
-		c.c1Done = false
-		c.c2()
-		c.nightsoulSrc = c.Core.F
-		c.QueueCharTask(func() {
-			c.AddStatus(surfingKey, -1, false)
-			c.nightsoulPointReduceFunc(c.nightsoulSrc)()
-		}, 6)
-	}, skillDelay)
-
-	canQueueAfter := skillFrames[action.ActionAttack] // earliest cancel
-	// press skill "while" walking
-	isWalking := c.Core.Player.AnimationHandler.CurrentState() == action.WalkState
-	if isWalking {
-		canQueueAfter = skillDelay
+	// Initial Skill Damage
+	ai := combat.AttackInfo{
+		ActorIndex:     c.Index,
+		Abil:           "The Named Moment(Press)",
+		AttackTag:      attacks.AttackTagElementalArt,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:         attacks.ICDTagNone,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Pyro,
+		Durability:     25,
+		Mult:           skill[c.TalentLvlSkill()],
 	}
+	canQueueAfter := skillFrames[action.ActionAttack]
+	AnimationLength := skillFrames[action.InvalidAction]
+	skillHitmark := 13
+
+	hold := max(p["hold"], 0)
+	if hold > 0 {
+		ai.Abil = "The Named Moment(Hold)"
+		ai.StrikeType = attacks.StrikeTypeBlunt
+		skillHitmark = 28
+		c.AddStatus(bikeKey, -1, false)
+		canQueueAfter = skillHoldFrames[action.ActionAttack]
+		AnimationLength = skillHoldFrames[action.InvalidAction]
+		c.c2DefModRemove()
+		c.c6DefModAdd()
+		c.c6()
+	} else {
+		c.QueueCharTask(c.searingradiance, 135)
+		c.c2DefModAdd()
+		c.c6DefModRemove()
+	}
+
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6), skillHitmark, skillHitmark, c.particleCB)
+
+	c.AddStatus(skillKey, -1, false)
+	c.SetCD(action.ActionSkill, 15*60)
+	c.enterNightsoul(80, 36)
 
 	return action.Info{
 		Frames: func(next action.Action) int {
-			if next == action.ActionWalk && isWalking {
-				// TODO: or 0f?
-				return skillDelay
+			if hold > 0 {
+				return skillHoldFrames[next]
+			} else {
+				return skillFrames[next]
 			}
-			return skillFrames[next]
 		},
-		AnimationLength: skillFrames[action.InvalidAction],
+		AnimationLength: AnimationLength,
 		CanQueueAfter:   canQueueAfter,
 		State:           action.SkillState,
 	}, nil
@@ -128,84 +162,52 @@ func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
-	if c.StatusIsActive(particleICDKey) {
-		return
-	}
-	c.AddStatus(particleICDKey, particleICD, true)
-
-	count := 4.0
-	if c.Core.Rand.Float64() < .5 {
-		count = 5
-	}
-	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Hydro, c.ParticleDelay)
+	count := 5.0
+	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Pyro, c.ParticleDelay)
 }
 
-func (c *char) surfingTick() {
-	// TODO: create a gadget?
-	c.Core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
-		if c.Core.Player.Active() != c.Index {
-			return false
-		}
-		if !c.nightsoulState.HasBlessing() {
-			return false
-		}
-		if !c.StatusIsActive(surfingKey) {
-			return false
-		}
-
-		switch c.Core.Player.CurrentState() {
-		case action.DashState, action.JumpState, action.WalkState:
-		default:
-			return false
-		}
-
-		// to avoid spamming Surfing Hit logs
-		useAttack := false
-		ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0.9}, 0, 1)
-		for _, e := range c.Core.Combat.Enemies() {
-			enemy, ok := e.(combat.Enemy)
-			if !ok {
-				continue
-			}
-
-			willLand, _ := e.AttackWillLand(ap)
-			if willLand && !enemy.StatusIsActive(momentumIcdKey) {
-				useAttack = true
-				break
-			}
-		}
-		if !useAttack {
-			return false
-		}
-
-		ai := combat.AttackInfo{
-			ActorIndex:         c.Index,
-			Abil:               "Surfing Hit",
-			AttackTag:          attacks.AttackTagNone,
-			ICDTag:             attacks.ICDTagNone,
-			ICDGroup:           attacks.ICDGroupDefault,
-			StrikeType:         attacks.StrikeTypeSpear,
-			Element:            attributes.Physical,
-			Durability:         100,
-			HitlagFactor:       0.01,
-			CanBeDefenseHalted: true,
-			IsDeployable:       true,
-		}
-		c.Core.QueueAttack(ai, ap, 0, 0, c.surfingCB)
-
-		return false
-	}, "mualani-surfing")
-}
-
-func (c *char) surfingCB(a combat.AttackCB) {
-	enemy, ok := a.Target.(*enemy.Enemy)
-	if !ok {
+func (c *char) searingradiance() {
+	if !c.nightsoulState.HasBlessing() {
 		return
 	}
-	if enemy.StatusIsActive(momentumIcdKey) {
+	if c.StatusIsActive(bikeKey) {
 		return
 	}
-	enemy.AddStatus(markedAsPreyKey, markedAsPreyDur, true)
-	enemy.AddStatus(momentumIcdKey, momentumIcd, false)
-	c.momentumStacks = min(c.momentumStacks+1, 3)
+	c.reduceNightsoulPoints(3)
+	// Skill DoT Damage
+	ai := combat.AttackInfo{
+		ActorIndex:     c.Index,
+		Abil:           "Ring of Searing Radiance DMG",
+		AttackTag:      attacks.AttackTagElementalArt,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:         attacks.ICDTagNone,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Pyro,
+		Durability:     25,
+		Mult:           skilldot[c.TalentLvlSkill()],
+	}
+
+	enemies := c.Core.Combat.RandomEnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), nil, 10)
+	enemyCount := len(enemies)
+	gadgets := c.Core.Combat.RandomGadgetsWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), nil, 10)
+	gadgetCount := len(gadgets)
+	totalEntities := enemyCount + gadgetCount
+
+	remaining := min(10, totalEntities)
+	for _, enemy := range enemies {
+		if remaining <= 0 {
+			break
+		}
+		c.Core.QueueAttack(ai, combat.NewSingleTargetHit(enemy.Key()), 0, 0, c.c6SkillCB())
+		remaining--
+	}
+	for _, gadget := range gadgets {
+		if remaining <= 0 {
+			break
+		}
+		c.Core.QueueAttack(ai, combat.NewSingleTargetHit(gadget.Key()), 0, 0)
+		remaining--
+	}
+	c.QueueCharTask(c.searingradiance, 119)
 }

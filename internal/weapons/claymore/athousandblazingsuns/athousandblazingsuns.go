@@ -61,8 +61,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 		// buffs
 		nonightsoul := make([]float64, attributes.EndStatType)
-		nonightsoul[attributes.CD] = 0.20 + float64(r)*0
-		nonightsoul[attributes.ATKP] = 0.28 + float64(r)*0
+		nonightsoul[attributes.CD] = 0.15 + float64(r)*0.05
+		nonightsoul[attributes.ATKP] = 0.21 + float64(r)*0.07
 
 		hasnightsoul := make([]float64, attributes.EndStatType)
 		hasnightsoul[attributes.CD] = nonightsoul[attributes.CD] * 1.75
@@ -107,8 +107,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 		// buffs
 		nonightsoul := make([]float64, attributes.EndStatType)
-		nonightsoul[attributes.CD] = 0.20 + float64(r)*0
-		nonightsoul[attributes.ATKP] = 0.28 + float64(r)*0
+		nonightsoul[attributes.CD] = 0.15 + float64(r)*0.05
+		nonightsoul[attributes.ATKP] = 0.21 + float64(r)*0.07
 
 		hasnightsoul := make([]float64, attributes.EndStatType)
 		hasnightsoul[attributes.CD] = nonightsoul[attributes.CD] * 1.75

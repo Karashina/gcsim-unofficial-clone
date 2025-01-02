@@ -171,6 +171,10 @@ func init() {
 	charPrettyName[Chongyun] = "Chongyun"
 	CharKeyToEle[Chongyun] = attributes.Cryo
 
+	charNames[Citlali] = "citlali"
+	charPrettyName[Citlali] = "Citlali"
+	CharKeyToEle[Citlali] = attributes.Cryo
+
 	charNames[Clorinde] = "clorinde"
 	charPrettyName[Clorinde] = "Clorinde"
 	CharKeyToEle[Clorinde] = attributes.Electro
@@ -306,6 +310,10 @@ func init() {
 	charNames[Lyney] = "lyney"
 	charPrettyName[Lyney] = "Lyney"
 	CharKeyToEle[Lyney] = attributes.Pyro
+
+	charNames[Mavuika] = "mavuika"
+	charPrettyName[Mavuika] = "Mavuika"
+	CharKeyToEle[Mavuika] = attributes.Pyro
 
 	charNames[Mika] = "mika"
 	charPrettyName[Mika] = "Mika"

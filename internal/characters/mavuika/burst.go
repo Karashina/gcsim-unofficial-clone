@@ -6,63 +6,61 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 )
 
-const burstHitmarks = 108 // adjusted to swap frame
+const (
+	burstHitmark = 116 // adjusted to swap frame
+	spiritIcdKey = "mavuika-spirit-icd"
+	BurstKey     = "mavuika-burst"
+	BurstCDKey   = "mavuika-burst-cd"
+)
 
 var (
 	burstFrames []int
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(180) // charge
-	burstFrames[action.ActionAttack] = 167
-	burstFrames[action.ActionSkill] = 166
-	burstFrames[action.ActionDash] = 167
-	burstFrames[action.ActionJump] = 167
-	burstFrames[action.ActionWalk] = 167
-	burstFrames[action.ActionSwap] = 108
+	burstFrames = frames.InitAbilSlice(125)
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	travel, ok := p["travel"]
-	if !ok {
-		travel = 70
+
+	c.consumedspirit = 0
+	c.consumedspirit = c.fightingspirit
+
+	c2buff := 0.0
+	if c.Base.Cons >= 2 {
+		c2buff = 1.2
 	}
 
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Boomsharka-laka",
+		Abil:           "Hour of Burning Skies",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		ICDTag:         attacks.ICDTagNone,
 		ICDGroup:       attacks.ICDGroupDefault,
 		StrikeType:     attacks.StrikeTypeDefault,
-		Element:        attributes.Hydro,
+		Element:        attributes.Pyro,
 		Durability:     25,
+		Mult:           burst[c.TalentLvlBurst()] + burstbonus[c.TalentLvlBurst()]*c.consumedspirit + c2buff,
 	}
-	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5)
+	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 7)
 
-	// snapshot at bullet creation
-	var snap combat.Snapshot
-	stacks := c.a4Stacks
-	c.a4Stacks = 0
-	c.QueueCharTask(func() {
-		snap = c.Snapshot(&ai)
-		c.Core.Tasks.Add(func() {
-			// TODO: verify if snapshot is used or if maxhp is recalced here
-			hp := c.MaxHP()
-			ai.FlatDmg = burst[c.TalentLvlBurst()] * hp
-			if c.Base.Ascension >= 4 {
-				ai.FlatDmg += 0.15 * float64(stacks) * hp
-			}
+	c.Core.QueueAttack(ai, burstArea, burstHitmark, burstHitmark)
 
-			c.Core.QueueAttackWithSnap(ai, snap, burstArea, 0)
-		}, travel)
-	}, burstHitmarks)
+	c.AddStatus(BurstKey, 10*60+110, true)
+	c.enterNightsoul(10, 110)
 
-	c.SetCDWithDelay(action.ActionBurst, 15*60, 0)
-	c.ConsumeEnergy(11)
+	c.AddStatus(bikeKey, -1, false)
+	c.c2DefModRemove()
+	c.c6DefModAdd()
+	c.c6()
+
+	c.a4()
+	c.AddStatus(BurstCDKey, 18*60, false)
+	c.QueueCharTask(func() { c.fightingspirit = 0 }, 2)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
@@ -70,4 +68,42 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
 		State:           action.BurstState,
 	}, nil
+}
+
+func (c *char) GainFightingSpirit() {
+	mult := 1.00
+	if c.Base.Cons >= 1 {
+		mult = 1.25
+	}
+	c.Core.Events.Subscribe(event.OnNightsoulConsume, func(args ...interface{}) bool {
+		amt := args[1].(float64)
+
+		c.fightingspirit += float64(amt * mult)
+		if c.fightingspirit >= c.maxfightingspirit {
+			c.fightingspirit = c.maxfightingspirit
+		}
+		c.c1()
+
+		return false
+	}, "mavuika-fightingspirit-nightsoul")
+	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+		ae := args[1].(*combat.AttackEvent)
+
+		if c.StatusIsActive(spiritIcdKey) {
+			return false
+		}
+		if ae.Info.AttackTag != attacks.AttackTagNormal {
+			return false
+		}
+
+		c.fightingspirit += float64(1.5 * mult)
+		if c.fightingspirit >= c.maxfightingspirit {
+			c.fightingspirit = c.maxfightingspirit
+		}
+
+		c.AddStatus(spiritIcdKey, 0.1*60, false)
+		c.c1()
+
+		return false
+	}, "mavuika-fightingspirit-attack")
 }
