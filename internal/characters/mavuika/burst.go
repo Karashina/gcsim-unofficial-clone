@@ -50,8 +50,9 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c.Core.QueueAttack(ai, burstArea, burstHitmark, burstHitmark)
 
-	c.AddStatus(BurstKey, 10*60+110, true)
-	c.enterNightsoul(10, 110)
+	c.QueueCharTask(func() { c.AddStatus(BurstKey, 10*60, true) }, 110)
+
+	c.enterNightsoul(10, 94)
 
 	c.AddStatus(bikeKey, -1, false)
 	c.c2DefModRemove()

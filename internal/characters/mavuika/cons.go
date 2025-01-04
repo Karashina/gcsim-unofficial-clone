@@ -4,11 +4,14 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
+const c2buffKey = "mavuika-c2-def"
+const c6buffKey = "mavuika-c6-def"
 const c6SkillIcdKey = "mavuika-c6-icd-skill"
 
 func (c *char) c1() {
@@ -32,28 +35,32 @@ func (c *char) c2() {
 	}
 	c.BaseStats[attributes.BaseATK] = c.BaseStats[attributes.BaseATK] + 200
 
-	c.c2trg = c.Core.Combat.RandomEnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), nil, 10)
+	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+		ae := args[1].(*combat.AttackEvent)
+
+		if !c.StatusIsActive(c2buffKey) {
+			return false
+		}
+
+		ae.Info.IgnoreDefPercent += 0.2
+		return false
+	}, "mavuika-c2-defmod")
+
+	c.c2trg = c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), nil)
 }
 
 func (c *char) c2DefModAdd() {
 	if c.Base.Cons < 2 {
 		return
 	}
-	for _, e := range c.c2trg {
-		e.AddDefMod(combat.DefMod{
-			Base:  modifier.NewBaseWithHitlag("mavuika-c2", -1),
-			Value: -0.2,
-		})
-	}
+	c.AddStatus(c2buffKey, -1, false)
 }
 
 func (c *char) c2DefModRemove() {
 	if c.Base.Cons < 2 {
 		return
 	}
-	for _, e := range c.c2trg {
-		e.DeleteDefMod("mavuika-c2")
-	}
+	c.DeleteStatus(c2buffKey)
 }
 
 func (c *char) c6SkillCB() combat.AttackCBFunc {
@@ -139,19 +146,28 @@ func (c *char) c6DefModAdd() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	for _, e := range c.c2trg {
-		e.AddDefMod(combat.DefMod{
-			Base:  modifier.NewBaseWithHitlag("mavuika-c6", -1),
-			Value: -0.2,
-		})
-	}
+	c.AddStatus(c6buffKey, -1, false)
 }
 
 func (c *char) c6DefModRemove() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	for _, e := range c.c2trg {
-		e.DeleteDefMod("mavuika-c6")
+	c.DeleteStatus(c6buffKey)
+}
+
+func (c *char) c6defmod() {
+	if c.Base.Cons < 6 {
+		return
 	}
+	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+		ae := args[1].(*combat.AttackEvent)
+
+		if !c.StatusIsActive(c6buffKey) {
+			return false
+		}
+
+		ae.Info.IgnoreDefPercent += 0.2
+		return false
+	}, "mavuika-c6-defmod")
 }

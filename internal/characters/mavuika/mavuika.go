@@ -60,6 +60,7 @@ func (c *char) Init() error {
 	c.a4buff = make([]float64, attributes.EndStatType)
 	c.a1()
 	c.c2()
+	c.c6defmod()
 	c.GainFightingSpirit()
 	c.onExitField()
 	return nil
@@ -103,6 +104,9 @@ func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
 		if c.StatusIsActive(bikeKey) {
 			c.DeleteStatus(bikeKey)
+			c.QueueCharTask(c.searingradiance, 120)
+			c.c6DefModRemove()
+			c.c2DefModAdd()
 		}
 		return false
 	}, "mavuika-exit")
