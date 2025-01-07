@@ -4,7 +4,7 @@ key: citlali
 action_param_keys:
   attack:
     - param: "travel"
-  burst:
+  charge:
     - param: "travel"
 skill_data_mapping:
   attack:
@@ -17,16 +17,16 @@ skill_data_mapping:
     charge:
       - 3 # Charged Attack DMG|{param3:F1P}
   skill:
-    bite:
-      - 0 # Sharky's Bite Base DMG|{param0:F2P} Max HP
-    momentumBonus:
-      - 1 # Wave Momentum DMG Bonus|{param1:F2P} Max HP/Stack
-    surgingBite:
-      - 2 # Sharky's Surging Bite Additional DMG Bonus|{param2:F2P} Max HP
+    skill:
+      - 0 # Obsidian Tzitzimitl DMG|{param0:F1P}
+    shieldperct:
+      - 1 # Shield DMG Absorption|{param1:F1P} EM
+    shieldconst:
+      - 2 # Shield DMG Absorption|{param2:F1P} Constant
+    skilldot:
+      - 3 # Frostfall Storm DMG|{param3:F1P}
   burst:
     burst:
-      - 0 # Skill DMG|{param0:F2P} Max HP
-documentation:
-  fields_data:
-    - fields: [.mualani.momentum]
-      desc: Number of Wave Momentum stacks.
+      - 0 # Ice Storm DMG|{param0:F1P}
+    burstskull:
+      - 1 # Spiritvessel Skull DMG|{param1:F1P}

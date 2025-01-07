@@ -8,61 +8,53 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 )
 
-const burstHitmarks = 108 // adjusted to swap frame
+const (
+	burstHitmark = 118
+	skullHitmark = 225
+)
 
 var (
 	burstFrames []int
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(180) // charge
-	burstFrames[action.ActionAttack] = 167
-	burstFrames[action.ActionSkill] = 166
-	burstFrames[action.ActionDash] = 167
-	burstFrames[action.ActionJump] = 167
-	burstFrames[action.ActionWalk] = 167
-	burstFrames[action.ActionSwap] = 108
+	burstFrames = frames.InitAbilSlice(121)
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	travel, ok := p["travel"]
-	if !ok {
-		travel = 70
-	}
 
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Boomsharka-laka",
+		Abil:           "Edict of Entwined Splendor: Ice Storm DMG",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		ICDTag:         attacks.ICDTagNone,
 		ICDGroup:       attacks.ICDGroupDefault,
 		StrikeType:     attacks.StrikeTypeDefault,
-		Element:        attributes.Hydro,
-		Durability:     25,
+		Element:        attributes.Cryo,
+		Durability:     50,
+		Mult:           burst[c.TalentLvlBurst()],
 	}
-	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5)
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6.5), 0, burstHitmark)
 
-	// snapshot at bullet creation
-	var snap combat.Snapshot
-	stacks := c.a4Stacks
-	c.a4Stacks = 0
-	c.QueueCharTask(func() {
-		snap = c.Snapshot(&ai)
-		c.Core.Tasks.Add(func() {
-			// TODO: verify if snapshot is used or if maxhp is recalced here
-			hp := c.MaxHP()
-			ai.FlatDmg = burst[c.TalentLvlBurst()] * hp
-			if c.Base.Ascension >= 4 {
-				ai.FlatDmg += 0.15 * float64(stacks) * hp
-			}
-
-			c.Core.QueueAttackWithSnap(ai, snap, burstArea, 0)
-		}, travel)
-	}, burstHitmarks)
-
-	c.SetCDWithDelay(action.ActionBurst, 15*60, 0)
-	c.ConsumeEnergy(11)
+	aiskull := combat.AttackInfo{
+		ActorIndex:     c.Index,
+		Abil:           "Edict of Entwined Splendor: Spiritvessel Skull DMG",
+		AttackTag:      attacks.AttackTagElementalBurst,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:         attacks.ICDTagElementalBurst,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Cryo,
+		Durability:     25,
+		Mult:           burstskull[c.TalentLvlBurst()],
+	}
+	enemies := c.Core.Combat.RandomEnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6.5), nil, 3)
+	for _, enemy := range enemies {
+		c.Core.QueueAttack(aiskull, combat.NewCircleHitOnTarget(enemy.Pos(), nil, 3.5), skullHitmark, skullHitmark)
+	}
+	c.SetCDWithDelay(action.ActionBurst, 15*60, 2)
+	c.ConsumeEnergy(109)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),

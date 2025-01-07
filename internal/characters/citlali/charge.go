@@ -6,30 +6,20 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
 var chargeFrames []int
 
-const shortChargeHitmark = 71
+const chargeHitmark = 44
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(100) // walk
-	chargeFrames[action.ActionAttack] = 73
-	chargeFrames[action.ActionCharge] = 85
-	chargeFrames[action.ActionSkill] = 72
-	chargeFrames[action.ActionBurst] = 73
-	chargeFrames[action.ActionDash] = 72
-	chargeFrames[action.ActionJump] = 73
-	chargeFrames[action.ActionSwap] = 71
+	chargeFrames = frames.InitAbilSlice(52)
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	// there is a windup out of dash/jump/walk/swap. Otherwise it is rolled into the Q/E/CA/NA -> CA frames
-	windup := 0
-	switch c.Core.Player.CurrentState() {
-	case action.Idle, action.DashState, action.JumpState, action.WalkState, action.SwapState:
-		windup = 13
+	travel, ok := p["travel"]
+	if !ok {
+		travel = 10
 	}
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -38,23 +28,27 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
 		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Hydro,
+		Element:    attributes.Cryo,
 		Durability: 25,
 		Mult:       charge[c.TalentLvlAttack()],
 	}
-	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 3.5)
-	// TODO: Not sure of snapshot timing
+
 	c.Core.QueueAttack(
 		ai,
-		ap,
-		shortChargeHitmark+windup,
-		shortChargeHitmark+windup,
+		combat.NewCircleHit(
+			c.Core.Combat.Player(),
+			c.Core.Combat.PrimaryTarget(),
+			nil,
+			3,
+		),
+		chargeHitmark,
+		chargeHitmark+travel,
 	)
 
 	return action.Info{
-		Frames:          func(next action.Action) int { return windup + chargeFrames[next] },
-		AnimationLength: windup + chargeFrames[action.InvalidAction],
-		CanQueueAfter:   windup + chargeFrames[action.ActionDash],
+		Frames:          func(next action.Action) int { return chargeFrames[next] },
+		AnimationLength: chargeFrames[action.InvalidAction],
+		CanQueueAfter:   chargeHitmark,
 		State:           action.ChargeAttackState,
 	}, nil
 }

@@ -5,10 +5,8 @@ import (
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/player"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/model"
 )
@@ -21,12 +19,7 @@ type char struct {
 	*tmpl.Character
 	nightsoulState *nightsoul.State
 	nightsoulSrc   int
-	momentumStacks int
-	momentumSrc    int
-	a4Stacks       int
-	c1Done         bool
-
-	a1Count int
+	c6count        float64
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -42,19 +35,18 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	w.Character = &c
 
 	c.nightsoulState = nightsoul.New(s, w)
-	c.nightsoulState.MaxPoints = 60
+	c.nightsoulState.MaxPoints = 100
 
 	return nil
 }
 
 func (c *char) Init() error {
+	c.SkillChecks()
+	c.a1()
 	c.a4()
-
-	c.c4()
-
-	c.SetNumCharges(action.ActionAttack, 1)
-	c.onExitField()
-	c.surfingTick()
+	c.c1()
+	c.c2()
+	c.c6()
 	return nil
 }
 
@@ -73,36 +65,16 @@ func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
 	case "nightsoul":
 		return c.nightsoulState.Condition(fields)
-	case "momentum":
-		return c.momentumStacks, nil
 	default:
 		return c.Character.Condition(fields)
 	}
 }
 
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
-	if c.nightsoulState.HasBlessing() {
-		if c.momentumStacks >= 3 {
-			switch k {
-			case model.AnimationXingqiuN0StartDelay:
-				return 44
-			default:
-				return 37
-			}
-		}
-		switch k {
-		case model.AnimationXingqiuN0StartDelay:
-			return 11
-		default:
-			return 9
-		}
+	if k == model.AnimationXingqiuN0StartDelay {
+		return 4
 	}
-	switch k {
-	case model.AnimationXingqiuN0StartDelay:
-		return 11
-	default:
-		return 11
-	}
+	return c.Character.AnimationStartDelay(k)
 }
 
 func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
@@ -110,24 +82,4 @@ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 		return 0
 	}
 	return c.Character.ActionStam(a, p)
-}
-
-func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]int) error {
-	if c.nightsoulState.HasBlessing() {
-		// cannot CA in nightsoul blessing
-		if a == action.ActionCharge {
-			return player.ErrInvalidChargeAction
-		}
-	}
-
-	return c.Character.NextQueueItemIsValid(k, a, p)
-}
-
-func (c *char) onExitField() {
-	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
-		if c.nightsoulState.HasBlessing() {
-			c.cancelNightsoul()
-		}
-		return false
-	}, "mualani-exit")
 }

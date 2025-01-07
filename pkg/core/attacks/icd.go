@@ -24,6 +24,7 @@ const (
 	ICDTagTravelerDewdrop
 	ICDTagShadowhuntShell
 	ICDTagShiningShadowhuntShell
+	ICDTagFrostfallStorm
 
 	ICDReactionDamageDelim
 	ICDTagOverloadDamage
@@ -55,6 +56,7 @@ const (
 	ICDGroupTravelerBurst
 	ICDGroupShadowhuntShell
 	ICDGroupChascaConvertedShell
+	ICDGroupFrostfallStorm
 	EndDefaultICDGroups
 )
 
@@ -73,6 +75,7 @@ func init() {
 	ICDGroupResetTimer[ICDGroupTravelerBurst] = 480
 	ICDGroupResetTimer[ICDGroupShadowhuntShell] = 90
 	ICDGroupResetTimer[ICDGroupChascaConvertedShell] = 90
+	ICDGroupResetTimer[ICDGroupFrostfallStorm] = 90
 
 	ICDGroupEleApplicationSequence = make([][]float64, ICDGroupLength)
 	ICDGroupEleApplicationSequence[ICDGroupDefault] = []float64{1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0}
@@ -84,6 +87,7 @@ func init() {
 	ICDGroupEleApplicationSequence[ICDGroupTravelerBurst] = []float64{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupShadowhuntShell] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupChascaConvertedShell] = []float64{1, 0, 1, 0, 1, 0, 1, 0}
+	ICDGroupEleApplicationSequence[ICDGroupFrostfallStorm] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 
 	ICDGroupDamageSequence = make([][]float64, ICDGroupLength)
 	ICDGroupDamageSequence[ICDGroupDefault] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
@@ -97,4 +101,5 @@ func init() {
 	ICDGroupDamageSequence[ICDGroupTravelerBurst] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupShadowhuntShell] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupChascaConvertedShell] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
+	ICDGroupDamageSequence[ICDGroupFrostfallStorm] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 }
