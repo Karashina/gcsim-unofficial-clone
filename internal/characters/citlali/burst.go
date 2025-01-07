@@ -54,6 +54,11 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(aiskull, combat.NewCircleHitOnTarget(enemy.Pos(), nil, 3.5), skullHitmark, skullHitmark)
 	}
 	c.SetCDWithDelay(action.ActionBurst, 15*60, 2)
+	c.QueueCharTask(func() {
+		if c.nightsoulState.HasBlessing() {
+			c.nightsoulState.GeneratePoints(24)
+		}
+	}, 1)
 	c.ConsumeEnergy(109)
 
 	return action.Info{

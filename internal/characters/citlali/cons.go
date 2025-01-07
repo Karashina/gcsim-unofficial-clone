@@ -28,6 +28,10 @@ func (c *char) c1() {
 			return false
 		}
 
+		if ae.Info.ActorIndex == c.Index {
+			return false
+		}
+
 		switch ae.Info.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagExtra:
@@ -96,7 +100,7 @@ func (c *char) c4CB(a combat.AttackCB) {
 	}
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Edict of Entwined Splendor: Spiritvessel Skull DMG",
+		Abil:           "Death Defier's Spirit Skull: Obsidian Spiritvessel Skull DMG",
 		AttackTag:      attacks.AttackTagNone,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		ICDTag:         attacks.ICDTagElementalBurst,

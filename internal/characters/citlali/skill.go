@@ -20,7 +20,7 @@ const (
 	NightsoulReductionStart = 10
 	ShieldDelay             = 39
 	SkillCDDelay            = 20
-	SkillDoTInit            = 3
+	SkillDoTInit            = 60
 	SkillDoTInterval        = 59
 	SkillKey                = "citlali-skill-active"
 	ItzpapaKey              = "citlali-itzpapa-active"
@@ -46,7 +46,7 @@ func (c *char) reduceNightsoulPoints(val float64) {
 			c.c6count = 40
 		}
 	}
-	if c.nightsoulState.Points() <= 0.00001 {
+	if c.nightsoulState.Points() <= 0.00001 && c.Base.Cons < 6 {
 		c.DeleteStatus(ItzpapaKey)
 	}
 }
@@ -107,7 +107,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.c6count = 0
 		c.QueueCharTask(func() {
 			c.reduceNightsoulPoints(100)
-		}, 1)
+		}, NightsoulDelay+1)
 	}
 	c.QueueCharTask(func() {
 		// add shield
