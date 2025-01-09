@@ -125,24 +125,21 @@ func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	m := make([]float64, attributes.EndStatType)
 	for _, char := range c.Core.Player.Chars() {
-		this := char
-		this.AddAttackMod(character.AttackMod{
-			Base: modifier.NewBase("citlali-c6", -1),
-			Amount: func(_ *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-				m[attributes.PyroP] = 0.015 * c.c6count
-				m[attributes.HydroP] = 0.015 * c.c6count
-				return m, true
+		char.AddAttackMod(character.AttackMod{
+			Base: modifier.NewBase("citlali-c6", 20*60),
+			Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+				if !c.StatusIsActive(SkillKey) {
+					return nil, false
+				}
+				if atk.Info.ActorIndex == c.Index {
+					return c.c6self, true
+				}
+				if atk.Info.Element != attributes.Hydro && atk.Info.Element != attributes.Pyro {
+					return nil, false
+				}
+				return c.c6buff, true
 			},
 		})
 	}
-	n := make([]float64, attributes.EndStatType)
-	c.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBase("citlali-c6-self", -1),
-		Amount: func(_ *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-			n[attributes.DmgP] = 0.025 * c.c6count
-			return m, true
-		},
-	})
 }

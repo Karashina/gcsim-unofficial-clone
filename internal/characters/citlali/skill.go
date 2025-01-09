@@ -45,6 +45,8 @@ func (c *char) reduceNightsoulPoints(val float64) {
 		if c.c6count >= 40 {
 			c.c6count = 40
 		}
+		c.c6buff[attributes.DmgP] = 0.015 * c.c6count
+		c.c6self[attributes.DmgP] = 0.025 * c.c6count
 	}
 	if c.nightsoulState.Points() <= 0.00001 && c.Base.Cons < 6 {
 		c.DeleteStatus(ItzpapaKey)
@@ -104,6 +106,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.SetTag(SkillKey, 10)
 	}
 	if c.Base.Cons >= 6 {
+		c.c6()
 		c.c6count = 0
 		c.QueueCharTask(func() {
 			c.reduceNightsoulPoints(100)
@@ -154,8 +157,10 @@ func (c *char) SkillChecks() {
 
 		if c.Base.Cons >= 6 && !c.StatusIsActive(ItzpapaKey) {
 			c.AddStatus(ItzpapaKey, -1, false)
+			c.QueueCharTask(c.nightsoulPointReduceFunc(c.nightsoulSrc), NightsoulReductionStart)
 			c.QueueCharTask(c.OpalFire(c.nightsoulSrc), SkillDoTInit)
-		} else if !c.StatusIsActive(ItzpapaKey) && c.nightsoulState.Points() >= 50 {
+		}
+		if !c.StatusIsActive(ItzpapaKey) && c.nightsoulState.Points() >= 50 {
 			c.AddStatus(ItzpapaKey, -1, false)
 			c.QueueCharTask(c.nightsoulPointReduceFunc(c.nightsoulSrc), NightsoulReductionStart)
 			c.QueueCharTask(c.OpalFire(c.nightsoulSrc), SkillDoTInit)

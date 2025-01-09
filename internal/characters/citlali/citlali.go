@@ -5,6 +5,7 @@ import (
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"
+	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
@@ -20,6 +21,8 @@ type char struct {
 	nightsoulState *nightsoul.State
 	nightsoulSrc   int
 	c6count        float64
+	c6buff         []float64
+	c6self         []float64
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -37,6 +40,10 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.nightsoulState = nightsoul.New(s, w)
 	c.nightsoulState.MaxPoints = 100
 
+	c.c6count = 0
+	c.c6buff = make([]float64, attributes.EndStatType)
+	c.c6self = make([]float64, attributes.EndStatType)
+
 	return nil
 }
 
@@ -46,7 +53,6 @@ func (c *char) Init() error {
 	c.a4()
 	c.c1()
 	c.c2()
-	c.c6()
 	return nil
 }
 
