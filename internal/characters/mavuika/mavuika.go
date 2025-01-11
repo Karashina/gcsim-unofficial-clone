@@ -88,6 +88,8 @@ func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
 	case "nightsoul":
 		return c.nightsoulState.Condition(fields)
+	case "fightingspirit":
+		return c.fightingspirit, nil
 	default:
 		return c.Character.Condition(fields)
 	}
