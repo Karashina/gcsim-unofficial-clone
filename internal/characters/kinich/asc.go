@@ -8,82 +8,70 @@ import (
 )
 
 const (
-	A1MarkKey = "kinich-desolation-mark"
-	A1ICDKey  = "kinich-desolation-icd"
-	A4DurKey  = "kinich-a4-duration"
+	desolationKey = "desolation"
+	a1Icd         = "a1-icd"
+	a4StackKey    = "hunters-experience"
 )
 
-func (c *char) a1mark() {
+func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		if !c.StatusIsActive(skillKey) {
-			return false
-		}
+	hook := func(args ...interface{}) bool {
 		t, ok := args[0].(*enemy.Enemy)
-		atk := args[1].(*combat.AttackEvent)
 		if !ok {
 			return false
 		}
-		if atk.Info.ActorIndex != c.Index {
+		atk := args[1].(*combat.AttackEvent)
+		switch atk.Info.AttackTag {
+		case attacks.AttackTagBurningDamage:
+		case attacks.AttackTagBurgeon:
+		default:
 			return false
 		}
-		if atk.Info.AttackTag != attacks.AttackTagElementalArt {
+		if !t.StatusIsActive(desolationKey) {
 			return false
 		}
-
-		t.AddStatus(A1MarkKey, -1, true)
-
+		if c.StatusIsActive(a1Icd) {
+			return false
+		}
+		c.nightsoulState.GeneratePoints(7)
+		c.AddStatus(a1Icd, 0.8*60, false)
 		return false
-	}, "kinich-desolation-mark")
+	}
+	c.Core.Events.Subscribe(event.OnEnemyDamage, hook, "kinich-a1")
 }
 
-func (c *char) a1regen() {
+func (c *char) a1CB(a combat.AttackCB) {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		if !c.StatusIsActive(skillKey) {
-			return false
-		}
-		if c.StatusIsActive(A1ICDKey) {
-			return false
-		}
-		t, ok := args[0].(*enemy.Enemy)
-		atk := args[1].(*combat.AttackEvent)
-		if !ok {
-			return false
-		}
-		if !t.StatusIsActive(A1MarkKey) {
-			return false
-		}
-		if atk.Info.AttackTag != attacks.AttackTagBurningDamage && atk.Info.AttackTag != attacks.AttackTagBurgeon {
-			return false
-		}
-
-		c.AddNightsoul("kinich-a1", 7)
-		c.AddStatus(A1ICDKey, 0.8*60, true)
-
-		return false
-	}, "kinich-a1-nightsoul-regen")
+	e, ok := a.Target.(*enemy.Enemy)
+	if !ok {
+		return
+	}
+	// TODO: add the modifier for a gadget
+	e.AddStatus(desolationKey, 12*60, true)
 }
 
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
-	if !c.StatusIsActive(A4DurKey) {
-		c.a4stacks = 0
-		c.a4buff = 0
-	}
 	c.Core.Events.Subscribe(event.OnNightsoulBurst, func(args ...interface{}) bool {
-		if c.a4stacks < 2 {
-			c.a4stacks++
-		}
-		c.a4buff = 3.2 * float64(c.a4stacks)
-		c.AddStatus(A4DurKey, 15*60, true)
-
+		stacks := min(c.Tag(a4StackKey)+1, 2)
+		c.AddStatus(a4StackKey, 15*60, true)
+		c.SetTag(a4StackKey, stacks)
 		return false
 	}, "kinich-a4")
+}
+
+func (c *char) a4Amount() float64 {
+	if c.Base.Ascension < 4 {
+		return 0.0
+	}
+	stacks := c.Tag(a4StackKey)
+	c.SetTag(a4StackKey, 0)
+	c.DeleteStatus(a4StackKey)
+	return 3.2 * float64(stacks) * c.TotalAtk()
 }
