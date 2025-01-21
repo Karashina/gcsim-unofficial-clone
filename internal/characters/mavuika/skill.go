@@ -83,7 +83,7 @@ func (c *char) nightsoulPointReduceFunc(src int) func() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	if c.StatusIsActive(skillKey) && c.nightsoulState.HasBlessing() {
+	if c.StatusIsActive(skillKey) && c.nightsoulState.HasBlessing() && !c.StatusIsActive(BurstKey) {
 		//toggle bike
 		if c.StatusIsActive(bikeKey) {
 			c.DeleteStatus(bikeKey)
@@ -122,7 +122,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	skillHitmark := 13
 
 	hold := max(p["hold"], 0)
-	if hold > 0 {
+	if hold > 0 || c.StatusIsActive(BurstKey) {
 		ai.Abil = "The Named Moment(Hold)"
 		ai.StrikeType = attacks.StrikeTypeBlunt
 		skillHitmark = 28
