@@ -1,0 +1,30 @@
+package_name: lanyan
+genshin_id: 90000006
+key: lanyan
+action_param_keys:
+  skill:
+    - param: "hold"
+  charge:
+    - param: "travel"
+skill_data_mapping:
+  attack:
+    attack_1:
+      - 0 # 1-Hit DMG|{param0:F1P}
+    attack_2:
+      - 1 # 2-Hit DMG|{param1:F1P}{param2:F1P}
+    attack_3:
+      - 2 # 3-Hit DMG|{param3:F1P}{param4:F1P}
+    attack_3:
+      - 3 # 4-Hit DMG|{param5:F1P}
+    charge:
+      - 3 # Charged Attack DMG|{param6:F1P}
+  skill:
+    skill:
+      - 0 # Feathermoon Ring DMG|{param0:F1P}
+    shieldperct:
+      - 1 # Shield DMG Absorption|{param1:F1P} ATK
+    shieldconst:
+      - 2 # Shield DMG Absorption|{param2:F1P} Constant
+  burst:
+    burst:
+      - 0 # Skill DMG|{param0:F1P}
