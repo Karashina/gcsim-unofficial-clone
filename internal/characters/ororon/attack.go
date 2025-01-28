@@ -12,17 +12,23 @@ import (
 )
 
 var attackFrames [][]int
-var attackHitmarks = []int{17, 10, 21}
+var attackHitmarks = []int{12, 10, 20}
 
-const normalHitNum = 5
+const normalHitNum = 3
 
 func init() {
 	attackFrames = make([][]int, normalHitNum)
 
-	// normal cancels (missing Nx -> Aim)
-	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 27)
-	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 30)
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 76)
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 32) // N1 -> Walk
+	attackFrames[0][action.ActionAttack] = 24
+	attackFrames[0][action.ActionAim] = 19
+
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 53) // N2 -> Walk
+	attackFrames[1][action.ActionAttack] = 27
+	attackFrames[1][action.ActionAim] = 19
+
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 70) // N3 -> N1
+	attackFrames[2][action.ActionWalk] = 61
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
@@ -35,22 +41,17 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		ActorIndex: c.Index,
 		Abil:       fmt.Sprintf("Normal %v", c.NormalCounter),
 		AttackTag:  attacks.AttackTagNormal,
-		ICDTag:     attacks.ICDTagNone,
+		ICDTag:     attacks.ICDTagNormalAttack,
 		ICDGroup:   attacks.ICDGroupDefault,
 		StrikeType: attacks.StrikeTypePierce,
 		Element:    attributes.Physical,
 		Durability: 25,
-		Mult:       auto[c.NormalCounter][c.TalentLvlAttack()],
+		Mult:       attack[c.NormalCounter][c.TalentLvlAttack()],
 	}
+	ap := combat.NewBoxHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), geometry.Point{Y: -0.5}, 0.1, 1)
 	c.Core.QueueAttack(
 		ai,
-		combat.NewBoxHit(
-			c.Core.Combat.Player(),
-			c.Core.Combat.PrimaryTarget(),
-			geometry.Point{Y: -0.5},
-			0.1,
-			1,
-		),
+		ap,
 		attackHitmarks[c.NormalCounter],
 		attackHitmarks[c.NormalCounter]+travel,
 	)

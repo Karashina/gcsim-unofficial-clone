@@ -4,10 +4,11 @@ import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/core/stacks"
+	"github.com/genshinsim/gcsim/pkg/model"
 )
 
 func init() {
@@ -16,12 +17,11 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	nightsoulState *nightsoul.State
-	a1Count        int
-	a4Count        int
-	c2buff         []float64
-	c2stacks       int
-	c6buff         []float64
+	nightsoulState     *nightsoul.State
+	particlesGenerated bool
+	c2Bonus            []float64
+	c6stacks           *stacks.MultipleRefreshNoRemove
+	c6bonus            []float64
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -30,33 +30,28 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 	c.EnergyMax = 60
 	c.NormalHitNum = normalHitNum
-	c.SkillCon = 5
 	c.BurstCon = 3
-	c.HasArkhe = false
-
-	w.Character = &c
-
+	c.SkillCon = 5
 	c.nightsoulState = nightsoul.New(s, w)
 	c.nightsoulState.MaxPoints = 80
+
+	w.Character = &c
 
 	return nil
 }
 
 func (c *char) Init() error {
-	c.c2buff = make([]float64, attributes.EndStatType)
-	c.c6buff = make([]float64, attributes.EndStatType)
-	c.a1()
-	c.a4()
-	c.c1()
-	c.c2()
+	c.a1Init()
+	c.a4Init()
+	c.c1Init()
+	c.c2Init()
+	c.c6Init()
 	return nil
 }
 
-func (c *char) Condition(fields []string) (any, error) {
-	switch fields[0] {
-	case "nightsoul":
-		return c.nightsoulState.Condition(fields)
-	default:
-		return c.Character.Condition(fields)
+func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
+	if k == model.AnimationXingqiuN0StartDelay {
+		return 14
 	}
+	return c.Character.AnimationStartDelay(k)
 }

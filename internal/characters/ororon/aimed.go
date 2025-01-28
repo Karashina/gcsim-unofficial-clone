@@ -16,15 +16,15 @@ var aimedFrames [][]int
 var aimedHitmarks = []int{15, 86}
 
 func init() {
-	aimedFrames = make([][]int, 2)
+	aimedFrames = make([][]int, 3)
 
 	// Aimed Shot
-	aimedFrames[0] = frames.InitAbilSlice(25)
+	aimedFrames[0] = frames.InitAbilSlice(23)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
 	// Fully-Charged Aimed Shot
-	aimedFrames[1] = frames.InitAbilSlice(96)
+	aimedFrames[1] = frames.InitAbilSlice(85)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
 }
@@ -57,7 +57,8 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		Durability:           25,
 		Mult:                 fullaim[c.TalentLvlAttack()],
 		HitWeakPoint:         weakspot == 1,
-		HitlagHaltFrames:     .12 * 60,
+		HitlagHaltFrames:     0.12 * 60,
+		HitlagFactor:         0.01,
 		HitlagOnHeadshotOnly: true,
 		IsDeployable:         true,
 	}
@@ -66,6 +67,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		ai.Element = attributes.Physical
 		ai.Mult = aim[c.TalentLvlAttack()]
 	}
+
 	c.Core.QueueAttack(
 		ai,
 		combat.NewBoxHit(

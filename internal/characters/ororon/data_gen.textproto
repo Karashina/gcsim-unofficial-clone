@@ -1,18 +1,18 @@
-id: 10000003
+id: 10000105
 key: "ororon"
 rarity: QUALITY_PURPLE
 body: BODY_MALE
 region: ASSOC_TYPE_NATLAN
 element: Electric
 weapon_class: WEAPON_BOW
-icon_name: "UI_AvatarIcon_Ambor"
+icon_name: "UI_AvatarIcon_Olorun"
 stats: {
-   base_hp: 775
-   base_atk: 49
-   base_def: 20
+   base_hp: 775.02234
+   base_atk: 20.4792
+   base_def: 49.2135
    hp_curve: GROW_CURVE_HP_S4
-   atk_curve: GROW_CURVE_ATTACK_S5
-   def_cruve: GROW_CURVE_HP_S5
+   atk_curve: GROW_CURVE_ATTACK_S4
+   def_cruve: GROW_CURVE_HP_S4
    promo_data: {
       max_level: 20
       add_props: {
@@ -32,15 +32,15 @@ stats: {
       max_level: 40
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 579
+         value: 578.9814
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 37
+         value: 36.765
       }
       add_props: {
-         prop_type: FIGHT_PROP_ATTACK_PERCENT
-         value: 16
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 15.29937
       }
       add_props: {
          prop_type: FIGHT_PROP_ATTACK_PERCENT
@@ -48,17 +48,17 @@ stats: {
    }
    promo_data: {
       max_level: 50
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 990.3795
+         value: 990.36285
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 63.2885
+         value: 62.8875
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 27.368
+         value: 26.169975
       }
       add_props: {
          prop_type: FIGHT_PROP_ATTACK_PERCENT
@@ -69,15 +69,15 @@ add_props: {
       max_level: 60
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1538.9241
+         value: 1538.8716
       }
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 98.3423
+         value: 97.7175
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 42.5264
+         value: 40.664116
       }
       add_props: {
          prop_type: FIGHT_PROP_ATTACK_PERCENT
@@ -88,15 +88,15 @@ add_props: {
       max_level: 70
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1950.3036
+         value: 1950.253
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 124.6308
+         value: 123.84
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 53.8944
+         value: 51.53472
       }
       add_props: {
          prop_type: FIGHT_PROP_ATTACK_PERCENT
@@ -107,15 +107,15 @@ add_props: {
       max_level: 80
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2361.6831
+         value: 2361.6345
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 150.9193
+         value: 149.9625
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 65.2624
+         value: 62.405327
       }
       add_props: {
          prop_type: FIGHT_PROP_ATTACK_PERCENT
@@ -126,15 +126,15 @@ add_props: {
       max_level: 90
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2773.1205
+         value: 2773.016
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 177.2115
+         value: 176.085
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 76.632
+         value: 73.27593
       }
       add_props: {
          prop_type: FIGHT_PROP_ATTACK_PERCENT
@@ -143,9 +143,9 @@ add_props: {
    }
 }
 skill_details: {
-   skill: 10262
-   burst: 10265
-   attack: 10261
+   skill: 30502
+   burst: 30505
+   attack: 30501
    burst_energy_cost: 60
 }
-name_text_hash_map: 1021947691
+name_text_hash_map: 1198350762

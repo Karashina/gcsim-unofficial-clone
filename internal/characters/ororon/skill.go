@@ -11,56 +11,62 @@ import (
 
 var skillFrames []int
 
-const (
-	skillKey      = "ororon-skill-a1-hook"
-	skillHitmark  = 24
-	skillInterval = 70
-)
+const skillHitmark = 31
 
 func init() {
-	skillFrames = frames.InitAbilSlice(12) // E -> E
+	skillFrames = frames.InitAbilSlice(31) // E -> Dash
+	skillFrames[action.ActionAttack] = 30
+	skillFrames[action.ActionCharge] = 30
+	skillFrames[action.ActionBurst] = 30
+	skillFrames[action.ActionJump] = 30
+	skillFrames[action.ActionWalk] = 30
+	skillFrames[action.ActionSwap] = 29
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-
-	c.AddStatus(skillKey, 15*60, true)
+	c.particlesGenerated = false
+	travel, ok := p["travel"]
+	if !ok {
+		travel = 10
+	}
 
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Night's Sling: Spirit Orb DMG (E)",
+		Abil:           "Spirit Orb DMG",
 		AttackTag:      attacks.AttackTagElementalArt,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		ICDTag:         attacks.ICDTagElementalArt,
 		ICDGroup:       attacks.ICDGroupDefault,
-		StrikeType:     attacks.StrikeTypePierce,
+		StrikeType:     attacks.StrikeTypeDefault,
 		Element:        attributes.Electro,
 		Durability:     25,
-		Mult:           skill[c.TalentLvlSkill()],
+		Mult:           spiritOrb[c.TalentLvlSkill()],
+		HitlagFactor:   0.05,
 	}
 
-	skillhits := 4
-	if c.Base.Cons >= 1 {
-		skillhits = 6
+	enemies := []combat.Target{c.Core.Combat.PrimaryTarget()}
+	maxHits := 3 + c.c1ExtraBounce()
+	for i := 0; len(enemies) < maxHits && i < c.Core.Combat.EnemyCount(); i++ {
+		newEnemy := c.Core.Combat.Enemy(i)
+		if newEnemy.Key() == enemies[0].Key() {
+			continue
+		}
+		enemies = append(enemies, newEnemy)
 	}
-	area := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10)
-	enemies := c.Core.Combat.RandomEnemiesWithinArea(area, nil, skillhits)
-
-	j := 0
-	for _, e := range enemies {
+	for i, e := range enemies {
 		c.Core.QueueAttack(
 			ai,
-			combat.NewSingleTargetHit(e.Key()),
-			skillHitmark+skillInterval*j,
-			skillHitmark+skillInterval*j,
-			c.a4CB,
-			c.c1cb,
+			combat.NewCircleHitOnTarget(e, nil, 0.6),
+			skillHitmark,
+			skillHitmark+travel*(i+1),
 			c.particleCB,
+			c.makeA4cb(),
+			c.makeC1cb(),
 		)
-		j++
 	}
 
-	c.SetCDWithDelay(action.ActionSkill, 15*60, 0)
-
+	c.SetCDWithDelay(action.ActionSkill, 15*60, 14)
+	c.a1OnSkill()
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
@@ -73,6 +79,9 @@ func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
-	count := 3.0
-	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Electro, c.ParticleDelay)
+	if c.particlesGenerated {
+		return
+	}
+	c.particlesGenerated = true
+	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Electro, c.ParticleDelay)
 }

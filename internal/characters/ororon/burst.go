@@ -6,34 +6,27 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
-const (
-	burstInitialHitmarks    = 41
-	burstDoTInitialHitmarks = 63
-	burstDoTInterval        = 59
-	burstDoTIntervalC4      = 39
-)
+var burstFrames []int
 
-var (
-	burstFrames []int
-)
+var burstTicks = []int{69, 63, 60, 60, 60, 60, 60, 60, 60}
+
+const burstHitmark = 36 // Initial Hit
 
 func init() {
-	burstFrames = frames.InitAbilSlice(180) // charge
-	burstFrames[action.ActionAttack] = 167
-	burstFrames[action.ActionSkill] = 166
-	burstFrames[action.ActionDash] = 167
-	burstFrames[action.ActionJump] = 167
-	burstFrames[action.ActionWalk] = 167
-	burstFrames[action.ActionSwap] = 108
+	burstFrames = frames.InitAbilSlice(62) // Q -> N1/CA/E/Walk
+	burstFrames[action.ActionDash] = 59
+	burstFrames[action.ActionJump] = 60
+	burstFrames[action.ActionSwap] = 61
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-
+	// first zap has no icd and hits everyone
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Dark Voices Echo: Ritual DMG (Q)",
+		Abil:           "Ritual DMG",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		ICDTag:         attacks.ICDTagNone,
@@ -43,52 +36,53 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Durability:     25,
 		Mult:           burst[c.TalentLvlBurst()],
 	}
-	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 7)
-	c.Core.QueueAttack(ai, burstArea, burstInitialHitmarks, burstInitialHitmarks)
+	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 2.3}, 6.5)
+	c.Core.QueueAttack(
+		ai,
+		ap,
+		burstHitmark,
+		burstHitmark,
+		c.makeC2cb(),
+	)
+	c.QueueCharTask(c.c4EnergyRestore, burstHitmark)
 
-	aidot := combat.AttackInfo{
+	ai = combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Dark Voices Echo: Soundwave Collision DMG (Q)",
+		Abil:           "Soundwave Collision DMG",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-		ICDTag:         attacks.ICDTagElementalBurst,
-		ICDGroup:       attacks.ICDGroupDoriBurst,
+		ICDTag:         attacks.ICDTagOroronElmentalBurst,
+		ICDGroup:       attacks.ICDGroupOroronElementalBurst,
 		StrikeType:     attacks.StrikeTypeDefault,
 		Element:        attributes.Electro,
 		Durability:     25,
-		Mult:           burstdot[c.TalentLvlBurst()],
+		Mult:           soundwave[c.TalentLvlBurst()],
 	}
 
-	bursthitcount := 9
-	interval := burstDoTInterval
-	if c.Base.Cons >= 4 {
-		bursthitcount = 11
-		interval = burstDoTIntervalC4
-	}
-	for i := 0; i < bursthitcount; i++ {
-		hitmark := burstDoTInitialHitmarks + interval*i
+	progress := 0
+	for i := 0; i < 9; i++ {
+		progress += int(float64(burstTicks[i]) * c.c4BurstInterval())
 		c.QueueCharTask(func() {
-			c.Core.QueueAttack(aidot, burstArea, 0, 0)
-		}, hitmark)
+			// TODO: make 3 boxes (bullets?) hits instead of 1 circle hit?
+			c.Core.QueueAttack(
+				ai,
+				ap,
+				0,
+				0,
+				c.makeC2cb(),
+			)
+		}, progress)
 	}
+	c.c2OnBurst()
+	c.c6OnBurst()
 
-	c.c2Init()
-	c.c6()
-	c.SetCDWithDelay(action.ActionBurst, 15*60, 0)
-	c.ConsumeEnergy(7)
-
-	c.QueueCharTask(c.c4Energy, 9)
+	c.SetCD(action.ActionBurst, 15*60)
+	c.ConsumeEnergy(22)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
 		State:           action.BurstState,
 	}, nil
-}
-
-func (c *char) c4Energy() {
-	if c.Base.Cons >= 4 {
-		c.AddEnergy("ororon-c4", 8)
-	}
 }
