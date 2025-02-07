@@ -1,0 +1,40 @@
+package_name: mizuki
+genshin_id: 90000007
+key: mizuki
+action_param_keys:
+    attack:
+        - param: "travel"
+    low_plunge:
+        - param: "collision"
+    high_plunge:
+        - param: "collision"
+skill_data_mapping:
+    attack:
+        attack_1:
+            - 0 # 1-Hit DMG|{param0:F1P}
+        attack_2:
+            - 1 # 2-Hit DMG|{param1:F1P}
+        attack_3:
+            - 2 # 3-Hit DMG|{param2:F1P}
+        charge:
+            - 3 # Charged Attack DMG|{param4:P}
+        collision:
+            - 6 # Plunge DMG|{param6:F1P}
+        lowPlunge:
+            - 7 # Low/High Plunge DMG|{param7:P}/{param8:P}
+        highPlunge:
+            - 8 # Low/High Plunge DMG|{param7:P}/{param8:P}
+    skill:
+        skill:
+            - 0 # Skill DMG|{param0:P}
+        skillDot:
+            - 1 # Skill DMG|{param0:P}
+    burst:
+        burst:
+            - 0 # Skill DMG|{param0:P}
+        burstSnack:
+            - 1 # Skill DMG|{param0:P}
+        burstHeal:
+            - 2 # Skill DMG|{param0:P}
+        burstHealC:
+            - 3 # Skill DMG|{param0:P}
