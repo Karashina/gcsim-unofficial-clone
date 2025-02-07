@@ -203,6 +203,7 @@ var weaponNames = []string{
 	"swordofdescension",
 	"swordofnarzissenkreuz",
 	"talkingstick",
+	"tamayuratei",
 	"thealleyflash",
 	"thebell",
 	"theblacksword",
@@ -412,6 +413,7 @@ const (
 	SwordOfDescension
 	SwordOfNarzissenkreuz
 	TalkingStick
+	TamayuraTeiNoOhanashi
 	TheAlleyFlash
 	TheBell
 	TheBlackSword
