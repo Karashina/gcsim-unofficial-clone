@@ -97,7 +97,7 @@ func (c *char) absorbEle() attributes.Element {
 	if c.Base.Ascension < 1 {
 		return attributes.Anemo
 	}
-	AbsorbCheckLocation := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5)
+	AbsorbCheckLocation := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.5)
 	absorbCheck := c.Core.Combat.AbsorbCheck(c.Index, AbsorbCheckLocation, attributes.Pyro, attributes.Hydro, attributes.Electro, attributes.Cryo)
 	if absorbCheck == attributes.NoElement {
 		return attributes.Anemo
