@@ -52,10 +52,14 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	//Aura Check
 	c.shieldele = attributes.Anemo
-	c.QueueCharTask(func() {
-		c.shieldele = c.absorbEle()
-	}, AuracheckDelay+heldtime)
-
+	for i := 0; i < 12; i++ {
+		if c.shieldele != attributes.Pyro {
+			break // for some reason, the aura check stops if shield ele is pyro. wtf lanyan
+		}
+		c.QueueCharTask(func() {
+			c.shieldele = c.absorbEle()
+		}, AuracheckDelay+heldtime+i)
+	}
 	//Shield
 	c.QueueCharTask(func() {
 		exist := c.Core.Player.Shields.Get(shield.LanyanSkill)
@@ -96,6 +100,9 @@ func (c *char) particleCB(a combat.AttackCB) {
 func (c *char) absorbEle() attributes.Element {
 	if c.Base.Ascension < 1 {
 		return attributes.Anemo
+	}
+	if c.IsAbsorbed {
+		return c.shieldele
 	}
 	AbsorbCheckLocation := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.5)
 	absorbCheck := c.Core.Combat.AbsorbCheck(c.Index, AbsorbCheckLocation, attributes.Pyro, attributes.Hydro, attributes.Electro, attributes.Cryo)
