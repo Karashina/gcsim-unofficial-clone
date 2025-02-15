@@ -65,7 +65,6 @@ func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
 	}
-	m := make([]float64, attributes.EndStatType)
 
 	var elems = []attributes.Stat{attributes.PyroP, attributes.HydroP, attributes.CryoP, attributes.ElectroP}
 	// recalc em
@@ -79,9 +78,8 @@ func (c *char) c2() {
 				AffectedStat: ele,
 				Extra:        true,
 				Amount: func() ([]float64, bool) {
-					clear(m)
-					m[ele] = dmg
-					return m, true
+					c.c2buff[ele] = dmg
+					return c.c2buff, true
 				},
 			})
 		}
