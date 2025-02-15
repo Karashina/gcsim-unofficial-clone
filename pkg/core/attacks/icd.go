@@ -57,6 +57,7 @@ const (
 	ICDGroupShadowhuntShell
 	ICDGroupChascaConvertedShell
 	ICDGroupFrostfallStorm
+	ICDGroupDreamdrifter
 	EndDefaultICDGroups
 )
 
@@ -76,6 +77,7 @@ func init() {
 	ICDGroupResetTimer[ICDGroupShadowhuntShell] = 90
 	ICDGroupResetTimer[ICDGroupChascaConvertedShell] = 90
 	ICDGroupResetTimer[ICDGroupFrostfallStorm] = 90
+	ICDGroupResetTimer[ICDGroupDreamdrifter] = 72
 
 	ICDGroupEleApplicationSequence = make([][]float64, ICDGroupLength)
 	ICDGroupEleApplicationSequence[ICDGroupDefault] = []float64{1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0}
@@ -88,6 +90,7 @@ func init() {
 	ICDGroupEleApplicationSequence[ICDGroupShadowhuntShell] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupChascaConvertedShell] = []float64{1, 0, 1, 0, 1, 0, 1, 0}
 	ICDGroupEleApplicationSequence[ICDGroupFrostfallStorm] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
+	ICDGroupEleApplicationSequence[ICDGroupDreamdrifter] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 
 	ICDGroupDamageSequence = make([][]float64, ICDGroupLength)
 	ICDGroupDamageSequence[ICDGroupDefault] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
@@ -102,4 +105,5 @@ func init() {
 	ICDGroupDamageSequence[ICDGroupShadowhuntShell] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupChascaConvertedShell] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupFrostfallStorm] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
+	ICDGroupDamageSequence[ICDGroupDreamdrifter] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 }

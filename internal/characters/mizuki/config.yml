@@ -28,13 +28,15 @@ skill_data_mapping:
         skill:
             - 0 # Skill DMG|{param0:P}
         skillDot:
-            - 1 # Skill DMG|{param0:P}
+            - 1 # Continuous Attack DMG|{param0:P}
+        skillBuff:
+            - 1 # Elemental Mastery-Based Swirl DMG Increase|{param0:P} EM
     burst:
         burst:
             - 0 # Skill DMG|{param0:P}
         burstSnack:
-            - 1 # Skill DMG|{param0:P}
+            - 1 # Munen Shockwave DMG|{param0:P}
         burstHeal:
-            - 2 # Skill DMG|{param0:P}
+            - 2 # Snack Pick-Up HP Regeneration|{param0:P} EM
         burstHealC:
-            - 3 # Skill DMG|{param0:P}
+            - 3 # Snack Pick-Up HP Regeneration|{param0:P} Constant

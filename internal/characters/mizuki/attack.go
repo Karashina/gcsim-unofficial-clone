@@ -12,7 +12,7 @@ import (
 
 var (
 	attackFrames   [][]int
-	attackHitmarks = []int{99, 99, 99}
+	attackHitmarks = []int{18, 26, 44}
 	attackRadius   = []float64{1, 1, 1}
 )
 
@@ -21,27 +21,27 @@ const normalHitNum = 3
 func init() {
 	attackFrames = make([][]int, normalHitNum)
 
-	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 99)
-	attackFrames[0][action.ActionAttack] = 99
-	attackFrames[0][action.ActionCharge] = 99
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 23)
+	attackFrames[0][action.ActionAttack] = 23
+	attackFrames[0][action.ActionCharge] = 23
 	attackFrames[0][action.ActionSkill] = attackHitmarks[0]
 	attackFrames[0][action.ActionBurst] = attackHitmarks[0]
 	attackFrames[0][action.ActionDash] = attackHitmarks[0]
 	attackFrames[0][action.ActionJump] = attackHitmarks[0]
 	attackFrames[0][action.ActionSwap] = attackHitmarks[0]
 
-	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 99)
-	attackFrames[1][action.ActionAttack] = 99
-	attackFrames[1][action.ActionCharge] = 99
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 33)
+	attackFrames[1][action.ActionAttack] = 33
+	attackFrames[1][action.ActionCharge] = 33
 	attackFrames[1][action.ActionSkill] = attackHitmarks[1]
 	attackFrames[1][action.ActionBurst] = attackHitmarks[1]
 	attackFrames[1][action.ActionDash] = attackHitmarks[1]
 	attackFrames[1][action.ActionJump] = attackHitmarks[1]
 	attackFrames[1][action.ActionSwap] = attackHitmarks[1]
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 99)
-	attackFrames[2][action.ActionAttack] = 99
-	attackFrames[2][action.ActionCharge] = 99
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 80)
+	attackFrames[2][action.ActionAttack] = 80
+	attackFrames[2][action.ActionCharge] = 80
 	attackFrames[2][action.ActionSkill] = attackHitmarks[2]
 	attackFrames[2][action.ActionBurst] = attackHitmarks[2]
 	attackFrames[2][action.ActionDash] = attackHitmarks[2]

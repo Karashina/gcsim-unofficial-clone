@@ -1,8 +1,6 @@
 package mizuki
 
 import (
-	"fmt"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -17,21 +15,21 @@ var burstFrames []int
 
 const (
 	burstKey           = "mizuki-burst"
-	burstHitmark       = 99
-	burstCDDelay       = 99
-	burstEnergyDelay   = 99
-	snackDelay         = 99
+	burstHitmark       = 94
+	burstCDDelay       = 95
+	burstEnergyDelay   = 5
+	snackDelay         = 190
 	burstIntervalKey   = "mizuki-burst-interval"
-	SnackSpawnInterval = 99
+	SnackSpawnInterval = 60
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(99)
-	burstFrames[action.ActionCharge] = 99
-	burstFrames[action.ActionSkill] = 99
-	burstFrames[action.ActionDash] = 99
-	burstFrames[action.ActionJump] = 99
-	burstFrames[action.ActionSwap] = 99
+	burstFrames = frames.InitAbilSlice(103)
+	burstFrames[action.ActionCharge] = 103
+	burstFrames[action.ActionSkill] = 103
+	burstFrames[action.ActionDash] = 103
+	burstFrames[action.ActionJump] = 103
+	burstFrames[action.ActionSwap] = 103
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
@@ -40,18 +38,19 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		ActorIndex: c.Index,
 		Abil:       "Anraku Secret Spring Therapy(Initial DMG)",
 		AttackTag:  attacks.AttackTagElementalBurst,
-		ICDTag:     attacks.ICDTagElementalBurst,
+		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
 		StrikeType: attacks.StrikeTypeDefault,
 		Element:    attributes.Anemo,
-		Durability: 25,
+		Durability: 50,
 		Mult:       burst[c.TalentLvlBurst()],
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5), burstHitmark, burstHitmark)
 
-	c.AddStatus(burstKey, 99*60, false)
-	c.SetCDWithDelay(action.ActionBurst, 99*60, burstCDDelay)
+	c.AddStatus(burstKey, 12*60, false)
+	c.SetCDWithDelay(action.ActionBurst, 15*60, burstCDDelay)
 	c.ConsumeEnergy(burstEnergyDelay)
+	c.c4Count = 0
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
@@ -64,12 +63,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 func (c *char) snackHandler(src string) {
 	snackfunc := func() {
 		active := c.Core.Player.ActiveChar()
-		c.Core.Log.NewEvent(
-			fmt.Sprintf("special snack picked up by %v", active.Base.Key.String()),
-			glog.LogCharacterEvent,
-			c.Index,
-		)
-		if active.CurrentHPRatio() > 0.7 {
+		if active.CurrentHPRatio() > 0.7 || c.Base.Cons >= 4 {
 			// snacc attacc
 			c.Core.Tasks.Add(func() {
 				ai := combat.AttackInfo{
@@ -85,7 +79,8 @@ func (c *char) snackHandler(src string) {
 				}
 				c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5), 0, 0)
 			}, snackDelay)
-		} else {
+		}
+		if active.CurrentHPRatio() <= 0.7 || c.Base.Cons >= 4 {
 			// snacc heal
 			c.Core.Tasks.Add(func() {
 				heal := burstHealC[c.TalentLvlBurst()] + burstHeal[c.TalentLvlBurst()]*c.Stat(attributes.EM)
@@ -97,8 +92,8 @@ func (c *char) snackHandler(src string) {
 					Bonus:   c.Stat(attributes.Heal),
 				})
 			}, snackDelay)
+			c.c4()
 		}
-
 	}
 	switch src {
 	case "init":
@@ -107,6 +102,11 @@ func (c *char) snackHandler(src string) {
 			if c.StatusIsActive(burstIntervalKey) {
 				return false
 			}
+			c.Core.Log.NewEvent(
+				"special snack picked up by dash",
+				glog.LogCharacterEvent,
+				c.Index,
+			)
 			c.AddStatus(burstIntervalKey, SnackSpawnInterval, false)
 			snackfunc()
 			return false
