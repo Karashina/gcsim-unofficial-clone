@@ -28,11 +28,11 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	r := float64(p.Refine)
 
 	onSwirl := make([]float64, attributes.EndStatType)
-	onSwirl[attributes.EM] = 120 + 0*r
+	onSwirl[attributes.EM] = 90 + 30*r
 	onSkill := make([]float64, attributes.EndStatType)
-	onSkill[attributes.EM] = 96 + 0*r
+	onSkill[attributes.EM] = 72 + 24*r
 	onBurst := make([]float64, attributes.EndStatType)
-	onBurst[attributes.EM] = 32 + 0*r
+	onBurst[attributes.EM] = 24 + 8*r
 
 	swirlcb := func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
