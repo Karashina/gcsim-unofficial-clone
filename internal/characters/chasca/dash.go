@@ -8,26 +8,17 @@ import (
 var skillDashFrames []int
 
 func init() {
-	skillDashFrames = frames.InitAbilSlice(24) // dash
-	skillDashFrames[action.ActionAttack] = 3
-	skillDashFrames[action.ActionSkill] = 2
-	skillDashFrames[action.ActionBurst] = 4
-	skillDashFrames[action.ActionJump] = 2
-	skillDashFrames[action.ActionWalk] = 3
-	skillDashFrames[action.ActionSwap] = 1
+	skillDashFrames = frames.InitAbilSlice(29)
+	skillDashFrames[action.ActionSkill] = 6
+	skillDashFrames[action.ActionBurst] = 25
 }
-
 func (c *char) Dash(p map[string]int) (action.Info, error) {
 	if c.nightsoulState.HasBlessing() {
-		c.reduceNightsoulPoints(13)
-
-		// assuming doesn't contribute to dash CD
-		return action.Info{
-			Frames:          frames.NewAbilFunc(skillDashFrames),
-			AnimationLength: skillDashFrames[action.InvalidAction],
-			CanQueueAfter:   skillDashFrames[action.ActionSwap],
-			State:           action.DashState,
-		}, nil
+		c.reduceNightsoulPoints(13.3)
+		d, e := c.Character.Dash(p)
+		d.Frames = c.skillNextFrames(d.Frames, 0)
+		d.CanQueueAfter = 1 // can run out of nightsoul and immediately start falling
+		return d, e
 	}
 	return c.Character.Dash(p)
 }

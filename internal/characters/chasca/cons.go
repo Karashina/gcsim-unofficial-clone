@@ -4,117 +4,148 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/genshinsim/gcsim/pkg/core/glog"
 )
 
-const (
-	c2ICDKey = "chasca-c2-icd"
-	c4ICDKey = "chasca-c4-icd"
-	c6Key    = "chasca-c6"
-	c6ICDKey = "chasca-c6-icd"
-)
+const c6key = "chasca-c6"
+const c6IcdKey = "chasca-c6-icd"
 
-func (c *char) c2CB(a combat.AttackCB) {
+func (c *char) c1() float64 {
+	if c.Base.Cons < 1 {
+		return 0.0
+	}
+	return 0.333
+}
+
+func (c *char) c1Conversion() {
+	if c.Base.Cons < 1 {
+		return
+	}
+	if c.bulletsNext[2] == attributes.Anemo {
+		return
+	}
+	c.bulletsNext[1] = c.partyPHECTypesUnique[c.Core.Rand.Intn(len(c.partyPHECTypesUnique))]
+}
+
+func (c *char) c2A1Stack() int {
 	if c.Base.Cons < 2 {
-		return
+		return 0
 	}
-	if a.AttackEvent.Info.Element == attributes.Anemo {
-		return
-	}
-	if a.Target.Type() != targets.TargettableEnemy {
-		return
-	}
-	if c.StatusIsActive(c2ICDKey) {
-		return
-	}
-
-	ai := combat.AttackInfo{
-		ActorIndex:     c.Index,
-		Abil:           "Muzzle, the Searing Smoke (C2)",
-		AttackTag:      attacks.AttackTagExtra,
-		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-		ICDTag:         attacks.ICDTagNone,
-		ICDGroup:       attacks.ICDGroupDefault,
-		StrikeType:     attacks.StrikeTypeDefault,
-		Mult:           4,
-		Element:        a.AttackEvent.Info.Element,
-		Durability:     25,
-	}
-
-	c.Core.QueueAttack(
-		ai,
-		combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key()),
-		0,
-		0,
-	)
-
-	c.AddStatus(c2ICDKey, particleICD, true)
+	return 1
 }
 
-func (c *char) c4CB(a combat.AttackCB) {
+func (c *char) c2cb(src int) combat.AttackCBFunc {
+	if c.Base.Cons < 2 {
+		return nil
+	}
+	return func(ac combat.AttackCB) {
+		if c.c2Src == src {
+			return
+		}
+		c.c2Src = src
+
+		ai := combat.AttackInfo{
+			ActorIndex:     c.Index,
+			Abil:           "Shining Shadowhunt Shell (C2)",
+			AttackTag:      attacks.AttackTagExtra,
+			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+			ICDTag:         attacks.ICDTagNone,
+			ICDGroup:       attacks.ICDGroupDefault,
+			StrikeType:     attacks.StrikeTypeDefault,
+			Element:        ac.AttackEvent.Info.Element,
+			Durability:     25,
+			Mult:           4,
+		}
+		ap := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5)
+		c.Core.QueueAttack(ai, ap, 0, 1)
+	}
+}
+
+func (c *char) c4cb(src int) combat.AttackCBFunc {
 	if c.Base.Cons < 4 {
-		return
+		return nil
 	}
-	c.AddEnergy("chasca-c4", 1.5)
+	return func(ac combat.AttackCB) {
+		c.AddEnergy("chasca-c4", 1.5)
+		if c.c4Src == src {
+			return
+		}
+		c.c4Src = src
 
-	if a.AttackEvent.Info.Abil != "Radiant Soulseeker Shell DMG (Q)" {
-		return
+		ai := combat.AttackInfo{
+			ActorIndex:     c.Index,
+			Abil:           "Radiant Shadowhunt Shell (C4)",
+			AttackTag:      attacks.AttackTagExtra,
+			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+			ICDTag:         attacks.ICDTagNone,
+			ICDGroup:       attacks.ICDGroupDefault,
+			StrikeType:     attacks.StrikeTypeDefault,
+			Element:        ac.AttackEvent.Info.Element,
+			Durability:     25,
+			Mult:           4,
+		}
+		// TODO: get the actual target range
+		ap := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5)
+		c.Core.QueueAttack(ai, ap, 0, 1)
 	}
-	if a.Target.Type() != targets.TargettableEnemy {
-		return
-	}
-	if c.StatusIsActive(c4ICDKey) {
-		return
-	}
-
-	ai := combat.AttackInfo{
-		ActorIndex:     c.Index,
-		Abil:           "Sparks, the Sudden Shot (C4)",
-		AttackTag:      attacks.AttackTagExtra,
-		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-		ICDTag:         attacks.ICDTagNone,
-		ICDGroup:       attacks.ICDGroupDefault,
-		StrikeType:     attacks.StrikeTypeDefault,
-		Mult:           4,
-		Element:        a.AttackEvent.Info.Element,
-		Durability:     25,
-	}
-
-	c.Core.QueueAttack(
-		ai,
-		combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key()),
-		0,
-		0,
-	)
-
-	c.AddStatus(c4ICDKey, particleICD, true)
 }
 
-func (c *char) c6CDbuff() {
+func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	m := make([]float64, attributes.EndStatType)
-	c.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBaseWithHitlag("Showdown, the Glory of Battle (C6)", -1),
-		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-			if !c.StatusIsActive(c6Key) {
-				return nil, false
-			}
-			if atk.Info.Abil != "Shining Shadowhunt Shell DMG (E)" && atk.Info.Abil != "Shadowhunt Shell DMG (E)" {
-				return nil, false
-			}
-			m[attributes.CD] = 1.2
-			return m, true
-		},
-	})
+	if c.Base.Ascension < 1 {
+		return
+	}
+	if c.StatusIsActive(c6IcdKey) {
+		return
+	}
+	c.AddStatus(c6IcdKey, 3*60, true)
+	c.AddStatus(c6key, 3*60, true)
 }
 
-func (c *char) removec6() {
+// if c6 is active, mark the aim attack as buffed (instant bullet load + cdmg) and remove the status
+func (c *char) c6AddBuff() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	c.DeleteStatus(c6Key)
+	if c.Base.Ascension < 1 {
+		return
+	}
+	if !c.StatusIsActive(c6key) {
+		return
+	}
+	c.c6Used = true
+	c.DeleteStatus(c6key)
+}
+
+func (c *char) c6buff() func(*combat.Snapshot) {
+	if c.Base.Cons < 6 {
+		return nil
+	}
+	if c.Base.Ascension < 1 {
+		return nil
+	}
+	if !c.c6Used {
+		return nil
+	}
+	c.c6Used = false
+
+	return func(snap *combat.Snapshot) {
+		old := snap.Stats[attributes.CD]
+		snap.Stats[attributes.CD] += 1.20
+		c.Core.Log.NewEvent("c6 adding crit dmg", glog.LogCharacterEvent, c.Index).
+			Write("old", old).
+			Write("new", snap.Stats[attributes.CD])
+	}
+}
+
+func (c *char) c6ChargeTime(count int) int {
+	if c.Base.Cons < 6 {
+		return cumuSkillAimLoadFrames[count-1]
+	}
+	if c.c6Used {
+		return cumuSkillAimLoadFramesC6Instant[count-1]
+	}
+	return cumuSkillAimLoadFramesC6[count-1]
 }

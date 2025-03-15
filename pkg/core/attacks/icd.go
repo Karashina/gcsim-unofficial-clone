@@ -22,8 +22,6 @@ const (
 	ICDTagDash
 	ICDTagTravelerWakeOfEarth
 	ICDTagTravelerDewdrop
-	ICDTagShadowhuntShell
-	ICDTagShiningShadowhuntShell
 	ICDTagFrostfallStorm
 
 	ICDReactionDamageDelim
@@ -37,6 +35,7 @@ const (
 	ICDTagSwirlElectro
 	ICDTagBurningDamage
 	ICDTagBloomDamage
+	ICDTagBountifulCoreDamage // special tag for nilou
 	ICDTagBurgeonDamage
 	ICDTagHyperbloomDamage
 
@@ -54,8 +53,6 @@ const (
 	ICDGroupBurning
 	ICDGroupTravelerDewdrop
 	ICDGroupTravelerBurst
-	ICDGroupShadowhuntShell
-	ICDGroupChascaConvertedShell
 	ICDGroupFrostfallStorm
 	ICDGroupDreamdrifter
 	EndDefaultICDGroups
@@ -74,8 +71,6 @@ func init() {
 	ICDGroupResetTimer[ICDGroupBurning] = 120
 	ICDGroupResetTimer[ICDGroupTravelerDewdrop] = 90
 	ICDGroupResetTimer[ICDGroupTravelerBurst] = 480
-	ICDGroupResetTimer[ICDGroupShadowhuntShell] = 90
-	ICDGroupResetTimer[ICDGroupChascaConvertedShell] = 90
 	ICDGroupResetTimer[ICDGroupFrostfallStorm] = 90
 	ICDGroupResetTimer[ICDGroupDreamdrifter] = 72
 
@@ -87,8 +82,6 @@ func init() {
 	ICDGroupEleApplicationSequence[ICDGroupBurning] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupTravelerDewdrop] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupTravelerBurst] = []float64{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0}
-	ICDGroupEleApplicationSequence[ICDGroupShadowhuntShell] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
-	ICDGroupEleApplicationSequence[ICDGroupChascaConvertedShell] = []float64{1, 0, 1, 0, 1, 0, 1, 0}
 	ICDGroupEleApplicationSequence[ICDGroupFrostfallStorm] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupDreamdrifter] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 
@@ -102,8 +95,6 @@ func init() {
 	ICDGroupDamageSequence[ICDGroupBurning] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupTravelerDewdrop] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupTravelerBurst] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-	ICDGroupDamageSequence[ICDGroupShadowhuntShell] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
-	ICDGroupDamageSequence[ICDGroupChascaConvertedShell] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupFrostfallStorm] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupDreamdrifter] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 }

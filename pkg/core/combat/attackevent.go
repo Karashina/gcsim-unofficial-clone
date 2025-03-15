@@ -57,12 +57,11 @@ type AttackInfo struct {
 	SourceIsSim bool
 	DoNotLog    bool
 	// hitlag stuff
-	Alignment            attacks.AdditionalTag // this is to track Arkhe/Nightsoul trigger (LEGACY NIGHTSOUL SUPPORT USED IN KINICH / KACHINA)
-	HitlagHaltFrames     float64               // this is the number of frames to pause by
-	HitlagFactor         float64               // this is factor to slow clock by
-	CanBeDefenseHalted   bool                  // for whacking ruin gaurds
-	IsDeployable         bool                  // if this is true, then hitlag does not affect owner
-	HitlagOnHeadshotOnly bool                  // if this is true, will only apply if HitWeakpoint is also true
+	HitlagHaltFrames     float64 // this is the number of frames to pause by
+	HitlagFactor         float64 // this is factor to slow clock by
+	CanBeDefenseHalted   bool    // for whacking ruin gaurds
+	IsDeployable         bool    // if this is true, then hitlag does not affect owner
+	HitlagOnHeadshotOnly bool    // if this is true, will only apply if HitWeakpoint is also true
 }
 
 type Snapshot struct {

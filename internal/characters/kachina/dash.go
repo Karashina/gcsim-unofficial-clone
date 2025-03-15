@@ -8,7 +8,7 @@ import (
 
 func (c *char) Dash(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(skillRideKey) {
-		return action.Info{}, errors.New("You can't use dash while riding Turbo Twirly")
+		return action.Info{}, errors.New("you can't use dash while riding Turbo Twirly")
 	}
 
 	c.ApplyDashCD()

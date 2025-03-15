@@ -4,10 +4,7 @@ import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
@@ -20,63 +17,71 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	lastSwap       int
-	nightsoulState *nightsoul.State
-	nightsoulSrc   int
-	ElementSlot    []attributes.Element
-	Shells         []attributes.Element
-	loadednum      int
-	typeCount      int
-	anemoCount     int
-	anemoremaining int
-	a1Prob         float64
+	nightsoulState       *nightsoul.State
+	nightsoulSrc         int
+	partyPHECTypes       []attributes.Element
+	partyPHECTypesUnique []attributes.Element
+	bulletsToFire        []attributes.Element
+	bulletsNext          []attributes.Element
+	bulletPool           []attributes.Element
+	bulletsCharged       int
+	aimSrc               int
+	skillParticleICD     bool
+	c2Src                int
+	c4Src                int
+	c6Used               bool
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := char{}
 	c.Character = tmpl.NewWithWrapper(s, w)
-
+	c.nightsoulState = nightsoul.New(c.Core, c.CharWrapper)
 	c.EnergyMax = 60
 	c.NormalHitNum = normalHitNum
 	c.SkillCon = 3
 	c.BurstCon = 5
-	c.HasArkhe = false
 
 	w.Character = &c
 
-	c.nightsoulState = nightsoul.New(s, w)
-	c.nightsoulState.MaxPoints = 80
+	c.partyPHECTypesUnique = make([]attributes.Element, 0)
 
 	return nil
 }
 
 func (c *char) Init() error {
-	c.ElementSlot = make([]attributes.Element, 3)
-	c.Shells = make([]attributes.Element, 6)
-	c.onExitField()
-	c.CheckShellElement()
-	c.a1()
-	c.a4()
-	c.c6CDbuff()
-	c.onSwap()
-	return nil
-}
-
-// used for early CA cancel swap cd calculation
-func (c *char) onSwap() {
-	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
-		// do nothing if next char isn't chasca
-		next := args[1].(int)
-		if next != c.Index {
-			return false
+	types := map[attributes.Element]bool{}
+	for _, other := range c.Core.Player.Chars() {
+		switch ele := other.Base.Element; ele {
+		case attributes.Pyro, attributes.Hydro, attributes.Cryo, attributes.Electro:
+			if !types[ele] {
+				c.partyPHECTypesUnique = append(c.partyPHECTypesUnique, ele)
+			}
+			types[ele] = true
+			c.partyPHECTypes = append(c.partyPHECTypes, ele)
 		}
-		c.lastSwap = c.Core.F
-		return false
-	}, "chasca-swap")
+	}
+	c.bulletsNext = make([]attributes.Element, 6)
+	c.bulletsToFire = make([]attributes.Element, 6)
+	c.loadSkillHoldBullets()
+	c.a1DMGBuff()
+	c.a4()
+	return nil
 }
 
 func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
+	case "bullet1":
+		return int(c.bulletsNext[0]), nil
+	case "bullet2":
+		return int(c.bulletsNext[1]), nil
+	case "bullet3":
+		return int(c.bulletsNext[2]), nil
+	case "bullet4":
+		return int(c.bulletsNext[3]), nil
+	case "bullet5":
+		return int(c.bulletsNext[4]), nil
+	case "bullet6":
+		return int(c.bulletsNext[5]), nil
 	case "nightsoul":
 		return c.nightsoulState.Condition(fields)
 	default:
@@ -85,86 +90,22 @@ func (c *char) Condition(fields []string) (any, error) {
 }
 
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
+	if c.nightsoulState.HasBlessing() {
+		switch k {
+		case model.AnimationXingqiuN0StartDelay:
+			return 5
+		case model.AnimationYelanN0StartDelay:
+			return 0
+		default:
+			return c.Character.AnimationStartDelay(k)
+		}
+	}
 	switch k {
 	case model.AnimationXingqiuN0StartDelay:
-		return 11
+		return 12
+	case model.AnimationYelanN0StartDelay:
+		return 5
 	default:
-		return 11
+		return c.Character.AnimationStartDelay(k)
 	}
-}
-
-func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
-	if c.nightsoulState.HasBlessing() {
-		return 0
-	}
-	return c.Character.ActionStam(a, p)
-}
-
-func (c *char) onExitField() {
-	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
-		if c.nightsoulState.HasBlessing() {
-			c.cancelNightsoul()
-		}
-		return false
-	}, "chasca-exit")
-}
-
-func (c *char) CheckShellElement() {
-	chars := c.Core.Player.Chars()
-	i := 0
-	c.typeCount = 0
-	pyroCount := 0
-	hydroCount := 0
-	electroCount := 0
-	cryoCount := 0
-	for _, this := range chars {
-		if this.Index == c.Index {
-			continue
-		}
-		switch this.Base.Element {
-		case attributes.Pyro:
-			c.ElementSlot[i] = attributes.Pyro
-			if pyroCount == 0 {
-				c.typeCount++
-			}
-			pyroCount++
-		case attributes.Hydro:
-			c.ElementSlot[i] = attributes.Hydro
-			if hydroCount == 0 {
-				c.typeCount++
-			}
-			hydroCount++
-		case attributes.Cryo:
-			c.ElementSlot[i] = attributes.Cryo
-			if cryoCount == 0 {
-				c.typeCount++
-			}
-			cryoCount++
-		case attributes.Electro:
-			c.ElementSlot[i] = attributes.Electro
-			if electroCount == 0 {
-				c.typeCount++
-			}
-			electroCount++
-		default:
-			c.ElementSlot[i] = attributes.Anemo
-			c.anemoCount++
-		}
-		i++
-	}
-	c.Core.Log.NewEvent("Chasca Shells Init", glog.LogCharacterEvent, c.Index).
-		Write("Slot-0", c.ElementSlot[0]).
-		Write("Slot-1", c.ElementSlot[1]).
-		Write("Slot-2", c.ElementSlot[2])
-	c.ElementSlot = removeAnemoElement(c.ElementSlot)
-}
-
-func removeAnemoElement(elements []attributes.Element) []attributes.Element {
-	var result []attributes.Element
-	for _, element := range elements {
-		if element != attributes.Anemo {
-			result = append(result, element)
-		}
-	}
-	return result
 }

@@ -1,6 +1,8 @@
 package chasca
 
 import (
+	"fmt"
+
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
@@ -9,88 +11,77 @@ import (
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-func (c *char) a1() {
+var a1DMGBuff = []float64{0.0, 0.15, 0.35, 0.65, 0.65} // has an extra 0.65 for c2 stack
+var a1ConversionChance = []float64{0.0, 0.333, 0.667, 1.0}
+
+func (c *char) a1DMGBuff() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-
-	c.a1Prob = 0
-	a4buff := 0.0
-	c1mod := 0.0
-
-	if c.Base.Cons >= 1 {
-		c1mod = 0.333
-	}
-
-	switch c.typeCount {
-	case 0:
-		c.a1Prob = 0 + c1mod
-		if c.Base.Cons >= 2 {
-			a4buff = 0.15
-		}
-	case 1:
-		c.a1Prob = 0.33 + c1mod
-		a4buff = 0.15
-		if c.Base.Cons >= 2 {
-			a4buff = 0.35
-		}
-	case 2:
-		c.a1Prob = 0.667 + c1mod
-		a4buff = 0.35
-		if c.Base.Cons >= 2 {
-			a4buff = 0.65
-		}
-	case 3:
-		c.a1Prob = 1
-		a4buff = 0.65
-	default:
-		c.a1Prob = 0
-	}
-
 	m := make([]float64, attributes.EndStatType)
+	// assuming we don't need to add and remove this buff constantly
+	// since it would be active for all E-CAs anyways
 	c.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBaseWithHitlag("Bullet Trick (A1)", -1),
-		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-			if atk.Info.Abil != "Shining Shadowhunt Shell DMG (E)" {
+		Base: modifier.NewBase("chasca-a1", -1),
+		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+			if atk.Info.ICDTag != attacks.ICDTagChascaShining {
 				return nil, false
 			}
-			m[attributes.DmgP] = a4buff
+			m[attributes.DmgP] = a1DMGBuff[len(c.partyPHECTypesUnique)+c.c2A1Stack()]
 			return m, true
 		},
 	})
+}
+
+func (c *char) a1Conversion() attributes.Element {
+	if c.Base.Ascension < 1 {
+		return attributes.Anemo
+	}
+	if len(c.partyPHECTypesUnique) == 0 {
+		return attributes.Anemo
+	}
+	chance := a1ConversionChance[len(c.partyPHECTypesUnique)]
+	chance += c.c1()
+	if c.Core.Rand.Float64() > chance {
+		return attributes.Anemo
+	}
+	return c.partyPHECTypesUnique[c.Core.Rand.Intn(len(c.partyPHECTypesUnique))]
 }
 
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
-	c.Core.Events.Subscribe(event.OnNightsoulBurst, func(args ...interface{}) bool {
-		ai := combat.AttackInfo{
-			ActorIndex:     c.Index,
-			Abil:           "Burning Shadowhunt Shot (A4)",
-			AttackTag:      attacks.AttackTagExtra,
-			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-			ICDTag:         attacks.ICDTagShadowhuntShell,
-			ICDGroup:       attacks.ICDGroupShadowhuntShell,
-			StrikeType:     attacks.StrikeTypeDefault,
-			Mult:           shadowhunt[c.TalentLvlSkill()] * 1.5,
-			Element:        attributes.Anemo,
-			Durability:     25,
+	ai := combat.AttackInfo{
+		ActorIndex:     c.Index,
+		Abil:           "Burning Shadowhunt Shot",
+		AttackTag:      attacks.AttackTagExtra,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:         attacks.ICDTagNone,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Anemo,
+		Durability:     25,
+		Mult:           1.5 * skillShadowhunt[c.TalentLvlSkill()],
+		IsDeployable:   true,
+	}
+	c.Core.Events.Subscribe(event.OnNightsoulBurst, func(_ ...interface{}) bool {
+		bulletElem := attributes.Anemo
+		if len(c.partyPHECTypesUnique) > 0 {
+			bulletElem = c.partyPHECTypesUnique[c.Core.Rand.Intn(len(c.partyPHECTypesUnique))]
 		}
-
-		if c.typeCount >= 1 {
-			ai.Abil = "Converted Burning Shadowhunt Shot (A4)"
-			ai.Mult = shiningshadowhunt[c.TalentLvlSkill()] * 1.5
-			ai.ICDTag = attacks.ICDTagNone
-			ai.ICDGroup = attacks.ICDGroupDefault
+		switch bulletElem {
+		case attributes.Anemo:
+			ai.Abil = "Burning Shadowhunt Shell"
+			ai.Element = attributes.Anemo
+			ai.Mult = 1.5 * skillShadowhunt[c.TalentLvlSkill()]
+		default:
+			ai.Abil = fmt.Sprintf("Burning Shadowhunt Shell (%s)", bulletElem)
+			ai.Element = bulletElem
+			ai.Mult = 1.5 * skillShining[c.TalentLvlSkill()]
 		}
-
-		c.Core.QueueAttack(
-			ai,
-			combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key()),
-			37,
-			37,
-		)
+		ap := combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key())
+		c.Core.QueueAttack(ai, ap, 0, 60)
 		return false
 	}, "chasca-a4")
 }

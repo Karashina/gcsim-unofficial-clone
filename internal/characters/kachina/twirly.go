@@ -41,19 +41,19 @@ func (c *char) newTwirly() {
 		Write("next_tick", c.Core.F+150)
 
 	c.skillai = combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Turbo Twirly Independent DMG (Tick)",
-		AttackTag:  attacks.AttackTagElementalArt,
-		ICDTag:     attacks.ICDTagElementalArt,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeBlunt,
-		PoiseDMG:   75,
-		Element:    attributes.Geo,
-		Durability: 25,
-		UseDef:     true,
-		Mult:       skillIndependent[c.TalentLvlSkill()],
-		FlatDmg:    c.a4flat,
-		Alignment:  attacks.AdditionalTagNightsoul,
+		ActorIndex:     c.Index,
+		Abil:           "Turbo Twirly Independent DMG (Tick)",
+		AttackTag:      attacks.AttackTagElementalArt,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:         attacks.ICDTagElementalArt,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeBlunt,
+		PoiseDMG:       75,
+		Element:        attributes.Geo,
+		Durability:     25,
+		UseDef:         true,
+		Mult:           skillIndependent[c.TalentLvlSkill()],
+		FlatDmg:        c.a4flat,
 	}
 	c.Core.Tasks.Add(c.Twirlytick(c.Core.F), 150)
 }
@@ -98,19 +98,19 @@ func (c *char) TwirlyRideAttack() func() {
 		}
 
 		ai := combat.AttackInfo{
-			ActorIndex: c.Index,
-			Abil:       "Turbo Twirly Mounted DMG",
-			AttackTag:  attacks.AttackTagElementalArt,
-			ICDTag:     attacks.ICDTagElementalArt,
-			ICDGroup:   attacks.ICDGroupDefault,
-			StrikeType: attacks.StrikeTypeBlunt,
-			PoiseDMG:   100,
-			Element:    attributes.Geo,
-			Durability: 25,
-			UseDef:     true,
-			Mult:       skillRide[c.TalentLvlSkill()],
-			FlatDmg:    c.a4flat,
-			Alignment:  attacks.AdditionalTagNightsoul,
+			ActorIndex:     c.Index,
+			Abil:           "Turbo Twirly Mounted DMG",
+			AttackTag:      attacks.AttackTagElementalArt,
+			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+			ICDTag:         attacks.ICDTagElementalArt,
+			ICDGroup:       attacks.ICDGroupDefault,
+			StrikeType:     attacks.StrikeTypeBlunt,
+			PoiseDMG:       100,
+			Element:        attributes.Geo,
+			Durability:     25,
+			UseDef:         true,
+			Mult:           skillRide[c.TalentLvlSkill()],
+			FlatDmg:        c.a4flat,
 		}
 		if c.StatusIsActive(burstKey) {
 			radius = 5.2

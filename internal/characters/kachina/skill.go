@@ -55,17 +55,16 @@ func (c *char) skillHold() action.Info {
 }
 
 func (c *char) skillInit() {
-	c.AddNightsoul("kachina-skill-init", 60)
+	c.nightsoulState.EnterBlessing(60)
 	c.AddStatus(skillKey, -1, true)
-	c.OnNightsoul = true
 	c.newTwirly()
 }
 
 func (c *char) skillEndRoutine() {
 	c.DeleteStatus(skillKey)
 	c.DeleteStatus(skillRideKey)
-	c.NightsoulPoint = 0
-	c.OnNightsoul = false
+	c.nightsoulState.ExitBlessing()
+	c.nightsoulState.ClearPoints()
 	c.removeTwirly()
 }
 
@@ -91,12 +90,12 @@ func (c *char) depleteNightsoulPoints(t string) {
 	}
 	switch t {
 	case "attack":
-		c.ConsumeNightsoul(10)
+		c.nightsoulState.ConsumePoints(10)
 	case "dismount":
-		c.ConsumeNightsoul(2)
+		c.nightsoulState.ConsumePoints(2)
 	default:
 	}
-	if c.NightsoulPoint <= 0 {
+	if c.nightsoulState.Points() <= 0 {
 		c.skillEndRoutine()
 	}
 }

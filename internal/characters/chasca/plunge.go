@@ -8,51 +8,74 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
-var highPlungeFrames []int
+var lowPlungeFrames []int
 
-const highPlungeHitmark = 56
-const highPlungePoiseDMG = 100.0
-const highPlungeRadius = 3.0
+const lowPlungeHitmark = 50
+const collisionHitmark = lowPlungeHitmark - 6
 
 func init() {
-	// high_plunge -> x
-	highPlungeFrames = frames.InitAbilSlice(76)
+	lowPlungeFrames = frames.InitAbilSlice(80)
+	lowPlungeFrames[action.ActionAttack] = 69
+	lowPlungeFrames[action.ActionCharge] = 65
+	lowPlungeFrames[action.ActionSkill] = 66 // assuming it's the same as burst
+	lowPlungeFrames[action.ActionBurst] = 66
+	lowPlungeFrames[action.ActionDash] = 52
+	lowPlungeFrames[action.ActionSwap] = 67
 }
 
-// High Plunge attack damage queue generator
-func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
-	return action.Info{}, errors.New("high_plunge can only be used while airborne")
-}
+func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
+	// Not in falling state
+	if !c.StatusIsActive(plungeAvailableKey) {
+		return action.Info{}, errors.New("only plunge after skill ends")
+	}
+	c.DeleteStatus(plungeAvailableKey)
 
-func (c *char) highPlunge() action.Info {
+	collision, ok := p["collision"]
+	if !ok {
+		collision = 0 // Whether or not Wanderer does a collision hit
+	}
+
+	if collision > 0 {
+		c.plungeCollision(collisionHitmark)
+	}
 
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "High Plunge",
+		Abil:       "Low Plunge Attack",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypePierce,
-		PoiseDMG:   highPlungePoiseDMG,
+		StrikeType: attacks.StrikeTypeDefault,
 		Element:    attributes.Physical,
 		Durability: 25,
-		Mult:       highPlunge[c.TalentLvlAttack()],
+		Mult:       lowPlunge[c.TalentLvlAttack()],
 	}
 
-	c.Core.QueueAttack(
-		ai,
-		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, highPlungeRadius),
-		highPlungeHitmark,
-		highPlungeHitmark,
-	)
+	// TODO: check snapshot delay
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3),
+		lowPlungeHitmark, lowPlungeHitmark)
 
 	return action.Info{
-		Frames:          frames.NewAbilFunc(highPlungeFrames),
-		AnimationLength: highPlungeFrames[action.InvalidAction],
-		CanQueueAfter:   highPlungeFrames[action.ActionAttack],
+		Frames:          func(next action.Action) int { return lowPlungeFrames[next] },
+		AnimationLength: lowPlungeFrames[action.InvalidAction],
+		CanQueueAfter:   lowPlungeHitmark,
 		State:           action.PlungeAttackState,
+	}, nil
+}
+
+func (c *char) plungeCollision(fullDelay int) {
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "Plunge Collision",
+		AttackTag:  attacks.AttackTagPlunge,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeDefault,
+		Element:    attributes.Physical,
+		Durability: 0,
+		Mult:       plunge[c.TalentLvlAttack()],
 	}
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.5), fullDelay, fullDelay)
 }

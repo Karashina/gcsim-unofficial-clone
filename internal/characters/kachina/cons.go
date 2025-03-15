@@ -74,11 +74,11 @@ func (c *char) c2() {
 	}
 	if !c.StatusIsActive(skillKey) {
 		c.AddStatus(skillKey, -1, true)
-		c.OnNightsoul = true
-		c.AddNightsoul("kachina-c2", 20)
+		c.nightsoulState.HasBlessing()
+		c.nightsoulState.GeneratePoints(20)
 		c.newTwirly()
 	} else {
-		c.AddNightsoul("kachina-c2", 20)
+		c.nightsoulState.GeneratePoints(20)
 	}
 }
 

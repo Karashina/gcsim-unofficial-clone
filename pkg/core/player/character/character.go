@@ -88,16 +88,15 @@ type CharWrapper struct {
 	tasks  task.Tasker
 
 	// base characteristics
-	HasNightsoul bool
-	Base         info.CharacterBase
-	Weapon       info.WeaponProfile
-	Talents      info.TalentProfile
-	CharZone     info.ZoneType
-	CharBody     info.BodyType
-	NormalCon    int
-	SkillCon     int
-	BurstCon     int
-	HasArkhe     bool
+	Base      info.CharacterBase
+	Weapon    info.WeaponProfile
+	Talents   info.TalentProfile
+	CharZone  info.ZoneType
+	CharBody  info.BodyType
+	NormalCon int
+	SkillCon  int
+	BurstCon  int
+	HasArkhe  bool
 
 	Equip struct {
 		Weapon info.Weapon
@@ -108,11 +107,6 @@ type CharWrapper struct {
 	ParticleDelay int // character custom particle delay
 	Energy        float64
 	EnergyMax     float64
-
-	OnNightsoul       bool
-	NightsoulPoint    float64
-	NightsoulPointMax float64
-
 	// needed so that start hp is not influenced by hp mods added during team initialization
 	StartHP      int
 	StartHPRatio int
@@ -133,7 +127,7 @@ type CharWrapper struct {
 	DashLockout     bool
 
 	// hitlag stuff
-	timePassed   int // how many frames have passed since start of sim
+	TimePassed   int // how many frames have passed since start of sim
 	frozenFrames int // how many frames are we still frozen for
 	queue        *task.Handler
 }
@@ -159,7 +153,7 @@ func New(
 		f:             f,
 		debug:         debug,
 	}
-	c.queue = task.New(&c.timePassed)
+	c.queue = task.New(&c.TimePassed)
 	s := (*[attributes.EndStatType]float64)(p.Stats)
 	c.BaseStats = *s
 	c.Equip.Sets = make(map[keys.Set]info.Set)

@@ -2,6 +2,7 @@ package kachina
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
+	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
@@ -18,12 +19,13 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	a1buff    []float64
-	a4flat    float64
-	skillai   combat.AttackInfo
-	twirlyDir geometry.Point
-	twirlyPos geometry.Point
-	Twirlysrc int
+	nightsoulState *nightsoul.State
+	a1buff         []float64
+	a4flat         float64
+	skillai        combat.AttackInfo
+	twirlyDir      geometry.Point
+	twirlyPos      geometry.Point
+	Twirlysrc      int
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -36,10 +38,8 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.SkillCon = 3
 	c.BurstCon = 5
 
-	c.NightsoulPointMax = 60
-	c.NightsoulPoint = 0
-	c.HasNightsoul = true
-	c.OnNightsoul = false
+	c.nightsoulState = nightsoul.New(s, w)
+	c.nightsoulState.MaxPoints = 60
 
 	c.SetNumCharges(action.ActionSkill, 1)
 
@@ -72,11 +72,8 @@ func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Fail
 
 func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
-	case "nightsoul-points":
-		if c.NightsoulPoint <= 0 {
-			return 0, nil
-		}
-		return c.NightsoulPoint, nil
+	case "nightsoul":
+		return c.nightsoulState.Condition(fields)
 	default:
 		return c.Character.Condition(fields)
 	}
