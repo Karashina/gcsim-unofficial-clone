@@ -46,6 +46,7 @@ var setNames = []string{
 	"vourukashasglow",
 	"echoesofanoffering",
 	"emblemofseveredfate",
+	"finaleofthedeepgalleries",
 	"flowerofparadiselost",
 	"fragmentofharmonicwhimsy",
 	"gambler",
@@ -56,6 +57,7 @@ var setNames = []string{
 	"huskofopulentdreams",
 	"instructor",
 	"lavawalker",
+	"longnightsoath",
 	"luckydog",
 	"maidenbeloved",
 	"marechausseehunter",
@@ -103,6 +105,7 @@ const (
 	VourukashasGlow
 	EchoesOfAnOffering
 	EmblemOfSeveredFate
+	FinaleOfTheDeepGalleries
 	FlowerOfParadiseLost
 	FragmentOfHarmonicWhimsy
 	Gambler
@@ -113,6 +116,7 @@ const (
 	HuskOfOpulentDreams
 	Instructor
 	Lavawalker
+	LongNightsOath
 	LuckyDog
 	MaidenBeloved
 	MarechausseeHunter
