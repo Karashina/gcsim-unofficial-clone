@@ -6,155 +6,120 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 )
 
-var (
-	skillFrames       []int
-	feathermoonFrames []int
-	SkillHitmarks     = []int{30, 41, 63}
+const (
+	leapBackStatus = "leap-back"
+
+	leapBackDuration   = 66
+	hitGenerateShield  = 11
+	missGenerateShield = 15
+	detectHitmark      = 7
 )
 
-const (
-	ShieldDelay    = 14
-	SkillCDDelay   = 78
-	AuracheckDelay = 10
-	skillWindow    = 77
-	SkillKey       = "lanyan-skill-active"
-	ParticleIcdKey = "lanyan-particle-icd"
+var (
+	skillMissFrames []int
+	skillHitFrames  []int
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(77) // E > Anything Else
-	skillFrames[action.ActionAttack] = 25  // E > FMR(E)
-	skillFrames[action.ActionSkill] = 25   // E > FMR(NA)
+	skillMissFrames = frames.InitAbilSlice(49) // E -> Swap
+	skillMissFrames[action.ActionAttack] = 45
+	skillMissFrames[action.ActionBurst] = 46
+	skillMissFrames[action.ActionDash] = 47
+	skillMissFrames[action.ActionJump] = 47
 
-	feathermoonFrames = frames.InitAbilSlice(61)
-	feathermoonFrames[action.ActionAttack] = 52
-	feathermoonFrames[action.ActionDash] = 58
+	skillHitFrames = frames.InitAbilSlice(80) // E -> Swap
+	skillHitFrames[action.ActionAttack] = 33
+	skillHitFrames[action.ActionSkill] = 33
+	skillHitFrames[action.ActionBurst] = 79
+	skillHitFrames[action.ActionDash] = 77
+	skillHitFrames[action.ActionJump] = 79
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	if c.StatusIsActive(SkillKey) {
-		return c.feathermoonRing()
+	if c.StatusIsActive(leapBackStatus) {
+		return c.reathermoonRings(), nil
 	}
 
-	hold := p["hold"]
-	heldtime := 0
-	if hold >= 1 {
-		heldtime = hold
+	hold, ok := p["hold"]
+	switch {
+	case !ok:
+	case hold < 0:
+		hold = 0
+	case hold > 610:
+		hold = 610
 	}
 
-	c.DeleteStatus(ParticleIcdKey)
+	c.particleGenerated = false
+	c.absorbedElement = attributes.Anemo
+	c.DeleteStatus(leapBackStatus)
 
-	c.AddStatus(SkillKey, skillWindow+heldtime, true)
-
-	//Aura Check
-	c.shieldele = attributes.Anemo
-	for i := 0; i < 12; i++ {
-		if c.shieldele != attributes.Pyro {
-			break // for some reason, the aura check stops if shield ele is pyro. wtf lanyan
-		}
-		c.QueueCharTask(func() {
-			c.shieldele = c.absorbEle()
-		}, AuracheckDelay+heldtime+i)
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "Swallow-Wisp Pinion Dance: Detect",
+		AttackTag:  attacks.AttackTagNone,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeDefault,
+		Element:    attributes.Physical,
 	}
-	//Shield
-	c.QueueCharTask(func() {
-		exist := c.Core.Player.Shields.Get(shield.LanyanSkill)
-		if exist == nil {
-			shield := shieldperct[c.TalentLvlSkill()]*c.TotalAtk() + shieldconst[c.TalentLvlSkill()]
-			c.Core.Player.Shields.Add(c.newShield(shield, 12.5*60))
-		} else {
-			shd, _ := exist.(*shd)
-			shd.Expires = c.Core.F + 12.5*60
-		}
-	}, ShieldDelay+heldtime)
+	ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 0.1, 5) // TODO: approximate hitbox
 
-	c.QueueCharTask(func() {
-		if c.StatusIsActive(SkillKey) {
-			c.SetCDWithDelay(action.ActionSkill, 16*60, 1)
+	c.Core.QueueAttack(ai, ap, detectHitmark+hold, detectHitmark+hold, c.leapBack())
+
+	c.Core.Tasks.Add(func() {
+		if !c.hasShield() {
+			c.genShield(attributes.Anemo)
 		}
-	}, SkillCDDelay+heldtime)
+	}, detectHitmark+hold+missGenerateShield)
+
+	c.SetCDWithDelay(action.ActionSkill, 16*60, 4+hold)
 
 	return action.Info{
-		Frames:          frames.NewAbilFunc(skillFrames),
-		AnimationLength: skillFrames[action.InvalidAction] + heldtime,
-		CanQueueAfter:   skillFrames[action.ActionAttack] + heldtime, // earliest cancel is before skillHitmark
+		Frames: func(next action.Action) int {
+			skillFrames := c.getCurrentSkillFrames()
+			return skillFrames[next] + hold
+		},
+		AnimationLength: skillHitFrames[action.InvalidAction] + hold,
+		CanQueueAfter:   detectHitmark + hold, // earliest cancel
 		State:           action.SkillState,
 	}, nil
+}
+
+func (c *char) getCurrentSkillFrames() []int {
+	if c.StatusIsActive(leapBackStatus) {
+		return skillHitFrames
+	}
+	return skillMissFrames
+}
+
+func (c *char) leapBack() func(combat.AttackCB) {
+	done := false
+	return func(a combat.AttackCB) {
+		if done {
+			return
+		}
+		if a.Target.Type() != targets.TargettableEnemy {
+			return
+		}
+		done = true
+		c.AddStatus(leapBackStatus, leapBackDuration, true)
+
+		// generate the shield with element absorb
+		c.absorbedElement = c.absorbA1()
+		c.Core.Player.Tasks.Add(func() { c.genShield(c.absorbedElement) }, hitGenerateShield)
+	}
 }
 
 func (c *char) particleCB(a combat.AttackCB) {
-	if c.StatusIsActive(ParticleIcdKey) {
-		return
-	}
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
+	if c.particleGenerated {
+		return
+	}
+	c.particleGenerated = true
 	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Anemo, c.ParticleDelay)
-	c.AddStatus(ParticleIcdKey, -1, false)
-}
-
-func (c *char) absorbEle() attributes.Element {
-	if c.Base.Ascension < 1 {
-		return attributes.Anemo
-	}
-	if c.IsAbsorbed {
-		return c.shieldele
-	}
-	AbsorbCheckLocation := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.5)
-	absorbCheck := c.Core.Combat.AbsorbCheck(c.Index, AbsorbCheckLocation, attributes.Pyro, attributes.Hydro, attributes.Electro, attributes.Cryo)
-	if absorbCheck == attributes.NoElement {
-		return attributes.Anemo
-	}
-	c.IsAbsorbed = true
-	return absorbCheck
-}
-
-func (c *char) feathermoonRing() (action.Info, error) {
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		AttackTag:  attacks.AttackTagElementalArt,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Durability: 25,
-	}
-	// C1 Ring Increase
-	ringnum := 1
-	if c.Base.Cons >= 1 && c.IsAbsorbed {
-		ringnum = 2
-	}
-	// A4 Flat DMG
-	if c.Base.Ascension >= 4 {
-		ai.FlatDmg = 3.09 * c.Stat(attributes.EM)
-	}
-	//Feathermoon Ring DMG
-	for j := 0; j < ringnum; j++ {
-		for i := 0; i < 3; i++ {
-			ai.Abil = "Swallow-Wisp Pinion Dance: Feathermoon Ring DMG"
-			ai.ICDTag = attacks.ICDTagElementalArt
-			ai.Element = attributes.Anemo
-			ai.Mult = skill[c.TalentLvlSkill()]
-			c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3), 0, SkillHitmarks[i], c.particleCB)
-
-			//A1 Additional DMG
-			if c.Base.Ascension >= 1 && c.IsAbsorbed {
-				ai.Abil = "Swallow-Wisp Pinion Dance: Feathermoon Ring DMG (A4 / Absorbed)"
-				ai.ICDTag = attacks.ICDTagExtraAttack
-				ai.Element = c.shieldele
-				ai.Mult = skill[c.TalentLvlSkill()] * 0.5
-				c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3), 0, SkillHitmarks[i], c.particleCB)
-			}
-		}
-	}
-	c.SetCDWithDelay(action.ActionSkill, 16*60, 1)
-	c.DeleteStatus(SkillKey)
-	return action.Info{
-		Frames:          frames.NewAbilFunc(feathermoonFrames),
-		AnimationLength: feathermoonFrames[action.InvalidAction],
-		CanQueueAfter:   feathermoonFrames[action.ActionAttack], // earliest cancel is before skillHitmark
-		State:           action.SkillState,
-	}, nil
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/model"
 )
 
 func init() {
@@ -17,11 +16,9 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	IsAbsorbed bool
-	shieldsrc  int
-	shieldamt  float64
-	shieldele  attributes.Element
-	shieldexp  int
+
+	particleGenerated bool
+	absorbedElement   attributes.Element
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -32,14 +29,6 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.NormalHitNum = normalHitNum
 	c.SkillCon = 3
 	c.BurstCon = 5
-	c.HasArkhe = false
-
-	c.IsAbsorbed = false
-	c.shieldele = attributes.Anemo
-
-	if c.Base.Cons >= 6 {
-		c.SetNumCharges(action.ActionSkill, 2)
-	}
 
 	w.Character = &c
 
@@ -48,19 +37,16 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 func (c *char) Init() error {
 	c.c2()
+
+	if c.Base.Cons >= 6 {
+		c.SetNumCharges(action.ActionSkill, 2)
+	}
+
 	return nil
 }
 
-func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
-	if k == model.AnimationXingqiuN0StartDelay {
-		return 4
-	}
-	return c.Character.AnimationStartDelay(k)
-}
-
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if it is possible to use next skill
-	if a == action.ActionSkill && c.StatusIsActive(SkillKey) {
+	if a == action.ActionSkill && c.StatusIsActive(leapBackStatus) {
 		return true, action.NoFailure
 	}
 	return c.Character.ActionReady(a, p)

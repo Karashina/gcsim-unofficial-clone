@@ -28,7 +28,7 @@ const (
 	TravelerHydroC4
 	SigewinneC2
 	CitlaliSkill
-	LanyanSkill
+	LanyanShield
 	EndType
 )
 

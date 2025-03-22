@@ -5,8 +5,6 @@ import (
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
@@ -14,127 +12,133 @@ import (
 	"github.com/genshinsim/gcsim/pkg/model"
 )
 
+type SkillState int
+
+const (
+	ring SkillState = iota
+	bike
+	bikeCDKey = "flamestrider-charge"
+)
+
+type char struct {
+	*tmpl.Character
+	fightingSpirit     float64
+	nightsoulState     *nightsoul.State
+	nightsoulSrc       int
+	armamentState      SkillState
+	ringSrc            int
+	burstStacks        float64
+	a4src              int
+	a4stacks           int
+	a4buff             []float64
+	c1buff             []float64
+	c6Src              int
+	savedNormalCounter int
+	caState            ChargeState
+	canBikePlunge      bool
+}
+
 func init() {
 	core.RegisterCharFunc(keys.Mavuika, NewChar)
 }
 
-type char struct {
-	*tmpl.Character
-	nightsoulState    *nightsoul.State
-	nightsoulSrc      int
-	normalBikeCounter int
-	fightingspirit    float64
-	maxfightingspirit float64
-	consumedspirit    float64
-	a4buff            []float64
-	c2trg             []combat.Enemy
-}
-
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := char{}
-	c.Character = tmpl.NewWithWrapper(s, w)
+	t := tmpl.New(s)
+
+	t.CharWrapper = w
+	c.Character = t
 
 	c.EnergyMax = 0
-	c.NormalHitNum = normalHitNum
-	c.SkillCon = 5
 	c.BurstCon = 3
-	c.HasArkhe = false
+	c.SkillCon = 5
+	c.NormalHitNum = normalHitNum
 
 	w.Character = &c
-
-	c.nightsoulState = nightsoul.New(s, w)
-	c.nightsoulState.MaxPoints = 80
-	if c.Base.Cons >= 1 {
-		c.nightsoulState.MaxPoints = 120
-	}
-
-	c.maxfightingspirit = 200
-	c.fightingspirit = c.maxfightingspirit
-
-	c.consumedspirit = 0
-
+	c.nightsoulState = nightsoul.New(c.Core, c.CharWrapper)
 	return nil
 }
 
 func (c *char) Init() error {
-	c.a4buff = make([]float64, attributes.EndStatType)
-	c.a1()
-	c.c2()
-	c.c6defmod()
-	c.GainFightingSpirit()
 	c.onExitField()
+	c.burstInit()
+	c.a1()
+	c.c1Init()
+	c.c2Init()
+	c.a4Init()
+
 	return nil
 }
 
-func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	if a == action.ActionSkill && c.nightsoulState.HasBlessing() {
-		return true, action.NoFailure
-	}
-	if a == action.ActionBurst {
-		if !c.StatusIsActive(BurstCDKey) {
-			if c.fightingspirit >= 100 {
-				return true, action.NoFailure
-			} else {
-				return false, action.InsufficientEnergy
-			}
-		} else {
-			return false, action.BurstCD
+func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
+	if c.armamentState == bike && c.nightsoulState.HasBlessing() {
+		switch a {
+		case action.ActionCharge:
+			return 0
+		case action.ActionDash:
+			return 0
 		}
 	}
+
+	if a == action.ActionCharge {
+		return 50
+	}
+	return c.Character.ActionStam(a, p)
+}
+
+func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
+	switch a {
+	case action.ActionBurst:
+		if c.fightingSpirit < 100 {
+			return false, action.InsufficientEnergy
+		}
+		return c.Character.ActionReady(a, p)
+	case action.ActionSkill:
+		if p["recast"] != 0 && !c.StatusIsActive(skillRecastCDKey) {
+			return true, action.NoFailure
+		}
+		return c.Character.ActionReady(a, p)
+	}
 	return c.Character.ActionReady(a, p)
+}
+
+func (c *char) onExitField() {
+	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
+		c.DeleteStatus(burstKey)
+		if c.armamentState == bike && c.nightsoulState.HasBlessing() {
+			c.exitBike()
+		}
+		return false
+	}, "mavuika-exit")
 }
 
 func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
 	case "nightsoul":
 		return c.nightsoulState.Condition(fields)
-	case "fightingspirit":
-		return c.fightingspirit, nil
 	default:
 		return c.Character.Condition(fields)
 	}
 }
 
-func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
-	if c.nightsoulState.HasBlessing() {
-		return 0
-	}
-	return c.Character.ActionStam(a, p)
-}
-
-func (c *char) onExitField() {
-	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
-		if c.StatusIsActive(bikeKey) {
-			c.DeleteStatus(bikeKey)
-			c.QueueCharTask(c.searingradiance, 120)
-			c.c6DefModRemove()
-			c.c2DefModAdd()
-		}
-		return false
-	}, "mavuika-exit")
-}
-
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
+	if c.armamentState == bike && c.nightsoulState.HasBlessing() {
+		switch k {
+		case model.AnimationXingqiuN0StartDelay:
+			return 0
+		case model.AnimationYelanN0StartDelay:
+			return 0
+		default:
+			return c.Character.AnimationStartDelay(k)
+		}
+	}
+
 	switch k {
 	case model.AnimationXingqiuN0StartDelay:
-		return 19
+		return 22
 	case model.AnimationYelanN0StartDelay:
-		return 19
+		return 22
 	default:
 		return c.Character.AnimationStartDelay(k)
-	}
-}
-
-func (c *char) AdvanceNormalIndex() {
-	if c.nightsoulState.HasBlessing() {
-		c.normalBikeCounter++
-		if c.normalBikeCounter == skillHitNum {
-			c.normalBikeCounter = 0
-		}
-		return
-	}
-	c.NormalCounter++
-	if c.NormalCounter == c.NormalHitNum {
-		c.NormalCounter = 0
 	}
 }

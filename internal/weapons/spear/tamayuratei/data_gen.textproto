@@ -1,8 +1,8 @@
-id: 90001
-key: "tamayuratei"
+id: 13432
+key: "tamayurateinoohanashi"
 rarity: 4
 weapon_class: WEAPON_POLE
-image_name: "UI_EquipIcon_Pole_Umpakati"
+image_name: "UI_EquipIcon_Pole_Aoandon"
 base_stats: {
    base_props: {
       prop_type: FIGHT_PROP_BASE_ATTACK
@@ -60,4 +60,4 @@ base_stats: {
       }
    }
 }
-name_text_hash_map: 1965515667
+name_text_hash_map: 486513155

@@ -4,170 +4,205 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-const c2buffKey = "mavuika-c2-def"
-const c6buffKey = "mavuika-c6-def"
-const c6SkillIcdKey = "mavuika-c6-icd-skill"
+const c6IcdKey = "mavuika-c6-icd"
+const c1Key = "mavuika-c1"
 
-func (c *char) c1() {
+func (c *char) c1Init() {
+	if c.Base.Cons < 1 {
+		c.nightsoulState.MaxPoints = 80
+		return
+	}
+	c.nightsoulState.MaxPoints = 120
+	c.c1buff = make([]float64, attributes.EndStatType)
+	c.c1buff[attributes.ATKP] = 0.4
+}
+
+func (c *char) c1FightingSpiritEff() float64 {
+	if c.Base.Cons < 1 {
+		return 1.0
+	}
+	return 1.25
+}
+
+func (c *char) c1OnFightingSpirit() {
 	if c.Base.Cons < 1 {
 		return
 	}
-	m := make([]float64, attributes.EndStatType)
-	m[attributes.ATKP] = 0.4
 	c.AddStatMod(character.StatMod{
-		Base:         modifier.NewBaseWithHitlag("mavuika-c1", 8*60),
-		AffectedStat: attributes.ATKP,
+		Base: modifier.NewBaseWithHitlag(c1Key, 10*60),
 		Amount: func() ([]float64, bool) {
-			return m, true
+			return c.c1buff, true
 		},
 	})
 }
 
-func (c *char) c2() {
+func (c *char) c2Init() {
 	if c.Base.Cons < 2 {
 		return
 	}
-	c.BaseStats[attributes.BaseATK] = c.BaseStats[attributes.BaseATK] + 200
-
-	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
-
-		if !c.StatusIsActive(c2buffKey) {
-			return false
-		}
-
-		ae.Info.IgnoreDefPercent += 0.2
-		return false
-	}, "mavuika-c2-defmod")
-
-	c.c2trg = c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), nil)
+	m := make([]float64, attributes.EndStatType)
+	m[attributes.BaseATK] = 200
+	c.AddStatMod(character.StatMod{
+		Base: modifier.NewBase("mavuika-c2-base-atk", -1),
+		Amount: func() ([]float64, bool) {
+			if c.nightsoulState.HasBlessing() {
+				return m, true
+			}
+			return nil, false
+		},
+	})
 }
 
-func (c *char) c2DefModAdd() {
+func (c *char) c2Ring() {
 	if c.Base.Cons < 2 {
 		return
 	}
-	c.AddStatus(c2buffKey, -1, false)
-}
-
-func (c *char) c2DefModRemove() {
-	if c.Base.Cons < 2 {
+	if !c.isRingFollowing() {
 		return
 	}
-	c.DeleteStatus(c2buffKey)
+	ap := combat.NewCircleHitOnTarget(
+		c.Core.Combat.Player(),
+		geometry.Point{Y: 1.0},
+		6,
+	)
+	for _, e := range c.Core.Combat.EnemiesWithinArea(ap, nil) {
+		e.AddDefMod(combat.DefMod{
+			Base:  modifier.NewBaseWithHitlag("mavuika-c2", 30),
+			Value: -0.2,
+		})
+	}
+	c.QueueCharTask(c.c2Ring, 18)
 }
 
-func (c *char) c6SkillCB() combat.AttackCBFunc {
+func (c *char) c2BikeNA() float64 {
+	if c.Base.Cons < 2 {
+		return 0.0
+	}
+	if c.armamentState != bike {
+		return 0.0
+	}
+	return 0.6 * c.TotalAtk()
+}
+
+func (c *char) c2BikeCA() float64 {
+	if c.Base.Cons < 2 {
+		return 0.0
+	}
+	if c.armamentState != bike {
+		return 0.0
+	}
+	return 0.9 * c.TotalAtk()
+}
+
+func (c *char) c2BikeQ() float64 {
+	if c.Base.Cons < 2 {
+		return 0.0
+	}
+	if c.armamentState != bike {
+		return 0.0
+	}
+	return 1.2 * c.TotalAtk()
+}
+
+func (c *char) c4BonusVal() float64 {
+	if c.Base.Cons < 4 {
+		return 0.0
+	}
+	return 0.1
+}
+
+func (c *char) c4DecayRate() int {
+	if c.Base.Cons < 4 {
+		return 1 // 1 stack per 1s, total 20
+	}
+	return 0
+}
+
+// this is just used for c2
+func (c *char) isRingFollowing() bool {
 	if c.Base.Cons < 6 {
-		return nil
+		return c.armamentState == ring
 	}
-	if c.StatusIsActive(bikeKey) {
-		return nil
-	}
-	if c.StatusIsActive(c6SkillIcdKey) {
+	return true
+}
+
+func (c *char) c6RingCB() func(a combat.AttackCB) {
+	if c.Base.Cons < 6 {
 		return nil
 	}
 	return func(a combat.AttackCB) {
 		if a.Target.Type() != targets.TargettableEnemy {
 			return
 		}
+		if c.StatusIsActive(c6IcdKey) {
+			return
+		}
+		c.AddStatus(c6IcdKey, 0.5*60, true)
 		ai := combat.AttackInfo{
 			ActorIndex:     c.Index,
-			Abil:           "Flamestrider Crash(C6)",
-			AttackTag:      attacks.AttackTagNone,
-			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+			Abil:           "Flamestrider (C6)",
+			AttackTag:      attacks.AttackTagElementalArt,
 			ICDTag:         attacks.ICDTagNone,
+			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 			ICDGroup:       attacks.ICDGroupDefault,
 			StrikeType:     attacks.StrikeTypeBlunt,
+			PoiseDMG:       75,
 			Element:        attributes.Pyro,
-			Durability:     25,
-			Mult:           2,
+			Durability:     0,
+			Mult:           2.0,
 		}
-		c.AddStatus(c6SkillIcdKey, 30, false)
-		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 3), 0, 0)
+		ap := combat.NewCircleHitOnTarget(
+			a.Target,
+			nil,
+			6,
+		)
+		c.Core.QueueAttack(ai, ap, 3, 3)
 	}
 }
 
-func (c *char) c6() {
+func (c *char) c6Bike() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	if !c.nightsoulState.HasBlessing() {
-		return
-	}
-	if !c.StatusIsActive(bikeKey) {
-		return
-	}
-	// Skill DoT Damage
-	ai := combat.AttackInfo{
-		ActorIndex:     c.Index,
-		Abil:           "Scorching Ring of Searing Radiance(C6)",
-		AttackTag:      attacks.AttackTagNone,
-		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-		ICDTag:         attacks.ICDTagNone,
-		ICDGroup:       attacks.ICDGroupDefault,
-		StrikeType:     attacks.StrikeTypeDefault,
-		Element:        attributes.Pyro,
-		Durability:     25,
-		Mult:           5,
-	}
-
-	enemies := c.Core.Combat.RandomEnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), nil, 10)
-	enemyCount := len(enemies)
-	gadgets := c.Core.Combat.RandomGadgetsWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), nil, 10)
-	gadgetCount := len(gadgets)
-	totalEntities := enemyCount + gadgetCount
-
-	remaining := min(10, totalEntities)
-	for _, enemy := range enemies {
-		if remaining <= 0 {
-			break
-		}
-		c.Core.QueueAttack(ai, combat.NewSingleTargetHit(enemy.Key()), 0, 0)
-		remaining--
-	}
-	for _, gadget := range gadgets {
-		if remaining <= 0 {
-			break
-		}
-		c.Core.QueueAttack(ai, combat.NewSingleTargetHit(gadget.Key()), 0, 0)
-		remaining--
-	}
-	c.QueueCharTask(c.c6, 180)
+	c.c6Src = c.Core.F
+	c.QueueCharTask(c.c6RingAtk(c.c6Src), 180)
 }
 
-func (c *char) c6DefModAdd() {
-	if c.Base.Cons < 6 {
-		return
-	}
-	c.AddStatus(c6buffKey, -1, false)
-}
-
-func (c *char) c6DefModRemove() {
-	if c.Base.Cons < 6 {
-		return
-	}
-	c.DeleteStatus(c6buffKey)
-}
-
-func (c *char) c6defmod() {
-	if c.Base.Cons < 6 {
-		return
-	}
-	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
-
-		if !c.StatusIsActive(c6buffKey) {
-			return false
+func (c *char) c6RingAtk(src int) func() {
+	return func() {
+		if c.c6Src != src {
+			return
 		}
-
-		ae.Info.IgnoreDefPercent += 0.2
-		return false
-	}, "mavuika-c6-defmod")
+		if c.armamentState != bike {
+			return
+		}
+		if !c.nightsoulState.HasBlessing() {
+			return
+		}
+		ai := combat.AttackInfo{
+			ActorIndex:     c.Index,
+			Abil:           "Rings of Searing Radiance (C6)",
+			AttackTag:      attacks.AttackTagElementalArt,
+			ICDTag:         attacks.ICDTagNone,
+			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+			ICDGroup:       attacks.ICDGroupDefault,
+			StrikeType:     attacks.StrikeTypePierce,
+			Element:        attributes.Pyro,
+			Durability:     0,
+			Mult:           4.0,
+		}
+		ap := combat.NewCircleHitOnTarget(
+			c.Core.Combat.Player(),
+			geometry.Point{Y: 1.0},
+			6,
+		)
+		c.Core.QueueAttack(ai, ap, 0, 0)
+		c.QueueCharTask(c.c6RingAtk(src), 180)
+	}
 }

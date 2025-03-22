@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	core.RegisterWeaponFunc(keys.TamayuraTeiNoOhanashi, NewWeapon)
+	core.RegisterWeaponFunc(keys.TamayurateiNoOhanashi, NewWeapon)
 }
 
 type Weapon struct {
@@ -23,6 +23,7 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
+// Increase ATK by 20% and Movement SPD by 10% for 10s when using an Elemental Skill.
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -35,11 +36,12 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 		char.AddStatMod(character.StatMod{
-			Base: modifier.NewBase("tamayuratei-atkp", 10*60),
+			Base: modifier.NewBaseWithHitlag("tamayuratei", 10*60),
 			Amount: func() ([]float64, bool) {
 				return m, true
 			},
 		})
+
 		return false
 	}, fmt.Sprintf("tamayuratei-%v", char.Base.Key.String()))
 

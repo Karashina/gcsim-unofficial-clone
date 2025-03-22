@@ -9,44 +9,56 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
-var bikeDashFrames []int
-var bikeDashHitmark = 6
+var dashFrames []int
 
 func init() {
-	bikeDashFrames = frames.InitAbilSlice(20) // dash
+	dashFrames = frames.InitAbilSlice(24) // Dash -> Dash
+	dashFrames[action.ActionAttack] = 18
+	dashFrames[action.ActionCharge] = 20
+	dashFrames[action.ActionSkill] = 20
+	dashFrames[action.ActionBurst] = 20
+	dashFrames[action.ActionSwap] = 0
+	dashFrames[action.ActionJump] = 0
 }
 
 func (c *char) Dash(p map[string]int) (action.Info, error) {
-	if c.nightsoulState.HasBlessing() {
-		c.reduceNightsoulPoints(10)
-
+	if c.armamentState == bike && c.nightsoulState.HasBlessing() {
 		ai := combat.AttackInfo{
 			ActorIndex:     c.Index,
-			Abil:           "Flamestrider Sprint DMG",
+			Abil:           "Flamestrider Sprint",
 			AttackTag:      attacks.AttackTagNone,
+			ICDTag:         attacks.ICDTagMavuikaFlamestrider,
 			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-			ICDTag:         attacks.ICDTagNormalAttack,
 			ICDGroup:       attacks.ICDGroupDefault,
 			StrikeType:     attacks.StrikeTypeBlunt,
+			PoiseDMG:       75.0,
 			Element:        attributes.Pyro,
 			Durability:     25,
-			Mult:           bikeplunge[c.TalentLvlSkill()],
-			IgnoreInfusion: true,
+			Mult:           skillDash[c.TalentLvlSkill()],
+			HitlagFactor:   0.05,
+			IsDeployable:   true,
 		}
-		c.Core.QueueAttack(
-			ai,
-			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 2),
-			bikeDashHitmark,
-			bikeDashHitmark,
+		ap := combat.NewCircleHitOnTarget(
+			c.Core.Combat.Player(),
+			geometry.Point{Y: 1.0},
+			1.2,
 		)
+		c.Core.QueueAttack(ai, ap, 6, 6)
+		c.reduceNightsoulPoints(10)
+		// If dashing from NA while in bike, do not reset NA string
+		if c.Core.Player.CurrentState() == action.NormalAttackState {
+			c.savedNormalCounter = c.NormalCounter
+		}
 
-		// assuming doesn't contribute to dash CD
+		// Execute dash CD logic
+		c.ApplyDashCD()
 		return action.Info{
-			Frames:          frames.NewAbilFunc(bikeDashFrames),
-			AnimationLength: bikeDashFrames[action.InvalidAction],
-			CanQueueAfter:   bikeDashFrames[action.ActionSwap],
+			Frames:          frames.NewAbilFunc(dashFrames),
+			AnimationLength: dashFrames[action.InvalidAction],
+			CanQueueAfter:   dashFrames[action.ActionJump],
 			State:           action.DashState,
 		}, nil
 	}
+
 	return c.Character.Dash(p)
 }

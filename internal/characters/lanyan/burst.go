@@ -8,25 +8,21 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 )
 
-const (
-	burstCDDelay       = 1
-	EnergyConsumeDelay = 4
-)
-
 var (
-	burstHitmarks = []int{31, 40, 47}
-	burstFrames   []int
+	burstFrames []int
+
+	burstHitmarks = []int{30, 46, 51}
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(80) // Q > D
-	burstFrames[action.ActionAttack] = 75  // Q > NA
-	burstFrames[action.ActionSkill] = 78   // Q > E
-	burstFrames[action.ActionJump] = 72    // Q > J
+	burstFrames = frames.InitAbilSlice(100) // Q - Jump
+	burstFrames[action.ActionAttack] = 75
+	burstFrames[action.ActionSkill] = 75
+	burstFrames[action.ActionDash] = 72
+	burstFrames[action.ActionSwap] = 75
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Lustrous Moonrise",
@@ -38,22 +34,28 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Durability: 50,
 		Mult:       burst[c.TalentLvlBurst()],
 	}
-	// A4 Flat DMG
 	if c.Base.Ascension >= 4 {
-		ai.FlatDmg = 7.74 * c.Stat(attributes.EM)
-	}
-	for i := 0; i < 3; i++ {
-		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6), 0, burstHitmarks[i])
+		ai.FlatDmg = c.Stat(attributes.EM) * 7.74
 	}
 
-	c.SetCDWithDelay(action.ActionBurst, 15*60, burstCDDelay)
-	c.ConsumeEnergy(EnergyConsumeDelay)
+	ap := combat.NewCircleHitOnTarget(
+		c.Core.Combat.PrimaryTarget(),
+		nil,
+		6.0,
+	)
+	for _, hitmark := range burstHitmarks {
+		c.Core.QueueAttack(ai, ap, hitmark, hitmark)
+	}
+
+	c.SetCD(action.ActionBurst, 15*60)
+	c.ConsumeEnergy(4)
+
 	c.c4()
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash],
 		State:           action.BurstState,
 	}, nil
 }

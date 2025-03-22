@@ -12,13 +12,17 @@ import (
 )
 
 var (
-	attackFrames          [][]int
-	attackHits            = []int{1, 2, 2, 1}
-	attackHitmarks        = [][]int{{12}, {16, 34}, {15, 16}, {40}}
-	attackHitlagHaltFrame = [][]float64{{0}, {0.03, 0}, {0.03, 0}, {0.06}}
-	attackDefHalt         = [][]bool{{false}, {true, true}, {true, true}, {true}}
-	attackHitboxes        = []float64{2, 2, 2, 2}
-	attackOffsets         = []float64{-0.2, -0.2, -0.2, -0.2}
+	attackFrames [][]int
+	ringsFrames  []int
+
+	attackHitmarks        = [][]int{{11}, {17, 37}, {15, 21}, {40}}
+	attackHitlagHaltFrame = [][]float64{{0.03}, {0.03, 0}, {0.03, 0}, {0.06}}
+	attackDefHalt         = [][]bool{{true}, {true, true}, {false, false}, {true}}
+	attackOffsets         = []float64{-0.2, -0.2, 0.3, 0.5}
+	attackHitboxes        = [][]float64{{2.2, 3.0}, {2.3, 3.0}, {2.2}, {2.4}}
+	attackFanAngles       = []float64{0, 0, 0, 240}
+
+	ringHitmarks = []int{38, 62, 85}
 )
 
 const normalHitNum = 4
@@ -26,36 +30,34 @@ const normalHitNum = 4
 func init() {
 	attackFrames = make([][]int, normalHitNum)
 
-	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 27)
-	attackFrames[0][action.ActionAttack] = 27
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 30) // N1 -> Walk
+	attackFrames[0][action.ActionAttack] = 20
 	attackFrames[0][action.ActionCharge] = 21
-	attackFrames[0][action.ActionDash] = 18
-	attackFrames[0][action.ActionJump] = 23
 
-	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][1], 52)
-	attackFrames[1][action.ActionAttack] = 52
-	attackFrames[1][action.ActionCharge] = 46
-	attackFrames[1][action.ActionDash] = 37
-	attackFrames[1][action.ActionJump] = 42
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][1], 46) // N2 -> N3
+	attackFrames[1][action.ActionCharge] = 30
+	attackFrames[1][action.ActionWalk] = 45
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][1], 45)
-	attackFrames[2][action.ActionAttack] = 45
-	attackFrames[2][action.ActionCharge] = 45
-	attackFrames[2][action.ActionDash] = 30
-	attackFrames[2][action.ActionJump] = 35
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][1], 53) // N3 -> N4
+	attackFrames[2][action.ActionCharge] = 37
+	attackFrames[2][action.ActionWalk] = 47
 
-	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][0], 63)
-	attackFrames[3][action.ActionAttack] = 63
-	attackFrames[3][action.ActionDash] = 21
-	attackFrames[3][action.ActionJump] = 49
-	attackFrames[3][action.ActionCharge] = 58
+	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][0], 63) // N4 -> Walk/N1
+	attackFrames[3][action.ActionCharge] = 50
+
+	ringsFrames = frames.InitAbilSlice(41) // Swap
+	ringsFrames[action.ActionAttack] = 37
+	ringsFrames[action.ActionBurst] = 39
+	ringsFrames[action.ActionDash] = 38
+	ringsFrames[action.ActionJump] = 39
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	if c.StatusIsActive(SkillKey) {
-		return c.feathermoonRing()
+	if c.StatusIsActive(leapBackStatus) {
+		return c.reathermoonRings(), nil
 	}
-	for i := 0; i < attackHits[c.NormalCounter]; i++ {
+
+	for i := 0; i < len(attack[c.NormalCounter]); i++ {
 		ai := combat.AttackInfo{
 			ActorIndex:         c.Index,
 			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
@@ -66,15 +68,37 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			Element:            attributes.Anemo,
 			Durability:         25,
 			Mult:               attack[c.NormalCounter][i][c.TalentLvlAttack()],
-			HitlagFactor:       0.01,
 			HitlagHaltFrames:   attackHitlagHaltFrame[c.NormalCounter][i] * 60,
 			CanBeDefenseHalted: attackDefHalt[c.NormalCounter][i],
 		}
-		ap := combat.NewCircleHitOnTarget(
-			c.Core.Combat.Player(),
-			geometry.Point{Y: attackOffsets[c.NormalCounter]},
-			attackHitboxes[c.NormalCounter],
-		)
+		if ai.HitlagHaltFrames > 0 {
+			ai.HitlagFactor = 0.01
+		}
+
+		var ap combat.AttackPattern
+		switch {
+		case len(attackHitboxes[c.NormalCounter]) == 2: // box
+			ap = combat.NewBoxHitOnTarget(
+				c.Core.Combat.Player(),
+				geometry.Point{Y: attackOffsets[c.NormalCounter]},
+				attackHitboxes[c.NormalCounter][0],
+				attackHitboxes[c.NormalCounter][1],
+			)
+		case attackFanAngles[c.NormalCounter] > 0: // circle with fan angle
+			ap = combat.NewCircleHitOnTargetFanAngle(
+				c.Core.Combat.Player(),
+				geometry.Point{Y: attackOffsets[c.NormalCounter]},
+				attackHitboxes[c.NormalCounter][0],
+				attackFanAngles[c.NormalCounter],
+			)
+		default: // circle
+			ap = combat.NewCircleHitOnTarget(
+				c.Core.Combat.Player(),
+				geometry.Point{Y: attackOffsets[c.NormalCounter]},
+				attackHitboxes[c.NormalCounter][0],
+			)
+		}
+
 		c.Core.QueueAttack(ai, ap, attackHitmarks[c.NormalCounter][i], attackHitmarks[c.NormalCounter][i])
 	}
 
@@ -86,4 +110,63 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		CanQueueAfter:   attackHitmarks[c.NormalCounter][len(attackHitmarks[c.NormalCounter])-1],
 		State:           action.NormalAttackState,
 	}, nil
+}
+
+func (c *char) reathermoonRings() action.Info {
+	c.DeleteStatus(leapBackStatus)
+
+	c.reathermoonRingsDetail("Feathermoon Ring", ringHitmarks)
+	if c.Base.Cons >= 1 && c.Base.Ascension >= 1 && c.absorbedElement != attributes.Anemo {
+		c.reathermoonRingsDetail("Feathermoon Ring (C1)", c1Hitmarks)
+	}
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(ringsFrames),
+		AnimationLength: ringsFrames[action.InvalidAction],
+		CanQueueAfter:   ringsFrames[action.ActionDash],
+		State:           action.SkillState,
+	}
+}
+
+func (c *char) reathermoonRingsDetail(abilName string, hitmarks []int) {
+	ai := combat.AttackInfo{
+		ActorIndex:         c.Index,
+		AttackTag:          attacks.AttackTagElementalArt,
+		StrikeType:         attacks.StrikeTypeDefault,
+		Durability:         25,
+		HitlagFactor:       0.01,
+		CanBeDefenseHalted: true,
+	}
+	if c.Base.Ascension >= 4 {
+		ai.FlatDmg = c.Stat(attributes.EM) * 3.09
+	}
+
+	target := c.Core.Combat.PrimaryTarget()
+	for _, hitmark := range hitmarks {
+		ai.Abil = abilName
+		ai.ICDTag = attacks.ICDTagLanyanRingAttack
+		ai.ICDGroup = attacks.ICDGroupLanyanRingAttack
+		ai.Element = attributes.Anemo
+		ai.Mult = ring[c.TalentLvlSkill()]
+
+		ap := combat.NewSingleTargetHit(target.Key())
+		c.Core.QueueAttack(ai, ap, hitmark, hitmark, c.particleCB)
+
+		if c.Base.Ascension >= 1 && c.absorbedElement != attributes.Anemo {
+			ai.Abil = fmt.Sprintf("%v (%v)", ai.Abil, c.absorbedElement.String())
+			ai.ICDTag = attacks.ICDTagLanyanRingAttackMix
+			ai.ICDGroup = attacks.ICDGroupLanyanRingAttackMix
+			ai.Element = c.absorbedElement
+			ai.Mult *= 0.5
+			c.Core.QueueAttack(ai, ap, hitmark, hitmark, c.particleCB)
+		}
+
+		// TODO: approximated
+		next := c.Core.Combat.RandomEnemyWithinArea(combat.NewCircleHitOnTarget(target, nil, 8), func(t combat.Enemy) bool {
+			return target.Key() != t.Key()
+		})
+		if next != nil {
+			target = next
+		}
+	}
 }

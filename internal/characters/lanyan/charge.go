@@ -9,42 +9,48 @@ import (
 )
 
 var (
-	chargeFrames   []int
-	chargeRelease  = 40
-	chargeHitmarks = []int{33, 42, 50}
+	chargeFrames []int
+
+	chargeHitmarks = []int{42, 49, 56}
 )
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(42) // C > NA
-	chargeFrames[action.ActionAttack] = 42
-	chargeFrames[action.ActionJump] = 38
-	chargeFrames[action.ActionDash] = 34
-	chargeFrames[action.ActionCharge] = 500 // Illegal action
+	chargeFrames = frames.InitAbilSlice(70) // CA -> Jump
+	chargeFrames[action.ActionAttack] = 41
+	chargeFrames[action.ActionSkill] = 44
+	chargeFrames[action.ActionBurst] = 44
+	chargeFrames[action.ActionDash] = 59
+	chargeFrames[action.ActionWalk] = 59
+	chargeFrames[action.ActionSwap] = 45
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	travel, ok := p["travel"]
-	if !ok {
-		travel = 10
-	}
 	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Charge Attack",
-		AttackTag:  attacks.AttackTagExtra,
-		ICDTag:     attacks.ICDTagExtraAttack,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Anemo,
-		Durability: 25,
-		Mult:       charge[c.TalentLvlAttack()],
+		ActorIndex:   c.Index,
+		Abil:         "Charged Attack",
+		AttackTag:    attacks.AttackTagExtra,
+		ICDTag:       attacks.ICDTagNone,
+		ICDGroup:     attacks.ICDGroupDefault,
+		StrikeType:   attacks.StrikeTypeDefault,
+		Element:      attributes.Anemo,
+		Durability:   25,
+		Mult:         charge[c.TalentLvlAttack()],
+		IsDeployable: true,
 	}
-	for i := 0; i < 3; i++ {
-		c.Core.QueueAttack(ai, combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 3), chargeRelease, chargeHitmarks[i]+travel)
+
+	for _, hitmark := range chargeHitmarks {
+		c.Core.QueueAttack(
+			ai,
+			combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 2.5),
+			hitmark,
+			hitmark,
+		)
 	}
+
 	return action.Info{
-		Frames:          func(next action.Action) int { return chargeFrames[next] },
+		Frames:          frames.NewAbilFunc(chargeFrames),
 		AnimationLength: chargeFrames[action.InvalidAction],
-		CanQueueAfter:   chargeRelease,
+		CanQueueAfter:   chargeFrames[action.ActionAttack],
 		State:           action.ChargeAttackState,
 	}, nil
 }

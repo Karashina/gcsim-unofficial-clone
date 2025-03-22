@@ -1,15 +1,15 @@
-id: 90000004
+id: 10000106
 key: "mavuika"
 rarity: QUALITY_ORANGE
 body: BODY_LADY
 region: ASSOC_TYPE_NATLAN
 element: Fire
 weapon_class: WEAPON_CLAYMORE
-icon_name: "UI_AvatarIcon_Ambor"
+icon_name: "UI_AvatarIcon_Mavuika"
 stats: {
-   base_hp: 977
-   base_atk: 28
-   base_def: 62
+   base_hp: 977.153
+   base_atk: 27.93
+   base_def: 61.6249
    hp_curve: GROW_CURVE_HP_S5
    atk_curve: GROW_CURVE_ATTACK_S5
    def_cruve: GROW_CURVE_HP_S5
@@ -32,15 +32,15 @@ stats: {
       max_level: 40
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 838
+         value: 837.8203
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 53
+         value: 52.839
       }
       add_props: {
-         prop_type: FIGHT_PROP_CRITICAL_HURT
-         value: 24
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 23.9457
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -48,17 +48,17 @@ stats: {
    }
    promo_data: {
       max_level: 50
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1433.399
+         value: 1433.1138
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 90.6565
+         value: 90.3825
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 41.052
+         value: 40.95975
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -69,15 +69,15 @@ add_props: {
       max_level: 60
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2227.3202
+         value: 2226.8384
       }
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 140.8687
+         value: 140.4405
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 63.7896
+         value: 63.64515
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -88,15 +88,15 @@ add_props: {
       max_level: 70
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2822.7192
+         value: 2822.1316
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 178.5252
+         value: 177.984
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 80.8416
+         value: 80.6592
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -107,15 +107,15 @@ add_props: {
       max_level: 80
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3418.1182
+         value: 3417.425
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 216.1817
+         value: 215.5275
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 97.8936
+         value: 97.67325
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -126,15 +126,15 @@ add_props: {
       max_level: 90
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 4013.601
+         value: 4012.7185
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 253.8435
+         value: 253.071
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 114.948
+         value: 114.6873
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL_HURT
@@ -143,9 +143,8 @@ add_props: {
    }
 }
 skill_details: {
-   skill: 10262
-   burst: 10265
-   attack: 10261
-   burst_energy_cost: 0
+   skill: 11062
+   burst: 11065
+   attack: 11061
 }
-name_text_hash_map: 1021947691
+name_text_hash_map: 113398050
