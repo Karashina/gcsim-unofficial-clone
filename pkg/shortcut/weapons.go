@@ -356,6 +356,7 @@ var WeaponNameToKey = map[string]keys.Weapon{
 	"misugiri":                        keys.UrakuMisugiri,
 	"urakumisugiri":                   keys.UrakuMisugiri,
 	"verdict":                         keys.Verdict,
+	"vividnotions":                    keys.VividNotions,
 	"vortexvanquisher":                keys.VortexVanquisher,
 	"vortex":                          keys.VortexVanquisher,
 	"wanderingevenstar":               keys.WanderingEvenstar,
