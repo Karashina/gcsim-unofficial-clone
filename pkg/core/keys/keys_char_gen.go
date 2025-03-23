@@ -43,6 +43,7 @@ const (
 	Gorou
 	Heizou
 	Hutao
+	Iansan
 	Itto
 	Jean
 	Kachina
@@ -85,6 +86,7 @@ const (
 	Tartaglia
 	Thoma
 	Tighnari
+	Varesa
 	Venti
 	Wanderer
 	Wriothesley
@@ -248,6 +250,10 @@ func init() {
 	charNames[Hutao] = "hutao"
 	charPrettyName[Hutao] = "Hutao"
 	CharKeyToEle[Hutao] = attributes.Pyro
+
+	charNames[Iansan] = "iansan"
+	charPrettyName[Iansan] = "Iansan"
+	CharKeyToEle[Iansan] = attributes.Electro
 
 	charNames[Itto] = "itto"
 	charPrettyName[Itto] = "Itto"
@@ -416,6 +422,10 @@ func init() {
 	charNames[Tighnari] = "tighnari"
 	charPrettyName[Tighnari] = "Tighnari"
 	CharKeyToEle[Tighnari] = attributes.Dendro
+
+	charNames[Varesa] = "varesa"
+	charPrettyName[Varesa] = "Varesa"
+	CharKeyToEle[Varesa] = attributes.Electro
 
 	charNames[Venti] = "venti"
 	charPrettyName[Venti] = "Venti"
