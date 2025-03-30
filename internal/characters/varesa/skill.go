@@ -6,120 +6,121 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 	"github.com/genshinsim/gcsim/pkg/enemy"
 )
 
 var skillFrames []int
-var skillCancelFrames []int
 
 const (
-	particleICDKey  = "varesa-particle-icd"
-	momentumIcdKey  = "varesa-momentum-icd"
-	surfingKey      = "varesa-surfing"
-	markedAsPreyKey = "marked-as-prey"
-
-	skillDelay      = 2
-	particleICD     = 9999 * 60
-	momentumIcd     = 0.7 * 60
-	markedAsPreyDur = 10 * 60
+	particleICDKey      = "varesa-particle-icd"
+	skillKey            = "follow-up-strike"
+	skillHitmark        = 6
+	skillTargetCountTag = "marked"
+	skillMarkedTag      = "varesa-skill-marked"
+	skillCd             = 9 * 60
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(69) // E -> E
-	skillFrames[action.ActionAttack] = 5
-	skillFrames[action.ActionBurst] = 6
-	skillFrames[action.ActionDash] = 15
-	skillFrames[action.ActionJump] = 18
-	skillFrames[action.ActionWalk] = 19
-	skillFrames[action.ActionSwap] = 65
-
-	skillCancelFrames = frames.InitAbilSlice(17) // E -> Charge
-	skillCancelFrames[action.ActionAttack] = 7
-	skillCancelFrames[action.ActionBurst] = 4
-	skillCancelFrames[action.ActionDash] = 13
-	skillCancelFrames[action.ActionJump] = 12
-	skillCancelFrames[action.ActionWalk] = 12
-	skillCancelFrames[action.ActionSwap] = 11
-}
-
-func (c *char) reduceNightsoulPoints(val float64) {
-	c.nightsoulState.ConsumePoints(val)
-	if c.nightsoulState.Points() <= 0.00001 {
-		c.cancelNightsoul()
-	}
-}
-
-func (c *char) cancelNightsoul() {
-	c.nightsoulState.ExitBlessing()
-	c.SetCD(action.ActionSkill, 6*60)
-	c.ResetActionCooldown(action.ActionAttack)
-	c.DeleteStatus(surfingKey)
-	c.momentumStacks = 0
-	c.momentumSrc = -1
-	c.nightsoulSrc = -1
-}
-
-func (c *char) nightsoulPointReduceFunc(src int) func() {
-	return func() {
-		if c.nightsoulSrc != src {
-			return
-		}
-
-		if !c.nightsoulState.HasBlessing() {
-			return
-		}
-
-		c.reduceNightsoulPoints(1)
-
-		// reduce 1 point per 6f
-		c.QueueCharTask(c.nightsoulPointReduceFunc(src), 6)
-	}
+	skillFrames = frames.InitAbilSlice(39) //E -> NA
+	skillFrames[action.ActionJump] = 39    //E -> J
+	skillFrames[action.ActionCharge] = 20  //E -> J
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	if c.nightsoulState.HasBlessing() {
-		c.cancelNightsoul()
-		return action.Info{
-			Frames:          frames.NewAbilFunc(skillCancelFrames),
-			AnimationLength: skillCancelFrames[action.InvalidAction],
-			CanQueueAfter:   skillCancelFrames[action.ActionAttack], // earliest cancel
-			State:           action.SkillState,
-		}, nil
+	nofp := combat.AttackInfo{
+		ActorIndex:     c.Index,
+		Abil:           "Riding the Night-Rainbow",
+		AttackTag:      attacks.AttackTagElementalArt,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:         attacks.ICDTagVaresaCombatCycle,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Electro,
+		Durability:     25,
+		Mult:           skill[c.TalentLvlSkill()],
 	}
 
-	c.QueueCharTask(func() {
-		c.nightsoulState.EnterBlessing(60)
-		c.DeleteStatus(particleICDKey)
-		c.a1Count = 0
-		c.c1Done = false
-		c.c2()
-		c.nightsoulSrc = c.Core.F
-		c.QueueCharTask(func() {
-			c.AddStatus(surfingKey, -1, false)
-			c.nightsoulPointReduceFunc(c.nightsoulSrc)()
-		}, 6)
-	}, skillDelay)
-
-	canQueueAfter := skillFrames[action.ActionAttack] // earliest cancel
-	// press skill "while" walking
-	isWalking := c.Core.Player.AnimationHandler.CurrentState() == action.WalkState
-	if isWalking {
-		canQueueAfter = skillDelay
+	hasfp := combat.AttackInfo{
+		ActorIndex:     c.Index,
+		Abil:           "Riding the Night-Rainbow (Fiery Passion)",
+		AttackTag:      attacks.AttackTagElementalArt,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:         attacks.ICDTagVaresaCombatCycle,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Electro,
+		Durability:     25,
+		Mult:           skillfp[c.TalentLvlSkill()],
 	}
+
+	ai := nofp
+	if c.StatusIsActive(fieryPassionKey) {
+		ai = hasfp
+	}
+
+	// clear all existing tags
+	for _, t := range c.Core.Combat.Enemies() {
+		if e, ok := t.(*enemy.Enemy); ok {
+			e.SetTag(skillMarkedTag, 0)
+		}
+	}
+
+	// add a task to loop through targets and mark them
+	marked, ok := p[skillTargetCountTag]
+	// default 1
+	if !ok {
+		marked = 1
+	}
+	c.Core.Tasks.Add(func() {
+		for _, t := range c.Core.Combat.Enemies() {
+			if marked == 0 {
+				break
+			}
+			e, ok := t.(*enemy.Enemy)
+			if !ok {
+				continue
+			}
+			e.SetTag(skillMarkedTag, 1)
+			c.Core.Log.NewEvent("Valesa Tackle Hit", glog.LogCharacterEvent, c.Index).
+				Write("target", e.Key())
+			marked--
+		}
+	}, skillHitmark)
+
+	c.Core.Tasks.Add(func() {
+		for _, t := range c.Core.Combat.Enemies() {
+			e, ok := t.(*enemy.Enemy)
+			if !ok {
+				continue
+			}
+			if e.GetTag(skillMarkedTag) == 0 {
+				continue
+			}
+			e.SetTag(skillMarkedTag, 0)
+			c.Core.Log.NewEvent("damaging marked target", glog.LogCharacterEvent, c.Index).
+				Write("target", e.Key())
+			marked--
+			c.Core.QueueAttack(ai, combat.NewSingleTargetHit(e.Key()), 1, 1, c.particleCB)
+		}
+
+	}, skillHitmark)
+
+	if c.StatusIsActive(freeskillkey) {
+		c.DeleteStatus(freeskillkey)
+	} else {
+		c.SetCDWithDelay(action.ActionSkill, skillCd, skillHitmark-2)
+	}
+
+	c.a1()
+	c.nightsoulState.GeneratePoints(20)
+	c.AddStatus(skillKey, -1, false)
 
 	return action.Info{
-		Frames: func(next action.Action) int {
-			if next == action.ActionWalk && isWalking {
-				// TODO: or 0f?
-				return skillDelay
-			}
-			return skillFrames[next]
-		},
+		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   canQueueAfter,
+		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
 		State:           action.SkillState,
 	}, nil
 }
@@ -128,84 +129,14 @@ func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
-	if c.StatusIsActive(particleICDKey) {
+	if c.particleGenerated {
 		return
 	}
-	c.AddStatus(particleICDKey, particleICD, true)
+	c.particleGenerated = true
 
-	count := 4.0
-	if c.Core.Rand.Float64() < .5 {
-		count = 5
+	count := 2.0
+	if c.Core.Rand.Float64() < 0.5 {
+		count = 3
 	}
-	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Hydro, c.ParticleDelay)
-}
-
-func (c *char) surfingTick() {
-	// TODO: create a gadget?
-	c.Core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
-		if c.Core.Player.Active() != c.Index {
-			return false
-		}
-		if !c.nightsoulState.HasBlessing() {
-			return false
-		}
-		if !c.StatusIsActive(surfingKey) {
-			return false
-		}
-
-		switch c.Core.Player.CurrentState() {
-		case action.DashState, action.JumpState, action.WalkState:
-		default:
-			return false
-		}
-
-		// to avoid spamming Surfing Hit logs
-		useAttack := false
-		ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0.9}, 0, 1)
-		for _, e := range c.Core.Combat.Enemies() {
-			enemy, ok := e.(combat.Enemy)
-			if !ok {
-				continue
-			}
-
-			willLand, _ := e.AttackWillLand(ap)
-			if willLand && !enemy.StatusIsActive(momentumIcdKey) {
-				useAttack = true
-				break
-			}
-		}
-		if !useAttack {
-			return false
-		}
-
-		ai := combat.AttackInfo{
-			ActorIndex:         c.Index,
-			Abil:               "Surfing Hit",
-			AttackTag:          attacks.AttackTagNone,
-			ICDTag:             attacks.ICDTagNone,
-			ICDGroup:           attacks.ICDGroupDefault,
-			StrikeType:         attacks.StrikeTypeSpear,
-			Element:            attributes.Physical,
-			Durability:         100,
-			HitlagFactor:       0.01,
-			CanBeDefenseHalted: true,
-			IsDeployable:       true,
-		}
-		c.Core.QueueAttack(ai, ap, 0, 0, c.surfingCB)
-
-		return false
-	}, "varesa-surfing")
-}
-
-func (c *char) surfingCB(a combat.AttackCB) {
-	enemy, ok := a.Target.(*enemy.Enemy)
-	if !ok {
-		return
-	}
-	if enemy.StatusIsActive(momentumIcdKey) {
-		return
-	}
-	enemy.AddStatus(markedAsPreyKey, markedAsPreyDur, true)
-	enemy.AddStatus(momentumIcdKey, momentumIcd, false)
-	c.momentumStacks = min(c.momentumStacks+1, 3)
+	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Electro, c.ParticleDelay)
 }

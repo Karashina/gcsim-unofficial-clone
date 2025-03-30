@@ -6,55 +6,93 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
-var chargeFrames []int
+var (
+	chargeFrames []int
+	swiftFrames  []int
+)
 
-const shortChargeHitmark = 71
+const (
+	chargeHitmark = 24
+	swiftHitmark  = 25
+)
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(100) // walk
-	chargeFrames[action.ActionAttack] = 73
-	chargeFrames[action.ActionCharge] = 85
-	chargeFrames[action.ActionSkill] = 72
-	chargeFrames[action.ActionBurst] = 73
-	chargeFrames[action.ActionDash] = 72
-	chargeFrames[action.ActionJump] = 73
-	chargeFrames[action.ActionSwap] = 71
+	chargeFrames = frames.InitAbilSlice(49)
+	chargeFrames[action.ActionDash] = chargeHitmark
+	chargeFrames[action.ActionJump] = chargeHitmark
+
+	swiftFrames = frames.InitAbilSlice(25)
+	swiftFrames[action.ActionAttack] = 41
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	// there is a windup out of dash/jump/walk/swap. Otherwise it is rolled into the Q/E/CA/NA -> CA frames
-	windup := 0
-	switch c.Core.Player.CurrentState() {
-	case action.Idle, action.DashState, action.JumpState, action.WalkState, action.SwapState:
-		windup = 13
+	if c.nightsoulState.HasBlessing() || c.StatusIsActive(fastSkill) {
+		c.DeleteStatus(fastSkill)
+		return c.chargedSwift(), nil
 	}
+
 	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Charge Attack",
-		AttackTag:  attacks.AttackTagExtra,
-		ICDTag:     attacks.ICDTagNone,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Hydro,
-		Durability: 25,
-		Mult:       charge[c.TalentLvlAttack()],
+		ActorIndex:         c.Index,
+		Abil:               "Charged Attack",
+		AttackTag:          attacks.AttackTagExtra,
+		ICDTag:             attacks.ICDTagExtraAttack,
+		ICDGroup:           attacks.ICDGroupPoleExtraAttack,
+		StrikeType:         attacks.StrikeTypeSpear,
+		Element:            attributes.Physical,
+		Durability:         25,
+		HitlagFactor:       0.01,
+		CanBeDefenseHalted: true,
+		IsDeployable:       true,
+		Mult:               charged[c.TalentLvlAttack()],
 	}
-	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 3.5)
-	// TODO: Not sure of snapshot timing
+
 	c.Core.QueueAttack(
 		ai,
-		ap,
-		shortChargeHitmark+windup,
-		shortChargeHitmark+windup,
+		combat.NewCircleHit(
+			c.Core.Combat.Player(),
+			c.Core.Combat.PrimaryTarget(),
+			nil,
+			0.8,
+		),
+		chargeHitmark,
+		chargeHitmark,
 	)
 
 	return action.Info{
-		Frames:          func(next action.Action) int { return windup + chargeFrames[next] },
-		AnimationLength: windup + chargeFrames[action.InvalidAction],
-		CanQueueAfter:   windup + chargeFrames[action.ActionDash],
+		Frames:          frames.NewAbilFunc(chargeFrames),
+		AnimationLength: chargeFrames[action.InvalidAction],
+		CanQueueAfter:   chargeHitmark,
 		State:           action.ChargeAttackState,
 	}, nil
+}
+
+func (c *char) chargedSwift() action.Info {
+	ai := combat.AttackInfo{
+		ActorIndex:     c.Index,
+		Abil:           "Swift Stormflight",
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		AttackTag:      attacks.AttackTagExtra,
+		ICDTag:         attacks.ICDTagNone,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Electro,
+		Durability:     25,
+		Mult:           swift[c.TalentLvlSkill()],
+	}
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 6),
+		swiftHitmark,
+		swiftHitmark,
+		c.makeA1CB(),
+	)
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(swiftFrames),
+		AnimationLength: swiftFrames[action.InvalidAction],
+		CanQueueAfter:   swiftFrames[action.ActionSwap],
+		State:           action.ChargeAttackState,
+	}
 }

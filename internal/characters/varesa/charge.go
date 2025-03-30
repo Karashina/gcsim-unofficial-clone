@@ -7,30 +7,45 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/genshinsim/gcsim/pkg/core/player"
 )
 
-var chargeFrames []int
-
-const shortChargeHitmark = 71
+var (
+	chargeFrames    []int
+	chargeFramesFP  []int
+	ChargeHitmark   = 67
+	ChargeHitmarkFP = 67
+)
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(100) // walk
-	chargeFrames[action.ActionAttack] = 73
-	chargeFrames[action.ActionCharge] = 85
-	chargeFrames[action.ActionSkill] = 72
-	chargeFrames[action.ActionBurst] = 73
-	chargeFrames[action.ActionDash] = 72
-	chargeFrames[action.ActionJump] = 73
-	chargeFrames[action.ActionSwap] = 71
+	chargeFrames = frames.InitAbilSlice(146) // attack
+	chargeFrames[action.ActionLowPlunge] = 84
+	chargeFrames[action.ActionHighPlunge] = chargeFrames[action.ActionLowPlunge] + 1
+
+	chargeFramesFP = frames.InitAbilSlice(146) // attack
+	chargeFramesFP[action.ActionLowPlunge] = 84
+	chargeFramesFP[action.ActionHighPlunge] = chargeFrames[action.ActionLowPlunge] + 1
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	// there is a windup out of dash/jump/walk/swap. Otherwise it is rolled into the Q/E/CA/NA -> CA frames
-	windup := 0
-	switch c.Core.Player.CurrentState() {
-	case action.Idle, action.DashState, action.JumpState, action.WalkState, action.SwapState:
-		windup = 13
+	if c.fastCharge {
+		chargeFrames = frames.InitAbilSlice(95) // attack
+		chargeFrames[action.ActionLowPlunge] = 30
+		chargeFrames[action.ActionHighPlunge] = chargeFrames[action.ActionLowPlunge] + 1
+
+		chargeFramesFP = frames.InitAbilSlice(95) // attack
+		chargeFramesFP[action.ActionLowPlunge] = 30
+		chargeFramesFP[action.ActionHighPlunge] = chargeFrames[action.ActionLowPlunge] + 1
+
+		ChargeHitmark = 12
+		ChargeHitmarkFP = 12
+
+		c.fastCharge = false
 	}
+	if c.StatusIsActive(fieryPassionKey) {
+		return c.ChargeFP(p)
+	}
+
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Charge Attack",
@@ -38,23 +53,56 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
 		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Hydro,
+		Element:    attributes.Electro,
 		Durability: 25,
 		Mult:       charge[c.TalentLvlAttack()],
 	}
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 3.5)
-	// TODO: Not sure of snapshot timing
 	c.Core.QueueAttack(
 		ai,
 		ap,
-		shortChargeHitmark+windup,
-		shortChargeHitmark+windup,
+		ChargeHitmark,
+		ChargeHitmark,
 	)
 
+	c.Core.Player.SetAirborne(player.AirborneVaresa)
+
 	return action.Info{
-		Frames:          func(next action.Action) int { return windup + chargeFrames[next] },
-		AnimationLength: windup + chargeFrames[action.InvalidAction],
-		CanQueueAfter:   windup + chargeFrames[action.ActionDash],
+		Frames:          func(next action.Action) int { return chargeFrames[next] },
+		AnimationLength: chargeFrames[action.InvalidAction],
+		CanQueueAfter:   chargeFrames[action.ActionDash],
+		State:           action.ChargeAttackState,
+	}, nil
+}
+
+//---------------------Fiery Passion--------------------------//
+
+func (c *char) ChargeFP(p map[string]int) (action.Info, error) {
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "Charge Attack (Fiery Passion)",
+		AttackTag:  attacks.AttackTagExtra,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeDefault,
+		Element:    attributes.Electro,
+		Durability: 25,
+		Mult:       chargefp[c.TalentLvlAttack()],
+	}
+	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 3.5)
+	c.Core.QueueAttack(
+		ai,
+		ap,
+		ChargeHitmarkFP,
+		ChargeHitmarkFP,
+	)
+
+	c.Core.Player.SetAirborne(player.AirborneVaresa)
+
+	return action.Info{
+		Frames:          func(next action.Action) int { return chargeFramesFP[next] },
+		AnimationLength: chargeFramesFP[action.InvalidAction],
+		CanQueueAfter:   chargeFramesFP[action.ActionDash],
 		State:           action.ChargeAttackState,
 	}, nil
 }

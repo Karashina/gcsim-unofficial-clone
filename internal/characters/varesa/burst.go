@@ -8,66 +8,99 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 )
 
-const burstHitmarks = 108 // adjusted to swap frame
-
 var (
-	burstFrames []int
+	burstFrames    []int
+	volcanicFrames []int
+)
+
+const (
+	burstHitmark     = 90
+	burstEnergyFrame = 10
+
+	kablamHitmark = 41
+	kablamCost    = 30
+	kablamAbil    = "Volcano Kablam"
+	c4Key         = "varesa-c4"
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(180) // charge
-	burstFrames[action.ActionAttack] = 167
-	burstFrames[action.ActionSkill] = 166
-	burstFrames[action.ActionDash] = 167
-	burstFrames[action.ActionJump] = 167
-	burstFrames[action.ActionWalk] = 167
-	burstFrames[action.ActionSwap] = 108
+	burstFrames = frames.InitAbilSlice(103)
+
+	volcanicFrames = frames.InitAbilSlice(46)
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	travel, ok := p["travel"]
-	if !ok {
-		travel = 70
+	if c.Base.Cons >= 4 && !c.StatusIsActive(apexDriveKey) && !c.StatusIsActive(fieryPassionKey) {
+		c.AddStatus(c4Key, 15*60, true)
 	}
-
+	if c.StatusIsActive(apexDriveKey) {
+		c.DeleteStatus(apexDriveKey)
+		return c.volcanicKablam(), nil
+	}
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Boomsharka-laka",
+		Abil:           "Flying Kick",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		ICDTag:         attacks.ICDTagNone,
 		ICDGroup:       attacks.ICDGroupDefault,
 		StrikeType:     attacks.StrikeTypeDefault,
-		Element:        attributes.Hydro,
+		Element:        attributes.Electro,
 		Durability:     25,
+		Mult:           burst[c.TalentLvlBurst()],
 	}
-	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5)
 
-	// snapshot at bullet creation
-	var snap combat.Snapshot
-	stacks := c.a4Stacks
-	c.a4Stacks = 0
-	c.QueueCharTask(func() {
-		snap = c.Snapshot(&ai)
-		c.Core.Tasks.Add(func() {
-			// TODO: verify if snapshot is used or if maxhp is recalced here
-			hp := c.MaxHP()
-			ai.FlatDmg = burst[c.TalentLvlBurst()] * hp
-			if c.Base.Ascension >= 4 {
-				ai.FlatDmg += 0.15 * float64(stacks) * hp
-			}
+	if c.nightsoulState.HasBlessing() {
+		ai.Abil = "Flying Kick (Fiery Passion)"
+		ai.Mult = burst[c.TalentLvlBurst()]
+	}
 
-			c.Core.QueueAttackWithSnap(ai, snap, burstArea, 0)
-		}, travel)
-	}, burstHitmarks)
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 6),
+		burstHitmark,
+		burstHitmark,
+	)
 
-	c.SetCDWithDelay(action.ActionBurst, 15*60, 0)
-	c.ConsumeEnergy(11)
+	c.ConsumeEnergy(burstEnergyFrame)
+	c.SetCD(action.ActionBurst, 18*60)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap],
 		State:           action.BurstState,
 	}, nil
+}
+
+func (c *char) volcanicKablam() action.Info {
+	ai := combat.AttackInfo{
+		ActorIndex:     c.Index,
+		Abil:           kablamAbil,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		AttackTag:      attacks.AttackTagPlunge,
+		ICDTag:         attacks.ICDTagVaresaCombatCycle,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Electro,
+		Durability:     25,
+		Mult:           volcano[c.TalentLvlBurst()],
+	}
+
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 6),
+		kablamHitmark,
+		kablamHitmark,
+	)
+
+	c.AddEnergy("varesa-kablam", -kablamCost)
+	c.SetCD(action.ActionBurst, 1*60)
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(volcanicFrames),
+		AnimationLength: volcanicFrames[action.InvalidAction],
+		CanQueueAfter:   volcanicFrames[action.ActionSwap],
+		State:           action.BurstState,
+	}
 }

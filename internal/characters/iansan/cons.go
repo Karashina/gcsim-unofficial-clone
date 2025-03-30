@@ -1,82 +1,90 @@
 package iansan
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-const c4key = "iansan-c4"
+const (
+	c1ICD    = "iansan-c1"
+	c6Status = "iansan-c6"
+)
 
-func (c *char) c1() float64 {
+func (c *char) c1(points float64) {
 	if c.Base.Cons < 1 {
-		return 0.0
-	}
-	if c.c1Done {
-		return 0.0
-	}
-	c.c1Done = true
-	c.c6()
-	return 0.66
-}
-
-func (c *char) c2() {
-	if c.Base.Cons < 2 {
 		return
 	}
-	c.momentumStacks = 2
+	if c.StatusIsActive(c1ICD) {
+		return
+	}
+	c.c1Points += points
+	if c.c1Points < 6 {
+		return
+	}
+	c.AddEnergy("iansan-c1", 15)
+	c.AddStatus(c1ICD, 18*60, true)
 }
 
-func (c *char) c2puffer() {
+func (c *char) c2ATKBuff(char *character.CharWrapper) {
+	c.burstBuff[attributes.ATKP] = 0
 	if c.Base.Cons < 2 {
 		return
 	}
 	if c.Base.Ascension < 1 {
 		return
 	}
-
-	c.momentumStacks = min(c.momentumStacks+1, 3)
-	if c.a1Count == 2 {
-		for i := 0; i < 12; i++ {
-			c.QueueCharTask(func() {
-				c.nightsoulState.GeneratePoints(1)
-			}, i*10+10)
-		}
+	if c.Index == c.Core.Player.Active() {
+		return
 	}
+	if char.Index != c.Core.Player.Active() {
+		return
+	}
+	c.burstBuff[attributes.ATKP] = 0.3
 }
+
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
 	}
-	m := make([]float64, attributes.EndStatType)
-	m[attributes.DmgP] = 0.75
-	c.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBaseWithHitlag(c4key, -1),
-		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			if atk.Info.AttackTag == attacks.AttackTagElementalBurst {
-				return m, true
-			}
-			return nil, false
-		},
-	})
+
+	c.Core.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
+		if !c.StatusIsActive(burstStatus) {
+			return false
+		}
+		if c.Index == c.Core.Player.Active() {
+			return false
+		}
+		c.c4Stacks = 2
+		return false
+	}, "iansan-c4")
 }
 
-func (c *char) c4puffer() {
+func (c *char) c4Points() float64 {
 	if c.Base.Cons < 4 {
-		return
+		return 0.0
 	}
-	if c.Base.Ascension < 1 {
-		return
+	points := c.pointsOverflow * 0.5
+	if c.c4Stacks > 0 {
+		points += 4.0
 	}
-
-	c.AddEnergy(c4key, 8)
+	return points
 }
 
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	c.c1Done = false
+	m := make([]float64, attributes.EndStatType)
+	m[attributes.DmgP] = 0.25
+
+	active := c.Core.Player.ActiveChar()
+	active.AddAttackMod(character.AttackMod{
+		Base: modifier.NewBaseWithHitlag(c6Status, 3*60),
+		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+			return m, true
+		},
+	})
 }
