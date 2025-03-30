@@ -34,8 +34,10 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.AddStatus(c4Key, 15*60, true)
 	}
 	if c.StatusIsActive(apexDriveKey) {
-		c.DeleteStatus(apexDriveKey)
 		return c.volcanicKablam(), nil
+	}
+	if c.nightsoulState.HasBlessing() {
+		c.c4()
 	}
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
@@ -62,6 +64,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstHitmark,
 	)
 
+	c.nightsoulState.GeneratePoints(40)
 	c.ConsumeEnergy(burstEnergyFrame)
 	c.SetCD(action.ActionBurst, 18*60)
 
@@ -93,9 +96,14 @@ func (c *char) volcanicKablam() action.Info {
 		kablamHitmark,
 		kablamHitmark,
 	)
+	if c.Base.Cons >= 1 {
+		c.a1()
+	}
+	c.c4()
 
 	c.AddEnergy("varesa-kablam", -kablamCost)
 	c.SetCD(action.ActionBurst, 1*60)
+	c.QueueCharTask(func() { c.DeleteStatus(apexDriveKey) }, kablamHitmark+10)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(volcanicFrames),

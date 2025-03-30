@@ -29,13 +29,8 @@ func init() {
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	if c.fastCharge {
-		chargeFrames = frames.InitAbilSlice(95) // attack
-		chargeFrames[action.ActionLowPlunge] = 30
-		chargeFrames[action.ActionHighPlunge] = chargeFrames[action.ActionLowPlunge] + 1
-
-		chargeFramesFP = frames.InitAbilSlice(95) // attack
-		chargeFramesFP[action.ActionLowPlunge] = 30
-		chargeFramesFP[action.ActionHighPlunge] = chargeFrames[action.ActionLowPlunge] + 1
+		chargeFrames = frames.InitAbilSlice(30)
+		chargeFramesFP = frames.InitAbilSlice(30)
 
 		ChargeHitmark = 12
 		ChargeHitmarkFP = 12

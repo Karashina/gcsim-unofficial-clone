@@ -37,7 +37,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 	c.EnergyMax = 70
 	c.NormalHitNum = normalHitNum
-	c.SkillCon = 5
+	c.NormalCon = 5
 	c.BurstCon = 3
 	c.HasArkhe = false
 
@@ -53,13 +53,15 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 func (c *char) Init() error {
 	c.Nightsoulckeck()
 	c.a4()
-	c.c4()
 	c.c6()
 	return nil
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
 	if a == action.ActionSkill && c.StatusIsActive(freeskillkey) {
+		return true, action.NoFailure
+	}
+	if a == action.ActionBurst && c.StatusIsActive(apexDriveKey) && c.Energy >= kablamCost && c.Cooldown(action.ActionBurst) <= 0 {
 		return true, action.NoFailure
 	}
 	return c.Character.ActionReady(a, p)
@@ -69,8 +71,8 @@ func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
 	case "nightsoul":
 		return c.nightsoulState.Condition(fields)
-	case "fiery":
-		if c.StatusIsActive(fieryPassionKey) {
+	case "apexdrive":
+		if c.StatusIsActive(apexDriveKey) {
 			return 1, nil
 		} else {
 			return 0, nil
@@ -89,10 +91,14 @@ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 
 func (c *char) Nightsoulckeck() {
 	c.Core.Events.Subscribe(event.OnNightsoulGenerate, func(args ...interface{}) bool {
-		if !c.nightsoulState.HasBlessing() {
-			c.nightsoulState.EnterBlessing(c.nightsoulState.Points())
+		idx := args[0].(int)
+		if c.Index != idx {
+			return false
 		}
-		if c.nightsoulState.Points() >= c.nightsoulState.MaxPoints {
+		if c.nightsoulState.Points() >= 40 {
+			if !c.nightsoulState.HasBlessing() {
+				c.nightsoulState.EnterBlessing(40)
+			}
 			c.AddStatus(fieryPassionKey, 15*60, false)
 			c.AddStatus(freeskillkey, 15*60, true)
 		}
@@ -100,15 +106,8 @@ func (c *char) Nightsoulckeck() {
 	}, "varesa-fierypassion-check")
 
 	c.Core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
-		if c.Index != c.Core.Player.ActiveChar().Index {
+		if !c.nightsoulState.HasBlessing() || c.StatusIsActive(fieryPassionKey) {
 			return false
-		}
-		if !c.nightsoulState.HasBlessing() {
-			return false
-		}
-		if c.nightsoulState.Points() <= 0 {
-			c.DeleteStatus(fieryPassionKey)
-			c.nightsoulState.ExitBlessing()
 		}
 		if !c.StatusIsActive(fieryPassionKey) {
 			c.nightsoulState.ExitBlessing()
@@ -117,6 +116,10 @@ func (c *char) Nightsoulckeck() {
 	}, "varesa-nightsoul-check")
 
 	c.Core.Events.Subscribe(event.OnActionExec, func(args ...interface{}) bool {
+		idx := args[0].(int)
+		if c.Index != idx {
+			return false
+		}
 		act := args[1].(action.Action)
 		if act == action.ActionSkill {
 			c.DeleteStatus(apexDriveKey)
