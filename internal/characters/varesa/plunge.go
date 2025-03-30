@@ -46,7 +46,7 @@ func init() {
 func (c *char) setValesaFrames() {
 	highPlungeHitmark = 35
 	highPlungeFrames = frames.InitAbilSlice(46)
-	highPlungeFrames[action.ActionJump] = 36
+	highPlungeFrames[action.ActionAttack] = 36
 	highPlungeFrames[action.ActionDash] = highPlungeHitmark
 }
 
@@ -97,7 +97,8 @@ func (c *char) lowPlunge(p map[string]int) action.Info {
 		Mult:           lowPlunge[c.TalentLvlAttack()],
 	}
 	c.c4Plunge()
-	ai.Mult += c.a1PlungeBuff() + c.c4buff
+	ai.Mult += c.a1PlungeBuff()
+	ai.FlatDmg += c.c4buff
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, lowPlungeRadius),
@@ -163,7 +164,8 @@ func (c *char) highPlunge(p map[string]int) action.Info {
 		Mult:           highPlunge[c.TalentLvlAttack()],
 	}
 	c.c4Plunge()
-	ai.Mult += c.a1PlungeBuff() + c.c4buff
+	ai.Mult += c.a1PlungeBuff()
+	ai.FlatDmg += c.c4buff
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, highPlungeRadius),
@@ -225,7 +227,8 @@ func (c *char) lowPlungeFP(p map[string]int) action.Info {
 		Mult:           lowPlungefp[c.TalentLvlAttack()],
 	}
 	c.c4Plunge()
-	ai.Mult += c.a1PlungeBuff() + c.c4buff
+	ai.Mult += c.a1PlungeBuff()
+	ai.FlatDmg += c.c4buff
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, lowPlungeRadius),
@@ -235,6 +238,11 @@ func (c *char) lowPlungeFP(p map[string]int) action.Info {
 		c.c2CB(),
 		c.a1Cancel,
 	)
+	c.nightsoulState.ConsumePoints(40)
+	c.QueueCharTask(func() {
+		c.nightsoulState.ExitBlessing()
+		c.DeleteStatus(fieryPassionKey)
+	}, 3*60)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(lowPlungeFrames),
@@ -267,7 +275,8 @@ func (c *char) highPlungeFP(p map[string]int) action.Info {
 		Mult:           highPlungefp[c.TalentLvlAttack()],
 	}
 	c.c4Plunge()
-	ai.Mult += c.a1PlungeBuff() + c.c4buff
+	ai.Mult += c.a1PlungeBuff()
+	ai.FlatDmg += c.c4buff
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, highPlungeRadius),
@@ -277,6 +286,11 @@ func (c *char) highPlungeFP(p map[string]int) action.Info {
 		c.c2CB(),
 		c.a1Cancel,
 	)
+	c.nightsoulState.ConsumePoints(40)
+	c.QueueCharTask(func() {
+		c.nightsoulState.ExitBlessing()
+		c.DeleteStatus(fieryPassionKey)
+	}, 3*60)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(highPlungeFrames),

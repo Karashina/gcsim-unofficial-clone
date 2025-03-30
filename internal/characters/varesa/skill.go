@@ -109,6 +109,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	if c.StatusIsActive(freeskillkey) {
 		c.DeleteStatus(freeskillkey)
+		c.particleGenerated = false
 	} else {
 		c.SetCDWithDelay(action.ActionSkill, skillCd, skillHitmark-2)
 	}

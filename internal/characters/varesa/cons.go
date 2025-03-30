@@ -46,14 +46,8 @@ func (c *char) c4() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DmgP] = 1.0
 	c.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBase("varesa-c4", -1),
+		Base: modifier.NewBase("varesa-c4", 45),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			if atk.Info.AttackTag != attacks.AttackTagElementalBurst && atk.Info.Abil != kablamAbil {
-				return nil, false
-			}
-			if !c.nightsoulState.HasBlessing() && !c.StatusIsActive(apexDriveKey) {
-				return nil, false
-			}
 			return m, true
 		},
 	})
