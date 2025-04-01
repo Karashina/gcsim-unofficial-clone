@@ -20,7 +20,6 @@ func init() {
 	}
 }
 
-
 func (x *char) Data() *model.AvatarData {
 	return base
 }
