@@ -55,6 +55,7 @@ func (c *char) Init() error {
 
 	c.a1()
 	c.a4()
+	c.c4()
 
 	return nil
 }
