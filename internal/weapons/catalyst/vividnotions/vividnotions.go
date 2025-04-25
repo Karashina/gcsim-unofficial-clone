@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
@@ -15,99 +14,92 @@ import (
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
+const (
+	plungeBuff     = "dawns-first-hue"
+	skillBurstBuff = "twilights-splendor"
+)
+
 func init() {
 	core.RegisterWeaponFunc(keys.VividNotions, NewWeapon)
 }
 
-const (
-	buffkeyp  = "vividnotions-dawnsfirsthue"
-	buffkeyeq = "vividnotions-twilightssplendor"
-)
-
 type Weapon struct {
 	Index int
-	core  *core.Core
 }
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	w := &Weapon{
-		core: c,
-	}
+	w := &Weapon{}
 	r := p.Refine
 
-	atkp := 0.28 + 0*float64(r) //REFINE
-	matk := make([]float64, attributes.EndStatType)
-	matk[attributes.ATKP] = atkp
-
+	m := make([]float64, attributes.EndStatType)
+	m[attributes.ATKP] = 0.21 + float64(r)*0.07
 	char.AddStatMod(character.StatMod{
-		Base:         modifier.NewBase("vividnotions-atkp", -1),
-		AffectedStat: attributes.ATKP,
+		Base: modifier.NewBase("vividnotions-atk", -1),
 		Amount: func() ([]float64, bool) {
-			return matk, true
+			return m, true
 		},
 	})
 
-	mDmg := make([]float64, attributes.EndStatType)
+	mCD := make([]float64, attributes.EndStatType)
+	plungeCD := 0.21 + float64(r)*0.07
+	skillBurstCD := 0.3 + float64(r)*0.1
+
 	char.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBaseWithHitlag("vividnotions-plungebuff", -1),
+		Base: modifier.NewBase("vividnotions-cd", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
 			if atk.Info.AttackTag != attacks.AttackTagPlunge {
 				return nil, false
 			}
-			mDmg[attributes.DmgP] = 0
-			if char.StatusIsActive(buffkeyp) {
-				mDmg[attributes.DmgP] += 0.28 + float64(r)*0 //REFINE
+
+			mCD[attributes.CD] = 0
+			if char.StatusIsActive(plungeBuff) {
+				mCD[attributes.CD] += plungeCD
 			}
-			if char.StatusIsActive(buffkeyeq) {
-				mDmg[attributes.DmgP] += 0.40 + float64(r)*0 //REFINE
+			if char.StatusIsActive(skillBurstBuff) {
+				mCD[attributes.CD] += skillBurstCD
 			}
-			return mDmg, true
+			return mCD, true
 		},
 	})
 
-	c.Events.Subscribe(event.OnActionExec, func(args ...interface{}) bool {
-		if c.Player.Active() != char.Index {
-			return false
-		}
-		act := args[1].(action.Action)
-
-		switch act {
-		case action.ActionHighPlunge:
-			char.AddStatus(buffkeyp, 15*60, true)
-		case action.ActionLowPlunge:
-			char.AddStatus(buffkeyp, 15*60, true)
-		case action.ActionSkill:
-			char.AddStatus(buffkeyeq, 15*60, true)
-		case action.ActionBurst:
-			char.AddStatus(buffkeyeq, 15*60, true)
-		default:
-			return false
-		}
-
+	c.Events.Subscribe(event.OnPlunge, func(args ...interface{}) bool {
+		char.AddStatus(plungeBuff, 15*60, true)
 		return false
-	}, fmt.Sprintf("vividnotion-onplungeexec-%v", char.Base.Key.String()))
+	}, fmt.Sprintf("vividnotions-plunge-%s", char.Base.Key.String()))
 
-	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
+		char.AddStatus(skillBurstBuff, 15*60, true)
+		return false
+	}, fmt.Sprintf("vividnotions-skill-%s", char.Base.Key.String()))
+
+	c.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
+		char.AddStatus(skillBurstBuff, 15*60, true)
+		return false
+	}, fmt.Sprintf("vividnotions-burst-%s", char.Base.Key.String()))
+
+	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
-
 		if ae.Info.ActorIndex != char.Index {
 			return false
 		}
-
 		if ae.Info.AttackTag != attacks.AttackTagPlunge {
 			return false
 		}
+		if ae.Info.Durability == 0 {
+			return false
+		}
 
+		// TODO: hitlag affected?
 		char.QueueCharTask(func() {
-			char.DeleteStatus(buffkeyp)
-			char.DeleteStatus(buffkeyeq)
-		}, 6)
+			char.DeleteStatus(plungeBuff)
+			char.DeleteStatus(skillBurstBuff)
+		}, 0.05*60)
 
 		return false
-	}, fmt.Sprintf("vividnotion-deletebuff-%v", char.Base.Key.String()))
+	}, fmt.Sprintf("vividnotions-%s", char.Base.Key.String()))
 
 	return w, nil
 }

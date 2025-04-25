@@ -96,21 +96,22 @@ func NewCrystallizeShield(index int, typ attributes.Element, src, lvl int, em fl
 		lvl = 0
 	}
 
-	s.emBonus = (40.0 / 9.0) * (em / (1400 + em))
-
 	s.Tmpl.ActorIndex = index
 	s.Tmpl.Target = -1
 	s.Tmpl.Ele = typ
 	s.Tmpl.ShieldType = shield.Crystallize
 	s.Tmpl.Name = "Crystallize " + typ.String()
 	s.Tmpl.Src = src
-	s.Tmpl.HP = shieldBaseHP[lvl] * (1 + s.emBonus)
+	s.Tmpl.HP = shieldBaseHP[lvl]
 	s.Tmpl.Expires = expiry
+
+	s.emBonus = (40.0 / 9.0) * (em / (1400 + em))
 
 	return s
 }
 
 func (c *CrystallizeShield) OnDamage(dmg float64, ele attributes.Element, bonus float64) (float64, bool) {
+	bonus += c.emBonus
 	return c.Tmpl.OnDamage(dmg, ele, bonus)
 }
 
