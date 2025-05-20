@@ -176,6 +176,7 @@ var weaponNames = []string{
 	"sapwoodblade",
 	"scionoftheblazingsun",
 	"seasonedhuntersbow",
+	"sequenceofsolitude",
 	"serpentspine",
 	"sharpshootersoath",
 	"silvershowerheartstrings",
@@ -202,6 +203,7 @@ var weaponNames = []string{
 	"surfsup",
 	"swordofdescension",
 	"swordofnarzissenkreuz",
+	"symphonistofscents",
 	"talkingstick",
 	"tamayurateinoohanashi",
 	"thealleyflash",
@@ -387,6 +389,7 @@ const (
 	SapwoodBlade
 	ScionOfTheBlazingSun
 	SeasonedHuntersBow
+	SequenceOfSolitude
 	SerpentSpine
 	SharpshootersOath
 	SilvershowerHeartstrings
@@ -413,6 +416,7 @@ const (
 	SurfsUp
 	SwordOfDescension
 	SwordOfNarzissenkreuz
+	SymphonistOfScents
 	TalkingStick
 	TamayurateiNoOhanashi
 	TheAlleyFlash

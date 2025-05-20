@@ -55,6 +55,7 @@ const (
 	ICDGroupTravelerBurst
 	ICDGroupFrostfallStorm
 	ICDGroupDreamdrifter
+	ICDGroupIfaShots
 	EndDefaultICDGroups
 )
 
@@ -73,6 +74,7 @@ func init() {
 	ICDGroupResetTimer[ICDGroupTravelerBurst] = 480
 	ICDGroupResetTimer[ICDGroupFrostfallStorm] = 90
 	ICDGroupResetTimer[ICDGroupDreamdrifter] = 72
+	ICDGroupResetTimer[ICDGroupIfaShots] = 720
 
 	ICDGroupEleApplicationSequence = make([][]float64, ICDGroupLength)
 	ICDGroupEleApplicationSequence[ICDGroupDefault] = []float64{1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0}
@@ -84,6 +86,7 @@ func init() {
 	ICDGroupEleApplicationSequence[ICDGroupTravelerBurst] = []float64{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupFrostfallStorm] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupDreamdrifter] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
+	ICDGroupEleApplicationSequence[ICDGroupIfaShots] = []float64{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0}
 
 	ICDGroupDamageSequence = make([][]float64, ICDGroupLength)
 	ICDGroupDamageSequence[ICDGroupDefault] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
@@ -97,4 +100,5 @@ func init() {
 	ICDGroupDamageSequence[ICDGroupTravelerBurst] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupFrostfallStorm] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupDreamdrifter] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
+	ICDGroupDamageSequence[ICDGroupIfaShots] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 }

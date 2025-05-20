@@ -33,6 +33,7 @@ const (
 	Diona
 	Dori
 	Emilie
+	Escoffier
 	Eula
 	Faruzan
 	Fischl
@@ -44,6 +45,7 @@ const (
 	Heizou
 	Hutao
 	Iansan
+	Ifa
 	Itto
 	Jean
 	Kachina
@@ -211,6 +213,10 @@ func init() {
 	charPrettyName[Emilie] = "Emilie"
 	CharKeyToEle[Emilie] = attributes.Dendro
 
+	charNames[Escoffier] = "escoffier"
+	charPrettyName[Escoffier] = "Escoffier"
+	CharKeyToEle[Escoffier] = attributes.Cryo
+
 	charNames[Eula] = "eula"
 	charPrettyName[Eula] = "Eula"
 	CharKeyToEle[Eula] = attributes.Cryo
@@ -254,6 +260,10 @@ func init() {
 	charNames[Iansan] = "iansan"
 	charPrettyName[Iansan] = "Iansan"
 	CharKeyToEle[Iansan] = attributes.Electro
+
+	charNames[Ifa] = "ifa"
+	charPrettyName[Ifa] = "Ifa"
+	CharKeyToEle[Ifa] = attributes.Anemo
 
 	charNames[Itto] = "itto"
 	charPrettyName[Itto] = "Itto"
