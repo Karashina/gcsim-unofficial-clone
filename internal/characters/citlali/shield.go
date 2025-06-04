@@ -5,22 +5,25 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/player/shield"
 )
 
-func (c *char) newShield(base float64, dur int) *shd {
-	n := &shd{}
-	n.Tmpl = &shield.Tmpl{}
-	n.Tmpl.ActorIndex = c.Index
-	n.Tmpl.Target = -1
-	n.Tmpl.Src = c.Core.F
-	n.Tmpl.ShieldType = shield.CitlaliSkill
-	n.Tmpl.Ele = attributes.Cryo
-	n.Tmpl.HP = base
-	n.Tmpl.Name = "Opal Shield"
-	n.Tmpl.Expires = c.Core.F + dur
-	n.c = c
-	return n
-}
-
+// need to rewrite Expires
 type shd struct {
 	*shield.Tmpl
-	c *char
+}
+
+func (c *char) addShield() {
+	em := c.Stat(attributes.EM)
+	shieldHP := shieldEM[c.TalentLvlSkill()]*em + shieldFlat[c.TalentLvlSkill()]
+	c.skillShield = &shd{
+		Tmpl: &shield.Tmpl{
+			ActorIndex: c.Index,
+			Target:     -1,
+			Src:        c.Core.F,
+			Name:       "Citalali Skill Shield",
+			ShieldType: shield.CitlaliSkill,
+			HP:         shieldHP,
+			Ele:        attributes.Cryo,
+			Expires:    c.Core.F + 20*60,
+		},
+	}
+	c.Core.Player.Shields.Add(c.skillShield)
 }

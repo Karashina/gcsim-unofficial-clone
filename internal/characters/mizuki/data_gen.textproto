@@ -1,15 +1,15 @@
-id: 90000007
+id: 10000109
 key: "mizuki"
 rarity: QUALITY_ORANGE
 body: BODY_GIRL
 region: ASSOC_TYPE_INAZUMA
 element: Wind
 weapon_class: WEAPON_CATALYST
-icon_name: "UI_AvatarIcon_Ambor"
+icon_name: "UI_AvatarIcon_Mizuki"
 stats: {
-   base_hp: 991
-   base_atk: 17
-   base_def: 59
+   base_hp: 991.4528
+   base_atk: 16.758
+   base_def: 58.93255
    hp_curve: GROW_CURVE_HP_S5
    atk_curve: GROW_CURVE_ATTACK_S5
    def_cruve: GROW_CURVE_HP_S5
@@ -32,15 +32,15 @@ stats: {
       max_level: 40
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 850
+         value: 850.0811
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 50
+         value: 50.5305
       }
       add_props: {
-         prop_type: FIGHT_PROP_ELEMENT_MASTERY
-         value: 15
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 14.36742
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -48,17 +48,17 @@ stats: {
    }
    promo_data: {
       max_level: 50
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1453.925
+         value: 1454.0862
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 85.525
+         value: 86.43375
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 25.6575
+         value: 24.57585
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -69,15 +69,15 @@ add_props: {
       max_level: 60
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2259.215
+         value: 2259.4263
       }
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 132.895
+         value: 134.30475
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 39.8685
+         value: 38.18709
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -88,15 +88,15 @@ add_props: {
       max_level: 70
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2863.14
+         value: 2863.4312
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 168.42
+         value: 170.208
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 50.526
+         value: 48.39552
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -107,15 +107,15 @@ add_props: {
       max_level: 80
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3467.065
+         value: 3467.4363
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 203.945
+         value: 206.11125
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 61.1835
+         value: 58.60395
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -126,15 +126,15 @@ add_props: {
       max_level: 90
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 4071.075
+         value: 4071.4412
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 239.475
+         value: 242.0145
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 71.8425
+         value: 68.81238
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -143,9 +143,9 @@ add_props: {
    }
 }
 skill_details: {
-   skill: 10262
-   burst: 10265
-   attack: 10261
+   skill: 11092
+   burst: 11095
+   attack: 11091
    burst_energy_cost: 60
 }
-name_text_hash_map: 1021947691
+name_text_hash_map: 3784387538

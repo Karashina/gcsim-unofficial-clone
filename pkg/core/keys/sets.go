@@ -43,7 +43,6 @@ var setNames = []string{
 	"deepwoodmemories",
 	"defenderswill",
 	"desertpavilionchronicle",
-	"vourukashasglow",
 	"echoesofanoffering",
 	"emblemofseveredfate",
 	"finaleofthedeepgalleries",
@@ -87,6 +86,7 @@ var setNames = []string{
 	"unfinishedreverie",
 	"vermillionhereafter",
 	"viridescentvenerer",
+	"vourukashasglow",
 	"wandererstroupe",
 }
 
@@ -102,7 +102,6 @@ const (
 	DeepwoodMemories
 	DefendersWill
 	DesertPavilionChronicle
-	VourukashasGlow
 	EchoesOfAnOffering
 	EmblemOfSeveredFate
 	FinaleOfTheDeepGalleries
@@ -146,5 +145,6 @@ const (
 	UnfinishedReverie
 	VermillionHereafter
 	ViridescentVenerer
+	VourukashasGlow
 	WanderersTroupe
 )

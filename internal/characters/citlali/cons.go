@@ -7,139 +7,159 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/genshinsim/gcsim/pkg/core/player/shield"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-const c4IcdKey = "citlali-c4-icd"
+const (
+	maxC6Stacks = 40
+	c4SkullIcd  = "c4-skull-icd"
+)
 
+// Additionally, when Citlali is using her leap, or is Aiming or using her
+// Charged Attack in mid-air, her Phlogiston consumption is decreased by 45%.
+// NOT IMPLEMENTED
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
 	}
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
-
-		if !c.StatusIsActive(SkillKey) {
+		atk := args[1].(*combat.AttackEvent)
+		if c.Index == atk.Info.ActorIndex {
 			return false
 		}
-
-		if c.Tags[SkillKey] <= 0 {
+		if c.Core.Player.Active() != atk.Info.ActorIndex {
 			return false
 		}
-
-		if ae.Info.ActorIndex == c.Index {
-			return false
-		}
-
-		switch ae.Info.AttackTag {
+		switch atk.Info.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagExtra:
-		case attacks.AttackTagPlunge:
 		case attacks.AttackTagElementalArt:
 		case attacks.AttackTagElementalArtHold:
 		case attacks.AttackTagElementalBurst:
 		default:
 			return false
 		}
-
-		dmgAdded := 2 * c.Stat(attributes.EM)
-		ae.Info.FlatDmg += dmgAdded
-
-		c.Tags[SkillKey] -= 1
-
-		c.Core.Log.NewEvent("citlali c1 adding damage", glog.LogPreDamageMod, ae.Info.ActorIndex).
-			Write("damage_added", dmgAdded)
-
+		if c.numStellarBlades > 0 {
+			em := c.Stat(attributes.EM)
+			amt := em * 2
+			if c.Core.Flags.LogDebug {
+				c.Core.Log.NewEvent("Citlali C1 proc dmg add", glog.LogPreDamageMod, atk.Info.ActorIndex).
+					Write("before", atk.Info.FlatDmg).
+					Write("addition", amt).
+					Write("Stellar Blades left", c.numStellarBlades)
+			}
+			atk.Info.FlatDmg += amt
+			c.numStellarBlades--
+		}
 		return false
-	}, "citlali-c1")
+	}, "citlali-c1-on-dmg")
 }
 
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
 	}
-	m := make([]float64, attributes.EndStatType)
-	m[attributes.EM] = 125
+
+	buffSelf := make([]float64, attributes.EndStatType)
+	buffSelf[attributes.EM] = 125
+	buffOther := make([]float64, attributes.EndStatType)
+	buffOther[attributes.EM] = 250
+
 	c.AddStatMod(character.StatMod{
-		Base:         modifier.NewBaseWithHitlag("citlali-c2-self", -1),
+		Base:         modifier.NewBase("citlali-c2-em", -1),
 		AffectedStat: attributes.EM,
 		Amount: func() ([]float64, bool) {
-			return m, true
+			if c.Core.Player.Shields.Get(shield.CitlaliSkill) == nil {
+				return nil, false
+			}
+			return buffSelf, true
 		},
 	})
-	n := make([]float64, attributes.EndStatType)
-	n[attributes.EM] = 250
-	for _, char := range c.Core.Player.Chars() {
+
+	chars := c.Core.Player.Chars()
+	for _, char := range chars {
+		if c.Index == char.Index {
+			continue
+		}
 		this := char
-		this.AddAttackMod(character.AttackMod{
-			Base: modifier.NewBase("citlali-c2-buff", -1),
-			Amount: func(_ *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-				// char must be active
+		this.AddStatMod(character.StatMod{
+			Base:         modifier.NewBase("citlali-c2-em", -1),
+			AffectedStat: attributes.EM,
+			Amount: func() ([]float64, bool) {
+				// character should be followed by Itzpapa, i.e. the character is active
 				if c.Core.Player.Active() != this.Index {
 					return nil, false
 				}
-				if !c.StatusIsActive(SkillKey) {
+				if c.Core.Player.Shields.Get(shield.CitlaliSkill) == nil && !c.nightsoulState.HasBlessing() {
 					return nil, false
 				}
-				return n, true
+				return buffOther, true
 			},
 		})
 	}
 }
 
-func (c *char) c4CB(a combat.AttackCB) {
+func (c *char) c4SkullCB(a combat.AttackCB) {
 	if c.Base.Cons < 4 {
 		return
 	}
-	if a.Target.Type() != targets.TargettableEnemy {
+	if c.StatusIsActive(c4SkullIcd) {
 		return
 	}
-	if c.StatusIsActive(c4IcdKey) {
-		return
-	}
-	ai := combat.AttackInfo{
+	c.AddStatus(c4SkullIcd, 8*60, true)
+
+	c.generateNightsoulPoints(16)
+	c.AddEnergy("citlali-c4", 8)
+	aiSpiritVesselSkull := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Death Defier's Spirit Skull: Obsidian Spiritvessel Skull DMG",
+		Abil:           "Spiritvessel Skull DMG (C4)",
 		AttackTag:      attacks.AttackTagNone,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-		ICDTag:         attacks.ICDTagElementalBurst,
+		ICDTag:         attacks.ICDTagNone,
 		ICDGroup:       attacks.ICDGroupDefault,
 		StrikeType:     attacks.StrikeTypeDefault,
 		Element:        attributes.Cryo,
 		Durability:     25,
-		FlatDmg:        c.Stat(attributes.EM) * 18,
+		FlatDmg:        18 * c.Stat(attributes.EM),
 	}
-	enemies := c.Core.Combat.RandomEnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6.5), nil, 1)
-	for _, enemy := range enemies {
-		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(enemy.Pos(), nil, 3.5), skullHitmark, skullHitmark)
-	}
-
-	c.nightsoulState.GeneratePoints(16)
-	c.AddEnergy("citlali-c4", 8)
-
-	c.AddStatus(c4IcdKey, 8*60, true)
+	// TODO: the actual hitmark
+	hitmark := spiritVesselSkullHitmark - iceStormHitmark
+	c.Core.QueueAttack(
+		aiSpiritVesselSkull,
+		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 3.5),
+		hitmark,
+		hitmark,
+	)
 }
 
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	for _, char := range c.Core.Player.Chars() {
-		char.AddAttackMod(character.AttackMod{
-			Base: modifier.NewBase("citlali-c6", 20*60),
-			Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-				if !c.StatusIsActive(SkillKey) {
-					return nil, false
-				}
-				if atk.Info.ActorIndex == c.Index {
-					return c.c6self, true
-				}
-				if atk.Info.Element != attributes.Hydro && atk.Info.Element != attributes.Pyro {
-					return nil, false
-				}
-				return c.c6buff, true
+
+	buffSelf := make([]float64, attributes.EndStatType)
+	buffOther := make([]float64, attributes.EndStatType)
+
+	chars := c.Core.Player.Chars()
+	for _, char := range chars {
+		if c.Index == char.Index {
+			continue
+		}
+		char.AddStatMod(character.StatMod{
+			Base: modifier.NewBaseWithHitlag("citlali-c6", -1),
+			Amount: func() ([]float64, bool) {
+				buffOther[attributes.PyroP] = 0.015 * c.numC6Stacks
+				buffOther[attributes.HydroP] = 0.015 * c.numC6Stacks
+				return buffOther, true
 			},
 		})
 	}
+	c.AddAttackMod(character.AttackMod{
+		Base: modifier.NewBaseWithHitlag("citlali-c6", -1),
+		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+			buffSelf[attributes.DmgP] = 0.025 * c.numC6Stacks
+			return buffSelf, true
+		},
+	})
 }

@@ -1,68 +1,112 @@
 package mizuki
 
 import (
+	"fmt"
+
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/enemy"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-const a1IcdKey = "mizuki-a1-icd"
+const (
+	a1SwirlKey                    = "mizuki-a1-swirl-%v"
+	a1ICDKey                      = "mizuki-a1-icd"
+	a1ICD                         = 0.3 * 60
+	a4Duration                    = 4 * 60
+	a4Key                         = "mizuki-a4"
+	a4ICDKey                      = "mizuki-a4-icd"
+	a4ICD                         = 0.3 * 60
+	a4EMBuff                      = 100
+	dreamDrifterExtensions        = 2
+	dreamDrifterDurationExtension = 2.5 * 60
+)
 
+// When Yumemizuki Mizuki triggers Swirl while in her Dreamdrifter state, Dreamdrifter's duration increases by 2.5s.
+// This effect can trigger once every 0.3s for a maximum of 2 times per Dreamdrifter state.
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	a1cb := func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
 
-		if !c.StatusIsActive(skillKey) {
+	swirlFunc := func(args ...interface{}) bool {
+		if _, ok := args[0].(*enemy.Enemy); !ok {
 			return false
 		}
 
-		if c.Tags[skillKey] <= 0 {
+		atk := args[1].(*combat.AttackEvent)
+
+		// Mizuki should trigger the swirl
+		if atk.Info.ActorIndex != c.Index {
 			return false
 		}
 
-		if ae.Info.ActorIndex != c.Index {
+		// Only when dream drifter is active
+		if !c.StatusIsActive(dreamDrifterStateKey) {
 			return false
 		}
 
-		if c.StatusIsActive(a1IcdKey) {
+		// Max 2 extensions per E
+		if c.dreamDrifterExtensionsRemaining <= 0 {
 			return false
 		}
 
-		c.AddStatus(a1IcdKey, 0.3*60, true)
-		c.Tags[skillKey] -= 1
-		c.ExtendStatus(skillKey, 2.5*60)
+		// ICD
+		if c.StatusIsActive(a1ICDKey) {
+			return false
+		}
+
+		c.AddStatus(a1ICDKey, a1ICD, true)
+
+		c.ExtendStatus(dreamDrifterStateKey, dreamDrifterDurationExtension)
+
+		c.dreamDrifterExtensionsRemaining--
 
 		return false
 	}
 
-	c.Core.Events.Subscribe(event.OnSwirlCryo, a1cb, "mizuki-a1")
-	c.Core.Events.Subscribe(event.OnSwirlElectro, a1cb, "mizuki-a1")
-	c.Core.Events.Subscribe(event.OnSwirlHydro, a1cb, "mizuki-a1")
-	c.Core.Events.Subscribe(event.OnSwirlPyro, a1cb, "mizuki-a1")
+	c.Core.Events.Subscribe(event.OnSwirlPyro, swirlFunc, fmt.Sprintf(a1SwirlKey, attributes.Pyro))
+	c.Core.Events.Subscribe(event.OnSwirlHydro, swirlFunc, fmt.Sprintf(a1SwirlKey, attributes.Hydro))
+	c.Core.Events.Subscribe(event.OnSwirlElectro, swirlFunc, fmt.Sprintf(a1SwirlKey, attributes.Electro))
+	c.Core.Events.Subscribe(event.OnSwirlCryo, swirlFunc, fmt.Sprintf(a1SwirlKey, attributes.Cryo))
 }
 
+// While Yumemizuki Mizuki is in the Dreamdrifter state, when other nearby party members hit opponents with
+// Pyro, Hydro, Cryo, or Electro attacks, her Elemental Mastery will increase by 100 for 4s.
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
-	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
 
-		if !c.StatusIsActive(skillKey) {
+	c.a4Buff = make([]float64, attributes.EndStatType)
+	c.a4Buff[attributes.EM] = a4EMBuff
+
+	hitFunc := func(args ...interface{}) bool {
+		if _, ok := args[0].(*enemy.Enemy); !ok {
 			return false
 		}
 
-		//TODO: is it possible to trigger a4 with her swirl?
-		if ae.Info.ActorIndex == c.Index {
+		// Only when others attack
+		atk := args[1].(*combat.AttackEvent)
+		if atk.Info.ActorIndex == c.Index {
 			return false
 		}
 
-		switch ae.Info.Element {
+		// Only when dream drifter is active
+		if !c.StatusIsActive(dreamDrifterStateKey) {
+			return false
+		}
+
+		// ICD
+		if c.StatusIsActive(a4ICDKey) {
+			return false
+		}
+		c.AddStatus(a4ICDKey, a4ICD, true)
+
+		// Only when enemy is hit by Pyro, Hydro, Cryo, Electro
+		switch atk.Info.Element {
 		case attributes.Electro:
 		case attributes.Hydro:
 		case attributes.Pyro:
@@ -71,16 +115,15 @@ func (c *char) a4() {
 			return false
 		}
 
-		m := make([]float64, attributes.EndStatType)
-		m[attributes.EM] = 100
 		c.AddStatMod(character.StatMod{
-			Base:         modifier.NewBaseWithHitlag("mizuki-a4", 4*60),
+			Base:         modifier.NewBaseWithHitlag(a4Key, a4Duration), // 4s
 			AffectedStat: attributes.EM,
 			Amount: func() ([]float64, bool) {
-				return m, true
+				return c.a4Buff, true
 			},
 		})
 
 		return false
-	}, "mizuki-a4")
+	}
+	c.Core.Events.Subscribe(event.OnEnemyHit, hitFunc, a4Key)
 }

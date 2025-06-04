@@ -27,8 +27,8 @@ const (
 	KiraraSkill
 	TravelerHydroC4
 	SigewinneC2
-	CitlaliSkill
 	LanyanShield
+	CitlaliSkill
 	EndType
 )
 

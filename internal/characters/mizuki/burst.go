@@ -6,134 +6,135 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
 var burstFrames []int
 
 const (
-	burstKey           = "mizuki-burst"
-	burstHitmark       = 94
-	burstCDDelay       = 95
-	burstEnergyDelay   = 5
-	snackDelay         = 190
-	burstIntervalKey   = "mizuki-burst-interval"
-	SnackSpawnInterval = 60
+	burstActivationDmgName     = "Anraku Secret Spring Therapy"
+	burstKey                   = "mizuki-burst"
+	burstHitmark               = 93
+	burstDurability            = 50
+	burstPoise                 = 100
+	burstDuration              = 12 * 60
+	burstCdDelay               = 1
+	burstEnergyDrainDelay      = 4
+	burstCd                    = 15 * 60
+	burstRadius                = 8
+	snackInterval              = 1.5 * 60
+	snackSpawnOnEnemyRadius    = 6
+	snackSpawnLocationVariance = 1.0
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(103)
-	burstFrames[action.ActionCharge] = 103
-	burstFrames[action.ActionSkill] = 103
-	burstFrames[action.ActionDash] = 103
-	burstFrames[action.ActionJump] = 103
-	burstFrames[action.ActionSwap] = 103
+	burstFrames = frames.InitAbilSlice(94) // Q -> Swap
+	burstFrames[action.ActionAttack] = 93
+	burstFrames[action.ActionCharge] = 92
+	burstFrames[action.ActionSkill] = 93
+	burstFrames[action.ActionDash] = 91
+	burstFrames[action.ActionJump] = 93
+	burstFrames[action.ActionWalk] = 92
 }
 
+// Summons forth countless lovely dreams and nightmares that pull in nearby objects and opponents,
+// dealing AoE Anemo DMG and summoning a Mini Baku.
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-
+	// Activation dmg
 	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Anraku Secret Spring Therapy(Initial DMG)",
-		AttackTag:  attacks.AttackTagElementalBurst,
-		ICDTag:     attacks.ICDTagNone,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Anemo,
-		Durability: 50,
-		Mult:       burst[c.TalentLvlBurst()],
+		ActorIndex:   c.Index,
+		Abil:         burstActivationDmgName,
+		AttackTag:    attacks.AttackTagElementalBurst,
+		ICDTag:       attacks.ICDTagNone,
+		ICDGroup:     attacks.ICDGroupDefault,
+		StrikeType:   attacks.StrikeTypeDefault,
+		Element:      attributes.Anemo,
+		Durability:   burstDurability,
+		PoiseDMG:     burstPoise,
+		Mult:         burstDMG[c.TalentLvlBurst()],
+		HitlagFactor: 0.05,
 	}
-	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5), burstHitmark, burstHitmark)
 
-	c.AddStatus(burstKey, 12*60, false)
-	c.SetCDWithDelay(action.ActionBurst, 15*60, burstCDDelay)
-	c.ConsumeEnergy(burstEnergyDelay)
-	c.c4Count = 0
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, burstRadius), burstHitmark, burstHitmark)
+
+	// might be useful for checking in scripts
+	c.AddStatus(burstKey, burstDuration, false)
+
+	if c.Base.Cons >= 4 {
+		c.c4EnergyGenerationsRemaining = c4EnergyGenerations
+	}
+
+	c.queueSnacks()
+
+	c.ConsumeEnergy(burstEnergyDrainDelay)
+	c.SetCDWithDelay(action.ActionBurst, burstCd, burstCdDelay)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash],
 		State:           action.BurstState,
 	}, nil
 }
 
-func (c *char) snackHandler(src string) {
-	snackfunc := func() {
-		active := c.Core.Player.ActiveChar()
-		if active.CurrentHPRatio() > 0.7 || c.Base.Cons >= 4 {
-			// snacc attacc
-			c.Core.Tasks.Add(func() {
-				ai := combat.AttackInfo{
-					ActorIndex: c.Index,
-					Abil:       "Anraku Secret Spring Therapy(Munen Shockwave)",
-					AttackTag:  attacks.AttackTagElementalBurst,
-					ICDTag:     attacks.ICDTagElementalBurst,
-					ICDGroup:   attacks.ICDGroupDefault,
-					StrikeType: attacks.StrikeTypeDefault,
-					Element:    attributes.Anemo,
-					Durability: 25,
-					Mult:       burstSnack[c.TalentLvlBurst()],
-				}
-				c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5), 0, 0)
-			}, snackDelay)
+func (c *char) queueSnacks() {
+	randomSign := func() float64 {
+		rnd := c.Core.Rand.Float64()
+		if 0.5 < rnd {
+			return -1
 		}
-		if active.CurrentHPRatio() <= 0.7 || c.Base.Cons >= 4 {
-			// snacc heal
-			c.Core.Tasks.Add(func() {
-				heal := burstHealC[c.TalentLvlBurst()] + burstHeal[c.TalentLvlBurst()]*c.Stat(attributes.EM)
-				c.Core.Player.Heal(info.HealInfo{
-					Caller:  c.Index,
-					Target:  c.Core.Player.Active(),
-					Message: "Anraku Secret Spring Therapy(Heal)",
-					Src:     heal,
-					Bonus:   c.Stat(attributes.Heal),
-				})
-			}, snackDelay)
-			c.c4()
-		}
+		return 1
 	}
-	switch src {
-	case "init":
-		//hook to dash
-		c.Core.Events.Subscribe(event.OnDash, func(args ...interface{}) bool {
-			if c.StatusIsActive(burstIntervalKey) {
-				return false
+	snackFunc := func() {
+		pos := c.calculateSnackSpawnLocation()
+
+		// randomize a bit the spawn location
+		pos.Y += c.Core.Rand.Float64() * snackSpawnLocationVariance * randomSign()
+		pos.X += c.Core.Rand.Float64() * snackSpawnLocationVariance * randomSign()
+
+		newSnack(c, pos)
+	}
+
+	// Spawn timer starts at burst hitmark
+	spawnTime := burstHitmark
+	for i := int(snackInterval); i <= burstDuration; i += snackInterval {
+		c.Core.Tasks.Add(snackFunc, spawnTime+i)
+	}
+}
+
+func (c *char) calculateSnackSpawnLocation() geometry.Point {
+	// According to testing, snacks appear within a small range (1m) in front of the target/player.
+	// However since the enemy direction is not set by default towards the player, we calculate
+	// a position relative to the player/enemy
+	playerPos := c.Core.Combat.Player().Pos()
+	finalPosition := playerPos
+
+	// find the closest enemy
+	target := c.Core.Combat.ClosestEnemyWithinArea(
+		combat.NewCircleHitOnTarget(playerPos, nil, snackSpawnOnEnemyRadius),
+		nil,
+	)
+
+	// if enemy is found use this, otherwise use the player position
+	if target != nil {
+		targetShape := target.Shape()
+		finalPosition = targetShape.Pos()
+		direction := geometry.Point{
+			X: playerPos.X - finalPosition.X,
+			Y: playerPos.Y - finalPosition.Y,
+		}
+		if v, ok := targetShape.(*geometry.Circle); ok {
+			if finalPosition != playerPos {
+				direction = direction.Normalize()
+				finalPosition.X += v.Radius() * direction.X
+				finalPosition.Y += v.Radius() * direction.Y
 			}
-			c.Core.Log.NewEvent(
-				"special snack picked up by dash",
-				glog.LogCharacterEvent,
-				c.Index,
-			)
-			c.AddStatus(burstIntervalKey, SnackSpawnInterval, false)
-			snackfunc()
-			return false
-		}, "mizuki-burst-snack-ondash")
-	case "skill":
-		if !c.StatusIsActive(burstKey) {
-			return
+		} else if _, ok := targetShape.(*geometry.Rectangle); ok {
+			// currently we cannot reliably get an edge to spawn the snack on rectangle.
+			// place it somewhere around the middle
+			finalPosition.X += direction.X / 2
+			finalPosition.Y += direction.Y / 2
 		}
-		c.Core.Log.NewEvent(
-			"special snack picked up by mizuki E",
-			glog.LogCharacterEvent,
-			c.Index,
-		)
-		snackfunc()
-	default:
-		if !c.StatusIsActive(burstKey) {
-			return
-		}
-		if c.StatusIsActive(burstIntervalKey) {
-			return
-		}
-		c.AddStatus(burstIntervalKey, SnackSpawnInterval, false)
-		c.Core.Log.NewEvent(
-			"special snack picked up by undefined move",
-			glog.LogCharacterEvent,
-			c.Index,
-		)
-		snackfunc()
 	}
+	return finalPosition
 }

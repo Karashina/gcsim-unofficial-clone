@@ -25,6 +25,7 @@ const (
 	GadgetTypSourcewaterDropletSigewinne
 	GadgetTypCrystallizeShard
 	GadgetTypReactableweapon
+	GadgetTypYumemiSnack
 	GadgetTypTest
 	EndGadgetTyp
 )

@@ -4,8 +4,6 @@ import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
@@ -18,11 +16,11 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	nightsoulState *nightsoul.State
-	nightsoulSrc   int
-	c6count        float64
-	c6buff         []float64
-	c6self         []float64
+	nightsoulState   *nightsoul.State
+	opalFireSrc      int
+	skillShield      *shd
+	numStellarBlades int
+	numC6Stacks      float64
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -30,7 +28,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.Character = tmpl.NewWithWrapper(s, w)
 
 	c.EnergyMax = 60
-	c.NormalHitNum = normalHitNum
+	c.NormalHitNum = 3
 	c.SkillCon = 3
 	c.BurstCon = 5
 	c.HasArkhe = false
@@ -40,35 +38,30 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.nightsoulState = nightsoul.New(s, w)
 	c.nightsoulState.MaxPoints = 100
 
-	c.c6count = 0
-	c.c6buff = make([]float64, attributes.EndStatType)
-	c.c6self = make([]float64, attributes.EndStatType)
+	c.opalFireSrc = -1
+	c.numC6Stacks = 0
 
 	return nil
 }
 
 func (c *char) Init() error {
-	c.SkillChecks()
 	c.a1()
 	c.a4()
+
 	c.c1()
 	c.c2()
+	c.c6()
 	return nil
-}
-
-func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	if a == action.ActionAttack && c.nightsoulState.HasBlessing() {
-		if c.AvailableCDCharge[a] <= 0 {
-			// TODO: Implement AttackCD warning
-			return false, action.CharacterDeceased
-		}
-	}
-
-	return c.Character.ActionReady(a, p)
 }
 
 func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
+	case "stellar-blade":
+		return c.numStellarBlades, nil
+	case "opal-fire":
+		return c.StatusIsActive(opalFireStateKey), nil
+	case "c6-stacks":
+		return c.numC6Stacks, nil
 	case "nightsoul":
 		return c.nightsoulState.Condition(fields)
 	default:
@@ -77,15 +70,12 @@ func (c *char) Condition(fields []string) (any, error) {
 }
 
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
-	if k == model.AnimationXingqiuN0StartDelay {
-		return 4
+	switch k {
+	case model.AnimationXingqiuN0StartDelay:
+		return 13
+	case model.AnimationYelanN0StartDelay:
+		return 3
+	default:
+		return c.Character.AnimationStartDelay(k)
 	}
-	return c.Character.AnimationStartDelay(k)
-}
-
-func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
-	if c.nightsoulState.HasBlessing() {
-		return 0
-	}
-	return c.Character.ActionStam(a, p)
 }

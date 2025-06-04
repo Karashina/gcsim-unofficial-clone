@@ -4,8 +4,7 @@ import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
@@ -17,10 +16,15 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	dreamdrifterSrc int
-	particleCount   int
-	c4Count         int
-	c2buff          []float64
+	particleGenerationsRemaining    int
+	dreamDrifterExtensionsRemaining int
+	cloudAttack                     combat.AttackInfo
+	cloudSnap                       combat.Snapshot
+	cloudSrc                        int
+	a4Buff                          []float64
+	c1EM                            float64
+	c2Buff                          []float64
+	c4EnergyGenerationsRemaining    int
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -29,54 +33,39 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 	c.EnergyMax = 60
 	c.NormalHitNum = normalHitNum
-	c.SkillCon = 3
 	c.BurstCon = 5
-
-	c.particleCount = 0
-	c.c4Count = 0
+	c.SkillCon = 3
 
 	w.Character = &c
-
-	c.c2buff = make([]float64, attributes.EndStatType)
 
 	return nil
 }
 
 func (c *char) Init() error {
-	c.onExitField()
-	c.swirlBuff()
-	c.snackHandler("init")
+	c.skillInit()
 	c.a1()
 	c.a4()
 	c.c1()
+	c.c2()
 	c.c6()
 	return nil
 }
 
-func (c *char) onExitField() {
-	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
-		if c.StatModIsActive(skillKey) {
-			c.DeleteStatMod(skillKey)
-		}
-		return false
-	}, "mizuki-exit")
-}
-
-func (c *char) Condition(fields []string) (any, error) {
-	switch fields[0] {
-	case "dreamdrifter":
-		if c.StatusIsActive(skillKey) {
-			return 1, nil
-		}
-		return 0, nil
-	default:
-		return c.Character.Condition(fields)
-	}
-}
-
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	if a == action.ActionSkill && c.StatusIsActive(skillKey) {
+	if !c.StatusIsActive(dreamDrifterStateKey) {
+		return c.Character.ActionReady(a, p)
+	}
+
+	// Allow to press E while in dreamDrifter that cancels the effect
+	if a == action.ActionSkill {
+		// cancel
 		return true, action.NoFailure
 	}
+
+	// restrict actions that can be performed while in dreamDrifter stat to swap, dash, burst
+	if a != action.ActionDash && a != action.ActionSwap && a != action.ActionBurst {
+		return false, action.NoFailure
+	}
+
 	return c.Character.ActionReady(a, p)
 }

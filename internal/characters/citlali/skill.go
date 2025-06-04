@@ -7,90 +7,36 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 )
 
-var skillFrames []int
-
 const (
-	SkillHitmark            = 23
-	NightsoulDelay          = 20
-	NightsoulReductionStart = 10
-	ShieldDelay             = 39
-	SkillCDDelay            = 20
-	SkillDoTInit            = 60
-	SkillDoTInterval        = 59
-	SkillKey                = "citlali-skill-active"
-	ItzpapaKey              = "citlali-itzpapa-active"
+	itzpapaInterval           = 59
+	obsidianTzitzimitlHitmark = 20
+	particleICDKey            = "citlali-particle-icd"
+	opalFireStateKey          = "opal-fire-state"
+	frostFallAbil             = "Frostfall Storm DMG"
+)
+
+var (
+	skillFrames []int
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(43) // E -> Q/D/J
-	skillFrames[action.ActionAttack] = 41  // E -> N1
-	skillFrames[action.ActionSkill] = 42   // E -> E
-	skillFrames[action.ActionWalk] = 42    // E -> W
-	skillFrames[action.ActionSwap] = 41    // E -> Swap
+	skillFrames = frames.InitAbilSlice(50) // E -> Walk
+	skillFrames[action.ActionAttack] = 42
+	skillFrames[action.ActionCharge] = 42
+	skillFrames[action.ActionBurst] = 41
+	skillFrames[action.ActionDash] = 49
+	skillFrames[action.ActionJump] = 49
+	skillFrames[action.ActionSwap] = 41
 }
 
-func (c *char) reduceNightsoulPoints(val float64) {
-	consumed := val
-	if c.nightsoulState.Points() <= val {
-		consumed = c.nightsoulState.Points()
-	}
-	c.nightsoulState.ConsumePoints(consumed)
-	if c.Base.Cons >= 6 {
-		c.c6count += consumed
-		if c.c6count >= 40 {
-			c.c6count = 40
-		}
-		c.c6buff[attributes.DmgP] = 0.015 * c.c6count
-		c.c6self[attributes.DmgP] = 0.025 * c.c6count
-	}
-	if c.nightsoulState.Points() <= 0.00001 && c.Base.Cons < 6 {
-		c.DeleteStatus(ItzpapaKey)
-	}
-}
-
-func (c *char) cancelNightsoul() {
-	c.DeleteStatus(ItzpapaKey)
-	c.nightsoulState.ExitBlessing()
-	c.nightsoulSrc = -1
-	c.c6count = 0
-}
-
-func (c *char) nightsoulPointReduceFunc(src int) func() {
-	return func() {
-		if c.nightsoulSrc != src {
-			return
-		}
-
-		if !c.nightsoulState.HasBlessing() {
-			return
-		}
-
-		if !c.StatusIsActive(ItzpapaKey) {
-			return
-		}
-
-		c.reduceNightsoulPoints(0.8)
-
-		// reduce 0.8 point per 6f
-		c.QueueCharTask(c.nightsoulPointReduceFunc(src), 6)
-	}
-}
-
-func (c *char) Skill(p map[string]int) (action.Info, error) {
-
-	c.QueueCharTask(func() {
-		c.nightsoulState.EnterBlessing(24)
-		c.nightsoulSrc = c.Core.F
-	}, NightsoulDelay)
-
+func (c *char) Skill(_ map[string]int) (action.Info, error) {
+	// do initial attack
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Dawnfrost Darkstar: Obsidian Tzitzimitl DMG",
+		Abil:           "Obsidian Tzitzimitl DMG",
 		AttackTag:      attacks.AttackTagElementalArt,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		ICDTag:         attacks.ICDTagNone,
@@ -99,113 +45,145 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Element:        attributes.Cryo,
 		Durability:     25,
 		Mult:           skill[c.TalentLvlSkill()],
+		HitlagFactor:   0.01,
 	}
-	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6), 0, SkillHitmark, c.particleCB)
-	c.AddStatus(SkillKey, 20*60, false)
-	if c.Base.Cons >= 1 {
-		c.SetTag(SkillKey, 10)
-	}
-	if c.Base.Cons >= 6 {
-		c.c6()
-		c.c6count = 0
-		c.QueueCharTask(func() {
-			c.reduceNightsoulPoints(100)
-		}, NightsoulDelay+1)
-	}
-	c.QueueCharTask(func() {
-		// add shield
-		exist := c.Core.Player.Shields.Get(shield.CitlaliSkill)
-		if exist == nil {
-			shield := shieldperct[c.TalentLvlSkill()]*c.Stat(attributes.EM) + shieldconst[c.TalentLvlSkill()]
-			c.Core.Player.Shields.Add(c.newShield(shield, 20*60))
-		} else {
-			shd, _ := exist.(*shd)
-			shd.Expires = c.Core.F + 20*60
-		}
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6),
+		obsidianTzitzimitlHitmark,
+		obsidianTzitzimitlHitmark,
+		c.particleCB,
+	)
 
-		// apply cryo & run a task
+	// to do with delay
+	c.QueueCharTask(func() {
+		c.SetCD(action.ActionSkill, 16*60)
+
+		// summon Itzpapa and immediately check if Opal Fire state can be activated
+		c.nightsoulState.EnterTimedBlessing(c.nightsoulState.Points()+24, 20*60, c.exitNightsoul)
+		c.tryEnterOpalFireState()
+
+		// apply cryo
 		player, ok := c.Core.Combat.Player().(*avatar.Player)
 		if !ok {
 			panic("target 0 should be Player but is not!!")
 		}
 		player.ApplySelfInfusion(attributes.Cryo, 25, 0.1*60)
-	}, ShieldDelay)
+	}, 18)
 
-	c.SetCDWithDelay(action.ActionSkill, 16*60, SkillCDDelay)
+	c.QueueCharTask(c.addShield, 37)
+
+	// to do now
+	if c.Base.Cons >= 1 {
+		c.numStellarBlades = 10
+	}
+
+	if c.Base.Cons >= 6 {
+		currentPoints := c.nightsoulState.Points()
+		c.nightsoulState.ClearPoints()
+		c.numC6Stacks = min(maxC6Stacks, currentPoints)
+	}
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionAttack], // earliest cancel is before skillHitmark
+		CanQueueAfter:   skillFrames[action.ActionBurst],
 		State:           action.SkillState,
 	}, nil
+}
+
+func (c *char) exitNightsoul() {
+	c.numC6Stacks = 0
+	c.numStellarBlades = 0
+	c.opalFireSrc = -1
+	c.DeleteStatus(opalFireStateKey)
+	c.nightsoulState.ExitBlessing()
+}
+
+func (c *char) generateNightsoulPoints(amount float64) {
+	c.nightsoulState.GeneratePoints(amount)
+	c.tryEnterOpalFireState()
+}
+
+// try to activate Opal Fire each time Citlali gains NS points to avoid event subscribtion
+func (c *char) tryEnterOpalFireState() {
+	if !c.nightsoulState.HasBlessing() {
+		return
+	}
+	if c.nightsoulState.Points() < 50 && c.Base.Cons < 6 {
+		return
+	}
+	// if it's activation or REactivation (of Opal Fire state)
+	if c.StatusIsActive(opalFireStateKey) {
+		return
+	}
+	c.AddStatus(opalFireStateKey, -1, false)
+	c.opalFireSrc = c.Core.F
+	c.itzpapaHitTask(c.opalFireSrc)
+	c.nightsoulPointReduceTask(c.opalFireSrc)
+}
+
+func (c *char) nightsoulPointReduceTask(src int) {
+	const tickInterval = .1
+	c.QueueCharTask(func() {
+		if c.opalFireSrc != src {
+			return
+		}
+		if !c.StatusIsActive(opalFireStateKey) {
+			return
+		}
+
+		// reduce 0.8 point every 6f, which is 8 per second
+		prev := c.nightsoulState.Points()
+		c.nightsoulState.ConsumePoints(0.8)
+		if c.Base.Cons >= 6 {
+			diff := prev - c.nightsoulState.Points()
+			c.numC6Stacks = min(maxC6Stacks, c.numC6Stacks+diff)
+		}
+		if c.nightsoulState.Points() < 0.001 && c.Base.Cons < 6 {
+			c.opalFireSrc = -1
+			c.DeleteStatus(opalFireStateKey)
+			return
+		}
+
+		c.nightsoulPointReduceTask(src)
+	}, 60*tickInterval)
+}
+
+func (c *char) itzpapaHitTask(src int) {
+	c.QueueCharTask(func() {
+		if src != c.opalFireSrc {
+			return
+		}
+		if !c.StatusIsActive(opalFireStateKey) {
+			return
+		}
+		ai := combat.AttackInfo{
+			ActorIndex:     c.Index,
+			Abil:           frostFallAbil,
+			AttackTag:      attacks.AttackTagElementalArt,
+			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+			ICDTag:         attacks.ICDTagCitlaliFrostfallStorm,
+			ICDGroup:       attacks.ICDGroupCitlaliFrostfallStorm,
+			StrikeType:     attacks.StrikeTypeDefault,
+			Element:        attributes.Cryo,
+			Durability:     25,
+			Mult:           frostfall[c.TalentLvlSkill()],
+			FlatDmg:        c.a4Dmg(frostFallAbil),
+			HitlagFactor:   0.01,
+		}
+		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player().Pos(), nil, 6), 0, 0, c.c4SkullCB)
+		c.itzpapaHitTask(src)
+	}, itzpapaInterval)
 }
 
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
-	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Cryo, c.ParticleDelay)
-}
-
-func (c *char) SkillChecks() {
-	c.Core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
-
-		if !c.nightsoulState.HasBlessing() {
-			return false
-		}
-
-		if c.Base.Cons >= 6 && !c.StatusIsActive(ItzpapaKey) {
-			c.AddStatus(ItzpapaKey, -1, false)
-			c.QueueCharTask(c.nightsoulPointReduceFunc(c.nightsoulSrc), NightsoulReductionStart)
-			c.QueueCharTask(c.OpalFire(c.nightsoulSrc), SkillDoTInit)
-		}
-		if !c.StatusIsActive(ItzpapaKey) && c.nightsoulState.Points() >= 50 {
-			c.AddStatus(ItzpapaKey, -1, false)
-			c.QueueCharTask(c.nightsoulPointReduceFunc(c.nightsoulSrc), NightsoulReductionStart)
-			c.QueueCharTask(c.OpalFire(c.nightsoulSrc), SkillDoTInit)
-		}
-
-		if !c.StatusIsActive(SkillKey) {
-			c.cancelNightsoul()
-		}
-
-		return false
-	}, "citlali-skill-check")
-}
-
-func (c *char) OpalFire(src int) func() {
-
-	return func() {
-
-		if c.nightsoulSrc != src {
-			return
-		}
-
-		if !c.nightsoulState.HasBlessing() {
-			return
-		}
-
-		if !c.StatusIsActive(ItzpapaKey) {
-			return
-		}
-
-		ai := combat.AttackInfo{
-			ActorIndex:     c.Index,
-			Abil:           "Dawnfrost Darkstar: Frostfall Storm DMG (DoT)",
-			AttackTag:      attacks.AttackTagElementalArt,
-			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-			ICDTag:         attacks.ICDTagFrostfallStorm,
-			ICDGroup:       attacks.ICDGroupFrostfallStorm,
-			StrikeType:     attacks.StrikeTypeDefault,
-			Element:        attributes.Cryo,
-			Durability:     25,
-			Mult:           skilldot[c.TalentLvlBurst()],
-		}
-
-		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6), 0, 0, c.c4CB)
-
-		c.QueueCharTask(c.OpalFire(src), SkillDoTInterval)
+	if c.StatusIsActive(particleICDKey) {
+		return
 	}
-
+	c.AddStatus(particleICDKey, 0.3*60, false)
+	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Cryo, c.ParticleDelay)
 }

@@ -22,7 +22,6 @@ const (
 	ICDTagDash
 	ICDTagTravelerWakeOfEarth
 	ICDTagTravelerDewdrop
-	ICDTagFrostfallStorm
 
 	ICDReactionDamageDelim
 	ICDTagOverloadDamage
@@ -53,7 +52,6 @@ const (
 	ICDGroupBurning
 	ICDGroupTravelerDewdrop
 	ICDGroupTravelerBurst
-	ICDGroupFrostfallStorm
 	ICDGroupDreamdrifter
 	ICDGroupIfaShots
 	EndDefaultICDGroups
@@ -72,7 +70,6 @@ func init() {
 	ICDGroupResetTimer[ICDGroupBurning] = 120
 	ICDGroupResetTimer[ICDGroupTravelerDewdrop] = 90
 	ICDGroupResetTimer[ICDGroupTravelerBurst] = 480
-	ICDGroupResetTimer[ICDGroupFrostfallStorm] = 90
 	ICDGroupResetTimer[ICDGroupDreamdrifter] = 72
 	ICDGroupResetTimer[ICDGroupIfaShots] = 720
 
@@ -84,7 +81,6 @@ func init() {
 	ICDGroupEleApplicationSequence[ICDGroupBurning] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupTravelerDewdrop] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupTravelerBurst] = []float64{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0}
-	ICDGroupEleApplicationSequence[ICDGroupFrostfallStorm] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupDreamdrifter] = []float64{1, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupEleApplicationSequence[ICDGroupIfaShots] = []float64{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0}
 
@@ -98,7 +94,6 @@ func init() {
 	ICDGroupDamageSequence[ICDGroupBurning] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupTravelerDewdrop] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupTravelerBurst] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-	ICDGroupDamageSequence[ICDGroupFrostfallStorm] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupDreamdrifter] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupIfaShots] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 }

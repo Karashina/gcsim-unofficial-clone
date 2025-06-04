@@ -81,25 +81,6 @@ func (h *Handler) Add(shd Shield) {
 	h.events.Emit(event.OnShielded, shd)
 }
 
-func (h *Handler) Replace(shd Shield) {
-	isTargetExists := false
-	Target := -1
-	// check if shield exists
-	for i, v := range h.shields {
-		if v.Type() == shd.Type() && v.ShieldTarget() == shd.ShieldTarget() {
-			Target = i
-		}
-	}
-	if isTargetExists {
-		h.log.NewEvent("shield regenerated", glog.LogShieldEvent, -1).
-			Write("name", shd.Desc()).
-			Write("hp", shd.CurrentHP()).
-			Write("ele", shd.Element()).
-			Write("expiry", shd.Expiry())
-		h.shields[Target] = shd
-	}
-}
-
 func (h *Handler) List() []Shield {
 	return h.shields
 }

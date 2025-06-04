@@ -1,15 +1,15 @@
-id: 90000005
+id: 10000107
 key: "citlali"
 rarity: QUALITY_ORANGE
 body: BODY_GIRL
 region: ASSOC_TYPE_NATLAN
 element: Ice
 weapon_class: WEAPON_CATALYST
-icon_name: "UI_AvatarIcon_Ambor"
+icon_name: "UI_AvatarIcon_Citlali"
 stats: {
-   base_hp: 906
-   base_atk: 10
-   base_def: 59
+   base_hp: 905.654
+   base_atk: 9.8686
+   base_def: 59.41119
    hp_curve: GROW_CURVE_HP_S5
    atk_curve: GROW_CURVE_ATTACK_S5
    def_cruve: GROW_CURVE_HP_S5
@@ -32,15 +32,15 @@ stats: {
       max_level: 40
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 777
+         value: 776.5164
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 141
+         value: 50.9409
       }
       add_props: {
-         prop_type: FIGHT_PROP_ELEMENT_MASTERY
-         value: 8
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 8.460814
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -48,17 +48,17 @@ stats: {
    }
    promo_data: {
       max_level: 50
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1329.0585
+         value: 1328.2517
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 241.1805
+         value: 87.13575
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 13.684
+         value: 14.472445
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -69,15 +69,15 @@ add_props: {
       max_level: 60
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2065.1883
+         value: 2063.899
       }
-add_props: {
+      add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 374.7639
+         value: 135.39555
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 21.2632
+         value: 22.487953
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -88,15 +88,15 @@ add_props: {
       max_level: 70
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2617.2468
+         value: 2615.6343
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 474.9444
+         value: 171.5904
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 26.9472
+         value: 28.499584
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -107,15 +107,15 @@ add_props: {
       max_level: 80
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3169.3053
+         value: 3167.3696
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 575.1249
+         value: 207.78525
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 32.6312
+         value: 34.511215
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -126,15 +126,15 @@ add_props: {
       max_level: 90
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3721.4415
+         value: 3719.105
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 675.3195
+         value: 243.9801
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 38.316
+         value: 40.522846
       }
       add_props: {
          prop_type: FIGHT_PROP_ELEMENT_MASTERY
@@ -143,9 +143,9 @@ add_props: {
    }
 }
 skill_details: {
-   skill: 10262
-   burst: 10265
-   attack: 10261
+   skill: 11072
+   burst: 11075
+   attack: 11071
    burst_energy_cost: 60
 }
-name_text_hash_map: 1021947691
+name_text_hash_map: 1197975042

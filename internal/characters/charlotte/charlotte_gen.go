@@ -38,9 +38,6 @@ func ValidateParamKeys(a action.Action, keys []string) error {
 	}
 	for _, v := range keys {
 		if !slices.Contains(valid, v) {
-			if v == "movement" {
-				return nil
-			}
 			return fmt.Errorf("key %v is invalid for action %v", v, a.String())
 		}
 	}

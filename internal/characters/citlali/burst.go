@@ -9,8 +9,10 @@ import (
 )
 
 const (
-	burstHitmark = 118
-	skullHitmark = 225
+	iceStormHitmark          = 118
+	spiritVesselSkullHitmark = 210
+
+	iceStormAbil = "Ice Storm DMG"
 )
 
 var (
@@ -18,14 +20,19 @@ var (
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(121)
+	burstFrames = frames.InitAbilSlice(113) // Q -> Jump
+	burstFrames[action.ActionAttack] = 112
+	burstFrames[action.ActionCharge] = 112
+	burstFrames[action.ActionSkill] = 111
+	burstFrames[action.ActionDash] = 112
+	burstFrames[action.ActionWalk] = 112
+	burstFrames[action.ActionSwap] = 110
 }
 
-func (c *char) Burst(p map[string]int) (action.Info, error) {
-
-	ai := combat.AttackInfo{
+func (c *char) Burst(_ map[string]int) (action.Info, error) {
+	aiIceStorm := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Edict of Entwined Splendor: Ice Storm DMG",
+		Abil:           iceStormAbil,
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		ICDTag:         attacks.ICDTagNone,
@@ -33,38 +40,50 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		StrikeType:     attacks.StrikeTypeDefault,
 		Element:        attributes.Cryo,
 		Durability:     50,
-		Mult:           burst[c.TalentLvlBurst()],
+		Mult:           iceStorm[c.TalentLvlBurst()],
+		FlatDmg:        c.a4Dmg(iceStormAbil),
 	}
-	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6.5), 0, burstHitmark)
-
-	aiskull := combat.AttackInfo{
+	aiSpiritVesselSkull := combat.AttackInfo{
 		ActorIndex:     c.Index,
-		Abil:           "Edict of Entwined Splendor: Spiritvessel Skull DMG",
+		Abil:           "Spiritvessel Skull DMG",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-		ICDTag:         attacks.ICDTagElementalBurst,
+		ICDTag:         attacks.ICDTagCitlaliSpiritVessel,
 		ICDGroup:       attacks.ICDGroupDefault,
 		StrikeType:     attacks.StrikeTypeDefault,
 		Element:        attributes.Cryo,
 		Durability:     25,
-		Mult:           burstskull[c.TalentLvlBurst()],
+		Mult:           spiritVessel[c.TalentLvlBurst()],
 	}
-	enemies := c.Core.Combat.RandomEnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6.5), nil, 3)
-	for _, enemy := range enemies {
-		c.Core.QueueAttack(aiskull, combat.NewCircleHitOnTarget(enemy.Pos(), nil, 3.5), skullHitmark, skullHitmark)
-	}
-	c.SetCDWithDelay(action.ActionBurst, 15*60, 2)
+
+	// with delay
+	c.ConsumeEnergy(8)
+	c.SetCD(action.ActionBurst, 15*60)
 	c.QueueCharTask(func() {
-		if c.nightsoulState.HasBlessing() {
-			c.nightsoulState.GeneratePoints(24)
+		c.generateNightsoulPoints(24)
+	}, 115)
+
+	// initial hit
+	c.Core.QueueAttack(aiIceStorm, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 6.5), iceStormHitmark, iceStormHitmark)
+
+	// skull hits
+	c.QueueCharTask(func() {
+		enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), nil)
+		points := 0.0
+		for i, enemy := range enemies {
+			if i > 2 {
+				break
+			}
+			points += 3.0
+			c.Core.QueueAttack(aiSpiritVesselSkull, combat.NewCircleHitOnTarget(enemy.Pos(), nil, 3.5), 0, 0)
 		}
-	}, 1)
-	c.ConsumeEnergy(109)
+		c.generateNightsoulPoints(points)
+	}, spiritVesselSkullHitmark)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap],
 		State:           action.BurstState,
 	}, nil
 }

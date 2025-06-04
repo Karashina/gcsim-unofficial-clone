@@ -17,6 +17,7 @@ const (
 	ICDGroupChascaBurst
 	ICDGroupChevreuseBurstMines
 	ICDGroupChioriSkill
+	ICDGroupCitlaliFrostfallStorm
 	ICDGroupClorindeElementalArt
 	ICDGroupColleiBurst
 	ICDGroupCynoBolt
@@ -32,6 +33,7 @@ const (
 	ICDGroupLanyanRingAttackMix
 	ICDGroupLayla
 	ICDGroupLyneyExtra
+	ICDGroupMizukiSkill
 	ICDGroupNahidaSkill
 	ICDGroupNaviaBurst
 	ICDGroupNilou
@@ -108,6 +110,10 @@ func init() {
 	ICDGroupEleApplicationSequence[ICDGroupChioriSkill] = []float64{1, 0, 0, 0, 0}
 	ICDGroupDamageSequence[ICDGroupChioriSkill] = []float64{1, 1, 1, 1, 1}
 
+	ICDGroupResetTimer[ICDGroupCitlaliFrostfallStorm] = 90
+	ICDGroupEleApplicationSequence[ICDGroupCitlaliFrostfallStorm] = []float64{1, 0}
+	ICDGroupDamageSequence[ICDGroupCitlaliFrostfallStorm] = []float64{1, 1}
+
 	ICDGroupResetTimer[ICDGroupClorindeElementalArt] = 60
 	ICDGroupEleApplicationSequence[ICDGroupClorindeElementalArt] = []float64{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupDamageSequence[ICDGroupClorindeElementalArt] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
@@ -167,6 +173,10 @@ func init() {
 	ICDGroupResetTimer[ICDGroupLyneyExtra] = 60
 	ICDGroupEleApplicationSequence[ICDGroupLyneyExtra] = []float64{1, 0, 0, 0, 0, 0}
 	ICDGroupDamageSequence[ICDGroupLyneyExtra] = []float64{1, 1, 1, 1, 1, 1}
+
+	ICDGroupResetTimer[ICDGroupMizukiSkill] = 72
+	ICDGroupEleApplicationSequence[ICDGroupMizukiSkill] = []float64{1, 0, 0, 0}
+	ICDGroupDamageSequence[ICDGroupMizukiSkill] = []float64{1, 1, 1, 1}
 
 	ICDGroupResetTimer[ICDGroupNahidaSkill] = 60
 	ICDGroupEleApplicationSequence[ICDGroupNahidaSkill] = []float64{1.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}

@@ -10,42 +10,55 @@ import (
 
 var chargeFrames []int
 
-const chargeHitmark = 27
+// hitmark frame, includes CA windup
+const chargeHitmark = 39
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(29)
-	chargeFrames[action.ActionCharge] = 29
-	chargeFrames[action.ActionSkill] = 29
-	chargeFrames[action.ActionBurst] = 29
-	chargeFrames[action.ActionDash] = chargeHitmark
-	chargeFrames[action.ActionJump] = chargeHitmark
-	chargeFrames[action.ActionSwap] = chargeHitmark
+	chargeFrames = frames.InitAbilSlice(81) // CA -> Walk
+	chargeFrames[action.ActionAttack] = 62
+	chargeFrames[action.ActionCharge] = 62
+	chargeFrames[action.ActionSkill] = 62
+	chargeFrames[action.ActionBurst] = 60
+	chargeFrames[action.ActionDash] = 37
+	chargeFrames[action.ActionJump] = 37
+	chargeFrames[action.ActionSwap] = 64
 }
 
+// Standard charge attack
+// CA has no travel time
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Charge Attack",
-		AttackTag:  attacks.AttackTagExtra,
-		ICDTag:     attacks.ICDTagNone,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Anemo,
-		Durability: 25,
-		Mult:       charge[c.TalentLvlAttack()],
+		ActorIndex:   c.Index,
+		Abil:         "Charge",
+		AttackTag:    attacks.AttackTagExtra,
+		ICDTag:       attacks.ICDTagNone,
+		ICDGroup:     attacks.ICDGroupDefault,
+		StrikeType:   attacks.StrikeTypeDefault,
+		Element:      attributes.Anemo,
+		Durability:   25,
+		Mult:         charge[c.TalentLvlAttack()],
+		HitlagFactor: 0.05,
 	}
+
+	// CA windup on idle
+	windup := 14
+	if c.Core.Player.CurrentState() == action.Idle {
+		windup = 0
+	}
+
+	radius := 3.5
 
 	c.Core.QueueAttack(
 		ai,
-		combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 5, 5),
-		chargeHitmark,
-		chargeHitmark,
+		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, radius),
+		chargeHitmark-windup,
+		chargeHitmark-windup,
 	)
 
 	return action.Info{
-		Frames:          func(next action.Action) int { return chargeFrames[next] },
-		AnimationLength: chargeFrames[action.InvalidAction],
-		CanQueueAfter:   chargeHitmark,
+		Frames:          func(next action.Action) int { return chargeFrames[next] - windup },
+		AnimationLength: chargeFrames[action.InvalidAction] - windup,
+		CanQueueAfter:   chargeFrames[action.ActionDash] - windup,
 		State:           action.ChargeAttackState,
 	}, nil
 }
