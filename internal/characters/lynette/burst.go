@@ -42,6 +42,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.a1() // same timing as cd start
 
 	c.ConsumeEnergy(burstEnergyDelay)
+	c.AddStatus(weaponoutkey, 20*60, false)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),

@@ -21,6 +21,7 @@ var (
 )
 
 const normalHitNum = 4
+const weaponoutkey = "lynette-weapon-out"
 
 func init() {
 	// NA cancels
@@ -74,6 +75,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		c.QueueCharTask(func() {
 			c.Core.QueueAttack(ai, ap, 0, 0)
 		}, attackHitmarks[c.NormalCounter][i])
+		c.AddStatus(weaponoutkey, 20*60, false)
 	}
 
 	defer c.AdvanceNormalIndex()
