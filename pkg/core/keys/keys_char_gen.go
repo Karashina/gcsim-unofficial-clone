@@ -29,6 +29,7 @@ const (
 	Collei
 	Cyno
 	Dehya
+	Dhalia
 	Diluc
 	Diona
 	Dori
@@ -84,6 +85,7 @@ const (
 	Sethos
 	Shenhe
 	Sigewinne
+	Skirk
 	Sucrose
 	Tartaglia
 	Thoma
@@ -208,6 +210,10 @@ func init() {
 	charNames[Dori] = "dori"
 	charPrettyName[Dori] = "Dori"
 	CharKeyToEle[Dori] = attributes.Electro
+
+	charNames[Dhalia] = "dhalia"
+	charPrettyName[Dhalia] = "Dhalia"
+	CharKeyToEle[Dhalia] = attributes.Hydro
 
 	charNames[Emilie] = "emilie"
 	charPrettyName[Emilie] = "Emilie"
@@ -416,6 +422,10 @@ func init() {
 	charNames[Sigewinne] = "sigewinne"
 	charPrettyName[Sigewinne] = "Sigewinne"
 	CharKeyToEle[Sigewinne] = attributes.Hydro
+
+	charNames[Skirk] = "skirk"
+	charPrettyName[Skirk] = "Skirk"
+	CharKeyToEle[Skirk] = attributes.Cryo
 
 	charNames[Sucrose] = "sucrose"
 	charPrettyName[Sucrose] = "Sucrose"
