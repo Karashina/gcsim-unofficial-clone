@@ -6,67 +6,61 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
 var burstFrames []int
 
 const (
-	burstHitmark     = 92
-	burstEnergyFrame = 3
+	initialHeal = 97 // depends on ping
+	hitmark     = 92
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(109)
-	burstFrames[action.ActionDash] = 105
+	burstFrames = frames.InitAbilSlice(110)
+	burstFrames[action.ActionSkill] = 109
+	burstFrames[action.ActionSwap] = 108
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "Scoring Cuts (Q)",
+		Abil:       "Scoring Cuts",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeSlash,
+		StrikeType: attacks.StrikeTypeDefault,
 		Element:    attributes.Cryo,
 		Durability: 50,
 		Mult:       burst[c.TalentLvlBurst()],
 	}
-
-	c.Core.QueueAttack(
-		ai,
-		combat.NewCircleHitOnTarget(c.Core.Combat.Player().Pos(), nil, 12),
-		burstHitmark,
-		burstHitmark,
-	)
-
 	c.QueueCharTask(func() {
+		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: -1.5}, 7), 0, 0, c.makeA4CB())
+	}, hitmark)
+
+	// initial heal
+	c.QueueCharTask(func() {
+		heal := burstHealFlat[c.TalentLvlBurst()] + burstHealPer[c.TalentLvlBurst()]*c.TotalAtk()
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,
 			Target:  -1,
-			Message: "Scoring Cuts (Q-Heal)",
-			Src:     burstHealCst[c.TalentLvlBurst()] + c.TotalAtk()*burstHealPct[c.TalentLvlBurst()],
+			Message: "Scoring Cuts (Healing)",
+			Src:     heal,
 			Bonus:   c.Stat(attributes.Heal),
 		})
-	}, 94)
+	}, initialHeal)
 
-	a1dur := 9 * 60
-	c.c4count = 0
-	if c.Base.Cons >= 4 {
-		a1dur = 15 * 60
-	}
-	c.AddStatus(a1Key, a1dur, true)
-	c.a1Src = c.Core.F
-	c.QueueCharTask(c.a1(c.a1Src), a1InitialHeal)
+	c.a1()
 
-	c.ConsumeEnergy(burstEnergyFrame)
-	c.SetCD(action.ActionBurst, 15*60)
+	c.SetCD(action.ActionBurst, int(burstCD[c.TalentLvlBurst()])*60)
+	c.ConsumeEnergy(5)
 
+	c.c1()
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap],
+		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
 		State:           action.BurstState,
 	}, nil
 }

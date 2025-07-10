@@ -15,22 +15,25 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	cookingMekSrc int
-	a1Src         int
-	c2count       int
-	c4count       int
-	c6count       int
+	skillSrc         int
+	skillTravel      int
+	a1Src            int
+	a4HydroCryoCount int
+	c1Active         bool
+	c1Buff           []float64
+	c2Count          int
+	c4Count          int
+	c6Count          int
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := char{}
 	c.Character = tmpl.NewWithWrapper(s, w)
-
-	c.EnergyMax = 60
-	c.NormalHitNum = normalHitNum
-	c.BurstCon = 5
 	c.SkillCon = 3
-	c.HasArkhe = true
+	c.BurstCon = 5
+
+	c.EnergyMax = burstEnergy[c.TalentLvlBurst()]
+	c.NormalHitNum = normalHitNum
 
 	w.Character = &c
 
@@ -38,19 +41,29 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	c.a4()
-	c.c2()
-	c.c6()
+	c.a4Init()
+	c.c1Init()
+	c.c2Init()
+	c.c6Init()
 	return nil
 }
 
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
-	switch k {
-	case model.AnimationXingqiuN0StartDelay:
-		return 15
-	case model.AnimationYelanN0StartDelay:
-		return 6
+	if k == model.AnimationXingqiuN0StartDelay {
+		return 11
+	}
+	return c.Character.AnimationStartDelay(k)
+}
+
+func (c *char) Condition(fields []string) (any, error) {
+	switch fields[0] {
+	case "c2-count":
+		return c.c2Count, nil
+	case "c4-count":
+		return c.c4Count, nil
+	case "c6-count":
+		return c.c6Count, nil
 	default:
-		return c.Character.AnimationStartDelay(k)
+		return c.Character.Condition(fields)
 	}
 }

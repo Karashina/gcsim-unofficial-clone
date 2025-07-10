@@ -1,6 +1,8 @@
 package escoffier
 
 import (
+	"math"
+
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -10,91 +12,129 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 )
 
-const (
-	arkheCD        = "skill-arkhe-cd"
-	particleICDKey = "skill-particle-icd"
-
-	skillHitmark    = 45
-	cookingMekSpawn = 41
-	arkheHitmark    = 88
-)
-
 var skillFrames []int
 
+const (
+	skillInitHitmark    = 23 // Initial Hit
+	skillAlignedHitmark = 83
+	skillTicks          = 21
+	skillInterval       = 58.5
+	skillFirstTickDelay = 148
+	skillAlignedICDKey  = "escoffier-aligned-icd"
+	skillKey            = "escoffier-skill"
+	particleICDKey      = "escoffier-particle-icd"
+	skillAlignedICD     = 10 * 60
+	skillCD             = 15 * 60
+)
+
 func init() {
-	skillFrames = frames.InitAbilSlice(38)
-	skillFrames[action.ActionAttack] = 38
-	skillFrames[action.ActionDash] = 45
+	skillFrames = frames.InitAbilSlice(35) // E -> D/J
+	skillFrames[action.ActionAttack] = 32
+	skillFrames[action.ActionBurst] = 32
+	skillFrames[action.ActionWalk] = 32
+	skillFrames[action.ActionSwap] = 31
+}
+
+func ceil(x float64) int {
+	return int(math.Ceil(x))
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
+	travel, ok := p["travel"]
+	if !ok {
+		travel = 5
+	}
+	c.skillTravel = travel
 
-	player := c.Core.Combat.Player()
-
+	skillPos := c.Core.Combat.Player()
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "Low-Temperature Cooking (E)",
+		Abil:       "Low-Temperature Cooking",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
-		ICDGroup:   attacks.ICDGroupEscoffierCookingMek,
+		ICDGroup:   attacks.ICDGroupEscoffierSkill,
 		StrikeType: attacks.StrikeTypeDefault,
 		Element:    attributes.Cryo,
 		Durability: 25,
-		Mult:       skill[c.TalentLvlSkill()],
+		Mult:       skillInital[c.TalentLvlSkill()],
 	}
-	c.Core.QueueAttack(
-		ai,
-		combat.NewCircleHitOnTarget(player, geometry.Point{Y: 2.6}, 4.5),
-		skillHitmark,
-		skillHitmark,
-		c.particleCB,
-	)
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(skillPos, geometry.Point{Y: -1.5}, 5), skillInitHitmark, skillInitHitmark, c.particleCB, c.makeA4CB())
+
+	// E duration and ticks are not affected by hitlag
+	c.skillSrc = c.Core.F
+	for i := 0.0; i < skillTicks; i++ {
+		c.Core.Tasks.Add(c.skillTick(c.skillSrc), skillFirstTickDelay+ceil(skillInterval*i))
+	}
+	c.AddStatus(skillKey, skillFirstTickDelay+ceil((skillTicks-1)*skillInterval), false)
 
 	c.QueueCharTask(func() {
-		c.spawnCookingMek()
-	}, cookingMekSpawn)
-	c.arkheAttack()
-	c.SetCD(action.ActionSkill, 15*60)
-	c.AddStatus(c2Key, 15*60, true)
-	c.c2count = 0
-	c.c6count = 0
+		if c.StatusIsActive(skillAlignedICDKey) {
+			return
+		}
+		c.AddStatus(skillAlignedICDKey, skillAlignedICD, true)
+		aiBlade := combat.AttackInfo{
+			// TODO: Apply Arkhe
+			ActorIndex: c.Index,
+			Abil:       "Surging Blade (" + c.Base.Key.Pretty() + ")",
+			AttackTag:  attacks.AttackTagElementalArt,
+			ICDTag:     attacks.ICDTagNone,
+			ICDGroup:   attacks.ICDGroupDefault,
+			StrikeType: attacks.StrikeTypeSpear,
+			Element:    attributes.Cryo,
+			Durability: 0,
+			Mult:       arkhe[c.TalentLvlSkill()],
+		}
+		c.Core.QueueAttack(
+			aiBlade,
+			combat.NewCircleHitOnTarget(skillPos, nil, 5),
+			0, // TODO: snapshot delay?
+			0, // TODO: snapshot delay?
+			c.makeA4CB(),
+		)
+	}, skillAlignedHitmark)
 
+	c.SetCDWithDelay(action.ActionSkill, skillCD, 22)
+
+	c.c1()
+	c.c2()
+	c.c6()
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
 		State:           action.SkillState,
 	}, nil
-}
-
-func (c *char) arkheAttack() {
-	if c.StatusIsActive(arkheCD) {
-		return
-	}
-	c.AddStatus(arkheCD, 10*60, true)
-
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Surging Blade (E-Arkhe)",
-		AttackTag:  attacks.AttackTagElementalArt,
-		ICDTag:     attacks.ICDTagNone,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Cryo,
-		Durability: 0,
-		Mult:       skillArkhe[c.TalentLvlSkill()],
-	}
-	c.Core.QueueAttack(
-		ai,
-		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), geometry.Point{Y: 2.6}, 4.5),
-		arkheHitmark,
-		arkheHitmark,
-	)
 }
 
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
+	if c.StatusIsActive(particleICDKey) {
+		return
+	}
+	c.AddStatus(particleICDKey, 0.2*60, false)
 	c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Cryo, c.ParticleDelay)
+}
+
+func (c *char) skillTick(src int) func() {
+	return func() {
+		if src != c.skillSrc {
+			return
+		}
+
+		ai := combat.AttackInfo{
+			ActorIndex: c.Index,
+			Abil:       "Frosty Parfait",
+			AttackTag:  attacks.AttackTagElementalArt,
+			ICDTag:     attacks.ICDTagElementalArt,
+			ICDGroup:   attacks.ICDGroupEscoffierSkill,
+			StrikeType: attacks.StrikeTypeDefault,
+			Element:    attributes.Cryo,
+			Durability: 25,
+			Mult:       skillDot[c.TalentLvlSkill()],
+		}
+		// trigger damage
+		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5), 0, c.skillTravel, c.makeA4CB())
+	}
 }
