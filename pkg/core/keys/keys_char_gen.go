@@ -47,6 +47,7 @@ const (
 	Hutao
 	Iansan
 	Ifa
+	Ineffa
 	Itto
 	Jean
 	Kachina
@@ -270,6 +271,10 @@ func init() {
 	charNames[Ifa] = "ifa"
 	charPrettyName[Ifa] = "Ifa"
 	CharKeyToEle[Ifa] = attributes.Anemo
+
+	charNames[Ineffa] = "ineffa"
+	charPrettyName[Ineffa] = "Ineffa"
+	CharKeyToEle[Ineffa] = attributes.Electro
 
 	charNames[Itto] = "itto"
 	charPrettyName[Itto] = "Itto"
