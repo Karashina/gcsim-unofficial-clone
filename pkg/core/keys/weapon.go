@@ -100,6 +100,7 @@ var weaponNames = []string{
 	"flowingpurity",
 	"footprintoftherainbow",
 	"forestregalia",
+	"fracturedhalo",
 	"freedomsworn",
 	"frostbearer",
 	"fruitfulhook",
@@ -314,6 +315,7 @@ const (
 	FlowingPurity
 	FootprintOfTheRainbow
 	ForestRegalia
+	FracturedHalo
 	FreedomSworn
 	Frostbearer
 	FruitfulHook
