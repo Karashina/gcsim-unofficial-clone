@@ -31,6 +31,7 @@ var eventToReaction = map[event.Event]reactions.ReactionType{
 	event.OnHyperbloom:         reactions.Hyperbloom,
 	event.OnBurgeon:            reactions.Burgeon,
 	event.OnBurning:            reactions.Burning,
+	event.OnLunarCharged:       reactions.LunarCharged,
 }
 
 func init() {

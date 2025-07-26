@@ -105,8 +105,11 @@ type Reactable struct {
 	core *core.Core
 	// ec specific
 	ecAtk      combat.AttackInfo // index of owner of next ec ticks
+	lcAtk      combat.AttackInfo // index of owner of next lc ticks
 	ecSnapshot combat.Snapshot
+	lcSnapshot combat.Snapshot
 	ecTickSrc  int
+	lcTickSrc  int
 	// burning specific
 	burningAtk      combat.AttackInfo
 	burningSnapshot combat.Snapshot

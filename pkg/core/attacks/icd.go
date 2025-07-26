@@ -37,6 +37,7 @@ const (
 	ICDTagBountifulCoreDamage // special tag for nilou
 	ICDTagBurgeonDamage
 	ICDTagHyperbloomDamage
+	ICDTagLCDamage
 
 	EndDefaultICDTags
 )

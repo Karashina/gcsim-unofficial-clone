@@ -25,6 +25,7 @@ const (
 	Bloom              ReactionType = "bloom"
 	Burgeon            ReactionType = "burgeon"
 	Hyperbloom         ReactionType = "hyperbloom"
+	LunarCharged       ReactionType = "lunar-charged"
 	NoReaction         ReactionType = ""
 	FreezeExtend       ReactionType = "freeze-extend"
 )
