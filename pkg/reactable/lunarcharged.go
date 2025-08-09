@@ -2,6 +2,7 @@ package reactable
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
@@ -11,48 +12,33 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/reactions"
 )
 
+var atk = combat.AttackInfo{}
+
+// Add this to Reactable struct definition (usually in reactable.go or similar file):
+// lastEleSource keeps track of the last actor index for each element.
+
+type lcDamageRecord struct {
+	Index  int
+	Damage float64
+}
+
+type lcDamageResult struct {
+	FinalDamage    float64
+	HighestCR      float64
+	HighestCRIndex int
+}
+
+// Try to add Lunar Charged (LC) status and handle its logic
 func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
-	if a.Info.Durability < ZeroDur {
-		return false
-	}
-	// if there's still frozen left don't try to lc
-	// game actively rejlcts lc reaction if frozen is present
-	if r.Durability[Frozen] > ZeroDur {
-		return false
+	// Reset contributor lists only when a new reaction is triggered and LC tick is not active
+	if !a.Reacted && r.lcTickSrc == -1 {
+		r.lcContributor = make([]int, 0, 4)
+		r.lcPrecalcDamages = make([]lcDamageRecord, 0, 4)
+		r.lcPrecalcDamagesCRIT = make([]lcDamageRecord, 0, 4)
 	}
 
-	// adding lc or hydro just adds to durability
-	switch a.Info.Element {
-	case attributes.Hydro:
-		// if there's no existing hydro or electro then do nothing
-		if r.Durability[Electro] < ZeroDur {
-			return false
-		}
-		// add to hydro durability (can't add if the atk already reacted)
-		//TODO: this shouldn't happen here
-		if !a.Reacted {
-			r.attachOrRefillNormalEle(Hydro, a.Info.Durability)
-		}
-	case attributes.Electro:
-		// if there's no existing hydro or ellctro then do nothing
-		if r.Durability[Hydro] < ZeroDur {
-			return false
-		}
-		// add to ellctro durability (can't add if the atk already reacted)
-		if !a.Reacted {
-			r.attachOrRefillNormalEle(Electro, a.Info.Durability)
-		}
-	default:
-		return false
-	}
-
-	a.Reacted = true
-	r.core.Events.Emit(event.OnLunarCharged, r.self, a)
-
-	// at this point lc is refereshed so we need to trigger a reaction
-	// and change ownership
-	atk := combat.AttackInfo{
-		ActorIndex:       a.Info.ActorIndex,
+	atk = combat.AttackInfo{
+		ActorIndex:       r.core.Player.ActiveChar().Index,
 		DamageSrc:        r.self.Key(),
 		Abil:             string(reactions.LunarCharged),
 		AttackTag:        attacks.AttackTagLCDamage,
@@ -62,61 +48,247 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 		Element:          attributes.Electro,
 		IgnoreDefPercent: 1,
 	}
-	char := r.core.Player.ByIndex(a.Info.ActorIndex)
-	em := char.Stat(attributes.EM)
-	flatdmg, snap := calcReactionDmg(char, atk, em)
-	atk.FlatDmg = 2.0 * flatdmg
-	r.lcAtk = atk
-	r.lcSnapshot = snap
 
-	// if this is a new lc then trigger tick immediately and queue up ticks
-	// otherwise do nothing
-	//TODO: need to chlck if refresh lc triggers new tick immediately or not
+	// Abort if durability is insufficient or frozen durability exists
+	if a.Info.Durability < ZeroDur || r.Durability[Frozen] > ZeroDur {
+		return false
+	}
+
+	switch a.Info.Element {
+	case attributes.Hydro, attributes.Electro:
+		actorIdx := a.Info.ActorIndex
+		char := r.core.Player.ByIndex(actorIdx)
+		em := char.Stat(attributes.EM)
+
+		// On LC creation, also add the other element's source character as a contributor
+		if !a.Reacted && r.lcTickSrc == -1 {
+			var otherElement attributes.Element
+			if a.Info.Element == attributes.Hydro {
+				otherElement = attributes.Electro
+			} else {
+				otherElement = attributes.Hydro
+			}
+			otherIdx := r.lastEleSource[otherElement]
+			if otherIdx != actorIdx && otherIdx >= 0 {
+				otherChar := r.core.Player.ByIndex(otherIdx)
+				otherEM := otherChar.Stat(attributes.EM)
+				found := false
+				for _, idx := range r.lcContributor {
+					if idx == otherIdx {
+						found = true
+						break
+					}
+				}
+				if !found {
+					r.lcContributor = append(r.lcContributor, otherIdx)
+					r.lcPrecalcDamages = append(r.lcPrecalcDamages, lcDamageRecord{
+						Index:  otherIdx,
+						Damage: calcLunarChargedDmg(otherChar, atk, otherEM),
+					})
+					r.lcPrecalcDamagesCRIT = append(r.lcPrecalcDamagesCRIT, lcDamageRecord{
+						Index:  otherIdx,
+						Damage: calcLunarChargedDmgCRIT(otherChar, atk, otherEM),
+					})
+				}
+			}
+		}
+
+		// Add or update the current actor as a contributor
+		found := -1
+		for i, idx := range r.lcContributor {
+			if idx == actorIdx {
+				found = i
+				break
+			}
+		}
+		if found == -1 {
+			r.lcContributor = append(r.lcContributor, actorIdx)
+			r.lcPrecalcDamages = append(r.lcPrecalcDamages, lcDamageRecord{
+				Index:  actorIdx,
+				Damage: calcLunarChargedDmg(char, atk, em),
+			})
+			r.lcPrecalcDamagesCRIT = append(r.lcPrecalcDamagesCRIT, lcDamageRecord{
+				Index:  actorIdx,
+				Damage: calcLunarChargedDmgCRIT(char, atk, em),
+			})
+		} else {
+			r.lcPrecalcDamages[found] = lcDamageRecord{
+				Index:  actorIdx,
+				Damage: calcLunarChargedDmg(char, atk, em),
+			}
+			r.lcPrecalcDamagesCRIT[found] = lcDamageRecord{
+				Index:  actorIdx,
+				Damage: calcLunarChargedDmgCRIT(char, atk, em),
+			}
+		}
+
+		if a.Info.Element == attributes.Hydro {
+			if r.Durability[Electro] < ZeroDur {
+				return false
+			}
+			if !a.Reacted {
+				r.attachOrRefillNormalEle(Hydro, a.Info.Durability)
+			}
+		} else { // Electro
+			if r.Durability[Hydro] < ZeroDur {
+				return false
+			}
+			if !a.Reacted {
+				r.attachOrRefillNormalEle(Electro, a.Info.Durability)
+			}
+		}
+	default:
+		return false
+	}
+
+	a.Reacted = true
+	r.core.Events.Emit(event.OnLunarCharged, r.self, a)
+
+	// Refresh LC expiration time and schedule removal check
+	r.lcActiveExpiry = r.core.F + 360
+	r.core.Tasks.Add(func() {
+		// Remove LC only if still active and expired
+		if r.lcTickSrc != -1 && r.core.F >= r.lcActiveExpiry {
+			r.removeLC()
+		}
+	}, 360)
+
+	// Calculate final LC damage and get highest CR
+	damageResult := r.calcLCDamage(r.lcContributor, r.lcPrecalcDamages, r.lcPrecalcDamagesCRIT)
+	atk.FlatDmg = damageResult.FinalDamage
+
+	// If LC tick is not active, start it and queue attack with calculated damage
 	if r.lcTickSrc == -1 {
 		r.lcTickSrc = r.core.F
+		var snap combat.Snapshot
+		snap.Stats[attributes.CR] = damageResult.HighestCR
+		snap.Stats[attributes.CD] = 0 // Block additional CD
+		snap.CharLvl = r.core.Player.ByIndex(damageResult.HighestCRIndex).Base.Level
 		r.core.QueueAttackWithSnap(
-			r.lcAtk,
-			r.lcSnapshot,
+			atk,
+			snap,
 			combat.NewSingleTargetHit(r.self.Key()),
-			10,
+			9,
 		)
 
-		r.core.Tasks.Add(r.nextTickLC(r.core.F), 60+10)
-		// subscribe to wane ticks
+		r.core.Tasks.Add(r.nextTickLC(r.core.F), 70)
 		r.core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-			// target should be first, then snapshot
 			n := args[0].(combat.Target)
-			a := args[1].(*combat.AttackEvent)
+			ae := args[1].(*combat.AttackEvent)
 			dmg := args[2].(float64)
-			//TODO: there's no target index
 			if n.Key() != r.self.Key() {
 				return false
 			}
-			if a.Info.AttackTag != attacks.AttackTagLCDamage {
+			if ae.Info.AttackTag != attacks.AttackTagLCDamage {
 				return false
 			}
-			// ignore if this dmg instance has been wiped out due to icd
 			if dmg == 0 {
 				return false
 			}
-			// ignore if we no longer have both electro and hydro
 			if r.Durability[Electro] < ZeroDur || r.Durability[Hydro] < ZeroDur {
 				return true
 			}
-
-			// wane in 0.1 slconds
 			r.core.Tasks.Add(func() {
 				r.wanelc()
 			}, 6)
 			return false
 		}, fmt.Sprintf("lc-%v", r.self.Key()))
 	}
-
-	// ticks are 60 frames since last tick
-	// taking tick dmg resets last tick
 	return true
 }
 
+// Calculate the final LC damage based on contributors, crits, and coefficients.
+// Returns the CR and index of the character who contributed the highest damage.
+func (r *Reactable) calcLCDamage(
+	lcContributor []int,
+	lcPrecalcDamages []lcDamageRecord,
+	lcPrecalcDamagesCRIT []lcDamageRecord,
+) lcDamageResult {
+	// Roll crit for each contributor
+	isCrit := make([]bool, len(lcContributor))
+	for i, idx := range lcContributor {
+		char := r.core.Player.ByIndex(idx)
+		cr := char.Stat(attributes.CR)
+		randVal := r.core.Rand.Float64()
+		isCrit[i] = randVal < cr
+	}
+
+	// Select each contributor's final damage according to crit result
+	damageList := make([]float64, len(lcContributor))
+	indexList := make([]int, len(lcContributor))
+	for i, idx := range lcContributor {
+		var dmg float64
+		if isCrit[i] {
+			for _, rec := range lcPrecalcDamagesCRIT {
+				if rec.Index == idx {
+					dmg = rec.Damage
+					break
+				}
+			}
+		} else {
+			for _, rec := range lcPrecalcDamages {
+				if rec.Index == idx {
+					dmg = rec.Damage
+					break
+				}
+			}
+		}
+		damageList[i] = dmg
+		indexList[i] = idx
+	}
+
+	// Find the index of the highest damage in damageList
+	maxIdx := 0
+	for i := 1; i < len(damageList); i++ {
+		if damageList[i] > damageList[maxIdx] {
+			maxIdx = i
+		}
+	}
+	highestCRIndex := indexList[maxIdx]
+	highestCR := 0.0
+	if len(indexList) > 0 {
+		char := r.core.Player.ByIndex(highestCRIndex)
+		highestCR = char.Stat(attributes.CR)
+	}
+
+	// Sort damages (and their indices) in descending order
+	type damageWithIndex struct {
+		Dmg float64
+		Idx int
+	}
+	dwiList := make([]damageWithIndex, len(damageList))
+	for i := range damageList {
+		dwiList[i] = damageWithIndex{Dmg: damageList[i], Idx: indexList[i]}
+	}
+	sort.SliceStable(dwiList, func(i, j int) bool {
+		return dwiList[i].Dmg > dwiList[j].Dmg
+	})
+
+	// Apply coefficients and sum damages (highest to lowest: x1, x0.5, x1/12, x1/12)
+	finalDamage := 0.0
+	for i := 0; i < len(dwiList); i++ {
+		var coef float64
+		switch i {
+		case 0:
+			coef = 1.0
+		case 1:
+			coef = 0.5
+		case 2, 3:
+			coef = 1.0 / 12.0
+		default:
+			coef = 0
+		}
+		finalDamage += dwiList[i].Dmg * coef
+	}
+
+	return lcDamageResult{
+		FinalDamage:    finalDamage,
+		HighestCR:      highestCR,
+		HighestCRIndex: highestCRIndex,
+	}
+}
+
+// Reduce both Electro and Hydro durability for LC wane
 func (r *Reactable) wanelc() {
 	r.Durability[Electro] -= 10
 	r.Durability[Electro] = max(0, r.Durability[Electro])
@@ -129,48 +301,45 @@ func (r *Reactable) wanelc() {
 		Write("aura", "lc").
 		Write("target", r.self.Key()).
 		Write("hydro", r.Durability[Hydro]).
-		Write("ellctro", r.Durability[Electro])
-
-	// lc is gone
-	r.chlcklc()
+		Write("electro", r.Durability[Electro])
 }
 
-func (r *Reactable) chlcklc() {
-	if r.Durability[Electro] < ZeroDur || r.Durability[Hydro] < ZeroDur {
-		r.lcTickSrc = -1
-		r.core.Events.Unsubscribe(event.OnEnemyDamage, fmt.Sprintf("lc-%v", r.self.Key()))
-		r.core.Log.NewEvent("lc expired",
-			glog.LogElementEvent,
-			-1,
-		).
-			Write("aura", "lc").
-			Write("target", r.self.Key()).
-			Write("hydro", r.Durability[Hydro]).
-			Write("ellctro", r.Durability[Electro])
-	}
+// Remove LC status and unsubscribe events
+func (r *Reactable) removeLC() {
+	r.lcTickSrc = -1
+	r.lcActiveExpiry = 0
+	r.core.Events.Unsubscribe(event.OnEnemyDamage, fmt.Sprintf("lc-%v", r.self.Key()))
+	r.core.Log.NewEvent("lc expired",
+		glog.LogElementEvent,
+		-1,
+	).
+		Write("aura", "lc").
+		Write("target", r.self.Key()).
+		Write("hydro", r.Durability[Hydro]).
+		Write("electro", r.Durability[Electro])
 }
 
+// Use the shared damage calculation logic in the tick processing
 func (r *Reactable) nextTickLC(src int) func() {
 	return func() {
+		// Only tick if LC is still valid and matches the current tick source
 		if r.lcTickSrc != src {
-			// source changed, do nothing
 			return
 		}
-		// lc SHOULD be active still, since if not we would have
-		// called cleanup and set source to -1
-		if r.Durability[Electro] < ZeroDur || r.Durability[Hydro] < ZeroDur {
-			return
-		}
+		// Calculate final LC damage using the latest LC state
+		damageResult := r.calcLCDamage(r.lcContributor, r.lcPrecalcDamages, r.lcPrecalcDamagesCRIT)
+		atk.FlatDmg = damageResult.FinalDamage
 
-		// so lc is active, which means both aura must still have value > 0; so we can do dmg
+		var snap combat.Snapshot
+		snap.Stats[attributes.CR] = damageResult.HighestCR
+		snap.Stats[attributes.CD] = 0 // Block additional CD
+		snap.CharLvl = r.core.Player.ByIndex(damageResult.HighestCRIndex).Base.Level
 		r.core.QueueAttackWithSnap(
-			r.lcAtk,
-			r.lcSnapshot,
+			atk,
+			snap,
 			combat.NewSingleTargetHit(r.self.Key()),
-			0,
+			9,
 		)
-
-		// queue up next tick
-		r.core.Tasks.Add(r.nextTickLC(src), 60)
+		r.core.Tasks.Add(r.nextTickLC(src), 122+r.core.Rand.Intn(9))
 	}
 }

@@ -47,6 +47,18 @@ type (
 	}
 	ReactBonusModFunc func(combat.AttackInfo) (float64, bool)
 
+	LCReactBonusMod struct {
+		Amount LCReactBonusModFunc
+		modifier.Base
+	}
+	LCReactBonusModFunc func(combat.AttackInfo) (float64, bool)
+
+	LCBaseReactBonusMod struct {
+		Amount BaseReactBonusModFunc
+		modifier.Base
+	}
+	BaseReactBonusModFunc func(combat.AttackInfo) (float64, bool)
+
 	StatMod struct {
 		AffectedStat attributes.Stat
 		Extra        bool
@@ -105,6 +117,18 @@ func (c *CharWrapper) AddReactBonusMod(mod ReactBonusMod) {
 	modifier.LogAdd("react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
 }
 
+func (c *CharWrapper) AddLCReactBonusMod(mod LCReactBonusMod) {
+	mod.SetExpiry(*c.f)
+	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
+	modifier.LogAdd("lc react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
+}
+
+func (c *CharWrapper) AddLCBaseReactBonusMod(mod LCBaseReactBonusMod) {
+	mod.SetExpiry(*c.f)
+	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
+	modifier.LogAdd("lc base react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
+}
+
 func (c *CharWrapper) AddStatMod(mod StatMod) {
 	mod.SetExpiry(*c.f)
 	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
@@ -125,6 +149,7 @@ func (c *CharWrapper) DeleteCooldownMod(key string)        { c.deleteMod(key) }
 func (c *CharWrapper) DeleteDamageReductionMod(key string) { c.deleteMod(key) }
 func (c *CharWrapper) DeleteHealBonusMod(key string)       { c.deleteMod(key) }
 func (c *CharWrapper) DeleteReactBonusMod(key string)      { c.deleteMod(key) }
+func (c *CharWrapper) DeleteBaseReactBonusMod(key string)  { c.deleteMod(key) }
 func (c *CharWrapper) DeleteStatMod(key string)            { c.deleteMod(key) }
 
 // Active.
@@ -138,6 +163,7 @@ func (c *CharWrapper) CooldownModIsActive(key string) bool        { return c.mod
 func (c *CharWrapper) DamageReductionModIsActive(key string) bool { return c.modIsActive(key) }
 func (c *CharWrapper) HealBonusModIsActive(key string) bool       { return c.modIsActive(key) }
 func (c *CharWrapper) ReactBonusModIsActive(key string) bool      { return c.modIsActive(key) }
+func (c *CharWrapper) BaseReactBonusModIsActive(key string) bool  { return c.modIsActive(key) }
 func (c *CharWrapper) StatModIsActive(key string) bool            { return c.modIsActive(key) }
 
 // Expiry.
@@ -334,6 +360,52 @@ func (c *CharWrapper) ReactBonus(atk combat.AttackInfo) float64 {
 	amt := 0.0
 	for _, v := range c.mods {
 		m, ok := v.(*ReactBonusMod)
+		if !ok {
+			c.mods[n] = v
+			n++
+			continue
+		}
+		if m.Expiry() > *c.f || m.Expiry() == -1 {
+			a, done := m.Amount(atk)
+			amt += a
+			if !done {
+				c.mods[n] = v
+				n++
+			}
+		}
+	}
+	c.mods = c.mods[:n]
+	return amt
+}
+
+func (c *CharWrapper) LCReactBonus(atk combat.AttackInfo) float64 {
+	n := 0
+	amt := 0.0
+	for _, v := range c.mods {
+		m, ok := v.(*LCReactBonusMod)
+		if !ok {
+			c.mods[n] = v
+			n++
+			continue
+		}
+		if m.Expiry() > *c.f || m.Expiry() == -1 {
+			a, done := m.Amount(atk)
+			amt += a
+			if !done {
+				c.mods[n] = v
+				n++
+			}
+		}
+	}
+	c.mods = c.mods[:n]
+	return amt
+}
+
+func (c *CharWrapper) LCBaseReactBonus(atk combat.AttackInfo) float64 {
+	n := 0
+	amt := 0.0
+	for _, v := range c.mods {
+		m, ok := v.(*LCBaseReactBonusMod)
 		if !ok {
 			c.mods[n] = v
 			n++

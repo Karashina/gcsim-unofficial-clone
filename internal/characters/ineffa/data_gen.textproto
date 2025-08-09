@@ -1,15 +1,15 @@
-id: 10000112
+id: 90000580
 key: "ineffa"
 rarity: QUALITY_ORANGE
 body: BODY_GIRL
-region: ASSOC_TYPE_FONTAINE
-element: Ice
-weapon_class: WEAPON_POLE
-icon_name: "UI_AvatarIcon_ineffa"
+region: ASSOC_TYPE_RANGER
+element: Electric
+weapon_class: WEAPON_SWORD_ONE_HAND
+icon_name: "UI_AvatarIcon_Ambor"
 stats: {
-   base_hp: 1039.1188
-   base_atk: 26.999
-   base_def: 56.95816
+   base_hp: 982
+   base_atk: 26
+   base_def: 64
    hp_curve: GROW_CURVE_HP_S5
    atk_curve: GROW_CURVE_ATTACK_S5
    def_cruve: GROW_CURVE_HP_S5
@@ -32,15 +32,15 @@ stats: {
       max_level: 40
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 890.95044
+         value: 842
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 48.8376
+         value: 55
       }
       add_props: {
-         prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 23.14751
+         prop_type: FIGHT_PROP_CRITICAL
+         value: 22
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -48,17 +48,17 @@ stats: {
    }
    promo_data: {
       max_level: 50
-      add_props: {
+add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 1523.9941
+         value: 1440.241
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 83.538
+         value: 94.0775
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 39.594425
+         value: 37.631
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -69,15 +69,15 @@ stats: {
       max_level: 60
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 2368.0525
+         value: 2237.9518
       }
-      add_props: {
+add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 129.8052
+         value: 146.1845
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 61.523643
+         value: 58.4738
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -88,15 +88,15 @@ stats: {
       max_level: 70
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3001.0962
+         value: 2836.1928
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 164.5056
+         value: 185.262
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 77.97056
+         value: 74.1048
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -107,15 +107,15 @@ stats: {
       max_level: 80
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 3634.14
+         value: 3434.4338
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 199.206
+         value: 224.3395
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 94.41747
+         value: 89.7358
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -126,15 +126,15 @@ stats: {
       max_level: 90
       add_props: {
          prop_type: FIGHT_PROP_BASE_HP
-         value: 4267.1836
+         value: 4032.759
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_DEFENSE
-         value: 233.9064
+         value: 263.4225
       }
       add_props: {
          prop_type: FIGHT_PROP_BASE_ATTACK
-         value: 110.86439
+         value: 105.369
       }
       add_props: {
          prop_type: FIGHT_PROP_CRITICAL
@@ -143,9 +143,9 @@ stats: {
    }
 }
 skill_details: {
-   skill: 11122
-   burst: 11125
-   attack: 11121
+   skill: 10262
+   burst: 10265
+   attack: 10261
    burst_energy_cost: 60
 }
-name_text_hash_map: 4035850498
+name_text_hash_map: 1021947691

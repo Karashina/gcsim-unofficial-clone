@@ -15,15 +15,7 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	skillSrc         int
-	skillTravel      int
-	a1Src            int
-	a4HydroCryoCount int
-	c1Active         bool
-	c1Buff           []float64
-	c2Count          int
-	c4Count          int
-	c6Count          int
+	skillSrc int
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -32,7 +24,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.SkillCon = 3
 	c.BurstCon = 5
 
-	c.EnergyMax = burstEnergy[c.TalentLvlBurst()]
+	c.EnergyMax = 60
 	c.NormalHitNum = normalHitNum
 
 	w.Character = &c
@@ -41,10 +33,10 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	c.a4Init()
-	c.c1Init()
-	c.c2Init()
-	c.c6Init()
+	c.InitLCallback()
+	c.a0()
+	c.c4()
+	c.c6()
 	return nil
 }
 
@@ -53,17 +45,4 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 		return 11
 	}
 	return c.Character.AnimationStartDelay(k)
-}
-
-func (c *char) Condition(fields []string) (any, error) {
-	switch fields[0] {
-	case "c2-count":
-		return c.c2Count, nil
-	case "c4-count":
-		return c.c4Count, nil
-	case "c6-count":
-		return c.c6Count, nil
-	default:
-		return c.Character.Condition(fields)
-	}
 }

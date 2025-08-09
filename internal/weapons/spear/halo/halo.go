@@ -5,7 +5,6 @@ import (
 
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
@@ -63,15 +62,10 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 
 		for _, v := range c.Player.Chars() {
-			v.AddReactBonusMod(character.ReactBonusMod{
+			v.AddLCReactBonusMod(character.LCReactBonusMod{
 				Base: modifier.NewBase("halo-LCDMG", 20*60),
 				Amount: func(ai combat.AttackInfo) (float64, bool) {
-					switch ai.AttackTag {
-					case attacks.AttackTagLCDamage:
-					default:
-						return 0, false
-					}
-					return 0.40 + float64(r)*0, false
+					return 0.40 + float64(r)*0, true
 				},
 			})
 		}

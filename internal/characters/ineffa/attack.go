@@ -13,33 +13,34 @@ import (
 
 var (
 	attackFrames          [][]int
-	attackHitmarks        = [][]int{{7}, {16}, {27, 40}}
-	attackHitlagHaltFrame = [][]float64{{0.06}, {0.06}, {0.06, 0.06}}
-	attackDefHalt         = [][]bool{{true}, {true}, {true, true}}
-	attackHitboxes        = [][][]float64{{{1.6, 2}}, {{2}}, {{2.5}, {2.5}}}
-	attackOffsets         = [][]float64{{1}, {-0.2}, {-0.2, -0.2}}
+	attackHitmarks        = [][]int{{10}, {15}, {7, 16}, {28}}
+	attackHitlagHaltFrame = [][]float64{{0.12}, {0.12}, {0.03, 0.12}, {0.10}}
+	attackDefHalt         = [][]bool{{true}, {true}, {false, true}, {true}}
+	attackHitboxes        = [][][]float64{{{1.6, 2}}, {{2}}, {{2.5}, {2.5}}, {{2.5}}}
+	attackOffsets         = [][]float64{{1}, {-0.2}, {-0.2, -0.2}, {0.2}}
 )
 
-const normalHitNum = 3
+const normalHitNum = 4
 
 func init() {
 	attackFrames = make([][]int, normalHitNum)
 
-	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 17)
-	attackFrames[0][action.ActionCharge] = 20
-	attackFrames[0][action.ActionWalk] = 22
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 22)
+	attackFrames[0][action.ActionCharge] = 35
+	attackFrames[0][action.ActionDash] = 10
 
-	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 21)
-	attackFrames[1][action.ActionAttack] = 29
-	attackFrames[1][action.ActionWalk] = 30
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 30)
+	attackFrames[1][action.ActionDash] = 20
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][1], 62)
-	attackFrames[2][action.ActionWalk] = 61
-	attackFrames[2][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 36)
+	attackFrames[2][action.ActionDash] = 22
+
+	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[2][1], 57)
+	attackFrames[3][action.ActionDash] = 37
+	attackFrames[3][action.ActionCharge] = 500 // Illegal action; needs better handling
 }
 
-// Normal attack damage queue generator
-// relatively standard with no major differences versus other characters
+// Normal attack implementation
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{

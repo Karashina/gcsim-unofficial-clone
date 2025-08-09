@@ -3,84 +3,59 @@ package ineffa
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/enemy"
+	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-const a1Scaling = 1.3824
-const a1key = "ineffa-a1"
-const a1Count = 9
-const a1FirstTick = 157
-const a1Interval = 58.5
-const a4Dur = 12 * 60
+// A0: Adds base reaction bonus mod for all characters
+func (c *char) a0() {
+	for _, char := range c.Core.Player.Chars() {
+		char.AddStatus("LC-Key", -1, false)
+		char.AddLCBaseReactBonusMod(character.LCBaseReactBonusMod{
+			Base: modifier.NewBase("Assemblage Hub (A0)", -1),
+			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				maxval := 0.14
+				return min(maxval, c.TotalAtk()/100*0.007), true
+			},
+		})
+	}
+}
 
-var a4Shred = []float64{0.0, 0.05, 0.10, 0.15, 0.55}
-
+// A1: Triggers dummy attack if ascension 1 and skill is active
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	c.a1Src = c.Core.F
-	ticks := a1Count + c.c4ExtraCount()
-	for i := 0; i < ticks; i++ {
-		c.QueueCharTask(c.a1Tick(c.a1Src), a1FirstTick+ceil(a1Interval*float64(i)))
+	if !c.StatusIsActive(skillKey) {
+		return
 	}
-	// this status is purely cosmetic and doesn't do anything right now
-	c.AddStatus(a1key, a1FirstTick+ceil(float64(ticks-1)*a1Interval), true)
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "Ineffa A1 Dummy",
+		FlatDmg:    0,
+	}
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99), 0, 0)
 }
 
-func (c *char) a1Tick(src int) func() {
-	return func() {
-		if src != c.a1Src {
-			return
-		}
-		scale := a1Scaling + c.c4ExtraHeal()
-		heal := scale * c.TotalAtk()
-		c.Core.Player.Heal(info.HealInfo{
-			Caller:  c.Index,
-			Target:  c.Core.Player.Active(),
-			Message: "Rehab Diet",
-			Src:     heal,
-			Bonus:   c.Stat(attributes.Heal),
-		})
-	}
-}
-
-func (c *char) a4Init() {
-	c.a4HydroCryoCount = 0
-	for _, char := range c.Core.Player.Chars() {
-		switch char.Base.Element {
-		case attributes.Hydro, attributes.Cryo:
-			c.a4HydroCryoCount++
-		default:
-		}
-	}
-}
-
-func (c *char) makeA4CB() combat.AttackCBFunc {
+// A4: Adds EM stat mod for all characters based on total ATK
+func (c *char) a4() {
 	if c.Base.Ascension < 4 {
-		return nil
+		return
 	}
-	return func(a combat.AttackCB) {
-		if a.Target.Type() != targets.TargettableEnemy {
-			return
-		}
-		e, ok := a.Target.(*enemy.Enemy)
-		if !ok {
-			return
-		}
-		shred := a4Shred[c.a4HydroCryoCount]
-		e.AddResistMod(combat.ResistMod{
-			Base:  modifier.NewBaseWithHitlag("ineffa-a4-shred-cryo", a4Dur),
-			Ele:   attributes.Cryo,
-			Value: -shred,
-		})
-		e.AddResistMod(combat.ResistMod{
-			Base:  modifier.NewBaseWithHitlag("ineffa-a4-shred-hydro", a4Dur),
-			Ele:   attributes.Hydro,
-			Value: -shred,
+	for _, char := range c.Core.Player.Chars() {
+		m := make([]float64, attributes.EndStatType)
+		m[attributes.EM] = c.TotalAtk() * 0.06
+		char.AddStatMod(character.StatMod{
+			Base:         modifier.NewBaseWithHitlag("ineffa-a4", 20*60),
+			AffectedStat: attributes.EM,
+			Amount: func() ([]float64, bool) {
+				if char.Index != c.Index {
+					if c.Core.Player.Active() != char.Index {
+						return nil, false
+					}
+				}
+				return m, true
+			},
 		})
 	}
 }

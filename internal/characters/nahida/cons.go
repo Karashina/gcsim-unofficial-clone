@@ -46,8 +46,6 @@ func (c *char) c2() {
 		}
 
 		//TODO: should this really be +=??
-		ae.Snapshot.Stats[attributes.CR] += 0.2
-		ae.Snapshot.Stats[attributes.CD] += 1
 
 		c.Core.Log.NewEvent("nahida c2 buff", glog.LogCharacterEvent, ae.Info.ActorIndex).
 			Write("final_crit", ae.Snapshot.Stats[attributes.CR])

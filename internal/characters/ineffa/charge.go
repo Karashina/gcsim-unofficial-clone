@@ -11,45 +11,35 @@ import (
 
 var chargeFrames []int
 
-const chargeHitmark = 20
+const chargeHitmark = 26
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(65)
-	chargeFrames[action.ActionAttack] = 53
-	chargeFrames[action.ActionSkill] = 52
-	chargeFrames[action.ActionBurst] = 52
-	chargeFrames[action.ActionDash] = chargeHitmark
-	chargeFrames[action.ActionJump] = chargeHitmark
-	chargeFrames[action.ActionSwap] = 52
+	chargeFrames = frames.InitAbilSlice(50) // CA -> Walk
+	chargeFrames[action.ActionAttack] = 39
+	chargeFrames[action.ActionSkill] = 42
+	chargeFrames[action.ActionBurst] = 39
+	chargeFrames[action.ActionSwap] = 47
 }
 
-// Charge attack damage queue generator
-// Very standard - consistent with other characters like Xiangling
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Charge",
 		AttackTag:          attacks.AttackTagExtra,
-		ICDTag:             attacks.ICDTagNone,
-		ICDGroup:           attacks.ICDGroupPoleExtraAttack,
+		ICDTag:             attacks.ICDTagExtraAttack,
+		ICDGroup:           attacks.ICDGroupDefault,
 		StrikeType:         attacks.StrikeTypeSlash,
 		Element:            attributes.Physical,
 		Durability:         25,
 		Mult:               charge[c.TalentLvlAttack()],
-		HitlagHaltFrames:   0.10,
+		HitlagHaltFrames:   0.09 * 60,
 		HitlagFactor:       0.01,
 		CanBeDefenseHalted: true,
 	}
 
 	c.Core.QueueAttack(
 		ai,
-		combat.NewBoxHit(
-			c.Core.Combat.Player(),
-			c.Core.Combat.PrimaryTarget(),
-			geometry.Point{Y: 1.5},
-			3.3,
-			3,
-		),
+		combat.NewBoxHitOnTarget(c.Core.Combat.PrimaryTarget(), geometry.Point{Y: -1.2}, 3.3, 3.5),
 		chargeHitmark,
 		chargeHitmark,
 	)

@@ -12,6 +12,9 @@ import (
 )
 
 func (r *Reactable) TryAddEC(a *combat.AttackEvent) bool {
+	if r.core.Player.ByIndex(a.Info.ActorIndex).StatusIsActive("LC-Key") {
+		return r.TryAddLC(a)
+	}
 	if a.Info.Durability < ZeroDur {
 		return false
 	}

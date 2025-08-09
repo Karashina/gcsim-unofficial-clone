@@ -105,11 +105,8 @@ type Reactable struct {
 	core *core.Core
 	// ec specific
 	ecAtk      combat.AttackInfo // index of owner of next ec ticks
-	lcAtk      combat.AttackInfo // index of owner of next lc ticks
 	ecSnapshot combat.Snapshot
-	lcSnapshot combat.Snapshot
 	ecTickSrc  int
-	lcTickSrc  int
 	// burning specific
 	burningAtk      combat.AttackInfo
 	burningSnapshot combat.Snapshot
@@ -125,6 +122,13 @@ type Reactable struct {
 	swirlCryoGCD    int
 	swirlPyroGCD    int
 	crystallizeGCD  int
+
+	lcContributor        []int
+	lcPrecalcDamages     []lcDamageRecord
+	lcPrecalcDamagesCRIT []lcDamageRecord
+	lcTickSrc            int
+	lcActiveExpiry       int
+	lastEleSource map[attributes.Element]int
 }
 
 type Enemy interface {
@@ -141,6 +145,7 @@ func (r *Reactable) Init(self combat.Target, c *core.Core) *Reactable {
 	r.core = c
 	r.DecayRate[Frozen] = frzDecayCap
 	r.ecTickSrc = -1
+	r.lcTickSrc = -1
 	r.burningTickSrc = -1
 	r.overloadGCD = -1
 	r.shatterGCD = -1
@@ -451,6 +456,28 @@ func (r *Reactable) calcCatalyzeDmg(atk combat.AttackInfo, em float64) float64 {
 		lvl = 0
 	}
 	return (1 + ((5 * em) / (1200 + em)) + r.core.Player.ByIndex(atk.ActorIndex).ReactBonus(atk)) * reactionLvlBase[lvl]
+}
+
+func calcLunarChargedDmg(char *character.CharWrapper, atk combat.AttackInfo, em float64) float64 {
+	lvl := char.Base.Level - 1
+	if lvl > 89 {
+		lvl = 89
+	}
+	if lvl < 0 {
+		lvl = 0
+	}
+	return 1.8 * (reactionLvlBase[lvl] * (1 + char.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + char.LCReactBonus(atk))
+}
+
+func calcLunarChargedDmgCRIT(char *character.CharWrapper, atk combat.AttackInfo, em float64) float64 {
+	lvl := char.Base.Level - 1
+	if lvl > 89 {
+		lvl = 89
+	}
+	if lvl < 0 {
+		lvl = 0
+	}
+	return 1.8 * (reactionLvlBase[lvl] * (1 + char.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + char.LCReactBonus(atk)) * (1 + char.Stat(attributes.CD))
 }
 
 var reactionLvlBase = []float64{

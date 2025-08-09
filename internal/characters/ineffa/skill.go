@@ -15,50 +15,42 @@ import (
 var skillFrames []int
 
 const (
-	skillInitHitmark    = 23 // Initial Hit
-	skillAlignedHitmark = 83
-	skillTicks          = 21
-	skillInterval       = 58.5
-	skillFirstTickDelay = 148
-	skillAlignedICDKey  = "ineffa-aligned-icd"
+	skillInitHitmark    = 25
+	skillTicks          = 10
+	skillInterval       = 117
+	skillFirstTickDelay = 82
 	skillKey            = "ineffa-skill"
 	particleICDKey      = "ineffa-particle-icd"
-	skillAlignedICD     = 10 * 60
-	skillCD             = 15 * 60
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(35) // E -> D/J
-	skillFrames[action.ActionAttack] = 32
-	skillFrames[action.ActionBurst] = 32
-	skillFrames[action.ActionWalk] = 32
-	skillFrames[action.ActionSwap] = 31
+	skillFrames = frames.InitAbilSlice(41) // E -> D/J
 }
 
+// Ceil helper for tick timing
 func ceil(x float64) int {
 	return int(math.Ceil(x))
 }
 
+// Skill ability implementation
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	travel, ok := p["travel"]
-	if !ok {
-		travel = 5
-	}
-	c.skillTravel = travel
-
 	skillPos := c.Core.Combat.Player()
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "Low-Temperature Cooking",
+		Abil:       "Cleaning Mode: Carrier Frequency (E)",
 		AttackTag:  attacks.AttackTagElementalArt,
-		ICDTag:     attacks.ICDTagElementalArt,
+		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
 		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Cryo,
+		Element:    attributes.Electro,
 		Durability: 25,
-		Mult:       skillInital[c.TalentLvlSkill()],
+		Mult:       skill[c.TalentLvlSkill()],
 	}
-	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(skillPos, geometry.Point{Y: -1.5}, 5), skillInitHitmark, skillInitHitmark, c.particleCB, c.makeA4CB())
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHitOnTarget(skillPos, geometry.Point{Y: -1.5}, 5),
+		skillInitHitmark, skillInitHitmark, c.particleCB,
+	)
 
 	// E duration and ticks are not affected by hitlag
 	c.skillSrc = c.Core.F
@@ -67,37 +59,9 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 	c.AddStatus(skillKey, skillFirstTickDelay+ceil((skillTicks-1)*skillInterval), false)
 
-	c.QueueCharTask(func() {
-		if c.StatusIsActive(skillAlignedICDKey) {
-			return
-		}
-		c.AddStatus(skillAlignedICDKey, skillAlignedICD, true)
-		aiBlade := combat.AttackInfo{
-			// TODO: Apply Arkhe
-			ActorIndex: c.Index,
-			Abil:       "Surging Blade (" + c.Base.Key.Pretty() + ")",
-			AttackTag:  attacks.AttackTagElementalArt,
-			ICDTag:     attacks.ICDTagNone,
-			ICDGroup:   attacks.ICDGroupDefault,
-			StrikeType: attacks.StrikeTypeSpear,
-			Element:    attributes.Cryo,
-			Durability: 0,
-			Mult:       arkhe[c.TalentLvlSkill()],
-		}
-		c.Core.QueueAttack(
-			aiBlade,
-			combat.NewCircleHitOnTarget(skillPos, nil, 5),
-			0, // TODO: snapshot delay?
-			0, // TODO: snapshot delay?
-			c.makeA4CB(),
-		)
-	}, skillAlignedHitmark)
+	c.genShield("ineffa-skill", c.shieldHP())
+	c.SetCD(action.ActionSkill, 16*60)
 
-	c.SetCDWithDelay(action.ActionSkill, skillCD, 22)
-
-	c.c1()
-	c.c2()
-	c.c6()
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
@@ -106,6 +70,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
+// Particle generation callback for skill
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -113,28 +78,34 @@ func (c *char) particleCB(a combat.AttackCB) {
 	if c.StatusIsActive(particleICDKey) {
 		return
 	}
-	c.AddStatus(particleICDKey, 0.2*60, false)
-	c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Cryo, c.ParticleDelay)
+	if c.Core.Rand.Float64() < 0.25 {
+		return
+	}
+	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Electro, c.ParticleDelay)
 }
 
+// Skill tick logic for DoT
 func (c *char) skillTick(src int) func() {
 	return func() {
 		if src != c.skillSrc {
 			return
 		}
-
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
-			Abil:       "Frosty Parfait",
+			Abil:       "Cleaning Mode: Carrier Frequency (E/DoT)",
 			AttackTag:  attacks.AttackTagElementalArt,
-			ICDTag:     attacks.ICDTagElementalArt,
+			ICDTag:     attacks.ICDTagNone,
 			ICDGroup:   attacks.ICDGroupDefault,
 			StrikeType: attacks.StrikeTypeDefault,
-			Element:    attributes.Cryo,
+			Element:    attributes.Electro,
 			Durability: 25,
 			Mult:       skillDot[c.TalentLvlSkill()],
 		}
-		// trigger damage
-		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5), 0, c.skillTravel, c.makeA4CB())
+		c.a1()
+		c.Core.QueueAttack(
+			ai,
+			combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5),
+			0, 0, c.particleCB,
+		)
 	}
 }
