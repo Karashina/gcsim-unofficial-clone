@@ -40,7 +40,6 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 	}
 
 	atk = combat.AttackInfo{
-		// ActorIndex will be set after contributors are determined.
 		DamageSrc:        r.self.Key(),
 		Abil:             string(reactions.LunarCharged),
 		AttackTag:        attacks.AttackTagLCDamage,
@@ -145,7 +144,9 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 	}
 
 	a.Reacted = true
-	r.core.Events.Emit(event.OnElectroCharged, r.self, a)
+	// ActorIndex is set to the character who triggered LC (the attacker).
+	atk.ActorIndex = a.Info.ActorIndex
+	r.core.Events.Emit(event.OnLunarCharged, r.self, a)
 
 	// Refresh LC expiration time and schedule removal check.
 	r.lcActiveExpiry = r.core.F + 360
@@ -159,11 +160,6 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 	// Calculate final LC damage and get highest CR.
 	damageResult := r.calcLCDamage(r.lcContributor, r.lcPrecalcDamages, r.lcPrecalcDamagesCRIT)
 	atk.FlatDmg = damageResult.FinalDamage
-
-	// Set ActorIndex to the last added contributor.
-	if len(r.lcContributor) > 0 {
-		atk.ActorIndex = r.lcContributor[len(r.lcContributor)-1]
-	}
 
 	// If LC tick is not active, start it and queue attack with calculated damage.
 	if r.lcTickSrc == -1 {
@@ -179,7 +175,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			9,
 		)
 
-		r.core.Tasks.Add(r.nextTickLC(r.core.F), 70)
+		r.core.Tasks.Add(r.nextTickLC(r.core.F, a.Info.ActorIndex), 70)
 		r.core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 			n := args[0].(combat.Target)
 			ae := args[1].(*combat.AttackEvent)
@@ -328,7 +324,7 @@ func (r *Reactable) removeLC() {
 }
 
 // nextTickLC handles LC periodic damage ticks using the shared damage calculation logic.
-func (r *Reactable) nextTickLC(src int) func() {
+func (r *Reactable) nextTickLC(src int, lcActorIndex int) func() {
 	return func() {
 		// Only tick if LC is still valid and matches the current tick source.
 		if r.lcTickSrc != src {
@@ -338,10 +334,8 @@ func (r *Reactable) nextTickLC(src int) func() {
 		damageResult := r.calcLCDamage(r.lcContributor, r.lcPrecalcDamages, r.lcPrecalcDamagesCRIT)
 		atk.FlatDmg = damageResult.FinalDamage
 
-		// Set ActorIndex to the last added contributor.
-		if len(r.lcContributor) > 0 {
-			atk.ActorIndex = r.lcContributor[len(r.lcContributor)-1]
-		}
+		// Set ActorIndex to the character who triggered LC (the original attacker).
+		atk.ActorIndex = lcActorIndex
 
 		var snap combat.Snapshot
 		snap.Stats[attributes.CR] = damageResult.HighestCR
@@ -354,6 +348,6 @@ func (r *Reactable) nextTickLC(src int) func() {
 			9,
 		)
 		// Schedule the next LC tick.
-		r.core.Tasks.Add(r.nextTickLC(src), 122+r.core.Rand.Intn(9))
+		r.core.Tasks.Add(r.nextTickLC(src, lcActorIndex), 122+r.core.Rand.Intn(9))
 	}
 }
