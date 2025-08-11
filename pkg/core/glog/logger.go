@@ -114,7 +114,7 @@ func (c *Ctrl) NewEventBuildMsg(typ Source, srcChar int, msg ...string) Event {
 
 func (c *Ctrl) NewEvent(msg string, typ Source, srcChar int) Event {
 	e := &LogEvent{
-		Msg:       msg,
+		Msg:       Translate(msg),  // Translate the message to Japanese
 		Frame:     *c.f,
 		Ended:     *c.f,
 		Event:     typ,
