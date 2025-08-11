@@ -15,7 +15,7 @@ func (c *char) a0() {
 			Base: modifier.NewBase("Assemblage Hub (A0)", -1),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
 				maxval := 0.14
-				return min(maxval, c.TotalAtk()/100*0.007), true
+				return min(maxval, c.TotalAtk()/100*0.007), false
 			},
 		})
 	}

@@ -49,6 +49,16 @@ func (c *char) a1() {
 		return
 	}
 	for _, chr := range c.Core.Player.Chars() {
+		chr.AddLCReactBonusMod(character.LCReactBonusMod{
+			Base: modifier.NewBase("ifa-a1-lc", 8*60),
+			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				maxval := 150.0
+				if c.Base.Cons >= 2 {
+					maxval = 200.0
+				}
+				return min(maxval, c.totalPts()) * 0.002, false
+			},
+		})
 		chr.AddReactBonusMod(character.ReactBonusMod{
 			Base: modifier.NewBase("Field Medic's Vision (A1)", -1),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {

@@ -64,6 +64,12 @@ func (c *char) c1() {
 						return 0, false
 					},
 				})
+				char.AddLCReactBonusMod(character.LCReactBonusMod{
+					Base: modifier.NewBase("mona-c1-lc", 8*60),
+					Amount: func(ai combat.AttackInfo) (float64, bool) {
+						return 0.15, false
+					},
+				})
 			}, 1)
 		}
 		return false

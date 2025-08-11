@@ -149,7 +149,6 @@ func (c *CharWrapper) DeleteCooldownMod(key string)        { c.deleteMod(key) }
 func (c *CharWrapper) DeleteDamageReductionMod(key string) { c.deleteMod(key) }
 func (c *CharWrapper) DeleteHealBonusMod(key string)       { c.deleteMod(key) }
 func (c *CharWrapper) DeleteReactBonusMod(key string)      { c.deleteMod(key) }
-func (c *CharWrapper) DeleteBaseReactBonusMod(key string)  { c.deleteMod(key) }
 func (c *CharWrapper) DeleteStatMod(key string)            { c.deleteMod(key) }
 
 // Active.
@@ -163,7 +162,6 @@ func (c *CharWrapper) CooldownModIsActive(key string) bool        { return c.mod
 func (c *CharWrapper) DamageReductionModIsActive(key string) bool { return c.modIsActive(key) }
 func (c *CharWrapper) HealBonusModIsActive(key string) bool       { return c.modIsActive(key) }
 func (c *CharWrapper) ReactBonusModIsActive(key string) bool      { return c.modIsActive(key) }
-func (c *CharWrapper) BaseReactBonusModIsActive(key string) bool  { return c.modIsActive(key) }
 func (c *CharWrapper) StatModIsActive(key string) bool            { return c.modIsActive(key) }
 
 // Expiry.

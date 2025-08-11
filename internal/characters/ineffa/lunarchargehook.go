@@ -31,7 +31,6 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
-		snap.Stats[attributes.EM] = em
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
 		c.Core.QueueAttackWithSnap(
@@ -58,7 +57,6 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
-		snap.Stats[attributes.EM] = em
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
 		c.Core.QueueAttackWithSnap(
@@ -85,7 +83,6 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
-		snap.Stats[attributes.EM] = em
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
 		c.Core.QueueAttackWithSnap(

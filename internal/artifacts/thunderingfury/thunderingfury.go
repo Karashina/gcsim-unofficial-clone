@@ -73,6 +73,12 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			return 0, false
 		},
 	})
+	char.AddLCReactBonusMod(character.LCReactBonusMod{
+		Base: modifier.NewBase("tf-4pc-lc", -1),
+		Amount: func(ai combat.AttackInfo) (float64, bool) {
+			return 0.20, false
+		},
+	})
 
 	//nolint:unparam // ignoring for now, event refactor should get rid of bool return of event sub
 	reduce := func(args ...interface{}) bool {
