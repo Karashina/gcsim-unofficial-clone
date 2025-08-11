@@ -128,7 +128,7 @@ type Reactable struct {
 	lcPrecalcDamagesCRIT []lcDamageRecord
 	lcTickSrc            int
 	lcActiveExpiry       int
-	lastEleSource map[attributes.Element]int
+	lastEleSource        map[attributes.Element]int
 }
 
 type Enemy interface {
@@ -477,7 +477,9 @@ func calcLunarChargedDmgCRIT(char *character.CharWrapper, atk combat.AttackInfo,
 	if lvl < 0 {
 		lvl = 0
 	}
-	return 1.8 * (reactionLvlBase[lvl] * (1 + char.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + char.LCReactBonus(atk)) * (1 + char.Stat(attributes.CD))
+	rb := char.LCReactBonus(atk)
+	brb := char.LCBaseReactBonus(atk)
+	return 1.8 * (reactionLvlBase[lvl] * (1 + brb)) * (1 + ((6 * em) / (2000 + em)) + rb*(1+char.Stat(attributes.CD)))
 }
 
 var reactionLvlBase = []float64{

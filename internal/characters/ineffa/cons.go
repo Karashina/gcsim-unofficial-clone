@@ -20,10 +20,11 @@ func (c *char) c1() {
 		return
 	}
 	for _, char := range c.Core.Player.Chars() {
+		amt := min(0.5, c.TotalAtk()/100*0.025)
 		char.AddLCReactBonusMod(character.LCReactBonusMod{
-			Base: modifier.NewBase("Ineffa C1", 20*60),
+			Base: modifier.NewBase("ineffa-c1", 20*60),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
-				return min(0.5, c.TotalAtk()/100*0.025), true
+				return amt, false
 			},
 		})
 	}
@@ -75,7 +76,7 @@ func (c *char) c6() {
 		if a.Info.Abil != string(reactions.LunarCharged) {
 			return false
 		}
-		if !c.ReactBonusModIsActive("Ineffa C1") {
+		if !c.ReactBonusModIsActive("ineffa-c1") {
 			return false
 		}
 		if c.StatusIsActive(c6IcdKey) {
