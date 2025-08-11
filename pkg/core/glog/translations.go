@@ -1,5 +1,10 @@
 package glog
 
+import (
+	"regexp"
+	"strings"
+)
+
 // translations provides Japanese translations for English log messages
 var translations = map[string]string{
 	// Character abilities and events
@@ -642,13 +647,92 @@ var translations = map[string]string{
 	
 	// Yun Jin specific
 	"yunjin burst adding damage":                   "雲菫元素爆発ダメージ追加",
+	
+	// Dynamic message patterns (with placeholders)
+	"mona-c6 stack gain check ignored, src diff":   "モナC6スタック獲得チェック無視、ソース異なる",
+	"mona-c6 stack gained":                         "モナC6スタック獲得",
+	"mona-c6 stacks reset via charge attack":       "モナC6スタック重撃でリセット",
+	"mona-c6 stacks reset via timer":               "モナC6スタックタイマーでリセット",
+}
+
+// translationPatterns defines regex patterns for dynamic messages
+var translationPatterns = []struct {
+	pattern     *regexp.Regexp
+	replacement string
+}{
+	// Itto SSS stacks pattern
+	{
+		pattern:     regexp.MustCompile(`^itto (\d+) SSS stacks from (.+)$`),
+		replacement: "荒瀧一斗 $1 SSSスタック from $2",
+	},
+	// Target hit pattern
+	{
+		pattern:     regexp.MustCompile(`^target (.+) hit (\d+) times$`),
+		replacement: "ターゲット $1 を $2 回攻撃",
+	},
+	// Crystal shrapnel firing pattern
+	{
+		pattern:     regexp.MustCompile(`^firing (\d+) crystal shrapnel$`),
+		replacement: "$1 個の岩晶の欠片を発射",
+	},
+	// Droplet spawning patterns
+	{
+		pattern:     regexp.MustCompile(`^Burst: Spawned (\d+) droplets$`),
+		replacement: "元素爆発: 水滴を $1 個生成",
+	},
+	{
+		pattern:     regexp.MustCompile(`^Picked up (\d+) droplets$`),
+		replacement: "水滴を $1 個収集",
+	},
+	{
+		pattern:     regexp.MustCompile(`^Skill: Spawned (\d+) droplets$`),
+		replacement: "スキル: 水滴を $1 個生成",
+	},
+	// Mirror patterns  
+	{
+		pattern:     regexp.MustCompile(`^Consumed (\d+) mirror\(s\)$`),
+		replacement: "鏡を $1 個消費",
+	},
+	{
+		pattern:     regexp.MustCompile(`^Gained (\d+) mirror\(s\)$`),
+		replacement: "鏡を $1 個獲得",
+	},
+	// Weapon hit patterns
+	{
+		pattern:     regexp.MustCompile(`^(.+) hit by (.+)$`),
+		replacement: "$1 が $2 に命中",
+	},
+	// Element interaction patterns
+	{
+		pattern:     regexp.MustCompile(`^(.+) came into contact with (.+)$`),
+		replacement: "$1 が $2 と接触",
+	},
+	// Adding hitlag pattern
+	{
+		pattern:     regexp.MustCompile(`^(.+) applying hitlag: (.+)$`),
+		replacement: "$1 ヒットラグ適用: $2",
+	},
+	// General weapon/effect proc patterns
+	{
+		pattern:     regexp.MustCompile(`^(.+) gained (.+) via (.+)$`),
+		replacement: "$1 が $3 経由で $2 を獲得",
+	},
 }
 
 // Translate returns the Japanese translation of an English message if available,
 // otherwise returns the original message
 func Translate(msg string) string {
+	// First try exact match
 	if translation, exists := translations[msg]; exists {
 		return translation
 	}
+	
+	// Then try pattern matching for dynamic messages
+	for _, pattern := range translationPatterns {
+		if pattern.pattern.MatchString(msg) {
+			return pattern.pattern.ReplaceAllString(msg, pattern.replacement)
+		}
+	}
+	
 	return msg
 }

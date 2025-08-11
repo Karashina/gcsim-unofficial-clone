@@ -23,6 +23,26 @@ func TestTranslate(t *testing.T) {
 	}
 }
 
+func TestTranslatePatterns(t *testing.T) {
+	tests := []struct {
+		english  string
+		japanese string
+	}{
+		{"itto 3 SSS stacks from skill", "荒瀧一斗 3 SSSスタック from skill"},
+		{"target hilichurl hit 5 times", "ターゲット hilichurl を 5 回攻撃"},
+		{"Consumed 2 mirror(s)", "鏡を 2 個消費"},
+		{"Gained 1 mirror(s)", "鏡を 1 個獲得"},
+		{"Burst: Spawned 3 droplets", "元素爆発: 水滴を 3 個生成"},
+	}
+
+	for _, test := range tests {
+		result := Translate(test.english)
+		if result != test.japanese {
+			t.Errorf("Translate(%q) = %q, want %q", test.english, result, test.japanese)
+		}
+	}
+}
+
 func TestLoggerWithTranslation(t *testing.T) {
 	frame := 0
 	logger := New(&frame, 100)
