@@ -62,6 +62,8 @@ type AttackInfo struct {
 	CanBeDefenseHalted   bool    // for whacking ruin gaurds
 	IsDeployable         bool    // if this is true, then hitlag does not affect owner
 	HitlagOnHeadshotOnly bool    // if this is true, will only apply if HitWeakpoint is also true
+
+	AuraExpiry int // for lc contributor tracking
 }
 
 type Snapshot struct {

@@ -43,7 +43,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 
 		mATK := make([]float64, attributes.EndStatType)
-		mATK[attributes.ATKP] = 0.24 + float64(r)*0
+		mATK[attributes.ATKP] = 0.18 + float64(r)*0.06
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("halo-atk", 20*60),
 			AffectedStat: attributes.ATKP,
@@ -65,7 +65,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			v.AddLCReactBonusMod(character.LCReactBonusMod{
 				Base: modifier.NewBase("halo-LCDMG", 20*60),
 				Amount: func(ai combat.AttackInfo) (float64, bool) {
-					return 0.40 + float64(r)*0, true
+					return 0.30 + float64(r)*0.10, false
 				},
 			})
 		}

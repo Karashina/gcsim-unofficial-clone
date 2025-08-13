@@ -14,10 +14,11 @@ import (
 
 var atk = combat.AttackInfo{}
 
-// lcDamageRecord stores the actor index and precomputed damage value.
+// lcDamageRecord stores the actor index, precomputed damage value, and expiry frame.
 type lcDamageRecord struct {
 	Index  int
 	Damage float64
+	Expiry int // 追加: 削除タイミング
 }
 
 // lcDamageResult stores the result of the LC damage calculation.
@@ -29,14 +30,14 @@ type lcDamageResult struct {
 
 // TryAddLC attempts to apply the Lunar Charged (LC) status and handles its logic.
 func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
+
 	// Reset contributor lists when:
-	// - A new reaction is triggered and LC tick is not active, or
-	// - Hydro or Electro durability is below ZeroDur
-	if (!a.Reacted && r.lcTickSrc == -1) ||
-		(r.Durability[Hydro] < ZeroDur || r.Durability[Electro] < ZeroDur) {
+	// - A new reaction is triggered and LC tick is not active
+	if !a.Reacted && r.lcTickSrc == -1 {
 		r.lcContributor = make([]int, 0, 4)
 		r.lcPrecalcDamages = make([]lcDamageRecord, 0, 4)
 		r.lcPrecalcDamagesCRIT = make([]lcDamageRecord, 0, 4)
+		r.expiryTaskMap = make(map[int]int) // 追加: 初期化
 	}
 
 	atk = combat.AttackInfo{
@@ -94,6 +95,15 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 		}
 
+		existing := r.Durability[a.Info.Element]
+		dur := 0.8 * a.Info.Durability
+		if existing > ZeroDur && dur >= existing {
+			dr := r.DecayRate[a.Info.Element]
+			a.Info.AuraExpiry = r.core.F + int(dur/dr)
+		} else {
+			a.Info.AuraExpiry = r.core.F + int(6*dur+420)
+		}
+
 		// Add or update the current actor as a contributor.
 		found := -1
 		for i, idx := range r.lcContributor {
@@ -107,22 +117,68 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			r.lcPrecalcDamages = append(r.lcPrecalcDamages, lcDamageRecord{
 				Index:  actorIdx,
 				Damage: calcLunarChargedDmg(char, atk, em),
+				Expiry: a.Info.AuraExpiry,
 			})
 			r.lcPrecalcDamagesCRIT = append(r.lcPrecalcDamagesCRIT, lcDamageRecord{
 				Index:  actorIdx,
 				Damage: calcLunarChargedDmgCRIT(char, atk, em),
+				Expiry: a.Info.AuraExpiry,
 			})
 		} else {
 			r.lcPrecalcDamages[found] = lcDamageRecord{
 				Index:  actorIdx,
 				Damage: calcLunarChargedDmg(char, atk, em),
+				Expiry: a.Info.AuraExpiry,
 			}
 			r.lcPrecalcDamagesCRIT[found] = lcDamageRecord{
 				Index:  actorIdx,
 				Damage: calcLunarChargedDmgCRIT(char, atk, em),
+				Expiry: a.Info.AuraExpiry,
 			}
 		}
 
+		// contributor/record削除タスクをAuraExpiryで登録（上書き時は再スケジューリング）
+		expiryIndex := actorIdx
+		expiryFrame := a.Info.AuraExpiry
+		if r.expiryTaskMap == nil {
+			r.expiryTaskMap = make(map[int]int)
+		}
+		r.expiryTaskMap[expiryIndex] = expiryFrame
+		r.core.Tasks.Add(func() {
+			// 最新のexpiryFrameでなければ何もしない
+			if r.expiryTaskMap == nil || r.expiryTaskMap[expiryIndex] != expiryFrame {
+				return
+			}
+			// lcContributorから削除
+			newContrib := make([]int, 0, len(r.lcContributor))
+			for _, idx := range r.lcContributor {
+				if idx != expiryIndex {
+					newContrib = append(newContrib, idx)
+				}
+			}
+			r.lcContributor = newContrib
+
+			// lcPrecalcDamagesから削除
+			newDamages := make([]lcDamageRecord, 0, len(r.lcPrecalcDamages))
+			for _, rec := range r.lcPrecalcDamages {
+				if rec.Index != expiryIndex || rec.Expiry != expiryFrame {
+					newDamages = append(newDamages, rec)
+				}
+			}
+			r.lcPrecalcDamages = newDamages
+
+			// lcPrecalcDamagesCRITから削除
+			newDamagesCRIT := make([]lcDamageRecord, 0, len(r.lcPrecalcDamagesCRIT))
+			for _, rec := range r.lcPrecalcDamagesCRIT {
+				if rec.Index != expiryIndex || rec.Expiry != expiryFrame {
+					newDamagesCRIT = append(newDamagesCRIT, rec)
+				}
+			}
+			r.lcPrecalcDamagesCRIT = newDamagesCRIT
+
+			// タスク完了後はmapからも削除
+			delete(r.expiryTaskMap, expiryIndex)
+		}, expiryFrame-r.core.F)
 		// Attach or refill Hydro/Electro durability as appropriate.
 		if a.Info.Element == attributes.Hydro {
 			if r.Durability[Electro] < ZeroDur {
@@ -313,6 +369,7 @@ func (r *Reactable) removeLC() {
 	r.lcTickSrc = -1
 	r.lcActiveExpiry = 0
 	r.core.Events.Unsubscribe(event.OnEnemyDamage, fmt.Sprintf("lc-%v", r.self.Key()))
+	r.core.Events.Unsubscribe(event.OnTick, fmt.Sprintf("lc-tick-%v", r.self.Key()))
 	r.core.Log.NewEvent("lc expired",
 		glog.LogElementEvent,
 		-1,

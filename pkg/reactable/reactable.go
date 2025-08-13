@@ -129,6 +129,7 @@ type Reactable struct {
 	lcTickSrc            int
 	lcActiveExpiry       int
 	lastEleSource        map[attributes.Element]int
+	expiryTaskMap        map[int]int
 }
 
 type Enemy interface {
@@ -427,6 +428,12 @@ func (r *Reactable) Tick() {
 	if r.ecTickSrc > -1 {
 		if r.Durability[Electro] < ZeroDur || r.Durability[Hydro] < ZeroDur {
 			r.ecTickSrc = -1
+		}
+	}
+
+	if r.lcTickSrc > -1 {
+		if r.Durability[Electro] < ZeroDur {
+
 		}
 	}
 }
