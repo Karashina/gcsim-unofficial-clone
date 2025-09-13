@@ -92,12 +92,12 @@ func (c *char) setupPaleHymnEffects() {
 	c.Core.Events.Subscribe(event.OnBurgeon, c.paleHymnReactionBonus("Burgeon"), "lauma-pale-hymn-burgeon")
 	
 	// Subscribe to Lunar-Bloom reactions
-	c.Core.Events.Subscribe(event.OnBloom, func(args ...interface{}) bool {
-		if len(args) < 1 {
+	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		if len(args) < 3 {
 			return false
 		}
-		if attackInfo, ok := args[0].(combat.AttackInfo); ok {
-			if attackInfo.AttackTag == attacks.AttackTagLBDamage {
+		if attackEvent, ok := args[1].(*combat.AttackEvent); ok {
+			if attackEvent.Info.AttackTag == attacks.AttackTagLBDamage {
 				return c.paleHymnLunarBloomBonus(args...)
 			}
 		}

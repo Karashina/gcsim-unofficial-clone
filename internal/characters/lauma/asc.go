@@ -5,7 +5,9 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/enemy"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
@@ -59,22 +61,33 @@ func (c *char) a1() {
 	
 	// Apply appropriate Moonsign buffs for 20s
 	if c.moonsignNascent {
-		// Moonsign: Nascent Gleam
-		for _, char := range c.Core.Player.Chars() {
-			char.AddReactBonusMod(character.ReactBonusMod{
-				Base: modifier.NewBase("lauma-a1-nascent-bloom-crit", 20*60),
-				Amount: func(ai combat.AttackInfo) (float64, bool) {
-					// For Bloom/Hyperbloom/Burgeon, add crit capability
-					if ai.AttackTag == attacks.AttackTagBloom || 
-					   ai.AttackTag == attacks.AttackTagHyperbloom || 
-					   ai.AttackTag == attacks.AttackTagBurgeon {
-						// This would need special reaction crit handling
-						return 0, false
-					}
-					return 0, false
-				},
-			})
-		}
+		// Moonsign: Nascent Gleam - Bloom, Hyperbloom, and Burgeon DMG can score CRIT Hits
+		// CRIT Rate fixed at 15%, CRIT DMG fixed at 100%
+		c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+			t, ok := args[0].(*enemy.Enemy)
+			if !ok {
+				return false
+			}
+			ae := args[1].(*combat.AttackEvent)
+
+			switch ae.Info.AttackTag {
+			case attacks.AttackTagBurningDamage:
+			case attacks.AttackTagBloom:
+			case attacks.AttackTagHyperbloom:
+			case attacks.AttackTagBurgeon:
+			default:
+				return false
+			}
+
+			// Add special crit handling for these reactions
+			ae.Snapshot.Stats[attributes.CR] += 0.15
+			ae.Snapshot.Stats[attributes.CD] += 1.0
+
+			c.Core.Log.NewEvent("lauma a1 nascent crit buff", glog.LogCharacterEvent, ae.Info.ActorIndex).
+				Write("final_crit", ae.Snapshot.Stats[attributes.CR])
+
+			return false
+		}, "lauma-a1-nascent-reaction-crit")
 	} else if c.moonsignAscendant {
 		// Moonsign: Ascendant Gleam
 		for _, char := range c.Core.Player.Chars() {
@@ -96,26 +109,35 @@ func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
+	
+	// add Damage Bonus for Elemental Skill
+	m := make([]float64, attributes.EndStatType)
+	c.AddAttackMod(character.AttackMod{
+		Base: modifier.NewBase("lauma-a4-skill-dmg-bonus", -1), // Permanent
+		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
+			// skip if not skill
+			if atk.Info.AttackTag != attacks.AttackTagElementalArt {
+				return nil, false
+			}
+			// calculate EM bonus
+			em := c.Stat(attributes.EM)
+			bonus := min(0.32, em*0.0004) // 0.04% per EM, max 32%
+			m[attributes.DmgP] = bonus
+			return m, true
+		},
+	})
 }
 
-// A4 helper for skill damage bonus
+// A4 helper for skill damage bonus - DEPRECATED, now using AddAttackMod
 func (c *char) a4SkillBonus(ai *combat.AttackInfo) {
-	if c.Base.Ascension < 4 {
-		return
-	}
-	em := c.Stat(attributes.EM)
-	bonus := min(0.32, em*0.0004) // 0.04% per EM, max 32%
-	ai.Mult *= (1 + bonus)
+	// This function is deprecated and should not be used
+	// A4 bonus is now handled via AddAttackMod in a4() function
 }
 
-// A4 helper for charged attack damage bonus (extending to CA as well)
+// A4 helper for charged attack damage bonus (extending to CA as well) - DEPRECATED
 func (c *char) a4ChargeBonus(ai *combat.AttackInfo) {
-	if c.Base.Ascension < 4 {
-		return
-	}
-	em := c.Stat(attributes.EM)
-	bonus := min(0.32, em*0.0004) // 0.04% per EM, max 32%
-	ai.Mult *= (1 + bonus)
+	// This function is deprecated and should not be used
+	// Charged attack functionality removed as Lauma doesn't have charged attacks
 }
 
 // RES reduction from skill hits

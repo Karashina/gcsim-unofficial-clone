@@ -36,6 +36,18 @@ func init() {
 // Normal Attack
 // Performs up to 3 attacks that deal Dendro DMG
 func (c *char) Attack(p map[string]int) (action.Info, error) {
+	// C6: Check if normal attack should be converted to Lunar-Bloom DMG
+	if c.c6NormalAttackConversion() {
+		// C6 conversion already handled, just return basic action info
+		defer c.AdvanceNormalIndex()
+		return action.Info{
+			Frames:          frames.NewAttackFunc(c.Character, attackFrames),
+			AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],
+			CanQueueAfter:   attackHitmarks[c.NormalCounter],
+			State:           action.NormalAttackState,
+		}, nil
+	}
+	
 	ai := combat.AttackInfo{
 		ActorIndex:   c.Index,
 		Abil:         fmt.Sprintf("Normal %v", c.NormalCounter),

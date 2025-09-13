@@ -37,12 +37,9 @@ func ceil(x float64) int {
 // summoning a Frostgrove Sanctuary with different effects depending on whether you Tap or Hold.
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	skillPos := c.Core.Combat.Player()
-	if p["hold"] == 1 {
+	if p["hold"] == 1 && c.verdantDew > 0 {
 		// Hold
 		// Can be unleashed when you have at least 1 Verdant Dew.
-		if c.verdantDew < 1 {
-			return action.Info{}, nil // Cannot cast if no Verdant Dew
-		}
 		
 		// Lauma consumes all Verdant Dew and intones a Hymn of Eternal Rest,
 		// dealing one regular instance of AoE Dendro DMG and another instance of AoE Dendro DMG that is considered Lunar-Bloom DMG.
@@ -64,8 +61,6 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			Durability: 25,
 			Mult:       skillHold1[c.TalentLvlSkill()],
 		}
-		// Apply A4 EM scaling to skill damage
-		c.a4SkillBonus(&ai1)
 		
 		c.Core.QueueAttack(
 			ai1,
@@ -111,8 +106,6 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			Durability: 25,
 			Mult:       skillPress[c.TalentLvlSkill()],
 		}
-		// Apply A4 EM scaling to skill damage
-		c.a4SkillBonus(&ai)
 		
 		c.Core.QueueAttack(
 			ai,
@@ -123,6 +116,15 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	// E duration and ticks are not affected by hitlag
 	c.skillSrc = c.Core.F
+	
+	// C6: Reset sanctuary count when using skill
+	if c.Base.Cons >= 6 {
+		c.c6SanctuaryCount = 0
+		// Remove C6 Pale Hymn stacks when using skill
+		c.paleHymn -= c.c6PaleHymnCount
+		c.c6PaleHymnCount = 0
+	}
+	
 	for i := 0.0; i < skillTicks; i++ {
 		c.Core.Tasks.Add(c.skillTick(c.skillSrc), skillFirstTickDelay+ceil(skillInterval*i))
 	}
@@ -176,8 +178,6 @@ func (c *char) skillTick(src int) func() {
 			Mult:       skillDotATK[c.TalentLvlSkill()],
 			FlatDmg:    skillDotEM[c.TalentLvlSkill()] * c.Stat(attributes.EM),
 		}
-		// Apply A4 EM scaling to skill DoT damage
-		c.a4SkillBonus(&ai)
 		
 		c.Core.QueueAttack(
 			ai,
@@ -185,5 +185,6 @@ func (c *char) skillTick(src int) func() {
 			0, 0, c.particleCB,
 		)
 		c.c4()
+		c.c6SanctuaryBonus() // C6 additional damage on sanctuary attacks
 	}
 }
