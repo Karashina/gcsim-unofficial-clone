@@ -19,3 +19,10 @@ skill_data_mapping:
     burst:
         burst:
             - 0 # Burst DMG|{param1:F1P}
+# Character abilities:
+# A1: When HP > 50%, Pyro DMG +15%; Charged Attack creates additional explosions
+# A4: After using Elemental Skill, all party members gain +20% Pyro DMG for 10s
+# C1: After using Elemental Skill, Normal Attack DMG +40% for 8s  
+# C2: Elemental Skill gains 1 additional charge
+# C4: Elemental Burst restores 15 Energy to all party members except self
+# C6: Elemental Burst creates additional Pyro DMG over time for 6s

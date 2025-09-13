@@ -41,6 +41,9 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		skillHitmark,
 	)
 
+	// Generate particles
+	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Pyro, c.ParticleDelay)
+
 	// Set skill cooldown
 	c.SetCDWithDelay(action.ActionSkill, 12*60, 20) // 12 second cooldown
 

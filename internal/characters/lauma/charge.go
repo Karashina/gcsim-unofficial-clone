@@ -33,12 +33,31 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charge[c.TalentLvlAttack()],
 	}
 
+	// Main charged attack
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 2}, 1.5),
 		chargeHitmark,
 		chargeHitmark,
 	)
+
+	// A1 passive: If HP > 50%, charged attack creates additional smaller explosions
+	if c.Base.Ascension >= 1 && c.CurrentHPRatio() > 0.5 {
+		for i := 0; i < 3; i++ {
+			c.Core.Tasks.Add(func() {
+				ai2 := ai
+				ai2.Abil = "Charged Attack (A1)"
+				ai2.Mult = charge[c.TalentLvlAttack()] * 0.3 // 30% of main damage
+				
+				c.Core.QueueAttack(
+					ai2,
+					combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 2 + float64(i)}, 1.0),
+					0,
+					0,
+				)
+			}, chargeHitmark + 10 + i*5) // Staggered explosions
+		}
+	}
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(chargeFrames),

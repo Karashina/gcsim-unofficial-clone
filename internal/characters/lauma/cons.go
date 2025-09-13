@@ -1,10 +1,12 @@
 package lauma
 
 import (
+	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
@@ -41,7 +43,8 @@ func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
 	}
-	// Implementation for additional skill charge would go here
+	// Add a second charge to elemental skill
+	c.SetNumCharges(action.ActionSkill, 2)
 }
 
 // C4: Elemental Burst restores energy to team
@@ -49,7 +52,21 @@ func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
 	}
-	// Implementation for team energy restoration would go here
+	
+	c.Core.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
+		if c.Core.Player.Active() != c.Index {
+			return false
+		}
+		
+		// Restore 15 energy to all team members except self
+		for i, char := range c.Core.Player.Chars() {
+			if i != c.Index {
+				char.AddEnergy("lauma-c4", 15)
+			}
+		}
+		
+		return false
+	}, "lauma-c4")
 }
 
 // C6: Enhanced burst damage and effects  
@@ -57,5 +74,37 @@ func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	// Implementation for enhanced burst would go here
+	
+	// C6: Burst creates additional pyro damage over time
+	c.Core.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
+		if c.Core.Player.Active() != c.Index {
+			return false
+		}
+		
+		// Create damage over time effect for 6 seconds
+		for i := 1; i <= 6; i++ {
+			c.Core.Tasks.Add(func() {
+				ai := combat.AttackInfo{
+					ActorIndex: c.Index,
+					Abil:       "Elemental Burst (C6)",
+					AttackTag:  attacks.AttackTagElementalBurst,
+					ICDTag:     attacks.ICDTagNone,
+					ICDGroup:   attacks.ICDGroupDefault,
+					StrikeType: attacks.StrikeTypeDefault,
+					Element:    attributes.Pyro,
+					Durability: 25,
+					Mult:       0.5, // 50% ATK per tick
+				}
+				
+				c.Core.QueueAttack(
+					ai,
+					combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 2}, 3.0),
+					0,
+					0,
+				)
+			}, i*60) // Every second for 6 seconds
+		}
+		
+		return false
+	}, "lauma-c6")
 }

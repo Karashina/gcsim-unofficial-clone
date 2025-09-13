@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
@@ -23,6 +24,17 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
+	// Count pyro characters in team for scaling
+	pyroCount := 0
+	for _, char := range c.Core.Player.Chars() {
+		if char.Base.Element == attributes.Pyro {
+			pyroCount++
+		}
+	}
+	
+	// Base burst damage scales with pyro characters in team
+	burstMult := burst[c.TalentLvlBurst()] * (1.0 + float64(pyroCount-1)*0.2) // 20% more per additional pyro character
+	
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Elemental Burst",
@@ -32,7 +44,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		StrikeType: attacks.StrikeTypeDefault,
 		Element:    attributes.Pyro,
 		Durability: 50,
-		Mult:       burst[c.TalentLvlBurst()],
+		Mult:       burstMult,
 	}
 
 	c.Core.QueueAttack(
@@ -41,6 +53,25 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstHitmark,
 		burstHitmark,
 	)
+
+	// Create pyro infusion field for team for 8 seconds if A4 is unlocked
+	if c.Base.Ascension >= 4 {
+		c.AddStatus("lauma-burst-field", 8*60, true)
+		
+		// Apply pyro infusion to team while field is active
+		c.Core.Events.Subscribe(event.OnAttack, func(args ...interface{}) bool {
+			if !c.StatusIsActive("lauma-burst-field") {
+				return false
+			}
+			
+			atk := args[1].(*combat.AttackEvent)
+			if atk.Info.Element == attributes.Physical {
+				atk.Info.Element = attributes.Pyro
+			}
+			
+			return false
+		}, "lauma-burst-infusion")
+	}
 
 	// Consume energy
 	c.ConsumeEnergy(5)

@@ -3,6 +3,7 @@ package lauma
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
@@ -27,12 +28,32 @@ func (c *char) a1() {
 	})
 }
 
-// A4: Advanced passive - provides team pyro damage bonus
+// A4: Advanced passive - provides team pyro damage bonus after using elemental skill
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
 	
-	// Team-wide pyro damage bonus when Lauma uses elemental skill
-	// This would be implemented when skill mechanics are expanded
+	c.Core.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
+		if c.Core.Player.Active() != c.Index {
+			return false
+		}
+		
+		// Grant team-wide pyro damage bonus for 10 seconds
+		for _, char := range c.Core.Player.Chars() {
+			char.AddAttackMod(character.AttackMod{
+				Base: modifier.NewBase("lauma-a4-team", 10*60),
+				Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+					if atk.Info.Element == attributes.Pyro {
+						buff := make([]float64, attributes.EndStatType)
+						buff[attributes.DmgP] = 0.20 // 20% pyro damage bonus
+						return buff, true
+					}
+					return nil, false
+				},
+			})
+		}
+		
+		return false
+	}, "lauma-a4")
 }
