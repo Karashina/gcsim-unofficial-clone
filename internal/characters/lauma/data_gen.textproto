@@ -1,0 +1,145 @@
+id: 10000109
+key: "lauma"
+rarity: QUALITY_PURPLE
+body: BODY_GIRL
+region: ASSOC_TYPE_LIYUE
+element: Fire
+weapon_class: WEAPON_CATALYST
+icon_name: "UI_AvatarIcon_Lauma"
+stats: {
+   base_hp: 812.15234
+   base_atk: 22.89344
+   base_def: 51.24125
+   hp_curve: GROW_CURVE_HP_S4
+   atk_curve: GROW_CURVE_ATTACK_S4
+   def_cruve: GROW_CURVE_HP_S4
+   promo_data: {
+      max_level: 20
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ATTACK_PERCENT
+      }
+   }
+   promo_data: {
+      max_level: 40
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 606.2814
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 38.2575
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 17.098484
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ATTACK_PERCENT
+         value: 0.06
+      }
+   }
+   promo_data: {
+      max_level: 50
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 1095.4532
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 69.1425
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 30.89343
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ATTACK_PERCENT
+         value: 0.12
+      }
+   }
+   promo_data: {
+      max_level: 60
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 1223.1943
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 77.2125
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 34.49843
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ATTACK_PERCENT
+         value: 0.12
+      }
+   }
+   promo_data: {
+      max_level: 70
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 1712.3661
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 108.0975
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 48.29338
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ATTACK_PERCENT
+         value: 0.18
+      }
+   }
+   promo_data: {
+      max_level: 80
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 1840.1072
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 116.1675
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 51.89838
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ATTACK_PERCENT
+         value: 0.18
+      }
+   }
+   promo_data: {
+      max_level: 90
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 1967.847
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 124.2375
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 55.50333
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ATTACK_PERCENT
+         value: 0.24
+      }
+   }
+}
