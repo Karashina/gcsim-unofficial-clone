@@ -33,6 +33,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
+	c.AddStatus("moonsignKey", -1, false)
 	c.InitLCallback()
 	c.a0()
 	c.c4()
