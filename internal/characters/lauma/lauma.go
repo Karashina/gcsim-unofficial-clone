@@ -3,8 +3,6 @@ package lauma
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
@@ -18,16 +16,14 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	skillSrc         int
-	burstLBBuff      float64
-	verdantDew       int
-	moonSong         int
-	paleHymn         int
-	a4crval          float64
-	a4cdval          float64
-	c6PaleHymnCount  int // C6-specific Pale Hymn stacks
-	c6SanctuaryCount int // C6 sanctuary hit counter (max 8 per sanctuary)
-	c6mult           float64
+	skillSrc    int
+	burstLBBuff float64
+	verdantDew  int
+	moonSong    int
+	paleHymn    int
+	a4crval     float64
+	a4cdval     float64
+	c6mult      float64
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -49,9 +45,9 @@ func (c *char) Init() error {
 	c.a4crval = 0
 	c.a4cdval = 0
 	c.moonsignInitFunc()
+	c.setupPaleHymnEffects()
 	c.a0()
 	c.a4()                               // Initialize A4 AddAttackMod
-	c.c6()                               // Initialize C6 effects
 	c.c6mult = c.c6AscendantMultiplier() // Apply C6 Ascendant multiplier if applicable
 	c.verdantDewCheck()                  // Initialize Verdant Dew monitoring
 	c.applyResReduction()                // Initialize RES reduction monitoring
@@ -72,23 +68,15 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 // If you trigger another Lunar-Bloom reaction during this time, the duration of this effect will be reset.
 func (c *char) verdantDewCheck() {
 	c.Core.Events.Subscribe(event.OnBloom, func(args ...interface{}) bool {
-		if len(args) < 1 {
-			return false
-		}
-		// Check if this is a Lunar-Bloom reaction
-		if attackInfo, ok := args[0].(combat.AttackInfo); ok {
-			if attackInfo.AttackTag == attacks.AttackTagLBDamage {
-				if c.StatusIsActive("LB-Key") {
-					c.AddStatus("dewchargingkey", 150, true) // 2.5s charging period
-					duradd := c.StatusDuration("dewchargingkey")
-					c.QueueCharTask(func() {
-						if c.verdantDew < 3 {
-							c.verdantDew++
-						}
-					}, 150+duradd)
-					return true
+		if c.StatusIsActive("LB-Key") {
+			duradd := c.StatusDuration("dewchargingkey")
+			c.AddStatus("dewchargingkey", 150, true) // 2.5s charging period
+			c.QueueCharTask(func() {
+				if c.verdantDew < 3 {
+					c.verdantDew++
 				}
-			}
+			}, 150+duradd)
+			return true
 		}
 		return false
 	}, "lauma-verdant-dew")

@@ -46,7 +46,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		// Each Verdant Dew consumed will give Lauma one stack of Moon Song.
 		// Each time you Hold to cast an Elemental Skill, a maximum of 3 Verdant Dew can be consumed in this way.
 		dewConsumed := min(c.verdantDew, 3)
-		c.verdantDew -= dewConsumed
+		c.verdantDew = 0
 		c.moonSong += dewConsumed
 
 		em := c.Stat(attributes.EM)
@@ -72,11 +72,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			ActorIndex:       c.Index,
 			Abil:             "Runo: Dawnless Rest of Karsikko (E/Hold/Hit 2)",
 			AttackTag:        attacks.AttackTagLBDamage,
-			ICDTag:           attacks.ICDTagNone,
-			ICDGroup:         attacks.ICDGroupReactionB,
 			StrikeType:       attacks.StrikeTypeDefault,
 			Element:          attributes.Dendro,
-			Durability:       0,
 			IgnoreDefPercent: 1,
 			FlatDmg:          (skillHold2[c.TalentLvlSkill()]*em*(1+c.LBBaseReactBonus(ai1)))*(1+((6*em)/(2000+em))+c.LBReactBonus(ai1)) + c.burstLBBuff*c.c6mult,
 		}
@@ -91,6 +88,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget().Pos(), nil, 6),
 			skillInitHitmarkHold,
 		)
+		c.paleHymnLunarBloomBonus()
 		// "considered Lunar-Bloom DMG area end"
 	} else {
 		// Press E
@@ -116,14 +114,6 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	// E duration and ticks are not affected by hitlag
 	c.skillSrc = c.Core.F
-
-	// C6: Reset sanctuary count when using skill
-	if c.Base.Cons >= 6 {
-		c.c6SanctuaryCount = 0
-		// Remove C6 Pale Hymn stacks when using skill
-		c.paleHymn -= c.c6PaleHymnCount
-		c.c6PaleHymnCount = 0
-	}
 
 	for i := 0.0; i < skillTicks; i++ {
 		c.Core.Tasks.Add(c.skillTick(c.skillSrc), skillFirstTickDelay+ceil(skillInterval*i))
@@ -181,10 +171,39 @@ func (c *char) skillTick(src int) func() {
 
 		c.Core.QueueAttack(
 			ai,
-			combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5),
+			combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 6.5),
 			0, 0, c.particleCB,
 		)
 		c.c4()
-		c.c6SanctuaryBonus() // C6 additional damage on sanctuary attacks
+
+		if c.Base.Cons >= 6 {
+			// Deal additional AoE Dendro DMG equal to 185% of EM
+			em := c.Stat(attributes.EM)
+			c6ai := combat.AttackInfo{
+				ActorIndex:       c.Index,
+				Abil:             "Frostgrove Sanctuary (C6 Bonus)",
+				AttackTag:        attacks.AttackTagLBDamage,
+				StrikeType:       attacks.StrikeTypeDefault,
+				Element:          attributes.Dendro,
+				IgnoreDefPercent: 1,
+			}
+
+			snapc6 := combat.Snapshot{
+				CharLvl: c.Base.Level,
+			}
+			c6ai.FlatDmg = (1.85*em*(1+c.LBBaseReactBonus(c6ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(c6ai)) + c.burstLBBuff*c.c6mult // 185% of EM
+			snapc6.Stats[attributes.CR] = c.Stat(attributes.CR) + c.a4crval
+			snapc6.Stats[attributes.CD] = c.Stat(attributes.CD) + c.a4cdval
+
+			c.Core.QueueAttackWithSnap(
+				c6ai,
+				snapc6,
+				combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget().Pos(), nil, 6.5),
+				1,
+			)
+
+			c.paleHymn += 3 // Gain 2+1 Pale Hymn stacks
+			c.AddStatus("pale-hymn-window", 15*60, true)
+		}
 	}
 }

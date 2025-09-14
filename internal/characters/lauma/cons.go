@@ -28,39 +28,28 @@ func (c *char) c1() {
 	c.AddStatus(c1Key, 20*60, true)
 
 	// Set up healing on Lunar-Bloom reactions
-	c.Core.Events.Subscribe(event.OnBloom, func(args ...interface{}) bool {
+	c.Core.Events.Subscribe(event.OnLunarBloom, func(args ...interface{}) bool {
 		if !c.StatusIsActive(c1Key) {
 			return false
 		}
 		if c.StatusIsActive(c1ICDKey) {
 			return false
 		}
+		em := c.Stat(attributes.EM)
+		healAmount := 5.0 * em // 500% of EM
 
-		// Check if this is a Lunar-Bloom reaction
-		if len(args) < 1 {
-			return false
+		for _, char := range c.Core.Player.Chars() {
+			char.Heal(&info.HealInfo{
+				Caller:  c.Index,
+				Target:  char.Index,
+				Message: "Threads of Life",
+				Src:     healAmount,
+				Bonus:   0,
+			})
 		}
-		if attackInfo, ok := args[0].(combat.AttackInfo); ok {
-			if attackInfo.AttackTag == attacks.AttackTagLBDamage {
-				// Heal all party members
-				em := c.Stat(attributes.EM)
-				healAmount := 5.0 * em // 500% of EM
 
-				for _, char := range c.Core.Player.Chars() {
-					char.Heal(&info.HealInfo{
-						Caller:  c.Index,
-						Target:  char.Index,
-						Message: "Threads of Life",
-						Src:     healAmount,
-						Bonus:   0,
-					})
-				}
-
-				// Set ICD for 1.9s
-				c.AddStatus(c1ICDKey, 114, true) // 1.9s * 60 = 114 frames
-				return true
-			}
-		}
+		// Set ICD for 1.9s
+		c.AddStatus(c1ICDKey, 114, true) // 1.9s * 60 = 114 frames
 		return false
 	}, "lauma-c1-heal")
 }
@@ -108,58 +97,6 @@ func (c *char) c4() {
 // Additionally, when Lauma uses a Normal Attack while she has Pale Hymn stacks,
 // she will consume 1 stack to convert this to deal Dendro DMG equal to 150% of her Elemental Mastery. This DMG is considered Lunar-Bloom DMG.
 // Moonsign: Ascendant Gleam: All nearby party members' Lunar-Bloom DMG is multiplied by 1.25.
-func (c *char) c6() {
-	if c.Base.Cons < 6 {
-		return
-	}
-
-	// Track C6 Pale Hymn stacks separately from regular ones
-	c.c6PaleHymnCount = 0
-	c.c6SanctuaryCount = 0
-}
-
-// C6 helper for sanctuary additional damage
-func (c *char) c6SanctuaryBonus() {
-	if c.Base.Cons < 6 {
-		return
-	}
-	if c.c6SanctuaryCount >= 8 {
-		return
-	}
-
-	// Deal additional AoE Dendro DMG equal to 185% of EM
-	em := c.Stat(attributes.EM)
-	ai := combat.AttackInfo{
-		ActorIndex:       c.Index,
-		Abil:             "Frostgrove Sanctuary (C6 Bonus)",
-		AttackTag:        attacks.AttackTagLBDamage,
-		ICDTag:           attacks.ICDTagNone,
-		ICDGroup:         attacks.ICDGroupReactionB,
-		StrikeType:       attacks.StrikeTypeDefault,
-		Element:          attributes.Dendro,
-		Durability:       0,
-		IgnoreDefPercent: 1,
-		FlatDmg:          1.85*em + c.burstLBBuff*c.c6mult, // 185% of EM
-	}
-
-	snap := combat.Snapshot{
-		CharLvl: c.Base.Level,
-	}
-	snap.Stats[attributes.CR] = c.Stat(attributes.CR) + c.a4crval
-	snap.Stats[attributes.CD] = c.Stat(attributes.CD) + c.a4cdval
-
-	c.Core.QueueAttackWithSnap(
-		ai,
-		snap,
-		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget().Pos(), nil, 3),
-		1,
-	)
-
-	// Add 2 C6 Pale Hymn stacks
-	c.c6PaleHymnCount += 2
-	c.paleHymn += 2
-	c.c6SanctuaryCount++
-}
 
 // C6 helper for normal attack conversion
 func (c *char) c6NormalAttackConversion() bool {
@@ -180,14 +117,13 @@ func (c *char) c6NormalAttackConversion() bool {
 		Abil:             "Normal Attack (C6 Conversion)",
 		AttackTag:        attacks.AttackTagLBDamage,
 		ICDTag:           attacks.ICDTagNone,
-		ICDGroup:         attacks.ICDGroupReactionB,
 		StrikeType:       attacks.StrikeTypeDefault,
 		Element:          attributes.Dendro,
 		Durability:       0,
 		IgnoreDefPercent: 1,
-		FlatDmg:          1.5*em + c.burstLBBuff*c.c6mult, // 150% of EM
 	}
 
+	ai.FlatDmg = (1.5*em*(1+c.LBBaseReactBonus(ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(ai)) + c.burstLBBuff*c.c6mult // 150% of EM
 	snap := combat.Snapshot{
 		CharLvl: c.Base.Level,
 	}
@@ -200,6 +136,7 @@ func (c *char) c6NormalAttackConversion() bool {
 		combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key()),
 		1,
 	)
+	c.paleHymnLunarBloomBonus()
 
 	return true
 }
