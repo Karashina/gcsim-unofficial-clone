@@ -6,122 +6,96 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/enemy"
 )
 
-var skillFrames []int
+var (
+	skillFrames      []int
+	fierySkillFrames []int
+)
 
 const (
-	particleICDKey      = "varesa-particle-icd"
-	skillKey            = "follow-up-strike"
-	skillHitmark        = 6
-	skillTargetCountTag = "marked"
-	skillMarkedTag      = "varesa-skill-marked"
-	skillCd             = 9 * 60
+	skillHitmark      = 5
+	fierySkillHitmark = 2
+
+	skillStatus = "follow-up"
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(39) //E -> NA
-	skillFrames[action.ActionJump] = 39    //E -> J
-	skillFrames[action.ActionCharge] = 20  //E -> J
+	skillFrames = frames.InitAbilSlice(43) // E -> Walk
+	skillFrames[action.ActionAttack] = 22
+	skillFrames[action.ActionCharge] = 22
+	skillFrames[action.ActionBurst] = 22
+	skillFrames[action.ActionDash] = 37
+	skillFrames[action.ActionJump] = 37
+	skillFrames[action.ActionSwap] = 21
+
+	fierySkillFrames = frames.InitAbilSlice(52) // E -> Swap
+	fierySkillFrames[action.ActionAttack] = 23
+	fierySkillFrames[action.ActionCharge] = 23
+	fierySkillFrames[action.ActionSkill] = 22
+	fierySkillFrames[action.ActionBurst] = 22
+	fierySkillFrames[action.ActionDash] = 38
+	fierySkillFrames[action.ActionJump] = 39
+	fierySkillFrames[action.ActionSwap] = 21
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	nofp := combat.AttackInfo{
-		ActorIndex:     c.Index,
-		Abil:           "Riding the Night-Rainbow",
-		AttackTag:      attacks.AttackTagElementalArt,
-		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-		ICDTag:         attacks.ICDTagVaresaCombatCycle,
-		ICDGroup:       attacks.ICDGroupDefault,
-		StrikeType:     attacks.StrikeTypeDefault,
-		Element:        attributes.Electro,
-		Durability:     25,
-		Mult:           skill[c.TalentLvlSkill()],
+	// OnRemoved is sometimes called after the next action is executed. so we need to exit nightsoul here too
+	c.clearNightsoulCB(action.SkillState)
+
+	ai := combat.AttackInfo{
+		ActorIndex:         c.Index,
+		Abil:               "Rush",
+		AdditionalTags:     []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		AttackTag:          attacks.AttackTagElementalArt,
+		ICDTag:             attacks.ICDTagVaresaCombatCycle,
+		ICDGroup:           attacks.ICDGroupDefault,
+		StrikeType:         attacks.StrikeTypePierce,
+		Element:            attributes.Electro,
+		Durability:         25,
+		Mult:               rush[c.TalentLvlSkill()],
+		HitlagFactor:       0.01,
+		CanBeDefenseHalted: true,
 	}
 
-	hasfp := combat.AttackInfo{
-		ActorIndex:     c.Index,
-		Abil:           "Riding the Night-Rainbow (Fiery Passion)",
-		AttackTag:      attacks.AttackTagElementalArt,
-		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-		ICDTag:         attacks.ICDTagVaresaCombatCycle,
-		ICDGroup:       attacks.ICDGroupDefault,
-		StrikeType:     attacks.StrikeTypeDefault,
-		Element:        attributes.Electro,
-		Durability:     25,
-		Mult:           skillfp[c.TalentLvlSkill()],
+	hitmark := skillHitmark
+	sFrames := skillFrames
+	if c.nightsoulState.HasBlessing() {
+		ai.Abil = "Fiery Passion Rush"
+		ai.Mult = fieryRush[c.TalentLvlSkill()]
+		hitmark = fierySkillHitmark
+		sFrames = fierySkillFrames
 	}
 
-	ai := nofp
-	if c.StatusIsActive(fieryPassionKey) {
-		ai = hasfp
-	}
-
-	// clear all existing tags
-	for _, t := range c.Core.Combat.Enemies() {
-		if e, ok := t.(*enemy.Enemy); ok {
-			e.SetTag(skillMarkedTag, 0)
-		}
-	}
-
-	// add a task to loop through targets and mark them
-	marked, ok := p[skillTargetCountTag]
-	// default 1
-	if !ok {
-		marked = 1
-	}
-	c.Core.Tasks.Add(func() {
-		for _, t := range c.Core.Combat.Enemies() {
-			if marked == 0 {
-				break
-			}
-			e, ok := t.(*enemy.Enemy)
-			if !ok {
-				continue
-			}
-			e.SetTag(skillMarkedTag, 1)
-			c.Core.Log.NewEvent("Valesa Tackle Hit", glog.LogCharacterEvent, c.Index).
-				Write("target", e.Key())
-			marked--
-		}
-	}, skillHitmark)
-
-	c.Core.Tasks.Add(func() {
-		for _, t := range c.Core.Combat.Enemies() {
-			e, ok := t.(*enemy.Enemy)
-			if !ok {
-				continue
-			}
-			if e.GetTag(skillMarkedTag) == 0 {
-				continue
-			}
-			e.SetTag(skillMarkedTag, 0)
-			c.Core.Log.NewEvent("damaging marked target", glog.LogCharacterEvent, c.Index).
-				Write("target", e.Key())
-			marked--
-			c.Core.QueueAttack(ai, combat.NewSingleTargetHit(e.Key()), 1, 1, c.particleCB)
-		}
-
-	}, skillHitmark)
-
-	if c.StatusIsActive(freeskillkey) {
-		c.DeleteStatus(freeskillkey)
-		c.particleGenerated = false
+	particleCB := c.particleCB
+	if c.freeSkill {
+		particleCB = nil
+		c.freeSkill = false
 	} else {
-		c.SetCDWithDelay(action.ActionSkill, skillCd, skillHitmark-2)
+		c.particleGenerated = false
+		c.SetCD(action.ActionSkill, 9*60)
 	}
+
+	c.Core.QueueAttack(
+		ai,
+		combat.NewBoxHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 0.1, 2), // TODO: approximated
+		hitmark,
+		hitmark,
+		particleCB,
+	)
 
 	c.a1()
-	c.nightsoulState.GeneratePoints(20)
-	c.AddStatus(skillKey, -1, false)
+	c.QueueCharTask(func() { c.nightsoulState.GeneratePoints(20) }, 5)
+	c.AddStatus(skillStatus, 5*60, true)
+	if c.StatusIsActive(apexState) {
+		c.DeleteStatus(apexState)
+	}
 
 	return action.Info{
-		Frames:          frames.NewAbilFunc(skillFrames),
-		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		Frames:          frames.NewAbilFunc(sFrames),
+		AnimationLength: sFrames[action.InvalidAction],
+		CanQueueAfter:   sFrames[action.ActionSwap], // earliest cancel
 		State:           action.SkillState,
 	}, nil
 }
@@ -141,3 +115,5 @@ func (c *char) particleCB(a combat.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Electro, c.ParticleDelay)
 }
+
+// TODO: skill hold

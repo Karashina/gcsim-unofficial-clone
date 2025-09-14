@@ -8,45 +8,57 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 )
 
-var (
-	burstHitmark           = 37
-	consumeEnergyFrame     = 4
-	generateNightsoulFrame = 44
+var burstFrames [][]int
 
-	burstFrames [][]int
+const (
+	burstHitmark = 40
 )
 
-const burstKey = "traveller-burst"
+var (
+	nightsoulGainDelays = []int{42, 52, 59, 59}
+)
 
 func init() {
 	burstFrames = make([][]int, 2)
 
 	// Male
-	burstFrames[0] = burstFrames[1] // Q -> E/D/Walk
+	burstFrames[0] = frames.InitAbilSlice(49) // Q -> N1
+	burstFrames[0][action.ActionSkill] = 48   // Q -> E, Eh
+	burstFrames[0][action.ActionSwap] = 47
 
 	// Female
-	burstFrames[1] = frames.InitAbilSlice(78) // Q -> Walk
+	burstFrames[1] = frames.InitAbilSlice(49) // Q -> N1
+	burstFrames[1][action.ActionSkill] = 48   // Q -> E, Eh
+	burstFrames[1][action.ActionSwap] = 47
 }
 
 func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
+	c.SetCD(action.ActionBurst, 18*60)
+	c.ConsumeEnergy(19)
+
+	c.c4AddMod()
+
 	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Plains Scorcher",
-		AttackTag:  attacks.AttackTagElementalBurst,
-		ICDTag:     attacks.ICDTagNone,
-		ICDGroup:   attacks.ICDGroupTravelerBurst,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Pyro,
-		Durability: 25,
-		Mult:       burst[c.TalentLvlBurst()],
+		ActorIndex:     c.Index,
+		Abil:           "Plains Scorcher",
+		AttackTag:      attacks.AttackTagElementalBurst,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:         attacks.ICDTagNone,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Pyro,
+		Durability:     25,
+		Mult:           burst[c.TalentLvlBurst()],
 	}
 
-	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player().Pos(), nil, 5), burstHitmark, burstHitmark)
-	c.SetCD(action.ActionBurst, 18*60)
-	c.c4()
-	c.AddStatus(burstKey, 239+generateNightsoulFrame, false)
-	c.QueueCharTask(c.gainNightsoul(), generateNightsoulFrame)
-	c.ConsumeEnergy(consumeEnergyFrame)
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 4.5),
+		burstHitmark,
+		burstHitmark,
+	)
+
+	c.QueueCharTask(c.nightsoulGainFunc(0), nightsoulGainDelays[0])
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames[c.gender]),
@@ -56,12 +68,11 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-func (c *Traveler) gainNightsoul() func() {
+func (c *Traveler) nightsoulGainFunc(count int) func() {
 	return func() {
-		if !c.StatusIsActive(burstKey) {
-			return
-		}
 		c.nightsoulState.GeneratePoints(7)
-		c.QueueCharTask(c.gainNightsoul(), 60)
+		if count < 3 {
+			c.QueueCharTask(c.nightsoulGainFunc(count+1), nightsoulGainDelays[count+1])
+		}
 	}
 }

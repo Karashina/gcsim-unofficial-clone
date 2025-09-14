@@ -1,6 +1,8 @@
 package pyro
 
 import (
+	"fmt"
+
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -8,63 +10,132 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/genshinsim/gcsim/pkg/enemy"
 )
 
-var (
-	skillPressFrames [][]int
-	skillHoldFrames  [][]int
-
-	skillPressHitmark = 21
-	skillHoldHitmark  = 53
-)
+var skillFrames [][]int
+var skillHoldFrames [][]int
 
 const (
-	skillPressCdStart               = 19
-	skillPressDoTInterval           = 66
-	skillPressNightsoulconsumestart = 35
-
-	skillHoldCdStart               = 56
-	skillHoldDoTHitmark            = 12
-	skillHoldNightsoulconsumestart = 61
-
-	skillHoldKey    = "travelerpyro-skill-hold"
-	skillHoldIcdKey = "travelerpyro-skill-hold-icd"
-
-	particleICDKey = "travelerpyro-particle-icd"
+	skillTapHitmark                = 24
+	skillHoldHitmark               = 50
+	blazingThresholdInterval       = 66
+	scorchingThresholdHitmarkDelay = 12
+	tapCdStart                     = 19
+	holdCdStart                    = 48
+	enterNightsoulDelay            = 19
+	nightsoulReduceDelay           = 8 // From wiki: consumption is 7.5 points per second -> 1 per 8f
+	scorchingThresholdICD          = 180
+	particleICDKey                 = "travelerpyro-particle-icd"
+	scoringThresholdKey            = "travelerpyro-e"
+	scorchingThresholdICDKey       = "travelerpyro-scorching-threshold-icd"
 )
 
 func init() {
-	// Tap E
-	skillPressFrames = make([][]int, 2)
-
-	// Male
-	skillPressFrames[0] = skillPressFrames[1] // Tap E -> E
-
-	// Female
-	skillPressFrames[1] = frames.InitAbilSlice(36) // Tap E -> E/Q/Walk
-
-	// Hold E
+	skillFrames = make([][]int, 2)
 	skillHoldFrames = make([][]int, 2)
 
 	// Male
-	skillHoldFrames[0] = skillHoldFrames[1] // Short Hold E -> Swap
+	// Tap
+	skillFrames[0] = frames.InitAbilSlice(49) // E -> N1
+	skillFrames[0][action.ActionDash] = 31
+	skillFrames[0][action.ActionJump] = 31
+	skillFrames[0][action.ActionSwap] = 48
+	// Hold
+	skillHoldFrames[0] = frames.InitAbilSlice(77) // E -> E
+	skillHoldFrames[0][action.ActionAttack] = 61
+	skillHoldFrames[0][action.ActionBurst] = 59
+	skillHoldFrames[0][action.ActionDash] = 60
+	skillHoldFrames[0][action.ActionJump] = 61
+	skillHoldFrames[0][action.ActionWalk] = 81
+	skillHoldFrames[0][action.ActionSwap] = 59
 
 	// Female
-	skillHoldFrames[1] = frames.InitAbilSlice(60) // Short Hold E -> Swap
+	// Tap
+	skillFrames[1] = frames.InitAbilSlice(49) // E -> N1
+	skillFrames[1][action.ActionDash] = 31
+	skillFrames[1][action.ActionJump] = 31
+	skillFrames[1][action.ActionSwap] = 48
+	// Hold
+	skillHoldFrames[1] = frames.InitAbilSlice(77) // E -> E
+	skillHoldFrames[1][action.ActionAttack] = 61
+	skillHoldFrames[1][action.ActionBurst] = 59
+	skillHoldFrames[1][action.ActionDash] = 60
+	skillHoldFrames[1][action.ActionJump] = 61
+	skillHoldFrames[1][action.ActionWalk] = 81
+	skillHoldFrames[1][action.ActionSwap] = 59
 }
 
-func (c *Traveler) reduceNightsoulPoints(val float64) {
-	c.nightsoulState.ConsumePoints(val)
-
-	if c.nightsoulState.Points() <= 0.00001 {
-		c.cancelNightsoul()
+func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
+	hold, ok := p["hold"]
+	if !ok {
+		hold = 0
 	}
+	switch hold {
+	case 0:
+	case 1:
+	default:
+		return action.Info{}, fmt.Errorf("invalid hold param supplied, got %v", hold)
+	}
+
+	c.c2OnSkill()
+
+	if hold == 0 {
+		return c.SkillTap(p)
+	}
+	return c.SkillHold(p)
 }
 
-func (c *Traveler) cancelNightsoul() {
-	c.nightsoulState.ExitBlessing()
-	c.DeleteStatus(skillHoldKey)
-	c.nightsoulSrc = -1
+func (c *Traveler) SkillTap(p map[string]int) (action.Info, error) {
+	// Enter Nightsoul and start reducing Points
+	skillSrc := c.Core.F + enterNightsoulDelay
+	c.QueueCharTask(func() {
+		c.enterNightsoul(skillSrc)
+	}, enterNightsoulDelay)
+	c.SetCDWithDelay(action.ActionSkill, 18*60, tapCdStart)
+	c.QueueCharTask(c.blazingThresholdHit(skillSrc), skillTapHitmark)
+	c.DeleteStatus(scoringThresholdKey)
+	return action.Info{
+		Frames:          frames.NewAbilFunc(skillFrames[c.gender]),
+		AnimationLength: skillFrames[c.gender][action.InvalidAction],
+		CanQueueAfter:   skillFrames[c.gender][action.ActionSwap], // earliest cancel
+		State:           action.SkillState,
+	}, nil
+}
+
+func (c *Traveler) SkillHold(p map[string]int) (action.Info, error) {
+	c.QueueCharTask(func() {
+		c.enterNightsoul(c.Core.F)
+	}, 48)
+	c.SetCDWithDelay(action.ActionSkill, 18*60, holdCdStart)
+	ai := combat.AttackInfo{
+		ActorIndex:     c.Index,
+		Abil:           "Flowfire Blade (Hold DMG)",
+		AttackTag:      attacks.AttackTagElementalArt,
+		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		ICDTag:         attacks.ICDTagTravelerHoldDMG,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeDefault,
+		Element:        attributes.Pyro,
+		Durability:     25,
+		Mult:           holdDMG[c.TalentLvlSkill()],
+	}
+
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 3.0),
+		skillHoldHitmark,
+		skillHoldHitmark,
+	)
+
+	c.AddStatus(scoringThresholdKey, -1, false)
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(skillHoldFrames[c.gender]),
+		AnimationLength: skillHoldFrames[c.gender][action.InvalidAction],
+		CanQueueAfter:   skillHoldFrames[c.gender][action.ActionSwap], // earliest cancel
+		State:           action.SkillState,
+	}, nil
 }
 
 func (c *Traveler) nightsoulPointReduceFunc(src int) func() {
@@ -72,119 +143,72 @@ func (c *Traveler) nightsoulPointReduceFunc(src int) func() {
 		if c.nightsoulSrc != src {
 			return
 		}
-
 		if !c.nightsoulState.HasBlessing() {
 			return
 		}
-
-		c.reduceNightsoulPoints(0.75)
-
-		// reduce 0.75 point per 6f
-		c.QueueCharTask(c.nightsoulPointReduceFunc(src), 6)
+		val := 1.
+		c.reduceNightsoulPoints(val)
+		c.QueueCharTask(c.nightsoulPointReduceFunc(src), nightsoulReduceDelay)
 	}
 }
 
-func (c *Traveler) skillPress(hitmark, cdStart int, skillFrames [][]int) (action.Info, error) {
-	if c.nightsoulState.HasBlessing() {
-		c.cancelNightsoul()
+func (c *Traveler) reduceNightsoulPoints(val float64) {
+	c.nightsoulState.ConsumePoints(val)
+	if c.nightsoulState.Points() <= 0.00001 && c.nightsoulState.HasBlessing() {
+		c.exitNightsoul()
 	}
-	c.nightsoulState.ClearPoints()
-	c.nightsoulState.EnterBlessing(42)
-	c.QueueCharTask(c.blazingThreshold(c.nightsoulSrc), hitmark)
-	c.QueueCharTask(c.nightsoulPointReduceFunc(c.nightsoulSrc), skillPressNightsoulconsumestart)
-
-	c.c2Count = 0
-	c.AddStatus(c2Key, 12*60, true)
-	c.SetCDWithDelay(action.ActionSkill, 18*60, cdStart)
-
-	return action.Info{
-		Frames:          frames.NewAbilFunc(skillFrames[c.gender]),
-		AnimationLength: skillFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   skillFrames[c.gender][action.ActionDash], // earliest cancel
-		State:           action.SkillState,
-	}, nil
 }
 
-func (c *Traveler) blazingThreshold(src int) func() {
+func (c *Traveler) blazingThresholdHit(src int) func() {
 	return func() {
-
-		if c.nightsoulSrc != src {
+		if src != c.nightsoulSrc {
 			return
 		}
-
 		if !c.nightsoulState.HasBlessing() {
 			return
 		}
-
 		ai := combat.AttackInfo{
 			ActorIndex:     c.Index,
-			Abil:           "Blazing Threshold",
+			Abil:           "Blazing Threshold DMG",
 			AttackTag:      attacks.AttackTagElementalArt,
 			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-			ICDTag:         attacks.ICDTagElementalArt,
+			ICDTag:         attacks.ICDTagTravelerBlazingThreshold,
 			ICDGroup:       attacks.ICDGroupDefault,
 			StrikeType:     attacks.StrikeTypeDefault,
 			Element:        attributes.Pyro,
 			Durability:     25,
-			Mult:           skillPress[c.TalentLvlSkill()],
+			Mult:           blazingThreshold[c.TalentLvlSkill()],
 		}
-		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player().Pos(), nil, 5), 0, 0, c.skillParticleCB)
-		c.QueueCharTask(c.blazingThreshold(src), skillPressDoTInterval)
+		radius := 0.5
+		if c.Base.Ascension >= 1 && c.nightsoulState.Points() >= 20 {
+			radius = 3.
+		}
+		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, radius), 0, 0, c.particleCB)
+		c.QueueCharTask(c.blazingThresholdHit(src), blazingThresholdInterval)
 	}
 }
 
-func (c *Traveler) skillHold() (action.Info, error) {
-	if c.nightsoulState.HasBlessing() {
-		c.cancelNightsoul()
-	}
-	c.nightsoulState.ClearPoints()
-	c.nightsoulState.EnterBlessing(42)
-	c.QueueCharTask(c.nightsoulPointReduceFunc(c.nightsoulSrc), skillHoldNightsoulconsumestart)
-
-	ai := combat.AttackInfo{
-		ActorIndex:     c.Index,
-		Abil:           "Flowfire Blade: Hold DMG",
-		AttackTag:      attacks.AttackTagElementalArt,
-		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-		ICDTag:         attacks.ICDTagElementalArtPyro,
-		ICDGroup:       attacks.ICDGroupDefault,
-		StrikeType:     attacks.StrikeTypeDefault,
-		Element:        attributes.Pyro,
-		Durability:     25,
-		Mult:           skillhold[c.TalentLvlSkill()],
-	}
-	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player().Pos(), nil, 5), skillHoldHitmark, skillHoldHitmark)
-
-	c.AddStatus(skillHoldKey, -1, false)
-	c.c2Count = 0
-	c.AddStatus(c2Key, 12*60, true)
-	c.SetCDWithDelay(action.ActionSkill, 18*60, skillHoldCdStart)
-
-	return action.Info{
-		Frames:          func(next action.Action) int { return skillHoldFrames[c.gender][next] },
-		AnimationLength: skillHoldFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[c.gender][action.ActionJump], // earliest cancel
-		State:           action.SkillState,
-	}, nil
-}
-
-func (c *Traveler) scorchingThreshold() {
+func (c *Traveler) scorchingThresholdOnDamage() {
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		_, ok := args[0].(*enemy.Enemy)
 		ae := args[1].(*combat.AttackEvent)
-
-		if ae.Info.ActorIndex != c.Core.Player.ActiveChar().Index {
+		dmg := args[2].(float64)
+		if !ok {
 			return false
 		}
-
-		if !c.nightsoulState.HasBlessing() {
+		if c.StatusIsActive(scorchingThresholdICDKey) {
 			return false
 		}
-
-		if !c.StatusIsActive(skillHoldKey) {
+		if !c.StatusIsActive(scoringThresholdKey) {
 			return false
 		}
-
-		if c.StatusIsActive(skillHoldIcdKey) {
+		// ignore burning damage
+		if ae.Info.AttackTag == attacks.AttackTagBurningDamage ||
+			ae.Info.AttackTag == attacks.AttackTagSwirlHydro {
+			return false
+		}
+		// ignore 0 damage
+		if dmg == 0 {
 			return false
 		}
 
@@ -193,51 +217,52 @@ func (c *Traveler) scorchingThreshold() {
 			Abil:           "Scorching Threshold",
 			AttackTag:      attacks.AttackTagElementalArt,
 			AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
-			ICDTag:         attacks.ICDTagElementalArt,
+			ICDTag:         attacks.ICDTagTravelerScorchingThreshold,
 			ICDGroup:       attacks.ICDGroupDefault,
 			StrikeType:     attacks.StrikeTypeDefault,
 			Element:        attributes.Pyro,
 			Durability:     25,
-			Mult:           skillholddot[c.TalentLvlSkill()],
+			Mult:           scorchingThreshold[c.TalentLvlSkill()],
 		}
-		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player().Pos(), nil, 5), skillHoldDoTHitmark, skillHoldDoTHitmark, c.skillParticleCB)
-		c.AddStatus(skillHoldIcdKey, 3*60, false)
+		radius := 1.5
+		if c.Base.Ascension >= 1 && c.nightsoulState.Points() >= 20 {
+			radius = 4.
+		}
+		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, radius),
+			scorchingThresholdHitmarkDelay, scorchingThresholdHitmarkDelay, c.particleCB)
+
+		c.AddStatus(scorchingThresholdICDKey, scorchingThresholdICD, true)
 		return false
-	}, "traveller-skill-hold")
+	}, "travelerpyro-scorching-threshold")
 }
 
-func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
-	hold := p["hold"]
-	if hold >= 1 {
-		return c.skillHold()
-	} else {
-		return c.skillPress(
-			skillPressHitmark,
-			skillPressCdStart,
-			skillPressFrames,
-		)
-	}
-}
-
-func (c *Traveler) skillParticleCB(a combat.AttackCB) {
+func (c *Traveler) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
 	if c.StatusIsActive(particleICDKey) {
 		return
 	}
-	c.AddStatus(particleICDKey, 3*60, true)
+	c.AddStatus(particleICDKey, int(2.9*60), true)
 
-	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Pyro, c.ParticleDelay)
+	count := 1.0
+	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Pyro, c.ParticleDelay)
 }
 
-func (c *Traveler) durWatcher() {
-	c.Core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
-		if c.nightsoulState.HasBlessing() {
-			if c.Core.F-c.nightsoulSrc >= 12*60 {
-				c.cancelNightsoul()
-			}
-		}
-		return false
-	}, "traveller-skill-duration-check")
+func (c *Traveler) enterNightsoul(src int) {
+	points := 42.0
+	if !c.nightsoulState.HasBlessing() {
+		points += c.nightsoulState.Points()
+	}
+
+	c.nightsoulSrc = src
+	c.nightsoulState.EnterTimedBlessing(points, 12*60, c.exitNightsoul)
+	c.QueueCharTask(c.nightsoulPointReduceFunc(c.nightsoulSrc), nightsoulReduceDelay)
+}
+
+func (c *Traveler) exitNightsoul() {
+	c.DeleteStatus(scoringThresholdKey)
+	c.nightsoulState.ExitBlessing()
+	c.nightsoulState.ClearPoints()
+	c.nightsoulSrc = -1
 }

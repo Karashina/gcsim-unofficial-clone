@@ -1,108 +1,119 @@
 package skirk
 
 import (
+	"fmt"
+
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
 var (
-	chargeFrames     []int
-	spchargeFrames   []int
-	chargeHitmarks   = []int{30, 40}
-	spchargeHitmarks = []int{29, 37, 47}
+	chargeFrames   []int
+	chargeHitmarks = []int{27, 27 + 7}
+
+	chargeSkillFrames   []int
+	chargeSkillHitmarks = []int{28, 28 + 9, 28 + 9 + 9}
 )
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(47)
-	chargeFrames[action.ActionDash] = 37
+	chargeFrames = frames.InitAbilSlice(53) // CA -> W
+	chargeFrames[action.ActionAttack] = 43  // CA -> N1
+	chargeFrames[action.ActionCharge] = 43  // CA -> CA
+	chargeFrames[action.ActionSkill] = 43   // CA -> E
+	chargeFrames[action.ActionBurst] = 43   // CA -> Q
+	chargeFrames[action.ActionDash] = 27    // CA -> D
+	chargeFrames[action.ActionJump] = 28    // CA -> J
+	chargeFrames[action.ActionSwap] = 42    // CA -> Swap
 
-	spchargeFrames = frames.InitAbilSlice(62)
-	spchargeFrames[action.ActionDash] = 37
+	chargeSkillFrames = frames.InitAbilSlice(54) // CA -> N1
+	chargeSkillFrames[action.ActionCharge] = 53  // CA -> CA
+	chargeSkillFrames[action.ActionBurst] = 43   // CA -> Q
+	chargeSkillFrames[action.ActionDash] = 27    // CA -> D
+	chargeSkillFrames[action.ActionJump] = 28    // CA -> J
+	chargeSkillFrames[action.ActionWalk] = 52    // CA -> W
+	chargeSkillFrames[action.ActionSwap] = 42    // CA -> Swap
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	if c.onSevenPhaseFlash {
-		return c.ChargeAttackSP(p)
+	if c.StatusIsActive(skillKey) {
+		return c.ChargeAttackSkill(p)
 	}
+
+	// If the previous attack is N1 to N4 of skill state, this CA is also in skill state
+	if c.Core.Player.CurrentState() == action.NormalAttackState && c.Core.Player.ActiveChar().NormalCounter > 0 && c.prevNASkillState {
+		return c.ChargeAttackSkill(p)
+	}
+
 	ai := combat.AttackInfo{
-		Abil:       "Charge",
 		ActorIndex: c.Index,
 		AttackTag:  attacks.AttackTagExtra,
 		ICDTag:     attacks.ICDTagExtraAttack,
-		ICDGroup:   attacks.ICDGroupAyakaExtraAttack,
+		ICDGroup:   attacks.ICDGroupDefault,
 		StrikeType: attacks.StrikeTypeSlash,
 		Element:    attributes.Physical,
 		Durability: 25,
-		Mult:       charge[c.TalentLvlAttack()],
 	}
 
-	singleCharge := func(pos geometry.Point, hitmark int) {
+	for i, mult := range charge {
+		ai.Mult = mult[c.TalentLvlAttack()]
+		ai.Abil = fmt.Sprintf("Charge %v", i)
+		// TODO: y=1 offset when no target in range. What is the range?
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(
-				pos,
+				c.Core.Combat.PrimaryTarget(),
 				nil,
-				4,
+				2.8,
 			),
-			hitmark,
-			hitmark,
+			chargeHitmarks[i],
+			chargeHitmarks[i],
 		)
 	}
 
-	for i := 0; i < 2; i++ {
-		c.Core.Tasks.Add(func() {
-			singleCharge(c.Core.Combat.PrimaryTarget().Pos(), 0)
-		}, chargeHitmarks[i])
-	}
-
 	return action.Info{
-		Frames:          frames.NewAbilFunc(chargeFrames),
+		Frames:          func(next action.Action) int { return chargeFrames[next] },
 		AnimationLength: chargeFrames[action.InvalidAction],
-		CanQueueAfter:   chargeHitmarks[len(chargeHitmarks)-1],
+		CanQueueAfter:   chargeFrames[action.ActionDash],
 		State:           action.ChargeAttackState,
 	}, nil
 }
 
-func (c *char) ChargeAttackSP(p map[string]int) (action.Info, error) {
+func (c *char) ChargeAttackSkill(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
-		Abil:       "Seven-Phase Flash Charge",
-		ActorIndex: c.Index,
-		AttackTag:  attacks.AttackTagExtra,
-		ICDTag:     attacks.ICDTagExtraAttack,
-		ICDGroup:   attacks.ICDGroupAyakaExtraAttack,
-		StrikeType: attacks.StrikeTypeSlash,
-		Element:    attributes.Cryo,
-		Durability: 25,
-		Mult:       spcharge[c.TalentLvlSkill()],
+		ActorIndex:     c.Index,
+		AttackTag:      attacks.AttackTagExtra,
+		ICDTag:         attacks.ICDTagExtraAttack,
+		ICDGroup:       attacks.ICDGroupDefault,
+		StrikeType:     attacks.StrikeTypeSlash,
+		Element:        attributes.Cryo,
+		Durability:     25,
+		IgnoreInfusion: true,
 	}
 
-	singleCharge := func(pos geometry.Point, hitmark int) {
+	for i, mult := range skillCharge {
+		ai.Mult = mult[c.TalentLvlSkill()]
+		ai.Abil = fmt.Sprintf("Charge (Skill) %v", i)
+		// TODO: y=1 offset when no target in range. What is the range?
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(
-				pos,
+				c.Core.Combat.Player(),
 				nil,
-				4,
+				3.3,
 			),
-			hitmark,
-			hitmark,
+			chargeSkillHitmarks[i],
+			chargeSkillHitmarks[i],
+			c.absorbVoidRiftCB,
 		)
 	}
 
-	for j := 0; j < 3; j++ {
-		c.Core.Tasks.Add(func() {
-			singleCharge(c.Core.Combat.PrimaryTarget().Pos(), 0)
-		}, spchargeHitmarks[j])
-	}
-
 	return action.Info{
-		Frames:          frames.NewAbilFunc(spchargeFrames),
-		AnimationLength: spchargeFrames[action.InvalidAction],
-		CanQueueAfter:   spchargeHitmarks[len(chargeHitmarks)-1],
+		Frames:          frames.NewAbilFunc(chargeSkillFrames),
+		AnimationLength: chargeSkillFrames[action.InvalidAction],
+		CanQueueAfter:   chargeSkillFrames[action.ActionDash], // earliest cancel
 		State:           action.ChargeAttackState,
 	}, nil
 }

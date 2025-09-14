@@ -42,6 +42,11 @@ func (c *Traveler) ChargeAttack(p map[string]int) (action.Info, error) {
 		Element:    attributes.Physical,
 		Durability: 25,
 	}
+	if c.Base.Cons >= 6 && c.nightsoulState.HasBlessing() {
+		ai.Element = attributes.Pyro
+		ai.IgnoreInfusion = true
+		ai.AdditionalTags = []attacks.AdditionalTag{attacks.AdditionalTagNightsoul}
+	}
 
 	for i, mult := range charge[c.gender] {
 		ai.Mult = mult[c.TalentLvlAttack()]

@@ -7,97 +7,137 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/player"
 )
 
 var (
-	chargeFrames    []int
-	chargeFramesFP  []int
-	ChargeHitmark   = 67
-	ChargeHitmarkFP = 67
+	chargeFrames      []int
+	fieryChargeFrames []int
+)
+
+const (
+	chargeHitmark      = 69
+	fieryChargeHitmark = 69
+
+	fastChargeHitmark      = 11
+	fastFieryChargeHitmark = 11
+
+	fastChargedFrame      = 57
+	fastFieryChargedFrame = 58
 )
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(146) // attack
-	chargeFrames[action.ActionLowPlunge] = 84
-	chargeFrames[action.ActionHighPlunge] = chargeFrames[action.ActionLowPlunge] + 1
+	chargeFrames = frames.InitAbilSlice(143) // CA -> Q/Dash/Jump
+	chargeFrames[action.ActionAttack] = 142
+	chargeFrames[action.ActionCharge] = 141
+	chargeFrames[action.ActionSkill] = 142
+	chargeFrames[action.ActionWalk] = 142
+	chargeFrames[action.ActionSwap] = 139
+	chargeFrames[action.ActionHighPlunge] = 77
 
-	chargeFramesFP = frames.InitAbilSlice(146) // attack
-	chargeFramesFP[action.ActionLowPlunge] = 84
-	chargeFramesFP[action.ActionHighPlunge] = chargeFrames[action.ActionLowPlunge] + 1
+	fieryChargeFrames = frames.InitAbilSlice(143) // CA -> CA/Jump
+	fieryChargeFrames[action.ActionAttack] = 142
+	fieryChargeFrames[action.ActionSkill] = 141
+	fieryChargeFrames[action.ActionBurst] = 141
+	fieryChargeFrames[action.ActionDash] = 142
+	fieryChargeFrames[action.ActionWalk] = 141
+	fieryChargeFrames[action.ActionSwap] = 138
+	fieryChargeFrames[action.ActionHighPlunge] = 81
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	if c.fastCharge {
-		chargeFrames = frames.InitAbilSlice(30)
-		chargeFramesFP = frames.InitAbilSlice(30)
+	// OnRemoved is sometimes called after the next action is executed. so we need to exit nightsoul here too
+	c.clearNightsoulCB(action.ChargeAttackState)
 
-		ChargeHitmark = 12
-		ChargeHitmarkFP = 12
-
-		c.fastCharge = false
-	}
-	if c.StatusIsActive(fieryPassionKey) {
-		return c.ChargeFP(p)
+	if c.nightsoulState.HasBlessing() {
+		return c.fieryChargeAttack(), nil
 	}
 
 	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Charge Attack",
-		AttackTag:  attacks.AttackTagExtra,
-		ICDTag:     attacks.ICDTagNone,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Electro,
-		Durability: 25,
-		Mult:       charge[c.TalentLvlAttack()],
+		ActorIndex:         c.Index,
+		Abil:               "Charged Attack",
+		AdditionalTags:     []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		AttackTag:          attacks.AttackTagExtra,
+		PoiseDMG:           80,
+		ICDTag:             attacks.ICDTagVaresaCombatCycle,
+		ICDGroup:           attacks.ICDGroupDefault,
+		StrikeType:         attacks.StrikeTypeBlunt,
+		Element:            attributes.Electro,
+		Durability:         25,
+		Mult:               charged[c.TalentLvlAttack()],
+		HitlagFactor:       0.01,
+		HitlagHaltFrames:   0.03 * 60,
+		CanBeDefenseHalted: true,
 	}
-	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 3.5)
+
+	hitmark := chargeHitmark
+	framesCB := frames.NewAbilFunc(chargeFrames)
+	if c.StatusIsActive(skillStatus) {
+		ai.Abil += " (Follow-Up Strike)"
+		hitmark = fastChargeHitmark
+		framesCB = quickAbilFunc(chargeFrames, fastChargedFrame)
+		c.DeleteStatus(skillStatus)
+	}
+
 	c.Core.QueueAttack(
 		ai,
-		ap,
-		ChargeHitmark,
-		ChargeHitmark,
+		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0.7}, 3.5),
+		hitmark,
+		hitmark,
 	)
-
-	c.Core.Player.SetAirborne(player.AirborneVaresa)
-
 	return action.Info{
-		Frames:          func(next action.Action) int { return chargeFrames[next] },
+		Frames:          framesCB,
 		AnimationLength: chargeFrames[action.InvalidAction],
-		CanQueueAfter:   chargeFrames[action.ActionDash],
+		CanQueueAfter:   hitmark,
 		State:           action.ChargeAttackState,
 	}, nil
 }
 
-//---------------------Fiery Passion--------------------------//
-
-func (c *char) ChargeFP(p map[string]int) (action.Info, error) {
+func (c *char) fieryChargeAttack() action.Info {
 	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Charge Attack (Fiery Passion)",
-		AttackTag:  attacks.AttackTagExtra,
-		ICDTag:     attacks.ICDTagNone,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Electro,
-		Durability: 25,
-		Mult:       chargefp[c.TalentLvlAttack()],
+		ActorIndex:         c.Index,
+		Abil:               "Fiery Passion Charged Attack",
+		AdditionalTags:     []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
+		PoiseDMG:           120,
+		AttackTag:          attacks.AttackTagExtra,
+		ICDTag:             attacks.ICDTagVaresaCombatCycle,
+		ICDGroup:           attacks.ICDGroupDefault,
+		StrikeType:         attacks.StrikeTypeBlunt,
+		Element:            attributes.Electro,
+		Durability:         25,
+		Mult:               fieryCharged[c.TalentLvlAttack()],
+		HitlagFactor:       0.01,
+		HitlagHaltFrames:   0.03 * 60,
+		CanBeDefenseHalted: true,
 	}
-	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 3.5)
+
+	hitmark := fieryChargeHitmark
+	framesCB := frames.NewAbilFunc(fieryChargeFrames)
+	if c.StatusIsActive(skillStatus) {
+		ai.Abil += " (Follow-Up Strike)"
+		hitmark = fastFieryChargeHitmark
+		framesCB = quickAbilFunc(fieryChargeFrames, fastFieryChargedFrame)
+		c.DeleteStatus(skillStatus)
+	}
+
 	c.Core.QueueAttack(
 		ai,
-		ap,
-		ChargeHitmarkFP,
-		ChargeHitmarkFP,
+		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0.7}, 3.5),
+		hitmark,
+		hitmark,
 	)
-
-	c.Core.Player.SetAirborne(player.AirborneVaresa)
-
 	return action.Info{
-		Frames:          func(next action.Action) int { return chargeFramesFP[next] },
-		AnimationLength: chargeFramesFP[action.InvalidAction],
-		CanQueueAfter:   chargeFramesFP[action.ActionDash],
+		Frames:          framesCB,
+		AnimationLength: fieryChargeFrames[action.InvalidAction],
+		CanQueueAfter:   hitmark,
 		State:           action.ChargeAttackState,
-	}, nil
+	}
+}
+
+func quickAbilFunc(slice []int, skip int) func(action.Action) int {
+	return func(next action.Action) int {
+		if next == action.ActionHighPlunge {
+			return slice[next] - skip
+		}
+		return slice[next]
+	}
 }

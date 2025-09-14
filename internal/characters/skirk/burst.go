@@ -11,117 +11,133 @@ import (
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-var (
-	burstFrames       []int
-	skillburstFrames  []int
-	burstHitmarks     = []int{111, 117, 121, 128, 134}
-	burstfinalhitmark = 160
-)
+var burstFrames []int
+var burstSkillFrames []int
+var burstHitmarks = []int{109, 109 + 2, 109 + 2 + 3, 109 + 2 + 3 + 11, 109 + 2 + 3 + 11 + 10}
 
 const (
-	burstCD  = 15 * 60
-	burstkey = "skirk-burst"
+	burstHitmarkFinal      = 109 + 2 + 3 + 11 + 10 + 23
+	burstExtinctKey        = "skirk-burst-extinction"
+	burstRuinKey           = "skirk-burst-ruin"
+	burstICDKey            = "skirk-burst-extinction-icd"
+	burstAbsorbRiftAnimKey = "skirk-burst-extinction-anim"
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(109)
-	skillburstFrames = frames.InitAbilSlice(78)
+	burstFrames = frames.InitAbilSlice(151) // Q -> W
+	burstFrames[action.ActionAttack] = 100  // Q -> N1
+	burstFrames[action.ActionCharge] = 102  // Q -> CA
+	burstFrames[action.ActionSkill] = 102   // Q -> E
+	burstFrames[action.ActionDash] = 102    // Q -> D
+	burstFrames[action.ActionJump] = 102    // Q -> J
+	burstFrames[action.ActionSwap] = 101    // Q -> Swap
+
+	burstSkillFrames = frames.InitAbilSlice(41)
+	burstSkillFrames[action.ActionAttack] = 39 // Q -> N1
+	burstSkillFrames[action.ActionCharge] = 39 // Q -> CA
+	burstSkillFrames[action.ActionDash] = 40   // Q -> D
+	burstSkillFrames[action.ActionJump] = 40   // Q -> J
+	burstSkillFrames[action.ActionSwap] = 39   // Q -> Swap
+}
+func (c *char) Burst(p map[string]int) (action.Info, error) {
+	if c.StatusIsActive(skillKey) {
+		return c.BurstExtinction(p)
+	}
+	return c.BurstRuin(p)
 }
 
-func (c *char) Burst(p map[string]int) (action.Info, error) {
-	if c.onSevenPhaseFlash {
-		c.c6("burst")
-		c.SetCD(action.ActionBurst, burstCD)
-		return c.spBurst()
-	}
-
-	excess := max(c.serpentsSubtlety-50, 0)
-	burstbuff := min(excess, 12)
-	if c.Base.Cons >= 2 {
-		excess = max(c.serpentsSubtlety+10-50, 0)
-		burstbuff = min(excess, 12)
-	}
+func (c *char) BurstRuin(p map[string]int) (action.Info, error) {
+	bonusSerpentsSubtlety := c.serpentsSubtlety - 50.0
+	bonusSerpentsSubtlety = max(min(bonusSerpentsSubtlety, 12+c.c2OnBurstRuin()), 0)
 
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "Havoc: Ruin (Slash DMG)",
+		Abil:       "Havoc: Ruin (DoT)",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
 		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeSlash,
+		StrikeType: attacks.StrikeTypeDefault,
 		Element:    attributes.Cryo,
 		Durability: 25,
-		Mult:       burst[c.TalentLvlBurst()] + burstbuff*burstDMGUp[c.TalentLvlBurst()],
-	}
-	ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: -1}, 11.2, 9)
-	for _, v := range burstHitmarks {
-		// TODO: what's the size of this??
-		c.Core.QueueAttack(ai, ap, v, v, c.particleCB)
+		Mult:       (burstDoT[c.TalentLvlBurst()] + bonusSerpentsSubtlety*burstBonus[c.TalentLvlBurst()]) * c.a4MultBurst(),
 	}
 
-	aifinal := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Havoc: Ruin (Final Slash DMG)",
-		AttackTag:  attacks.AttackTagElementalBurst,
-		ICDTag:     attacks.ICDTagElementalBurst,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeSlash,
-		Element:    attributes.Cryo,
-		Durability: 25,
-		Mult:       burstlast[c.TalentLvlBurst()] + burstbuff*burstDMGUp[c.TalentLvlBurst()],
+	ap := combat.NewBoxHitOnTarget(
+		c.Core.Combat.Player(),
+		geometry.Point{Y: 2.5},
+		14,
+		9,
+	)
+	for _, delay := range burstHitmarks {
+		c.Core.QueueAttack(ai, ap, delay, delay)
 	}
-	c.Core.QueueAttack(aifinal, ap, burstfinalhitmark, burstfinalhitmark, c.particleCB)
+
+	ai.Abil = "Havoc: Ruin (Final)"
+	ai.Mult = (burstFinal[c.TalentLvlBurst()] + bonusSerpentsSubtlety*burstBonus[c.TalentLvlBurst()]) * c.a4MultBurst()
+	c.Core.QueueAttack(ai, ap, burstHitmarkFinal, burstHitmarkFinal)
+
+	c.c6OnBurstRuin()
+
+	c.ConsumeSerpentsSubtlety(7, burstRuinKey)
+
+	c.SetCDWithDelay(action.ActionBurst, 15*60, 0)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionAttack], // earliest cancel
 		State:           action.BurstState,
 	}, nil
 }
 
-func (c *char) spBurst() (action.Info, error) {
-	c.burstbuff()
-	c.a1(false)
-	c.AddStatus(burstkey, -1, true)
-	c.burstbuffcount = 10
-	return action.Info{
-		Frames:          frames.NewAbilFunc(skillburstFrames),
-		AnimationLength: skillburstFrames[action.InvalidAction],
-		CanQueueAfter:   skillburstFrames[action.ActionSwap], // earliest cancel
-		State:           action.BurstState,
-	}, nil
-}
-
-func (c *char) burstbuff() {
-	m := make([]float64, attributes.EndStatType)
-	switch c.voidrift {
-	case 1:
-		m[attributes.DmgP] = 0.06 + 0.006*float64(c.TalentLvlBurst())
-	case 2:
-		m[attributes.DmgP] = 0.08 + 0.008*float64(c.TalentLvlBurst())
-	case 3:
-		m[attributes.DmgP] = 0.10 + 0.01*float64(c.TalentLvlBurst())
-	default:
-		m[attributes.DmgP] = 0.03 + 0.005*float64(c.TalentLvlBurst())
-	}
+func (c *char) BurstInit() {
+	mDmg := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{
-		Base: modifier.NewBase("skirk-burst-buff", -1),
+		Base: modifier.NewBase(burstExtinctKey+"-dmg", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			if !c.StatusIsActive(burstkey) {
+			if c.burstCount <= 0 {
 				return nil, false
 			}
-			if !c.onSevenPhaseFlash {
+			switch atk.Info.AttackTag {
+			case attacks.AttackTagNormal:
+			default:
 				return nil, false
 			}
-			if atk.Info.AttackTag != attacks.AttackTagNormal {
+
+			if !c.StatusIsActive(burstExtinctKey) {
 				return nil, false
 			}
-			if c.burstbuffcount <= 0 {
+
+			if c.StatusIsActive(burstICDKey) {
 				return nil, false
 			}
-			c.burstbuffcount--
-			return m, true
+			c.AddStatus(burstICDKey, 0.1*60, true)
+			c.burstCount--
+			if c.burstCount <= 0 {
+				// Cannot delete statuses in an attack mod
+				c.AddStatus(burstExtinctKey, 0, false)
+			}
+			mDmg[attributes.DmgP] = burstDMG[c.burstVoids][c.TalentLvlBurst()]
+			return mDmg, true
 		},
 	})
+}
+
+func (c *char) BurstExtinction(p map[string]int) (action.Info, error) {
+	c.AddStatus(burstExtinctKey, 12.5*60, false)
+	c.burstCount = 10
+	c.burstVoids = c.absorbVoidRifts()
+	// status used to absorb void rifts constantly during the burst animation
+	c.AddStatus(burstAbsorbRiftAnimKey, burstSkillFrames[action.InvalidAction], true)
+
+	c.c2OnBurstExtinction()
+	c.SetCDWithDelay(action.ActionBurst, 15*60, 0)
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(burstSkillFrames),
+		AnimationLength: burstSkillFrames[action.InvalidAction],
+		CanQueueAfter:   burstSkillFrames[action.ActionAttack], // earliest cancel
+		State:           action.BurstState,
+		OnRemoved:       func(next action.AnimationState) { c.DeleteStatus(burstAbsorbRiftAnimKey) },
+	}, nil
 }

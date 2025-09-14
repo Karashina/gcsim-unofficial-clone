@@ -5,33 +5,41 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/event"
 )
 
-const a4IcdKey = "traveller-a4-icd"
+const a4OnReactICD = "travelerpyro-a4-icd"
 
-func (c *Traveler) a4() {
+func (c *Traveler) a4Init() {
 	if c.Base.Ascension < 4 {
 		return
 	}
-	a4cb := func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
-		if ae.Info.ActorIndex != c.Core.Player.Active() {
+	fReactionHook := func(args ...interface{}) bool {
+		// Attack must be from active character
+		atk := args[1].(*combat.AttackEvent)
+		if atk.Info.ActorIndex != c.Core.Player.Active() {
 			return false
 		}
-		if c.StatusIsActive(a4IcdKey) {
+		if !c.nightsoulState.HasBlessing() {
 			return false
 		}
-		c.AddStatus(a4IcdKey, 12*60, true)
-		c.AddEnergy("traveller-a4-reaction", 5)
+		if c.StatusIsActive(a4OnReactICD) {
+			return false
+		}
+
+		c.AddStatus(a4OnReactICD, 12*60, true)
+		c.AddEnergy("travelerpyro-a4-energy", 5)
 		return false
 	}
-	c.Core.Events.Subscribe(event.OnNightsoulBurst, func(args ...interface{}) bool {
-		c.AddEnergy("traveller-a4-nightsoul", 4)
+
+	fNSHook := func(args ...interface{}) bool {
+		c.AddEnergy("travelerpyro-a4-energy", 4)
 		return false
-	}, "traveller-a4-nightsoul-check")
-	c.Core.Events.Subscribe(event.OnOverload, a4cb, "traveller-a4")
-	c.Core.Events.Subscribe(event.OnVaporize, a4cb, "traveller-a4")
-	c.Core.Events.Subscribe(event.OnMelt, a4cb, "traveller-a4")
-	c.Core.Events.Subscribe(event.OnBurning, a4cb, "traveller-a4")
-	c.Core.Events.Subscribe(event.OnBurgeon, a4cb, "traveller-a4")
-	c.Core.Events.Subscribe(event.OnSwirlPyro, a4cb, "traveller-a4")
-	c.Core.Events.Subscribe(event.OnCrystallizePyro, a4cb, "traveller-a4")
+	}
+
+	c.Core.Events.Subscribe(event.OnBurning, fReactionHook, "travelerpyro-a4-onburning")
+	c.Core.Events.Subscribe(event.OnVaporize, fReactionHook, "travelerpyro-a4-onvaporize")
+	c.Core.Events.Subscribe(event.OnMelt, fReactionHook, "travelerpyro-a4-onmelt")
+	c.Core.Events.Subscribe(event.OnOverload, fReactionHook, "travelerpyro-a4-onoverload")
+	c.Core.Events.Subscribe(event.OnBurgeon, fReactionHook, "travelerpyro-a4-onburgeon")
+	c.Core.Events.Subscribe(event.OnSwirlPyro, fReactionHook, "travelerpyro-a4-onswirlpyro")
+	c.Core.Events.Subscribe(event.OnCrystallizePyro, fReactionHook, "travelerpyro-a4-oncrystallizepyro")
+	c.Core.Events.Subscribe(event.OnNightsoulBurst, fNSHook, "travelerpyro-a4-onnsburst")
 }

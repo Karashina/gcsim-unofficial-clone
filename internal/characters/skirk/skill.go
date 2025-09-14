@@ -1,104 +1,59 @@
 package skirk
 
 import (
+	"errors"
+
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/genshinsim/gcsim/pkg/enemy"
 )
 
-var (
-	skillFrames     []int
-	skillHoldFrames []int
-)
+var skillFrames []int
+var skillHoldFrames []int
 
 const (
-	particleICDKey = "skirk-particle-icd"
-	particleICD    = 9999 * 60
-
-	skillDelay = 26
+	maxSerpentsSubtlety    = 100
+	skillGainSS            = 25
+	skillKey               = "seven-phase-flash"
+	skillDelay             = 19
+	skillDur               = 754
+	particleICD            = 15 * 60
+	particleICDKey         = "skirk-particle-icd"
+	skillHoldGainSS        = 18
+	skillAbsorbRiftAnimKey = "skirk-hold-e-anim"
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(27)
-	skillFrames[action.ActionAttack] = 26
+	skillFrames = frames.InitAbilSlice(43) // E -> W
+	skillFrames[action.ActionAttack] = 21
+	skillFrames[action.ActionCharge] = 21
+	skillFrames[action.ActionBurst] = 31
+	skillFrames[action.ActionDash] = 29
+	skillFrames[action.ActionJump] = 30
+	skillFrames[action.ActionSwap] = 29
 
-	skillHoldFrames = frames.InitAbilSlice(27)
-	skillHoldFrames[action.ActionAttack] = 26
-	skillHoldFrames[action.ActionDash] = 5
-}
-
-func (c *char) reduceSerpentsSubtlety(val float64) {
-	c.serpentsSubtlety -= val
-	if c.serpentsSubtlety <= 0.00001 {
-		c.cancelSevenPhaseFlash()
-	}
-	c.Core.Log.NewEvent("serpents subtlety reduced", glog.LogEnergyEvent, c.Index).
-		Write("reduced", val).Write("current point", c.serpentsSubtlety)
-}
-
-func (c *char) generateSerpentsSubtlety(val float64) {
-	c.serpentsSubtlety += val
-	if c.serpentsSubtlety >= c.serpentsSubtletyMax {
-		c.serpentsSubtlety = c.serpentsSubtletyMax
-	}
-	c.Core.Log.NewEvent("serpents subtlety generated", glog.LogEnergyEvent, c.Index).
-		Write("generated", val).Write("current point", c.serpentsSubtlety)
-}
-
-func (c *char) cancelSevenPhaseFlash() {
-	if !c.onSevenPhaseFlash {
-		return
-	}
-	c.onSevenPhaseFlash = false
-	c.DeleteStatus(burstkey)
-	c.DeleteStatMod("skirk-c2")
-	c.serpentsSubtlety = 0
-	c.SetCD(action.ActionSkill, 8*60)
-}
-
-func (c *char) serpentsSubtletyReduceFunc(src int) func() {
-	return func() {
-		if c.sevenPhaseFlashsrc != src {
-			return
-		}
-
-		if !c.onSevenPhaseFlash {
-			return
-		}
-
-		c.reduceSerpentsSubtlety(0.7)
-
-		// reduce 1 point per 6f
-		c.QueueCharTask(c.serpentsSubtletyReduceFunc(src), 6)
-	}
+	skillHoldFrames = frames.InitAbilSlice(18)
+	skillHoldFrames[action.ActionSwap] = 15
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	hold := p["hold"]
-	if hold > 0 {
-		return c.SkillHold(p)
+	if c.StatusIsActive(skillKey) {
+		return action.Info{}, errors.New("skill cannot be used while in seven-phase flash")
 	}
-	c.QueueCharTask(func() {
-		c.onSevenPhaseFlash = true
-		if c.Base.Cons < 2 {
-			c.generateSerpentsSubtlety(45)
-		} else {
-			c.generateSerpentsSubtlety(55)
-		}
-		c.DeleteStatus(particleICDKey)
-		c.c2()
-		c.sevenPhaseFlashsrc = c.Core.F
-		c.QueueCharTask(func() {
-			c.serpentsSubtletyReduceFunc(c.sevenPhaseFlashsrc)()
-		}, 6)
-		c.QueueCharTask(func() {
-			c.cancelSevenPhaseFlash()
-		}, 12*60)
-	}, skillDelay)
+
+	h := p["hold"]
+	if h > 0 {
+		return c.skillHold(p)
+	}
+	return c.skillTap()
+}
+
+func (c *char) skillTap() (action.Info, error) {
+	c.QueueCharTask(func() { c.enterSkillState() }, skillDelay)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
@@ -108,37 +63,92 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-func (c *char) SkillHold(p map[string]int) (action.Info, error) {
+func (c *char) enterSkillState() {
+	c.skillSrc = c.Core.F
+	c.AddStatus(skillKey, skillDur, false)
+	c.AddSerpentsSubtlety(c.Base.Key.String()+"-skill", 45.0)
+	c.c2OnSkill()
+	c.serpentsReduceTask(c.skillSrc)
+	src := c.skillSrc
+	c.Core.Tasks.Add(func() { c.exitSkillState(src) }, skillDur)
+}
 
-	c.a1(false)
+func (c *char) exitSkillState(src int) {
+	if c.skillSrc != src {
+		return
+	}
+	c.Core.Log.NewEventBuildMsg(glog.LogCharacterEvent, c.Index, "exit skirk skill").Write("src", src)
+	c.skillSrc = -1
+	c.DeleteAttackMod(c2Key)
+	c.DeleteStatus(skillKey)
+	c.DeleteStatus(burstExtinctKey)
+	c.SetCD(action.ActionSkill, 8*60)
+	c.ConsumeSerpentsSubtlety(0, c.Base.Key.String()+"-skill-exit")
+}
+
+func (c *char) serpentsReduceTask(src int) {
+	const tickInterval = .2
+	c.Core.Tasks.Add(func() {
+		if c.skillSrc != src {
+			return
+		}
+		// reduce 1.4 point every 12f, which is 7 per second
+		c.ReduceSerpentsSubtlety(c.Base.Key.String()+"skill", 1.4)
+		if c.serpentsSubtlety == 0 && c.StatusIsActive(skillKey) {
+			c.exitSkillState(src)
+		}
+		c.serpentsReduceTask(src)
+	}, 60*tickInterval)
+}
+
+func (c *char) skillHold(p map[string]int) (action.Info, error) {
+	duration := p["hold"]
+	// TODO: max duration of hold E?
+	extraDuration := min(duration, 184) - 1 // subtract 1 because frames are listed as the minimum already
+	c.QueueCharTask(func() {
+		c.AddSerpentsSubtlety(c.Base.Key.String()+"-skill-hold", 45.0)
+		c.c2OnSkill()
+		c.absorbVoidRifts()
+	}, skillHoldGainSS)
+
+	// status used to absorb void rifts constantly during the hold E animation
+	c.AddStatus(skillAbsorbRiftAnimKey, extraDuration, true)
+
+	c.SetCDWithDelay(action.ActionSkill, 8*60, extraDuration+skillHoldGainSS)
 
 	return action.Info{
-		Frames:          frames.NewAbilFunc(skillHoldFrames),
-		AnimationLength: skillHoldFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionAttack],
+		Frames: func(next action.Action) int {
+			return skillHoldFrames[next] + extraDuration
+		},
+		AnimationLength: skillHoldFrames[action.InvalidAction] + extraDuration,
+		CanQueueAfter:   skillHoldFrames[action.ActionSwap] + extraDuration,
 		State:           action.SkillState,
 	}, nil
 }
 
-func (c *char) particleCB(a combat.AttackCB) {
-	if a.Target.Type() != targets.TargettableEnemy {
-		return
-	}
-	if c.StatusIsActive(particleICDKey) {
-		return
-	}
-	c.AddStatus(particleICDKey, particleICD, true)
-
-	count := 4.0
-	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Cryo, c.ParticleDelay)
-}
-
-func (c *char) onExitField() {
-	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
-		if c.onSevenPhaseFlash {
-			c.cancelSevenPhaseFlash()
-			c.serpentsSubtlety = 0
+func (c *char) particleInit() {
+	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		atk := args[1].(*combat.AttackEvent)
+		_, ok := args[0].(*enemy.Enemy)
+		if !ok {
+			return false
 		}
+		if atk.Info.ActorIndex != c.Index {
+			return false
+		}
+
+		if atk.Info.Element != attributes.Cryo {
+			return false
+		}
+
+		if c.StatusIsActive(particleICDKey) {
+			return false
+		}
+		c.AddStatus(particleICDKey, particleICD, false)
+
+		count := 4.0
+		c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Cryo, c.ParticleDelay)
+
 		return false
-	}, "skirk-exit")
+	}, c.Base.Key.String()+"-particles")
 }

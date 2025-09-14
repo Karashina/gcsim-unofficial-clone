@@ -5,30 +5,28 @@ import (
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/core/stacks"
+	"github.com/genshinsim/gcsim/pkg/model"
 )
 
 func init() {
 	core.RegisterCharFunc(keys.Varesa, NewChar)
 }
 
-const (
-	fieryPassionKey = "fiery-passion"
-	freeskillkey    = "varesa-free-skill"
-	apexDriveKey    = "varesa-apex-drive"
-)
-
 type char struct {
 	*tmpl.Character
-	nightsoulState    *nightsoul.State
+	nightsoulState *nightsoul.State
+
 	particleGenerated bool
-	fastCharge        bool
+	freeSkill         bool
+	exitNS            bool
+	a1Src             int
+	a1Atk             float64
 	a4Stacks          *stacks.MultipleRefreshNoRemove
-	c4buff            float64
+	usedShortBurst    bool
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -36,32 +34,48 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.Character = tmpl.NewWithWrapper(s, w)
 
 	c.EnergyMax = 70
-	c.NormalHitNum = normalHitNum
-	c.NormalCon = 5
 	c.BurstCon = 3
-	c.HasArkhe = false
+	c.NormalCon = 5
+	c.NormalHitNum = 3
 
-	w.Character = &c
+	c.SetNumCharges(action.ActionSkill, 2)
 
 	c.nightsoulState = nightsoul.New(s, w)
 	c.nightsoulState.MaxPoints = 40
 
-	c.SetNumCharges(action.ActionSkill, 2)
+	w.Character = &c
+
 	return nil
 }
 
 func (c *char) Init() error {
-	c.Nightsoulckeck()
+	c.a1Src = c.Core.F
+	c.updateA1Bonus(c.a1Src)
 	c.a4()
+	c.c4()
 	c.c6()
+
 	return nil
 }
 
+func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
+	if a == action.ActionCharge && c.StatusIsActive(skillStatus) {
+		return 0
+	}
+	return c.Character.ActionStam(a, p)
+}
+
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	if a == action.ActionSkill && c.StatusIsActive(freeskillkey) {
+	if a == action.ActionSkill && c.freeSkill {
 		return true, action.NoFailure
 	}
-	if a == action.ActionBurst && c.StatusIsActive(apexDriveKey) && c.Energy >= kablamCost && c.Cooldown(action.ActionBurst) <= 0 {
+	if a == action.ActionBurst && c.StatusIsActive(apexState) {
+		if !c.Core.Flags.IgnoreBurstEnergy && c.Energy < kablamCost {
+			return false, action.InsufficientEnergy
+		}
+		if c.AvailableCDCharge[a] <= 0 {
+			return false, action.BurstCD
+		}
 		return true, action.NoFailure
 	}
 	return c.Character.ActionReady(a, p)
@@ -71,73 +85,53 @@ func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
 	case "nightsoul":
 		return c.nightsoulState.Condition(fields)
-	case "apexdrive":
-		if c.StatusIsActive(apexDriveKey) {
-			return 1, nil
-		} else {
-			return 0, nil
-		}
 	default:
 		return c.Character.Condition(fields)
 	}
 }
 
-func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
-	if a == action.ActionCharge && c.StatusIsActive(skillKey) {
-		return 0
+func (c *char) generatePlungeNightsoul() {
+	c.nightsoulState.GeneratePoints(25)
+	if !c.nightsoulState.HasBlessing() && c.nightsoulState.Points() == c.nightsoulState.MaxPoints {
+		c.nightsoulState.EnterTimedBlessing(c.nightsoulState.Points(), 15*60, c.clearNightsoul)
+		c.freeSkill = true
 	}
-	return c.Character.ActionStam(a, p)
 }
 
-func (c *char) Nightsoulckeck() {
-	c.Core.Events.Subscribe(event.OnNightsoulGenerate, func(args ...interface{}) bool {
-		idx := args[0].(int)
-		if c.Index != idx {
-			return false
-		}
-		if c.nightsoulState.Points() >= 40 {
-			if !c.nightsoulState.HasBlessing() {
-				c.nightsoulState.EnterBlessing(40)
-			}
-			c.AddStatus(fieryPassionKey, 15*60, false)
-			c.AddStatus(freeskillkey, 15*60, true)
-		}
-		return false
-	}, "varesa-fierypassion-check")
+func (c *char) clearNightsoul() {
+	c.freeSkill = false
+	c.nightsoulState.ExitBlessing()
+}
 
-	c.Core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
-		if !c.nightsoulState.HasBlessing() || c.StatusIsActive(fieryPassionKey) {
-			return false
-		}
-		if !c.StatusIsActive(fieryPassionKey) {
-			c.nightsoulState.ExitBlessing()
-		}
-		return false
-	}, "varesa-nightsoul-check")
+func (c *char) clearNightsoulCB(next action.AnimationState) {
+	// ignore volcanic kablam
+	if next == action.BurstState {
+		return
+	}
+	if c.exitNS {
+		c.clearNightsoul()
+		c.exitNS = false
+	}
+}
 
-	c.Core.Events.Subscribe(event.OnActionExec, func(args ...interface{}) bool {
-		idx := args[0].(int)
-		if c.Index != idx {
-			return false
+func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
+	if c.nightsoulState.HasBlessing() {
+		switch k {
+		case model.AnimationXingqiuN0StartDelay:
+			return 23
+		case model.AnimationYelanN0StartDelay:
+			return 5
+		default:
+			return c.Character.AnimationStartDelay(k)
 		}
-		act := args[1].(action.Action)
-		if act == action.ActionSkill {
-			c.DeleteStatus(apexDriveKey)
-			return false
-		}
-		if act != action.ActionHighPlunge && act != action.ActionLowPlunge {
-			return false
-		}
-		if c.Index != c.Core.Player.ActiveChar().Index {
-			return false
-		}
-		if !c.StatusIsActive(fieryPassionKey) {
-			if c.Base.Cons >= 2 {
-				c.AddStatus(apexDriveKey, 5*60, true)
-			}
-			return false
-		}
-		c.AddStatus(apexDriveKey, 5*60, true)
-		return false
-	}, "varesa-apexdrive-check")
+	}
+
+	switch k {
+	case model.AnimationXingqiuN0StartDelay:
+		return 34
+	case model.AnimationYelanN0StartDelay:
+		return 4
+	default:
+		return c.Character.AnimationStartDelay(k)
+	}
 }

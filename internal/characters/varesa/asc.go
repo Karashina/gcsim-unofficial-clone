@@ -6,10 +6,24 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/core/stacks"
+	"github.com/genshinsim/gcsim/pkg/core/targets"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
 const a1Status = "rainbow-crash"
+
+func (c *char) updateA1Bonus(src int) {
+	if c.Base.Ascension < 1 {
+		return
+	}
+	c.QueueCharTask(func() {
+		if c.a1Src != src {
+			return
+		}
+		c.a1Atk = c.TotalAtk()
+		c.updateA1Bonus(src)
+	}, 0.1*60)
+}
 
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
@@ -18,24 +32,28 @@ func (c *char) a1() {
 	c.AddStatus(a1Status, 5*60, true)
 }
 
-func (c *char) a1PlungeBuff() float64 {
+func (c *char) a1PlungeBonus() float64 {
 	if c.Base.Ascension < 1 {
 		return 0.0
 	}
 	if !c.StatusIsActive(a1Status) {
 		return 0.0
 	}
+	mult := 0.5
 	if c.Base.Cons >= 1 || c.nightsoulState.HasBlessing() {
-		return 1.8
+		mult = 1.8
 	}
-	return 0.5
+	return mult * c.a1Atk
 }
 
-func (c *char) a1Cancel(_ combat.AttackCB) {
+func (c *char) a1Cancel(a combat.AttackCB) {
+	if a.Target.Type() != targets.TargettableEnemy {
+		return
+	}
 	if c.Base.Ascension < 1 {
 		return
 	}
-	c.DeleteAttackMod(a1Status)
+	c.DeleteStatus(a1Status)
 }
 
 func (c *char) a4() {
