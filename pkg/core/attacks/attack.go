@@ -28,6 +28,7 @@ const (
 	AttackTagBurgeon
 	AttackTagHyperbloom
 	AttackTagLCDamage
+	AttackTagLBDamage
 	AttackTagLength
 )
 

@@ -18,7 +18,7 @@ var atk = combat.AttackInfo{}
 type lcDamageRecord struct {
 	Index  int
 	Damage float64
-	Expiry int // 追加: 削除タイミング
+	Expiry int // Frame when this contributor's aura expires
 }
 
 // lcDamageResult stores the result of the LC damage calculation.
@@ -30,14 +30,12 @@ type lcDamageResult struct {
 
 // TryAddLC attempts to apply the Lunar Charged (LC) status and handles its logic.
 func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
-
-	// Reset contributor lists when:
-	// - A new reaction is triggered and LC tick is not active
+	// Reset contributor lists when a new reaction is triggered and LC tick is not active
 	if !a.Reacted && r.lcTickSrc == -1 {
 		r.lcContributor = make([]int, 0, 4)
 		r.lcPrecalcDamages = make([]lcDamageRecord, 0, 4)
 		r.lcPrecalcDamagesCRIT = make([]lcDamageRecord, 0, 4)
-		r.expiryTaskMap = make(map[int]int) // 追加: 初期化
+		r.expiryTaskMap = make(map[int]int)
 	}
 
 	atk = combat.AttackInfo{
@@ -95,6 +93,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 		}
 
+		// Aura expiry calculation for contributor removal
 		existing := r.Durability[a.Info.Element]
 		dur := 0.8 * a.Info.Durability
 		if existing > ZeroDur && dur >= existing {
@@ -137,7 +136,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 		}
 
-		// contributor/record削除タスクをAuraExpiryで登録（上書き時は再スケジューリング）
+		// Schedule contributor removal at aura expiry
 		expiryIndex := actorIdx
 		expiryFrame := a.Info.AuraExpiry
 		if r.expiryTaskMap == nil {
@@ -145,11 +144,11 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 		}
 		r.expiryTaskMap[expiryIndex] = expiryFrame
 		r.core.Tasks.Add(func() {
-			// 最新のexpiryFrameでなければ何もしない
+			// Only remove if this is the latest expiry for the contributor
 			if r.expiryTaskMap == nil || r.expiryTaskMap[expiryIndex] != expiryFrame {
 				return
 			}
-			// lcContributorから削除
+			// Remove from lcContributor
 			newContrib := make([]int, 0, len(r.lcContributor))
 			for _, idx := range r.lcContributor {
 				if idx != expiryIndex {
@@ -158,7 +157,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 			r.lcContributor = newContrib
 
-			// lcPrecalcDamagesから削除
+			// Remove from lcPrecalcDamages
 			newDamages := make([]lcDamageRecord, 0, len(r.lcPrecalcDamages))
 			for _, rec := range r.lcPrecalcDamages {
 				if rec.Index != expiryIndex || rec.Expiry != expiryFrame {
@@ -167,7 +166,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 			r.lcPrecalcDamages = newDamages
 
-			// lcPrecalcDamagesCRITから削除
+			// Remove from lcPrecalcDamagesCRIT
 			newDamagesCRIT := make([]lcDamageRecord, 0, len(r.lcPrecalcDamagesCRIT))
 			for _, rec := range r.lcPrecalcDamagesCRIT {
 				if rec.Index != expiryIndex || rec.Expiry != expiryFrame {
@@ -176,9 +175,10 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 			r.lcPrecalcDamagesCRIT = newDamagesCRIT
 
-			// タスク完了後はmapからも削除
+			// Remove from expiryTaskMap
 			delete(r.expiryTaskMap, expiryIndex)
 		}, expiryFrame-r.core.F)
+
 		// Attach or refill Hydro/Electro durability as appropriate.
 		if a.Info.Element == attributes.Hydro {
 			if r.Durability[Electro] < ZeroDur {
@@ -200,7 +200,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 	}
 
 	a.Reacted = true
-	// ActorIndex is set to the character who triggered LC (the attacker).
+	// Set ActorIndex to the character who triggered LC (the attacker).
 	atk.ActorIndex = a.Info.ActorIndex
 	r.core.Events.Emit(event.OnLunarCharged, r.self, a)
 

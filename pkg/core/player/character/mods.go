@@ -54,10 +54,22 @@ type (
 	LCReactBonusModFunc func(combat.AttackInfo) (float64, bool)
 
 	LCBaseReactBonusMod struct {
-		Amount BaseReactBonusModFunc
+		Amount LCBaseReactBonusModFunc
 		modifier.Base
 	}
-	BaseReactBonusModFunc func(combat.AttackInfo) (float64, bool)
+	LCBaseReactBonusModFunc func(combat.AttackInfo) (float64, bool)
+
+	LBReactBonusMod struct {
+		Amount LBReactBonusModFunc
+		modifier.Base
+	}
+	LBReactBonusModFunc func(combat.AttackInfo) (float64, bool)
+
+	LBBaseReactBonusMod struct {
+		Amount LBBaseReactBonusModFunc
+		modifier.Base
+	}
+	LBBaseReactBonusModFunc func(combat.AttackInfo) (float64, bool)
 
 	StatMod struct {
 		AffectedStat attributes.Stat
@@ -127,6 +139,18 @@ func (c *CharWrapper) AddLCBaseReactBonusMod(mod LCBaseReactBonusMod) {
 	mod.SetExpiry(*c.f)
 	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
 	modifier.LogAdd("lc base react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
+}
+
+func (c *CharWrapper) AddLBReactBonusMod(mod LBReactBonusMod) {
+	mod.SetExpiry(*c.f)
+	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
+	modifier.LogAdd("lb react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
+}
+
+func (c *CharWrapper) AddLBBaseReactBonusMod(mod LBBaseReactBonusMod) {
+	mod.SetExpiry(*c.f)
+	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
+	modifier.LogAdd("lb base react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
 }
 
 func (c *CharWrapper) AddStatMod(mod StatMod) {
@@ -404,6 +428,52 @@ func (c *CharWrapper) LCBaseReactBonus(atk combat.AttackInfo) float64 {
 	amt := 0.0
 	for _, v := range c.mods {
 		m, ok := v.(*LCBaseReactBonusMod)
+		if !ok {
+			c.mods[n] = v
+			n++
+			continue
+		}
+		if m.Expiry() > *c.f || m.Expiry() == -1 {
+			a, done := m.Amount(atk)
+			amt += a
+			if !done {
+				c.mods[n] = v
+				n++
+			}
+		}
+	}
+	c.mods = c.mods[:n]
+	return amt
+}
+
+func (c *CharWrapper) LBReactBonus(atk combat.AttackInfo) float64 {
+	n := 0
+	amt := 0.0
+	for _, v := range c.mods {
+		m, ok := v.(*LBReactBonusMod)
+		if !ok {
+			c.mods[n] = v
+			n++
+			continue
+		}
+		if m.Expiry() > *c.f || m.Expiry() == -1 {
+			a, done := m.Amount(atk)
+			amt += a
+			if !done {
+				c.mods[n] = v
+				n++
+			}
+		}
+	}
+	c.mods = c.mods[:n]
+	return amt
+}
+
+func (c *CharWrapper) LBBaseReactBonus(atk combat.AttackInfo) float64 {
+	n := 0
+	amt := 0.0
+	for _, v := range c.mods {
+		m, ok := v.(*LBBaseReactBonusMod)
 		if !ok {
 			c.mods[n] = v
 			n++
