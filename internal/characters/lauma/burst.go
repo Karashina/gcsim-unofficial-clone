@@ -14,8 +14,8 @@ import (
 var burstFrames []int
 
 const (
-	buffapply     = 104
-	paleHymnKey   = "lauma-pale-hymn"
+	buffapply        = 104
+	paleHymnKey      = "lauma-pale-hymn"
 	paleHymnDuration = 30 * 60 // 30 seconds
 )
 
@@ -39,7 +39,7 @@ func init() {
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	// Initial 18 Pale Hymn stacks
 	initialStacks := 18
-	
+
 	// Check for Moon Song conversion
 	bonusStacks := 0
 	if c.moonSong > 0 {
@@ -47,15 +47,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.moonSong = 0
 		c.AddStatus("moon-song-consumed", -1, false) // Mark that Moon Song was consumed for this burst
 	}
-	
+
 	totalStacks := initialStacks + bonusStacks
 	c.paleHymn += totalStacks
-	
+
 	// Set up Pale Hymn effect monitoring
 	c.Core.Tasks.Add(func() {
 		c.setupPaleHymnEffects()
 	}, buffapply)
-	
+
 	// Set up Moon Song monitoring for 15s window
 	c.AddStatus("moon-song-window", 15*60, true)
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
@@ -90,15 +90,12 @@ func (c *char) setupPaleHymnEffects() {
 	c.Core.Events.Subscribe(event.OnBloom, c.paleHymnReactionBonus("Bloom"), "lauma-pale-hymn-bloom")
 	c.Core.Events.Subscribe(event.OnHyperbloom, c.paleHymnReactionBonus("Hyperbloom"), "lauma-pale-hymn-hyperbloom")
 	c.Core.Events.Subscribe(event.OnBurgeon, c.paleHymnReactionBonus("Burgeon"), "lauma-pale-hymn-burgeon")
-	
+
 	// Subscribe to Lunar-Bloom reactions
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		if len(args) < 3 {
-			return false
-		}
 		if attackEvent, ok := args[1].(*combat.AttackEvent); ok {
 			if attackEvent.Info.AttackTag == attacks.AttackTagLBDamage {
-				return c.paleHymnLunarBloomBonus(args...)
+				return c.paleHymnLunarBloomBonus()
 			}
 		}
 		return false
@@ -111,21 +108,21 @@ func (c *char) paleHymnReactionBonus(reactionType string) func(args ...interface
 		if c.paleHymn <= 0 {
 			return false
 		}
-		
+
 		// Consume 1 stack per enemy hit (need to calculate number of targets)
 		enemiesHit := 1 // Default to 1, would need target counting logic for precise implementation
 		stacksConsumed := min(c.paleHymn, enemiesHit)
 		c.paleHymn -= stacksConsumed
-		
+
 		// Add damage bonus based on EM
 		em := c.Stat(attributes.EM)
 		bonusDamage := burstBuffBloom[c.TalentLvlBurst()] * em
-		
+
 		// C2 additional bonus
 		if c.Base.Cons >= 2 {
 			bonusDamage += 5.0 * em // 500% of EM
 		}
-		
+
 		// Apply the bonus damage (this would need to be integrated with the reaction system)
 		// For now, we'll add it as a modifier to the character dealing the reaction
 		if len(args) > 0 {
@@ -138,33 +135,33 @@ func (c *char) paleHymnReactionBonus(reactionType string) func(args ...interface
 				})
 			}
 		}
-		
+
 		return true
 	}
 }
 
 // Pale Hymn bonus for Lunar-Bloom damage
-func (c *char) paleHymnLunarBloomBonus(args ...interface{}) bool {
+func (c *char) paleHymnLunarBloomBonus() bool {
 	if c.paleHymn <= 0 {
 		return false
 	}
-	
+
 	// Consume 1 stack per enemy hit
 	enemiesHit := 1 // Default to 1
 	stacksConsumed := min(c.paleHymn, enemiesHit)
 	c.paleHymn -= stacksConsumed
-	
+
 	// Add damage bonus based on EM
 	em := c.Stat(attributes.EM)
 	bonusDamage := burstBuffLBloom[c.TalentLvlBurst()] * em
-	
+
 	// C2 additional bonus
 	if c.Base.Cons >= 2 {
 		bonusDamage += 4.0 * em // 400% of EM
 	}
-	
+
 	// Store the bonus for Lunar-Bloom damage
 	c.burstLBBuff = bonusDamage
-	
+
 	return true
 }

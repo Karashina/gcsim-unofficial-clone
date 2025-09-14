@@ -40,7 +40,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	if p["hold"] == 1 && c.verdantDew > 0 {
 		// Hold
 		// Can be unleashed when you have at least 1 Verdant Dew.
-		
+
 		// Lauma consumes all Verdant Dew and intones a Hymn of Eternal Rest,
 		// dealing one regular instance of AoE Dendro DMG and another instance of AoE Dendro DMG that is considered Lunar-Bloom DMG.
 		// Each Verdant Dew consumed will give Lauma one stack of Moon Song.
@@ -48,7 +48,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		dewConsumed := min(c.verdantDew, 3)
 		c.verdantDew -= dewConsumed
 		c.moonSong += dewConsumed
-		
+
 		em := c.Stat(attributes.EM)
 		ai1 := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -61,7 +61,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			Durability: 25,
 			Mult:       skillHold1[c.TalentLvlSkill()],
 		}
-		
+
 		c.Core.QueueAttack(
 			ai1,
 			combat.NewCircleHitOnTarget(skillPos, geometry.Point{Y: -1.5}, 5),
@@ -78,7 +78,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			Element:          attributes.Dendro,
 			Durability:       0,
 			IgnoreDefPercent: 1,
-			FlatDmg:          (skillHold2[c.TalentLvlSkill()]*em*(1+c.LBBaseReactBonus(ai1)))*(1+((6*em)/(2000+em))+c.LBReactBonus(ai1)) + c.burstLBBuff,
+			FlatDmg:          (skillHold2[c.TalentLvlSkill()]*em*(1+c.LBBaseReactBonus(ai1)))*(1+((6*em)/(2000+em))+c.LBReactBonus(ai1)) + c.burstLBBuff*c.c6mult,
 		}
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
@@ -106,7 +106,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			Durability: 25,
 			Mult:       skillPress[c.TalentLvlSkill()],
 		}
-		
+
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(skillPos, geometry.Point{Y: -1.5}, 5),
@@ -116,7 +116,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	// E duration and ticks are not affected by hitlag
 	c.skillSrc = c.Core.F
-	
+
 	// C6: Reset sanctuary count when using skill
 	if c.Base.Cons >= 6 {
 		c.c6SanctuaryCount = 0
@@ -124,7 +124,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.paleHymn -= c.c6PaleHymnCount
 		c.c6PaleHymnCount = 0
 	}
-	
+
 	for i := 0.0; i < skillTicks; i++ {
 		c.Core.Tasks.Add(c.skillTick(c.skillSrc), skillFirstTickDelay+ceil(skillInterval*i))
 	}
@@ -178,7 +178,7 @@ func (c *char) skillTick(src int) func() {
 			Mult:       skillDotATK[c.TalentLvlSkill()],
 			FlatDmg:    skillDotEM[c.TalentLvlSkill()] * c.Stat(attributes.EM),
 		}
-		
+
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5),

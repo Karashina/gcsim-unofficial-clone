@@ -27,6 +27,7 @@ type char struct {
 	paleHymn          int
 	c6PaleHymnCount   int // C6-specific Pale Hymn stacks
 	c6SanctuaryCount  int // C6 sanctuary hit counter (max 8 per sanctuary)
+	c6mult            float64
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -47,11 +48,11 @@ func (c *char) Init() error {
 	c.AddStatus("moonsignKey", -1, false)
 	c.moonsignInitFunc()
 	c.a0()
-	c.a4() // Initialize A4 AddAttackMod
-	c.c6() // Initialize C6 effects
-	c.c6AscendantMultiplier() // Apply C6 Ascendant multiplier if applicable
-	c.verdantDewCheck() // Initialize Verdant Dew monitoring
-	c.applyResReduction() // Initialize RES reduction monitoring
+	c.a4()                               // Initialize A4 AddAttackMod
+	c.c6()                               // Initialize C6 effects
+	c.c6mult = c.c6AscendantMultiplier() // Apply C6 Ascendant multiplier if applicable
+	c.verdantDewCheck()                  // Initialize Verdant Dew monitoring
+	c.applyResReduction()                // Initialize RES reduction monitoring
 	return nil
 }
 

@@ -7,7 +7,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/enemy"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
@@ -58,16 +57,12 @@ func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	
+
 	// Apply appropriate Moonsign buffs for 20s
 	if c.moonsignNascent {
 		// Moonsign: Nascent Gleam - Bloom, Hyperbloom, and Burgeon DMG can score CRIT Hits
 		// CRIT Rate fixed at 15%, CRIT DMG fixed at 100%
 		c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-			t, ok := args[0].(*enemy.Enemy)
-			if !ok {
-				return false
-			}
 			ae := args[1].(*combat.AttackEvent)
 
 			switch ae.Info.AttackTag {
@@ -109,7 +104,7 @@ func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
-	
+
 	// add Damage Bonus for Elemental Skill
 	m := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{
@@ -128,18 +123,6 @@ func (c *char) a4() {
 	})
 }
 
-// A4 helper for skill damage bonus - DEPRECATED, now using AddAttackMod
-func (c *char) a4SkillBonus(ai *combat.AttackInfo) {
-	// This function is deprecated and should not be used
-	// A4 bonus is now handled via AddAttackMod in a4() function
-}
-
-// A4 helper for charged attack damage bonus (extending to CA as well) - DEPRECATED
-func (c *char) a4ChargeBonus(ai *combat.AttackInfo) {
-	// This function is deprecated and should not be used
-	// Charged attack functionality removed as Lauma doesn't have charged attacks
-}
-
 // RES reduction from skill hits
 // Additionally, when Lauma's Elemental Skill or attacks from Frostgrove Sanctuary hit an opponent,
 // that opponent's Dendro RES and Hydro RES will be decreased for 10s.
@@ -149,31 +132,31 @@ func (c *char) applyResReduction() {
 		if len(args) < 3 {
 			return false
 		}
-		
+
 		enemy, ok := args[0].(combat.Target)
 		if !ok {
 			return false
 		}
-		
+
 		atk, ok := args[1].(*combat.AttackEvent)
 		if !ok {
 			return false
 		}
-		
+
 		dmg, ok := args[2].(float64)
 		if !ok || dmg == 0 {
 			return false
 		}
-		
+
 		// Check if this is from Lauma's skill or sanctuary
 		if atk.Info.ActorIndex != c.Index {
 			return false
 		}
-		
+
 		if atk.Info.AttackTag != attacks.AttackTagElementalArt {
 			return false
 		}
-		
+
 		// Apply Dendro and Hydro RES reduction
 		if e, ok := enemy.(interface{ AddResistMod(combat.ResistMod) }); ok {
 			e.AddResistMod(combat.ResistMod{
@@ -187,7 +170,7 @@ func (c *char) applyResReduction() {
 				Value: -0.2,
 			})
 		}
-		
+
 		return false
 	}, "lauma-res-reduction")
 }
