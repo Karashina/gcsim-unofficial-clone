@@ -55,6 +55,7 @@ var weaponNames = []string{
 	"blackcliffpole",
 	"blackcliffslasher",
 	"blackcliffwarbow",
+	"blackmarrowlantern",
 	"blacktassel",
 	"bloodtaintedgreatsword",
 	"calamityofeshu",
@@ -83,6 +84,7 @@ var weaponNames = []string{
 	"engulfinglightning",
 	"everlastingmoonglow",
 	"eyeofperception",
+	"etherlightspindlelute",
 	"fadingtwilight",
 	"fangofthemountainking",
 	"favoniuscodex",
@@ -94,6 +96,7 @@ var weaponNames = []string{
 	"festeringdesire",
 	"filletblade",
 	"finaleofthedeep",
+	"flameforgedinsight",
 	"fleuvecendreferryman",
 	"flowerwreathedfeathers",
 	"fluteofezpitzal",
@@ -133,14 +136,17 @@ var weaponNames = []string{
 	"mailedflower",
 	"makhairaaquamarine",
 	"mappamare",
+	"masterkey",
 	"memoryofdust",
 	"messenger",
 	"missivewindspear",
 	"mistsplitterreforged",
 	"mitternachtswaltz",
 	"moonpiercer",
+	"moonweaversdawn",
 	"mountainbracingbolt",
 	"mouunsmoon",
+	"nightweaverslookingglass",
 	"oathsworneye",
 	"oldmercspal",
 	"otherworldlystory",
@@ -152,6 +158,7 @@ var weaponNames = []string{
 	"primordialjadecutter",
 	"primordialjadewingedspear",
 	"prospectorsdrill",
+	"prospectorsshovel",
 	"prototypeamber",
 	"prototypearchaic",
 	"prototypecrescent",
@@ -179,6 +186,7 @@ var weaponNames = []string{
 	"scionoftheblazingsun",
 	"seasonedhuntersbow",
 	"sequenceofsolitude",
+	"serenityscall",
 	"serpentspine",
 	"sharpshootersoath",
 	"silvershowerheartstrings",
@@ -191,6 +199,7 @@ var weaponNames = []string{
 	"skywardpride",
 	"skywardspine",
 	"slingshot",
+	"snarehook",
 	"snowtombedstarsilver",
 	"solarpearl",
 	"songofbrokenpines",
@@ -270,6 +279,7 @@ const (
 	BlackcliffPole
 	BlackcliffSlasher
 	BlackcliffWarbow
+	BlackmarrowLantern
 	BlackTassel
 	BloodtaintedGreatsword
 	CalamityOfEshu
@@ -296,6 +306,7 @@ const (
 	EmeraldOrb
 	EndOfTheLine
 	EngulfingLightning
+	EtherlightSpindleLute
 	EverlastingMoonglow
 	EyeOfPerception
 	FadingTwilight
@@ -309,6 +320,7 @@ const (
 	FesteringDesire
 	FilletBlade
 	FinaleOfTheDeep
+	FlameForgedInsight
 	FleuveCendreFerryman
 	FlowerWreathedFeathers
 	FluteOfEzpitzal
@@ -348,14 +360,17 @@ const (
 	MailedFlower
 	MakhairaAquamarine
 	MappaMare
+	MasterKey
 	MemoryOfDust
 	Messenger
 	MissiveWindspear
 	MistsplitterReforged
 	MitternachtsWaltz
 	Moonpiercer
+	MoonweaversDawn
 	MountainBracingBolt
 	MouunsMoon
+	NightweaversLookingGlass
 	OathswornEye
 	OldMercsPal
 	OtherworldlyStory
@@ -367,6 +382,7 @@ const (
 	PrimordialJadeCutter
 	PrimordialJadeWingedSpear
 	ProspectorsDrill
+	ProspectorsShovel
 	PrototypeAmber
 	PrototypeArchaic
 	PrototypeCrescent
@@ -391,6 +407,7 @@ const (
 	SacrificialJade
 	SacrificialSword
 	SapwoodBlade
+	SerenityScall
 	ScionOfTheBlazingSun
 	SeasonedHuntersBow
 	SequenceOfSolitude
@@ -406,6 +423,7 @@ const (
 	SkywardPride
 	SkywardSpine
 	Slingshot
+	SnareHook
 	SnowTombedStarsilver
 	SolarPearl
 	SongOfBrokenPines
