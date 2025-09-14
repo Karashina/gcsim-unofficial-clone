@@ -7,11 +7,12 @@
 package model
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -399,17 +400,19 @@ func (BodyType) EnumDescriptor() ([]byte, []int) {
 type ZoneType int32
 
 const (
-	ZoneType_INVALID_ZONE_TYPE    ZoneType = 0
-	ZoneType_ASSOC_TYPE_UNKNOWN   ZoneType = 1
-	ZoneType_ASSOC_TYPE_MONDSTADT ZoneType = 2
-	ZoneType_ASSOC_TYPE_LIYUE     ZoneType = 3
-	ZoneType_ASSOC_TYPE_INAZUMA   ZoneType = 4
-	ZoneType_ASSOC_TYPE_SUMERU    ZoneType = 5
-	ZoneType_ASSOC_TYPE_FATUI     ZoneType = 6
-	ZoneType_ASSOC_TYPE_RANGER    ZoneType = 7 // aloy pls
-	ZoneType_ASSOC_TYPE_MAINACTOR ZoneType = 8 // traveler is cool
-	ZoneType_ASSOC_TYPE_FONTAINE  ZoneType = 9
-	ZoneType_ASSOC_TYPE_NATLAN    ZoneType = 10
+	ZoneType_INVALID_ZONE_TYPE       ZoneType = 0
+	ZoneType_ASSOC_TYPE_UNKNOWN      ZoneType = 1
+	ZoneType_ASSOC_TYPE_MONDSTADT    ZoneType = 2
+	ZoneType_ASSOC_TYPE_LIYUE        ZoneType = 3
+	ZoneType_ASSOC_TYPE_INAZUMA      ZoneType = 4
+	ZoneType_ASSOC_TYPE_SUMERU       ZoneType = 5
+	ZoneType_ASSOC_TYPE_FATUI        ZoneType = 6
+	ZoneType_ASSOC_TYPE_RANGER       ZoneType = 7 // aloy pls
+	ZoneType_ASSOC_TYPE_MAINACTOR    ZoneType = 8 // traveler is cool
+	ZoneType_ASSOC_TYPE_FONTAINE     ZoneType = 9
+	ZoneType_ASSOC_TYPE_NATLAN       ZoneType = 10
+	ZoneType_ASSOC_TYPE_OMNI_SCOURGE ZoneType = 11
+	ZoneType_ASSOC_TYPE_NODKRAI      ZoneType = 12
 )
 
 // Enum value maps for ZoneType.
@@ -426,19 +429,23 @@ var (
 		8:  "ASSOC_TYPE_MAINACTOR",
 		9:  "ASSOC_TYPE_FONTAINE",
 		10: "ASSOC_TYPE_NATLAN",
+		11: "ASSOC_TYPE_OMNI_SCOURGE",
+		12: "ASSOC_TYPE_NODKRAI",
 	}
 	ZoneType_value = map[string]int32{
-		"INVALID_ZONE_TYPE":    0,
-		"ASSOC_TYPE_UNKNOWN":   1,
-		"ASSOC_TYPE_MONDSTADT": 2,
-		"ASSOC_TYPE_LIYUE":     3,
-		"ASSOC_TYPE_INAZUMA":   4,
-		"ASSOC_TYPE_SUMERU":    5,
-		"ASSOC_TYPE_FATUI":     6,
-		"ASSOC_TYPE_RANGER":    7,
-		"ASSOC_TYPE_MAINACTOR": 8,
-		"ASSOC_TYPE_FONTAINE":  9,
-		"ASSOC_TYPE_NATLAN":    10,
+		"INVALID_ZONE_TYPE":       0,
+		"ASSOC_TYPE_UNKNOWN":      1,
+		"ASSOC_TYPE_MONDSTADT":    2,
+		"ASSOC_TYPE_LIYUE":        3,
+		"ASSOC_TYPE_INAZUMA":      4,
+		"ASSOC_TYPE_SUMERU":       5,
+		"ASSOC_TYPE_FATUI":        6,
+		"ASSOC_TYPE_RANGER":       7,
+		"ASSOC_TYPE_MAINACTOR":    8,
+		"ASSOC_TYPE_FONTAINE":     9,
+		"ASSOC_TYPE_NATLAN":       10,
+		"ASSOC_TYPE_OMNI_SCOURGE": 11,
+		"ASSOC_TYPE_NODKRAI":      12,
 	}
 )
 
