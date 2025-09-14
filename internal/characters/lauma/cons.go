@@ -72,7 +72,7 @@ func (c *char) c2() {
 		return
 	}
 
-	if c.moonsignAscendant {
+	if c.MoonsignAscendant {
 		// Apply 40% Lunar-Bloom damage bonus for duration of burst effects
 		for _, char := range c.Core.Player.Chars() {
 			char.AddLBReactBonusMod(character.LBReactBonusMod{
@@ -145,8 +145,8 @@ func (c *char) c6SanctuaryBonus() {
 	snap := combat.Snapshot{
 		CharLvl: c.Base.Level,
 	}
-	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
-	snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+	snap.Stats[attributes.CR] = c.Stat(attributes.CR) + c.a4crval
+	snap.Stats[attributes.CD] = c.Stat(attributes.CD) + c.a4cdval
 
 	c.Core.QueueAttackWithSnap(
 		ai,
@@ -191,8 +191,8 @@ func (c *char) c6NormalAttackConversion() bool {
 	snap := combat.Snapshot{
 		CharLvl: c.Base.Level,
 	}
-	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
-	snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+	snap.Stats[attributes.CR] = c.Stat(attributes.CR) + c.a4crval
+	snap.Stats[attributes.CD] = c.Stat(attributes.CD) + c.a4cdval
 
 	c.Core.QueueAttackWithSnap(
 		ai,
@@ -209,7 +209,7 @@ func (c *char) c6AscendantMultiplier() float64 {
 	if c.Base.Cons < 6 {
 		return 1
 	}
-	if !c.moonsignAscendant {
+	if !c.MoonsignAscendant {
 		return 1
 	}
 	return 1.25

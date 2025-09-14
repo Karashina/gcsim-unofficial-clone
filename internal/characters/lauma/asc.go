@@ -10,24 +10,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
-func (c *char) moonsignInitFunc() {
-	count := 0
-	for _, char := range c.Core.Player.Chars() {
-		if char.StatusIsActive("moonsignKey") {
-			count++
-		}
-	}
-	switch count {
-	case 1:
-		c.moonsignNascent = true // Moonsign: Nascent Gleam
-	case 2:
-		c.moonsignAscendant = true // Moonsign: Ascendant Gleam
-	default:
-		c.moonsignNascent = false
-		c.moonsignAscendant = false
-	}
-}
-
 // A0
 // Every point of Elemental Mastery that Lauma has increasing Lunar-Bloom's Base DMG by 0.0175%, up to a maximum of 14%.
 func (c *char) a0() {
@@ -59,7 +41,7 @@ func (c *char) a1() {
 	}
 
 	// Apply appropriate Moonsign buffs for 20s
-	if c.moonsignNascent {
+	if c.MoonsignNascent {
 		// Moonsign: Nascent Gleam - Bloom, Hyperbloom, and Burgeon DMG can score CRIT Hits
 		// CRIT Rate fixed at 15%, CRIT DMG fixed at 100%
 		c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
@@ -83,17 +65,10 @@ func (c *char) a1() {
 
 			return false
 		}, "lauma-a1-nascent-reaction-crit")
-	} else if c.moonsignAscendant {
+	} else if c.MoonsignAscendant {
 		// Moonsign: Ascendant Gleam
-		for _, char := range c.Core.Player.Chars() {
-			char.AddLBReactBonusMod(character.LBReactBonusMod{
-				Base: modifier.NewBase("lauma-a1-ascendant-lunar-bloom", 20*60),
-				Amount: func(ai combat.AttackInfo) (float64, bool) {
-					// Add CRIT Rate +10%, CRIT DMG +20% for Lunar-Bloom
-					return 0, false // Would need to modify crit stats
-				},
-			})
-		}
+		c.a4crval = 0.1
+		c.a4cdval = 0.2
 	}
 }
 

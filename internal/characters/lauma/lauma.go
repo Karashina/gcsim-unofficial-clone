@@ -18,16 +18,16 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	skillSrc          int
-	burstLBBuff       float64
-	moonsignNascent   bool
-	moonsignAscendant bool
-	verdantDew        int
-	moonSong          int
-	paleHymn          int
-	c6PaleHymnCount   int // C6-specific Pale Hymn stacks
-	c6SanctuaryCount  int // C6 sanctuary hit counter (max 8 per sanctuary)
-	c6mult            float64
+	skillSrc         int
+	burstLBBuff      float64
+	verdantDew       int
+	moonSong         int
+	paleHymn         int
+	a4crval          float64
+	a4cdval          float64
+	c6PaleHymnCount  int // C6-specific Pale Hymn stacks
+	c6SanctuaryCount int // C6 sanctuary hit counter (max 8 per sanctuary)
+	c6mult           float64
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -46,6 +46,8 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 func (c *char) Init() error {
 	c.AddStatus("moonsignKey", -1, false)
+	c.a4crval = 0
+	c.a4cdval = 0
 	c.moonsignInitFunc()
 	c.a0()
 	c.a4()                               // Initialize A4 AddAttackMod
@@ -90,4 +92,24 @@ func (c *char) verdantDewCheck() {
 		}
 		return false
 	}, "lauma-verdant-dew")
+}
+
+func (c *char) moonsignInitFunc() {
+	count := 0
+	for _, char := range c.Core.Player.Chars() {
+		if char.StatusIsActive("moonsignKey") {
+			count++
+		}
+	}
+	switch count {
+	case 1:
+		c.MoonsignNascent = true // Moonsign: Nascent Gleam
+		c.MoonsignAscendant = false
+	case 2:
+		c.MoonsignAscendant = true // Moonsign: Ascendant Gleam
+		c.MoonsignNascent = false
+	default:
+		c.MoonsignNascent = false
+		c.MoonsignAscendant = false
+	}
 }

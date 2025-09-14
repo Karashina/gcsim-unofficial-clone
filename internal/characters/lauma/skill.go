@@ -83,8 +83,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
-		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
-		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		snap.Stats[attributes.CR] = c.Stat(attributes.CR) + c.a4crval
+		snap.Stats[attributes.CD] = c.Stat(attributes.CD) + c.a4cdval
 		c.Core.QueueAttackWithSnap(
 			ai2,
 			snap,

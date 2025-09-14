@@ -91,15 +91,17 @@ type CharWrapper struct {
 	tasks  task.Tasker
 
 	// base characteristics
-	Base      info.CharacterBase
-	Weapon    info.WeaponProfile
-	Talents   info.TalentProfile
-	CharZone  info.ZoneType
-	CharBody  info.BodyType
-	NormalCon int
-	SkillCon  int
-	BurstCon  int
-	HasArkhe  bool
+	Base              info.CharacterBase
+	Weapon            info.WeaponProfile
+	Talents           info.TalentProfile
+	CharZone          info.ZoneType
+	CharBody          info.BodyType
+	NormalCon         int
+	SkillCon          int
+	BurstCon          int
+	HasArkhe          bool
+	MoonsignNascent   bool
+	MoonsignAscendant bool
 
 	Equip struct {
 		Weapon info.Weapon

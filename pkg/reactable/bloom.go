@@ -52,6 +52,9 @@ func (r *Reactable) TryBloom(a *combat.AttackEvent) bool {
 	a.Reacted = true
 
 	r.addBloomGadget(a)
+	if r.core.Player.ByIndex(a.Info.ActorIndex).StatusIsActive("LB-Key") {
+		r.core.Events.Emit(event.OnLunarBloom, r.self, a)
+	}
 	r.core.Events.Emit(event.OnBloom, r.self, a)
 	return true
 }

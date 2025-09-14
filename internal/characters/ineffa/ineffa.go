@@ -34,6 +34,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 func (c *char) Init() error {
 	c.AddStatus("moonsignKey", -1, false)
+	c.moonsignInitFunc()
 	c.InitLCallback()
 	c.a0()
 	c.c4()
@@ -46,4 +47,24 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 		return 11
 	}
 	return c.Character.AnimationStartDelay(k)
+}
+
+func (c *char) moonsignInitFunc() {
+	count := 0
+	for _, char := range c.Core.Player.Chars() {
+		if char.StatusIsActive("moonsignKey") {
+			count++
+		}
+	}
+	switch count {
+	case 1:
+		c.MoonsignNascent = true // Moonsign: Nascent Gleam
+		c.MoonsignAscendant = false
+	case 2:
+		c.MoonsignAscendant = true // Moonsign: Ascendant Gleam
+		c.MoonsignNascent = false
+	default:
+		c.MoonsignNascent = false
+		c.MoonsignAscendant = false
+	}
 }
