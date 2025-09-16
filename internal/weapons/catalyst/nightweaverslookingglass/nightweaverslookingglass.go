@@ -76,29 +76,31 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, "nightweaverslookingglass-lb")
 
-	char.AddReactBonusMod(character.ReactBonusMod{
-		Base: modifier.NewBaseWithHitlag("nightweaverslookingglass-bloom-buff", -1),
-		Amount: func(ai combat.AttackInfo) (float64, bool) {
-			if char.StatusIsActive(nmvKey) && char.StatusIsActive(potfnKey) {
-				if ai.AttackTag == attacks.AttackTagBloom {
-					return 0.9 + 0.3*float64(r), false
+	for _, chr := range c.Player.Chars() {
+		chr.AddReactBonusMod(character.ReactBonusMod{
+			Base: modifier.NewBaseWithHitlag("nightweaverslookingglass-bloom-buff", -1),
+			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				if char.StatusIsActive(nmvKey) && char.StatusIsActive(potfnKey) {
+					if ai.AttackTag == attacks.AttackTagBloom {
+						return 0.9 + 0.3*float64(r), false
+					}
+					if ai.AttackTag == attacks.AttackTagHyperbloom || ai.AttackTag == attacks.AttackTagBurgeon {
+						return 0.6 + 0.2*float64(r), false
+					}
 				}
-				if ai.AttackTag == attacks.AttackTagHyperbloom || ai.AttackTag == attacks.AttackTagBurgeon {
-					return 0.6 + 0.2*float64(r), false
+				return 0, false
+			},
+		})
+		chr.AddLBReactBonusMod(character.LBReactBonusMod{
+			Base: modifier.NewBaseWithHitlag("nightweaverslookingglass-lb-buff", -1),
+			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				if char.StatusIsActive(nmvKey) && char.StatusIsActive(potfnKey) {
+					return 0.3 + 0.1*float64(r), false
 				}
-			}
-			return 0, false
-		},
-	})
-	char.AddLBReactBonusMod(character.LBReactBonusMod{
-		Base: modifier.NewBaseWithHitlag("nightweaverslookingglass-lb-buff", -1),
-		Amount: func(ai combat.AttackInfo) (float64, bool) {
-			if char.StatusIsActive(nmvKey) && char.StatusIsActive(potfnKey) {
-				return 0.3 + 0.1*float64(r), false
-			}
-			return 0, false
-		},
-	})
+				return 0, false
+			},
+		})
+	}
 
 	return w, nil
 }
