@@ -60,7 +60,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		}
 
 		c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-			atk := args[0].(*combat.AttackEvent)
+			atk := args[1].(*combat.AttackEvent)
 			if atk.Info.ActorIndex != char.Index {
 				return false
 			}
