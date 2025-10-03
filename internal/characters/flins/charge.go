@@ -21,10 +21,11 @@ func init() {
 	chargeFrames[action.ActionSwap] = 47
 }
 
+// Charged Attack - part of Pocztowy Demonspear
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
-		Abil:               "Charge",
+		Abil:               "Pocztowy Demonspear (Charged)",
 		AttackTag:          attacks.AttackTagExtra,
 		ICDTag:             attacks.ICDTagExtraAttack,
 		ICDGroup:           attacks.ICDGroupDefault,

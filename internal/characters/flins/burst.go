@@ -20,10 +20,13 @@ func init() {
 }
 
 // Burst ability implementation
+// Ancient Ritual: Cometh the Night (Q)
+// Flins unleashes the true power of his lamp, dealing AoE Electro DMG
+// Transforms to Thunderous Symphony after using Northland Spearstorm
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "Supreme Instruction: Cyclonic Exterminator (Q)",
+		Abil:       "Ancient Ritual: Cometh the Night (Q)",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,

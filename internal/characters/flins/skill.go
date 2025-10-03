@@ -33,11 +33,13 @@ func ceil(x float64) int {
 }
 
 // Skill ability implementation
+// Ancient Rite: Arcane Light (E)
+// Flins summons forth the ancient power concealed within his lamp
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	skillPos := c.Core.Combat.Player()
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "Cleaning Mode: Carrier Frequency (E)",
+		Abil:       "Ancient Rite: Arcane Light (E)",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -85,6 +87,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 }
 
 // Skill tick logic for DoT
+// Northland Spearstorm - special skill during Manifest Flame form
 func (c *char) skillTick(src int) func() {
 	return func() {
 		if src != c.skillSrc {
@@ -92,7 +95,7 @@ func (c *char) skillTick(src int) func() {
 		}
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
-			Abil:       "Cleaning Mode: Carrier Frequency (E/DoT)",
+			Abil:       "Northland Spearstorm (E/DoT)",
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagNone,
 			ICDGroup:   attacks.ICDGroupDefault,

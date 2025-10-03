@@ -41,11 +41,12 @@ func init() {
 }
 
 // Normal attack implementation
+// Pocztowy Demonspear
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{
 			ActorIndex:         c.Index,
-			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
+			Abil:               fmt.Sprintf("Pocztowy Demonspear %v", c.NormalCounter),
 			AttackTag:          attacks.AttackTagNormal,
 			ICDTag:             attacks.ICDTagNormalAttack,
 			ICDGroup:           attacks.ICDGroupDefault,
