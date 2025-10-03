@@ -4,7 +4,7 @@ rarity: QUALITY_ORANGE
 body: BODY_GIRL
 region: ASSOC_TYPE_RANGER
 element: Electric
-weapon_class: WEAPON_SWORD_ONE_HAND
+weapon_class: WEAPON_POLE
 icon_name: "UI_AvatarIcon_Ambor"
 stats: {
    base_hp: 982
