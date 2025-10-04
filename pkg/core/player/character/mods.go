@@ -47,6 +47,12 @@ type (
 	}
 	ReactBonusModFunc func(combat.AttackInfo) (float64, bool)
 
+	ElevationMod struct {
+		Amount ElevationModFunc
+		modifier.Base
+	}
+	ElevationModFunc func(combat.AttackInfo) (float64, bool)
+
 	LCReactBonusMod struct {
 		Amount LCReactBonusModFunc
 		modifier.Base
@@ -121,6 +127,12 @@ func (c *CharWrapper) AddHealBonusMod(mod HealBonusMod) {
 	mod.SetExpiry(*c.f)
 	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
 	modifier.LogAdd("heal bonus", c.Index, &mod, c.log, overwrote, oldEvt)
+}
+
+func (c *CharWrapper) AddElevationMod(mod ElevationMod) {
+	mod.SetExpiry(*c.f)
+	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
+	modifier.LogAdd("react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
 }
 
 func (c *CharWrapper) AddReactBonusMod(mod ReactBonusMod) {
@@ -382,6 +394,29 @@ func (c *CharWrapper) ReactBonus(atk combat.AttackInfo) float64 {
 	amt := 0.0
 	for _, v := range c.mods {
 		m, ok := v.(*ReactBonusMod)
+		if !ok {
+			c.mods[n] = v
+			n++
+			continue
+		}
+		if m.Expiry() > *c.f || m.Expiry() == -1 {
+			a, done := m.Amount(atk)
+			amt += a
+			if !done {
+				c.mods[n] = v
+				n++
+			}
+		}
+	}
+	c.mods = c.mods[:n]
+	return amt
+}
+
+func (c *CharWrapper) ElevationBonus(atk combat.AttackInfo) float64 {
+	n := 0
+	amt := 0.0
+	for _, v := range c.mods {
+		m, ok := v.(*ElevationMod)
 		if !ok {
 			c.mods[n] = v
 			n++

@@ -27,7 +27,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * burstlcmid[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlcmid[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
@@ -52,7 +52,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * burstlcfin[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlcfin[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
@@ -77,7 +77,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * burstlcts[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlcts[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
@@ -95,14 +95,14 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 	case "Flins TSADD Dummy":
 		atk := combat.AttackInfo{
 			ActorIndex:       c.Index,
-			Abil:             "Thunderous Symphony Additional DMG (C6)",
+			Abil:             "Thunderous Symphony Additional DMG (Q)",
 			AttackTag:        attacks.AttackTagLCDamage,
 			StrikeType:       attacks.StrikeTypeDefault,
 			Element:          attributes.Electro,
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * burstlctsadd[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlctsadd[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
@@ -127,7 +127,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * 0.5 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * 0.5 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}

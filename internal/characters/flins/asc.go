@@ -45,10 +45,10 @@ func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
-	m := make([]float64, attributes.EndStatType)
-	c.AddStatMod(character.StatMod{
+	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBaseWithHitlag("Whispering Flame (A4)", -1),
-		Amount: func() ([]float64, bool) {
+		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
+			m := make([]float64, attributes.EndStatType)
 			if c.Base.Cons >= 4 {
 				// C4: 10% of ATK, max 220
 				m[attributes.EM] = min(220, c.TotalAtk()*0.10)

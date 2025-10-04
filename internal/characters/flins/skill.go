@@ -76,7 +76,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			State:           action.SkillState,
 		}, nil
 	} else {
-		c.AddStatus(skillKey, 10*60, false) // 10s
+		c.AddStatus(skillKey, 10*60, true) // 10s
 		c.SetCD(action.ActionSkill, 16*60)
 
 		return action.Info{

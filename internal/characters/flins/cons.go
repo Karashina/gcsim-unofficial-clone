@@ -1,6 +1,7 @@
 package flins
 
 import (
+	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
@@ -25,7 +26,11 @@ func (c *char) c1() {
 	c.northlandCD = 4 * 60
 
 	// Subscribe to Lunar-Charged reaction events for energy recovery
-	c.Core.Events.Subscribe(event.OnLunarCharged, func(args ...interface{}) bool {
+	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		atk := args[1].(*combat.AttackEvent)
+		if atk.Info.AttackTag != attacks.AttackTagLCDamage {
+			return false
+		}
 		if c.StatusIsActive(c1EnergyICD) {
 			return false
 		}
@@ -137,20 +142,28 @@ func (c *char) c6() {
 	}
 
 	// Flins's own Lunar-Charged DMG bonus: 35%
-	c.AddLCReactBonusMod(character.LCReactBonusMod{
+	c.AddElevationMod(character.ElevationMod{
 		Base: modifier.NewBase("Flins C6", -1),
 		Amount: func(ai combat.AttackInfo) (float64, bool) {
-			return 0.35, false
+			if ai.AttackTag == attacks.AttackTagLCDamage {
+				return 0.35, false
+			} else {
+				return 0, false
+			}
 		},
 	})
 
 	// Team-wide Lunar-Charged DMG bonus when Moonsign: Ascendant Gleam: 10%
 	if c.MoonsignAscendant {
 		for _, char := range c.Core.Player.Chars() {
-			char.AddLCReactBonusMod(character.LCReactBonusMod{
+			char.AddElevationMod(character.ElevationMod{
 				Base: modifier.NewBase("Flins C6 Team", -1),
 				Amount: func(ai combat.AttackInfo) (float64, bool) {
-					return 0.10, false
+					if ai.AttackTag == attacks.AttackTagLCDamage {
+						return 0.1, false
+					} else {
+						return 0, false
+					}
 				},
 			})
 		}

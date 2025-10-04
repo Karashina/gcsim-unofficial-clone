@@ -476,7 +476,7 @@ func calcLunarChargedDmg(char *character.CharWrapper, atk combat.AttackInfo, em 
 	if lvl < 0 {
 		lvl = 0
 	}
-	return 1.8 * (reactionLvlBase[lvl] * (1 + char.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + char.LCReactBonus(atk))
+	return 1.8 * (reactionLvlBase[lvl] * (1 + char.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + char.LCReactBonus(atk)) * (1 + char.ElevationBonus(atk))
 }
 
 func calcLunarChargedDmgCRIT(char *character.CharWrapper, atk combat.AttackInfo, em float64) float64 {
@@ -489,7 +489,7 @@ func calcLunarChargedDmgCRIT(char *character.CharWrapper, atk combat.AttackInfo,
 	}
 	rb := char.LCReactBonus(atk)
 	brb := char.LCBaseReactBonus(atk)
-	return 1.8 * (reactionLvlBase[lvl] * (1 + brb)) * (1 + ((6 * em) / (2000 + em)) + rb*(1+char.Stat(attributes.CD)))
+	return 1.8 * (reactionLvlBase[lvl] * (1 + brb)) * (1 + ((6 * em) / (2000 + em)) + rb*(1+char.Stat(attributes.CD))) * (1 + char.ElevationBonus(atk))
 }
 
 var reactionLvlBase = []float64{
