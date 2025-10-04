@@ -57,6 +57,7 @@ var weaponNames = []string{
 	"blackcliffwarbow",
 	"blackmarrowlantern",
 	"blacktassel",
+	"bloodsoakedruins",
 	"bloodtaintedgreatsword",
 	"calamityofeshu",
 	"calamityqueller",
@@ -281,6 +282,7 @@ const (
 	BlackcliffWarbow
 	BlackmarrowLantern
 	BlackTassel
+	BloodsoakedRuins
 	BloodtaintedGreatsword
 	CalamityOfEshu
 	CalamityQueller
