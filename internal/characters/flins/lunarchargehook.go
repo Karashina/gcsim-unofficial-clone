@@ -9,25 +9,25 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/event"
 )
 
-// Special Lunar Charged damage handler for Flins
-func (c *char) onLunarChargedFlinsSpecial(args ...interface{}) bool {
+// Lunar Charged damage ("DMG considered as Lunar-Charged DMG") handler for Flins
+func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 	n := args[0].(combat.Target)
 	ae := args[1].(*combat.AttackEvent)
 
 	switch ae.Info.Abil {
-	case "Flins A1 Dummy":
+
+	// Ancient Ritual: Cometh the Night: Middle Phase Lunar-Charged DMG
+	case "Flins QMid Dummy":
 		atk := combat.AttackInfo{
 			ActorIndex:       c.Index,
-			Abil:             "Overclocking Circuit (A1)",
+			Abil:             "Middle Phase Lunar-Charged DMG (Q)",
 			AttackTag:        attacks.AttackTagLCDamage,
-			ICDTag:           attacks.ICDTagLCDamage,
-			ICDGroup:         attacks.ICDGroupReactionB,
 			StrikeType:       attacks.StrikeTypeDefault,
 			Element:          attributes.Electro,
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * 0.65 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlcmid[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
@@ -37,23 +37,22 @@ func (c *char) onLunarChargedFlinsSpecial(args ...interface{}) bool {
 			atk,
 			snap,
 			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
-			9,
+			0,
 		)
 		return false
 
-	case "Flins C2 Dummy":
+		// Ancient Ritual: Cometh the Night: Final Phase Lunar-Charged DMG
+	case "Flins QFin Dummy":
 		atk := combat.AttackInfo{
 			ActorIndex:       c.Index,
-			Abil:             "Support Cleaning Module (C2)",
+			Abil:             "Final Phase Lunar-Charged DMG (Q)",
 			AttackTag:        attacks.AttackTagLCDamage,
-			ICDTag:           attacks.ICDTagLCDamage,
-			ICDGroup:         attacks.ICDGroupReactionB,
 			StrikeType:       attacks.StrikeTypeDefault,
 			Element:          attributes.Electro,
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * 3 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlcfin[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
@@ -63,23 +62,47 @@ func (c *char) onLunarChargedFlinsSpecial(args ...interface{}) bool {
 			atk,
 			snap,
 			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
-			180,
+			0,
 		)
 		return false
 
-	case "Flins C6 Dummy":
+	// Ancient Ritual: Cometh the Night: Thunderous Symphony DMG
+	case "Flins TS Dummy":
 		atk := combat.AttackInfo{
 			ActorIndex:       c.Index,
-			Abil:             "A Dawning Morn for You (C6)",
+			Abil:             "Thunderous Symphony DMG (Q)",
 			AttackTag:        attacks.AttackTagLCDamage,
-			ICDTag:           attacks.ICDTagLCDamage,
-			ICDGroup:         attacks.ICDGroupReactionB,
 			StrikeType:       attacks.StrikeTypeDefault,
 			Element:          attributes.Electro,
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * 1.35 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlcts[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		snap := combat.Snapshot{
+			CharLvl: c.Base.Level,
+		}
+		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
+		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		c.Core.QueueAttackWithSnap(
+			atk,
+			snap,
+			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			0,
+		)
+		return false
+
+	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
+	case "Flins TSADD Dummy":
+		atk := combat.AttackInfo{
+			ActorIndex:       c.Index,
+			Abil:             "Thunderous Symphony Additional DMG (C6)",
+			AttackTag:        attacks.AttackTagLCDamage,
+			StrikeType:       attacks.StrikeTypeDefault,
+			Element:          attributes.Electro,
+			IgnoreDefPercent: 1,
+		}
+		em := c.Stat(attributes.EM)
+		atk.FlatDmg = (c.TotalAtk() * burstlctsadd[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
@@ -98,5 +121,5 @@ func (c *char) onLunarChargedFlinsSpecial(args ...interface{}) bool {
 
 // Register Flins's special Lunar Charged callback
 func (c *char) InitLCallback() {
-	c.Core.Events.Subscribe(event.OnEnemyHit, c.onLunarChargedFlinsSpecial, "lc-flins-special")
+	c.Core.Events.Subscribe(event.OnEnemyHit, c.onSpecialLunarChargedFlins, "lc-flins-special")
 }

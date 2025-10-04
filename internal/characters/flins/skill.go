@@ -1,8 +1,6 @@
 package flins
 
 import (
-	"math"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -12,67 +10,80 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 )
 
-var skillFrames []int
+var (
+	skillFrames     []int
+	northlandFrames []int
+)
 
 const (
-	skillInitHitmark    = 25
-	skillTicks          = 10
-	skillInterval       = 117
-	skillFirstTickDelay = 82
-	skillKey            = "flins-skill"
-	particleICDKey      = "flins-particle-icd"
+	skillEnter       = 25
+	northlandHitmark = 14
+	skillKey         = "flins-skill"
+	northlandKey     = "flins-northland"
+	northlandCdKey   = "flins-northland-cd"
+	particleICDKey   = "flins-particle-icd"
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(41) // E -> D/J
+	skillFrames = frames.InitAbilSlice(41)     // E -> D/J
+	northlandFrames = frames.InitAbilSlice(41) // E -> D/J
 }
 
-// Ceil helper for tick timing
-func ceil(x float64) int {
-	return int(math.Ceil(x))
-}
+// E
+/*
+Flins enters Manifest Flame form and obtains skillKey. This form has the following characteristics:
+· Flins's Normal and Charged Attack's element is converted into Electro and he is unable to use Plunging Attacks.
+· His Elemental Skill: "Ancient Rite: Arcane Light" is replaced with the special Elemental Skill: "Northland Spearstorm".
 
-// Skill ability implementation
-// Ancient Rite: Arcane Light (E)
-// Flins summons forth the ancient power concealed within his lamp
+Northland Spearstorm
+Deals AoE Electro DMG and gives him northlandKey for the next 6s.
+
+---ADDITIONAL INFO FOR COPILOT---
+for implementation of "Flins's Normal and Charged Attack's element is converted into Electro and he is unable to use Plunging Attacks",
+this should be handled in attack.go and charge.go. for additional example, see implementation of cyno.
+*/
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	skillPos := c.Core.Combat.Player()
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Ancient Rite: Arcane Light (E)",
-		AttackTag:  attacks.AttackTagElementalArt,
-		ICDTag:     attacks.ICDTagNone,
-		ICDGroup:   attacks.ICDGroupDefault,
-		StrikeType: attacks.StrikeTypeDefault,
-		Element:    attributes.Electro,
-		Durability: 25,
-		Mult:       skill[c.TalentLvlSkill()],
+	if c.StatusIsActive(skillKey) {
+		aiNorthland := combat.AttackInfo{
+			ActorIndex: c.Index,
+			Abil:       "Northland Spearstorm DMG (E)",
+			AttackTag:  attacks.AttackTagElementalArt,
+			ICDTag:     attacks.ICDTagNone,
+			ICDGroup:   attacks.ICDGroupDefault,
+			StrikeType: attacks.StrikeTypeDefault,
+			Element:    attributes.Electro,
+			Durability: 25,
+			Mult:       skill[c.TalentLvlSkill()],
+		}
+		c.Core.QueueAttack(
+			aiNorthland,
+			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: -1.5}, 5),
+			northlandHitmark, northlandHitmark, c.particleCB,
+		)
+
+		c.AddStatus(northlandKey, 6*60, true)
+		c.AddStatus(northlandCdKey, c.northlandCD, true)
+
+		return action.Info{
+			Frames:          frames.NewAbilFunc(northlandFrames),
+			AnimationLength: northlandFrames[action.InvalidAction],
+			CanQueueAfter:   northlandFrames[action.ActionSwap], // earliest cancel
+			State:           action.SkillState,
+		}, nil
+	} else {
+		c.AddStatus(skillKey, 10*60, false) // 10s
+		c.SetCD(action.ActionSkill, 16*60)
+
+		return action.Info{
+			Frames:          frames.NewAbilFunc(skillFrames),
+			AnimationLength: skillFrames[action.InvalidAction],
+			CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+			State:           action.SkillState,
+		}, nil
 	}
-	c.Core.QueueAttack(
-		ai,
-		combat.NewCircleHitOnTarget(skillPos, geometry.Point{Y: -1.5}, 5),
-		skillInitHitmark, skillInitHitmark, c.particleCB,
-	)
-
-	// E duration and ticks are not affected by hitlag
-	c.skillSrc = c.Core.F
-	for i := 0.0; i < skillTicks; i++ {
-		c.Core.Tasks.Add(c.skillTick(c.skillSrc), skillFirstTickDelay+ceil(skillInterval*i))
-	}
-	c.AddStatus(skillKey, skillFirstTickDelay+ceil((skillTicks-1)*skillInterval), false)
-
-	c.genShield("flins-skill", c.shieldHP())
-	c.SetCD(action.ActionSkill, 16*60)
-
-	return action.Info{
-		Frames:          frames.NewAbilFunc(skillFrames),
-		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
-		State:           action.SkillState,
-	}, nil
 }
 
-// Particle generation callback for skill
+// Particle generation callback for skill - called every time an Electro-converted attack is landed
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -80,35 +91,6 @@ func (c *char) particleCB(a combat.AttackCB) {
 	if c.StatusIsActive(particleICDKey) {
 		return
 	}
-	if c.Core.Rand.Float64() < 0.25 {
-		return
-	}
+	c.AddStatus(particleICDKey, 3*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Electro, c.ParticleDelay)
-}
-
-// Skill tick logic for DoT
-// Northland Spearstorm - special skill during Manifest Flame form
-func (c *char) skillTick(src int) func() {
-	return func() {
-		if src != c.skillSrc {
-			return
-		}
-		ai := combat.AttackInfo{
-			ActorIndex: c.Index,
-			Abil:       "Northland Spearstorm (E/DoT)",
-			AttackTag:  attacks.AttackTagElementalArt,
-			ICDTag:     attacks.ICDTagNone,
-			ICDGroup:   attacks.ICDGroupDefault,
-			StrikeType: attacks.StrikeTypeDefault,
-			Element:    attributes.Electro,
-			Durability: 25,
-			Mult:       skillDot[c.TalentLvlSkill()],
-		}
-		c.a1()
-		c.Core.QueueAttack(
-			ai,
-			combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5),
-			0, 0, c.particleCB,
-		)
-	}
 }

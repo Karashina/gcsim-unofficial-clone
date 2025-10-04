@@ -3,6 +3,7 @@ package flins
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/pkg/core"
+	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
@@ -15,7 +16,7 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	skillSrc int
+	northlandCD int
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -37,8 +38,8 @@ func (c *char) Init() error {
 	c.moonsignInitFunc()
 	c.InitLCallback()
 	c.a0()
-	c.c4()
-	c.c6()
+	c.a1()
+	c.a4()
 	return nil
 }
 
@@ -47,6 +48,22 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 		return 11
 	}
 	return c.Character.AnimationStartDelay(k)
+}
+
+func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
+	if a == action.ActionSkill && c.StatusIsActive(skillKey) {
+		if c.StatusIsActive(northlandCdKey) {
+			return false, action.SkillCD // Fails if Northland Spearstorm is still on CD (This CD is unaffected by other effects such as c.CDReduction())
+		}
+		return true, action.NoFailure // Make Northland Spearstorm usable even on normal skill is in CD
+	}
+	if a == action.ActionBurst && c.StatusIsActive(northlandKey) {
+		if !c.Core.Flags.IgnoreBurstEnergy && c.Energy < 30 {
+			return false, action.InsufficientEnergy // Energy cost of Thunderous Symphony is 30
+		}
+		return true, action.NoFailure // Make Thunderous Symphony usable even on normal burst is in CD
+	}
+	return c.Character.ActionReady(a, p)
 }
 
 func (c *char) moonsignInitFunc() {
@@ -60,7 +77,7 @@ func (c *char) moonsignInitFunc() {
 	case 1:
 		c.MoonsignNascent = true // Moonsign: Nascent Gleam
 		c.MoonsignAscendant = false
-	case 2:
+	case 2, 3, 4:
 		c.MoonsignAscendant = true // Moonsign: Ascendant Gleam
 		c.MoonsignNascent = false
 	default:

@@ -13,14 +13,14 @@ import (
 
 var (
 	attackFrames          [][]int
-	attackHitmarks        = [][]int{{10}, {15}, {7, 16}, {28}}
-	attackHitlagHaltFrame = [][]float64{{0.12}, {0.12}, {0.03, 0.12}, {0.10}}
-	attackDefHalt         = [][]bool{{true}, {true}, {false, true}, {true}}
-	attackHitboxes        = [][][]float64{{{1.6, 2}}, {{2}}, {{2.5}, {2.5}}, {{2.5}}}
-	attackOffsets         = [][]float64{{1}, {-0.2}, {-0.2, -0.2}, {0.2}}
+	attackHitmarks        = [][]int{{10}, {15}, {15}, {7, 16}, {28}}
+	attackHitlagHaltFrame = [][]float64{{0.12}, {0.12}, {0.12}, {0.03, 0.12}, {0.10}}
+	attackDefHalt         = [][]bool{{true}, {true}, {true}, {false, true}, {true}}
+	attackHitboxes        = [][][]float64{{{2}}, {{2}}, {{2}}, {{2.5}, {2.5}}, {{2.5}}}
+	attackOffsets         = [][]float64{{-0.2}, {-0.2}, {-0.2}, {-0.2, -0.2}, {-0.2}}
 )
 
-const normalHitNum = 4
+const normalHitNum = 5
 
 func init() {
 	attackFrames = make([][]int, normalHitNum)
@@ -32,12 +32,15 @@ func init() {
 	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 30)
 	attackFrames[1][action.ActionDash] = 20
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 36)
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][0], 36)
 	attackFrames[2][action.ActionDash] = 22
 
-	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[2][1], 57)
-	attackFrames[3][action.ActionDash] = 37
-	attackFrames[3][action.ActionCharge] = 500 // Illegal action; needs better handling
+	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][1], 36)
+	attackFrames[3][action.ActionDash] = 22
+
+	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 57)
+	attackFrames[4][action.ActionDash] = 37
+	attackFrames[4][action.ActionCharge] = 500 // Illegal action; needs better handling
 }
 
 // Normal attack implementation

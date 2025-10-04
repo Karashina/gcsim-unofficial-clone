@@ -25,7 +25,7 @@ func init() {
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
-		Abil:               "Pocztowy Demonspear (Charged)",
+		Abil:               "Charge",
 		AttackTag:          attacks.AttackTagExtra,
 		ICDTag:             attacks.ICDTagExtraAttack,
 		ICDGroup:           attacks.ICDGroupDefault,

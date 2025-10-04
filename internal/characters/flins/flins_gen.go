@@ -52,17 +52,27 @@ var (
 	attack = [][][]float64{
 		{attack_1},
 		{attack_2},
-		attack_3,
-		{attack_4},
+		{attack_3},
+		attack_4,
+		{attack_5},
+	}
+	attack_e = [][][]float64{
+		{attack_e_1},
+		{attack_e_2},
+		{attack_e_3},
+		attack_e_4,
+		{attack_e_5},
 	}
 )
 
-var (
-	// attack: attack_1 = [0]
+/* ADDITIONAL INSTRUCTION FOR COPILOT
+EXAMPLE:
+	// attack: attack_1 = [0] ---- [ability]: [ability internal name] = [ability index, must be consistent with config.yml]
+	// Pocztowy Demonspear: 1-Hit DMG ---- [real talent name]: [ability in the talent]
 	attack_1 = []float64{
-		0.348,
-		0.376188,
-		0.404724,
+		0.348,   ---- talent level 1, number in the wiki is written by percentage, so convert it to decimal
+		0.376188,   ---- talent level 2
+		0.404724,   ---- talent level 3 ... and so on
 		0.445092,
 		0.47328,
 		0.505644,
@@ -72,245 +82,82 @@ var (
 		0.687996,
 		0.736368,
 		0.785088,
+		0.83346, ---- talent scaling must have 15 levels, but some ability only have 11 or 13 levels, so just repeat the last value
 		0.83346,
 		0.83346,
-		0.83346,
 	}
-	// attack: attack_2 = [1]
-	attack_2 = []float64{
-		0.342,
-		0.369702,
-		0.397746,
-		0.437418,
-		0.46512,
-		0.496926,
-		0.540702,
-		0.584478,
-		0.628254,
-		0.676134,
-		0.723672,
-		0.771552,
-		0.81909,
-		0.81909,
-		0.81909,
-	}
-	// attack: attack_3 = [2 3]
-	attack_3 = [][]float64{
-		{
-			0.228,
-			0.246468,
-			0.265164,
-			0.291612,
-			0.31008,
-			0.331284,
-			0.360468,
-			0.389652,
-			0.418836,
-			0.450756,
-			0.482448,
-			0.514368,
-			0.54606,
-			0.54606,
-			0.54606,
-		},
-		{
-			0.228,
-			0.246468,
-			0.265164,
-			0.291612,
-			0.31008,
-			0.331284,
-			0.360468,
-			0.389652,
-			0.418836,
-			0.450756,
-			0.482448,
-			0.514368,
-			0.54606,
-			0.54606,
-			0.54606,
-		},
-	}
-	// attack: attack_4 = [4]
-	attack_4 = []float64{
-		0.342,
-		0.369702,
-		0.397746,
-		0.437418,
-		0.46512,
-		0.496926,
-		0.540702,
-		0.584478,
-		0.628254,
-		0.676134,
-		0.723672,
-		0.771552,
-		0.81909,
-		0.81909,
-		0.81909,
-	}
-	// attack: charge = [5]
-	charge = []float64{
-		0.949,
-		1.025869,
-		1.103687,
-		1.213771,
-		1.29064,
-		1.378897,
-		1.500369,
-		1.621841,
-		1.743313,
-		1.876173,
-		2.008084,
-		2.140944,
-		2.272855,
-		2.272855,
-		2.272855,
-	}
-	// attack: collision = [6]
-	collision = []float64{
-		0.639324,
-		0.691362,
-		0.7434,
-		0.81774,
-		0.869778,
-		0.92925,
-		1.011024,
-		1.092798,
-		1.174572,
-		1.26378,
-		1.352988,
-		1.442196,
-		1.531404,
-		1.620612,
-		1.70982,
-	}
-	// attack: highPlunge = [8]
-	highPlunge = []float64{
-		1.596762,
-		1.726731,
-		1.8567,
-		2.04237,
-		2.172339,
-		2.320875,
-		2.525112,
-		2.729349,
-		2.933586,
-		3.15639,
-		3.379194,
-		3.601998,
-		3.824802,
-		4.047606,
-		4.27041,
-	}
-	// attack: lowPlunge = [7]
-	lowPlunge = []float64{
-		1.278377,
-		1.382431,
-		1.486485,
-		1.635134,
-		1.739187,
-		1.858106,
-		2.02162,
-		2.185133,
-		2.348646,
-		2.527025,
-		2.705403,
-		2.883781,
-		3.062159,
-		3.240537,
-		3.418915,
-	}
-	// skill: skill = [0]
-	skill = []float64{
-		0.864,
-		0.9288,
-		0.9936,
-		1.08,
-		1.1448,
-		1.2096,
-		1.296,
-		1.3824,
-		1.4688,
-		1.5552,
-		1.6416,
-		1.728,
-		1.836,
-		1.836,
-		1.836,
 
-		1.197,
+all value should be taken from https://wiki.hoyolab.com/pc/genshin/entry/8398?lang=en-us.
+*/
+
+var (
+	// attack: attack_1 = [0]
+	// Pocztowy Demonspear: 1-Hit DMG
+	attack_1 = []float64{}
+	// attack: attack_2 = [1]
+	// Pocztowy Demonspear: 2-Hit DMG
+	attack_2 = []float64{}
+	// attack: attack_3 = [2]
+	// Pocztowy Demonspear: 3-Hit DMG
+	attack_3 = []float64{}
+	// attack: attack_4 = [3 4]
+	// Pocztowy Demonspear: 4-Hit DMG
+	attack_4 = [][]float64{
+		{},
+		{},
 	}
-	// skill: skillDot = [1]
-	skillDot = []float64{
-		0.96,
-		1.032,
-		1.104,
-		1.2,
-		1.272,
-		1.344,
-		1.44,
-		1.536,
-		1.632,
-		1.728,
-		1.824,
-		1.92,
-		2.04,
-		2.04,
-		2.04,
+	// attack: attack_5 = [5]
+	// Pocztowy Demonspear: 5-Hit DMG
+	attack_5 = []float64{}
+	// attack: charge = [6]
+	// Pocztowy Demonspear: Charged Attack DMG
+	charge = []float64{}
+	// attack: collision = [6]
+	// Pocztowy Demonspear: Plunge DMG
+	collision = []float64{}
+	// attack: highPlunge = [8]
+	// Pocztowy Demonspear: High Plunge DMG
+	highPlunge = []float64{}
+	// attack: lowPlunge = [7]
+	// Pocztowy Demonspear: Low Plunge DMG
+	lowPlunge = []float64{}
+	// skill: attack_e_1 = [0]
+	// Ancient Rite: Arcane Light: 1-Hit DMG
+	attack_e_1 = []float64{}
+	// skill: attack_e_2 = [1]
+	// Ancient Rite: Arcane Light: 2-Hit DMG
+	attack_e_2 = []float64{}
+	// skill: attack_e_3 = [2]
+	// Ancient Rite: Arcane Light: 3-Hit DMG
+	attack_e_3 = []float64{}
+	// skill: attack_e_4 = [3 4]
+	// Ancient Rite: Arcane Light: 4-Hit DMG
+	attack_e_4 = [][]float64{
+		{},
+		{},
 	}
-	// skill: shieldPct = [2]
-	shieldPct = []float64{
-		2.212,
-		2.3779,
-		2.5438,
-		2.765,
-		2.9309,
-		3.0968,
-		3.318,
-		3.5392,
-		3.7604,
-		3.9816,
-		4.2028,
-		4.424,
-		4.7005,
-		4.7005,
-		4.7005,
-	}
-	// skill: shieldCst = [3]
-	shieldCst = []float64{
-		1387,
-		1525.7,
-		1675.496,
-		1837.775,
-		2011.15,
-		2195.621,
-		2392.575,
-		2600.625,
-		2819.771,
-		3051.4,
-		3294.125,
-		3549.333,
-		3814.25,
-		3814.25,
-		3814.25,
-	}
+	// skill: attack_e_5 = [5]
+	// Ancient Rite: Arcane Light: 5-Hit DMG
+	attack_e_5 = []float64{}
+	// skill: charge_e = [6]
+	// Ancient Rite: Arcane Light: Charged Attack DMG
+	charge_e = []float64{}
+	// skill: skill = [7]
+	// Ancient Rite: Arcane Light: Northland Spearstorm DMG
+	skill = []float64{}
 	// burst: burst = [0]
-	burst = []float64{
-		6.768,
-		7.2756,
-		7.7832,
-		8.46,
-		8.9676,
-		9.4752,
-		10.152,
-		10.8288,
-		11.5056,
-		12.1824,
-		12.8592,
-		13.536,
-		14.382,
-		14.382,
-		14.382,
-	}
+	// Ancient Ritual: Cometh the Night: Initial Skill DMG
+	burst = []float64{}
+	// burst: burstlcmid = [1]
+	// Ancient Ritual: Cometh the Night: Middle Phase Lunar-Charged DMG
+	burstlcmid = []float64{}
+	// burst: burstlcfin = [2]
+	// Ancient Ritual: Cometh the Night: Final Phase Lunar-Charged DMG
+	burstlcfin = []float64{}
+	// burst: burstlcts = [3]
+	// Ancient Ritual: Cometh the Night: Thunderous Symphony DMG
+	burstlcts = []float64{}
+	// burst: burstlctsadd = [4]
+	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
+	burstlctsadd = []float64{}
 )

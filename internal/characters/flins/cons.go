@@ -1,94 +1,45 @@
 package flins
 
-import (
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/core/reactions"
-	"github.com/genshinsim/gcsim/pkg/modifier"
-)
+const ()
 
-const (
-	c4IcdKey = "flins-c4-icd"
-	c6IcdKey = "flins-c6-icd"
-)
-
-// C1: Adds reaction bonus mod for all characters
+// C1
+// The basic cooldown of the special Elemental Skill: Northland Spearstorm is reduced to 4s.
+// Additionally, when party members trigger Lunar-Charged reactions, Flins will recover 8 Elemental Energy. This effect can occur once every 5.5s.
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
+		c.northlandCD = 6 * 60
 		return
 	}
-	for _, char := range c.Core.Player.Chars() {
-		amt := min(0.5, c.TotalAtk()/100*0.025)
-		char.AddLCReactBonusMod(character.LCReactBonusMod{
-			Base: modifier.NewBase("flins-c1", 20*60),
-			Amount: func(ai combat.AttackInfo) (float64, bool) {
-				return amt, false
-			},
-		})
-	}
+	c.northlandCD = 4 * 60
+
 }
 
-// C2: Generates shield and triggers dummy attack
+// C2
+// For the next 6s after using the special Elemental Skill: Northland Spearstorm, when Flins's next Normal Attack hits an opponent, it will deal an additional 50% of Flins's ATK as AoE Electro DMG. This DMG is considered Lunar-Charged DMG.
+// When the moonsign is Moonsign: Ascendant Gleam, While Flins is on the field, after his Electro attacks hit an opponent, that opponent's Electro RES will be decreased by 25% for 7s.
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
 	}
-	c.genShield("flins-skill", c.shieldHP())
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
-		Abil:       "Flins C2 Dummy",
-		FlatDmg:    0,
-	}
-	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99), 0, 0)
+
 }
 
-// C4: Adds energy on LC damage, with ICD
+// C4
+// Flins's ATK is increased by 20%.
+// Additionally, his Ascension Talent "Whispering Flame" is changed: Flins's Elemental Mastery is increased by 10% of his ATK. The maximum increase obtainable this way is 220.
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
 	}
-	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		a := args[1].(*combat.AttackEvent)
-		if a.Info.AttackTag != attacks.AttackTagLCDamage {
-			return false
-		}
-		if c.StatusIsActive(c4IcdKey) {
-			return false
-		}
-		c.AddEnergy("Flins C4", 5)
-		c.AddStatus(c4IcdKey, 4*60, true)
-		return false
-	}, "flins-c4")
+
 }
 
-// C6: Triggers dummy attack if C1 buff is active and LC triggers, with ICD
+// C6
+// The DMG dealt to opponents by Flins's Lunar-Charged reactions is multiplied by 35%.
+// When the moonsign is Moonsign: Ascendant Gleam, All nearby party members' Lunar-Charged DMG is multiplied by 10%.
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		a := args[1].(*combat.AttackEvent)
-		if a.Info.AttackTag != attacks.AttackTagLCDamage {
-			return false
-		}
-		if a.Info.Abil != string(reactions.LunarCharged) {
-			return false
-		}
-		if !c.ReactBonusModIsActive("flins-c1") {
-			return false
-		}
-		if c.StatusIsActive(c6IcdKey) {
-			return false
-		}
-		ai := combat.AttackInfo{
-			ActorIndex: c.Index,
-			Abil:       "Flins C6 Dummy",
-			FlatDmg:    0,
-		}
-		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99), 0, 0)
-		c.AddStatus(c6IcdKey, 3.5*60, true)
-		return false
-	}, "flins-c6")
+
 }
