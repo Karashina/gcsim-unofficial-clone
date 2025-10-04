@@ -131,4 +131,5 @@ const (
 	ZoneFontaine
 	ZoneNatlan
 	ZoneSnezhnaya
+	ZoneNodkrai
 )

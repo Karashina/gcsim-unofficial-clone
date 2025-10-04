@@ -2,7 +2,7 @@ id: 90000600
 key: "lauma"
 rarity: QUALITY_ORANGE
 body: BODY_LADY
-region: ASSOC_TYPE_RANGER
+region: ASSOC_TYPE_NODKRAI
 element: Grass
 weapon_class: WEAPON_CATALYST
 icon_name: "UI_AvatarIcon_Ambor"
