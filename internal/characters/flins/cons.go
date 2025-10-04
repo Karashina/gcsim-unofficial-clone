@@ -1,12 +1,10 @@
 package flins
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
@@ -27,7 +25,7 @@ func (c *char) c1() {
 	c.northlandCD = 4 * 60
 
 	// Subscribe to Lunar-Charged reaction events for energy recovery
-	c.Core.Events.Subscribe(event.OnLCReaction, func(args ...interface{}) bool {
+	c.Core.Events.Subscribe(event.OnLunarCharged, func(args ...interface{}) bool {
 		if c.StatusIsActive(c1EnergyICD) {
 			return false
 		}
@@ -66,8 +64,11 @@ func (c *char) c2() {
 			return false
 		}
 
-		trg := args[0].(combat.Target)
-		trg.AddResistMod(combat.ResistMod{
+		enemy, ok := args[0].(combat.Enemy)
+		if !ok {
+			return false
+		}
+		enemy.AddResistMod(combat.ResistMod{
 			Base:  modifier.NewBaseWithHitlag(c2ResDebuff, 7*60),
 			Ele:   attributes.Electro,
 			Value: -0.25,
@@ -90,7 +91,8 @@ func (c *char) c2AdditionalDamage() combat.AttackCBFunc {
 		if !c.StatusIsActive(c2NorthlandKey) {
 			return
 		}
-		if a.Target.Type() != targets.TargettableEnemy {
+		_, ok := a.Target.(combat.Enemy)
+		if !ok {
 			return
 		}
 
@@ -99,28 +101,11 @@ func (c *char) c2AdditionalDamage() combat.AttackCBFunc {
 
 		// Additional 50% ATK as Electro DMG (Lunar-Charged)
 		ai := combat.AttackInfo{
-			ActorIndex:       c.Index,
-			Abil:             "C2 Additional DMG",
-			AttackTag:        attacks.AttackTagLCDamage,
-			StrikeType:       attacks.StrikeTypeDefault,
-			Element:          attributes.Electro,
-			IgnoreDefPercent: 1,
+			ActorIndex: c.Index,
+			Abil:       "Flins C2 Dummy",
+			FlatDmg:    0,
 		}
-		em := c.Stat(attributes.EM)
-		ai.FlatDmg = (c.TotalAtk() * 0.5 * (1 + c.LCBaseReactBonus(ai))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(ai)) * 3
-
-		snap := combat.Snapshot{
-			CharLvl: c.Base.Level,
-		}
-		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
-		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
-
-		c.Core.QueueAttackWithSnap(
-			ai,
-			snap,
-			combat.NewCircleHitOnTarget(a.Target, nil, 5),
-			0,
-		)
+		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99), 0, 0)
 	}
 }
 
