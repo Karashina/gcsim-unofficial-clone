@@ -46,6 +46,9 @@ func init() {
 // Normal attack implementation
 // Pocztowy Demonspear
 func (c *char) Attack(p map[string]int) (action.Info, error) {
+	if c.StatusIsActive(skillKey) {
+		return c.attackE() // go to Electro-infused attacks during Manifest Flame form
+	}
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{
 			ActorIndex:         c.Index,
@@ -78,6 +81,55 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		}
 		c.QueueCharTask(func() {
 			c.Core.QueueAttack(ai, ap, 0, 0)
+		}, attackHitmarks[c.NormalCounter][i])
+	}
+
+	defer c.AdvanceNormalIndex()
+
+	return action.Info{
+		Frames:          frames.NewAttackFunc(c.Character, attackFrames),
+		AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],
+		CanQueueAfter:   attackHitmarks[c.NormalCounter][len(attackHitmarks[c.NormalCounter])-1],
+		State:           action.NormalAttackState,
+	}, nil
+}
+
+// Normal attack implementation during Manifest Flame form (Electro-infused)
+// Ancient Rite: Arcane Light
+func (c *char) attackE() (action.Info, error) {
+	for i, mult := range attack_e[c.NormalCounter] {
+		ai := combat.AttackInfo{
+			ActorIndex:         c.Index,
+			Abil:               fmt.Sprintf("Ancient Rite: Arcane Light %v", c.NormalCounter),
+			AttackTag:          attacks.AttackTagNormal,
+			ICDTag:             attacks.ICDTagNormalAttack,
+			ICDGroup:           attacks.ICDGroupDefault,
+			StrikeType:         attacks.StrikeTypeSlash,
+			Element:            attributes.Electro,
+			Durability:         25,
+			Mult:               mult[c.TalentLvlSkill()],
+			HitlagFactor:       0.01,
+			HitlagHaltFrames:   attackHitlagHaltFrame[c.NormalCounter][i] * 60,
+			CanBeDefenseHalted: attackDefHalt[c.NormalCounter][i],
+			IgnoreInfusion:     true,
+		}
+
+		ap := combat.NewCircleHitOnTarget(
+			c.Core.Combat.Player(),
+			geometry.Point{Y: attackOffsets[c.NormalCounter][i]},
+			attackHitboxes[c.NormalCounter][i][0],
+		)
+		if c.NormalCounter == 0 {
+			ai.StrikeType = attacks.StrikeTypeSpear
+			ap = combat.NewBoxHitOnTarget(
+				c.Core.Combat.Player(),
+				geometry.Point{Y: attackOffsets[c.NormalCounter][i]},
+				attackHitboxes[c.NormalCounter][i][0],
+				attackHitboxes[c.NormalCounter][i][1],
+			)
+		}
+		c.QueueCharTask(func() {
+			c.Core.QueueAttack(ai, ap, 0, 0, c.particleCB)
 		}, attackHitmarks[c.NormalCounter][i])
 	}
 

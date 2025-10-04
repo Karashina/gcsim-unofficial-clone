@@ -49,6 +49,11 @@ func init() {
 // Use the "collision" optional argument if you want to do a falling hit on the way down
 // Default = 0
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
+	// Cannot use plunge attacks during Manifest Flame form
+	if c.StatusIsActive(skillKey) {
+		return action.Info{}, errors.New("plunge cannot be used during Manifest Flame form")
+	}
+
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
 	case player.AirborneXianyun:
@@ -99,6 +104,11 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 // Use the "collision" optional argument if you want to do a falling hit on the way down
 // Default = 0
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
+	// Cannot use plunge attacks during Manifest Flame form
+	if c.StatusIsActive(skillKey) {
+		return action.Info{}, errors.New("plunge cannot be used during Manifest Flame form")
+	}
+
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
 	case player.AirborneXianyun:
