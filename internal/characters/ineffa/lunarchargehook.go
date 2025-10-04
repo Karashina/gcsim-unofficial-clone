@@ -25,18 +25,20 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * 0.65 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * 0.65 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			9,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	case "Ineffa C2 Dummy":
@@ -49,18 +51,20 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * 3 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * 3 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			180,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	case "Ineffa C6 Dummy":
@@ -73,18 +77,20 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * 1.35 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * 1.35 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 	}
 	return false

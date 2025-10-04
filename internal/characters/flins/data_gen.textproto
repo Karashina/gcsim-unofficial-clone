@@ -2,7 +2,7 @@ id: 90000603
 key: "flins"
 rarity: QUALITY_ORANGE
 body: BODY_MALE
-region: ASSOC_TYPE_NODKRAI
+region: 12
 element: Electric
 weapon_class: WEAPON_POLE
 icon_name: "UI_AvatarIcon_Ambor"

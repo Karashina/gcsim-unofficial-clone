@@ -27,18 +27,20 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * burstlcmid[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlcmid[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 		// Ancient Ritual: Cometh the Night: Final Phase Lunar-Charged DMG
@@ -52,18 +54,20 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * burstlcfin[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlcfin[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony DMG
@@ -77,43 +81,47 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * burstlcts[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlcts[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
 	case "Flins TSADD Dummy":
 		atk := combat.AttackInfo{
 			ActorIndex:       c.Index,
-			Abil:             "Thunderous Symphony Additional DMG (C6)",
+			Abil:             "Thunderous Symphony Additional DMG (Q)",
 			AttackTag:        attacks.AttackTagLCDamage,
 			StrikeType:       attacks.StrikeTypeDefault,
 			Element:          attributes.Electro,
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * burstlctsadd[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * burstlctsadd[c.TalentLvlBurst()] * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
@@ -127,18 +135,20 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			IgnoreDefPercent: 1,
 		}
 		em := c.Stat(attributes.EM)
-		atk.FlatDmg = (c.TotalAtk() * 0.5 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		atk.FlatDmg = (c.TotalAtk() * 0.5 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3 * (1 + c.ElevationBonus(atk))
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 	}
 	return false

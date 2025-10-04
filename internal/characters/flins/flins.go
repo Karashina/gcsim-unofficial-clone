@@ -95,3 +95,12 @@ func (c *char) moonsignInitFunc() {
 		c.MoonsignAscendant = false
 	}
 }
+
+func (c *char) Condition(fields []string) (any, error) {
+	switch fields[0] {
+	case "northlandup":
+		return c.StatusIsActive(northlandCdKey), nil
+	default:
+		return c.Character.Condition(fields)
+	}
+}

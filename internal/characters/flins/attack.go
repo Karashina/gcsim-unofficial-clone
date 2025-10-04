@@ -94,11 +94,17 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		)
 		if c.NormalCounter == 0 {
 			ai.StrikeType = attacks.StrikeTypeSpear
+			// Check length before accessing [1]
+			hitbox := attackHitboxes[c.NormalCounter][i]
+			var width float64 = 1.0
+			if len(hitbox) > 1 {
+				width = hitbox[1]
+			}
 			ap = combat.NewBoxHitOnTarget(
 				c.Core.Combat.Player(),
 				geometry.Point{Y: attackOffsets[c.NormalCounter][i]},
-				attackHitboxes[c.NormalCounter][i][0],
-				attackHitboxes[c.NormalCounter][i][1],
+				hitbox[0],
+				width,
 			)
 		}
 		c.QueueCharTask(func() {
@@ -144,11 +150,17 @@ func (c *char) attackE() (action.Info, error) {
 		)
 		if c.NormalCounter == 0 {
 			ai.StrikeType = attacks.StrikeTypeSpear
+			// Check length before accessing [1]
+			hitbox := attackHitboxes[c.NormalCounter][i]
+			var width float64 = 1.0
+			if len(hitbox) > 1 {
+				width = hitbox[1]
+			}
 			ap = combat.NewBoxHitOnTarget(
 				c.Core.Combat.Player(),
 				geometry.Point{Y: attackOffsets[c.NormalCounter][i]},
-				attackHitboxes[c.NormalCounter][i][0],
-				attackHitboxes[c.NormalCounter][i][1],
+				hitbox[0],
+				width,
 			)
 		}
 		c.QueueCharTask(func() {

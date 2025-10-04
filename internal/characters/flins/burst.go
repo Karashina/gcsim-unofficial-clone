@@ -53,6 +53,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			c.Core.QueueAttack(aiadd, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99), tsAddHitmark, tsAddHitmark)
 		}
 
+		c.DeleteStatus(northlandKey)
 		c.ConsumeEnergyPartial(7, 30)
 
 		return action.Info{

@@ -16,7 +16,6 @@ var (
 )
 
 const (
-	skillEnter       = 25
 	northlandHitmark = 23
 	skillKey         = "flins-skill"
 	northlandKey     = "flins-northland"
@@ -76,7 +75,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			State:           action.SkillState,
 		}, nil
 	} else {
-		c.AddStatus(skillKey, 10*60, false) // 10s
+		c.AddStatus(skillKey, 10*60, true) // 10s
 		c.SetCD(action.ActionSkill, 16*60)
 
 		return action.Info{
@@ -96,6 +95,6 @@ func (c *char) particleCB(a combat.AttackCB) {
 	if c.StatusIsActive(particleICDKey) {
 		return
 	}
-	c.AddStatus(particleICDKey, 3*60, true)
+	c.AddStatus(particleICDKey, 2.1*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Electro, c.ParticleDelay)
 }

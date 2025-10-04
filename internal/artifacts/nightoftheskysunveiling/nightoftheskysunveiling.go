@@ -90,12 +90,12 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 					count := 0
 					sms := false
 					notsu := false
-					for _, char := range c.Player.Chars() {
-						if char.StatusIsActive("gleamingmoon-key-sms") || !sms {
+					for _, chr := range c.Player.Chars() {
+						if chr.StatusIsActive("gleamingmoon-key-sms") || !sms {
 							count++
 							sms = true
 						}
-						if char.StatusIsActive("gleamingmoon-key-notsu") || !notsu {
+						if chr.StatusIsActive("gleamingmoon-key-notsu") || !notsu {
 							count++
 							notsu = true
 						}
@@ -104,18 +104,18 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 					return val, false
 				},
 			})
-			char.AddLCReactBonusMod(character.LCReactBonusMod{
+			ch.AddLCReactBonusMod(character.LCReactBonusMod{
 				Base: modifier.NewBase("gleamingmoon-lc", -1),
 				Amount: func(ai combat.AttackInfo) (float64, bool) {
 					count := 0
 					sms := false
 					notsu := false
-					for _, char := range c.Player.Chars() {
-						if char.StatusIsActive("gleamingmoon-key-sms") || !sms {
+					for _, chr := range c.Player.Chars() {
+						if chr.StatusIsActive("gleamingmoon-key-sms") || !sms {
 							count++
 							sms = true
 						}
-						if char.StatusIsActive("gleamingmoon-key-notsu") || !notsu {
+						if chr.StatusIsActive("gleamingmoon-key-notsu") || !notsu {
 							count++
 							notsu = true
 						}
