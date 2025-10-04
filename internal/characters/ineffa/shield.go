@@ -13,7 +13,7 @@ func (c *char) genShield(src string, shieldamt float64) {
 			ActorIndex: c.Index,
 			Target:     -1,
 			Src:        c.Core.F,
-			ShieldType: shield.DhaliaBurst,
+			ShieldType: shield.IneffaSkill,
 			Name:       src,
 			HP:         shieldamt,
 			Ele:        attributes.Hydro,

@@ -26,7 +26,7 @@ func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	if !c.StatusIsActive(skillKey) {
+	if !c.StatusIsActive(skillKey) && !c.lcCloudCheck() {
 		return
 	}
 	ai := combat.AttackInfo{
@@ -58,4 +58,13 @@ func (c *char) a4() {
 			},
 		})
 	}
+}
+
+func (c *char) lcCloudCheck() bool {
+	for _, target := range c.Core.Combat.Enemies() {
+		if c.HasLCCloudOn(target) {
+			return true
+		}
+	}
+	return false
 }

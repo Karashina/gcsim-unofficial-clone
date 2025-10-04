@@ -130,6 +130,9 @@ type Reactable struct {
 	lcActiveExpiry       int
 	lastEleSource        map[attributes.Element]int
 	expiryTaskMap        map[int]int
+	// Lunar Charged Cloud state
+	lcCloudActive bool
+	lcCloudExpiry int
 }
 
 type Enemy interface {

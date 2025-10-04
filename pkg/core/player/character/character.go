@@ -182,6 +182,19 @@ func New(
 	return c, nil
 }
 
+// HasLCCloudOn checks if the given target currently has an active LC Cloud.
+// This allows character code to check LC Cloud state on any target.
+func (c *CharWrapper) HasLCCloudOn(target combat.Target) bool {
+	// Try to get the Reactable interface from the target
+	type hasLCCloud interface {
+		HasLCCloud() bool
+	}
+	if r, ok := target.(hasLCCloud); ok {
+		return r.HasLCCloud()
+	}
+	return false
+}
+
 func (c *CharWrapper) SetIndex(index int) {
 	c.Index = index
 }

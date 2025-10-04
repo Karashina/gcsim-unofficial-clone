@@ -1,0 +1,58 @@
+package_name: flins
+genshin_id: 10000603
+key: flins
+action_param_keys:
+  low_plunge:
+    - param: "collision"
+  high_plunge:
+    - param: "collision"
+  skill_data_mapping:
+    # ADDITIONAL INSTRUCTION FOR COPILOT:
+    # use [ability] and [ability internal name] in the comment from flins_gen.go to fill in the values below
+    attack:
+      attack_1:
+        - 0 # 1-Hit DMG
+      attack_2:
+        - 1 # 2-Hit DMG
+      attack_3:
+        - 2 # 3-Hit DMG
+      attack_4:
+        - 3 # 4-Hit DMG (1st)
+        - 4 # 4-Hit DMG (2nd)
+      attack_5:
+        - 5 # 5-Hit DMG
+      charge:
+        - 6 # Charged Attack DMG
+      collision:
+        - 6 # Plunge DMG
+      lowPlunge:
+        - 7 # Low Plunge DMG
+      highPlunge:
+        - 8 # High Plunge DMG
+    skill:
+      attack_e_1:
+        - 0 # Arcane Light: 1-Hit DMG
+      attack_e_2:
+        - 1 # Arcane Light: 2-Hit DMG
+      attack_e_3:
+        - 2 # Arcane Light: 3-Hit DMG
+      attack_e_4:
+        - 3 # Arcane Light: 4-Hit DMG (1st)
+        - 4 # Arcane Light: 4-Hit DMG (2nd)
+      attack_e_5:
+        - 5 # Arcane Light: 5-Hit DMG
+      charge_e:
+        - 6 # Arcane Light: Charged Attack DMG
+      skill:
+        - 7 # Northland Spearstorm DMG
+    burst:
+      burst:
+        - 0 # Initial Skill DMG
+      burstlcmid:
+        - 1 # Middle Phase Lunar-Charged DMG
+      burstlcfin:
+        - 2 # Final Phase Lunar-Charged DMG
+      burstlcts:
+        - 3 # Thunderous Symphony DMG
+      burstlctsadd:
+        - 4 # Thunderous Symphony Additional DMG

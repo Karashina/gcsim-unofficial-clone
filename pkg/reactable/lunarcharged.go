@@ -12,6 +12,17 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/reactions"
 )
 
+// HasLCCloud returns true if LC Cloud is currently active and this is the global LC Cloud holder.
+func (r *Reactable) HasLCCloud() bool {
+	if r.core.ActiveLCCloud == nil {
+		return false
+	}
+	if cloud, ok := r.core.ActiveLCCloud.(*Reactable); ok {
+		return r.lcCloudActive && r.core.F < r.lcCloudExpiry && cloud == r
+	}
+	return false
+}
+
 var atk = combat.AttackInfo{}
 
 // lcDamageRecord stores the actor index, precomputed damage value, and expiry frame.
@@ -30,6 +41,29 @@ type lcDamageResult struct {
 
 // TryAddLC attempts to apply the Lunar Charged (LC) status and handles its logic.
 func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
+	// --- LC Cloud singleton spec ---
+	// Only one LC Cloud can exist on the field at a time.
+	// If another Reactable tries to add LC, transfer the cloud to it and deactivate the previous one.
+	const lcCloudDuration = 360 // 6 seconds = 360 frames
+	// If another LC Cloud is active, deactivate it
+	if r.core.ActiveLCCloud != nil && r.core.ActiveLCCloud != r {
+		if prev, ok := r.core.ActiveLCCloud.(*Reactable); ok {
+			prev.lcCloudActive = false
+		}
+	}
+	r.core.ActiveLCCloud = r
+	r.lcCloudActive = true
+	r.lcCloudExpiry = r.core.F + lcCloudDuration
+	r.core.Tasks.Add(func() {
+		// Deactivate LC Cloud when expired
+		if r.lcCloudActive && r.core.F >= r.lcCloudExpiry {
+			r.lcCloudActive = false
+			if r.core.ActiveLCCloud == r {
+				r.core.ActiveLCCloud = nil
+			}
+		}
+	}, lcCloudDuration)
+
 	// Reset contributor lists when a new reaction is triggered and LC tick is not active
 	if !a.Reacted && r.lcTickSrc == -1 {
 		r.lcContributor = make([]int, 0, 4)
@@ -383,8 +417,18 @@ func (r *Reactable) removeLC() {
 // nextTickLC handles LC periodic damage ticks using the shared damage calculation logic.
 func (r *Reactable) nextTickLC(src int, lcActorIndex int) func() {
 	return func() {
-		// Only tick if LC is still valid and matches the current tick source.
-		if r.lcTickSrc != src {
+		// Only tick if LC is still valid, matches the current tick source, and is the global LC Cloud holder.
+		if r.lcTickSrc != src || !r.lcCloudActive {
+			return
+		}
+		if r.core.ActiveLCCloud != r {
+			return
+		}
+		// Find the closest enemy to this reactable
+		closest := r.core.Combat.ClosestEnemy(r.self.Pos())
+		if closest == nil {
+			// No valid enemy to target
+			r.core.Tasks.Add(r.nextTickLC(src, lcActorIndex), 122+r.core.Rand.Intn(9))
 			return
 		}
 		// Calculate final LC damage using the latest LC state.
@@ -401,7 +445,7 @@ func (r *Reactable) nextTickLC(src int, lcActorIndex int) func() {
 		r.core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewSingleTargetHit(r.self.Key()),
+			combat.NewSingleTargetHit(closest.Key()),
 			9,
 		)
 		// Schedule the next LC tick.
