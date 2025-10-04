@@ -36,6 +36,8 @@ type Core struct {
 	Combat     *combat.Handler
 	Constructs *construct.Handler
 	Player     *player.Handler
+	// Global singleton for LC Cloud: only one Reactable can hold the cloud at a time
+	ActiveLCCloud interface{}
 }
 
 type Flags struct {
