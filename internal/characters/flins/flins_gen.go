@@ -87,77 +87,419 @@ EXAMPLE:
 		0.83346,
 	}
 
-all value should be taken from https://wiki.hoyolab.com/pc/genshin/entry/8398?lang=en-us.
+all value should be taken from C:\Users\Karashina\Documents\Gitrepos\gcsim-unofficial-clone\internal\characters\flins\values
 */
 
 var (
 	// attack: attack_1 = [0]
 	// Pocztowy Demonspear: 1-Hit DMG
-	attack_1 = []float64{}
+	attack_1 = []float64{
+		0.447,
+		0.484,
+		0.52,
+		0.572,
+		0.608,
+		0.65,
+		0.707,
+		0.765,
+		0.822,
+		0.884,
+		0.947,
+		0.947,
+		0.947,
+		0.947,
+		0.947,
+	}
 	// attack: attack_2 = [1]
 	// Pocztowy Demonspear: 2-Hit DMG
-	attack_2 = []float64{}
+	attack_2 = []float64{
+		0.451,
+		0.488,
+		0.525,
+		0.577,
+		0.614,
+		0.656,
+		0.714,
+		0.772,
+		0.829,
+		0.892,
+		0.955,
+		0.955,
+		0.955,
+		0.955,
+		0.955,
+	}
 	// attack: attack_3 = [2]
 	// Pocztowy Demonspear: 3-Hit DMG
-	attack_3 = []float64{}
+	attack_3 = []float64{
+		0.559,
+		0.605,
+		0.65,
+		0.715,
+		0.761,
+		0.813,
+		0.884,
+		0.956,
+		1.027,
+		1.105,
+		1.183,
+		1.183,
+		1.183,
+		1.183,
+		1.183,
+	}
 	// attack: attack_4 = [3 4]
 	// Pocztowy Demonspear: 4-Hit DMG
 	attack_4 = [][]float64{
-		{},
-		{},
+		{
+			0.32,
+			0.346,
+			0.373,
+			0.41,
+			0.436,
+			0.466,
+			0.507,
+			0.548,
+			0.589,
+			0.633,
+			0.678,
+			0.678,
+			0.678,
+			0.678,
+			0.678,
+		},
+		{
+			0.32,
+			0.346,
+			0.373,
+			0.41,
+			0.436,
+			0.466,
+			0.507,
+			0.548,
+			0.589,
+			0.633,
+			0.678,
+			0.678,
+			0.678,
+			0.678,
+			0.678,
+		},
 	}
 	// attack: attack_5 = [5]
 	// Pocztowy Demonspear: 5-Hit DMG
-	attack_5 = []float64{}
+	attack_5 = []float64{
+		0.768,
+		0.83,
+		0.893,
+		0.982,
+		1.045,
+		1.116,
+		1.214,
+		1.313,
+		1.411,
+		1.518,
+		1.625,
+		1.625,
+		1.625,
+		1.625,
+		1.625,
+	}
 	// attack: charge = [6]
 	// Pocztowy Demonspear: Charged Attack DMG
-	charge = []float64{}
+	charge = []float64{
+		1.03,
+		1.114,
+		1.198,
+		1.318,
+		1.402,
+		1.498,
+		1.629,
+		1.761,
+		1.893,
+		2.037,
+		2.18,
+		2.18,
+		2.18,
+		2.18,
+		2.18,
+	}
 	// attack: collision = [6]
 	// Pocztowy Demonspear: Plunge DMG
-	collision = []float64{}
+	collision = []float64{
+		0.639,
+		0.691,
+		0.743,
+		0.818,
+		0.87,
+		0.929,
+		1.011,
+		1.093,
+		1.175,
+		1.264,
+		1.353,
+		1.353,
+		1.353,
+		1.353,
+		1.353,
+	}
 	// attack: highPlunge = [8]
 	// Pocztowy Demonspear: High Plunge DMG
-	highPlunge = []float64{}
+	highPlunge = []float64{
+		1.6,
+		1.73,
+		1.86,
+		2.04,
+		2.17,
+		2.32,
+		2.53,
+		2.73,
+		2.93,
+		3.16,
+		3.38,
+		3.38,
+		3.38,
+		3.38,
+		3.38,
+	}
 	// attack: lowPlunge = [7]
 	// Pocztowy Demonspear: Low Plunge DMG
-	lowPlunge = []float64{}
+	lowPlunge = []float64{
+		1.28,
+		1.38,
+		1.49,
+		1.64,
+		1.74,
+		1.86,
+		2.02,
+		2.19,
+		2.35,
+		2.53,
+		2.71,
+		2.71,
+		2.71,
+		2.71,
+		2.71,
+	}
 	// skill: attack_e_1 = [0]
 	// Ancient Rite: Arcane Light: 1-Hit DMG
-	attack_e_1 = []float64{}
+	attack_e_1 = []float64{
+		0.582,
+		0.626,
+		0.67,
+		0.728,
+		0.772,
+		0.815,
+		0.874,
+		0.932,
+		0.99,
+		1.048,
+		1.107,
+		1.165,
+		1.238,
+	}
 	// skill: attack_e_2 = [1]
 	// Ancient Rite: Arcane Light: 2-Hit DMG
-	attack_e_2 = []float64{}
+	attack_e_2 = []float64{
+		0.588,
+		0.632,
+		0.676,
+		0.735,
+		0.779,
+		0.823,
+		0.882,
+		0.941,
+		1.0,
+		1.058,
+		1.117,
+		1.176,
+		1.249,
+	}
 	// skill: attack_e_3 = [2]
 	// Ancient Rite: Arcane Light: 3-Hit DMG
-	attack_e_3 = []float64{}
+	attack_e_3 = []float64{
+		0.728,
+		0.783,
+		0.837,
+		0.91,
+		0.965,
+		1.02,
+		1.092,
+		1.165,
+		1.238,
+		1.311,
+		1.384,
+		1.457,
+		1.548,
+	}
 	// skill: attack_e_4 = [3 4]
 	// Ancient Rite: Arcane Light: 4-Hit DMG
 	attack_e_4 = [][]float64{
-		{},
-		{},
+		{
+			0.417,
+			0.449,
+			0.48,
+			0.522,
+			0.553,
+			0.584,
+			0.626,
+			0.668,
+			0.709,
+			0.751,
+			0.793,
+			0.835,
+			0.887,
+		},
+		{
+			0.417,
+			0.449,
+			0.48,
+			0.522,
+			0.553,
+			0.584,
+			0.626,
+			0.668,
+			0.709,
+			0.751,
+			0.793,
+			0.835,
+			0.887,
+		},
 	}
 	// skill: attack_e_5 = [5]
 	// Ancient Rite: Arcane Light: 5-Hit DMG
-	attack_e_5 = []float64{}
+	attack_e_5 = []float64{
+		1.0,
+		1.075,
+		1.15,
+		1.25,
+		1.325,
+		1.4,
+		1.5,
+		1.6,
+		1.7,
+		1.8,
+		1.9,
+		2.0,
+		2.125,
+	}
 	// skill: charge_e = [6]
 	// Ancient Rite: Arcane Light: Charged Attack DMG
-	charge_e = []float64{}
+	charge_e = []float64{
+		1.15,
+		1.236,
+		1.322,
+		1.437,
+		1.523,
+		1.609,
+		1.724,
+		1.839,
+		1.954,
+		2.069,
+		2.184,
+		2.299,
+		2.443,
+	}
 	// skill: skill = [7]
 	// Ancient Rite: Arcane Light: Northland Spearstorm DMG
-	skill = []float64{}
+	skill = []float64{
+		1.784,
+		1.918,
+		2.052,
+		2.23,
+		2.364,
+		2.498,
+		2.676,
+		2.854,
+		3.033,
+		3.211,
+		3.39,
+		3.568,
+		3.791,
+	}
 	// burst: burst = [0]
 	// Ancient Ritual: Cometh the Night: Initial Skill DMG
-	burst = []float64{}
+	burst = []float64{
+		2.598,
+		2.793,
+		2.988,
+		3.248,
+		3.443,
+		3.638,
+		3.898,
+		4.157,
+		4.417,
+		4.677,
+		4.937,
+		5.197,
+		5.522,
+	}
 	// burst: burstlcmid = [1]
 	// Ancient Ritual: Cometh the Night: Middle Phase Lunar-Charged DMG
-	burstlcmid = []float64{}
+	burstlcmid = []float64{
+		0.162,
+		0.175,
+		0.187,
+		0.203,
+		0.215,
+		0.227,
+		0.244,
+		0.26,
+		0.276,
+		0.292,
+		0.309,
+		0.325,
+		0.345,
+	}
 	// burst: burstlcfin = [2]
 	// Ancient Ritual: Cometh the Night: Final Phase Lunar-Charged DMG
-	burstlcfin = []float64{}
+	burstlcfin = []float64{
+		1.169,
+		1.257,
+		1.345,
+		1.462,
+		1.549,
+		1.637,
+		1.754,
+		1.871,
+		1.988,
+		2.105,
+		2.222,
+		2.339,
+		2.485,
+	}
 	// burst: burstlcts = [3]
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony DMG
-	burstlcts = []float64{}
+	burstlcts = []float64{
+		0.715,
+		0.768,
+		0.822,
+		0.893,
+		0.947,
+		1.0,
+		1.072,
+		1.143,
+		1.215,
+		1.286,
+		1.358,
+		1.429,
+		1.518,
+	}
 	// burst: burstlctsadd = [4]
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
-	burstlctsadd = []float64{}
+	burstlctsadd = []float64{
+		1.039,
+		1.117,
+		1.195,
+		1.299,
+		1.377,
+		1.455,
+		1.559,
+		1.663,
+		1.767,
+		1.871,
+		1.975,
+		2.079,
+		2.209,
+	}
 )

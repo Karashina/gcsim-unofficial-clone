@@ -115,6 +115,31 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			0,
 		)
 		return false
+
+	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
+	case "Flins C2 Dummy":
+		atk := combat.AttackInfo{
+			ActorIndex:       c.Index,
+			Abil:             "The Devil's Wall (C2)",
+			AttackTag:        attacks.AttackTagLCDamage,
+			StrikeType:       attacks.StrikeTypeDefault,
+			Element:          attributes.Electro,
+			IgnoreDefPercent: 1,
+		}
+		em := c.Stat(attributes.EM)
+		atk.FlatDmg = (c.TotalAtk() * 0.5 * (1 + c.LCBaseReactBonus(atk))) * (1 + ((6 * em) / (2000 + em)) + c.LCReactBonus(atk)) * 3
+		snap := combat.Snapshot{
+			CharLvl: c.Base.Level,
+		}
+		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
+		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		c.Core.QueueAttackWithSnap(
+			atk,
+			snap,
+			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			0,
+		)
+		return false
 	}
 	return false
 }

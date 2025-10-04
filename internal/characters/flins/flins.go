@@ -22,10 +22,10 @@ type char struct {
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := char{}
 	c.Character = tmpl.NewWithWrapper(s, w)
-	c.SkillCon = 3
-	c.BurstCon = 5
+	c.SkillCon = 5
+	c.BurstCon = 3
 
-	c.EnergyMax = 60
+	c.EnergyMax = 80
 	c.NormalHitNum = normalHitNum
 
 	w.Character = &c
@@ -40,6 +40,16 @@ func (c *char) Init() error {
 	c.a0()
 	c.a1()
 	c.a4()
+	c.c1()
+	if c.Base.Cons >= 2 {
+		c.c2()
+	}
+	if c.Base.Cons >= 4 {
+		c.c4()
+	}
+	if c.Base.Cons >= 6 {
+		c.c6()
+	}
 	return nil
 }
 

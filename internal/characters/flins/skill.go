@@ -64,6 +64,11 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.AddStatus(northlandKey, 6*60, true)
 		c.AddStatus(northlandCdKey, c.northlandCD, true)
 
+		// C2: Set status for additional damage on next Normal Attack
+		if c.Base.Cons >= 2 {
+			c.AddStatus(c2NorthlandKey, 6*60, true)
+		}
+
 		return action.Info{
 			Frames:          frames.NewAbilFunc(northlandFrames),
 			AnimationLength: northlandFrames[action.InvalidAction],

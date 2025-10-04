@@ -40,6 +40,7 @@ func (c *char) a1() {
 
 // A4
 // Flins's Elemental Mastery is increased by 8% of his ATK. The maximum increase obtainable this way is 160.
+// C4 changes this: Flins's Elemental Mastery is increased by 10% of his ATK. The maximum increase obtainable this way is 220.
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -48,7 +49,13 @@ func (c *char) a4() {
 	c.AddStatMod(character.StatMod{
 		Base: modifier.NewBaseWithHitlag("Whispering Flame (A4)", -1),
 		Amount: func() ([]float64, bool) {
-			m[attributes.EM] = min(160, c.TotalAtk()*0.08)
+			if c.Base.Cons >= 4 {
+				// C4: 10% of ATK, max 220
+				m[attributes.EM] = min(220, c.TotalAtk()*0.10)
+			} else {
+				// Base A4: 8% of ATK, max 160
+				m[attributes.EM] = min(160, c.TotalAtk()*0.08)
+			}
 			return m, true
 		},
 	})
