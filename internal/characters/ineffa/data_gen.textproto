@@ -2,7 +2,7 @@ id: 90000580
 key: "ineffa"
 rarity: QUALITY_ORANGE
 body: BODY_GIRL
-region: ASSOC_TYPE_RANGER
+region: ASSOC_TYPE_NODKRAI
 element: Electric
 weapon_class: WEAPON_POLE
 icon_name: "UI_AvatarIcon_Ambor"
