@@ -11,14 +11,11 @@ import (
 
 var chargeFrames []int
 
-const chargeHitmark = 26
+const chargeHitmark = 31
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(50) // CA -> Walk
-	chargeFrames[action.ActionAttack] = 39
-	chargeFrames[action.ActionSkill] = 42
-	chargeFrames[action.ActionBurst] = 39
-	chargeFrames[action.ActionSwap] = 47
+	chargeFrames = frames.InitAbilSlice(39) // CA -> Walk
+	chargeFrames[action.ActionAttack] = 59
 }
 
 // Charged Attack - part of Pocztowy Demonspear
@@ -70,7 +67,7 @@ func (c *char) chargeE() (action.Info, error) {
 		Element:            attributes.Electro,
 		Durability:         25,
 		Mult:               charge_e[c.TalentLvlSkill()],
-		HitlagHaltFrames:   0.09 * 60,
+		HitlagHaltFrames:   0.00,
 		HitlagFactor:       0.01,
 		CanBeDefenseHalted: true,
 		IgnoreInfusion:     true,

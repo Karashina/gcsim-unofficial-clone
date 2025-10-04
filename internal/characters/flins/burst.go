@@ -12,19 +12,19 @@ import (
 var (
 	burstFrames      []int
 	tsFrames         []int
-	NascentHitmark   = []int{147, 197, 247}           // middle phase x2 + final phase x1
-	AscendantHitmark = []int{147, 197, 247, 297, 347} // middle phase x4 + final phase x1
+	NascentHitmark   = []int{111, 125, 185}           // middle phase x2 + final phase x1
+	AscendantHitmark = []int{111, 125, 129, 138, 164} // middle phase x4 + final phase x1
 )
 
 const (
-	initialHitmark = 119
-	tsHitmark      = 93
-	tsAddHitmark   = 123
+	initialHitmark = 96
+	tsHitmark      = 45
+	tsAddHitmark   = 66
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(114)
-	tsFrames = frames.InitAbilSlice(114)
+	burstFrames = frames.InitAbilSlice(113)
+	tsFrames = frames.InitAbilSlice(55)
 }
 
 // Q
@@ -53,7 +53,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			c.Core.QueueAttack(aiadd, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99), tsAddHitmark, tsAddHitmark)
 		}
 
-		c.ConsumeEnergyPartial(4, 30)
+		c.ConsumeEnergyPartial(7, 30)
 
 		return action.Info{
 			Frames:          frames.NewAbilFunc(tsFrames),
@@ -116,7 +116,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			}
 		}
 		c.SetCD(action.ActionBurst, 20*60)
-		c.ConsumeEnergy(4)
+		c.ConsumeEnergy(7)
 
 		return action.Info{
 			Frames:          frames.NewAbilFunc(burstFrames),

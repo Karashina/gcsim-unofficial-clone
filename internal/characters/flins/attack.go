@@ -12,12 +12,15 @@ import (
 )
 
 var (
-	attackFrames          [][]int
-	attackHitmarks        = [][]int{{10}, {15}, {15}, {7, 16}, {28}}
-	attackHitlagHaltFrame = [][]float64{{0.12}, {0.12}, {0.12}, {0.03, 0.12}, {0.10}}
-	attackDefHalt         = [][]bool{{true}, {true}, {true}, {false, true}, {true}}
-	attackHitboxes        = [][][]float64{{{2}}, {{2}}, {{2}}, {{2.5}, {2.5}}, {{2.5}}}
-	attackOffsets         = [][]float64{{-0.2}, {-0.2}, {-0.2}, {-0.2, -0.2}, {-0.2}}
+	attackFrames           [][]int
+	attackHitmarks         = [][]int{{12}, {8}, {15}, {21, 31}, {31}}
+	attackHitlagHaltFrame  = [][]float64{{0.12}, {0.06}, {0.03}, {0.00, 0.00}, {0.06}}
+	attackFramesE          [][]int
+	attackHitmarksE        = [][]int{{12}, {9}, {16}, {20, 31}, {31}}
+	attackHitlagHaltFrameE = [][]float64{{0.12}, {0.00}, {0.00}, {0.00, 0.00}, {0.12}}
+	attackDefHalt          = [][]bool{{true}, {true}, {true}, {false, true}, {true}}
+	attackHitboxes         = [][][]float64{{{2}}, {{2}}, {{2}}, {{2.5}, {2.5}}, {{2.5}}}
+	attackOffsets          = [][]float64{{-0.2}, {-0.2}, {-0.2}, {-0.2, -0.2}, {-0.2}}
 )
 
 const normalHitNum = 5
@@ -25,22 +28,41 @@ const normalHitNum = 5
 func init() {
 	attackFrames = make([][]int, normalHitNum)
 
-	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 22)
-	attackFrames[0][action.ActionCharge] = 35
-	attackFrames[0][action.ActionDash] = 10
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 21)
+	attackFrames[0][action.ActionCharge] = 21
+	attackFrames[0][action.ActionDash] = 14
 
-	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 30)
-	attackFrames[1][action.ActionDash] = 20
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 18)
+	attackFrames[1][action.ActionDash] = 19
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][0], 36)
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][0], 26)
 	attackFrames[2][action.ActionDash] = 22
 
-	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][1], 36)
-	attackFrames[3][action.ActionDash] = 22
+	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][1], 42)
+	attackFrames[3][action.ActionDash] = 41
 
-	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 57)
-	attackFrames[4][action.ActionDash] = 37
+	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 63)
+	attackFrames[4][action.ActionDash] = 31
 	attackFrames[4][action.ActionCharge] = 500 // Illegal action; needs better handling
+
+	attackFramesE = make([][]int, normalHitNum)
+
+	attackFramesE[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 18)
+	attackFramesE[0][action.ActionCharge] = 21
+	attackFramesE[0][action.ActionDash] = 14
+
+	attackFramesE[1] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 20)
+	attackFramesE[1][action.ActionDash] = 19
+
+	attackFramesE[2] = frames.InitNormalCancelSlice(attackHitmarks[2][0], 24)
+	attackFramesE[2][action.ActionDash] = 22
+
+	attackFramesE[3] = frames.InitNormalCancelSlice(attackHitmarks[3][1], 40)
+	attackFramesE[3][action.ActionDash] = 41
+
+	attackFramesE[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 65)
+	attackFramesE[4][action.ActionDash] = 37
+	attackFramesE[4][action.ActionCharge] = 500 // Illegal action; needs better handling
 }
 
 // Normal attack implementation
@@ -110,7 +132,7 @@ func (c *char) attackE() (action.Info, error) {
 			Durability:         25,
 			Mult:               mult[c.TalentLvlSkill()],
 			HitlagFactor:       0.01,
-			HitlagHaltFrames:   attackHitlagHaltFrame[c.NormalCounter][i] * 60,
+			HitlagHaltFrames:   attackHitlagHaltFrameE[c.NormalCounter][i] * 60,
 			CanBeDefenseHalted: attackDefHalt[c.NormalCounter][i],
 			IgnoreInfusion:     true,
 		}
@@ -131,15 +153,15 @@ func (c *char) attackE() (action.Info, error) {
 		}
 		c.QueueCharTask(func() {
 			c.Core.QueueAttack(ai, ap, 0, 0, c.particleCB, c2CB)
-		}, attackHitmarks[c.NormalCounter][i])
+		}, attackHitmarksE[c.NormalCounter][i])
 	}
 
 	defer c.AdvanceNormalIndex()
 
 	return action.Info{
-		Frames:          frames.NewAttackFunc(c.Character, attackFrames),
-		AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],
-		CanQueueAfter:   attackHitmarks[c.NormalCounter][len(attackHitmarks[c.NormalCounter])-1],
+		Frames:          frames.NewAttackFunc(c.Character, attackFramesE),
+		AnimationLength: attackFramesE[c.NormalCounter][action.InvalidAction],
+		CanQueueAfter:   attackHitmarksE[c.NormalCounter][len(attackHitmarksE[c.NormalCounter])-1],
 		State:           action.NormalAttackState,
 	}, nil
 }

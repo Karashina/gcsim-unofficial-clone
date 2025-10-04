@@ -17,7 +17,7 @@ var (
 
 const (
 	skillEnter       = 25
-	northlandHitmark = 14
+	northlandHitmark = 23
 	skillKey         = "flins-skill"
 	northlandKey     = "flins-northland"
 	northlandCdKey   = "flins-northland-cd"
@@ -25,8 +25,8 @@ const (
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(41)     // E -> D/J
-	northlandFrames = frames.InitAbilSlice(41) // E -> D/J
+	skillFrames = frames.InitAbilSlice(25)     // E -> D/J
+	northlandFrames = frames.InitAbilSlice(37) // E -> D/J
 }
 
 // E
