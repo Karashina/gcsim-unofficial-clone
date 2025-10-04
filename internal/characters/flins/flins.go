@@ -40,6 +40,16 @@ func (c *char) Init() error {
 	c.a0()
 	c.a1()
 	c.a4()
+	c.c1()
+	if c.Base.Cons >= 2 {
+		c.c2()
+	}
+	if c.Base.Cons >= 4 {
+		c.c4()
+	}
+	if c.Base.Cons >= 6 {
+		c.c6()
+	}
 	return nil
 }
 

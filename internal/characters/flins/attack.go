@@ -97,6 +97,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 // Normal attack implementation during Manifest Flame form (Electro-infused)
 // Ancient Rite: Arcane Light
 func (c *char) attackE() (action.Info, error) {
+	c2CB := c.c2AdditionalDamage()
 	for i, mult := range attack_e[c.NormalCounter] {
 		ai := combat.AttackInfo{
 			ActorIndex:         c.Index,
@@ -129,7 +130,7 @@ func (c *char) attackE() (action.Info, error) {
 			)
 		}
 		c.QueueCharTask(func() {
-			c.Core.QueueAttack(ai, ap, 0, 0, c.particleCB)
+			c.Core.QueueAttack(ai, ap, 0, 0, c.particleCB, c2CB)
 		}, attackHitmarks[c.NormalCounter][i])
 	}
 
