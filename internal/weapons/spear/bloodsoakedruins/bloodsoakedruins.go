@@ -32,12 +32,12 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	r := p.Refine
 
 	const (
-		lcDmgBuffKey     = "bloodsoakedruins-lcdmg"
-		cdBuffKey        = "bloodsoakedruins-cd"
-		energyICDKey     = "bloodsoakedruins-energy-icd"
-		lcDmgBuffDur     = 210 // 3.5s * 60 frames
-		cdBuffDur        = 360 // 6s * 60 frames
-		energyICD        = 840 // 14s * 60 frames
+		lcDmgBuffKey = "bloodsoakedruins-lcdmg"
+		cdBuffKey    = "bloodsoakedruins-cd"
+		energyICDKey = "bloodsoakedruins-energy-icd"
+		lcDmgBuffDur = 210 // 3.5s * 60 frames
+		cdBuffDur    = 360 // 6s * 60 frames
+		energyICD    = 840 // 14s * 60 frames
 	)
 
 	lcDmgBonus := 0.24 + float64(r)*0.12
@@ -63,7 +63,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	// Effect 2: After triggering Lunar-Charged reaction, gain CRIT DMG buff and restore energy
 	c.Events.Subscribe(event.OnLunarCharged, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
-		
+
 		// Check if the character triggered the Lunar-Charged reaction
 		if ae.Info.ActorIndex != char.Index {
 			return false
