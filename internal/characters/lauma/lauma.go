@@ -93,7 +93,7 @@ func (c *char) moonsignInitFunc() {
 	case 1:
 		c.MoonsignNascent = true // Moonsign: Nascent Gleam
 		c.MoonsignAscendant = false
-	case 2:
+	case 2, 3, 4:
 		c.MoonsignAscendant = true // Moonsign: Ascendant Gleam
 		c.MoonsignNascent = false
 	default:
