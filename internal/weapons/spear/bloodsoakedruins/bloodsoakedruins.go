@@ -62,7 +62,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("bloodsoakedruins-burst-%v", char.Base.Key.String()))
 
 	// Effect 2: After triggering Lunar-Charged reaction, gain CRIT DMG buff and restore energy
-	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+	c.Events.Subscribe(event.OnLunarCharged, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
 
 		if ae.Info.AttackTag != attacks.AttackTagLCDamage {
