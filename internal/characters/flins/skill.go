@@ -16,7 +16,6 @@ var (
 )
 
 const (
-	skillEnter       = 25
 	northlandHitmark = 23
 	skillKey         = "flins-skill"
 	northlandKey     = "flins-northland"
@@ -96,6 +95,6 @@ func (c *char) particleCB(a combat.AttackCB) {
 	if c.StatusIsActive(particleICDKey) {
 		return
 	}
-	c.AddStatus(particleICDKey, 3*60, true)
+	c.AddStatus(particleICDKey, 2.1*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Electro, c.ParticleDelay)
 }

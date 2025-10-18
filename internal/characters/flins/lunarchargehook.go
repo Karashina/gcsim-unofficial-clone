@@ -33,12 +33,14 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 		// Ancient Ritual: Cometh the Night: Final Phase Lunar-Charged DMG
@@ -58,12 +60,14 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony DMG
@@ -83,12 +87,14 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
@@ -108,12 +114,14 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
@@ -133,12 +141,14 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 	}
 	return false

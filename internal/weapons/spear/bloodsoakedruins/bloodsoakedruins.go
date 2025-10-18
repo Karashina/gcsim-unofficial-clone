@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
@@ -64,10 +63,6 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	// Effect 2: After triggering Lunar-Charged reaction, gain CRIT DMG buff and restore energy
 	c.Events.Subscribe(event.OnLunarCharged, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
-
-		if ae.Info.AttackTag != attacks.AttackTagLCDamage {
-			return false
-		}
 
 		// Check if the character triggered the Lunar-Charged reaction
 		if ae.Info.ActorIndex != char.Index {

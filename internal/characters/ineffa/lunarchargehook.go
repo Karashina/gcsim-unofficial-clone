@@ -31,12 +31,14 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			9,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	case "Ineffa C2 Dummy":
@@ -55,12 +57,14 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			180,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	case "Ineffa C6 Dummy":
@@ -79,12 +83,14 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 		}
 		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
+		trg := combat.NewCircleHitOnTarget(n.Pos(), nil, 6)
 		c.Core.QueueAttackWithSnap(
 			atk,
 			snap,
-			combat.NewCircleHitOnTarget(n.Pos(), nil, 6),
+			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 	}
 	return false

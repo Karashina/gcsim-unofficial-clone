@@ -70,30 +70,31 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			char.AddStatus("gleamingmoon-key-sms", 8*60, true)
 			m := make([]float64, attributes.EndStatType)
 			m[attributes.EM] = emval
-			char.AddStatMod(character.StatMod{
-				Base:         modifier.NewBase("sms-4pc-em", 8*60),
-				AffectedStat: attributes.EM,
-				Amount: func() ([]float64, bool) {
-					return m, true
-				},
-			})
+			for _, ch := range c.Player.Chars() {
+				ch.AddStatMod(character.StatMod{
+					Base:         modifier.NewBase("sms-4pc-em", 8*60),
+					AffectedStat: attributes.EM,
+					Amount: func() ([]float64, bool) {
+						return m, true
+					},
+				})
+			}
 			return false
 		}, "sms-4pc")
 
 		for _, ch := range c.Player.Chars() {
-
 			ch.AddLBReactBonusMod(character.LBReactBonusMod{
 				Base: modifier.NewBase("gleamingmoon-lb", -1),
 				Amount: func(ai combat.AttackInfo) (float64, bool) {
 					count := 0
 					sms := false
 					notsu := false
-					for _, char := range c.Player.Chars() {
-						if char.StatusIsActive("gleamingmoon-key-sms") || !sms {
+					for _, chr := range c.Player.Chars() {
+						if chr.StatusIsActive("gleamingmoon-key-sms") || !sms {
 							count++
 							sms = true
 						}
-						if char.StatusIsActive("gleamingmoon-key-notsu") || !notsu {
+						if chr.StatusIsActive("gleamingmoon-key-notsu") || !notsu {
 							count++
 							notsu = true
 						}
@@ -102,18 +103,18 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 					return val, false
 				},
 			})
-			char.AddLCReactBonusMod(character.LCReactBonusMod{
+			ch.AddLCReactBonusMod(character.LCReactBonusMod{
 				Base: modifier.NewBase("gleamingmoon-lc", -1),
 				Amount: func(ai combat.AttackInfo) (float64, bool) {
 					count := 0
 					sms := false
 					notsu := false
-					for _, char := range c.Player.Chars() {
-						if char.StatusIsActive("gleamingmoon-key-sms") || !sms {
+					for _, chr := range c.Player.Chars() {
+						if chr.StatusIsActive("gleamingmoon-key-sms") || !sms {
 							count++
 							sms = true
 						}
-						if char.StatusIsActive("gleamingmoon-key-notsu") || !notsu {
+						if chr.StatusIsActive("gleamingmoon-key-notsu") || !notsu {
 							count++
 							notsu = true
 						}
