@@ -20,6 +20,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/core/player/infusion"
 	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/genshinsim/gcsim/pkg/core/player/verdant"
 	"github.com/genshinsim/gcsim/pkg/core/task"
 )
 
@@ -35,6 +36,7 @@ type Handler struct {
 	*animation.AnimationHandler
 	Shields *shield.Handler
 	infusion.Handler
+	Verdant *verdant.Handler
 
 	// tracking
 	chars   []*character.CharWrapper
@@ -88,6 +90,7 @@ func New(opt Opt) *Handler {
 	h.Shields = shield.New(opt.F, opt.Log, opt.Events)
 	h.Handler = infusion.New(opt.F, opt.Log, opt.Debug)
 	h.AnimationHandler = animation.New(opt.F, opt.Debug, opt.Log, opt.Events, opt.Tasks)
+	h.Verdant = verdant.New(opt.F, opt.Events, opt.Tasks, opt.Log)
 	return h
 }
 
