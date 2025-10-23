@@ -16,7 +16,8 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	a1buff float64
+	a1count   float64
+	c4buffkey bool
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -34,15 +35,12 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
+	c.AddStatus("moonsignKey", -1, false)
+	c.moonsignInitFunc()
 	c.InitLCallback()
+	c.makeBurstBonus()
 	c.a0()
 	c.a1()
-	if c.Base.Cons >= 1 {
-		c.c1()
-	}
-	if c.Base.Cons >= 2 {
-		c.c2()
-	}
 	if c.Base.Cons >= 4 {
 		c.c4()
 	}
@@ -50,6 +48,33 @@ func (c *char) Init() error {
 		c.c6()
 	}
 	return nil
+}
+
+func (c *char) moonsignInitFunc() {
+	count := 0
+	for _, ch := range c.Core.Player.Chars() {
+		if ch.StatusIsActive("moonsignKey") {
+			count++
+		}
+	}
+	c.MoonsignNascent, c.MoonsignAscendant = false, false
+	switch count {
+	case 1:
+		c.MoonsignNascent = true
+	case 2, 3, 4:
+		c.MoonsignAscendant = true
+	}
+}
+
+func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
+	if a == action.ActionCharge && c.StatusIsActive(skillKey) {
+		if c.Core.Player.Verdant.Count() >= 1 {
+			return 0
+		} else {
+			return 25
+		}
+	}
+	return c.Character.ActionStam(a, p)
 }
 
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {

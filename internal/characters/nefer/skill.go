@@ -3,6 +3,10 @@ package nefer
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
+	"github.com/genshinsim/gcsim/pkg/core/attacks"
+	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
 var (
@@ -18,17 +22,46 @@ func init() {
 	skillFrames = frames.InitAbilSlice(30)
 }
 
-// Elemental Skill
+// Elemental Skill: AoE Dendro + Shadow Dance status; grants charges. In Shadow Dance, Verdant Dew enables Phantasm Performance.
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	/*
-		Nefer deals AoE Dendro DMG and entering the Shadow Dance state.
-		Two initial charges.
 
-		While in the Shadow Dance state, if you have at least 1 Verdant Dew, Nefer's Charged Attacks will be replaced with the special Charged Attack Phantasm Performance, which will not consume Stamina.
-		TO COPILOT: this ability must be implemented in the charge.go but get the talent level for the Phantasm Performance from c.TalentLvlSkill().
-	*/
+	// Skill DMG has both ATK and EM scaling
+	c.QueueCharTask(func() {
+		ai := combat.AttackInfo{
+			ActorIndex: c.Index,
+			Abil:       "Skill Initial DMG (E)",
+			AttackTag:  attacks.AttackTagElementalArt,
+			ICDTag:     attacks.ICDTagNone,
+			ICDGroup:   attacks.ICDGroupDefault,
+			StrikeType: attacks.StrikeTypeDefault,
+			Element:    attributes.Dendro,
+			Durability: 25,
+			FlatDmg:    skillatk[c.TalentLvlSkill()]*c.Stat(attributes.ATK) + skillem[c.TalentLvlSkill()]*c.Stat(attributes.EM),
+		}
 
-	c.SetCD(action.ActionSkill, 9*60)
+		c.Core.QueueAttack(
+			ai,
+			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0}, 5),
+			0,
+			0,
+		)
+
+		// Enter Shadow Dance state
+		c.AddStatus(skillKey, 10*60, true) // 10s duration
+
+		// C2: Gain 2 stacks of Veil of Falsehood when using Elemental Skill
+		if c.Base.Cons >= 2 && c.Base.Ascension >= 1 {
+			maxStacks := 5.0
+			if c.a1count < maxStacks-1 {
+				c.a1count += 2
+			} else if c.a1count < maxStacks {
+				c.a1count = maxStacks
+			}
+			c.AddStatus("veil-of-falsehood", 14*60, true) // 9s base + 5s from C2
+		}
+	}, skillHitmark)
+
+	c.SetCDWithDelay(action.ActionSkill, 9*60, skillHitmark)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),

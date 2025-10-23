@@ -12,12 +12,10 @@ import (
 )
 
 var (
-	attackFrames          [][]int
-	attackHitmarks        = [][]int{{15}, {12}, {20}, {25}}
-	attackHitlagFactor    = [][]float64{{0}, {0}, {0.01}, {0.01}}
-	attackHitlagHaltFrame = [][]float64{{0}, {0}, {0.03}, {0.06}}
-	attackHitboxes        = [][]float64{{2.5}, {2.5}, {3.0}, {3.5}}
-	attackOffsets         = []float64{0, 0, 0, 0}
+	attackFrames   [][]int
+	attackHitmarks = [][]int{{15}, {12}, {18, 22}, {28}}
+	attackHitboxes = [][]float64{{2.5}, {2.5}, {3.0}, {3.5}}
+	attackOffsets  = []float64{0, 0, 0, 0}
 )
 
 const normalHitNum = 4
@@ -33,32 +31,29 @@ func init() {
 	attackFrames[1][action.ActionAttack] = 15
 	attackFrames[1][action.ActionCharge] = 22
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][0], 45)
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][1], 45)
 	attackFrames[2][action.ActionAttack] = 26
-	attackFrames[2][action.ActionCharge] = 22
+	attackFrames[2][action.ActionCharge] = 24
 
-	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][0], 65)
+	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][0], 60)
 	attackFrames[3][action.ActionCharge] = 40
-	attackFrames[3][action.ActionWalk] = 60
+	attackFrames[3][action.ActionWalk] = 58
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{
-			ActorIndex:         c.Index,
-			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
-			AttackTag:          attacks.AttackTagNormal,
-			ICDTag:             attacks.ICDTagNormalAttack,
-			ICDGroup:           attacks.ICDGroupDefault,
-			StrikeType:         attacks.StrikeTypeDefault,
-			Element:            attributes.Dendro,
-			Durability:         25,
-			Mult:               mult[c.TalentLvlAttack()],
-			HitlagFactor:       attackHitlagFactor[c.NormalCounter][i],
-			HitlagHaltFrames:   attackHitlagHaltFrame[c.NormalCounter][i] * 60,
-			CanBeDefenseHalted: true,
+			ActorIndex: c.Index,
+			Abil:       fmt.Sprintf("Normal %v", c.NormalCounter),
+			AttackTag:  attacks.AttackTagNormal,
+			ICDTag:     attacks.ICDTagNormalAttack,
+			ICDGroup:   attacks.ICDGroupDefault,
+			StrikeType: attacks.StrikeTypeDefault,
+			Element:    attributes.Dendro,
+			Durability: 25,
+			Mult:       mult[c.TalentLvlAttack()],
 		}
-		
+
 		c.QueueCharTask(func() {
 			c.Core.QueueAttack(
 				ai,

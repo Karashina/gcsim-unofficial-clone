@@ -3,10 +3,17 @@ package nefer
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
+	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
-var chargeFrames []int
+var (
+	chargeFrames     []int
+	phantasmFrames   []int
+	phantasmHitmarks = []int{15, 22, 30, 38, 46} // 2 Nefer hits + 3 Shade hits
+)
 
 const (
 	chargeHitmark = 22
@@ -18,35 +25,61 @@ func init() {
 	chargeFrames[action.ActionJump] = chargeHitmark
 	chargeFrames[action.ActionWalk] = 53
 	chargeFrames[action.ActionSkill] = 1
+
+	phantasmFrames = frames.InitAbilSlice(52)
+	phantasmFrames[action.ActionDash] = 48
+	phantasmFrames[action.ActionJump] = 48
+	phantasmFrames[action.ActionWalk] = 50
+	phantasmFrames[action.ActionSkill] = 1
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	// Charged attack
-	/*
-		Nefer enters the Slither state, consuming 1.82 Stamina per 6 frames to move rapidly forward for up to 2.5s.
-		When the hold duration ends, or Stamina runs out, Nefer will exit the Slither state and deal Dendro DMG to opponents this attack consumes remaining stamina up to 50.
-		When in the Shadow Dance state, max attack Stamina consumption is decreased to 25.
-	*/
-	// Elemental Skill interaction
-	/*
-		When nefer is on the Shadow Dance state and party have at least 1 Verdant Dew, Nefer's Charged Attacks will be replaced with the special Charged Attack "Phantasm Performance", which will not consume Stamina.
-		Nefer will deal "Phantasm Performance n-Hit DMG (Nefer)" 2 times and "Phantasm Performance n-Hit DMG (Shades)" 3 times. DMG dealt by the shades is considered Lunar-Bloom DMG.
-		after Phantasm Performance 1-Hit DMG (Shades) is used, 1 Verdant Dew will be consumed.
-		TO COPILOT: actual DMG will be implemented in lunarbloomhook.go so just queue dummy attack like ineffa/lauma/flins.
-	*/
-	// A4 interaction
-	/*
-	   When Nefer is in the Shadow Dance state and any party member triggers a Lunar-Bloom reaction, Nefer's Slither state will provide additional Verdant Dew for 5s.
-	   Every points of Nefer's Elemental Mastery beyond 500 will strengthen this additional provision effect by 0.1%. The maximum increase that can be achieved this way is 50%.
-	*/
+	// Check if we should use Phantasm Performance
+	if c.StatusIsActive(skillKey) && c.Core.Player.Verdant.Count() >= 1 {
+		return c.phantasmPerformance(p)
+	}
+
+	// Normal Charged attack (Slither): forward movement with stamina drain; exit deals Dendro DMG. Shadow Dance lowers max consumption.
+
 	if p["hold"] > 0 {
-		// hold
+		// Slither hold - set up stamina drain mechanics
 		dur := p["hold"]
 		chargeFrames[action.ActionSkill] = 1 // using the Elemental Skill while Nefer is in the Slither state will not cause her to exit the state.
-		c.Core.Player.Verdant.StartCharge(dur)
-		c.Core.Tasks.Add(func() { c.Core.Player.Verdant.GetGainBonus() }, dur)
-		c.Core.Player.Verdant.SetGainBonus(min(0.001*float64(c.Stat(attributes.EM)), 0.5))
+		prevbonus := c.Core.Player.Verdant.GetGainBonus()
+		frameremaining := c.Core.Player.Verdant.RemainingFrames()
+
+		// A4 interaction: strengthen Verdant Dew gain in Shadow Dance
+		if c.StatusIsActive(skillKey) {
+			emBonus := 1 + min(0.001*float64(max(0, c.Stat(attributes.EM)-500)), 0.5)
+			c.Core.Player.Verdant.SetGainBonus(prevbonus + emBonus)
+			if frameremaining < dur {
+				c.Core.Player.Verdant.StartCharge(dur - frameremaining)
+			}
+			c.Core.Tasks.Add(func() {
+				c.Core.Player.Verdant.SetGainBonus(prevbonus)
+			}, dur)
+		}
 	}
+
+	// Deal Charged Attack DMG
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "Charge Attack",
+		AttackTag:  attacks.AttackTagExtra,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeDefault,
+		Element:    attributes.Dendro,
+		Durability: 25,
+		Mult:       charge[c.TalentLvlAttack()],
+	}
+
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0}, 3.5),
+		chargeHitmark,
+		chargeHitmark,
+	)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(chargeFrames),
@@ -54,4 +87,149 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		CanQueueAfter:   chargeHitmark,
 		State:           action.ChargeAttackState,
 	}, nil
+}
+
+func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
+	/*
+		When nefer is on the Shadow Dance state and party have at least 1 Verdant Dew, Nefer's Charged Attacks will be replaced with the special Charged Attack "Phantasm Performance", which will not consume Stamina.
+		Nefer will deal "Phantasm Performance n-Hit DMG (Nefer)" 2 times and "Phantasm Performance n-Hit DMG (Shades)" 3 times. DMG dealt by the shades is considered Lunar-Bloom DMG.
+		after Phantasm Performance 1-Hit DMG (Shades) is used, 1 Verdant Dew will be consumed.
+	*/
+
+	// Phantasm Performance: 2 Nefer hits (ATK-scaled) and 3 Shade hits (Lunar-Bloom). Consumes 1 Verdant Dew after first Shade hit.
+	c.QueueCharTask(func() {
+		aiATK := combat.AttackInfo{
+			ActorIndex: c.Index,
+			Abil:       "Phantasm Performance 1-Hit (Nefer / C)",
+			AttackTag:  attacks.AttackTagExtra,
+			ICDTag:     attacks.ICDTagNone,
+			ICDGroup:   attacks.ICDGroupDefault,
+			StrikeType: attacks.StrikeTypeDefault,
+			Element:    attributes.Dendro,
+			Durability: 25,
+			FlatDmg:    skillppn1atk[c.TalentLvlSkill()]*c.Stat(attributes.ATK) + skillppn1em[c.TalentLvlSkill()]*c.Stat(attributes.EM),
+		}
+		c.Core.QueueAttack(
+			aiATK,
+			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0}, 4),
+			0, 0,
+			c.makePhantasmBonus(),
+		)
+
+	}, phantasmHitmarks[0])
+
+	// 2nd Nefer hit (ATK) or C6 conversion to Lunar-Bloom
+	c.QueueCharTask(func() {
+		if c.Base.Cons >= 6 {
+			// C6: Convert 2nd hit to Lunar-Bloom DMG based on EM
+			ai := combat.AttackInfo{
+				ActorIndex: c.Index,
+				Abil:       "Nefer C6 2nd Dummy (C)",
+				FlatDmg:    0,
+			}
+			c.Core.QueueAttack(
+				ai,
+				combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99),
+				0, 0,
+			)
+		} else {
+			// Normal 2nd hit
+			aiATK := combat.AttackInfo{
+				ActorIndex: c.Index,
+				Abil:       "Phantasm Performance 2-Hit (Nefer / C)",
+				AttackTag:  attacks.AttackTagExtra,
+				ICDTag:     attacks.ICDTagNone,
+				ICDGroup:   attacks.ICDGroupDefault,
+				StrikeType: attacks.StrikeTypeDefault,
+				Element:    attributes.Dendro,
+				Durability: 25,
+				FlatDmg:    skillppn2atk[c.TalentLvlSkill()]*c.Stat(attributes.ATK) + skillppn2em[c.TalentLvlSkill()]*c.Stat(attributes.EM),
+			}
+			c.Core.QueueAttack(
+				aiATK,
+				combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0}, 4),
+				0, 0,
+				c.makePhantasmBonus(),
+			)
+		}
+	}, phantasmHitmarks[1])
+
+	// Shade hits (dummies) -> resolved to Lunar-Bloom via hook; consume Verdant Dew after first Shade hit
+	c.QueueCharTask(func() {
+		ai := combat.AttackInfo{
+			ActorIndex: c.Index,
+			Abil:       "Nefer PP1Shade Dummy (C)",
+			FlatDmg:    0,
+		}
+		c.Core.QueueAttack(
+			ai,
+			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99),
+			0, 0,
+		)
+		// Consume 1 Verdant Dew
+		c.Core.Player.Verdant.Consume(1)
+	}, phantasmHitmarks[2])
+
+	// Shade 2 (dummy)
+	c.QueueCharTask(func() {
+		ai := combat.AttackInfo{
+			ActorIndex: c.Index,
+			Abil:       "Nefer PP2Shade Dummy (C)",
+			FlatDmg:    0,
+		}
+		c.Core.QueueAttack(
+			ai,
+			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99),
+			0, 0,
+		)
+	}, phantasmHitmarks[3])
+
+	// Shade 3 (dummy)
+	c.QueueCharTask(func() {
+		ai := combat.AttackInfo{
+			ActorIndex: c.Index,
+			Abil:       "Nefer PP3Shade Dummy (C)",
+			FlatDmg:    0,
+		}
+		c.Core.QueueAttack(
+			ai,
+			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99),
+			0, 0,
+		)
+	}, phantasmHitmarks[4])
+
+	// C6: Extra dummy hit after PP
+	if c.Base.Cons >= 6 {
+		c.QueueCharTask(func() {
+			ai := combat.AttackInfo{
+				ActorIndex: c.Index,
+				Abil:       "Nefer C6 Extra Dummy (C)",
+				FlatDmg:    0,
+			}
+			c.Core.QueueAttack(
+				ai,
+				combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99),
+				0, 0,
+			)
+		}, phantasmHitmarks[4]+5)
+	}
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(phantasmFrames),
+		AnimationLength: phantasmFrames[action.InvalidAction],
+		CanQueueAfter:   phantasmHitmarks[4],
+		State:           action.ChargeAttackState,
+	}, nil
+}
+
+// Apply Veil of Falsehood bonus to Phantasm Performance
+func (c *char) makePhantasmBonus() combat.AttackCBFunc {
+	bonus := c.a1count * 0.08 // Each stack increases DMG by 8%
+	if bonus == 0 {
+		return nil
+	}
+	return func(a combat.AttackCB) {
+		// Apply bonus as percentage increase to total damage
+		a.AttackEvent.Info.FlatDmg *= (1 + bonus)
+	}
 }

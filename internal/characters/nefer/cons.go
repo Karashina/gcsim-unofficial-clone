@@ -1,54 +1,83 @@
 package nefer
 
-// C1
-// The Base DMG for Lunar-Bloom reactions caused by Nefer's Phantasm Performance is increased by 60% of her Elemental Mastery.
-func (c *char) c1() {
-	if c.Base.Cons < 1 {
-		return
-	}
-	// Placeholder for C1 constellation implementation
-}
+import (
+	"github.com/genshinsim/gcsim/pkg/core/attacks"
+	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/modifier"
+)
 
-// C2
-/*
-	Enhances the effects of the A1. Adds duration by 5s, and increases its stack limit to 5. When Nefer unleashes her Elemental Skill, she will instantly gain 2 stacks of Veil of Falsehood.
-	Additionally, when Veil of Falsehood reaches 5 stacks, or when the fifth stack's duration is refreshed, Nefer's Elemental Mastery will be increased by 200 for 8s instead of 100 for 8s.
-	You must first unlock the A1 to gain this effect.
-*/
-func (c *char) c2() {
-	if c.Base.Cons < 2 {
-		return
-	}
-	// Placeholder for C2 constellation implementation
-}
-
-// C4: Constellation 4
-/*
-	When Nefer is on the field and in the Shadow Dance state, you will get.
-	Additionally, while Nefer is in the Shadow Dance state, nearby opponents will have their Dendro RES decreased by 20%.
-	When Nefer exits the Shadow Dance state, this effect will be removed after 4.5s.
-*/
+// C4: Const - Verdant gain +25% on-field; while in Shadow Dance, nearby enemies have Dendro RES -20% (removed 4.5s after exit)
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
 	}
 	// add onfield constraint
-	c.Core.Player.Verdant.SetGainBonus(c.Core.Player.Verdant.GetGainBonus() + 0.25)
+	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
+		prev := args[0].(int)
+		next := args[1].(int)
+
+		if prev == c.Index && c.c4buffkey {
+			c.Core.Player.Verdant.SetGainBonus(c.Core.Player.Verdant.GetGainBonus() + 0.25)
+			c.c4buffkey = false
+		}
+		if next == c.Index {
+			c.Core.Player.Verdant.SetGainBonus(c.Core.Player.Verdant.GetGainBonus() - 0.25)
+			c.c4buffkey = true
+		}
+		return false
+	}, "nefer-c4-verdantdewgain")
+
+	// Apply Dendro RES -20% to nearby opponents while in Shadow Dance.
+	// When Nefer exits Shadow Dance, this effect lasts an additional 4.5s.
+	// We detect skill use while Nefer is active and apply the resist mod to nearby enemies.
+	c.Core.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
+		// only trigger if Nefer is the active character
+		if c.Core.Player.Active() != c.Index {
+			return false
+		}
+
+		// radius: use 10 units as "nearby" (common convention in other skills)
+		enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10), nil)
+		if len(enemies) == 0 {
+			return false
+		}
+
+		// duration: Shadow Dance base 10s (10*60) + 4.5s (270 frames) = 870 frames
+		dur := 10*60 + 270
+		for _, e := range enemies {
+			if targ, ok := e.(interface{ AddResistMod(combat.ResistMod) }); ok {
+				targ.AddResistMod(combat.ResistMod{
+					Base:  modifier.NewBaseWithHitlag("nefer-c4-dendro", dur),
+					Ele:   attributes.Dendro,
+					Value: -0.20,
+				})
+			}
+		}
+
+		return false
+	}, "nefer-c4")
 }
 
-// C6: Constellation 6
-/*
-	When Nefer unleashes Phantasm Performance, the second DMG dealt by herself will be converted to deal AoE Dendro DMG equal to 85% of her Elemental Mastery.
-	Additionally, when the attacks from Phantasm Performance end, an extra instance of AoE Dendro DMG equal to 120% of Nefer's Elemental Mastery will be dealt.
-	All of the aforementioned DMG is considered Lunar-Bloom DMG dealt by Phantasm Performance.
-	TO COPILOT: actual DMG will be implemented in lunarbloomhook.go so just queue dummy attack like ineffa/lauma/flins.
-
-	Moonsign: Ascendant Gleam
-	Nefer's Lunar-Bloom DMG is elevated by 15%.
-*/
+// C6: Converts 2nd PP hit and adds extra AoE LB DMG (EM-scaling). If Moonsign Ascendant, LB DMG +15% via ElevationMod.
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
 	}
-	// Placeholder for C6 constellation implementation
+
+	// Moonsign: Ascendant Gleam - Lunar-Bloom DMG elevation by 15%
+	// This is handled via ElevationBonus in character system
+	if c.MoonsignAscendant {
+		c.AddElevationMod(character.ElevationMod{
+			Base: modifier.NewBase("Nefer C6", -1),
+			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				if ai.AttackTag == attacks.AttackTagLBDamage {
+					return 0.15, false
+				}
+				return 0, false
+			},
+		})
+	}
 }

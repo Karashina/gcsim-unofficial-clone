@@ -45,151 +45,36 @@ func ValidateParamKeys(a action.Action, keys []string) error {
 	return nil
 }
 
-func (x *char) Data() *model.AvatarData {
-	return base
-}
+func (x *char) Data() *model.AvatarData { return base }
 
+// Talent scaling tables (generated from data_gen.textproto)
 var (
-	attack = [][][]float64{
-		{attack_1},
-		{attack_2},
-		{attack_3},
-		{attack_4},
-	}
-)
+	attack = [][][]float64{{attack_1}, {attack_2}, {attack_3, attack_3}, {attack_4}}
 
-/* ADDITIONAL INSTRUCTION FOR COPILOT
-EXAMPLE:
-	// attack: attack_1 = [0] ---- [ability]: [ability internal name] = [ability index, must be consistent with config.yml]
-	// Striking Serpent: 1-Hit DMG ---- [real talent name]: [ability in the talent]
-	attack_1 = []float64{
-		0.348,
-		0.376188,
-		0.404724,
-		0.348,   ---- talent level 1, number in the wiki is written by percentage, so convert it to decimal
-		0.376188,   ---- talent level 2
-		0.404724,   ---- talent level 3 ... and so on
-		0.445092,
-		0.47328,
-		0.505644,
-		0.550188,
-		0.594732,
-		0.639276,
-		0.687996,
-		0.736368,
-		0.785088,
-		0.83346,
-		0.83346, ---- talent scaling must have 15 levels, but some ability only have 11 or 13 levels, so just repeat the last value
-		0.83346,
-		0.83346,
-	}
+	attack_1 = []float64{0.381, 0.409, 0.438, 0.476, 0.504, 0.533, 0.571, 0.609, 0.647, 0.685, 0.723, 0.723, 0.723, 0.723, 0.723}
+	attack_2 = []float64{0.376, 0.404, 0.432, 0.47, 0.498, 0.526, 0.563, 0.601, 0.639, 0.676, 0.714, 0.714, 0.714, 0.714, 0.714}
+	attack_3 = []float64{0.252, 0.271, 0.29, 0.316, 0.334, 0.353, 0.379, 0.404, 0.429, 0.454, 0.48, 0.48, 0.48, 0.48, 0.48}
+	attack_4 = []float64{0.61, 0.656, 0.701, 0.762, 0.808, 0.854, 0.915, 0.976, 1.037, 1.098, 1.159, 1.159, 1.159, 1.159, 1.159}
 
-all value should be taken from below;
+	charge     = []float64{1.309, 1.407, 1.505, 1.636, 1.734, 1.832, 1.963, 2.094, 2.225, 2.356, 2.487, 2.487, 2.487, 2.487, 2.487}
+	collision  = []float64{0.568, 0.615, 0.661, 0.727, 0.773, 0.826, 0.899, 0.971, 1.044, 1.123, 1.203, 1.203, 1.203, 1.203, 1.203}
+	highPlunge = []float64{1.42, 1.53, 1.65, 1.82, 1.93, 2.06, 2.24, 2.43, 2.61, 2.81, 3.0, 3.0, 3.0, 3.0, 3.0}
+	lowPlunge  = []float64{1.14, 1.23, 1.32, 1.45, 1.55, 1.65, 1.8, 1.94, 2.09, 2.25, 2.4, 2.4, 2.4, 2.4, 2.4}
 
-attack - Striking Serpent
-Level 	Lv.1	Lv.2	Lv.3	Lv.4	Lv.5	Lv.6	Lv.7	Lv.8	Lv.9	Lv.10	Lv.11
-1-Hit DMG 	38.1%	40.9%	43.8%	47.6%	50.4%	53.3%	57.1%	60.9%	64.7%	68.5%	72.3%
-2-Hit DMG 	37.6%	40.4%	43.2%	47%	49.8%	52.6%	56.3%	60.1%	63.9%	67.6%	71.4%
-3-Hit DMG 	25.2%×2	27.1%×2	29%×2	31.6%×2	33.4%×2	35.3%×2	37.9%×2	40.4%×2	42.9%×2	45.4%×2	48.0%×2
-4-Hit DMG 	61.0%	65.6%	70.1%	76.2%	80.8%	85.4%	91.5%	97.6%	103.7%	109.8%	115.9%
-Charged Attack DMG 	130.9%	140.7%	150.5%	163.6%	173.4%	183.2%	196.3%	209.4%	222.5%	235.6%	248.7%
-Charged Attack Charging Stamina Drain 	18.2/s	18.2/s	18.2/s	18.2/s	18.2/s	18.2/s	18.2/s	18.2/s	18.2/s	18.2/s	18.2/s
-Charged Attack Stamina Cost 	50.0	50.0	50.0	50.0	50.0	50.0	50.0	50.0	50.0	50.0	50.0
-Shadow Dance Charged Attack Stamina Cost 	25.0	25.0	25.0	25.0	25.0	25.0	25.0	25.0	25.0	25.0	25.0
+	skillatk = []float64{0.764, 0.821, 0.878, 0.955, 1.012, 1.069, 1.146, 1.222, 1.299, 1.375, 1.451, 1.528, 1.623}
+	skillem  = []float64{1.528, 1.642, 1.757, 1.91, 2.024, 2.139, 2.292, 2.444, 2.597, 2.75, 2.903, 3.055, 3.246}
 
-Plunge DMG 	56.8% 	61.5% 	66.1% 	72.7% 	77.3% 	82.6% 	89.9% 	97.1% 	104.4% 	112.3% 	120.3%
-Low Plunge DMG 	114% 	123% 	132% 	145% 	155% 	165% 	180% 	194% 	209% 	225% 	240%
-High Plunge DMG 	142% 	153% 	165% 	182% 	193% 	206% 	224% 	243% 	261% 	281% 	300%
+	skillppn1atk = []float64{0.246, 0.265, 0.283, 0.308, 0.326, 0.345, 0.37, 0.394, 0.419, 0.444, 0.468, 0.493, 0.524}
+	skillppn1em  = []float64{0.493, 0.53, 0.567, 0.616, 0.653, 0.69, 0.739, 0.788, 0.838, 0.887, 0.936, 0.986, 1.047}
+	skillppn2atk = []float64{0.32, 0.344, 0.368, 0.4, 0.424, 0.448, 0.48, 0.513, 0.545, 0.577, 0.609, 0.641, 0.681}
+	skillppn2em  = []float64{0.641, 0.689, 0.737, 0.801, 0.849, 0.897, 0.961, 1.025, 1.089, 1.153, 1.217, 1.281, 1.361}
+	skillpps1    = []float64{0.96, 1.032, 1.104, 1.2, 1.272, 1.344, 1.44, 1.536, 1.632, 1.728, 1.824, 1.92, 2.04}
+	skillpps2    = []float64{0.96, 1.032, 1.104, 1.2, 1.272, 1.344, 1.44, 1.536, 1.632, 1.728, 1.824, 1.92, 2.04}
+	skillpps3    = []float64{1.28, 1.376, 1.472, 1.6, 1.696, 1.792, 1.92, 2.048, 2.176, 2.304, 2.432, 2.56, 2.72}
 
-skill - Senet Strategy: Dance of a Thousand Nights
-Level 	Lv.1	Lv.2	Lv.3	Lv.4	Lv.5	Lv.6	Lv.7	Lv.8	Lv.9	Lv.10	Lv.11	Lv.12	Lv.13
-Skill DMG (ATK) 	76.4% 	82.1% 	87.8% 	95.5% 	101.2% 	106.9% 	114.6% 	122.2% 	129.9% 	137.5% 	145.1% 	152.8% 	162.3%
-Skill DMG (EM) 	152.8% 	164.2% 	175.7% 	191% 	202.4% 	213.9% 	229.2% 	244.4% 	259.7% 	275% 	290.3% 	305.5% 	324.6%
-Phantasm Performance 1-Hit DMG (Nefer - ATK) 	24.6% 	26.5% 	28.3% 	30.8% 	32.6% 	34.5% 	37.0% 	39.4% 	41.9% 	44.4% 	46.8% 	49.3% 	52.4%
-Phantasm Performance 2-Hit DMG (Nefer - ATK) 	32.0% 	34.4% 	36.8% 	40.0% 	42.4% 	44.8% 	48.0% 	51.3% 	54.5% 	57.7% 	60.9% 	64.1% 	68.1%
-Phantasm Performance 1-Hit DMG (Nefer - EM) 	49.3% 	53% 	56.7% 	61.6% 	65.3% 	69% 	73.9% 	78.8% 	83.8% 	88.7% 	93.6% 	98.6% 	104.7%
-Phantasm Performance 2-Hit DMG (Nefer - EM) 	64.1% 	68.9% 	73.7% 	80.1% 	84.9% 	89.7% 	96.1% 	102.5% 	108.9% 	115.3% 	121.7% 	128.1% 	136.1%
-Phantasm Performance 1-Hit DMG (Shades) 	96.0% 	103.2% 	110.4% 	120.0% 	127.2% 	134.4% 	144.0% 	153.6% 	163.2% 	172.8% 	182.4% 	192.0% 	204.0%
-Phantasm Performance 2-Hit DMG (Shades) 	96.0% 	103.2% 	110.4% 	120.0% 	127.2% 	134.4% 	144.0% 	153.6% 	163.2% 	172.8% 	182.4% 	192.0% 	204.0%
-Phantasm Performance 3-Hit DMG (Shades) 	128.0% 	137.6% 	147.2% 	160.0% 	169.6% 	179.2% 	192.0% 	204.8% 	217.6% 	230.4% 	243.2% 	256.0% 	272.0%
-
-
-burst - Sacred Vow: True Eye's Phantasm
-Level 	Lv.1	Lv.2	Lv.3	Lv.4	Lv.5	Lv.6	Lv.7	Lv.8	Lv.9	Lv.10	Lv.11	Lv.12	Lv.13
-1-Hit DMG (ATK) 	224.6% 	241.5% 	258.3% 	280.8% 	297.6% 	314.5% 	337.0% 	359.4% 	381.9% 	404.4% 	426.8% 	449.3% 	477.4%
-1-Hit DMG (EM) 	449.3% 	483% 	516.7% 	561.6% 	595.3% 	629% 	673.9% 	718.8% 	763.8% 	808.7% 	853.6% 	898.6% 	954.7%
-2-Hit DMG (ATK) 	337.0% 	362.2% 	387.5% 	421.2% 	446.5% 	471.7% 	505.4% 	539.1% 	572.8% 	606.5% 	640.2% 	673.9% 	716.0%
-2-Hit DMG (EM) 	673.9% 	724.5% 	775.0% 	842.4% 	892.9% 	943.5% 	1010.9% 	1078.3% 	1145.7% 	1213.1% 	1280.4% 	1347.8% 	1432.1%
-DMG Bonus 	13% 	16% 	19% 	22% 	25% 	28% 	31% 	34% 	37% 	40% 	43% 	46% 	49%
-
-source: https://wiki.hoyolab.com/pc/genshin/entry/8894?lang=en-us
-*/
-
-var (
-	// attack: attack_1 = [0]
-	// Striking Serpent: 1-Hit DMG
-	attack_1 = []float64{}
-	// attack: attack_2 = [1]
-	// Striking Serpent: 2-Hit DMG
-	attack_2 = []float64{}
-	// attack: attack_3 = [2]
-	// Striking Serpent: 3-Hit DMG
-	attack_3 = []float64{}
-	// attack: attack_4 = [3]
-	// Striking Serpent: 4-Hit DMG
-	attack_4 = []float64{}
-	// attack: charge = [4]
-	// Striking Serpent: Charged Attack DMG
-	charge = []float64{}
-	// attack: collision = [5]
-	// Striking Serpent: Plunge DMG
-	collision = []float64{}
-	// attack: highPlunge = [6]
-	// Striking Serpent: High Plunge DMG
-	highPlunge = []float64{}
-	// attack: lowPlunge = [7]
-	// Striking Serpent: Low Plunge DMG
-	lowPlunge = []float64{}
-	// skillatk: skill = [0]
-	// Senet Strategy: Dance of a Thousand Nights: Skill DMG (ATK)
-	skillatk = []float64{}
-	// skillem: skill = [1]
-	// Senet Strategy: Dance of a Thousand Nights: Skill DMG (EM)
-	skillem = []float64{}
-	// skill: skillppn1atk = [2]
-	// Senet Strategy: Dance of a Thousand Nights: Phantasm Performance 1-Hit DMG (Nefer - ATK)
-	skillppn1atk = []float64{}
-	// skill: skillppn1em = [3]
-	// Senet Strategy: Dance of a Thousand Nights: Phantasm Performance 1-Hit DMG (Nefer - EM)
-	skillppn1em = []float64{}
-	// skill: skillppn2atk = [4]
-	// Senet Strategy: Dance of a Thousand Nights: Phantasm Performance 2-Hit DMG (Nefer - ATK)
-	skillppn2atk = []float64{}
-	// skill: skillppn2em = [5]
-	// Senet Strategy: Dance of a Thousand Nights: Phantasm Performance 2-Hit DMG (Nefer - EM)
-	skillppn2em = []float64{}
-	// skill: skillpps1 = [6]
-	// Senet Strategy: Dance of a Thousand Nights: Phantasm Performance 1-Hit DMG (Shades)
-	skillpps1 = []float64{}
-	// skill: skillpps2 = [7]
-	// Senet Strategy: Dance of a Thousand Nights: Phantasm Performance 2-Hit DMG (Shades)
-	skillpps2 = []float64{}
-	// skill: skillpps3 = [8]
-	// Senet Strategy: Dance of a Thousand Nights: Phantasm Performance 3-Hit DMG (Shades)
-	skillpps3 = []float64{}
-	// burst: burst1atk = [0]
-	// Sacred Vow: True Eye's Phantasm: 1-Hit DMG (ATK)
-	burst1atk = []float64{}
-	// burst: burst1em = [1]
-	// Sacred Vow: True Eye's Phantasm: 1-Hit DMG (EM)
-	burst1em = []float64{}
-	// burst: burst1atk = [2]
-	// Sacred Vow: True Eye's Phantasm: 2-Hit DMG (ATK)
-	burst2atk = []float64{}
-	// burst: burst1em = [3]
-	// Sacred Vow: True Eye's Phantasm: 2-Hit DMG (EM)
-	burst2em = []float64{}
-	// burst: burstbonus = [4]
-	// Sacred Vow: True Eye's Phantasm: DMG Bonus
-	burstbonus = []float64{}
+	burst1atk  = []float64{2.246, 2.415, 2.583, 2.808, 2.976, 3.145, 3.37, 3.594, 3.819, 4.044, 4.268, 4.493, 4.774}
+	burst1em   = []float64{4.493, 4.83, 5.167, 5.616, 5.953, 6.29, 6.739, 7.188, 7.638, 8.087, 8.536, 8.986, 9.547}
+	burst2atk  = []float64{3.37, 3.622, 3.875, 4.212, 4.465, 4.717, 5.054, 5.391, 5.728, 6.065, 6.402, 6.739, 7.16}
+	burst2em   = []float64{6.739, 7.245, 7.75, 8.424, 8.929, 9.435, 10.109, 10.783, 11.457, 12.131, 12.804, 13.478, 14.321}
+	burstbonus = []float64{0.13, 0.16, 0.19, 0.22, 0.25, 0.28, 0.31, 0.34, 0.37, 0.4, 0.43, 0.46, 0.49}
 )

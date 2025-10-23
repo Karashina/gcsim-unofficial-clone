@@ -11,16 +11,17 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/player"
 )
 
-var highPlungeFrames []int
-var lowPlungeFrames []int
+var highPlungeFrames, lowPlungeFrames []int
 
-const lowPlungeHitmark = 44
-const highPlungeHitmark = 47
-const collisionHitmark = lowPlungeHitmark - 6
-
-const lowPlungeRadius = 3.0
-
-const highPlungeRadius = 3.5
+const (
+	lowPlungeHitmark  = 44
+	highPlungeHitmark = 47
+	collisionHitmark  = lowPlungeHitmark - 6
+)
+const (
+	lowPlungeRadius  = 3.0
+	highPlungeRadius = 3.5
+)
 
 func init() {
 	// low_plunge -> x
@@ -40,9 +41,7 @@ func init() {
 	highPlungeFrames[action.ActionSwap] = 51
 }
 
-// Low Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// LowPlungeAttack: low plunge handling; optional "collision" arg triggers falling hit.
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
@@ -89,9 +88,7 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// High Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// HighPlungeAttack: high plunge handling; optional "collision" arg triggers falling hit.
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
@@ -138,8 +135,7 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// Plunge normal falling attack damage queue generator
-// Standard - Always part of high/low plunge attacks
+// plungeCollision: common falling attack queued by low/high plunge when collision>0
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
