@@ -64,6 +64,7 @@ const (
 	OnNightsoulBurst    // target, AttackEvent
 	OnNightsoulGenerate // char, amount
 	OnNightsoulConsume  // char, amount
+	OnVerdantDewGain    // amountGranted, totalCount (party-level Verdant Dew)
 	// ability use
 	OnActionFailed // ActiveCharIndex, action.Action, param, action.ActionFailure
 	OnActionExec   // ActiveCharIndex, action.Action, param
