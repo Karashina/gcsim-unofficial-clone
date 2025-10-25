@@ -1,12 +1,18 @@
 package nefer
 
 import (
+	"math"
+
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/genshinsim/gcsim/pkg/reactable"
+
+	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
 var (
@@ -81,6 +87,9 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		chargeHitmark,
 	)
 
+	// Attempt to absorb Seeds of Deceit within range when using Charged Attack
+	c.absorbSeeds(5)
+
 	return action.Info{
 		Frames:          frames.NewAbilFunc(chargeFrames),
 		AnimationLength: chargeFrames[action.InvalidAction],
@@ -97,6 +106,9 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 	*/
 
 	// Phantasm Performance: 2 Nefer hits (ATK-scaled) and 3 Shade hits (Lunar-Bloom). Consumes 1 Verdant Dew after first Shade hit.
+
+	// Absorb Seeds of Deceit when unleashing Phantasm Performance
+	c.absorbSeeds(6)
 	c.QueueCharTask(func() {
 		aiATK := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -231,5 +243,60 @@ func (c *char) makePhantasmBonus() combat.AttackCBFunc {
 	return func(a combat.AttackCB) {
 		// Apply bonus as percentage increase to total damage
 		a.AttackEvent.Info.FlatDmg *= (1 + bonus)
+	}
+}
+
+// absorbSeeds looks for Seeds of Deceit (DendroCore with IsSeed=true) within radius of player's position and absorbs them
+func (c *char) absorbSeeds(radius float64) {
+	absorbed := 0
+	player := c.Core.Combat.Player()
+	for _, g := range c.Core.Combat.Gadgets() {
+		if g == nil {
+			continue
+		}
+		if g.GadgetTyp() != combat.GadgetTypDendroCore {
+			continue
+		}
+		if dc, ok := g.(*reactable.DendroCore); ok {
+			if !dc.IsSeed {
+				continue
+			}
+			// distance check
+			if dc.Pos().Distance(player.Pos()) <= radius {
+				absorbed++
+				// remove gadget
+				dc.Gadget.Kill()
+			}
+		}
+	}
+	if absorbed == 0 {
+		return
+	}
+
+	prev := c.a1count
+	maxStacks := 3.0
+	if c.Base.Cons >= 2 {
+		maxStacks = 5.0
+	}
+	c.a1count = math.Min(maxStacks, c.a1count+float64(absorbed))
+
+	// add per-stack duration (9s) and refresh durations
+	c.AddStatus("veil-of-falsehood", 9*60, true)
+
+	// If reaching 3 stacks or refreshing 3rd stack's duration, grant EM bonus
+	if c.a1count >= 3 || (prev >= 3 && absorbed > 0) {
+		emBonus := 100.0
+		if c.Base.Cons >= 2 && c.a1count >= 5 {
+			emBonus = 200.0
+		}
+		c.AddStatMod(character.StatMod{
+			Base:         modifier.NewBaseWithHitlag("veil-em-bonus", 8*60),
+			AffectedStat: attributes.EM,
+			Amount: func() ([]float64, bool) {
+				m := make([]float64, attributes.EndStatType)
+				m[attributes.EM] = emBonus
+				return m, true
+			},
+		})
 	}
 }

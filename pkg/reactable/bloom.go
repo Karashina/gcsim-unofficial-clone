@@ -82,11 +82,21 @@ type DendroCore struct {
 	*gadget.Gadget
 	srcFrame  int
 	CharIndex int
+	// If true, this dendro core is a Seed of Deceit (Nefer)
+	IsSeed bool
 }
 
 func (r *Reactable) addBloomGadget(a *combat.AttackEvent) {
 	r.core.Tasks.Add(func() {
-		t := NewDendroCore(r.core, r.self.Shape(), a)
+		// determine if this should be a Seed of Deceit: if any party member has the nefer seed-convert status
+		isSeed := false
+		for _, ch := range r.core.Player.Chars() {
+			if ch.StatusIsActive("nefer-seed-convert") {
+				isSeed = true
+				break
+			}
+		}
+		t := NewDendroCore(r.core, r.self.Shape(), a, isSeed)
 		r.core.Combat.AddGadget(t)
 		r.core.Events.Emit(event.OnDendroCore, t, a)
 		r.core.Log.NewEvent(
@@ -99,10 +109,11 @@ func (r *Reactable) addBloomGadget(a *combat.AttackEvent) {
 	}, DendroCoreDelay)
 }
 
-func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent) *DendroCore {
+func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent, isSeed bool) *DendroCore {
 	s := &DendroCore{
 		srcFrame:  c.F,
 		CharIndex: a.Info.ActorIndex,
+		IsSeed:    isSeed,
 	}
 
 	circ, ok := shp.(*geometry.Circle)
@@ -140,8 +151,14 @@ func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent) *Den
 			}, 1)
 		}
 	}
-	s.Gadget.OnExpiry = explode("expired")
-	s.Gadget.OnKill = explode("killed")
+	if !isSeed {
+		s.Gadget.OnExpiry = explode("expired")
+		s.Gadget.OnKill = explode("killed")
+	} else {
+		// Seeds of Deceit do not burst or cause reactions on expiry/kill
+		s.Gadget.OnExpiry = nil
+		s.Gadget.OnKill = nil
+	}
 
 	return s
 }
@@ -186,6 +203,10 @@ func (s *DendroCore) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, b
 			}
 		}, 60)
 
+		if s.IsSeed {
+			// Seeds of Deceit cannot trigger Hyperbloom
+			return 0, false
+		}
 		s.Gadget.OnKill = nil
 		s.Gadget.Kill()
 		s.Core.Events.Emit(event.OnHyperbloom, s, atk)
@@ -213,6 +234,10 @@ func (s *DendroCore) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, b
 			s.Core.QueueAttackWithSnap(ai, snap, ap, 0)
 		}, 1)
 
+		if s.IsSeed {
+			// Seeds of Deceit cannot trigger Burgeon
+			return 0, false
+		}
 		s.Gadget.OnKill = nil
 		s.Gadget.Kill()
 		s.Core.Events.Emit(event.OnBurgeon, s, atk)

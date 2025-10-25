@@ -3,7 +3,6 @@ package nefer
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
@@ -28,43 +27,5 @@ func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-
-	// Subscribe to charge attack to add Veil of Falsehood stacks
-	// For simplicity, assume we gain stacks on CA/PP usage
-	// In actual implementation, would need to check Seeds of Deceit on field
-	c.Core.Events.Subscribe(event.OnChargeAttack, func(args ...interface{}) bool {
-		if c.Core.Player.Active() != c.Index {
-			return false
-		}
-
-		// Add Veil of Falsehood stack (simplified - assuming 1 seed absorbed per CA)
-		maxStacks := 3.0
-		if c.Base.Cons >= 2 {
-			maxStacks = 5.0
-		}
-
-		if c.a1count < maxStacks {
-			c.a1count++
-			// Duration is tracked per stack, but simplified here
-			c.AddStatus("veil-of-falsehood", 9*60, true)
-
-			// When reaching max stacks, add EM bonus
-			if c.a1count >= maxStacks || (c.a1count >= 3 && c.Base.Cons < 2) {
-				emBonus := 100.0
-				if c.Base.Cons >= 2 && c.a1count >= 5 {
-					emBonus = 200.0
-				}
-				c.AddStatMod(character.StatMod{
-					Base:         modifier.NewBaseWithHitlag("veil-em-bonus", 8*60),
-					AffectedStat: attributes.EM,
-					Amount: func() ([]float64, bool) {
-						m := make([]float64, attributes.EndStatType)
-						m[attributes.EM] = emBonus
-						return m, true
-					},
-				})
-			}
-		}
-		return false
-	}, "nefer-a1-veil")
+	// Now handled via direct seed absorption in Charge/Phantasm attacks
 }

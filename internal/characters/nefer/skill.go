@@ -7,6 +7,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/genshinsim/gcsim/pkg/reactable"
 )
 
 var (
@@ -48,6 +49,27 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 		// Enter Shadow Dance state
 		c.AddStatus(skillKey, 10*60, true) // 10s duration
+
+		// If Moonsign Ascendant: convert existing Dendro Cores to Seeds of Deceit and set 15s conversion window
+		if c.MoonsignAscendant {
+			// set status window
+			c.AddStatus("nefer-seed-convert", 15*60, true)
+			// convert existing dendro cores
+			for _, g := range c.Core.Combat.Gadgets() {
+				if g == nil {
+					continue
+				}
+				if g.GadgetTyp() == combat.GadgetTypDendroCore {
+					// type assert to reactable.DendroCore and mark as seed
+					if dc, ok := g.(*reactable.DendroCore); ok {
+						dc.IsSeed = true
+						// disable explosions and reaction triggers
+						dc.Gadget.OnExpiry = nil
+						dc.Gadget.OnKill = nil
+					}
+				}
+			}
+		}
 
 		// C2: Gain 2 stacks of Veil of Falsehood when using Elemental Skill
 		if c.Base.Cons >= 2 && c.Base.Ascension >= 1 {
