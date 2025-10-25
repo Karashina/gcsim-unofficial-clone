@@ -1,5 +1,9 @@
 package aino
 
+import (
+	"github.com/genshinsim/gcsim/pkg/core/attributes"
+)
+
 // A1 - Modular Efficiency Protocol
 // When the Moonsign is Ascendant, Her Elemental Burst Precision Hydronic Cooler is enhanced:
 // The Cool Your Jets Ducky will fire water balls more frequently, and the water balls will deal AoE Hydro DMG over a larger area of effect.

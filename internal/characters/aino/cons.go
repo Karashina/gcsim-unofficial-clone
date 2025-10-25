@@ -115,7 +115,7 @@ func (c *char) c2() {
 
 		c.Core.QueueAttack(
 			ai,
-			combat.NewCircleHitOnTargetFanAngle(ae.Target, nil, 3, 360),
+			combat.NewCircleHitOnTarget(ae.Target, nil, 3),
 			0,
 			0,
 		)
@@ -176,26 +176,41 @@ func (c *char) c6() {
 		return false
 	}, "aino-c6")
 
-	// Apply reaction damage bonus
-	c.Core.Events.Subscribe(event.OnTransformReaction, func(args ...interface{}) bool {
-		atk := args[0].(*combat.AttackEvent)
+	// Apply reaction damage bonus for Electro-Charged
+	c.Core.Events.Subscribe(event.OnElectroCharged, func(args ...interface{}) bool {
+		atk := args[1].(*combat.AttackEvent)
 
 		if !c.StatusIsActive(c6Key) {
 			return false
 		}
 
-		// Check if reaction is one of the specified types
-		switch atk.Info.AttackTag {
-		case attacks.AttackTagElectroCharged, attacks.AttackTagBloom, attacks.AttackTagLunarCharged, attacks.AttackTagBountifulCore:
-			bonus := c6DMGBonus
-			if c.MoonsignAscendant {
-				bonus += c6ExtraBonus
-			}
-			atk.Info.FlatDmg += atk.Info.FlatDmg * bonus
-			c.Core.Log.NewEvent("aino c6 reaction dmg bonus", glog.LogCharacterEvent, c.Index).
-				Write("bonus", bonus)
+		bonus := c6DMGBonus
+		if c.MoonsignAscendant {
+			bonus += c6ExtraBonus
 		}
+		atk.Info.FlatDmg += atk.Info.FlatDmg * bonus
+		c.Core.Log.NewEvent("aino c6 electro-charged dmg bonus", glog.LogCharacterEvent, c.Index).
+			Write("bonus", bonus)
 
 		return false
-	}, "aino-c6-reaction")
+	}, "aino-c6-ec")
+
+	// Apply reaction damage bonus for Bloom
+	c.Core.Events.Subscribe(event.OnBloom, func(args ...interface{}) bool {
+		atk := args[1].(*combat.AttackEvent)
+
+		if !c.StatusIsActive(c6Key) {
+			return false
+		}
+
+		bonus := c6DMGBonus
+		if c.MoonsignAscendant {
+			bonus += c6ExtraBonus
+		}
+		atk.Info.FlatDmg += atk.Info.FlatDmg * bonus
+		c.Core.Log.NewEvent("aino c6 bloom dmg bonus", glog.LogCharacterEvent, c.Index).
+			Write("bonus", bonus)
+
+		return false
+	}, "aino-c6-bloom")
 }

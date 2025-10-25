@@ -64,7 +64,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 		}
 		c.Core.QueueAttack(
 			ai,
-			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, lowPlungeRadius),
+			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, lowPlungeRadius),
 			lowPlungeHitmark,
 			lowPlungeHitmark,
 		)
@@ -106,7 +106,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 		}
 		c.Core.QueueAttack(
 			ai,
-			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, highPlungeRadius),
+			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, highPlungeRadius),
 			highPlungeHitmark,
 			highPlungeHitmark,
 		)
@@ -132,5 +132,5 @@ func (c *char) plungeCollision(delay int) {
 		Durability: 25,
 		Mult:       collision[c.TalentLvlAttack()],
 	}
-	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1), delay, delay)
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 1), delay, delay)
 }
