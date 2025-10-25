@@ -1,5 +1,5 @@
 package_name: nefer
-genshin_id: 10000620
+genshin_id: 10000610
 key: nefer
 action_param_keys:
   charge:
