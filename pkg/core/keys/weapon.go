@@ -254,6 +254,8 @@ var weaponNames = []string{
 	"wolffang",
 	"wolfsgravestone",
 	"xiphosmoonlight",
+	"sacrificersstaff",
+	"dawningfrost",
 	"reliquaryoftruth",
 }
 
@@ -481,4 +483,6 @@ const (
 	WolfsGravestone
 	XiphosMoonlight
 	ReliquaryOfTruth
+	SacrificersStaff
+	DawningFrost
 )
