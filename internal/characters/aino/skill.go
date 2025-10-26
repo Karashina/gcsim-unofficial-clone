@@ -12,16 +12,12 @@ import (
 var skillFrames []int
 
 const (
-	skillStage1Hitmark = 30
-	skillStage2Hitmark = 45
+	skillStage1Hitmark = 16
+	skillStage2Hitmark = 36
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(70)
-	skillFrames[action.ActionAttack] = 60
-	skillFrames[action.ActionBurst] = 60
-	skillFrames[action.ActionDash] = 50
-	skillFrames[action.ActionSwap] = 58
+	skillFrames = frames.InitAbilSlice(46)
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {

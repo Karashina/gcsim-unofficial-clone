@@ -6,24 +6,19 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
 )
 
 var burstFrames []int
 
 const (
 	burstDuration       = 14 * 60 // 14 seconds
-	burstTickInterval   = 2 * 60  // 2 seconds (default)
-	burstTickIntervalA1 = 1 * 60  // 1 second (when Moonsign is Ascendant)
+	burstTickInterval   = 90      // 90 frames (default)
+	burstTickIntervalA1 = 42      // 42 frames (when Moonsign is Ascendant)
 	burstKey            = "aino-burst"
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(95)
-	burstFrames[action.ActionAttack] = 85
-	burstFrames[action.ActionSkill] = 85
-	burstFrames[action.ActionDash] = 75
-	burstFrames[action.ActionSwap] = 82
+	burstFrames = frames.InitAbilSlice(62)
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
@@ -37,11 +32,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		radius = 5.0
 	}
 
-	// Schedule water ball attacks
-	numTicks := burstDuration / interval
-	for i := 0; i < numTicks; i++ {
-		c.Core.Tasks.Add(c.burstTick(c.burstSrc, radius), interval*i)
-	}
+	c.QueueCharTask(func() {
+		// Schedule water ball attacks
+		numTicks := burstDuration / interval
+		for i := 0; i < numTicks; i++ {
+			c.Core.Tasks.Add(c.burstTick(c.burstSrc, radius), interval*i)
+		}
+	}, 120)
 
 	c.AddStatus(burstKey, burstDuration, false)
 
@@ -75,7 +72,12 @@ func (c *char) burstTick(src int, radius float64) func() {
 			Element:    attributes.Hydro,
 			Durability: 25,
 			Mult:       burst[c.TalentLvlBurst()],
-			FlatDmg:    c.a4FlatDmgBuff,
+		}
+		if c.MoonsignAscendant {
+			ai.ICDGroup = attacks.ICDGroupAinoBurstEnhanced
+		}
+		if c.Base.Ascension >= 4 {
+			ai.FlatDmg += 0.5 * c.Stat(attributes.EM)
 		}
 
 		c.Core.QueueAttack(

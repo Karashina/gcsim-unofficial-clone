@@ -1,22 +1,22 @@
 package aino
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
 const (
-	c1Key       = "aino-c1"
-	c1Duration  = 15 * 60
-	c1EMBonus   = 80
-	c6Key       = "aino-c6"
-	c6Duration  = 15 * 60
-	c6DMGBonus  = 0.15
+	c1Key        = "aino-c1"
+	c1Duration   = 15 * 60
+	c1EMBonus    = 80
+	c6Key        = "aino-c6"
+	c6Duration   = 15 * 60
+	c6DMGBonus   = 0.15
 	c6ExtraBonus = 0.20
 )
 
@@ -50,12 +50,11 @@ func (c *char) applyC1Buff() {
 	// Apply to all party members
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatMod(character.StatMod{
-			Base:         character.ModBase(c1Key),
+			Base:         modifier.NewBaseWithHitlag(c1Key, c1Duration),
 			AffectedStat: attributes.EM,
 			Amount: func() ([]float64, bool) {
 				return c.c1EMBuff(), true
 			},
-			Expiry: c.Core.F + c1Duration,
 		})
 	}
 	c.Core.Log.NewEvent("aino c1 em buff applied", glog.LogCharacterEvent, c.Index)
@@ -78,8 +77,7 @@ func (c *char) c2() {
 	}
 
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
-		
+
 		// Check if Aino is off-field
 		if c.Core.Player.Active() == c.Index {
 			return false
@@ -96,7 +94,7 @@ func (c *char) c2() {
 		}
 
 		// Trigger additional water ball
-		atk := c.Base.Atk + c.Weapon.Atk
+		atk := c.Stat(attributes.ATK)
 		em := c.Stat(attributes.EM)
 		flatDmg := 0.25*atk + 1.0*em
 
@@ -113,9 +111,11 @@ func (c *char) c2() {
 			FlatDmg:    flatDmg,
 		}
 
+		// args[0] is the target (enemy) and args[1] is the attack event
+		tgt := args[0].(combat.Target)
 		c.Core.QueueAttack(
 			ai,
-			combat.NewCircleHitOnTarget(ae.Target, nil, 3),
+			combat.NewCircleHitOnTarget(tgt, nil, 3),
 			0,
 			0,
 		)
