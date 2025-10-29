@@ -51,6 +51,36 @@ func RunSubstatOptim(simopt simulator.Options, verbose bool, additionalOptions s
 
 	clean, err := removeSubstatLines(cfg)
 	if errors.Is(err, errInvalidStats) {
+		// Provide detailed diagnostics to help identify which character(s) are missing
+		// valid main stat rows (flower HP). This will list character names that
+		// have no matching mainstat line (hp=4780 or hp=3571).
+		charMatches := regexpLineCharname.FindAllStringSubmatch(cfg, -1)
+		mainMatches := regexpLineMainstat.FindAllString(cfg, -1)
+
+		hasMain := make(map[string]bool)
+		for _, mm := range mainMatches {
+			// Attempt to extract the character name from the main stat line
+			sub := regexpLineCharname.FindStringSubmatch(mm)
+			if len(sub) > 1 {
+				hasMain[sub[1]] = true
+			}
+		}
+
+		var missing []string
+		for _, cm := range charMatches {
+			if len(cm) > 1 {
+				name := cm[1]
+				if !hasMain[name] {
+					missing = append(missing, name)
+				}
+			}
+		}
+
+		if len(missing) > 0 {
+			sugarLog.Panicf("Error: Could not identify valid main artifact stat rows for the following characters (missing flower HP main stat lines): %v\n5* flowers must have 4780 HP, and 4* flowers must have 3571 HP.", missing)
+		}
+
+		// Fallback generic message
 		sugarLog.Panic("Error: Could not identify valid main artifact stat rows for all characters based on flower HP values.\n5* flowers must have 4780 HP, and 4* flowers must have 3571 HP.")
 		os.Exit(1)
 	}

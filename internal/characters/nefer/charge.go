@@ -18,25 +18,20 @@ import (
 var (
 	chargeFrames     []int
 	phantasmFrames   []int
-	phantasmHitmarks = []int{15, 22, 30, 38, 46} // 2 Nefer hits + 3 Shade hits
+	phantasmHitmarks = []int{28, 81, 48, 56, 81} // 2 Nefer hits + 3 Shade hits
 )
 
 const (
-	chargeHitmark = 22
+	chargeHitmark = 45
 )
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(55)
+	chargeFrames = frames.InitAbilSlice(60)
 	chargeFrames[action.ActionDash] = chargeHitmark
 	chargeFrames[action.ActionJump] = chargeHitmark
-	chargeFrames[action.ActionWalk] = 53
-	chargeFrames[action.ActionSkill] = 1
 
-	phantasmFrames = frames.InitAbilSlice(52)
-	phantasmFrames[action.ActionDash] = 48
-	phantasmFrames[action.ActionJump] = 48
-	phantasmFrames[action.ActionWalk] = 50
-	phantasmFrames[action.ActionSkill] = 1
+	phantasmFrames = frames.InitAbilSlice(92)
+	phantasmFrames[action.ActionDash] = 28
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
@@ -114,7 +109,7 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 			ActorIndex: c.Index,
 			Abil:       "Phantasm Performance 1-Hit (Nefer / C)",
 			AttackTag:  attacks.AttackTagExtra,
-			ICDTag:     attacks.ICDTagNone,
+			ICDTag:     attacks.ICDTagExtraAttack,
 			ICDGroup:   attacks.ICDGroupDefault,
 			StrikeType: attacks.StrikeTypeDefault,
 			Element:    attributes.Dendro,
@@ -150,7 +145,7 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 				ActorIndex: c.Index,
 				Abil:       "Phantasm Performance 2-Hit (Nefer / C)",
 				AttackTag:  attacks.AttackTagExtra,
-				ICDTag:     attacks.ICDTagNone,
+				ICDTag:     attacks.ICDTagExtraAttack,
 				ICDGroup:   attacks.ICDGroupDefault,
 				StrikeType: attacks.StrikeTypeDefault,
 				Element:    attributes.Dendro,

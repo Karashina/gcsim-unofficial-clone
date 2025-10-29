@@ -16,12 +16,12 @@ var (
 )
 
 const (
-	burstHitmark1 = 95
-	burstHitmark2 = 105
+	burstHitmark1 = 103
+	burstHitmark2 = 149
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(115)
+	burstFrames = frames.InitAbilSlice(122)
 }
 
 // Elemental Burst: two AoE Dendro hits; consumes Veil stacks to buff damage.
@@ -54,7 +54,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			ActorIndex: c.Index,
 			Abil:       "Sacred Vow: True Eye's Phantasm / 2-Hit DMG (Q)",
 			AttackTag:  attacks.AttackTagElementalBurst,
-			ICDTag:     attacks.ICDTagNone,
+			ICDTag:     attacks.ICDTagElementalBurst,
 			ICDGroup:   attacks.ICDGroupDefault,
 			StrikeType: attacks.StrikeTypeDefault,
 			Element:    attributes.Dendro,
@@ -72,7 +72,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}, burstHitmark2)
 
 	c.SetCD(action.ActionBurst, 15*60)
-	c.ConsumeEnergy(5)
+	c.ConsumeEnergy(4)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),

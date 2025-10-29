@@ -7,6 +7,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/genshinsim/gcsim/pkg/core/targets"
 	"github.com/genshinsim/gcsim/pkg/reactable"
 )
 
@@ -15,12 +16,12 @@ var (
 )
 
 const (
-	skillHitmark = 28
+	skillHitmark = 26
 	skillKey     = "nefer-skill"
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(30)
+	skillFrames = frames.InitAbilSlice(31)
 }
 
 // Elemental Skill: AoE Dendro + Shadow Dance status; grants charges. In Shadow Dance, Verdant Dew enables Phantasm Performance.
@@ -32,7 +33,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			ActorIndex: c.Index,
 			Abil:       "Skill Initial DMG (E)",
 			AttackTag:  attacks.AttackTagElementalArt,
-			ICDTag:     attacks.ICDTagNone,
+			ICDTag:     attacks.ICDTagElementalArt,
 			ICDGroup:   attacks.ICDGroupDefault,
 			StrikeType: attacks.StrikeTypeDefault,
 			Element:    attributes.Dendro,
@@ -45,6 +46,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0}, 5),
 			0,
 			0,
+			c.particleCB,
 		)
 
 		// Enter Shadow Dance state
@@ -91,4 +93,15 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		CanQueueAfter:   skillFrames[action.ActionSwap],
 		State:           action.SkillState,
 	}, nil
+}
+
+func (c *char) particleCB(a combat.AttackCB) {
+	if a.Target.Type() != targets.TargettableEnemy {
+		return
+	}
+	count := 2.0
+	if c.Core.Rand.Float64() < 0.667 {
+		count = 3
+	}
+	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Dendro, c.ParticleDelay)
 }
