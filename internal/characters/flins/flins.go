@@ -34,6 +34,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
+	// mark this character as a potential moonsign holder for team initialization
 	c.AddStatus("moonsignKey", -1, false)
 	c.InitLCallback()
 	c.a0()
@@ -60,18 +61,25 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
+	// Allow special skill/burst variants when their custom statuses are active.
 	if a == action.ActionSkill && c.StatusIsActive(skillKey) {
 		if c.StatusIsActive(northlandCdKey) {
-			return false, action.SkillCD // Fails if Northland Spearstorm is still on CD (This CD is unaffected by other effects such as c.CDReduction())
+			// Northland Spearstorm is on its own CD and cannot be used yet.
+			return false, action.SkillCD
 		}
-		return true, action.NoFailure // Make Northland Spearstorm usable even on normal skill is in CD
+		// Skill variant allowed even if normal skill CD is active.
+		return true, action.NoFailure
 	}
+
 	if a == action.ActionBurst && c.StatusIsActive(northlandKey) {
 		if !c.Core.Flags.IgnoreBurstEnergy && c.Energy < 30 {
-			return false, action.InsufficientEnergy // Energy cost of Thunderous Symphony is 30
+			// Thunderous Symphony requires 30 energy unless IgnoreBurstEnergy is set.
+			return false, action.InsufficientEnergy
 		}
-		return true, action.NoFailure // Make Thunderous Symphony usable even on normal burst is in CD
+		// Burst variant allowed even if normal burst CD is active.
+		return true, action.NoFailure
 	}
+
 	return c.Character.ActionReady(a, p)
 }
 

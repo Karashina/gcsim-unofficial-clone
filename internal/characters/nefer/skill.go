@@ -1,6 +1,7 @@
 package nefer
 
 import (
+	"math"
 	"reflect"
 
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -106,12 +107,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 		// C2: Gain 2 stacks of Veil of Falsehood when using Elemental Skill
 		if c.Base.Cons >= 2 && c.Base.Ascension >= 1 {
-			maxStacks := 5.0
-			if c.a1count < maxStacks-1 {
-				c.a1count += 2
-			} else if c.a1count < maxStacks {
-				c.a1count = maxStacks
-			}
+			// Add up to 2 stacks, capped at 5
+			c.a1count = math.Min(5.0, c.a1count+2)
 			c.AddStatus("veil-of-falsehood", 14*60, true) // 9s base + 5s from C2
 		}
 	}, skillHitmark)

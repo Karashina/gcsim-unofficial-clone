@@ -37,6 +37,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
+	// mark this character as a potential moonsign holder for team initialization
 	c.AddStatus("moonsignKey", -1, false)
 	c.InitLCallback()
 	c.makeBurstBonus()
@@ -52,14 +53,14 @@ func (c *char) Init() error {
 }
 
 func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
-	if a == action.ActionCharge && c.StatusIsActive(skillKey) {
-		if c.Core.Player.Verdant.Count() >= 1 {
-			return 0
-		} else {
-			return 25
-		}
+	// If charging during Shadow Dance (skill active), stamina cost is 0 when Verdant Dew >=1.
+	if a != action.ActionCharge || !c.StatusIsActive(skillKey) {
+		return c.Character.ActionStam(a, p)
 	}
-	return c.Character.ActionStam(a, p)
+	if c.Core.Player.Verdant.Count() >= 1 {
+		return 0
+	}
+	return 25
 }
 
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {

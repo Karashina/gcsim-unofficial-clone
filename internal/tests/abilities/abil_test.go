@@ -36,6 +36,10 @@ func testChar(t *testing.T, k keys.Char) {
 		t.FailNow()
 	}
 	c.Player.SetActive(idx)
+	// ensure there is a default combat target before initializing the core
+	// some character init code (e.g. const handlers) assumes a default target
+	// exists, so set it here to avoid panics during Init()
+	c.Combat.DefaultTarget = trg[0].Key()
 	err = c.Init()
 	if err != nil {
 		t.Errorf("error initializing core: %v", err)
