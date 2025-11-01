@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/enemy"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
@@ -20,11 +21,11 @@ func (c *char) c4() {
 		next := args[1].(int)
 
 		if prev == c.Index && c.c4buffkey {
-			c.Core.Player.Verdant.SetGainBonus(c.Core.Player.Verdant.GetGainBonus() + 0.25)
+			c.Core.Player.Verdant.SetGainBonus(c.Core.Player.Verdant.GetGainBonus() - 0.25)
 			c.c4buffkey = false
 		}
 		if next == c.Index {
-			c.Core.Player.Verdant.SetGainBonus(c.Core.Player.Verdant.GetGainBonus() - 0.25)
+			c.Core.Player.Verdant.SetGainBonus(c.Core.Player.Verdant.GetGainBonus() + 0.25)
 			c.c4buffkey = true
 		}
 		return false
@@ -48,13 +49,15 @@ func (c *char) c4() {
 		// duration: Shadow Dance base 10s (10*60) + 4.5s (270 frames) = 870 frames
 		dur := 10*60 + 270
 		for _, e := range enemies {
-			if targ, ok := e.(interface{ AddResistMod(combat.ResistMod) }); ok {
-				targ.AddResistMod(combat.ResistMod{
-					Base:  modifier.NewBaseWithHitlag("nefer-c4-dendro", dur),
-					Ele:   attributes.Dendro,
-					Value: -0.20,
-				})
+			targ, ok := e.(*enemy.Enemy)
+			if !ok {
+				continue
 			}
+			targ.AddResistMod(combat.ResistMod{
+				Base:  modifier.NewBaseWithHitlag("nefer-c4-dendro", dur),
+				Ele:   attributes.Dendro,
+				Value: -0.20,
+			})
 		}
 
 		return false

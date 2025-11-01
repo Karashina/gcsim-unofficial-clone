@@ -25,6 +25,8 @@ action_param_keys:
           - 3 # Frostgrove Sanctuary Attack DMG (ATK)
         skillDotEM:
           - 4 # Frostgrove Sanctuary Attack DMG (EM)
+        skillRESShred:
+          - 5 # Frostgrove Sanctuary Dendro RES Shred (EM)
       burst:
         burstBuffBloom:
           - 0 # Bloom, Hyperbloom, and Burgeon DMG Increase (EM)

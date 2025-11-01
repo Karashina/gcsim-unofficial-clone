@@ -21,8 +21,6 @@ type char struct {
 	verdantDew  int
 	moonSong    int
 	paleHymn    int
-	a4crval     float64
-	a4cdval     float64
 	c6mult      float64
 }
 
@@ -42,8 +40,6 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 func (c *char) Init() error {
 	c.AddStatus("moonsignKey", -1, false)
-	c.a4crval = 0
-	c.a4cdval = 0
 	c.moonsignInitFunc()
 	c.setupPaleHymnEffects()
 	c.a0()

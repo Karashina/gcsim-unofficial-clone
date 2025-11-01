@@ -66,9 +66,21 @@ func (c *char) a1() {
 			return false
 		}, "lauma-a1-nascent-reaction-crit")
 	} else if c.MoonsignAscendant {
-		// Moonsign: Ascendant Gleam
-		c.a4crval = 0.1
-		c.a4cdval = 0.2
+		c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+			ae := args[1].(*combat.AttackEvent)
+
+			switch ae.Info.AttackTag {
+			case attacks.AttackTagLBDamage:
+			default:
+				return false
+			}
+			ae.Snapshot.Stats[attributes.CR] += 0.1
+			ae.Snapshot.Stats[attributes.CD] += 0.2
+
+			c.Core.Log.NewEvent("lauma a1 nascent crit buff", glog.LogCharacterEvent, ae.Info.ActorIndex)
+
+			return false
+		}, "lauma-a1-nascent-reaction-crit")
 	}
 }
 

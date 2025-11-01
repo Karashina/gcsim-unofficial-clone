@@ -10,6 +10,8 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/genshinsim/gcsim/pkg/enemy"
+	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
 var skillFrames []int
@@ -65,7 +67,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(
 			ai1,
 			combat.NewCircleHitOnTarget(skillPos, geometry.Point{Y: -1.5}, 5),
-			skillInitHitmarkHold, skillInitHitmarkHold, c.particleCB,
+			skillInitHitmarkHold, skillInitHitmarkHold, c.particleCB, c.shredCB,
 		)
 		// "considered Lunar-Bloom DMG area"
 		ai2 := combat.AttackInfo{
@@ -80,15 +82,15 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
 		}
-		snap.Stats[attributes.CR] = c.Stat(attributes.CR) + c.a4crval
-		snap.Stats[attributes.CD] = c.Stat(attributes.CD) + c.a4cdval
+		snap.Stats[attributes.CR] = c.Stat(attributes.CR)
+		snap.Stats[attributes.CD] = c.Stat(attributes.CD)
 		c.Core.QueueAttackWithSnap(
 			ai2,
 			snap,
 			combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget().Pos(), nil, 6),
 			skillInitHitmarkHold,
+			c.shredCB,
 		)
-		c.paleHymnLunarBloomBonus()
 		// "considered Lunar-Bloom DMG area end"
 	} else {
 		// Press E
@@ -108,7 +110,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(skillPos, geometry.Point{Y: -1.5}, 5),
-			skillInitHitmark, skillInitHitmark, c.particleCB,
+			skillInitHitmark, skillInitHitmark, c.particleCB, c.shredCB,
 		)
 	}
 
@@ -119,9 +121,6 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.Core.Tasks.Add(c.skillTick(c.skillSrc), skillFirstTickDelay+ceil(skillInterval*i))
 	}
 	c.AddStatus(skillKey, skillFirstTickDelay+ceil((skillTicks-1)*skillInterval), false)
-
-	// Additionally, when Lauma's Elemental Skill or attacks from Frostgrove Sanctuary hit an opponent,
-	// that opponent's Dendro RES and Hydro RES will be decreased for 10s.
 
 	c.SetCD(action.ActionSkill, 12*60)
 	c.a1() // Apply A1 moonsign buffs for 20s
@@ -172,7 +171,7 @@ func (c *char) skillTick(src int) func() {
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 6.5),
-			0, 0, c.particleCB,
+			0, 0, c.particleCB, c.shredCB,
 		)
 		c.c4()
 
@@ -192,18 +191,34 @@ func (c *char) skillTick(src int) func() {
 				CharLvl: c.Base.Level,
 			}
 			c6ai.FlatDmg = (1.85*em*(1+c.LBBaseReactBonus(c6ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(c6ai)) + c.burstLBBuff*c.c6mult // 185% of EM
-			snapc6.Stats[attributes.CR] = c.Stat(attributes.CR) + c.a4crval
-			snapc6.Stats[attributes.CD] = c.Stat(attributes.CD) + c.a4cdval
+			snapc6.Stats[attributes.CR] = c.Stat(attributes.CR)
+			snapc6.Stats[attributes.CD] = c.Stat(attributes.CD)
 
 			c.Core.QueueAttackWithSnap(
 				c6ai,
 				snapc6,
 				combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget().Pos(), nil, 6.5),
 				1,
+				c.shredCB,
 			)
 
 			c.paleHymn += 3 // Gain 2+1 Pale Hymn stacks
 			c.AddStatus("pale-hymn-window", 15*60, true)
 		}
 	}
+}
+
+func (c *char) shredCB(a combat.AttackCB) {
+	if a.Target.Type() != targets.TargettableEnemy {
+		return
+	}
+	e, ok := a.Target.(*enemy.Enemy)
+	if !ok {
+		return
+	}
+	e.AddResistMod(combat.ResistMod{
+		Base:  modifier.NewBaseWithHitlag("lauma-e-dendro", 10*60),
+		Ele:   attributes.Dendro,
+		Value: -1 * skillRESShred[c.TalentLvlSkill()],
+	})
 }

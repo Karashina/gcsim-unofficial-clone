@@ -131,6 +131,11 @@ func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent, isSe
 	explode := func(reason string) func() {
 		return func() {
 			s.Core.Tasks.Add(func() {
+				if s.IsSeed {
+					// Seeds of Deceit do not explode
+					return
+				}
+				// bloom attack
 				ai, snap := NewBloomAttack(char, s, nil)
 				ap := combat.NewCircleHitOnTarget(s, nil, 5)
 				c.QueueAttackWithSnap(ai, snap, ap, 0)
@@ -183,6 +188,10 @@ func (s *DendroCore) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, b
 	// only contact with pyro/electro to trigger burgeon/hyperbloom accordingly
 	switch atk.Info.Element {
 	case attributes.Electro:
+		if s.IsSeed {
+			// Seeds of Deceit cannot trigger Hyperbloom
+			return 0, false
+		}
 		// trigger hyperbloom targets the nearest enemy
 		// it can also do damage to player in small aoe
 		s.Core.Tasks.Add(func() {
@@ -203,10 +212,6 @@ func (s *DendroCore) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, b
 			}
 		}, 60)
 
-		if s.IsSeed {
-			// Seeds of Deceit cannot trigger Hyperbloom
-			return 0, false
-		}
 		s.Gadget.OnKill = nil
 		s.Gadget.Kill()
 		s.Core.Events.Emit(event.OnHyperbloom, s, atk)
@@ -218,6 +223,10 @@ func (s *DendroCore) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, b
 			Write("dendro_core_char", s.CharIndex).
 			Write("dendro_core_src", s.Gadget.Src())
 	case attributes.Pyro:
+		if s.IsSeed {
+			// Seeds of Deceit cannot trigger Burgeon
+			return 0, false
+		}
 		// trigger burgeon, aoe dendro damage
 		// self damage
 		s.Core.Tasks.Add(func() {
@@ -234,10 +243,6 @@ func (s *DendroCore) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, b
 			s.Core.QueueAttackWithSnap(ai, snap, ap, 0)
 		}, 1)
 
-		if s.IsSeed {
-			// Seeds of Deceit cannot trigger Burgeon
-			return 0, false
-		}
 		s.Gadget.OnKill = nil
 		s.Gadget.Kill()
 		s.Core.Events.Emit(event.OnBurgeon, s, atk)

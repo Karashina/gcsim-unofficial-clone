@@ -224,7 +224,7 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(phantasmFrames),
 		AnimationLength: phantasmFrames[action.InvalidAction],
-		CanQueueAfter:   phantasmHitmarks[4],
+		CanQueueAfter:   phantasmHitmarks[0],
 		State:           action.ChargeAttackState,
 	}, nil
 }
