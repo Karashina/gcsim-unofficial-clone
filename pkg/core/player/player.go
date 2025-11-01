@@ -291,6 +291,26 @@ func (h *Handler) InitializeTeam() error {
 			Write("starting_hp_ratio", h.chars[i].CurrentHPRatio()).
 			Write("starting_hp", h.chars[i].CurrentHP())
 	}
+
+	// Determine Moonsign state for the whole party once (nascent/ascendant)
+	count := 0
+	for _, ch := range h.chars {
+		if ch.StatusIsActive("moonsignKey") {
+			count++
+		}
+	}
+	for _, ch := range h.chars {
+		ch.MoonsignNascent = false
+		ch.MoonsignAscendant = false
+		switch count {
+		case 1:
+			ch.MoonsignNascent = true
+		case 2, 3, 4:
+			ch.MoonsignAscendant = true
+		}
+	}
+	h.Log.NewEvent("moonsign party init", glog.LogDebugEvent, -1).
+		Write("count", count)
 	return nil
 }
 

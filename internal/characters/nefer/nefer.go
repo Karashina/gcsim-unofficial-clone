@@ -38,7 +38,6 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 func (c *char) Init() error {
 	c.AddStatus("moonsignKey", -1, false)
-	c.moonsignInitFunc()
 	c.InitLCallback()
 	c.makeBurstBonus()
 	c.a0()
@@ -50,22 +49,6 @@ func (c *char) Init() error {
 		c.c6()
 	}
 	return nil
-}
-
-func (c *char) moonsignInitFunc() {
-	count := 0
-	for _, ch := range c.Core.Player.Chars() {
-		if ch.StatusIsActive("moonsignKey") {
-			count++
-		}
-	}
-	c.MoonsignNascent, c.MoonsignAscendant = false, false
-	switch count {
-	case 1:
-		c.MoonsignNascent = true
-	case 2, 3, 4:
-		c.MoonsignAscendant = true
-	}
 }
 
 func (c *char) ActionStam(a action.Action, p map[string]int) float64 {

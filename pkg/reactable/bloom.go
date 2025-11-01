@@ -87,16 +87,18 @@ type DendroCore struct {
 }
 
 func (r *Reactable) addBloomGadget(a *combat.AttackEvent) {
-	r.core.Tasks.Add(func() {
-		// determine if this should be a Seed of Deceit: if any party member has the nefer seed-convert status
-		isSeed := false
-		for _, ch := range r.core.Player.Chars() {
-			if ch.StatusIsActive("nefer-seed-convert") {
-				isSeed = true
-				break
-			}
+	// determine if this should be a Seed of Deceit at scheduling time to avoid timing races
+	isSeed := false
+	for _, ch := range r.core.Player.Chars() {
+		if ch.StatusIsActive("nefer-seed-convert") {
+			isSeed = true
+			break
 		}
-		t := NewDendroCore(r.core, r.self.Shape(), a, isSeed)
+	}
+	// capture isSeed in closure
+	capturedIsSeed := isSeed
+	r.core.Tasks.Add(func() {
+		t := NewDendroCore(r.core, r.self.Shape(), a, capturedIsSeed)
 		r.core.Combat.AddGadget(t)
 		r.core.Events.Emit(event.OnDendroCore, t, a)
 		r.core.Log.NewEvent(
@@ -105,7 +107,8 @@ func (r *Reactable) addBloomGadget(a *combat.AttackEvent) {
 			a.Info.ActorIndex,
 		).
 			Write("src", t.Src()).
-			Write("expiry", r.core.F+t.Duration)
+			Write("expiry", r.core.F+t.Duration).
+			Write("is_seed", capturedIsSeed)
 	}, DendroCoreDelay)
 }
 
@@ -126,11 +129,27 @@ func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent, isSe
 	s.Gadget = gadget.New(c, geometry.CalcRandomPointFromCenter(circ.Pos(), r, r, c.Rand), 2, combat.GadgetTypDendroCore)
 	s.Gadget.Duration = 300 // ??
 
+	// Log creation details for debugging Seed of Deceit behavior
+	c.Log.NewEvent(
+		"new dendro core created",
+		glog.LogElementEvent,
+		a.Info.ActorIndex,
+	).Write("is_seed", isSeed).
+		Write("src_frame", s.srcFrame)
+
 	char := s.Core.Player.ByIndex(a.Info.ActorIndex)
 
 	explode := func(reason string) func() {
 		return func() {
 			s.Core.Tasks.Add(func() {
+				// Log an explode attempt and current IsSeed state
+				s.Core.Log.NewEvent(
+					"dendro core explode attempt",
+					glog.LogElementEvent,
+					char.Index,
+				).Write("is_seed", s.IsSeed).
+					Write("src", s.Src())
+
 				if s.IsSeed {
 					// Seeds of Deceit do not explode
 					return

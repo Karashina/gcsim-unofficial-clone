@@ -35,7 +35,6 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 func (c *char) Init() error {
 	c.AddStatus("moonsignKey", -1, false)
-	c.moonsignInitFunc()
 	c.InitLCallback()
 	c.a0()
 	c.a1()
@@ -74,26 +73,6 @@ func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Fail
 		return true, action.NoFailure // Make Thunderous Symphony usable even on normal burst is in CD
 	}
 	return c.Character.ActionReady(a, p)
-}
-
-func (c *char) moonsignInitFunc() {
-	count := 0
-	for _, char := range c.Core.Player.Chars() {
-		if char.StatusIsActive("moonsignKey") {
-			count++
-		}
-	}
-	switch count {
-	case 1:
-		c.MoonsignNascent = true // Moonsign: Nascent Gleam
-		c.MoonsignAscendant = false
-	case 2, 3, 4:
-		c.MoonsignAscendant = true // Moonsign: Ascendant Gleam
-		c.MoonsignNascent = false
-	default:
-		c.MoonsignNascent = false
-		c.MoonsignAscendant = false
-	}
 }
 
 func (c *char) Condition(fields []string) (any, error) {

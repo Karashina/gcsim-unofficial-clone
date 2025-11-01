@@ -1,12 +1,15 @@
 package nefer
 
 import (
+	"reflect"
+
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/targets"
 	"github.com/genshinsim/gcsim/pkg/reactable"
 )
@@ -53,14 +56,26 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.AddStatus(skillKey, 10*60, true) // 10s duration
 
 		// If Moonsign Ascendant: convert existing Dendro Cores to Seeds of Deceit and set 15s conversion window
+		// Log moonsign state for debugging
+		c.Core.Log.NewEvent("nefer skill moonsign state", glog.LogDebugEvent, c.Index).
+			Write("moonsign_nascent", c.MoonsignNascent).
+			Write("moonsign_ascendant", c.MoonsignAscendant)
+
 		if c.MoonsignAscendant {
 			// set status window
 			c.AddStatus("nefer-seed-convert", 15*60, true)
 			// convert existing dendro cores
-			for _, g := range c.Core.Combat.Gadgets() {
+			gad := c.Core.Combat.Gadgets()
+			c.Core.Log.NewEvent("nefer skill found gadgets", glog.LogDebugEvent, c.Index).
+				Write("count", len(gad))
+			for _, g := range gad {
 				if g == nil {
 					continue
 				}
+				// log gadget basic info
+				c.Core.Log.NewEvent("nefer skill gadget info", glog.LogDebugEvent, c.Index).
+					Write("gadget_src", g.Src()).
+					Write("gadget_typ", g.GadgetTyp())
 				if g.GadgetTyp() == combat.GadgetTypDendroCore {
 					// type assert to reactable.DendroCore and mark as seed
 					if dc, ok := g.(*reactable.DendroCore); ok {
@@ -68,6 +83,22 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 						// disable explosions and reaction triggers
 						dc.Gadget.OnExpiry = nil
 						dc.Gadget.OnKill = nil
+
+						// Log conversion for debugging
+						c.Core.Log.NewEvent(
+							"nefer converted dendro core to seed",
+							glog.LogElementEvent,
+							c.Index,
+						).Write("gadget_src", g.Src()).
+							Write("is_seed", dc.IsSeed)
+					} else {
+						// Log unexpected concrete type to help debug why assertion may fail
+						c.Core.Log.NewEvent(
+							"nefer conversion type mismatch",
+							glog.LogElementEvent,
+							c.Index,
+						).Write("gadget_src", g.Src()).
+							Write("concrete_type", reflect.TypeOf(g).String())
 					}
 				}
 			}
