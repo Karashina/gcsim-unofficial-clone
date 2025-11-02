@@ -113,12 +113,11 @@ func (c *char) c2() {
 
 		// args[0] is the target (enemy) and args[1] is the attack event
 		tgt := args[0].(combat.Target)
-		c.Core.QueueAttack(
-			ai,
-			combat.NewCircleHitOnTarget(tgt, nil, 3),
-			0,
-			0,
-		)
+		// Avoid generating a snapshot synchronously inside an OnEnemyHit event handler.
+		// Synchronous snapshots here can re-enter event handlers and cause unbounded recursion
+		// (see issue: stack overflow during sim runs). Schedule the snapshot+damage 1 frame
+		// later to break the re-entrant call chain.
+		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(tgt, nil, 3), 1, 1)
 
 		c.AddStatus(c.c2IcdKey, 5*60, false)
 		c.Core.Log.NewEvent("aino c2 proc", glog.LogCharacterEvent, c.Index)

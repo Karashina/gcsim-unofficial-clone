@@ -40,40 +40,22 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 	}
 	if count >= 4 {
 
-		crval := 0.0
-		nascent := false
-		ascendant := false
-		for _, char := range c.Player.Chars() {
-			if char.MoonsignAscendant {
-				ascendant = true
-				nascent = false
-				break
-			}
-			if char.MoonsignNascent {
-				nascent = true
-			}
-		}
-		if ascendant {
-			crval = 0.30
-		} else if nascent {
-			crval = 0.15
-		}
-
 		notsucb := func(args ...interface{}) bool {
-			atk := args[1].(*combat.AttackEvent)
-			if atk.Info.ActorIndex != char.Index {
-				return false
-			}
-			if atk.Info.Element == attributes.Physical {
+			if c.Player.ActiveChar().Index != char.Index {
 				return false
 			}
 			char.AddStatus("gleamingmoon-key-notsu", 4*60, true)
 			m := make([]float64, attributes.EndStatType)
-			m[attributes.CR] = crval
 			char.AddStatMod(character.StatMod{
 				Base:         modifier.NewBase("notsu-4pc-cr", 4*60),
 				AffectedStat: attributes.CR,
 				Amount: func() ([]float64, bool) {
+					m[attributes.CR] = 0.0
+					if char.MoonsignAscendant {
+						m[attributes.CR] = 0.30
+					} else if char.MoonsignNascent {
+						m[attributes.CR] = 0.15
+					}
 					return m, true
 				},
 			})
