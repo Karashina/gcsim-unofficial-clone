@@ -7,6 +7,7 @@ import (
 
 const (
 	TestCharDoNotUse Char = iota + TravelerDelim + 1
+	Aino
 	Albedo
 	Alhaitham
 	Aloy
@@ -28,8 +29,8 @@ const (
 	Clorinde
 	Collei
 	Cyno
-	Dahlia
 	Dehya
+	Dhalia
 	Diluc
 	Diona
 	Dori
@@ -38,6 +39,7 @@ const (
 	Eula
 	Faruzan
 	Fischl
+	Flins
 	Freminet
 	Furina
 	Gaming
@@ -45,8 +47,12 @@ const (
 	Gorou
 	Heizou
 	Hutao
+	Iansan
+	Ifa
+	Ineffa
 	Itto
 	Jean
+	Kachina
 	Kaeya
 	Kaveh
 	Kazuha
@@ -57,6 +63,7 @@ const (
 	Kokomi
 	Kuki
 	Lanyan
+	Lauma
 	Layla
 	Lisa
 	Lynette
@@ -68,6 +75,7 @@ const (
 	Mualani
 	Nahida
 	Navia
+	Nefer
 	Neuvillette
 	Nilou
 	Ningguang
@@ -108,6 +116,10 @@ const (
 )
 
 func init() {
+	charNames[Aino] = "aino"
+	charPrettyName[Aino] = "Aino"
+	CharKeyToEle[Aino] = attributes.Hydro
+
 	charNames[Albedo] = "albedo"
 	charPrettyName[Albedo] = "Albedo"
 	CharKeyToEle[Albedo] = attributes.Geo
@@ -192,10 +204,6 @@ func init() {
 	charPrettyName[Cyno] = "Cyno"
 	CharKeyToEle[Cyno] = attributes.Electro
 
-	charNames[Dahlia] = "dahlia"
-	charPrettyName[Dahlia] = "Dahlia"
-	CharKeyToEle[Dahlia] = attributes.Hydro
-
 	charNames[Dehya] = "dehya"
 	charPrettyName[Dehya] = "Dehya"
 	CharKeyToEle[Dehya] = attributes.Pyro
@@ -211,6 +219,10 @@ func init() {
 	charNames[Dori] = "dori"
 	charPrettyName[Dori] = "Dori"
 	CharKeyToEle[Dori] = attributes.Electro
+
+	charNames[Dhalia] = "dhalia"
+	charPrettyName[Dhalia] = "Dhalia"
+	CharKeyToEle[Dhalia] = attributes.Hydro
 
 	charNames[Emilie] = "emilie"
 	charPrettyName[Emilie] = "Emilie"
@@ -231,6 +243,10 @@ func init() {
 	charNames[Fischl] = "fischl"
 	charPrettyName[Fischl] = "Fischl"
 	CharKeyToEle[Fischl] = attributes.Electro
+
+	charNames[Flins] = "flins"
+	charPrettyName[Flins] = "Flins"
+	CharKeyToEle[Flins] = attributes.Electro
 
 	charNames[Freminet] = "freminet"
 	charPrettyName[Freminet] = "Freminet"
@@ -260,6 +276,18 @@ func init() {
 	charPrettyName[Hutao] = "Hutao"
 	CharKeyToEle[Hutao] = attributes.Pyro
 
+	charNames[Iansan] = "iansan"
+	charPrettyName[Iansan] = "Iansan"
+	CharKeyToEle[Iansan] = attributes.Electro
+
+	charNames[Ifa] = "ifa"
+	charPrettyName[Ifa] = "Ifa"
+	CharKeyToEle[Ifa] = attributes.Anemo
+
+	charNames[Ineffa] = "ineffa"
+	charPrettyName[Ineffa] = "Ineffa"
+	CharKeyToEle[Ineffa] = attributes.Electro
+
 	charNames[Itto] = "itto"
 	charPrettyName[Itto] = "Itto"
 	CharKeyToEle[Itto] = attributes.Geo
@@ -267,6 +295,10 @@ func init() {
 	charNames[Jean] = "jean"
 	charPrettyName[Jean] = "Jean"
 	CharKeyToEle[Jean] = attributes.Anemo
+
+	charNames[Kachina] = "kachina"
+	charPrettyName[Kachina] = "Kachina"
+	CharKeyToEle[Kachina] = attributes.Geo
 
 	charNames[Kaeya] = "kaeya"
 	charPrettyName[Kaeya] = "Kaeya"
@@ -307,6 +339,10 @@ func init() {
 	charNames[Lanyan] = "lanyan"
 	charPrettyName[Lanyan] = "Lanyan"
 	CharKeyToEle[Lanyan] = attributes.Anemo
+
+	charNames[Lauma] = "lauma"
+	charPrettyName[Lauma] = "Lauma"
+	CharKeyToEle[Lauma] = attributes.Dendro
 
 	charNames[Layla] = "layla"
 	charPrettyName[Layla] = "Layla"
@@ -351,6 +387,10 @@ func init() {
 	charNames[Navia] = "navia"
 	charPrettyName[Navia] = "Navia"
 	CharKeyToEle[Navia] = attributes.Geo
+
+	charNames[Nefer] = "nefer"
+	charPrettyName[Nefer] = "Nefer"
+	CharKeyToEle[Nefer] = attributes.Dendro
 
 	charNames[Neuvillette] = "neuvillette"
 	charPrettyName[Neuvillette] = "Neuvillette"
