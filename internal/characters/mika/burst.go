@@ -29,7 +29,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.QueueCharTask(func() {
 		heal := burstHealFirstF[c.TalentLvlBurst()] + burstHealFirstP[c.TalentLvlBurst()]*c.MaxHP()
 		c.Core.Player.Heal(info.HealInfo{
-			Caller:  c.Index()(),
+			Caller:  c.Index(),
 			Target:  -1,
 			Message: "Skyfeather Song",
 			Src:     heal,
@@ -71,7 +71,7 @@ func (c *char) onBurstHeal() {
 
 		heal := burstHealF[c.TalentLvlBurst()] + burstHealP[c.TalentLvlBurst()]*c.MaxHP()
 		c.Core.Player.Heal(info.HealInfo{
-			Caller:  c.Index()(),
+			Caller:  c.Index(),
 			Target:  active.Index(),
 			Message: "Eagleplume",
 			Src:     heal,
@@ -88,4 +88,5 @@ func (c *char) onBurstHeal() {
 		return false
 	}, "mika-eagleplume")
 }
+
 

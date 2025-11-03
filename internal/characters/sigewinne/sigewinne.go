@@ -104,7 +104,7 @@ func (c *char) getSourcewaterDroplets() []*sourcewaterdroplet.Gadget {
 func (c *char) onSwap() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...any) bool {
 		next := args[1].(int)
-		if next != c.Index()() {
+		if next != c.Index() {
 			return false
 		}
 		c.lastSwap = c.Core.F
@@ -127,4 +127,5 @@ func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
 		return c.Character.AnimationStartDelay(k)
 	}
 }
+
 

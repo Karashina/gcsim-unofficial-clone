@@ -42,7 +42,7 @@ func (c *char) c1() {
 		}
 
 		atk := args[1].(*info.AttackEvent)
-		if atk.Info.ActorIndex == c.Index()() {
+		if atk.Info.ActorIndex == c.Index() {
 			return false
 		}
 		if atk.Info.Element != attributes.Geo {
@@ -103,4 +103,5 @@ func (c *char) c6() {
 		})
 	}
 }
+
 

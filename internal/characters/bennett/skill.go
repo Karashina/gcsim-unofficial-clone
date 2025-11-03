@@ -81,7 +81,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 func (c *char) skillPress() (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index()(),
+		ActorIndex:         c.Index(),
 		Abil:               "Passion Overload (Press)",
 		AttackTag:          attacks.AttackTagElementalArt,
 		ICDTag:             attacks.ICDTagNone,
@@ -136,7 +136,7 @@ func (c *char) pressParticleCB(a info.AttackCB) {
 
 func (c *char) skillHold(level int, c4Active bool) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index()(),
+		ActorIndex:         c.Index(),
 		Abil:               fmt.Sprintf("Passion Overload (Level %v)", level),
 		AttackTag:          attacks.AttackTagElementalArt,
 		ICDTag:             attacks.ICDTagNone,
@@ -241,4 +241,5 @@ func (c *char) holdParticleCB(a info.AttackCB) {
 	c.AddStatus(holdParticleICDKey, 1.5*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Pyro, c.ParticleDelay)
 }
+
 

@@ -34,7 +34,7 @@ func (c *char) a1() {
 		}
 		c.AddStatus(a1IcdKey, 3600, false)
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       "Devotion (A1)",
 			AttackTag:  attacks.AttackTagNone,
 		}
@@ -42,7 +42,7 @@ func (c *char) a1() {
 
 		// add shield
 		c.Core.Player.Shields.Add(&shield.Tmpl{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Target:     active.Index(),
 			Src:        c.Core.F,
 			ShieldType: shield.NoelleA1,
@@ -80,4 +80,5 @@ func (c *char) makeA4CB() info.AttackCBFunc {
 		}
 	}
 }
+
 

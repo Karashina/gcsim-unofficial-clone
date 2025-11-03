@@ -103,7 +103,7 @@ func (c *char) a4() {
 					return 0, false
 				}
 
-				c.Core.Combat.Log.NewEvent("adding nilou a4 bonus", glog.LogCharacterEvent, c.Index()()).Write("bonus", c.a4Bonus)
+				c.Core.Combat.Log.NewEvent("adding nilou a4 bonus", glog.LogCharacterEvent, c.Index()).Write("bonus", c.a4Bonus)
 				return c.a4Bonus, false
 			},
 		})
@@ -131,4 +131,5 @@ func (c *char) updateA4Bonus(src int) func() {
 		c.QueueCharTask(c.updateA4Bonus(src), 0.5*60)
 	}
 }
+
 

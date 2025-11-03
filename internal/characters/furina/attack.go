@@ -56,7 +56,7 @@ func (c *char) arkheCB(a info.AttackCB) {
 	arkhePos := info.CalcOffsetPoint(player.Pos(), info.Point{Y: -0.3}, player.Direction())
 	c.QueueCharTask(func() {
 		ai := info.AttackInfo{
-			ActorIndex:     c.Index()(),
+			ActorIndex:     c.Index(),
 			Abil:           arkhePrettyPrint[c.arkhe] + " (" + c.Base.Key.Pretty() + ")",
 			AttackTag:      attacks.AttackTagNormal,
 			ICDTag:         attacks.ICDTagNone,
@@ -85,7 +85,7 @@ func (c *char) arkheCB(a info.AttackCB) {
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index()(),
+		ActorIndex:         c.Index(),
 		Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
 		AttackTag:          attacks.AttackTagNormal,
 		ICDTag:             attacks.ICDTagNormalAttack,
@@ -141,4 +141,5 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
+
 

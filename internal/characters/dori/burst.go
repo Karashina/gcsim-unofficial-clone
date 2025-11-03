@@ -28,7 +28,7 @@ func init() {
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Alcazarzaray's Exactitude: Connector DMG",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -103,7 +103,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			}
 			// Heals
 			c.Core.Player.Heal(info.HealInfo{
-				Caller:  c.Index()(),
+				Caller:  c.Index(),
 				Target:  c.Core.Player.Active(),
 				Message: "Alcazarzaray's Exactitude: Healing",
 				Src:     bursthealpp[c.TalentLvlBurst()]*c.MaxHP() + bursthealflat[c.TalentLvlBurst()],
@@ -125,4 +125,5 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
+
 

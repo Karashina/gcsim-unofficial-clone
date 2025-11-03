@@ -139,7 +139,7 @@ func (c *char) makeC6CB() info.AttackCBFunc {
 		c.AddStatus(c6ICDKey, 0.2*60, true)
 
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       "Tri-Karma Purification: Karmic Oblivion",
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagNahidaC6,
@@ -170,4 +170,5 @@ func (c *char) makeC6CB() info.AttackCBFunc {
 		c.c6Count++
 	}
 }
+
 

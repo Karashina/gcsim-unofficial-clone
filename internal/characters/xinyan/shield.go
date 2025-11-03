@@ -13,7 +13,7 @@ type xinyanShield struct {
 func (c *char) newShield(base float64, t shield.Type, dur int) *xinyanShield {
 	n := &xinyanShield{}
 	n.Tmpl = &shield.Tmpl{}
-	n.ActorIndex = c.Index()()
+	n.ActorIndex = c.Index()
 	n.Target = -1
 	n.Src = c.Core.F
 	n.ShieldType = t
@@ -35,4 +35,5 @@ func (n *xinyanShield) OnDamage(dmg float64, ele attributes.Element, bonus float
 	}
 	return taken, ok
 }
+
 

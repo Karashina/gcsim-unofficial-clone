@@ -33,7 +33,7 @@ const (
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index()(),
+		ActorIndex:         c.Index(),
 		Abil:               skillAbilName,
 		AttackTag:          attacks.AttackTagElementalArt,
 		ICDTag:             attacks.ICDTagNone,
@@ -98,4 +98,5 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.AddStatus(particleICDKey, 1*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Hydro, c.ParticleDelay)
 }
+
 

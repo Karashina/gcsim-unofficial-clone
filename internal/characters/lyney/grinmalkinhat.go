@@ -33,7 +33,7 @@ func (c *char) newGrinMalkinHat(pos info.Point, hpDrained bool, duration int) *G
 	g.char.AddStatus(grinMalkinHatKey, g.Duration, false)
 
 	g.pyrotechnicAI = info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Pyrotechnic Strike",
 		AttackTag:  attacks.AttackTagExtra,
 		ICDTag:     attacks.ICDTagLyneyEndBoom,
@@ -51,7 +51,7 @@ func (c *char) newGrinMalkinHat(pos info.Point, hpDrained bool, duration int) *G
 	g.OnExpiry = g.skillPyrotechnic("expiry")
 	g.OnKill = g.skillPyrotechnic("kill")
 
-	g.Core.Log.NewEvent("Lyney Grin-Malkin Hat added", glog.LogCharacterEvent, c.Index()()).Write("src", g.Src()).Write("hp_drained", g.hpDrained)
+	g.Core.Log.NewEvent("Lyney Grin-Malkin Hat added", glog.LogCharacterEvent, c.Index()).Write("src", g.Src()).Write("hp_drained", g.hpDrained)
 
 	return g
 }
@@ -123,4 +123,5 @@ func (g *GrinMalkinHat) SetDirectionToClosestEnemy() {}
 func (g *GrinMalkinHat) CalcTempDirection(trg info.Point) info.Point {
 	return info.DefaultDirection()
 }
+
 

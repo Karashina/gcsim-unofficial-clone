@@ -69,7 +69,7 @@ func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
 	noMeteorite := p["no_meteorite"] == 1
 
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index()(),
+		ActorIndex:         c.Index(),
 		Abil:               "Starfell Sword",
 		AttackTag:          attacks.AttackTagElementalArt,
 		ICDTag:             attacks.ICDTagElementalArt,
@@ -188,4 +188,5 @@ func (s *stone) IsLimited() bool                  { return true }
 func (s *stone) Count() int                       { return 1 }
 func (s *stone) Direction() info.Point            { return s.dir }
 func (s *stone) Pos() info.Point                  { return s.pos }
+
 

@@ -44,7 +44,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	// add initial damage
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       burstInitialAbil,
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -68,7 +68,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	// deployable; not affected by hitlag
 	c.Core.Tasks.Add(func() {
 		c.Core.Status.Add(burstKey, 600-lightfallHitmark-burstFrames[action.ActionWalk]+1)
-		c.Core.Log.NewEvent("eula burst started", glog.LogCharacterEvent, c.Index()()).
+		c.Core.Log.NewEvent("eula burst started", glog.LogCharacterEvent, c.Index()).
 			Write("stacks", c.burstCounter).
 			Write("expiry", c.Core.F+600-lightfallHitmark-burstFrames[action.ActionWalk]+1)
 	}, burstFrames[action.ActionWalk]) // start Q status at earliest point
@@ -99,7 +99,7 @@ func (c *char) triggerBurst() {
 		c.burstCounter = 30
 	}
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       burstLightfallAbil,
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -111,7 +111,7 @@ func (c *char) triggerBurst() {
 		Mult:       burstExplodeBase[c.TalentLvlBurst()] + burstExplodeStack[c.TalentLvlBurst()]*float64(c.burstCounter),
 	}
 
-	c.Core.Log.NewEvent("eula burst triggering", glog.LogCharacterEvent, c.Index()()).
+	c.Core.Log.NewEvent("eula burst triggering", glog.LogCharacterEvent, c.Index()).
 		Write("stacks", c.burstCounter).
 		Write("mult", ai.Mult)
 
@@ -131,7 +131,7 @@ func (c *char) burstStackCB(a info.AttackCB) {
 	if a.Target.Type() != info.TargettableEnemy {
 		return
 	}
-	if c.Core.Player.Active() != c.Index()() {
+	if c.Core.Player.Active() != c.Index() {
 		return
 	}
 	if c.Core.Status.Duration(burstKey) == 0 {
@@ -148,12 +148,12 @@ func (c *char) burstStackCB(a info.AttackCB) {
 
 	// add to counter
 	c.burstCounter++
-	c.Core.Log.NewEvent("eula burst add stack", glog.LogCharacterEvent, c.Index()()).
+	c.Core.Log.NewEvent("eula burst add stack", glog.LogCharacterEvent, c.Index()).
 		Write("stack count", c.burstCounter)
 	// check for c6
 	if c.Base.Cons == 6 && c.Core.Rand.Float64() < 0.5 {
 		c.burstCounter++
-		c.Core.Log.NewEvent("eula c6 add additional stack", glog.LogCharacterEvent, c.Index()()).
+		c.Core.Log.NewEvent("eula c6 add additional stack", glog.LogCharacterEvent, c.Index()).
 			Write("stack count", c.burstCounter)
 	}
 }
@@ -166,4 +166,5 @@ func (c *char) onExitField() {
 		return false
 	}, "eula-exit")
 }
+
 

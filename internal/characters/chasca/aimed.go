@@ -77,7 +77,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	weakspot := p["weakspot"]
 
 	ai := info.AttackInfo{
-		ActorIndex:           c.Index()(),
+		ActorIndex:           c.Index(),
 		Abil:                 "Fully-Charged Aimed Shot",
 		AttackTag:            attacks.AttackTagExtra,
 		ICDTag:               attacks.ICDTagNone,
@@ -189,7 +189,7 @@ func (c *char) fireBullets() {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:     c.Index()(),
+		ActorIndex:     c.Index(),
 		Abil:           "Shadowhunt Shell",
 		AttackTag:      attacks.AttackTagExtra,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
@@ -286,4 +286,5 @@ func (c *char) randomElemFromBulletPool() attributes.Element {
 	c.bulletPool = c.bulletPool[:len(c.bulletPool)-1]
 	return ele
 }
+
 

@@ -62,7 +62,7 @@ func (c *char) legalEvalFindDroplets() int {
 			break
 		}
 	}
-	c.Core.Combat.Log.NewEvent(fmt.Sprint("Picked up ", orbs, " droplets"), glog.LogCharacterEvent, c.Index()())
+	c.Core.Combat.Log.NewEvent(fmt.Sprint("Picked up ", orbs, " droplets"), glog.LogCharacterEvent, c.Index())
 	return orbs
 }
 
@@ -96,7 +96,7 @@ func (c *char) chargeAttackJudgement(p map[string]int, windup int) (action.Info,
 		chargeLegalEvalLeft -= dropletLegalEvalReduction[orbs]
 
 		c.chargeAi = info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       chargeJudgementName,
 			AttackTag:  attacks.AttackTagExtra,
 			ICDTag:     attacks.ICDTagExtraAttack,
@@ -163,7 +163,7 @@ func (c *char) chargeAttackShort(windup int) (action.Info, error) {
 		if c.Core.Player.Stam > 50*r {
 			c.Core.Player.UseStam(50*r, action.ActionCharge)
 			ai := info.AttackInfo{
-				ActorIndex: c.Index()(),
+				ActorIndex: c.Index(),
 				Abil:       "Charge Attack",
 				AttackTag:  attacks.AttackTagExtra,
 				ICDTag:     attacks.ICDTagNone,
@@ -289,7 +289,7 @@ func (c *char) consumeHp(src int) func() {
 			hpDrain := 0.08 * c.MaxHP()
 
 			c.Core.Player.Drain(info.DrainInfo{
-				ActorIndex: c.Index()(),
+				ActorIndex: c.Index(),
 				Abil:       "Charged Attack: Equitable Judgment",
 				Amount:     hpDrain,
 			})
@@ -304,12 +304,13 @@ func (c *char) consumeDroplet(g *sourcewaterdroplet.Gadget) {
 	// the healing is slightly delayed by 5f
 	c.QueueCharTask(func() {
 		c.Core.Player.Heal(info.HealInfo{
-			Caller:  c.Index()(),
-			Target:  c.Index()(),
+			Caller:  c.Index(),
+			Target:  c.Index(),
 			Message: "Sourcewater Droplets Healing",
 			Src:     c.MaxHP() * 0.16,
 			Bonus:   c.Stat(attributes.Heal),
 		})
 	}, 5)
 }
+
 

@@ -49,7 +49,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 func (c *char) skillFirst() action.Info {
 	ai := info.AttackInfo{
 		Abil:       "Stellar Restoration",
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -88,7 +88,7 @@ func (c *char) skillRecast() action.Info {
 	if c.Base.Cons >= 1 {
 		ai := info.AttackInfo{
 			Abil:       "Stellar Restoration (C1)",
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			AttackTag:  attacks.AttackTagElementalArtHold,
 			ICDTag:     attacks.ICDTagElementalArt,
 			ICDGroup:   attacks.ICDGroupDefault,
@@ -114,7 +114,7 @@ func (c *char) skillRecast() action.Info {
 
 	ai := info.AttackInfo{
 		Abil:             "Stellar Restoration (Slashing)",
-		ActorIndex:       c.Index()(),
+		ActorIndex:       c.Index(),
 		AttackTag:        attacks.AttackTagElementalArt,
 		ICDTag:           attacks.ICDTagElementalArt,
 		ICDGroup:         attacks.ICDGroupDefault,
@@ -163,4 +163,5 @@ func (c *char) particleCB(a info.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Electro, c.ParticleDelay)
 }
+
 

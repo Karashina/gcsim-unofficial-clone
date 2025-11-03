@@ -146,7 +146,7 @@ func (c *char) c6RingCB() func(a info.AttackCB) {
 		}
 		c.AddStatus(c6IcdKey, 0.5*60, true)
 		ai := info.AttackInfo{
-			ActorIndex:     c.Index()(),
+			ActorIndex:     c.Index(),
 			Abil:           "Flamestrider (C6)",
 			AttackTag:      attacks.AttackTagElementalArt,
 			ICDTag:         attacks.ICDTagNone,
@@ -187,7 +187,7 @@ func (c *char) c6RingAtk(src int) func() {
 			return
 		}
 		ai := info.AttackInfo{
-			ActorIndex:     c.Index()(),
+			ActorIndex:     c.Index(),
 			Abil:           "Rings of Searing Radiance (C6)",
 			AttackTag:      attacks.AttackTagElementalArt,
 			ICDTag:         attacks.ICDTagNone,
@@ -207,4 +207,5 @@ func (c *char) c6RingAtk(src int) func() {
 		c.QueueCharTask(c.c6RingAtk(src), 180)
 	}
 }
+
 

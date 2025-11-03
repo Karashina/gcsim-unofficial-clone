@@ -180,11 +180,11 @@ func New(
 }
 
 func (c *CharWrapper) SetIndex(index int) {
-	c.Index() = index
+	c.index = index
 }
 
 func (c *CharWrapper) Index() int {
-	return c.Index()
+	return c.index
 }
 
 func (c *CharWrapper) SetWeapon(w info.Weapon) {

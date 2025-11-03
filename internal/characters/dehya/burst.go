@@ -62,11 +62,11 @@ func (c *char) burstPunchFunc(src int) func() {
 		if c.burstHitSrc != src {
 			return
 		}
-		if c.Core.Player.Active() != c.Index()() {
+		if c.Core.Player.Active() != c.Index() {
 			return
 		}
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       "Flame-Mane's Fist",
 			AttackTag:  attacks.AttackTagElementalBurst,
 			ICDTag:     attacks.ICDTagElementalBurst,
@@ -103,11 +103,11 @@ func (c *char) burstKickFunc(src int) func() {
 		if src != c.burstHitSrc { // prevents duplicates
 			return
 		}
-		if c.Core.Player.Active() != c.Index()() {
+		if c.Core.Player.Active() != c.Index() {
 			return
 		}
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       "Incineration Drive",
 			AttackTag:  attacks.AttackTagElementalBurst,
 			ICDTag:     attacks.ICDTagNone,
@@ -175,4 +175,5 @@ func (c *char) burstKick(src int) action.Info {
 		State:           action.Idle,                   // TODO: cannot use burst state because burst state implies iframes
 	}
 }
+
 

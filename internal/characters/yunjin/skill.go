@@ -56,7 +56,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index()(),
+		ActorIndex:         c.Index(),
 		Abil:               "Opening Flourish (Press)",
 		AttackTag:          attacks.AttackTagElementalArt,
 		ICDTag:             attacks.ICDTagNone,
@@ -105,8 +105,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	// Add shield until skill unleashed (treated as frame when attack hits)
 	c.Core.Player.Shields.Add(&shield.Tmpl{
-		ActorIndex: c.Index()(),
-		Target:     c.Index()(),
+		ActorIndex: c.Index(),
+		Target:     c.Index(),
 		Src:        c.Core.F,
 		Name:       "Opening Flourish (Shield)",
 		ShieldType: shield.YunjinSkill,
@@ -142,4 +142,5 @@ func (c *char) makeParticleCB(count float64) info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Geo, c.ParticleDelay)
 	}
 }
+
 

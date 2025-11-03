@@ -93,11 +93,11 @@ func init() {
 func (c *char) naBuff() {
 	c.Core.Events.Subscribe(event.OnHPDebt, func(args ...any) bool {
 		target := args[0].(int)
-		if target != c.Index()() {
+		if target != c.Index() {
 			return false
 		}
 		// TODO: Remove when BoL changes get logged for all characters
-		c.Core.Log.NewEvent("Bond of Life changed", glog.LogCharacterEvent, c.Index()()).
+		c.Core.Log.NewEvent("Bond of Life changed", glog.LogCharacterEvent, c.Index()).
 			Write("arle_hp_debt", c.CurrentHPDebt()).
 			Write("arle_hp_debt%", c.CurrentHPDebt()/c.MaxHP())
 		if c.CurrentHPDebt() >= c.MaxHP()*0.3 {
@@ -115,7 +115,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	for i, mult := range attack[counter] {
 		c.QueueCharTask(func() {
 			ai := info.AttackInfo{
-				ActorIndex:         c.Index()(),
+				ActorIndex:         c.Index(),
 				Abil:               fmt.Sprintf("Normal %v", counter),
 				AttackTag:          attacks.AttackTagNormal,
 				ICDTag:             attacks.ICDTagNormalAttack,
@@ -200,4 +200,5 @@ func (c *char) bondConsumeCB(a info.AttackCB) {
 
 	c.ReduceActionCooldown(action.ActionSkill, 0.8*60)
 }
+
 

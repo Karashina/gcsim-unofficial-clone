@@ -121,3 +121,8 @@ var CharKeyToEle = map[Char]attributes.Element{
 	LumineCryo:       attributes.Cryo,
 	TestCharDoNotUse: attributes.Geo,
 }
+
+// Backwards compatibility aliases (some codebases refer to Dahlia)
+const (
+    Dahlia = Dhalia
+)

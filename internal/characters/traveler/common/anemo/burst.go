@@ -44,7 +44,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	c.qAbsorbCheckLocation = combat.NewBoxHitOnTarget(c.Core.Combat.Player(), info.Point{Y: -1.5}, 2.5, 2.5)
 
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Gust Surge",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalArtAnemo,
@@ -58,7 +58,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	snap := c.Snapshot(&ai)
 
 	aiAbs := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Gust Surge (Absorbed)",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -112,7 +112,7 @@ func (c *Traveler) absorbCheckQ(src, count, maxcount int) func() {
 		if count == maxcount {
 			return
 		}
-		c.qAbsorb = c.Core.Combat.AbsorbCheck(c.Index()(), c.qAbsorbCheckLocation, attributes.Cryo, attributes.Pyro, attributes.Hydro, attributes.Electro)
+		c.qAbsorb = c.Core.Combat.AbsorbCheck(c.Index(), c.qAbsorbCheckLocation, attributes.Cryo, attributes.Pyro, attributes.Hydro, attributes.Electro)
 		switch c.qAbsorb {
 		case attributes.Cryo:
 			c.qICDTag = attacks.ICDTagElementalBurstCryo
@@ -128,4 +128,5 @@ func (c *Traveler) absorbCheckQ(src, count, maxcount int) func() {
 		}
 	}
 }
+
 

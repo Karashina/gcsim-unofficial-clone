@@ -27,7 +27,7 @@ func init() {
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
 		Abil:       "Hyouka",
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -72,4 +72,5 @@ func (c *char) particleCB(a info.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Cryo, c.ParticleDelay)
 }
+
 

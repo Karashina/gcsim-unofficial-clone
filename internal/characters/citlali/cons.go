@@ -26,7 +26,7 @@ func (c *char) c1() {
 	}
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...any) bool {
 		atk := args[1].(*info.AttackEvent)
-		if c.Index()() == atk.Info.ActorIndex {
+		if c.Index() == atk.Info.ActorIndex {
 			return false
 		}
 		if c.Core.Player.Active() != atk.Info.ActorIndex {
@@ -77,7 +77,7 @@ func (c *char) c2() {
 
 	chars := c.Core.Player.Chars()
 	for _, char := range chars {
-		if c.Index()() == char.Index() {
+		if c.Index() == char.Index() {
 			continue
 		}
 		this := char
@@ -110,7 +110,7 @@ func (c *char) c4SkullCB(a info.AttackCB) {
 	c.generateNightsoulPoints(16)
 	c.AddEnergy("citlali-c4", 8)
 	aiSpiritVesselSkull := info.AttackInfo{
-		ActorIndex:     c.Index()(),
+		ActorIndex:     c.Index(),
 		Abil:           "Spiritvessel Skull DMG (C4)",
 		AttackTag:      attacks.AttackTagNone,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
@@ -141,7 +141,7 @@ func (c *char) c6() {
 
 	chars := c.Core.Player.Chars()
 	for _, char := range chars {
-		if c.Index()() == char.Index() {
+		if c.Index() == char.Index() {
 			continue
 		}
 		char.AddStatMod(character.StatMod{
@@ -161,4 +161,5 @@ func (c *char) c6() {
 		},
 	})
 }
+
 

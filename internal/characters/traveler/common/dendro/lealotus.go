@@ -67,7 +67,7 @@ func (c *Traveler) newLeaLotusLamp() *LeaLotus {
 	c.burstOverflowingLotuslight = 0
 
 	procAI := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       burstAbil,
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -258,4 +258,5 @@ func (s *LeaLotus) SetDirectionToClosestEnemy() {}
 func (s *LeaLotus) CalcTempDirection(trg info.Point) info.Point {
 	return info.DefaultDirection()
 }
+
 

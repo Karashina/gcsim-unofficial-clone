@@ -24,7 +24,7 @@ func (c *char) a1() {
 	c.SetTag(lumidouceScent, c.Tag(lumidouceScent)-2)
 
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       a1Abil,
 		AttackTag:  attacks.AttackTagNone,
 		ICDTag:     attacks.ICDTagNone,
@@ -65,4 +65,5 @@ func (c *char) a4() {
 		},
 	})
 }
+
 

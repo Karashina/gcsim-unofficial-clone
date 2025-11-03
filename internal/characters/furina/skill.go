@@ -107,7 +107,7 @@ func (c *char) skillPneuma(_ map[string]int) (action.Info, error) {
 
 func (c *char) skillOusia(_ map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Salon Solitaire: Ousia Bubble",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
@@ -136,7 +136,7 @@ func (c *char) summonSalonMembers(delay int) {
 	c.Core.Tasks.Add(func() {
 		src := c.Core.F
 		c.lastSummonSrc = src
-		c.Core.Log.NewEvent("Summoned Salon Solitaire", glog.LogCharacterEvent, c.Index()())
+		c.Core.Log.NewEvent("Summoned Salon Solitaire", glog.LogCharacterEvent, c.Index())
 		c.Core.Tasks.Add(
 			c.surintendanteChevalmarin(src, 0),
 			c.calcSalonTick(0, chevalmarinInitialTick, chevalmarinIntervalMean),
@@ -156,7 +156,7 @@ func (c *char) summonSinger(delay int) {
 	c.Core.Tasks.Add(func() {
 		src := c.Core.F
 		c.lastSummonSrc = src
-		c.Core.Log.NewEvent("Summoned Singer of Many Waters", glog.LogCharacterEvent, c.Index()())
+		c.Core.Log.NewEvent("Summoned Singer of Many Waters", glog.LogCharacterEvent, c.Index())
 		c.Core.Tasks.Add(c.singerOfManyWaters(src), singerInitialTick)
 	}, delay)
 }
@@ -198,7 +198,7 @@ func (c *char) surintendanteChevalmarin(src, tick int) func() {
 		damageMultiplier := 1 + 0.1*float64(alliesWithDrainedHPCounter)
 
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       fmt.Sprintf("%v: Surintendante Chevalmarin", salonMemberKey),
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagFurinaChevalmarin,
@@ -233,7 +233,7 @@ func (c *char) gentilhommeUsher(src, tick int) func() {
 		damageMultiplier := 1 + 0.1*float64(alliesWithDrainedHPCounter)
 
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       fmt.Sprintf("%v: Gentilhomme Usher", salonMemberKey),
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagFurinaUsher,
@@ -269,7 +269,7 @@ func (c *char) mademoiselleCrabaletta(src, tick int) func() {
 		damageMultiplier := 1 + 0.1*float64(alliesWithDrainedHPCounter)
 
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       fmt.Sprintf("%v: Mademoiselle Crabaletta", salonMemberKey),
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagNone,
@@ -303,7 +303,7 @@ func (c *char) singerOfManyWaters(src int) func() {
 		}
 		// heal
 		c.Core.Player.Heal(info.HealInfo{
-			Caller:  c.Index()(),
+			Caller:  c.Index(),
 			Target:  c.Core.Player.Active(),
 			Message: "Singer of Many Waters",
 			Src:     skillSingerHealFlat[c.TalentLvlSkill()] + skillSingerHealScale[c.TalentLvlSkill()]*c.MaxHP(),
@@ -356,4 +356,5 @@ func (c *char) consumeAlliesHealth(hpDrainRatio float64) int {
 
 	return alliesWithDrainedHPCounter
 }
+
 

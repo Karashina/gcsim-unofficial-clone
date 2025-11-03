@@ -30,7 +30,7 @@ func init() {
 
 func (c *char) Burst(_ map[string]int) (action.Info, error) {
 	aiIceStorm := info.AttackInfo{
-		ActorIndex:     c.Index()(),
+		ActorIndex:     c.Index(),
 		Abil:           iceStormAbil,
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
@@ -43,7 +43,7 @@ func (c *char) Burst(_ map[string]int) (action.Info, error) {
 		FlatDmg:        c.a4Dmg(iceStormAbil),
 	}
 	aiSpiritVesselSkull := info.AttackInfo{
-		ActorIndex:     c.Index()(),
+		ActorIndex:     c.Index(),
 		Abil:           "Spiritvessel Skull DMG",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
@@ -86,4 +86,5 @@ func (c *char) Burst(_ map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
+
 

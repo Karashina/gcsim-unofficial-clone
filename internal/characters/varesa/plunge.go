@@ -158,7 +158,7 @@ func (c *char) highPlungeCA(p map[string]int) action.Info {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:     c.Index()(),
+		ActorIndex:     c.Index(),
 		Abil:           "High Plunge",
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		AttackTag:      attacks.AttackTagPlunge,
@@ -218,7 +218,7 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:     c.Index()(),
+		ActorIndex:     c.Index(),
 		Abil:           "High Plunge",
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		AttackTag:      attacks.AttackTagPlunge,
@@ -278,7 +278,7 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:     c.Index()(),
+		ActorIndex:     c.Index(),
 		Abil:           "Low Plunge",
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		AttackTag:      attacks.AttackTagPlunge,
@@ -341,7 +341,7 @@ func (c *char) newAbilFuncXYPlunge(slice []int, nonNSWalk int) func(action.Actio
 // Standard - Always part of high/low plunge attacks
 func (c *char) plungeCollision(delay int) {
 	ai := info.AttackInfo{
-		ActorIndex:   c.Index()(),
+		ActorIndex:   c.Index(),
 		Abil:         "Plunge Collision",
 		AttackTag:    attacks.AttackTagPlunge,
 		ICDTag:       attacks.ICDTagNone,
@@ -364,4 +364,5 @@ func (c *char) getApexDrive() {
 		c.AddEnergy("varesa-c6", 30)
 	}
 }
+
 

@@ -28,7 +28,7 @@ func init() {
 // TODO: No information available on whether regular CAs follow a similar pattern
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index()(),
+		ActorIndex:         c.Index(),
 		Abil:               "Charge",
 		AttackTag:          attacks.AttackTagExtra,
 		ICDTag:             attacks.ICDTagExtraAttack,
@@ -61,4 +61,5 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
+
 

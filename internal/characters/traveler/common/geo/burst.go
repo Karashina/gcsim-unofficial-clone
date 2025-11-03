@@ -48,7 +48,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Wake of Earth",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagTravelerWakeOfEarth,
@@ -170,4 +170,5 @@ func (w *wall) IsLimited() bool                  { return true }
 func (w *wall) Count() int                       { return 1 }
 func (w *wall) Direction() info.Point            { return w.dir }
 func (w *wall) Pos() info.Point                  { return w.pos }
+
 

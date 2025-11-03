@@ -47,10 +47,10 @@ func (c *char) c4() {
 	c.Core.Events.Subscribe(event.OnHeal, func(args ...any) bool {
 		target := args[1].(int)
 
-		if c.Core.Player.Active() != c.Index()() {
+		if c.Core.Player.Active() != c.Index() {
 			return false
 		}
-		if c.Index()() != target {
+		if c.Index() != target {
 			return false
 		}
 		if c.StatusIsActive(c4ICDKey) {
@@ -74,7 +74,7 @@ func (c *char) c4() {
 			),
 			info.GadgetTypSourcewaterDropletNeuv,
 		)
-		c.Core.Combat.Log.NewEvent("C4: Spawned 1 droplet", glog.LogCharacterEvent, c.Index()())
+		c.Core.Combat.Log.NewEvent("C4: Spawned 1 droplet", glog.LogCharacterEvent, c.Index())
 
 		return false
 	}, "neuvillette-c4")
@@ -95,7 +95,7 @@ func (c *char) c6DropletCheck(src int) func() {
 
 			// c6 only absorbs one droplet at a time
 			if len(droplets) > 0 {
-				c.Core.Combat.Log.NewEvent("C6: Picked up 1 droplet", glog.LogCharacterEvent, c.Index()()).
+				c.Core.Combat.Log.NewEvent("C6: Picked up 1 droplet", glog.LogCharacterEvent, c.Index()).
 					Write("prev-charge-duration", c.chargeJudgeDur).
 					Write("curr-charge-duration", c.chargeJudgeDur+60)
 
@@ -118,7 +118,7 @@ func (c *char) c6cb(a info.AttackCB) {
 	}
 	c.AddStatus(c6ICDKey, 2*60, true)
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       chargeJudgementName + " (C6)",
 		AttackTag:  attacks.AttackTagExtra,
 		ICDTag:     attacks.ICDTagNeuvilletteC6,
@@ -135,4 +135,5 @@ func (c *char) c6cb(a info.AttackCB) {
 	c.Core.QueueAttack(ai, ap, 29, 29)
 	c.Core.QueueAttack(ai, ap, 29, 29)
 }
+
 

@@ -56,7 +56,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	for i, mult := range attack[c.NormalCounter] {
 		ai := info.AttackInfo{
 			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
-			ActorIndex:         c.Index()(),
+			ActorIndex:         c.Index(),
 			AttackTag:          attacks.AttackTagNormal,
 			ICDTag:             attacks.ICDTagNormalAttack,
 			ICDGroup:           attacks.ICDGroupDefault,
@@ -100,7 +100,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 func (c *char) SoukaiKanka(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
 		Abil:               fmt.Sprintf("Shunsuiken %v", c.NormalCounter),
-		ActorIndex:         c.Index()(),
+		ActorIndex:         c.Index(),
 		AttackTag:          attacks.AttackTagNormal,
 		ICDTag:             attacks.ICDTagNormalAttack,
 		ICDGroup:           attacks.ICDGroupDefault,
@@ -134,4 +134,5 @@ func (c *char) SoukaiKanka(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
+
 

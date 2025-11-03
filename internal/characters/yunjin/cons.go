@@ -57,7 +57,7 @@ func (c *char) c4() {
 		}
 
 		ae := args[1].(*info.AttackEvent)
-		if ae.Info.ActorIndex != c.Index()() {
+		if ae.Info.ActorIndex != c.Index() {
 			return false
 		}
 
@@ -106,4 +106,5 @@ func (c *char) deleteC6() {
 		char.DeleteStatus(c6Key)
 	}
 }
+
 

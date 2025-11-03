@@ -38,8 +38,9 @@ func (c *char) a4(a4Delay int) {
 		c.Core.Log.NewEvent(
 			fmt.Sprintf("xiangling a4 chili pepper picked up by %v", active.Base.Key.String()),
 			glog.LogCharacterEvent,
-			c.Index()(),
+			c.Index(),
 		)
 	}, a4Delay)
 }
+
 

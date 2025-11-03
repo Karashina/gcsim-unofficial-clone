@@ -35,7 +35,7 @@ func newSnack(c *char, pos info.Point) *snack {
 	p := &snack{
 		char: c,
 		attackInfo: info.AttackInfo{
-			ActorIndex:   c.Index()(),
+			ActorIndex:   c.Index(),
 			Abil:         snackDmgName,
 			AttackTag:    attacks.AttackTagElementalBurst,
 			ICDTag:       attacks.ICDTagElementalBurst,
@@ -61,7 +61,7 @@ func newSnack(c *char, pos info.Point) *snack {
 	p.CollidableTypes[info.TargettablePlayer] = true
 	p.OnExpiry = func() {
 		p.explode()
-		p.Core.Log.NewEvent("Snack exploded by itself", glog.LogCharacterEvent, c.Index()())
+		p.Core.Log.NewEvent("Snack exploded by itself", glog.LogCharacterEvent, c.Index())
 	}
 	p.OnCollision = func(target info.Target) {
 		if _, ok := target.(*avatar.Player); !ok {
@@ -79,7 +79,7 @@ func newSnack(c *char, pos info.Point) *snack {
 		p.onPickedUp()
 	}
 
-	p.Core.Log.NewEvent("Snack spawned", glog.LogCharacterEvent, c.Index()()).
+	p.Core.Log.NewEvent("Snack spawned", glog.LogCharacterEvent, c.Index()).
 		Write("x", pos.X).
 		Write("y", pos.Y)
 	return p
@@ -150,4 +150,5 @@ func (p *snack) SetDirectionToClosestEnemy() {}
 func (p *snack) CalcTempDirection(trg info.Point) info.Point {
 	return info.DefaultDirection()
 }
+
 

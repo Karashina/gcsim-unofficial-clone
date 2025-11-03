@@ -37,7 +37,7 @@ func (c *char) removeShield() {
 func (c *char) newShield(base float64, dur int) *shd {
 	n := &shd{}
 	n.Tmpl = &shield.Tmpl{}
-	n.ActorIndex = c.Index()()
+	n.ActorIndex = c.Index()
 	n.Target = -1
 	n.Src = c.Core.F
 	n.ShieldType = shield.LaylaSkill
@@ -73,7 +73,7 @@ func (c *char) addNightStars(count int, icd ICDNightStar) {
 
 	stars := min(count+c.Tag(nightStars), 4)
 	c.SetTag(nightStars, stars)
-	c.Core.Log.NewEvent("adding stars", glog.LogCharacterEvent, c.Index()()).
+	c.Core.Log.NewEvent("adding stars", glog.LogCharacterEvent, c.Index()).
 		Write("stars", stars)
 
 	if stars == 4 && c.Tag(shootingStars) == 0 {
@@ -117,7 +117,7 @@ func (c *char) shootStars(src int, last info.Enemy, particleCB info.AttackCBFunc
 		}
 
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       shootingStarsAbil,
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagElementalArt,
@@ -225,4 +225,5 @@ func (s *shd) OnDamage(dmg float64, ele attributes.Element, bonus float64) (floa
 	}
 	return taken, ok
 }
+
 

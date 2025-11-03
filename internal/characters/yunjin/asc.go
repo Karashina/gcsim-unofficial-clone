@@ -20,7 +20,7 @@ func (c *char) a4Init() {
 	for range partyElementalTypes {
 		c.partyElementalTypes += 1
 	}
-	c.Core.Log.NewEvent("Yun Jin Party Elemental Types (A4)", glog.LogCharacterEvent, c.Index()()).
+	c.Core.Log.NewEvent("Yun Jin Party Elemental Types (A4)", glog.LogCharacterEvent, c.Index()).
 		Write("party_elements", c.partyElementalTypes)
 }
 
@@ -35,4 +35,5 @@ func (c *char) a4() float64 {
 	}
 	return 0.025 * float64(c.partyElementalTypes)
 }
+
 

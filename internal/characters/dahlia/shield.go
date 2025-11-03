@@ -13,7 +13,7 @@ type shd struct {
 func (c *char) genShield() {
 	c.shield = &shd{
 		Tmpl: &shield.Tmpl{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Target:     -1,
 			Src:        c.Core.F,
 			Name:       "Radiant Psalter (Shield)",
@@ -68,4 +68,5 @@ func (c *char) tryRegenShield(delay int) {
 		c.c2()
 	}, delay)
 }
+
 

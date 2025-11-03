@@ -64,7 +64,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	c.AddStatus(persTimeKey, 10*60, true)
 
 	ai := info.AttackInfo{
-		ActorIndex:       c.Index()(),
+		ActorIndex:       c.Index(),
 		Abil:             "Pressurized Floe: Upward Thrust",
 		AttackTag:        attacks.AttackTagElementalArt,
 		ICDTag:           attacks.ICDTagElementalArt,
@@ -109,7 +109,7 @@ func (c *char) skillAligned() {
 	c.AddStatus(skillAlignedICDKey, skillAlignedICD, true)
 
 	aiSpiritbreath := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Pressurized Floe: Spiritbreath Thorn",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
@@ -139,7 +139,7 @@ func (c *char) detonateSkill() (action.Info, error) {
 			poiseDMG = 70.0
 		}
 		ai := info.AttackInfo{
-			ActorIndex:       c.Index()(),
+			ActorIndex:       c.Index(),
 			Abil:             fmt.Sprintf("%v (Cryo Lvl %v)", pressureBaseName, c.skillStacks),
 			AttackTag:        attacks.AttackTagElementalArt,
 			ICDTag:           attacks.ICDTagElementalArt,
@@ -167,7 +167,7 @@ func (c *char) detonateSkill() (action.Info, error) {
 			poiseDMG = 70.0
 		}
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       fmt.Sprintf("%v (Physical Lvl %v)", pressureBaseName, c.skillStacks),
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagNone,
@@ -247,4 +247,5 @@ func (c *char) particleCBLv4(a info.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), particles, attributes.Cryo, c.ParticleDelay)
 }
+
 

@@ -46,7 +46,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:     c.Index()(),
+		ActorIndex:     c.Index(),
 		Abil:           "Flying Kick",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
@@ -95,7 +95,7 @@ func (c *char) volcanicKablam() action.Info {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:     c.Index()(),
+		ActorIndex:     c.Index(),
 		Abil:           kablamAbil,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		PoiseDMG:       75,
@@ -136,4 +136,5 @@ func (c *char) volcanicKablam() action.Info {
 		},
 	}
 }
+
 

@@ -66,7 +66,7 @@ func (c *char) makeC6Callback() func(cb info.AttackCB) {
 			c.c6Count++
 			c.skydwellerPoints += 4
 
-			c.Core.Log.NewEventBuildMsg(glog.LogCharacterEvent, c.Index()(),
+			c.Core.Log.NewEventBuildMsg(glog.LogCharacterEvent, c.Index(),
 				"wanderer c6 added 4 skydweller points",
 			)
 		}
@@ -75,7 +75,7 @@ func (c *char) makeC6Callback() func(cb info.AttackCB) {
 		trg := a.Target
 
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       "Shugen: The Curtains EMelancholic Sway",
 			AttackTag:  attacks.AttackTagNormal,
 			ICDTag:     attacks.ICDTagWandererC6,
@@ -93,4 +93,5 @@ func (c *char) makeC6Callback() func(cb info.AttackCB) {
 		)
 	}
 }
+
 

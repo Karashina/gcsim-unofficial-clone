@@ -23,7 +23,7 @@ func (c *char) makeA1CB() info.AttackCBFunc {
 		snap := a.AttackEvent.Snapshot
 		if c.Core.Rand.Float64() < 0.5 {
 			c.Core.Player.Heal(info.HealInfo{
-				Caller:  c.Index()(),
+				Caller:  c.Index(),
 				Target:  -1,
 				Message: "Wind Companion",
 				Src:     snap.Stats.TotalATK() * .15,
@@ -40,4 +40,5 @@ func (c *char) a4() {
 	}
 	c.AddEnergy("jean-a4", 16)
 }
+
 

@@ -39,7 +39,7 @@ func (c *char) c2OnAbsorbDue() {
 
 	c.AddStatus(c2IcdKey, 10*60, true)
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Balemoon Bloodfire (C2)",
 		AttackTag:  attacks.AttackTagNone,
 		ICDTag:     attacks.ICDTagNone,
@@ -83,7 +83,7 @@ func (c *char) c6Amount() float64 {
 	}
 
 	amt := c.TotalAtk() * 7.0 * c.CurrentHPDebt() / c.MaxHP()
-	c.Core.Log.NewEvent("Arlecchino C6 dmg add", glog.LogCharacterEvent, c.Index()()).
+	c.Core.Log.NewEvent("Arlecchino C6 dmg add", glog.LogCharacterEvent, c.Index()).
 		Write("amt", amt)
 	return amt
 }
@@ -112,4 +112,5 @@ func (c *char) c6skill() {
 		},
 	})
 }
+
 

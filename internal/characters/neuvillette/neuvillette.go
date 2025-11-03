@@ -140,11 +140,12 @@ func (c *char) onSwap() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...any) bool {
 		// do nothing if next char isn't neuvillette
 		next := args[1].(int)
-		if next != c.Index()() {
+		if next != c.Index() {
 			return false
 		}
 		c.lastSwap = c.Core.F
 		return false
 	}, "neuvillette-swap")
 }
+
 

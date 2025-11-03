@@ -54,12 +54,12 @@ func (c *char) a1Extension() {
 			return false
 		}
 		active := c.Core.Player.ActiveChar()
-		if active.Index() != c.Index()() || !active.StatusIsActive(a1Key) {
+		if active.Index() != c.Index() || !active.StatusIsActive(a1Key) {
 			return false
 		}
 		c.ExtendStatus(a1Key, 17)
 		c.a1Extended = true
-		c.Core.Log.NewEvent("a1 dash pp slide", glog.LogCharacterEvent, c.Index()()).
+		c.Core.Log.NewEvent("a1 dash pp slide", glog.LogCharacterEvent, c.Index()).
 			Write("expiry", c.StatusExpiry(a1Key))
 		return false
 	}, "cyno-a1-dash")
@@ -84,4 +84,5 @@ func (c *char) a4Bolt() float64 {
 	}
 	return c.Stat(attributes.EM) * 2.5
 }
+
 

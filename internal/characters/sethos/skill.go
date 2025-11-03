@@ -33,7 +33,7 @@ func (c *char) skillRefundHook() {
 		// 	return false
 		// }
 		ae := args[1].(*info.AttackEvent)
-		if ae.Info.ActorIndex != c.Index()() {
+		if ae.Info.ActorIndex != c.Index() {
 			return false
 		}
 		if ae.Info.AttackTag != attacks.AttackTagElementalArt {
@@ -61,7 +61,7 @@ func (c *char) skillRefundHook() {
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Ancient Rite: Thunderous Roar of Sand",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
@@ -95,4 +95,5 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.AddStatus(skillParticleICDKey, 0.5*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 2, attributes.Electro, c.ParticleDelay)
 }
+
 

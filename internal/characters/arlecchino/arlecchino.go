@@ -82,9 +82,10 @@ func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
 
 func (c *char) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
 	// ignore all healing except hers
-	if hi.Caller == c.Index()() && hi.Message == balemoonRisingHealAbil {
+	if hi.Caller == c.Index() && hi.Message == balemoonRisingHealAbil {
 		return c.Character.ReceiveHeal(hi, healAmt)
 	}
 	return 0
 }
+
 

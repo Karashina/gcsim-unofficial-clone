@@ -39,7 +39,7 @@ func (c *char) newBogglecatBox(vividTravel int) *BogglecatBox {
 
 	// initial hit
 	initialAI := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Magic Trick: Astonishing Shift",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -53,7 +53,7 @@ func (c *char) newBogglecatBox(vividTravel int) *BogglecatBox {
 
 	// bogglecat ticks
 	bogglecatAI := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Bogglecat Box",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -72,7 +72,7 @@ func (c *char) newBogglecatBox(vividTravel int) *BogglecatBox {
 	b.OnThinkInterval = b.absorbCheck
 	b.ThinkInterval = 0.3 * 60
 
-	b.Core.Log.NewEvent("Lynette Bogglecat Box added", glog.LogCharacterEvent, c.Index()()).Write("src", b.Src())
+	b.Core.Log.NewEvent("Lynette Bogglecat Box added", glog.LogCharacterEvent, c.Index()).Write("src", b.Src())
 
 	return b
 }
@@ -154,4 +154,5 @@ func (b *BogglecatBox) SetDirectionToClosestEnemy() {}
 func (b *BogglecatBox) CalcTempDirection(trg info.Point) info.Point {
 	return info.DefaultDirection()
 }
+
 

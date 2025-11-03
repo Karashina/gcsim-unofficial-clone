@@ -33,7 +33,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	c6CB := c.makeC6CB()
 	for i, mult := range auto[c.NormalCounter] {
 		ai := info.AttackInfo{
-			ActorIndex:         c.Index()(),
+			ActorIndex:         c.Index(),
 			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
 			AttackTag:          attacks.AttackTagNormal,
 			ICDTag:             attacks.ICDTagNormalAttack,
@@ -66,4 +66,5 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
+
 

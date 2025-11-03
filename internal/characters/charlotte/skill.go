@@ -64,7 +64,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 func (c *char) skillPress() (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Framing: Freezing Point Composition",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
@@ -107,7 +107,7 @@ func (c *char) skillHold(p map[string]int) (action.Info, error) {
 			p["hold"], 1), 809)
 	hitmark := hold + skillHoldHitmark
 	ai := info.AttackInfo{
-		ActorIndex: c.Index()(),
+		ActorIndex: c.Index(),
 		Abil:       "Framing: Freezing Point Composition (Hold)",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
@@ -207,7 +207,7 @@ func (c *char) skillPressMark(src int, t *enemy.Enemy) func() {
 			return
 		}
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       "Snappy Silhouette Mark",
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagCharlotteMark,
@@ -231,7 +231,7 @@ func (c *char) skillHoldMark(src int, t *enemy.Enemy) func() {
 			return
 		}
 		ai := info.AttackInfo{
-			ActorIndex: c.Index()(),
+			ActorIndex: c.Index(),
 			Abil:       "Focused Impression Mark",
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagCharlotteMark,
@@ -245,4 +245,5 @@ func (c *char) skillHoldMark(src int, t *enemy.Enemy) func() {
 		c.Core.Tasks.Add(c.skillHoldMark(src, t), 1.5*60)
 	}
 }
+
 

@@ -28,7 +28,7 @@ func (c *char) c1Heal(char *character.CharWrapper) func() {
 		}
 
 		c.Core.Player.Heal(info.HealInfo{
-			Caller:  c.Index()(),
+			Caller:  c.Index(),
 			Target:  char.Index(),
 			Message: c1HealMsg,
 			Src:     c.TotalAtk() * 0.8,
@@ -106,7 +106,7 @@ func (c *char) c4() {
 		}
 		dmg := 0.1
 		ae.Snapshot.Stats[attributes.DmgP] += dmg
-		c.Core.Log.NewEvent("charlotte c4 adding dmg%", glog.LogCharacterEvent, c.Index()()).Write("dmg%", dmg)
+		c.Core.Log.NewEvent("charlotte c4 adding dmg%", glog.LogCharacterEvent, c.Index()).Write("dmg%", dmg)
 		c.AddEnergy("charlotte-c4", 2)
 		counter++
 		return false
@@ -134,7 +134,7 @@ func (c *char) c6() {
 		}
 		c.AddStatus(c6IcdKey, 6*60, true)
 		ai := info.AttackInfo{
-			ActorIndex:         c.Index()(),
+			ActorIndex:         c.Index(),
 			Abil:               "A Summation of Interest (C6)",
 			AttackTag:          attacks.AttackTagElementalBurst,
 			ICDTag:             attacks.ICDTagNone,
@@ -152,7 +152,7 @@ func (c *char) c6() {
 			c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(pos, nil, c6AttackRadius), 0, 0)
 			if c.Core.Combat.Player().IsWithinArea(combat.NewCircleHitOnTarget(pos, nil, c6HealRadius)) {
 				c.Core.Player.Heal(info.HealInfo{
-					Caller:  c.Index()(),
+					Caller:  c.Index(),
 					Target:  c.Core.Player.Active(),
 					Message: c6HealMsg,
 					Src:     c.TotalAtk() * 0.42,
@@ -163,4 +163,5 @@ func (c *char) c6() {
 		return false
 	}, "charlotte-c6")
 }
+
 

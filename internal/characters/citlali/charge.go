@@ -34,7 +34,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:   c.Index()(),
+		ActorIndex:   c.Index(),
 		Abil:         "Charge Attack",
 		AttackTag:    attacks.AttackTagExtra,
 		ICDTag:       attacks.ICDTagNone,
@@ -59,4 +59,5 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
+
 
