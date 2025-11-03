@@ -400,4 +400,10 @@ var WeaponNameToKey = map[string]keys.Weapon{
 	"wgs":                             keys.WolfsGravestone,
 	"xiphosmoonlight":                 keys.XiphosMoonlight,
 	"xiphos":                          keys.XiphosMoonlight,
+	"sacrificersstaff":                keys.SacrificersStaff,
+	"sacrificer":                      keys.SacrificersStaff,
+	"dawningfrost":                    keys.DawningFrost,
+	"dawning":                         keys.DawningFrost,
+	"reliquaryoftruth":                keys.ReliquaryOfTruth,
+	"reliquary":                       keys.ReliquaryOfTruth,
 }

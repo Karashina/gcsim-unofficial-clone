@@ -82,11 +82,23 @@ type DendroCore struct {
 	*gadget.Gadget
 	srcFrame  int
 	CharIndex int
+	// If true, this dendro core is a Seed of Deceit (Nefer)
+	IsSeed bool
 }
 
 func (r *Reactable) addBloomGadget(a *combat.AttackEvent) {
+	// determine if this should be a Seed of Deceit at scheduling time to avoid timing races
+	isSeed := false
+	for _, ch := range r.core.Player.Chars() {
+		if ch.StatusIsActive("nefer-seed-convert") {
+			isSeed = true
+			break
+		}
+	}
+	// capture isSeed in closure
+	capturedIsSeed := isSeed
 	r.core.Tasks.Add(func() {
-		t := NewDendroCore(r.core, r.self.Shape(), a)
+		t := NewDendroCore(r.core, r.self.Shape(), a, capturedIsSeed)
 		r.core.Combat.AddGadget(t)
 		r.core.Events.Emit(event.OnDendroCore, t, a)
 		r.core.Log.NewEvent(
@@ -95,14 +107,16 @@ func (r *Reactable) addBloomGadget(a *combat.AttackEvent) {
 			a.Info.ActorIndex,
 		).
 			Write("src", t.Src()).
-			Write("expiry", r.core.F+t.Duration)
+			Write("expiry", r.core.F+t.Duration).
+			Write("is_seed", capturedIsSeed)
 	}, DendroCoreDelay)
 }
 
-func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent) *DendroCore {
+func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent, isSeed bool) *DendroCore {
 	s := &DendroCore{
 		srcFrame:  c.F,
 		CharIndex: a.Info.ActorIndex,
+		IsSeed:    isSeed,
 	}
 
 	circ, ok := shp.(*geometry.Circle)
@@ -115,11 +129,32 @@ func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent) *Den
 	s.Gadget = gadget.New(c, geometry.CalcRandomPointFromCenter(circ.Pos(), r, r, c.Rand), 2, combat.GadgetTypDendroCore)
 	s.Gadget.Duration = 300 // ??
 
+	// Log creation details for debugging Seed of Deceit behavior
+	c.Log.NewEvent(
+		"new dendro core created",
+		glog.LogElementEvent,
+		a.Info.ActorIndex,
+	).Write("is_seed", isSeed).
+		Write("src_frame", s.srcFrame)
+
 	char := s.Core.Player.ByIndex(a.Info.ActorIndex)
 
 	explode := func(reason string) func() {
 		return func() {
 			s.Core.Tasks.Add(func() {
+				// Log an explode attempt and current IsSeed state
+				s.Core.Log.NewEvent(
+					"dendro core explode attempt",
+					glog.LogElementEvent,
+					char.Index,
+				).Write("is_seed", s.IsSeed).
+					Write("src", s.Src())
+
+				if s.IsSeed {
+					// Seeds of Deceit do not explode
+					return
+				}
+				// bloom attack
 				ai, snap := NewBloomAttack(char, s, nil)
 				ap := combat.NewCircleHitOnTarget(s, nil, 5)
 				c.QueueAttackWithSnap(ai, snap, ap, 0)
@@ -140,8 +175,14 @@ func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent) *Den
 			}, 1)
 		}
 	}
-	s.Gadget.OnExpiry = explode("expired")
-	s.Gadget.OnKill = explode("killed")
+	if !isSeed {
+		s.Gadget.OnExpiry = explode("expired")
+		s.Gadget.OnKill = explode("killed")
+	} else {
+		// Seeds of Deceit do not burst or cause reactions on expiry/kill
+		s.Gadget.OnExpiry = nil
+		s.Gadget.OnKill = nil
+	}
 
 	return s
 }
@@ -166,6 +207,10 @@ func (s *DendroCore) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, b
 	// only contact with pyro/electro to trigger burgeon/hyperbloom accordingly
 	switch atk.Info.Element {
 	case attributes.Electro:
+		if s.IsSeed {
+			// Seeds of Deceit cannot trigger Hyperbloom
+			return 0, false
+		}
 		// trigger hyperbloom targets the nearest enemy
 		// it can also do damage to player in small aoe
 		s.Core.Tasks.Add(func() {
@@ -197,6 +242,10 @@ func (s *DendroCore) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, b
 			Write("dendro_core_char", s.CharIndex).
 			Write("dendro_core_src", s.Gadget.Src())
 	case attributes.Pyro:
+		if s.IsSeed {
+			// Seeds of Deceit cannot trigger Burgeon
+			return 0, false
+		}
 		// trigger burgeon, aoe dendro damage
 		// self damage
 		s.Core.Tasks.Add(func() {

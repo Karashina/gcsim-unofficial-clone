@@ -127,8 +127,8 @@ func (c *char) c6NormalAttackConversion() bool {
 	snap := combat.Snapshot{
 		CharLvl: c.Base.Level,
 	}
-	snap.Stats[attributes.CR] = c.Stat(attributes.CR) + c.a4crval
-	snap.Stats[attributes.CD] = c.Stat(attributes.CD) + c.a4cdval
+	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
+	snap.Stats[attributes.CD] = c.Stat(attributes.CD)
 
 	c.Core.QueueAttackWithSnap(
 		ai,
@@ -136,8 +136,6 @@ func (c *char) c6NormalAttackConversion() bool {
 		combat.NewSingleTargetHit(c.Core.Combat.PrimaryTarget().Key()),
 		1,
 	)
-	c.paleHymnLunarBloomBonus()
-
 	return true
 }
 

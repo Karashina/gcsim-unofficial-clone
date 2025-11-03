@@ -47,7 +47,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			State:           action.NormalAttackState,
 		}, nil
 	}
-	
+
 	ai := combat.AttackInfo{
 		ActorIndex:   c.Index,
 		Abil:         fmt.Sprintf("Normal %v", c.NormalCounter),

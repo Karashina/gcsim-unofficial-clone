@@ -10,13 +10,11 @@ import (
 
 // Special Lunar Bloom damage handler for Lauma
 func (c *char) onLunarBloomLaumaSpecial(args ...interface{}) bool {
-	n := args[0].(combat.Target)
 	ae := args[1].(*combat.AttackEvent)
 
 	if ae.Info.AttackTag != attacks.AttackTagLBDamage {
 		return false
 	}
-	c.Core.Events.Emit(event.OnLunarBloom, n, ae)
 	return false
 }
 

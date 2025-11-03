@@ -19,7 +19,7 @@ var base *model.AvatarData
 var paramKeysValidation = map[action.Action][]string{
 	2: {"travel"},
 	3: {"travel"},
-	4: {"travel","Hold"},
+	4: {"travel", "Hold"},
 }
 
 func init() {
@@ -76,7 +76,7 @@ var (
 		1.072,
 		1.139,
 		1.139,
-		1.139,		
+		1.139,
 	}
 	// attack: attack_2 = [1]
 	attack_2 = []float64{
@@ -94,7 +94,7 @@ var (
 		0.95,
 		1.009375,
 		1.009375,
-		1.009375,		
+		1.009375,
 	}
 	// attack: attack_3 = [2]
 	attack_3 = []float64{
@@ -112,7 +112,7 @@ var (
 		1.496,
 		1.5895,
 		1.5895,
-		1.5895,		
+		1.5895,
 	}
 	// attack: charge = [4]
 	charge = []float64{
@@ -130,7 +130,7 @@ var (
 		2.94,
 		3.12375,
 		3.12375,
-		3.12375,		
+		3.12375,
 	}
 	// attack: collision = [8]
 	collision = []float64{
@@ -202,7 +202,7 @@ var (
 		2.668,
 		2.83475,
 		2.83475,
-		2.83475,		
+		2.83475,
 	}
 	// skill: skillHealPct = [1]
 	skillHealPct = []float64{
@@ -220,7 +220,7 @@ var (
 		0.404,
 		0.42925,
 		0.42925,
-		0.42925,		
+		0.42925,
 	}
 	// skill: skillHeacCst = [2]
 	skillHealCst = []float64{
@@ -238,7 +238,7 @@ var (
 		123.0879,
 		132.275,
 		132.275,
-		132.275,		
+		132.275,
 	}
 	// burst: burst = [0]
 	burst = []float64{
@@ -256,7 +256,7 @@ var (
 		10.17,
 		10.805625,
 		10.805625,
-		10.805625,		
+		10.805625,
 	}
 	// burst: sedationmark = [2]
 	sedationmark = []float64{
@@ -274,6 +274,6 @@ var (
 		2.18,
 		2.31625,
 		2.31625,
-		2.31625,		
+		2.31625,
 	}
 )

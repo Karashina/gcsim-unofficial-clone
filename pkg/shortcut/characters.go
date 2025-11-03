@@ -38,6 +38,7 @@ var CharNameToKey = map[string]keys.Char{
 	"luminepyro":      keys.LuminePyro,
 	"aethercryo":      keys.AetherCryo,
 	"luminecryo":      keys.LumineCryo,
+	"aino":            keys.Aino,
 	"albedo":          keys.Albedo,
 	"aloy":            keys.Aloy,
 	"amber":           keys.Amber,
@@ -194,4 +195,5 @@ var CharNameToKey = map[string]keys.Char{
 	"ineffa":                  keys.Ineffa,
 	"varesa":                  keys.Varesa,
 	"lauma":                   keys.Lauma,
+	"nefer":                   keys.Nefer,
 }

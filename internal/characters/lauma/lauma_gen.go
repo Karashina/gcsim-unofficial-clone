@@ -200,6 +200,24 @@ var (
 		4.08,
 		4.08,
 	}
+	// skill: skillRESShred = [5]
+	skillRESShred = []float64{
+		0.025,
+		0.05,
+		0.075,
+		0.1,
+		0.125,
+		0.15,
+		0.175,
+		0.2,
+		0.225,
+		0.25,
+		0.28,
+		0.31,
+		0.34,
+		0.34,
+		0.34,
+	}
 	// burst: burstBuffBloom = [0]
 	burstBuffBloom = []float64{
 		2.778,

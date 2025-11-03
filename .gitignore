@@ -36,3 +36,5 @@ go.mod
 go.sum
 tsconfig.json
 Taskfile.yml
+serve_data.json.gz
+serve_sample.json.gz

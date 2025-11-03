@@ -70,6 +70,8 @@ func (c *char) setupPaleHymnEffects() {
 		switch ae.Info.AttackTag {
 		case attacks.AttackTagBloom, attacks.AttackTagHyperbloom, attacks.AttackTagBurgeon, attacks.AttackTagBountifulCore:
 			return c.paleHymnReactionBonus(ae)
+		case attacks.AttackTagLBDamage:
+			return c.paleHymnLunarBloomBonus(ae)
 		}
 		return false
 	}, "lauma-pale-hymn-lunar-bloom")
@@ -106,12 +108,12 @@ func (c *char) paleHymnReactionBonus(ae *combat.AttackEvent) bool {
 }
 
 // Pale Hymn bonus for Lunar-Bloom damage
-func (c *char) paleHymnLunarBloomBonus() {
+func (c *char) paleHymnLunarBloomBonus(ae *combat.AttackEvent) bool {
 	if !c.StatusIsActive("pale-hymn-window") {
-		return
+		return false
 	}
 	if c.paleHymn <= 0 {
-		return
+		return false
 	}
 
 	// Consume 1 stack per enemy hit
@@ -129,5 +131,6 @@ func (c *char) paleHymnLunarBloomBonus() {
 	}
 
 	// Store the bonus for Lunar-Bloom damage
-	c.burstLBBuff = bonusDamage
+	ae.Info.FlatDmg += bonusDamage
+	return false
 }

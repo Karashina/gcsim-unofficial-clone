@@ -7,6 +7,7 @@ import (
 
 const (
 	TestCharDoNotUse Char = iota + TravelerDelim + 1
+	Aino
 	Albedo
 	Alhaitham
 	Aloy
@@ -74,6 +75,7 @@ const (
 	Mualani
 	Nahida
 	Navia
+	Nefer
 	Neuvillette
 	Nilou
 	Ningguang
@@ -114,6 +116,10 @@ const (
 )
 
 func init() {
+	charNames[Aino] = "aino"
+	charPrettyName[Aino] = "Aino"
+	CharKeyToEle[Aino] = attributes.Hydro
+
 	charNames[Albedo] = "albedo"
 	charPrettyName[Albedo] = "Albedo"
 	CharKeyToEle[Albedo] = attributes.Geo
@@ -381,6 +387,10 @@ func init() {
 	charNames[Navia] = "navia"
 	charPrettyName[Navia] = "Navia"
 	CharKeyToEle[Navia] = attributes.Geo
+
+	charNames[Nefer] = "nefer"
+	charPrettyName[Nefer] = "Nefer"
+	CharKeyToEle[Nefer] = attributes.Dendro
 
 	charNames[Neuvillette] = "neuvillette"
 	charPrettyName[Neuvillette] = "Neuvillette"

@@ -21,8 +21,6 @@ type char struct {
 	verdantDew  int
 	moonSong    int
 	paleHymn    int
-	a4crval     float64
-	a4cdval     float64
 	c6mult      float64
 }
 
@@ -41,16 +39,14 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
+	// mark this character as a potential moonsign holder for team initialization
 	c.AddStatus("moonsignKey", -1, false)
-	c.a4crval = 0
-	c.a4cdval = 0
-	c.moonsignInitFunc()
 	c.setupPaleHymnEffects()
 	c.a0()
-	c.a4()                               // Initialize A4 AddAttackMod
-	c.c6mult = c.c6AscendantMultiplier() // Apply C6 Ascendant multiplier if applicable
-	c.verdantDewCheck()                  // Initialize Verdant Dew monitoring
-	c.applyResReduction()                // Initialize RES reduction monitoring
+	c.a4()                               // initialize A4 AddAttackMod
+	c.c6mult = c.c6AscendantMultiplier() // apply C6 ascendant multiplier if applicable
+	c.verdantDewCheck()                  // initialize Verdant Dew monitoring
+	c.applyResReduction()                // initialize RES reduction monitoring
 	return nil
 }
 
@@ -61,43 +57,20 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	return c.Character.AnimationStartDelay(k)
 }
 
-// Verdant Dew
-// When party members trigger Lunar-Bloom reactions, the party will receive such a resource.
-// Your party will receive 1 Verdant Dew every 2.5s for 2.5s after triggering a Lunar-Bloom reaction.
-// Your party can have up to 3 Verdant Dew.
-// If you trigger another Lunar-Bloom reaction during this time, the duration of this effect will be reset.
+// verdantDewCheck subscribes to Bloom events and grants Verdant Dew to the party.
+// Verdant Dew is capped at 3 and gains are queued after the charging period.
 func (c *char) verdantDewCheck() {
 	c.Core.Events.Subscribe(event.OnBloom, func(args ...interface{}) bool {
-		if c.StatusIsActive("LB-Key") {
-			duradd := c.StatusDuration("dewchargingkey")
-			c.AddStatus("dewchargingkey", 150, true) // 2.5s charging period
-			c.QueueCharTask(func() {
-				if c.verdantDew < 3 {
-					c.verdantDew++
-				}
-			}, 150+duradd)
-			return true
+		if !c.StatusIsActive("LB-Key") {
+			return false
 		}
-		return false
+		duradd := c.StatusDuration("dewchargingkey")
+		c.AddStatus("dewchargingkey", 150, true) // 2.5s charging period
+		c.QueueCharTask(func() {
+			if c.verdantDew < 3 {
+				c.verdantDew++
+			}
+		}, 150+duradd)
+		return true
 	}, "lauma-verdant-dew")
-}
-
-func (c *char) moonsignInitFunc() {
-	count := 0
-	for _, char := range c.Core.Player.Chars() {
-		if char.StatusIsActive("moonsignKey") {
-			count++
-		}
-	}
-	switch count {
-	case 1:
-		c.MoonsignNascent = true // Moonsign: Nascent Gleam
-		c.MoonsignAscendant = false
-	case 2, 3, 4:
-		c.MoonsignAscendant = true // Moonsign: Ascendant Gleam
-		c.MoonsignNascent = false
-	default:
-		c.MoonsignNascent = false
-		c.MoonsignAscendant = false
-	}
 }
