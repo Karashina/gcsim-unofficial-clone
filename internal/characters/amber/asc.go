@@ -1,10 +1,11 @@
-package amber
+﻿package amber
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
@@ -18,7 +19,7 @@ func (c *char) a1() {
 	m[attributes.CR] = .1
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("amber-a1", -1),
-		Amount: func(atk *info.AttackEvent, t info.Target) ([]float64, bool) {
+		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
 			return m, atk.Info.AttackTag == attacks.AttackTagElementalBurst
 		},
 	})
@@ -27,12 +28,12 @@ func (c *char) a1() {
 }
 
 // Aimed Shot hits on weak points increase ATK by 15% for 10s.
-func (c *char) makeA4CB() info.AttackCBFunc {
+func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil
 	}
 	done := false
-	return func(a info.AttackCB) {
+	return func(a combat.AttackCB) {
 		if !a.AttackEvent.Info.HitWeakPoint {
 			return
 		}

@@ -1,4 +1,4 @@
-package albedo
+﻿package albedo
 
 import (
 	"fmt"
@@ -38,12 +38,12 @@ func init() {
 	attackFrames[3][action.ActionCharge] = 36                             // N4 -> CA
 
 	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[3], 62) // N5 -> N1
-	attackFrames[4][action.ActionCharge] = 500                            // TODO: this action is illegal; need better way to handle it
+	attackFrames[4][action.ActionCharge] = 500                            //TODO: this action is illegal; need better way to handle it
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	ai := info.AttackInfo{
-		ActorIndex:         c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex:         c.Index,
 		Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
 		AttackTag:          attacks.AttackTagNormal,
 		ICDTag:             attacks.ICDTagNormalAttack,
@@ -82,5 +82,3 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-
-

@@ -1,4 +1,4 @@
-package aloy
+﻿package aloy
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"

@@ -1,4 +1,4 @@
-package albedo
+﻿package albedo
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -11,10 +11,8 @@ import (
 
 var burstFrames []int
 
-const (
-	burstHitmark        = 75                 // Initial Hit
-	fatalBlossomHitmark = 145 - burstHitmark // Fatal Blossom, accounting for task queuing
-)
+const burstHitmark = 75                        // Initial Hit
+const fatalBlossomHitmark = 145 - burstHitmark // Fatal Blossom, accounting for task queuing
 
 func init() {
 	burstFrames = frames.InitAbilSlice(96) // Q -> N1/E
@@ -24,8 +22,8 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Rite of Progeniture: Tectonic Tide",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -79,7 +77,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		enemies := c.Core.Combat.RandomEnemiesWithinArea(c.skillArea, nil, maxBlossoms)
 		tracking := len(enemies)
 		var center info.Point
-		for i := range maxBlossoms {
+		for i := 0; i < maxBlossoms; i++ {
 			if i < tracking {
 				// each blossom targets a separate enemy if possible
 				center = enemies[i].Pos()
@@ -108,5 +106,3 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
-
-

@@ -1,4 +1,4 @@
-package ayato
+﻿package ayato
 
 import (
 	"errors"
@@ -8,7 +8,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
 var chargeFrames []int
@@ -26,9 +25,9 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(skillBuffKey) {
 		return action.Info{}, errors.New("charged attack called in skill state")
 	}
-	ai := info.AttackInfo{
+	ai := combat.AttackInfo{
 		Abil:       "Charge",
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index,
 		AttackTag:  attacks.AttackTagExtra,
 		ICDTag:     attacks.ICDTagExtraAttack,
 		ICDGroup:   attacks.ICDGroupPoleExtraAttack,
@@ -57,5 +56,3 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
-
-

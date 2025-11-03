@@ -1,9 +1,9 @@
-package amber
+﻿package amber
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
@@ -15,7 +15,7 @@ func (c *char) c2() {
 	m[attributes.DmgP] = 2
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("amber-c2", -1),
-		Amount: func(atk *info.AttackEvent, _ info.Target) ([]float64, bool) {
+		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
 			if atk.Info.AttackTag != attacks.AttackTagElementalArt {
 				return nil, false
 			}

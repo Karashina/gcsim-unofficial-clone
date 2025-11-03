@@ -1,4 +1,4 @@
-package amber
+﻿package amber
 
 import (
 	"fmt"
@@ -13,10 +13,8 @@ import (
 
 var aimedFrames [][]int
 
-var (
-	aimedHitmarks = []int{15, 86}
-	c1Delay       = 9 // C1 arrow comes out 9f after the normal one, still comes out even if you cancel at aimedHitmark
-)
+var aimedHitmarks = []int{15, 86}
+var c1Delay = 9 // C1 arrow comes out 9f after the normal one, still comes out even if you cancel at aimedHitmark
 
 func init() {
 	aimedFrames = make([][]int, 2)
@@ -67,9 +65,9 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		}, nil
 	}
 
-	ai := info.AttackInfo{
+	ai := combat.AttackInfo{
 		Abil:         "Fully-Charged Aimed Shot",
-		ActorIndex:   c.Index(),
+		ActorIndex:   c.Index,
 		AttackTag:    attacks.AttackTagExtra,
 		ICDTag:       attacks.ICDTagExtraAttack,
 		ICDGroup:     attacks.ICDGroupAmber,
@@ -101,7 +99,6 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 
 	if c.Base.Cons >= 1 {
 		ai.Mult = .2 * ai.Mult
-		ai.Abil = "Aimed Shot (C1)"
 		c.Core.QueueAttack(
 			ai,
 			combat.NewBoxHit(
@@ -123,5 +120,3 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		State:           action.AimState,
 	}, nil
 }
-
-

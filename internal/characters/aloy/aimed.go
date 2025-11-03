@@ -1,4 +1,4 @@
-package aloy
+﻿package aloy
 
 import (
 	"fmt"
@@ -47,8 +47,8 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	}
 	weakspot := p["weakspot"]
 
-	ai := info.AttackInfo{
-		ActorIndex:           c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex:           c.Index,
 		Abil:                 "Fully-Charged Aimed Shot",
 		AttackTag:            attacks.AttackTagExtra,
 		ICDTag:               attacks.ICDTagNone,
@@ -88,5 +88,3 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		State:           action.AimState,
 	}, nil
 }
-
-

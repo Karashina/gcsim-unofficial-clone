@@ -1,4 +1,4 @@
-package baizhu
+﻿package baizhu
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
@@ -13,14 +13,14 @@ func (c *char) removeShield() {
 func (c *char) newShield(base float64, dur int) *shd {
 	n := &shd{}
 	n.Tmpl = &shield.Tmpl{}
-	n.ActorIndex = c.Index()
-	n.Target = -1
-	n.Src = c.Core.F
-	n.ShieldType = shield.BaizhuBurst
-	n.Ele = attributes.Dendro
-	n.HP = base
-	n.Name = "Baizhu Seamless shield"
-	n.Expires = c.Core.F + dur
+	n.Tmpl.ActorIndex = c.Index
+	n.Tmpl.Target = -1
+	n.Tmpl.Src = c.Core.F
+	n.Tmpl.ShieldType = shield.BaizhuBurst
+	n.Tmpl.Ele = attributes.Dendro
+	n.Tmpl.HP = base
+	n.Tmpl.Name = "Baizhu Seamless shield"
+	n.Tmpl.Expires = c.Core.F + dur
 	n.c = c
 	return n
 }
@@ -41,5 +41,3 @@ func (s *shd) OnDamage(dmg float64, ele attributes.Element, bonus float64) (floa
 	}
 	return taken, ok
 }
-
-

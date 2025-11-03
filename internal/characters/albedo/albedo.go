@@ -1,11 +1,13 @@
-package albedo
+﻿package albedo
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/pkg/core"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/model"
 )
 
 func init() {
@@ -15,12 +17,12 @@ func init() {
 type char struct {
 	*tmpl.Character
 	lastConstruct int
-	bloomSnapshot info.Snapshot
+	bloomSnapshot combat.Snapshot
 	// tracking skill information
 	skillActive     bool
-	skillArea       info.AttackPattern
-	skillAttackInfo info.AttackInfo
-	skillSnapshot   info.Snapshot
+	skillArea       combat.AttackPattern
+	skillAttackInfo combat.AttackInfo
+	skillSnapshot   combat.Snapshot
 	// c2 tracking
 	c2stacks int
 }
@@ -56,8 +58,8 @@ func (c *char) Condition(fields []string) (any, error) {
 	}
 }
 
-func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
-	if k == info.AnimationXingqiuN0StartDelay {
+func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
+	if k == model.AnimationXingqiuN0StartDelay {
 		return 9
 	}
 	return c.Character.AnimationStartDelay(k)

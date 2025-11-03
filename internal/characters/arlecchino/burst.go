@@ -1,4 +1,4 @@
-package arlecchino
+﻿package arlecchino
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -7,14 +7,15 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
-const (
-	burstHitmarks          = 110
-	balemoonRisingHealAbil = "Balemoon Rising (Heal)"
-)
+const burstHitmarks = 110
+const balemoonRisingHealAbil = "Balemoon Rising (Heal)"
 
-var burstFrames []int
+var (
+	burstFrames []int
+)
 
 func init() {
 	burstFrames = frames.InitAbilSlice(146)
@@ -26,8 +27,8 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Balemoon Rising",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -58,7 +59,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
 		State:           action.BurstState,
 	}, nil
 }
@@ -66,12 +67,10 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 func (c *char) balemoonRisingHeal() {
 	amt := 1.5*c.CurrentHPDebt() + 1.5*c.TotalAtk()
 	c.Heal(&info.HealInfo{
-		Caller:  c.Index(),
-		Target:  c.Index(),
+		Caller:  c.Index,
+		Target:  c.Index,
 		Message: balemoonRisingHealAbil,
 		Src:     amt,
 		Bonus:   c.Stat(attributes.Heal),
 	})
 }
-
-

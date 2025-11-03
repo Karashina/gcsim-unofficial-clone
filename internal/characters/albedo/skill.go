@@ -1,4 +1,4 @@
-package albedo
+﻿package albedo
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -7,6 +7,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 )
@@ -24,16 +25,14 @@ func init() {
 }
 
 const (
-	skillICDKey      = "albedo-skill-icd"
-	particleICDKey   = "albedo-particle-icd"
-	skillAbilInitial = "Abiogenesis: Solar Isotoma (Initial)"
-	skillAbilTick    = "Abiogenesis: Solar Isotoma (Tick)"
+	skillICDKey    = "albedo-skill-icd"
+	particleICDKey = "albedo-particle-icd"
 )
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
-		Abil:       skillAbilInitial,
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "Abiogenesis: Solar Isotoma",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -55,7 +54,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	c.Core.QueueAttackWithSnap(ai, c.bloomSnapshot, combat.NewCircleHitOnTarget(skillPos, nil, 5), skillHitmark)
 
 	// snapshot for ticks
-	ai.Abil = skillAbilTick
+	ai.Abil = "Abiogenesis: Solar Isotoma (Tick)"
 	ai.ICDTag = attacks.ICDTagElementalArt
 	ai.Mult = skillTick[c.TalentLvlSkill()]
 	ai.UseDef = true
@@ -89,7 +88,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-func (c *char) particleCB(a info.AttackCB) {
+func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != info.TargettableEnemy {
 		return
 	}
@@ -103,9 +102,9 @@ func (c *char) particleCB(a info.AttackCB) {
 }
 
 func (c *char) skillHook() {
-	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...any) bool {
-		trg := args[0].(info.Target)
-		atk := args[1].(*info.AttackEvent)
+	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		trg := args[0].(combat.Target)
+		atk := args[1].(*combat.AttackEvent)
 		dmg := args[2].(float64)
 		if !c.skillActive {
 			return false
@@ -114,7 +113,7 @@ func (c *char) skillHook() {
 			return false
 		}
 		// Can't be triggered by itself when refreshing
-		if atk.Info.Abil == skillAbilInitial {
+		if atk.Info.Abil == "Abiogenesis: Solar Isotoma" {
 			return false
 		}
 		if dmg == 0 {
@@ -139,7 +138,7 @@ func (c *char) skillHook() {
 		// c1: skill tick regen 1.2 energy
 		if c.Base.Cons >= 1 {
 			c.AddEnergy("albedo-c1", 1.2)
-			c.Core.Log.NewEvent("c1 restoring energy", glog.LogCharacterEvent, c.Index())
+			c.Core.Log.NewEvent("c1 restoring energy", glog.LogCharacterEvent, c.Index)
 		}
 
 		// c2: skill tick grant stacks, lasts 30s; each stack increase burst dmg by 30% of def, stack up to 4 times
@@ -157,5 +156,3 @@ func (c *char) skillHook() {
 		return false
 	}, "albedo-skill")
 }
-
-

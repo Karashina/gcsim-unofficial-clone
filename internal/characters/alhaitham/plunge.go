@@ -1,4 +1,4 @@
-package alhaitham
+﻿package alhaitham
 
 import (
 	"errors"
@@ -16,26 +16,18 @@ var lowPlungeFramesAL []int
 
 const lowPlungeHitmarkAL = 38
 
-const (
-	lowPlungeHitmarkXY  = 46
-	highPlungeHitmarkXY = 48
-	collisionHitmarkXY  = lowPlungeHitmarkXY - 6
-)
+const lowPlungeHitmarkXY = 46
+const highPlungeHitmarkXY = 48
+const collisionHitmarkXY = lowPlungeHitmarkXY - 6
 
-const (
-	lowPlungePoiseDMG = 100.0
-	lowPlungeRadius   = 3.0
-)
+const lowPlungePoiseDMG = 100.0
+const lowPlungeRadius = 3.0
 
-const (
-	highPlungePoiseDMG = 150.0
-	highPlungeRadius   = 5.0
-)
+const highPlungePoiseDMG = 150.0
+const highPlungeRadius = 5.0
 
-var (
-	highPlungeFramesXY []int
-	lowPlungeFramesXY  []int
-)
+var highPlungeFramesXY []int
+var lowPlungeFramesXY []int
 
 func init() {
 	lowPlungeFramesAL = frames.InitAbilSlice(70)
@@ -87,8 +79,8 @@ func (c *char) lowPlungeAl(p map[string]int) action.Info {
 		skip = 20
 	}
 
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Low Plunge Attack",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,
@@ -127,8 +119,8 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 		c.plungeCollision(collisionHitmarkXY)
 	}
 
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Low Plunge",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,
@@ -180,8 +172,8 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 		c.plungeCollision(collisionHitmarkXY)
 	}
 
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "High Plunge",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,
@@ -212,8 +204,8 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 // Plunge normal falling attack damage queue generator
 // Standard - Always part of high/low plunge attacks
 func (c *char) plungeCollision(delay int) {
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Plunge Collision",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,
@@ -232,5 +224,3 @@ func (c *char) plungeCollision(delay int) {
 		c.projectionAttack,
 	)
 }
-
-

@@ -1,4 +1,4 @@
-package ayaka
+﻿package ayaka
 
 import (
 	"fmt"
@@ -40,7 +40,7 @@ func init() {
 	attackFrames[3][action.ActionAttack] = 22
 
 	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 66)
-	attackFrames[4][action.ActionCharge] = 500 // TODO: this action is illegal; need better way to handle it
+	attackFrames[4][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
@@ -51,9 +51,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			icdGroup = attacks.ICDGroupPoleExtraAttack   // N5 has a different ICDGroup
 			centerTarget = c.Core.Combat.PrimaryTarget() // N5 is a bullet
 		}
-		ai := info.AttackInfo{
+		ai := combat.AttackInfo{
 			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
-			ActorIndex:         c.Index(),
+			ActorIndex:         c.Index,
 			AttackTag:          attacks.AttackTagNormal,
 			ICDTag:             attacks.ICDTagNormalAttack,
 			ICDGroup:           icdGroup,
@@ -86,5 +86,3 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-
-

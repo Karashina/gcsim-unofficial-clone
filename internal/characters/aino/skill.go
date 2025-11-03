@@ -1,4 +1,4 @@
-package aino
+﻿package aino
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -22,8 +22,8 @@ func init() {
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	// Stage 1: Single target damage
-	aiStage1 := info.AttackInfo{
-		ActorIndex: c.Index(),
+	aiStage1 := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Musecatcher (Stage 1)",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
@@ -41,8 +41,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	)
 
 	// Stage 2: AoE damage
-	aiStage2 := info.AttackInfo{
-		ActorIndex: c.Index(),
+	aiStage2 := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Musecatcher (Stage 2)",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
@@ -68,5 +68,3 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		State:           action.SkillState,
 	}, nil
 }
-
-

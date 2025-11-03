@@ -1,4 +1,4 @@
-package ayaka
+﻿package ayaka
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -22,9 +22,9 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	ai := info.AttackInfo{
+	ai := combat.AttackInfo{
 		Abil:       "Soumetsu",
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index,
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -50,13 +50,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	)
 
 	// C2 mini-frostflake bloom
-	var aiC2 info.AttackInfo
+	var aiC2 combat.AttackInfo
 	if c.Base.Cons >= 2 {
 		aiC2 = ai
 		aiC2.Mult = burstBloom[c.TalentLvlBurst()] * .2
-		aiC2.Abil = "Mini-Frostflake Seki no To (Bloom) (C2)"
+		aiC2.Abil = "C2 Mini-Frostflake Seki no To (Bloom)"
 		// TODO: Not sure about the positioning/size...
-		for range 2 {
+		for i := 0; i < 2; i++ {
 			c.Core.QueueAttack(
 				aiC2,
 				combat.NewCircleHit(
@@ -72,7 +72,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}
 	}
 
-	for i := range 19 {
+	for i := 0; i < 19; i++ {
 		ai.Mult = burstCut[c.TalentLvlBurst()]
 		ai.StrikeType = attacks.StrikeTypeSlash
 		ai.Abil = "Soumetsu (Cutting)"
@@ -93,9 +93,9 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		if c.Base.Cons >= 2 {
 			aiC2.Mult = burstCut[c.TalentLvlBurst()] * .2
 			aiC2.StrikeType = attacks.StrikeTypeSlash
-			aiC2.Abil = "Mini-Frostflake Seki no To (Cutting) (C2)"
+			aiC2.Abil = "C2 Mini-Frostflake Seki no To (Cutting)"
 			// TODO: Not sure about the positioning/size...
-			for range 2 {
+			for j := 0; j < 2; j++ {
 				c.Core.QueueAttack(
 					aiC2,
 					combat.NewCircleHit(
@@ -122,5 +122,3 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
-
-

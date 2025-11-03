@@ -1,4 +1,4 @@
-package baizhu
+﻿package baizhu
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -73,7 +73,7 @@ func (c *char) summonSeamlessShield() {
 func (c *char) summonSeamlessShieldHealing() {
 	// Seamless Shield Healing
 	c.Core.Player.Heal(info.HealInfo{
-		Caller:  c.Index(),
+		Caller:  c.Index,
 		Target:  c.Core.Player.Active(),
 		Message: "Seamless Shield Healing",
 		Src:     burstHealPP[c.TalentLvlBurst()]*c.MaxHP() + burstHealFlat[c.TalentLvlBurst()],
@@ -83,8 +83,8 @@ func (c *char) summonSeamlessShieldHealing() {
 }
 
 func (c *char) summonSpiritvein() {
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Spiritvein Damage",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -105,5 +105,3 @@ func (c *char) summonSpiritvein() {
 		burstTickRelease+burstTickTravel,
 	)
 }
-
-

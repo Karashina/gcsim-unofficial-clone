@@ -1,4 +1,4 @@
-package barbara
+﻿package barbara
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
@@ -17,7 +17,7 @@ func (c *char) c1(delay int) {
 
 func (c *char) c2() {
 	for i, char := range c.Core.Player.Chars() {
-		if i == c.Index() {
+		if i == c.Index {
 			continue
 		}
 		char.AddStatMod(character.StatMod{
@@ -33,12 +33,12 @@ func (c *char) c2() {
 // inspired from hutao c6
 // TODO: does this even work?
 func (c *char) c6() {
-	c.Core.Events.Subscribe(event.OnPlayerHPDrain, func(args ...any) bool {
+	c.Core.Events.Subscribe(event.OnPlayerHPDrain, func(args ...interface{}) bool {
 		di := args[0].(*info.DrainInfo)
 		if di.Amount <= 0 {
 			return false
 		}
-		if c.Core.Player.Active() != c.Index() { // trigger only when not barbara
+		if c.Core.Player.Active() != c.Index { // trigger only when not barbara
 			c.checkc6()
 		}
 		return false
@@ -61,5 +61,3 @@ func (c *char) checkc6() {
 
 	c.c6icd = c.Core.F + 60*60*15
 }
-
-

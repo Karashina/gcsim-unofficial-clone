@@ -1,16 +1,17 @@
-package baizhu
+﻿package baizhu
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
 
 // Baizhu gains different effects according to the current HP of your current active character:
-// ·When their HP is less than 50%, Baizhu gains 20% Healing Bonus.
-// ·When their HP is equal to or more than 50%, Baizhu gains 25% Dendro DMG Bonus.
+// ﾂｷWhen their HP is less than 50%, Baizhu gains 20% Healing Bonus.
+// ﾂｷWhen their HP is equal to or more than 50%, Baizhu gains 25% Dendro DMG Bonus.
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -58,12 +59,12 @@ func (c *char) a4() {
 	}
 	c.Core.Player.ActiveChar().AddReactBonusMod(character.ReactBonusMod{
 		Base: modifier.NewBaseWithHitlag("baizhu-a4", 6*60),
-		Amount: func(ai info.AttackInfo) (float64, bool) {
+		Amount: func(ai combat.AttackInfo) (float64, bool) {
 			limitHP := c.MaxHP() / 1000.0
 			if limitHP > 50 {
 				limitHP = 50
 			}
-			if ai.Catalyzed && (ai.CatalyzedType == info.ReactionTypeAggravate || ai.CatalyzedType == info.ReactionTypeSpread) {
+			if ai.Catalyzed && (ai.CatalyzedType == reactions.Aggravate || ai.CatalyzedType == reactions.Spread) {
 				return limitHP * 0.008, false
 			}
 			switch ai.AttackTag {

@@ -1,4 +1,4 @@
-package arlecchino
+﻿package arlecchino
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/model"
 )
 
 func init() {
@@ -48,7 +49,7 @@ func (c *char) Init() error {
 }
 
 func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]int) error {
-	lastAction := c.Core.Player.LastAction
+	lastAction := c.Character.Core.Player.LastAction
 	if k != c.Base.Key && a != action.ActionSwap {
 		return fmt.Errorf("%v: Tried to execute %v when not on field", c.Base.Key, a)
 	}
@@ -69,11 +70,11 @@ func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]i
 	return c.Character.NextQueueItemIsValid(k, a, p)
 }
 
-func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
+func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	switch k {
-	case info.AnimationXingqiuN0StartDelay:
+	case model.AnimationXingqiuN0StartDelay:
 		return 15
-	case info.AnimationYelanN0StartDelay:
+	case model.AnimationYelanN0StartDelay:
 		return 7
 	default:
 		return c.Character.AnimationStartDelay(k)
@@ -82,10 +83,8 @@ func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
 
 func (c *char) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
 	// ignore all healing except hers
-	if hi.Caller == c.Index() && hi.Message == balemoonRisingHealAbil {
+	if hi.Caller == c.Index && hi.Message == balemoonRisingHealAbil {
 		return c.Character.ReceiveHeal(hi, healAmt)
 	}
 	return 0
 }
-
-

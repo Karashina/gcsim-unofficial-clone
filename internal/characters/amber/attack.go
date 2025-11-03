@@ -1,4 +1,4 @@
-package amber
+﻿package amber
 
 import (
 	"fmt"
@@ -11,10 +11,8 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
-var (
-	attackFrames   [][]int
-	attackHitmarks = []int{14, 10, 27, 26, 26}
-)
+var attackFrames [][]int
+var attackHitmarks = []int{14, 10, 27, 26, 26}
 
 const normalHitNum = 5
 
@@ -34,9 +32,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		travel = 10
 	}
 
-	ai := info.AttackInfo{
+	ai := combat.AttackInfo{
 		Abil:       fmt.Sprintf("Normal %v", c.NormalCounter),
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index,
 		AttackTag:  attacks.AttackTagNormal,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupAmber,
@@ -67,5 +65,3 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-
-

@@ -1,4 +1,4 @@
-package alhaitham
+﻿package alhaitham
 
 import (
 	"fmt"
@@ -8,13 +8,10 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
-var (
-	chargeFrames   []int
-	chargeHitmarks = []int{19, 27}
-)
+var chargeFrames []int
+var chargeHitmarks = []int{19, 27}
 
 func init() {
 	chargeFrames = frames.InitAbilSlice(64)
@@ -27,8 +24,8 @@ func init() {
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		AttackTag:  attacks.AttackTagExtra,
 		ICDTag:     attacks.ICDTagExtraAttack,
 		ICDGroup:   attacks.ICDGroupAlhaithamExtraAttack,
@@ -57,5 +54,3 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
-
-

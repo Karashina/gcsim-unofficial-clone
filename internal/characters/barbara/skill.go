@@ -1,4 +1,4 @@
-package barbara
+﻿package barbara
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -40,7 +40,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	ai := info.AttackInfo{
 		ActorIndex: c.Index(),
-		Abil:       "Let the Show Begin♪ (Droplet)",
+		Abil:       "Let the Show Begin笙ｪ (Droplet)",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -68,7 +68,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	heal := skillhp[c.TalentLvlSkill()] + skillhpp[c.TalentLvlSkill()]*c.MaxHP()
 
 	// setup Melody Loop ticks (first tick at skillCDStart, once every 1.5s)
-	ai.Abil = "Let the Show Begin♪ (Melody Loop)"
+	ai.Abil = "Let the Show Begin笙ｪ (Melody Loop)"
 	ai.AttackTag = attacks.AttackTagNone
 	ai.Mult = 0
 	ai.HitlagFactor = 0.05

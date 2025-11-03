@@ -1,4 +1,4 @@
-package barbara
+﻿package barbara
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -22,9 +22,9 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	stats, _ := c.Stats()
 	c.Core.Tasks.Add(func() {
 		c.Core.Player.Heal(info.HealInfo{
-			Caller:  c.Index(),
+			Caller:  c.Index,
 			Target:  -1,
-			Message: "Shining Miracle♪",
+			Message: "Shining Miracle笙ｪ",
 			Src:     bursthp[c.TalentLvlBurst()] + bursthpp[c.TalentLvlBurst()]*c.MaxHP(),
 			Bonus:   stats[attributes.Heal],
 		})
@@ -40,5 +40,3 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
-
-

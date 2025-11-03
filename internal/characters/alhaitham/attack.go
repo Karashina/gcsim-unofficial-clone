@@ -1,4 +1,4 @@
-package alhaitham
+﻿package alhaitham
 
 import (
 	"fmt"
@@ -54,8 +54,8 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		strikeType = attacks.StrikeTypeSpear
 	}
 	for i, mult := range attack[c.NormalCounter] {
-		ai := info.AttackInfo{
-			ActorIndex:         c.Index(),
+		ai := combat.AttackInfo{
+			ActorIndex:         c.Index,
 			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
 			AttackTag:          attacks.AttackTagNormal,
 			ICDTag:             attacks.ICDTagNormalAttack,
@@ -103,5 +103,3 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-
-

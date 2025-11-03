@@ -1,4 +1,4 @@
-package arlecchino
+﻿package arlecchino
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 )
@@ -56,11 +57,9 @@ var (
 	attackFanAngles = [][]float64{{360}, {300}, {360}, {360, 360}, {360}, {360}}
 )
 
-const (
-	naBuffKey         = "masque-of-the-red-death"
-	bondConsumeICDKey = "bond-consume-icd"
-	normalHitNum      = 6
-)
+const naBuffKey = "masque-of-the-red-death"
+const bondConsumeICDKey = "bond-consume-icd"
+const normalHitNum = 6
 
 func init() {
 	attackFrames = make([][]int, normalHitNum)
@@ -91,13 +90,13 @@ func init() {
 }
 
 func (c *char) naBuff() {
-	c.Core.Events.Subscribe(event.OnHPDebt, func(args ...any) bool {
+	c.Core.Events.Subscribe(event.OnHPDebt, func(args ...interface{}) bool {
 		target := args[0].(int)
-		if target != c.Index() {
+		if target != c.Index {
 			return false
 		}
 		// TODO: Remove when BoL changes get logged for all characters
-		c.Core.Log.NewEvent("Bond of Life changed", glog.LogCharacterEvent, c.Index()).
+		c.Core.Log.NewEvent("Bond of Life changed", glog.LogCharacterEvent, c.Index).
 			Write("arle_hp_debt", c.CurrentHPDebt()).
 			Write("arle_hp_debt%", c.CurrentHPDebt()/c.MaxHP())
 		if c.CurrentHPDebt() >= c.MaxHP()*0.3 {
@@ -114,8 +113,8 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	counter := c.NormalCounter
 	for i, mult := range attack[counter] {
 		c.QueueCharTask(func() {
-			ai := info.AttackInfo{
-				ActorIndex:         c.Index(),
+			ai := combat.AttackInfo{
+				ActorIndex:         c.Index,
 				Abil:               fmt.Sprintf("Normal %v", counter),
 				AttackTag:          attacks.AttackTagNormal,
 				ICDTag:             attacks.ICDTagNormalAttack,
@@ -139,7 +138,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 				ai.FlatDmg += c.bondBonus()
 			}
 
-			var ap info.AttackPattern
+			var ap combat.AttackPattern
 			if len(attackHitboxes[naIndex][counter][i]) == 1 { // circle or fan
 				ap = combat.NewCircleHitOnTargetFanAngle(
 					c.Core.Combat.Player(),
@@ -179,7 +178,7 @@ func (c *char) bondBonus() float64 {
 	return amt
 }
 
-func (c *char) bondConsumeCB(a info.AttackCB) {
+func (c *char) bondConsumeCB(a combat.AttackCB) {
 	if a.Target.Type() != info.TargettableEnemy {
 		return
 	}
@@ -200,5 +199,3 @@ func (c *char) bondConsumeCB(a info.AttackCB) {
 
 	c.ReduceActionCooldown(action.ActionSkill, 0.8*60)
 }
-
-

@@ -1,4 +1,4 @@
-package amber
+﻿package amber
 
 import (
 	"fmt"
@@ -7,36 +7,38 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/hacks"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/enemy"
 	"github.com/genshinsim/gcsim/pkg/gadget"
+	"github.com/genshinsim/gcsim/pkg/reactable"
 )
 
 const manualExplosionAbil = "Baron Bunny (Manual Explosion)"
 
 type Bunny struct {
 	*gadget.Gadget
-	info.Reactable
-	ae   *info.AttackEvent
+	*reactable.Reactable
+	ae   *combat.AttackEvent
 	char *char
 }
 
-func (b *Bunny) HandleAttack(atk *info.AttackEvent) float64 {
+func (b *Bunny) HandleAttack(atk *combat.AttackEvent) float64 {
 	b.Core.Events.Emit(event.OnGadgetHit, b, atk)
 
-	b.Core.Log.NewEvent(fmt.Sprintf("baron bunny hit by %s", atk.Info.Abil), glog.LogCharacterEvent, b.char.Index())
+	b.Core.Log.NewEvent(fmt.Sprintf("baron bunny hit by %s", atk.Info.Abil), glog.LogCharacterEvent, b.char.Index)
 
 	b.PoiseDMGCheck(atk)
 	b.ShatterCheck(atk)
 
-	// TODO: Check if sucrose E or faruzan E on Bunny is 25 dur or 50 dur
+	//TODO: Check if sucrose E or faruzan E on Bunny is 25 dur or 50 dur
 
 	if atk.Info.Durability > 0 {
 		atk.Info.Durability *= info.Durability(b.WillApplyEle(atk.Info.ICDTag, atk.Info.ICDGroup, atk.Info.ActorIndex))
 		if atk.Info.Durability > 0 && atk.Info.Element != attributes.Physical {
-			existing := b.ActiveAuraString()
+			existing := b.Reactable.ActiveAuraString()
 			applied := atk.Info.Durability
 			b.React(atk)
 			if b.Core.Flags.LogDebug && atk.Reacted {
@@ -51,7 +53,7 @@ func (b *Bunny) HandleAttack(atk *info.AttackEvent) float64 {
 					Write("abil", atk.Info.Abil).
 					Write("target", "Bunny").
 					Write("existing", existing).
-					Write("after", b.ActiveAuraString())
+					Write("after", b.Reactable.ActiveAuraString())
 			}
 		}
 	}
@@ -62,7 +64,7 @@ func (b *Bunny) HandleAttack(atk *info.AttackEvent) float64 {
 	if atk.Info.Element != attributes.Cryo {
 		return 0
 	}
-	if atk.Info.Durability < info.ZeroDur {
+	if atk.Info.Durability < reactable.ZeroDur {
 		return 0
 	}
 	if atk.Reacted {
@@ -74,9 +76,9 @@ func (b *Bunny) HandleAttack(atk *info.AttackEvent) float64 {
 	return 0
 }
 
-func (b *Bunny) attachEle(atk *info.AttackEvent) {
+func (b *Bunny) attachEle(atk *combat.AttackEvent) {
 	// check for ICD first
-	existing := b.ActiveAuraString()
+	existing := b.Reactable.ActiveAuraString()
 	applied := atk.Info.Durability
 	b.AttachOrRefill(atk)
 	if b.Core.Flags.LogDebug {
@@ -91,11 +93,11 @@ func (b *Bunny) attachEle(atk *info.AttackEvent) {
 			Write("abil", atk.Info.Abil).
 			Write("target", "Bunny").
 			Write("existing", existing).
-			Write("after", b.ActiveAuraString())
+			Write("after", b.Reactable.ActiveAuraString())
 	}
 }
 
-func (b *Bunny) React(a *info.AttackEvent) {
+func (b *Bunny) React(a *combat.AttackEvent) {
 	// only check the ones possible
 	switch a.Info.Element {
 	case attributes.Electro:
@@ -135,16 +137,17 @@ func (c *char) makeBunny() *Bunny {
 		info.Point{Y: 1.4},
 		player.Direction(),
 	)
-	b.Gadget = gadget.New(c.Core, bunnyPos, 1, info.GadgetTypBaronBunny)
-	b.Reactable = hacks.NewReactable(b, c.Core)
+	b.Gadget = gadget.New(c.Core, bunnyPos, 1, combat.GadgetTypBaronBunny)
+	b.Reactable = &reactable.Reactable{}
+	b.Reactable.Init(b, c.Core)
 
-	b.Duration = 484
+	b.Gadget.Duration = 484
 
 	b.char = c
 
-	ai := info.AttackInfo{
+	ai := combat.AttackInfo{
 		Abil:       "Baron Bunny",
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index,
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -155,7 +158,7 @@ func (c *char) makeBunny() *Bunny {
 		Mult:       bunnyExplode[c.TalentLvlSkill()],
 	}
 	snap := c.Snapshot(&ai)
-	b.ae = &info.AttackEvent{
+	b.ae = &combat.AttackEvent{
 		Info:        ai,
 		Pattern:     combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3),
 		SourceFrame: c.Core.F,
@@ -163,16 +166,16 @@ func (c *char) makeBunny() *Bunny {
 	}
 	b.ae.Callbacks = append(b.ae.Callbacks, c.makeParticleCB())
 	c.bunnies = append(c.bunnies, b)
-	b.OnKill = b.explode
-	b.OnExpiry = b.explode
+	b.Gadget.OnKill = b.explode
+	b.Gadget.OnExpiry = b.explode
 	c.Core.Combat.AddGadget(b)
 	return b
 }
 
 func (b *Bunny) explode() {
 	// Explode
-	b.char.Core.Log.NewEvent("amber exploding bunny", glog.LogCharacterEvent, b.char.Index()).
-		Write("src", b.Src())
+	b.char.Core.Log.NewEvent("amber exploding bunny", glog.LogCharacterEvent, b.char.Index).
+		Write("src", b.Gadget.Src())
 	b.char.Core.QueueAttackEvent(b.ae, 1)
 
 	// remove self from list of bunnies
@@ -183,9 +186,9 @@ func (b *Bunny) explode() {
 	}
 }
 
-func (c *char) makeParticleCB() info.AttackCBFunc {
+func (c *char) makeParticleCB() combat.AttackCBFunc {
 	done := false
-	return func(a info.AttackCB) {
+	return func(a combat.AttackCB) {
 		if a.Target.Type() != info.TargettableEnemy {
 			return
 		}
@@ -200,7 +203,7 @@ func (c *char) makeParticleCB() info.AttackCBFunc {
 func (c *char) manualExplode() {
 	// do nothing if there are no bunnies
 	if len(c.bunnies) == 0 {
-		c.Core.Log.NewEvent("Did not find any Bunnies", glog.LogCharacterEvent, c.Index())
+		c.Core.Log.NewEvent("Did not find any Bunnies", glog.LogCharacterEvent, c.Index)
 		return
 	}
 	// only explode the first bunny
@@ -210,14 +213,14 @@ func (c *char) manualExplode() {
 
 // explode all bunnies on overload
 func (c *char) overloadExplode() {
-	c.Core.Events.Subscribe(event.OnOverload, func(args ...any) bool {
+	c.Core.Events.Subscribe(event.OnOverload, func(args ...interface{}) bool {
 		target := args[0].(*enemy.Enemy)
-		atk := args[1].(*info.AttackEvent)
+		atk := args[1].(*combat.AttackEvent)
 		if len(c.bunnies) == 0 {
 			return false
 		}
-		// TODO: only amber trigger?
-		if atk.Info.ActorIndex != c.Index() {
+		//TODO: only amber trigger?
+		if atk.Info.ActorIndex != c.Index {
 			return false
 		}
 
@@ -237,5 +240,3 @@ func (c *char) overloadExplode() {
 		return false
 	}, "amber-bunny-explode-overload")
 }
-
-

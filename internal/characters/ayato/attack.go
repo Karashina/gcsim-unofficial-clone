@@ -1,4 +1,4 @@
-package ayato
+﻿package ayato
 
 import (
 	"fmt"
@@ -21,10 +21,8 @@ var (
 	attackOffsets         = []float64{0.6, 0.8, 0.3, -0.2, 0.6}
 )
 
-const (
-	normalHitNum      = 5
-	shunsuikenHitmark = 5
-)
+const normalHitNum = 5
+const shunsuikenHitmark = 5
 
 func init() {
 	// NA cancels
@@ -54,9 +52,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}
 
 	for i, mult := range attack[c.NormalCounter] {
-		ai := info.AttackInfo{
+		ai := combat.AttackInfo{
 			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
-			ActorIndex:         c.Index(),
+			ActorIndex:         c.Index,
 			AttackTag:          attacks.AttackTagNormal,
 			ICDTag:             attacks.ICDTagNormalAttack,
 			ICDGroup:           attacks.ICDGroupDefault,
@@ -98,9 +96,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 }
 
 func (c *char) SoukaiKanka(p map[string]int) (action.Info, error) {
-	ai := info.AttackInfo{
-		Abil:               fmt.Sprintf("Shunsuiken %v", c.NormalCounter),
-		ActorIndex:         c.Index(),
+	ai := combat.AttackInfo{
+		Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
+		ActorIndex:         c.Index,
 		AttackTag:          attacks.AttackTagNormal,
 		ICDTag:             attacks.ICDTagNormalAttack,
 		ICDGroup:           attacks.ICDGroupDefault,
@@ -134,5 +132,3 @@ func (c *char) SoukaiKanka(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-
-

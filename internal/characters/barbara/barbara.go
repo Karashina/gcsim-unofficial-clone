@@ -1,4 +1,4 @@
-package barbara
+﻿package barbara
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"

@@ -1,4 +1,4 @@
-package ayato
+﻿package ayato
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -27,8 +27,8 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Kamisato Art: Suiyuu",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -40,7 +40,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 
 	// snapshot when the circle forms (is this correct?)
-	var snap info.Snapshot
+	var snap combat.Snapshot
 	c.Core.Tasks.Add(func() { snap = c.Snapshot(&ai) }, burstStart)
 
 	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10)
@@ -52,7 +52,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			// burst tick
 			enemy := c.Core.Combat.RandomEnemyWithinArea(
 				burstArea,
-				func(e info.Enemy) bool {
+				func(e combat.Enemy) bool {
 					return !e.StatusIsActive(burstMarkKey)
 				},
 			)
@@ -73,7 +73,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			active := c.Core.Player.ActiveChar()
 			active.AddAttackMod(character.AttackMod{
 				Base: modifier.NewBaseWithHitlag("ayato-burst", 90),
-				Amount: func(a *info.AttackEvent, t info.Target) ([]float64, bool) {
+				Amount: func(a *combat.AttackEvent, t combat.Target) ([]float64, bool) {
 					return m, a.Info.AttackTag == attacks.AttackTagNormal
 				},
 			})
@@ -105,5 +105,3 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
-
-

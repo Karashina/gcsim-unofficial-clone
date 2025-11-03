@@ -1,4 +1,4 @@
-package baizhu
+﻿package baizhu
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
@@ -29,8 +30,8 @@ const (
 )
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Universal Diagnosis",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
@@ -42,7 +43,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 
 	snap := c.Snapshot(&ai)
-	c.skillAtk = &info.AttackEvent{
+	c.skillAtk = &combat.AttackEvent{
 		Info:     ai,
 		Snapshot: snap,
 	}
@@ -70,11 +71,11 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-func (c *char) chain(src, count int) info.AttackCBFunc {
+func (c *char) chain(src, count int) combat.AttackCBFunc {
 	if count == 3 {
 		return nil
 	}
-	return func(a info.AttackCB) {
+	return func(a combat.AttackCB) {
 		// on hit figure out the next target
 		next := c.Core.Combat.RandomEnemyWithinArea(combat.NewCircleHitOnTarget(a.Target, nil, 10), nil)
 		if next == nil {
@@ -100,9 +101,9 @@ func (c *char) chain(src, count int) info.AttackCBFunc {
 	}
 }
 
-func (c *char) makeParticleCB() info.AttackCBFunc {
+func (c *char) makeParticleCB() combat.AttackCBFunc {
 	done := false
-	return func(a info.AttackCB) {
+	return func(a combat.AttackCB) {
 		if a.Target.Type() != info.TargettableEnemy {
 			return
 		}
@@ -122,7 +123,7 @@ func (c *char) makeParticleCB() info.AttackCBFunc {
 func (c *char) skillHealing() {
 	c.Core.Tasks.Add(func() {
 		c.Core.Player.Heal(info.HealInfo{
-			Caller:  c.Index(),
+			Caller:  c.Index,
 			Target:  -1,
 			Message: "Universal Diagnosis Healing",
 			Src:     skillHealPP[c.TalentLvlBurst()]*c.MaxHP() + skillHealFlat[c.TalentLvlBurst()],
@@ -130,5 +131,3 @@ func (c *char) skillHealing() {
 		})
 	}, skillReturnTravel)
 }
-
-

@@ -1,4 +1,4 @@
-package arlecchino
+﻿package arlecchino
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/enemy"
@@ -33,8 +34,8 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "All is Ash (Spike)",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
@@ -47,8 +48,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	skillArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 0.5)
 	c.Core.QueueAttack(ai, skillArea, spikeHitmark, spikeHitmark)
 
-	ai = info.AttackInfo{
-		ActorIndex:         c.Index(),
+	ai = combat.AttackInfo{
+		ActorIndex:         c.Index,
 		Abil:               "All is Ash (Cleave)",
 		AttackTag:          attacks.AttackTagElementalArt,
 		ICDTag:             attacks.ICDTagNone,
@@ -69,12 +70,12 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
 		State:           action.SkillState,
 	}, nil
 }
 
-func (c *char) particleCB(a info.AttackCB) {
+func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != info.TargettableEnemy {
 		return
 	}
@@ -85,7 +86,7 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Pyro, c.ParticleDelay)
 }
 
-func (c *char) bloodDebtDirective(a info.AttackCB) {
+func (c *char) bloodDebtDirective(a combat.AttackCB) {
 	if a.Target.Type() != info.TargettableEnemy {
 		return
 	}
@@ -110,12 +111,12 @@ func (c *char) directiveTickFunc(src, count int, trg *enemy.Enemy) func() {
 		if !trg.StatusIsActive(directiveKey) {
 			return
 		}
-		c.Core.Log.NewEvent("Blood Debt Directive checking for tick", glog.LogCharacterEvent, c.Index()).
+		c.Core.Log.NewEvent("Blood Debt Directive checking for tick", glog.LogCharacterEvent, c.Index).
 			Write("src", src)
 
 		// queue up one damage instance
-		ai := info.AttackInfo{
-			ActorIndex: c.Index(),
+		ai := combat.AttackInfo{
+			ActorIndex: c.Index,
 			Abil:       "Blood Debt Directive",
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagElementalArt,
@@ -169,5 +170,3 @@ func (c *char) absorbDirectives() {
 		}
 	}
 }
-
-

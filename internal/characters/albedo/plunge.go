@@ -1,4 +1,4 @@
-package albedo
+﻿package albedo
 
 import (
 	"errors"
@@ -12,26 +12,18 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/player"
 )
 
-var (
-	highPlungeFrames []int
-	lowPlungeFrames  []int
-)
+var highPlungeFrames []int
+var lowPlungeFrames []int
 
-const (
-	lowPlungeHitmark  = 37
-	highPlungeHitmark = 39
-	collisionHitmark  = lowPlungeHitmark - 6
-)
+const lowPlungeHitmark = 37
+const highPlungeHitmark = 39
+const collisionHitmark = lowPlungeHitmark - 6
 
-const (
-	lowPlungePoiseDMG = 100.0
-	lowPlungeRadius   = 3.0
-)
+const lowPlungePoiseDMG = 100.0
+const lowPlungeRadius = 3.0
 
-const (
-	highPlungePoiseDMG = 150.0
-	highPlungeRadius   = 5.0
-)
+const highPlungePoiseDMG = 150.0
+const highPlungeRadius = 5.0
 
 func init() {
 	// low_plunge -> x
@@ -76,8 +68,8 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 		c.plungeCollision(collisionHitmark)
 	}
 
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Low Plunge",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,
@@ -126,8 +118,8 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 		c.plungeCollision(collisionHitmark)
 	}
 
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "High Plunge",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,
@@ -156,8 +148,8 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 // Plunge normal falling attack damage queue generator
 // Standard - Always part of high/low plunge attacks
 func (c *char) plungeCollision(delay int) {
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Plunge Collision",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,
@@ -169,5 +161,3 @@ func (c *char) plungeCollision(delay int) {
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), info.Point{Y: 1}, 1), delay, delay)
 }
-
-

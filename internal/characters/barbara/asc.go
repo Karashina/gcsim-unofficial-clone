@@ -1,4 +1,4 @@
-package barbara
+﻿package barbara
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/action"
@@ -6,7 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 )
 
-// The Stamina Consumption of characters within Let the Show Begin♪'s Melody Loop is reduced by 12%.
+// The Stamina Consumption of characters within Let the Show Begin笙ｪ's Melody Loop is reduced by 12%.
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -17,13 +17,13 @@ func (c *char) a1() {
 	})
 }
 
-// When your active character gains an Elemental Orb/Particle, the duration of the Melody Loop of Let the Show Begin♪ is extended by 1s.
+// When your active character gains an Elemental Orb/Particle, the duration of the Melody Loop of Let the Show Begin笙ｪ is extended by 1s.
 // The maximum extension is 5s.
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
-	c.Core.Events.Subscribe(event.OnParticleReceived, func(_ ...any) bool {
+	c.Core.Events.Subscribe(event.OnParticleReceived, func(_ ...interface{}) bool {
 		if c.Core.Status.Duration(barbSkillKey) == 0 {
 			return false
 		}
@@ -34,10 +34,8 @@ func (c *char) a4() {
 		c.a4extendCount++
 		c.Core.Status.Extend(barbSkillKey, 60)
 
-		c.Core.Log.NewEvent("barbara skill extended from a4", glog.LogCharacterEvent, c.Index())
+		c.Core.Log.NewEvent("barbara skill extended from a4", glog.LogCharacterEvent, c.Index)
 
 		return false
 	}, "barbara-a4")
 }
-
-

@@ -1,4 +1,4 @@
-package aloy
+﻿package aloy
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -26,8 +26,8 @@ func init() {
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	// snapshots before or during Burst Animation
 	// https://library.keqingmains.com/evidence/characters/cryo/aloy#burst-mechanics
-	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
 		Abil:       "Prophecies of Dawn",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -55,5 +55,3 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
-
-

@@ -1,15 +1,17 @@
-package alhaitham
+﻿package alhaitham
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/genshinsim/gcsim/pkg/model"
 )
 
 func init() {
@@ -42,25 +44,24 @@ func (c *char) Init() error {
 	c.a4()
 	return nil
 }
-
 func (c *char) onExitField() {
-	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...any) bool {
+	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		// do nothing if previous char wasn't alhaitham
 		prev := args[0].(int)
-		if prev != c.Index() {
+		if prev != c.Index {
 			return false
 		}
 		c.lastInfusionSrc = -1 // Might prevent undesired behaviour
 		if c.mirrorCount > 0 {
 			c.mirrorCount = 0
-			c.Core.Log.NewEvent("Alhaitham left the field, mirror lost", glog.LogCharacterEvent, c.Index())
+			c.Core.Log.NewEvent("Alhaitham left the field, mirror lost", glog.LogCharacterEvent, c.Index)
 		}
 
 		return false
 	}, "alhaitham-exit")
 }
 
-func (c *char) Snapshot(ai *info.AttackInfo) info.Snapshot {
+func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
 	ds := c.Character.Snapshot(ai)
 
 	if c.mirrorCount > 0 { // weapon infusion can't be overriden for haitham
@@ -75,7 +76,6 @@ func (c *char) Snapshot(ai *info.AttackInfo) info.Snapshot {
 	}
 	return ds
 }
-
 func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
 	case "mirrors":
@@ -93,15 +93,13 @@ func (c *char) Condition(fields []string) (any, error) {
 	}
 }
 
-func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
+func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	switch k {
-	case info.AnimationXingqiuN0StartDelay:
+	case model.AnimationXingqiuN0StartDelay:
 		return 14
-	case info.AnimationYelanN0StartDelay:
+	case model.AnimationYelanN0StartDelay:
 		return 7
 	default:
 		return c.Character.AnimationStartDelay(k)
 	}
 }
-
-

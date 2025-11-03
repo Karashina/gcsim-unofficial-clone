@@ -1,4 +1,4 @@
-package aino
+﻿package aino
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
