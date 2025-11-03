@@ -34,7 +34,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.a4Stacks = 0
 
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Painted Dome",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -88,3 +88,4 @@ func (c *char) addBurstExitHandler() {
 		return false
 	}, "kaveh-exit")
 }
+

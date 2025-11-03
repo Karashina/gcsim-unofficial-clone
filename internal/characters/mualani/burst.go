@@ -30,7 +30,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:     c.Index(),
+		ActorIndex:     c.Index()(),
 		Abil:           "Boomsharka-laka",
 		AttackTag:      attacks.AttackTagElementalBurst,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
@@ -70,3 +70,4 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
+

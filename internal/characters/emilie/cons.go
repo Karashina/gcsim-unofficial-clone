@@ -81,7 +81,7 @@ func (c *char) c1Scent() {
 	}
 	c.AddStatus(c1ScentICDKey, c1ScentICD, true)
 
-	c.Core.Log.NewEvent("emilie c1 proc'd", glog.LogCharacterEvent, c.Index())
+	c.Core.Log.NewEvent("emilie c1 proc'd", glog.LogCharacterEvent, c.Index()())
 	c.generateScent()
 }
 
@@ -159,3 +159,4 @@ func (c *char) c6ScentCB() func(info.AttackCB) {
 		}
 	}
 }
+

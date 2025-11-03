@@ -15,7 +15,7 @@ func (c *char) genShield(src string, shieldamt float64) {
 	// add shield
 	c.Core.Tasks.Add(func() {
 		c.Core.Player.Shields.Add(&shield.Tmpl{
-			ActorIndex: c.Index(),
+			ActorIndex: c.Index()(),
 			Target:     -1,
 			Src:        c.Core.F,
 			ShieldType: shield.KiraraSkill,
@@ -34,3 +34,4 @@ func (c *char) shieldHP() float64 {
 func (c *char) maxShieldHP() float64 {
 	return maxShieldPP[c.TalentLvlSkill()]*c.MaxHP() + maxShieldFlat[c.TalentLvlSkill()]
 }
+

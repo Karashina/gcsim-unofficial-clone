@@ -72,7 +72,7 @@ func (c *char) Init() error {
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...any) bool {
 		prev := args[0].(int)
-		if prev != c.Index() {
+		if prev != c.Index()() {
 			return false
 		}
 		c.jadeCount = 0
@@ -124,3 +124,4 @@ func (c *char) xingqiuN0Delay() int {
 		return 0
 	}
 }
+

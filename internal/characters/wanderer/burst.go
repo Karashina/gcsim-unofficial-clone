@@ -51,7 +51,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Kyougen: Five Ceremonial Plays",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -80,7 +80,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 func (c *char) WindfavoredBurst(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Kyougen: Five Ceremonial Plays (Windfavored)",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -118,3 +118,4 @@ func (c *char) WindfavoredBurst(p map[string]int) (action.Info, error) {
 		},
 	}, nil
 }
+

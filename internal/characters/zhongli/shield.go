@@ -49,7 +49,7 @@ func (c *char) removeJadeShield() {
 func (c *char) newShield(base float64, dur int) *shd {
 	n := &shd{}
 	n.Tmpl = &shield.Tmpl{}
-	n.ActorIndex = c.Index()
+	n.ActorIndex = c.Index()()
 	n.Target = -1
 	n.Src = c.Core.F
 	n.ShieldType = shield.ZhongliJadeShield
@@ -84,7 +84,7 @@ func (s *shd) OnDamage(dmg float64, ele attributes.Element, bonus float64) (floa
 			heal = 0.08 * maxhp
 		}
 		s.c.Core.Player.Heal(info.HealInfo{
-			Caller:  s.c.Index(),
+			Caller:  s.c.Index()(),
 			Target:  active.Index(),
 			Message: "Chrysos, Bounty of Dominator",
 			Src:     heal,
@@ -99,3 +99,4 @@ func (s *shd) OnDamage(dmg float64, ele attributes.Element, bonus float64) (floa
 	}
 	return taken, ok
 }
+

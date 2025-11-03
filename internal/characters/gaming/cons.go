@@ -22,8 +22,8 @@ func (c *char) c1() {
 	}
 
 	c.Core.Player.Heal(info.HealInfo{
-		Caller:  c.Index(),
-		Target:  c.Index(),
+		Caller:  c.Index()(),
+		Target:  c.Index()(),
 		Message: "Bringer of Blessing (C1)",
 		Type:    info.HealTypePercent,
 		Src:     0.15,
@@ -48,7 +48,7 @@ func (c *char) c2() {
 			return false
 		}
 
-		if hi.Target != c.Index() {
+		if hi.Target != c.Index()() {
 			return false
 		}
 
@@ -104,3 +104,4 @@ func (c *char) c6() {
 		},
 	})
 }
+

@@ -29,7 +29,7 @@ func init() {
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Celestial Shower",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -91,7 +91,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 					if increase {
 						c4Stacks := min(e.GetTag(c4Key)+1, 5)
 						e.SetTag(c4Key, c4Stacks)
-						c.Core.Log.NewEvent(c4Key+" tick on enemy", glog.LogCharacterEvent, c.Index()).
+						c.Core.Log.NewEvent(c4Key+" tick on enemy", glog.LogCharacterEvent, c.Index()()).
 							Write("stacks", c4Stacks).
 							Write("enemy key", e.Key())
 					}
@@ -112,3 +112,4 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
+

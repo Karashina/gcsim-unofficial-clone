@@ -57,7 +57,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	weakspot := p["weakspot"]
 
 	ai := info.AttackInfo{
-		ActorIndex:           c.Index(),
+		ActorIndex:           c.Index()(),
 		Abil:                 "Fully-Charged Aimed Shot",
 		AttackTag:            attacks.AttackTagExtra,
 		ICDTag:               attacks.ICDTagExtraAttack,
@@ -112,3 +112,4 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 
 	return a, nil
 }
+

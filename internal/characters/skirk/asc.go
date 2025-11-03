@@ -89,7 +89,7 @@ func (c *char) a4Init() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...any) bool {
 		atk := args[1].(*info.AttackEvent)
 		charElem := c.Core.Player.Chars()[atk.Info.ActorIndex].Base.Element
-		if atk.Info.ActorIndex == c.Index() {
+		if atk.Info.ActorIndex == c.Index()() {
 			return false
 		}
 		if atk.Info.Element != charElem {
@@ -128,3 +128,4 @@ func (c *char) a4MultAttack() float64 {
 func (c *char) a4MultBurst() float64 {
 	return a4MultBurst[c.getA4Stacks()]
 }
+

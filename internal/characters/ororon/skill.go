@@ -31,7 +31,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:     c.Index(),
+		ActorIndex:     c.Index()(),
 		Abil:           "Spirit Orb DMG",
 		AttackTag:      attacks.AttackTagElementalArt,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
@@ -85,3 +85,4 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.particlesGenerated = true
 	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Electro, c.ParticleDelay)
 }
+

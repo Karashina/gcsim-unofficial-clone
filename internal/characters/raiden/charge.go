@@ -29,7 +29,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index(),
+		ActorIndex:         c.Index()(),
 		Abil:               "Charge Attack",
 		AttackTag:          attacks.AttackTagExtra,
 		ICDTag:             attacks.ICDTagExtraAttack,
@@ -73,7 +73,7 @@ func init() {
 func (c *char) swordCharge() action.Info {
 	for i, mult := range chargeSword {
 		ai := info.AttackInfo{
-			ActorIndex:         c.Index(),
+			ActorIndex:         c.Index()(),
 			Abil:               fmt.Sprintf("Musou Isshin (Charge Attack %v)", i),
 			AttackTag:          attacks.AttackTagElementalBurst,
 			ICDTag:             attacks.ICDTagNormalAttack,
@@ -113,3 +113,4 @@ func (c *char) swordCharge() action.Info {
 		State:           action.ChargeAttackState,
 	}
 }
+

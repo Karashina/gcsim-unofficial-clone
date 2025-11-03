@@ -36,7 +36,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	// hook for buffs; active right away after cast
 
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Fantastic Voyage",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -109,7 +109,7 @@ func (c *char) applyBennettField(stats [attributes.EndStatType]float64, firstTic
 		// heal if not first tick and under 70%
 		if !firstTick && active.CurrentHPRatio() < 0.7 {
 			c.Core.Player.Heal(info.HealInfo{
-				Caller:  c.Index(),
+				Caller:  c.Index()(),
 				Target:  active.Index(),
 				Message: "Inspiration Field",
 				Src:     heal,
@@ -152,8 +152,9 @@ func (c *char) applyBennettField(stats [attributes.EndStatType]float64, firstTic
 				},
 			})
 
-			c.Core.Log.NewEvent("bennett field - adding attack", glog.LogCharacterEvent, c.Index()).
+			c.Core.Log.NewEvent("bennett field - adding attack", glog.LogCharacterEvent, c.Index()()).
 				Write("threshold", threshold)
 		}
 	}
 }
+

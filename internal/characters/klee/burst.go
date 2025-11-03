@@ -29,7 +29,7 @@ func init() {
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index(),
+		ActorIndex:         c.Index()(),
 		Abil:               "Sparks'n'Splash",
 		AttackTag:          attacks.AttackTagElementalBurst,
 		ICDTag:             attacks.ICDTagElementalBurst,
@@ -86,7 +86,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				}
 
 				for i, x := range c.Core.Player.Chars() {
-					if i == c.Index() {
+					if i == c.Index()() {
 						continue
 					}
 					x.AddEnergy("klee-c6", 3)
@@ -133,7 +133,7 @@ func (c *char) onExitField() {
 		if c.Base.Cons >= 4 {
 			// blow up
 			ai := info.AttackInfo{
-				ActorIndex:         c.Index(),
+				ActorIndex:         c.Index()(),
 				Abil:               "Sparkly Explosion (C4)",
 				AttackTag:          attacks.AttackTagNone,
 				ICDTag:             attacks.ICDTagNone,
@@ -151,3 +151,4 @@ func (c *char) onExitField() {
 		return false
 	}, "klee-exit")
 }
+

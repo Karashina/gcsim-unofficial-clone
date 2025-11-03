@@ -22,7 +22,7 @@ func (c *char) c1(delay int) {
 	c.c1Chance = 0.1
 
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index(),
+		ActorIndex:         c.Index()(),
 		Abil:               "Sparks'n'Splash (C1)",
 		AttackTag:          attacks.AttackTagElementalBurst,
 		ICDTag:             attacks.ICDTagElementalBurst,
@@ -51,3 +51,4 @@ func (c *char) c2(a info.AttackCB) {
 		Value: -0.233,
 	})
 }
+

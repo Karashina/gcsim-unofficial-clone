@@ -31,7 +31,7 @@ func (c *char) a1() {
 		}
 		c.AddStatus(icdKey, icd, true)
 		c.ReduceActionCooldown(action.ActionSkill, 60)
-		c.Core.Log.NewEvent("dori a1 proc", glog.LogCharacterEvent, c.Index()).
+		c.Core.Log.NewEvent("dori a1 proc", glog.LogCharacterEvent, c.Index()()).
 			Write("reaction", atk.Info.Abil).
 			Write("new cd", c.Cooldown(action.ActionSkill))
 		return false
@@ -80,3 +80,4 @@ func (c *char) makeA4CB() info.AttackCBFunc {
 		c.AddEnergy("dori-a4", a4Energy)
 	}
 }
+

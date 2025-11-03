@@ -144,7 +144,7 @@ func (c *char) particleCB(a info.AttackCB) {
 func (c *char) surfingTick() {
 	// TODO: create a gadget?
 	c.Core.Events.Subscribe(event.OnTick, func(args ...any) bool {
-		if c.Core.Player.Active() != c.Index() {
+		if c.Core.Player.Active() != c.Index()() {
 			return false
 		}
 		if !c.nightsoulState.HasBlessing() {
@@ -180,7 +180,7 @@ func (c *char) surfingTick() {
 		}
 
 		ai := info.AttackInfo{
-			ActorIndex:         c.Index(),
+			ActorIndex:         c.Index()(),
 			Abil:               "Surfing Hit",
 			AttackTag:          attacks.AttackTagNone,
 			ICDTag:             attacks.ICDTagNone,
@@ -210,3 +210,4 @@ func (c *char) surfingCB(a info.AttackCB) {
 	enemy.AddStatus(momentumIcdKey, momentumIcd, false)
 	c.momentumStacks = min(c.momentumStacks+1, 3)
 }
+

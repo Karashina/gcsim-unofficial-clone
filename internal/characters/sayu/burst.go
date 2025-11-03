@@ -25,7 +25,7 @@ func init() {
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	// dmg
 	ai := info.AttackInfo{
-		ActorIndex:       c.Index(),
+		ActorIndex:       c.Index()(),
 		Abil:             "Yoohoo Art: Mujina Flurry",
 		AttackTag:        attacks.AttackTagElementalBurst,
 		ICDTag:           attacks.ICDTagNone,
@@ -50,7 +50,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	atk := snap.Stats.TotalATK()
 	heal := initHealFlat[c.TalentLvlBurst()] + atk*initHealPP[c.TalentLvlBurst()]
 	c.Core.Player.Heal(info.HealInfo{
-		Caller:  c.Index(),
+		Caller:  c.Index()(),
 		Target:  -1,
 		Message: "Yoohoo Art: Mujina Flurry",
 		Src:     heal,
@@ -94,7 +94,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				}
 				if needHeal {
 					c.Core.Player.Heal(info.HealInfo{
-						Caller:  c.Index(),
+						Caller:  c.Index()(),
 						Target:  char.Index(),
 						Message: "Muji-Muji Daruma",
 						Src:     heal,
@@ -119,7 +119,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 // TODO: is this helper function needed?
 func (c *char) createBurstSnapshot() *info.AttackEvent {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Muji-Muji Daruma",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -137,3 +137,4 @@ func (c *char) createBurstSnapshot() *info.AttackEvent {
 	}
 	return &ae
 }
+

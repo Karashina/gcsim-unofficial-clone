@@ -63,7 +63,7 @@ func (c *char) burstTick(src int, radius float64) func() {
 		}
 
 		ai := info.AttackInfo{
-			ActorIndex: c.Index(),
+			ActorIndex: c.Index()(),
 			Abil:       "Precision Hydronic Cooler (Water Ball)",
 			AttackTag:  attacks.AttackTagElementalBurst,
 			ICDTag:     attacks.ICDTagElementalBurst,
@@ -88,3 +88,4 @@ func (c *char) burstTick(src int, radius float64) func() {
 		)
 	}
 }
+

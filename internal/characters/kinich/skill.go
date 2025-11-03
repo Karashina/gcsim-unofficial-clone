@@ -122,7 +122,7 @@ func (c *char) ScalespikerCannon(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:     c.Index(),
+		ActorIndex:     c.Index()(),
 		Abil:           "Scalespiker Cannon",
 		AttackTag:      attacks.AttackTagElementalArt,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul, attacks.AdditionalTagKinichCannon},
@@ -149,7 +149,7 @@ func (c *char) ScalespikerCannon(p map[string]int) (action.Info, error) {
 				c.c2AoeIncreased = true
 				radius = 5.0
 				snap.Stats[attributes.DmgP] += 1.0
-				c.Core.Log.NewEvent("C2 bonus dmg% applied", glog.LogCharacterEvent, c.Index()).
+				c.Core.Log.NewEvent("C2 bonus dmg% applied", glog.LogCharacterEvent, c.Index()()).
 					Write("final", snap.Stats[attributes.DmgP])
 			}
 			ap := combat.NewCircleHitOnTarget(target, nil, radius)
@@ -217,3 +217,4 @@ func (c *char) particleCB(a info.AttackCB) {
 
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Dendro, c.ParticleDelay)
 }
+

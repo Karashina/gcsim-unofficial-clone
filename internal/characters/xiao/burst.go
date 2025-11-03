@@ -40,7 +40,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				// TODO: not sure if this is affected by hitlag
 				hpICD = c.Core.F + 60
 				c.Core.Player.Drain(info.DrainInfo{
-					ActorIndex: c.Index(),
+					ActorIndex: c.Index()(),
 					Abil:       "Bane of All Evil",
 					Amount:     burstDrain[c.TalentLvlBurst()] * c.CurrentHP(),
 				})
@@ -67,3 +67,4 @@ func (c *char) onExitField() {
 		return false
 	}, "xiao-exit")
 }
+

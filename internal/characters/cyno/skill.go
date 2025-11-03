@@ -44,7 +44,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Secret Rite: Chasmic Soulfarer",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
@@ -80,7 +80,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 func (c *char) skillB() (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex:       c.Index(),
+		ActorIndex:       c.Index()(),
 		Abil:             skillBName,
 		AttackTag:        attacks.AttackTagElementalArt,
 		ICDTag:           attacks.ICDTagNone,
@@ -184,3 +184,4 @@ func (c *char) makeParticleCB(burst bool) info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Electro, c.ParticleDelay)
 	}
 }
+

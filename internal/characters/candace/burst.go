@@ -32,7 +32,7 @@ func init() {
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.waveCount = 0
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index(),
+		ActorIndex:         c.Index()(),
 		Abil:               "Sacred Rite: Wagtail's Tide (Initial)",
 		AttackTag:          attacks.AttackTagElementalBurst,
 		ICDTag:             attacks.ICDTagNone,
@@ -112,7 +112,7 @@ func (c *char) burstSwap() {
 			return false
 		}
 		ai := info.AttackInfo{
-			ActorIndex:         c.Index(),
+			ActorIndex:         c.Index()(),
 			Abil:               "Sacred Rite: Wagtail's Tide (Wave)",
 			AttackTag:          attacks.AttackTagElementalBurst,
 			ICDTag:             attacks.ICDTagNone,
@@ -154,3 +154,4 @@ func (c *char) burstInit(char *character.CharWrapper) {
 		},
 	})
 }
+

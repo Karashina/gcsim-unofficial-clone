@@ -35,7 +35,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	// ICDGroupColleiBoomerangForward, and ICDGroupColleiBoomerangBack. However,
 	// we believe this is unnecessary, so just use ICDTagNone.
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index(),
+		ActorIndex:         c.Index()(),
 		Abil:               "Floral Brush",
 		AttackTag:          attacks.AttackTagElementalArt,
 		ICDTag:             attacks.ICDTagNone,
@@ -118,3 +118,4 @@ func (c *char) makeParticleCB() info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Dendro, c.ParticleDelay)
 	}
 }
+

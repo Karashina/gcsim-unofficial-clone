@@ -77,7 +77,7 @@ func (c *char) enterNightsoul() {
 }
 
 func (c *char) nigthsoulFallingMsg() {
-	c.Core.Log.NewEvent("nightsoul ended, falling", glog.LogCharacterEvent, c.Index())
+	c.Core.Log.NewEvent("nightsoul ended, falling", glog.LogCharacterEvent, c.Index()())
 }
 
 func (c *char) exitNightsoul() {
@@ -129,7 +129,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:     c.Index(),
+		ActorIndex:     c.Index()(),
 		Abil:           "Spirit Reins, Shadow Hunt",
 		AttackTag:      attacks.AttackTagElementalArt,
 		AdditionalTags: []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
@@ -165,3 +165,4 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.skillParticleICD = true
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Anemo, c.ParticleDelay)
 }
+

@@ -41,7 +41,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.irisDmg(a.Target)
 	}
 	auraCheck := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Windmuster Iris (Aura check)",
 		AttackTag:  attacks.AttackTagNone,
 		ICDTag:     attacks.ICDTagNone,
@@ -58,7 +58,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.Core.QueueAttack(auraCheck, ap, burstHitmark, burstHitmark, burstCB)
 
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Fudou Style Vacuum Slugger",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -100,7 +100,7 @@ func (c *char) irisDmg(t info.Target) {
 	}
 	// TODO: does burst iris snapshot
 	aiAbs := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Windmuster Iris",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -121,10 +121,11 @@ func (c *char) irisDmg(t info.Target) {
 		c.Core.Log.NewEvent(
 			"No valid aura detected, omiting iris",
 			glog.LogCharacterEvent,
-			c.Index(),
+			c.Index()(),
 		).Write("target", t.Key())
 		return
 	}
 
 	c.Core.QueueAttack(aiAbs, combat.NewCircleHitOnTarget(t, nil, 2.5), 0, 40) // if any of this is wrong blame Koli
 }
+

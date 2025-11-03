@@ -31,7 +31,7 @@ func init() {
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex:   c.Index(),
+		ActorIndex:   c.Index()(),
 		Abil:         "Skyward Sonnett (Press)",
 		AttackTag:    attacks.AttackTagElementalArt,
 		ICDTag:       attacks.ICDTagNone,
@@ -93,3 +93,4 @@ func (c *char) makeParticleCB(count float64) info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Anemo, c.ParticleDelay)
 	}
 }
+

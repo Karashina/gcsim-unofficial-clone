@@ -43,7 +43,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	player := c.Core.Combat.Player()
 
 	aiInitialHit := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "O Tides, I Have Returned: Skill DMG",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -54,7 +54,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		FlatDmg:    burst[c.TalentLvlBurst()] * c.MaxHP(),
 	}
 	aiWaterfall := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "O Tides, I Have Returned: Waterfall DMG",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -89,7 +89,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 					info.GadgetTypSourcewaterDropletNeuv,
 				)
 			}
-			c.Core.Combat.Log.NewEvent(fmt.Sprint("Burst: Spawned ", dropletCount, " droplets"), glog.LogCharacterEvent, c.Index())
+			c.Core.Combat.Log.NewEvent(fmt.Sprint("Burst: Spawned ", dropletCount, " droplets"), glog.LogCharacterEvent, c.Index()())
 
 			// determine attack pattern
 			// initial tick
@@ -147,3 +147,4 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
+

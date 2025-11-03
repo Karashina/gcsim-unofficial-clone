@@ -30,7 +30,7 @@ func (c *char) a1() {
 			return false
 		}
 
-		if atk.Info.ActorIndex == c.Index() {
+		if atk.Info.ActorIndex == c.Index()() {
 			return false
 		}
 
@@ -96,3 +96,4 @@ func (c *char) a4() {
 		},
 	})
 }
+

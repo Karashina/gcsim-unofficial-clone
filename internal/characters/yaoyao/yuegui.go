@@ -43,9 +43,9 @@ func (c *char) newYueguiThrow() *yuegui {
 	yg.ThinkInterval = 29
 
 	yg.OnKill = func() {
-		yg.Core.Log.NewEvent("Yuegui (Throwing) removed", glog.LogCharacterEvent, yg.c.Index())
+		yg.Core.Log.NewEvent("Yuegui (Throwing) removed", glog.LogCharacterEvent, yg.c.Index()())
 	}
-	yg.Core.Log.NewEvent("Yuegui (Throwing) summoned", glog.LogCharacterEvent, yg.c.Index())
+	yg.Core.Log.NewEvent("Yuegui (Throwing) summoned", glog.LogCharacterEvent, yg.c.Index()())
 	// yg.Reactable = &reactable.Reactable{}
 	// yg.Reactable.Init(yg, c.Core)
 	yg.aoe = combat.NewCircleHitOnTarget(pos, nil, skillTargetingRad)
@@ -72,9 +72,9 @@ func (c *char) newYueguiJump() {
 	yg.ThinkInterval = 29
 
 	yg.OnKill = func() {
-		yg.Core.Log.NewEvent("Yuegui (Jumping) removed", glog.LogCharacterEvent, yg.c.Index())
+		yg.Core.Log.NewEvent("Yuegui (Jumping) removed", glog.LogCharacterEvent, yg.c.Index()())
 	}
-	yg.Core.Log.NewEvent("Yuegui (Jumping) summoned", glog.LogCharacterEvent, yg.c.Index())
+	yg.Core.Log.NewEvent("Yuegui (Jumping) summoned", glog.LogCharacterEvent, yg.c.Index()())
 	// yg.Reactable = &reactable.Reactable{}
 	// yg.Reactable.Init(yg, c.Core)
 	yg.aoe = combat.NewCircleHitOnTarget(pos, nil, skillTargetingRad)
@@ -179,3 +179,4 @@ func (yg *yuegui) SetDirectionToClosestEnemy()                          {}
 func (yg *yuegui) CalcTempDirection(trg info.Point) info.Point {
 	return info.DefaultDirection()
 }
+

@@ -144,7 +144,7 @@ func (c *char) makeBunny() *Bunny {
 
 	ai := info.AttackInfo{
 		Abil:       "Baron Bunny",
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -200,7 +200,7 @@ func (c *char) makeParticleCB() info.AttackCBFunc {
 func (c *char) manualExplode() {
 	// do nothing if there are no bunnies
 	if len(c.bunnies) == 0 {
-		c.Core.Log.NewEvent("Did not find any Bunnies", glog.LogCharacterEvent, c.Index())
+		c.Core.Log.NewEvent("Did not find any Bunnies", glog.LogCharacterEvent, c.Index()())
 		return
 	}
 	// only explode the first bunny
@@ -217,7 +217,7 @@ func (c *char) overloadExplode() {
 			return false
 		}
 		// TODO: only amber trigger?
-		if atk.Info.ActorIndex != c.Index() {
+		if atk.Info.ActorIndex != c.Index()() {
 			return false
 		}
 
@@ -237,3 +237,4 @@ func (c *char) overloadExplode() {
 		return false
 	}, "amber-bunny-explode-overload")
 }
+

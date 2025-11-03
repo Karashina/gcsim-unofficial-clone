@@ -67,7 +67,7 @@ func (c *char) particleCB(a info.AttackCB) {
 // TODO: how long do stacks last?
 func (c *char) skillPress() action.Info {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       skillPressAbil,
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagLisaElectro,
@@ -80,7 +80,7 @@ func (c *char) skillPress() action.Info {
 
 	cb := func(a info.AttackCB) {
 		// doesn't stack off-field
-		if c.Core.Player.Active() != c.Index() {
+		if c.Core.Player.Active() != c.Index()() {
 			return
 		}
 		t, ok := a.Target.(*enemy.Enemy)
@@ -116,7 +116,7 @@ func (c *char) skillPress() action.Info {
 func (c *char) skillHold() action.Info {
 	// no multiplier as that's target dependent
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       skillHoldAbil,
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
@@ -194,3 +194,4 @@ func (c *char) skillHoldMult() {
 		return false
 	}, "lisa-skill-hold-mul")
 }
+

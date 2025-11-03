@@ -29,7 +29,7 @@ func init() {
 
 /**
 The number of Hydro Swords summoned per wave follows a specific pattern, usually alternating between 2 and 3 swords.
-At C6, this is upgraded and follows a pattern of 2 → 3 → 5… which then repeats.
+At C6, this is upgraded and follows a pattern of 2 ↁE3 ↁE5… which then repeats.
 
 There is an approximately 1 second interval between summoned Hydro Sword waves, so that means a theoretical maximum of 15 or 18 waves.
 
@@ -72,7 +72,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 func (c *char) summonSwordWave() {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Guhua Sword: Raincutter",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
@@ -160,3 +160,4 @@ func (c *char) summonSwordWave() {
 
 	c.AddStatus(burstICDKey, 60, true)
 }
+

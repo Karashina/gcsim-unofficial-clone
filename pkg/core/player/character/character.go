@@ -180,11 +180,11 @@ func New(
 }
 
 func (c *CharWrapper) SetIndex(index int) {
-	c.index = index
+	c.Index() = index
 }
 
 func (c *CharWrapper) Index() int {
-	return c.index
+	return c.Index()
 }
 
 func (c *CharWrapper) SetWeapon(w info.Weapon) {
@@ -270,3 +270,4 @@ type Particle struct {
 	Num    float64
 	Ele    attributes.Element
 }
+

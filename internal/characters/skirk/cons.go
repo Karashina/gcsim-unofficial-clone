@@ -23,7 +23,7 @@ func (c *char) c1() {
 		return
 	}
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index(),
+		ActorIndex:         c.Index()(),
 		Abil:               "Far to Fall (C1)",
 		Mult:               5,
 		AttackTag:          attacks.AttackTagExtra,
@@ -113,7 +113,7 @@ func (c *char) c6OnBurstRuin() {
 		return
 	}
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Havoc: Sever (Burst)",
 		Mult:       7.5 * c.a4MultBurst(),
 		AttackTag:  attacks.AttackTagElementalBurst,
@@ -175,7 +175,7 @@ func (c *char) c6OnAttackCB() func(a info.AttackCB) {
 		c.AddStatus(c6IcdKey, c6Icd, true)
 
 		ai := info.AttackInfo{
-			ActorIndex: c.Index(),
+			ActorIndex: c.Index()(),
 			Abil:       "Havoc: Sever (Normal)",
 			Mult:       1.8 * c.a4MultAttack(),
 			AttackTag:  attacks.AttackTagNormal,
@@ -204,3 +204,4 @@ func (c *char) c6Init() {
 
 	// TODO: OnCharacterHurt?
 }
+

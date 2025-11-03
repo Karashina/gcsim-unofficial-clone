@@ -24,7 +24,7 @@ func init() {
 func (c *char) Dash(p map[string]int) (action.Info, error) {
 	if c.armamentState == bike && c.nightsoulState.HasBlessing() {
 		ai := info.AttackInfo{
-			ActorIndex:     c.Index(),
+			ActorIndex:     c.Index()(),
 			Abil:           "Flamestrider Sprint",
 			AttackTag:      attacks.AttackTagNone,
 			ICDTag:         attacks.ICDTagMavuikaFlamestrider,
@@ -62,3 +62,4 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 
 	return c.Character.Dash(p)
 }
+

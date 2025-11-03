@@ -79,7 +79,7 @@ func (c *char) exitSkillState(src int) {
 	if c.skillSrc != src {
 		return
 	}
-	c.Core.Log.NewEventBuildMsg(glog.LogCharacterEvent, c.Index(), "exit skirk skill").Write("src", src)
+	c.Core.Log.NewEventBuildMsg(glog.LogCharacterEvent, c.Index()(), "exit skirk skill").Write("src", src)
 	c.skillSrc = -1
 	c.DeleteAttackMod(c2Key)
 	c.DeleteStatus(skillKey)
@@ -135,7 +135,7 @@ func (c *char) particleInit() {
 		if !ok {
 			return false
 		}
-		if atk.Info.ActorIndex != c.Index() {
+		if atk.Info.ActorIndex != c.Index()() {
 			return false
 		}
 
@@ -154,3 +154,4 @@ func (c *char) particleInit() {
 		return false
 	}, c.Base.Key.String()+"-particles")
 }
+

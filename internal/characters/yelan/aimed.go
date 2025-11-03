@@ -60,10 +60,10 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 
 	if c.breakthrough && hold == attacks.AimParamLv1 {
 		c.breakthrough = false
-		c.Core.Log.NewEvent("breakthrough state deleted", glog.LogCharacterEvent, c.Index())
+		c.Core.Log.NewEvent("breakthrough state deleted", glog.LogCharacterEvent, c.Index()())
 
 		ai := info.AttackInfo{
-			ActorIndex:   c.Index(),
+			ActorIndex:   c.Index()(),
 			Abil:         "Breakthrough Barb",
 			AttackTag:    attacks.AttackTagExtra,
 			ICDTag:       attacks.ICDTagYelanBreakthrough,
@@ -95,7 +95,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:   c.Index(),
+		ActorIndex:   c.Index()(),
 		Abil:         "Fully-Charged Aimed Shot",
 		AttackTag:    attacks.AttackTagExtra,
 		ICDTag:       attacks.ICDTagNone,
@@ -131,3 +131,4 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		State:           action.AimState,
 	}, nil
 }
+

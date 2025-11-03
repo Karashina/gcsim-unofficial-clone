@@ -9,7 +9,7 @@ import (
 
 func (c *char) c6Wave() {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Evernight Raven (C6)",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
@@ -34,3 +34,4 @@ func (c *char) c6Wave() {
 		c.ozTravel,
 	)
 }
+

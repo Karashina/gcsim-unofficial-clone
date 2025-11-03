@@ -40,7 +40,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index(),
+		ActorIndex:         c.Index()(),
 		Abil:               "Tidecaller",
 		AttackTag:          attacks.AttackTagElementalArt,
 		ICDTag:             attacks.ICDTagNone,
@@ -67,8 +67,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	// add shield
 	c.Core.Player.Shields.Add(&shield.Tmpl{
-		ActorIndex: c.Index(),
-		Target:     c.Index(),
+		ActorIndex: c.Index()(),
+		Target:     c.Index()(),
 		Src:        c.Core.F,
 		ShieldType: shield.BeidouThunderShield,
 		Name:       "Tidecaller (Shield)",
@@ -101,3 +101,4 @@ func (c *char) makeParticleCB(counter int) info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 2+float64(counter), attributes.Electro, c.ParticleDelay)
 	}
 }
+

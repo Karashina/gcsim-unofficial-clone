@@ -39,7 +39,7 @@ func (c *char) a1Tick(src int) func() {
 		scale := a1Scaling + c.c4ExtraHeal()
 		heal := scale * c.TotalAtk()
 		c.Core.Player.Heal(info.HealInfo{
-			Caller:  c.Index(),
+			Caller:  c.Index()(),
 			Target:  c.Core.Player.Active(),
 			Message: "Rehab Diet",
 			Src:     heal,
@@ -84,3 +84,4 @@ func (c *char) makeA4CB() info.AttackCBFunc {
 		})
 	}
 }
+

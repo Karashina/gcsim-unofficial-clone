@@ -35,7 +35,7 @@ func init() {
 
 func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Razorgrass Blade",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
@@ -85,3 +85,4 @@ func (c *Traveler) particleCB(a info.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Dendro, c.ParticleDelay)
 }
+

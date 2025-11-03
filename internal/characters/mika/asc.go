@@ -19,7 +19,7 @@ func (c *char) addDetectorStack() {
 
 	if stacks < c.maxDetectorStacks {
 		stacks++
-		c.Core.Log.NewEvent("add detector stack", glog.LogCharacterEvent, c.Index()).
+		c.Core.Log.NewEvent("add detector stack", glog.LogCharacterEvent, c.Index()()).
 			Write("stacks", stacks).
 			Write("maxstacks", c.maxDetectorStacks)
 	}
@@ -76,3 +76,4 @@ func (c *char) a4() {
 		return false
 	}, "mika-a4")
 }
+

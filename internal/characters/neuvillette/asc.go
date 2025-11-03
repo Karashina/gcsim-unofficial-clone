@@ -76,7 +76,7 @@ func (c *char) a4() {
 			return false
 		}
 
-		if di.ActorIndex != c.Index() {
+		if di.ActorIndex != c.Index()() {
 			return false
 		}
 
@@ -98,7 +98,7 @@ func (c *char) a4() {
 			return false
 		}
 
-		if target != c.Index() {
+		if target != c.Index()() {
 			return false
 		}
 
@@ -122,3 +122,4 @@ func (c *char) updateA4() {
 
 	c.a4Buff[attributes.HydroP] = hydroDmgBuff
 }
+

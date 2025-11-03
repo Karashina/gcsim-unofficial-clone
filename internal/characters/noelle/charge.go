@@ -167,7 +167,7 @@ func (c *char) queueChargeAttack(hitIndex int) {
 	}
 
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index(),
+		ActorIndex:         c.Index()(),
 		AttackTag:          attacks.AttackTagExtra,
 		ICDTag:             attacks.ICDTagNormalAttack,
 		ICDGroup:           attacks.ICDGroupDefault,
@@ -219,3 +219,4 @@ func (c *char) caStaminaTask(src int, startF *int, ended *bool) {
 		c.caStaminaTask(src, startF, ended)
 	}, 60*tickInterval)
 }
+

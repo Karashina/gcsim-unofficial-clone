@@ -46,7 +46,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.normalAttackCount = 0
 
 	ai := info.AttackInfo{
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		Abil:       "Radiant Psalter",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -153,3 +153,4 @@ func (c *char) addBenisonStack(stacks, charIndex int) {
 		c.tryRegenShield(burstShieldAfterBenisonStack)
 	}
 }
+

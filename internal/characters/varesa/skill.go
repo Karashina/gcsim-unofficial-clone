@@ -45,7 +45,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	c.clearNightsoulCB(action.SkillState)
 
 	ai := info.AttackInfo{
-		ActorIndex:         c.Index(),
+		ActorIndex:         c.Index()(),
 		Abil:               "Rush",
 		AdditionalTags:     []attacks.AdditionalTag{attacks.AdditionalTagNightsoul},
 		AttackTag:          attacks.AttackTagElementalArt,
@@ -117,3 +117,4 @@ func (c *char) particleCB(a info.AttackCB) {
 }
 
 // TODO: skill hold
+

@@ -27,7 +27,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	ai := info.AttackInfo{
 		Abil:       "Kamisato Art: Kyouka",
-		ActorIndex: c.Index(),
+		ActorIndex: c.Index()(),
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -79,7 +79,7 @@ func (c *char) particleCB(a info.AttackCB) {
 func (c *char) skillStacks(ac info.AttackCB) {
 	if c.stacks < c.stacksMax {
 		c.stacks++
-		c.Core.Log.NewEvent("gained namisen stack", glog.LogCharacterEvent, c.Index()).
+		c.Core.Log.NewEvent("gained namisen stack", glog.LogCharacterEvent, c.Index()()).
 			Write("stacks", c.stacks)
 	}
 }
@@ -88,7 +88,7 @@ func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...any) bool {
 		// do nothing if previous char wasn't ayato
 		prev := args[0].(int)
-		if prev != c.Index() {
+		if prev != c.Index()() {
 			return false
 		}
 		// clear skill status on field exit
@@ -99,3 +99,4 @@ func (c *char) onExitField() {
 		return false
 	}, "ayato-exit")
 }
+
