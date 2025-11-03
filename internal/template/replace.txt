@@ -8,7 +8,7 @@ c.Core.Status.AddStatus(
 c.Core.Status.Add(
 
 core.TargettableEnemy
-info.TargettableEnemy
+targets.TargettableEnemy
 
 core.AttackCB
-info.AttackCB
+combat.AttackCB

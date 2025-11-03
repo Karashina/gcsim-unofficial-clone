@@ -1,2 +1,2 @@
-# https://github.com/golangci/golangci-lint-action#multiple-os-support
-*.go text eol=lf
+# Auto detect text files and perform LF normalization
+* text=auto
