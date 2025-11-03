@@ -38,6 +38,7 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 			trg,
 			9,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	case "Ineffa C2 Dummy":
@@ -63,6 +64,7 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 			trg,
 			180,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	case "Ineffa C6 Dummy":
@@ -88,6 +90,7 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 	}
 	return false

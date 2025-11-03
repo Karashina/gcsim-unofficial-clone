@@ -40,6 +40,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 		// Ancient Ritual: Cometh the Night: Final Phase Lunar-Charged DMG
@@ -66,6 +67,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony DMG
@@ -92,6 +94,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
@@ -118,6 +121,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
 	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
@@ -144,6 +148,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 			trg,
 			0,
 		)
+		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 	}
 	return false
