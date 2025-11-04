@@ -27,7 +27,7 @@ type Weapon struct {
 }
 
 func (w *Weapon) SetIndex(idx int) {
-	w.Index() = idx
+	w.Index = idx
 }
 
 func (w *Weapon) Init() error {
