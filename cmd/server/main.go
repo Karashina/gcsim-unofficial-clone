@@ -6,14 +6,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	selfupdate "github.com/creativeprojects/go-selfupdate"
+	"github.com/genshinsim/gcsim/pkg/servermode"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"time"
-
-	selfupdate "github.com/creativeprojects/go-selfupdate"
-	"github.com/genshinsim/gcsim/pkg/servermode"
 )
 
 var (

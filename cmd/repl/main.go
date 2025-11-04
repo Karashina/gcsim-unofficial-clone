@@ -1,10 +1,9 @@
 package main
 
 import (
+	"github.com/genshinsim/gcsim/pkg/gcs/repl"
 	"log"
 	"os"
-
-	"github.com/genshinsim/gcsim/pkg/gcs/repl"
 )
 
 func main() {

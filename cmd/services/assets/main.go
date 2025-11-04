@@ -4,15 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/caarlos0/env/v10"
+	"github.com/genshinsim/gcsim/internal/services/assets"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/caarlos0/env/v10"
-	"github.com/genshinsim/gcsim/internal/services/assets"
 )
 
 type config struct {

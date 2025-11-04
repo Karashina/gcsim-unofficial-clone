@@ -5,10 +5,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"slices"
-	"strconv"
-	"syscall/js"
-
 	"github.com/genshinsim/gcsim/pkg/agg"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/gcs/ast"
@@ -18,6 +14,9 @@ import (
 	"github.com/genshinsim/gcsim/pkg/simulation"
 	"github.com/genshinsim/gcsim/pkg/simulator"
 	"github.com/genshinsim/gcsim/pkg/stats"
+	"slices"
+	"strconv"
+	"syscall/js"
 )
 
 const DefaultBufferLength = 1024 * 10

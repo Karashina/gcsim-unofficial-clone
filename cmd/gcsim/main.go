@@ -6,6 +6,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	selfupdate "github.com/creativeprojects/go-selfupdate"
+	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/genshinsim/gcsim/pkg/optimization"
+	"github.com/genshinsim/gcsim/pkg/simulator"
 	"log"
 	"os"
 	"os/exec"
@@ -13,11 +17,6 @@ import (
 	"runtime/pprof"
 	"strconv"
 	"strings"
-
-	selfupdate "github.com/creativeprojects/go-selfupdate"
-	"github.com/genshinsim/gcsim/pkg/model"
-	"github.com/genshinsim/gcsim/pkg/optimization"
-	"github.com/genshinsim/gcsim/pkg/simulator"
 )
 
 var (
