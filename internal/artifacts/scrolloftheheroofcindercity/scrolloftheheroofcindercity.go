@@ -2,8 +2,6 @@ package scrolloftheheroofcindercity
 
 import (
 	"fmt"
-	"slices"
-
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
@@ -12,6 +10,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
+	"slices"
 )
 
 var reactToElements = map[info.ReactionType][]attributes.Element{

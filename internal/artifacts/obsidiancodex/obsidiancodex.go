@@ -2,7 +2,6 @@ package obsidiancodex
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
