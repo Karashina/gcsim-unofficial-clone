@@ -2,11 +2,10 @@ package notify
 
 import (
 	"errors"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"log"
 	"os"
 	"time"
-
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 type Client struct {

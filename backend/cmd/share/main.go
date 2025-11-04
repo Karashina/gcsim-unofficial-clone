@@ -1,13 +1,12 @@
 package main
 
 import (
-	"log"
-	"net"
-	"os"
-
 	"github.com/genshinsim/gcsim/backend/pkg/services/share"
 	"github.com/genshinsim/gcsim/backend/pkg/services/share/mongo"
 	"google.golang.org/grpc"
+	"log"
+	"net"
+	"os"
 )
 
 func main() {

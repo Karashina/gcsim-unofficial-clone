@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-
 	"github.com/genshinsim/gcsim/pkg/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc/codes"

@@ -3,13 +3,12 @@ package discord
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/diamondburned/arikawa/v3/api"
 	"github.com/diamondburned/arikawa/v3/api/cmdroute"
 	"github.com/diamondburned/arikawa/v3/discord"
 	"github.com/diamondburned/arikawa/v3/utils/json/option"
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
+	"strings"
 )
 
 func init() {

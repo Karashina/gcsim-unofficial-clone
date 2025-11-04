@@ -3,13 +3,12 @@ package backend
 import (
 	"context"
 	"errors"
-	"regexp"
-
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"github.com/genshinsim/gcsim/pkg/model"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"regexp"
 )
 
 type ShareReader interface {

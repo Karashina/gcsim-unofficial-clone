@@ -2,14 +2,13 @@ package share
 
 import (
 	"context"
-	"math/rand"
-	"time"
-
 	"github.com/jaevor/go-nanoid"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"math/rand"
+	"time"
 )
 
 var generateID func() string

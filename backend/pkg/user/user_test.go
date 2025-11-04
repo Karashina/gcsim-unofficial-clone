@@ -3,10 +3,9 @@ package user
 import (
 	"context"
 	"encoding/json"
+	"github.com/genshinsim/gcsim/backend/pkg/api"
 	"os"
 	"testing"
-
-	"github.com/genshinsim/gcsim/backend/pkg/api"
 )
 
 func TestUserStoreCRUD(t *testing.T) {

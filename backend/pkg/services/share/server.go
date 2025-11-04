@@ -3,7 +3,6 @@ package share
 import (
 	context "context"
 	"fmt"
-
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

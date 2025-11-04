@@ -3,14 +3,13 @@ package db
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/genshinsim/gcsim/pkg/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	structpb "google.golang.org/protobuf/types/known/structpb"
+	"time"
 )
 
 type Store interface {

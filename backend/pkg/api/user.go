@@ -5,13 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
-	"time"
-
 	"github.com/genshinsim/gcsim/pkg/model"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/oauth2"
+	"io"
+	"net/http"
+	"time"
 )
 
 type UserStore interface {

@@ -3,7 +3,6 @@ package share
 import (
 	context "context"
 	"fmt"
-
 	"github.com/genshinsim/gcsim/pkg/model"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

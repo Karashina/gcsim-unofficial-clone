@@ -1,10 +1,9 @@
 package notify
 
 import (
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"log"
 	"strings"
-
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 func (c *Client) msgHandler(client mqtt.Client, msg mqtt.Message) {

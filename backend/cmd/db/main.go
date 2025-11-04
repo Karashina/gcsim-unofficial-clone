@@ -1,16 +1,15 @@
 package main
 
 import (
-	"log"
-	"net"
-	"os"
-	"runtime/debug"
-
 	"github.com/genshinsim/gcsim/backend/pkg/mongo"
 	"github.com/genshinsim/gcsim/backend/pkg/notify"
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"github.com/genshinsim/gcsim/backend/pkg/services/share"
 	"google.golang.org/grpc"
+	"log"
+	"net"
+	"os"
+	"runtime/debug"
 )
 
 var sha1ver string

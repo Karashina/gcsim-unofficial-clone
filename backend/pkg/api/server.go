@@ -2,8 +2,6 @@ package api
 
 import (
 	"fmt"
-	"time"
-
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"github.com/go-chi/chi"
@@ -12,6 +10,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"time"
 )
 
 type Server struct {

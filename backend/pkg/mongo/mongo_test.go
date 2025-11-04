@@ -3,11 +3,6 @@ package mongo
 import (
 	"context"
 	"fmt"
-	"log"
-	"math/rand"
-	"os"
-	"testing"
-
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"github.com/genshinsim/gcsim/pkg/model"
 	"github.com/ory/dockertest/v3"
@@ -16,6 +11,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
+	"log"
+	"math/rand"
+	"os"
+	"testing"
 )
 
 var s *Server

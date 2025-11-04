@@ -3,7 +3,6 @@ package backend
 import (
 	"context"
 	"errors"
-
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc/codes"

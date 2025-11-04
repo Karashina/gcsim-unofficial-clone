@@ -3,16 +3,15 @@ package discord
 import (
 	"context"
 	"errors"
-	"log"
-	"os"
-	"os/signal"
-
 	"github.com/diamondburned/arikawa/v3/api/cmdroute"
 	"github.com/diamondburned/arikawa/v3/gateway"
 	"github.com/diamondburned/arikawa/v3/state"
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"github.com/genshinsim/gcsim/pkg/model"
 	"go.uber.org/zap"
+	"log"
+	"os"
+	"os/signal"
 )
 
 type Backend interface {

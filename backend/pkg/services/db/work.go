@@ -2,11 +2,10 @@ package db
 
 import (
 	context "context"
-	"time"
-
 	"github.com/genshinsim/gcsim/pkg/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 func (s *Server) GetWork(ctx context.Context, req *GetWorkRequest) (*GetWorkResponse, error) {

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"github.com/dgraph-io/badger/v3"
 	"github.com/genshinsim/gcsim/backend/pkg/api"
 	"go.uber.org/zap"

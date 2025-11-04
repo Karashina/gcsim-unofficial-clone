@@ -2,12 +2,11 @@ package mongo
 
 import (
 	"context"
+	"github.com/genshinsim/gcsim/backend/pkg/services/db"
+	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"strings"
 	"testing"
-
-	"github.com/genshinsim/gcsim/backend/pkg/services/db"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestInsert(t *testing.T) {

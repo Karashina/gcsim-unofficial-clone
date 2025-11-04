@@ -4,15 +4,6 @@ import (
 	context "context"
 	"embed"
 	"fmt"
-	"html/template"
-	"io/fs"
-	"log"
-	"net/http"
-	"path"
-	"regexp"
-	"sync"
-	"time"
-
 	"github.com/chromedp/chromedp"
 	"github.com/genshinsim/gcsim/pkg/model"
 	"github.com/go-chi/chi"
@@ -21,6 +12,14 @@ import (
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"html/template"
+	"io/fs"
+	"log"
+	"net/http"
+	"path"
+	"regexp"
+	"sync"
+	"time"
 )
 
 type Config struct {

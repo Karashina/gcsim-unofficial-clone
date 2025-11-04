@@ -2,7 +2,6 @@ package backend
 
 import (
 	"context"
-
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

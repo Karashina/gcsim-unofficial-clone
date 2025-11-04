@@ -2,18 +2,17 @@ package share
 
 import (
 	"context"
-	"log"
-	"net"
-	"os"
-	"testing"
-	"time"
-
 	"github.com/genshinsim/gcsim/pkg/model"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
+	"log"
+	"net"
+	"os"
+	"testing"
+	"time"
 )
 
 const bufSize = 1024 * 1024

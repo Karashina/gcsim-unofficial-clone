@@ -2,12 +2,11 @@ package mongo
 
 import (
 	"context"
+	"github.com/genshinsim/gcsim/backend/pkg/services/db"
+	"github.com/genshinsim/gcsim/pkg/model"
 	"log"
 	"strings"
 	"testing"
-
-	"github.com/genshinsim/gcsim/backend/pkg/services/db"
-	"github.com/genshinsim/gcsim/pkg/model"
 )
 
 func TestGetWork(t *testing.T) {

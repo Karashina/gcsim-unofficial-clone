@@ -3,12 +3,11 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"github.com/genshinsim/gcsim/pkg/model"
+	"go.mongodb.org/mongo-driver/bson"
 	"math/rand"
 	"strings"
 	"testing"
-
-	"github.com/genshinsim/gcsim/pkg/model"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestApproveTag(t *testing.T) {

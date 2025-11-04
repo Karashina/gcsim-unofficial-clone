@@ -2,7 +2,6 @@ package mocks
 
 import (
 	"context"
-
 	"github.com/genshinsim/gcsim/backend/pkg/api"
 	"github.com/genshinsim/gcsim/pkg/model"
 	"github.com/jaevor/go-nanoid"

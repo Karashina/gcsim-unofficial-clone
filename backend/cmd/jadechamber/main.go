@@ -3,18 +3,17 @@ package main
 import (
 	"encoding/hex"
 	"encoding/json"
-	"io"
-	"log"
-	"net/http"
-	"os"
-	"runtime/debug"
-
 	"github.com/genshinsim/gcsim/backend/pkg/api"
 	"github.com/genshinsim/gcsim/backend/pkg/services/preview"
 	"github.com/genshinsim/gcsim/backend/pkg/services/share"
 	"github.com/genshinsim/gcsim/backend/pkg/user"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"runtime/debug"
 )
 
 var sha1ver string

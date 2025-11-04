@@ -2,17 +2,16 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
 	"github.com/containrrr/shoutrrr"
 	"github.com/genshinsim/gcsim/backend/pkg/notify"
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"github.com/genshinsim/gcsim/pkg/model"
 	"google.golang.org/protobuf/encoding/protojson"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 type service struct {

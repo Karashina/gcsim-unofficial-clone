@@ -3,14 +3,13 @@ package mongo
 import (
 	"context"
 	"errors"
-	"time"
-
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 func (s *Server) Create(ctx context.Context, entry *db.Entry) (string, error) {

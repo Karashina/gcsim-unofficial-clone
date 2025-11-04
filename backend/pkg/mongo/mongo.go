@@ -2,13 +2,12 @@ package mongo
 
 import (
 	"context"
-	"os"
-	"strconv"
-
 	"github.com/jaevor/go-nanoid"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
+	"os"
+	"strconv"
 )
 
 var generateID func() string

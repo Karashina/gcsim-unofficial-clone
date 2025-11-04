@@ -3,14 +3,13 @@ package api
 import (
 	"compress/gzip"
 	"encoding/json"
-	"net/http"
-
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"github.com/go-chi/chi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
+	"net/http"
 )
 
 type dbGetOpt struct {

@@ -3,8 +3,6 @@ package mongo
 import (
 	"context"
 	"errors"
-	"math/rand"
-
 	"github.com/genshinsim/gcsim/backend/pkg/services/share"
 	"github.com/jaevor/go-nanoid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,6 +11,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"math/rand"
 )
 
 var generateID func() string

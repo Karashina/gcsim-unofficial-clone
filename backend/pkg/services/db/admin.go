@@ -2,7 +2,6 @@ package db
 
 import (
 	context "context"
-
 	"github.com/genshinsim/gcsim/pkg/model"
 )
 

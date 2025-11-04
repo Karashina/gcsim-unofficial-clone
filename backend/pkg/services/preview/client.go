@@ -2,7 +2,6 @@ package preview
 
 import (
 	context "context"
-
 	model "github.com/genshinsim/gcsim/pkg/model"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

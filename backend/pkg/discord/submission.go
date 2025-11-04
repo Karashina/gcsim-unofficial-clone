@@ -3,7 +3,6 @@ package discord
 import (
 	"context"
 	"fmt"
-
 	"github.com/diamondburned/arikawa/v3/api"
 	"github.com/diamondburned/arikawa/v3/api/cmdroute"
 	"github.com/diamondburned/arikawa/v3/discord"

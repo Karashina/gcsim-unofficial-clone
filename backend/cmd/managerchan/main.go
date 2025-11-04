@@ -2,12 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io"
-	"log"
-	"os"
-	"regexp"
-	"strconv"
-
 	"github.com/genshinsim/gcsim/backend/pkg/api"
 	"github.com/genshinsim/gcsim/backend/pkg/discord"
 	"github.com/genshinsim/gcsim/backend/pkg/discord/backend"
@@ -15,6 +9,11 @@ import (
 	"github.com/genshinsim/gcsim/pkg/model"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"io"
+	"log"
+	"os"
+	"regexp"
+	"strconv"
 )
 
 func main() {

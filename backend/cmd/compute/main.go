@@ -4,16 +4,15 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"log"
-	"os"
-	"runtime/debug"
-	"time"
-
 	"github.com/genshinsim/gcsim/backend/pkg/services/db"
 	"github.com/genshinsim/gcsim/pkg/model"
 	"github.com/genshinsim/gcsim/pkg/simulator"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"log"
+	"os"
+	"runtime/debug"
+	"time"
 )
 
 type client struct {

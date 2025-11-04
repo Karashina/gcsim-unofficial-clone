@@ -2,13 +2,12 @@ package main
 
 import (
 	"embed"
+	"github.com/genshinsim/gcsim/backend/pkg/services/preview"
+	"google.golang.org/grpc"
 	"log"
 	"net"
 	"net/http"
 	"os"
-
-	"github.com/genshinsim/gcsim/backend/pkg/services/preview"
-	"google.golang.org/grpc"
 )
 
 //go:embed dist/*

@@ -3,10 +3,6 @@ package mongo
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
-	"testing"
-
 	"github.com/genshinsim/gcsim/backend/pkg/services/share"
 	"github.com/genshinsim/gcsim/pkg/model"
 	"github.com/ory/dockertest/v3"
@@ -16,6 +12,9 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"log"
+	"os"
+	"testing"
 )
 
 var s *Server
