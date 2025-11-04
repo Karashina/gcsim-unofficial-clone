@@ -1,8 +1,6 @@
 package gorou
 
 import (
-	"math"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/internal/template/crystallize"
 	"github.com/genshinsim/gcsim/pkg/core/action"
@@ -10,6 +8,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/info"
+	"math"
 )
 
 var burstFrames []int

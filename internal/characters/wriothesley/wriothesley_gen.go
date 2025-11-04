@@ -3,7 +3,6 @@ package wriothesley
 
 import (
 	_ "embed"
-
 	"fmt"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/keys"

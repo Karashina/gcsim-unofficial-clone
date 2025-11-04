@@ -2,7 +2,6 @@ package dehya
 
 import (
 	"errors"
-
 	"github.com/genshinsim/gcsim/pkg/core/action"
 )
 

@@ -1,18 +1,12 @@
 ﻿# Fix pass 1: normalize imports, replace c.Index -> c.Index(), convert common combat.* -> info.*
 param()
 
-$dirs = @(
-  'internal/characters/aino',
-  'internal/characters/albedo',
-  'internal/characters/alhaitham',
-  'internal/characters/aloy',
-  'internal/characters/amber',
-  'internal/characters/arlecchino',
-  'internal/characters/ayaka',
-  'internal/characters/ayato',
-  'internal/characters/baizhu',
-  'internal/characters/barbara'
-)
+$dirs = Get-ChildItem -Path 'internal/characters' -Directory -Recurse | ForEach-Object {
+    # Only include directories that contain at least one .go file (leaf or nested)
+    $dir = $_.FullName
+    $hasGo = (Get-ChildItem -Path $dir -Filter *.go -Recurse -ErrorAction SilentlyContinue).Count -gt 0
+    if ($hasGo) { $dir }
+}
 
 $changedFiles = @()
 
@@ -33,7 +27,8 @@ function Normalize-ImportBlock([string]$text) {
         $newInner = $uniq -join "`n"
         $newImp = "import(`n`t$newInner`n)"
         return ($pre + $newImp + $post)
-    } else {
+    }
+    else {
         return $text
     }
 }
@@ -58,7 +53,7 @@ foreach ($d in $dirs) {
             $l = $lines[$i]
             if ($l -match '^\s*func\b') { continue }
             # replace patterns like ' c.Index ' or 'c.Index,' or 'c.Index)' etc when not followed by (
-            $lines[$i] = [regex]::Replace($l, '(\w+)\.Index\b(?!\()','$1.Index()')
+            $lines[$i] = [regex]::Replace($l, '(\w+)\.Index\b(?!\()', '$1.Index()')
         }
         $text = $lines -join "`n"
 
@@ -77,12 +72,13 @@ if ($changedFiles.Count -gt 0) {
     Write-Host "Files changed:`n"; $changedFiles | ForEach-Object { Write-Host $_ }
     Write-Host "Running gofmt on changed files..."
     foreach ($f in $changedFiles) { & gofmt -w $f }
-} else {
+}
+else {
     Write-Host "No files changed by the pass"
 }
 
 Write-Host "Running: go build ./..."
 & go build ./...
-$exit=$LASTEXITCODE
+$exit = $LASTEXITCODE
 if ($exit -ne 0) { Write-Host "go build exit code: $exit"; exit $exit }
 Write-Host "Build succeeded"

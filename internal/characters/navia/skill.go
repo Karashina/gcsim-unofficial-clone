@@ -2,8 +2,6 @@ package navia
 
 import (
 	"fmt"
-	"math"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/internal/template/crystallize"
 	"github.com/genshinsim/gcsim/pkg/core/action"
@@ -15,6 +13,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/player/shield"
 	"github.com/genshinsim/gcsim/pkg/enemy"
+	"math"
 )
 
 var (

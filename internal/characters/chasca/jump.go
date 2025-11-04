@@ -2,7 +2,6 @@ package chasca
 
 import (
 	"errors"
-
 	"github.com/genshinsim/gcsim/pkg/core/action"
 )
 

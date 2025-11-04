@@ -2,7 +2,6 @@ package itto
 
 import (
 	"fmt"
-
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"

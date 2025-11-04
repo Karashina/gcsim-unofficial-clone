@@ -2,8 +2,6 @@ package neuvillette
 
 import (
 	"fmt"
-	"math"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/internal/template/sourcewaterdroplet"
 	"github.com/genshinsim/gcsim/pkg/core/action"
@@ -13,6 +11,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/player"
+	"math"
 )
 
 var (

@@ -2,7 +2,6 @@ package xilonen
 
 import (
 	"errors"
-
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
 	"github.com/genshinsim/gcsim/internal/template/nightsoul"
 	"github.com/genshinsim/gcsim/pkg/core"

@@ -1,8 +1,6 @@
 package clorinde
 
 import (
-	"math"
-
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/event"
@@ -12,6 +10,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/stacks"
 	"github.com/genshinsim/gcsim/pkg/enemy"
 	"github.com/genshinsim/gcsim/pkg/modifier"
+	"math"
 )
 
 const (

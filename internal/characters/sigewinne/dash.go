@@ -2,7 +2,6 @@ package sigewinne
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 )
