@@ -1,4 +1,4 @@
-﻿package arlecchino
+package arlecchino
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -6,7 +6,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
@@ -27,8 +26,8 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
+	ai := info.AttackInfo{
+		ActorIndex: c.Index(),
 		Abil:       "Balemoon Rising",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
@@ -67,8 +66,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 func (c *char) balemoonRisingHeal() {
 	amt := 1.5*c.CurrentHPDebt() + 1.5*c.TotalAtk()
 	c.Heal(&info.HealInfo{
-		Caller:  c.Index,
-		Target:  c.Index,
+		Caller:  c.Index(),
+		Target:  c.Index(),
 		Message: balemoonRisingHealAbil,
 		Src:     amt,
 		Bonus:   c.Stat(attributes.Heal),

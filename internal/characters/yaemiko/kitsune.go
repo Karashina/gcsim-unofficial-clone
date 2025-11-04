@@ -183,5 +183,3 @@ func (c *char) sakuraLevelCheck() int {
 	}
 	return count
 }
-
-

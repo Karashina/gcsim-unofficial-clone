@@ -127,5 +127,3 @@ func (c *char) a4() {
 	}
 	c.Core.Events.Subscribe(event.OnEnemyHit, hitFunc, a4Key)
 }
-
-

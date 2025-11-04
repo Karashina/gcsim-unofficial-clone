@@ -168,5 +168,3 @@ func (c *char) burstHook() {
 		}, "yoimiya-died")
 	}
 }
-
-

@@ -86,5 +86,3 @@ func (c *char) Burst(_ map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
-
-

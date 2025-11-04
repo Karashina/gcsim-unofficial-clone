@@ -58,5 +58,3 @@ func (c *char) a4() {
 		return false
 	}, "kokomi-a4")
 }
-
-

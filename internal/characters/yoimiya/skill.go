@@ -62,5 +62,3 @@ func (c *char) onExit() {
 		return false
 	}, "yoimiya-exit")
 }
-
-

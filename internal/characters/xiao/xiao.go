@@ -94,5 +94,3 @@ func (c *char) Snapshot(a *info.AttackInfo) info.Snapshot {
 	}
 	return ds
 }
-
-

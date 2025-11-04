@@ -153,5 +153,3 @@ func (c *char) addBenisonStack(stacks, charIndex int) {
 		c.tryRegenShield(burstShieldAfterBenisonStack)
 	}
 }
-
-

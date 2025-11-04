@@ -162,5 +162,3 @@ func (c *char) c6(c6Travel int) {
 		c.makeC4CB(),
 	)
 }
-
-

@@ -86,5 +86,3 @@ func (c *char) burstHeal(ai info.AttackInfo) {
 		}, hitmark)
 	}
 }
-
-

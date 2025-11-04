@@ -351,4 +351,3 @@ func (c *CharWrapper) ReactBonus(atk info.AttackInfo) float64 {
 	c.mods = c.mods[:n]
 	return amt
 }
-

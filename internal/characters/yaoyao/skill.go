@@ -54,5 +54,3 @@ func (c *char) getSkillHealInfo(snap *info.Snapshot) info.HealInfo {
 		Bonus:   snap.Stats[attributes.Heal],
 	}
 }
-
-

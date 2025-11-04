@@ -170,5 +170,3 @@ func (w *wall) IsLimited() bool                  { return true }
 func (w *wall) Count() int                       { return 1 }
 func (w *wall) Direction() info.Point            { return w.dir }
 func (w *wall) Pos() info.Point                  { return w.pos }
-
-

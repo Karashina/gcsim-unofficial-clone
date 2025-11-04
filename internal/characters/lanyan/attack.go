@@ -170,5 +170,3 @@ func (c *char) reathermoonRingsDetail(abilName string, hitmarks []int) {
 		}
 	}
 }
-
-

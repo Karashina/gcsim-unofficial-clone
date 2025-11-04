@@ -99,5 +99,3 @@ func (c *char) onBurstExpiry(burstSrc int) {
 	}
 	c.burstSrc = -1 // make sure we don't call other burst fns
 }
-
-

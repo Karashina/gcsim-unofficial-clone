@@ -98,5 +98,3 @@ func (c *char) c6() {
 		return false
 	}, "kaveh-c6")
 }
-
-

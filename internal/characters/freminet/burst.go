@@ -76,5 +76,3 @@ func (c *char) onExitField() {
 		return false
 	}, "freminet-exit")
 }
-
-

@@ -138,5 +138,3 @@ func (c *char) bellTick(src int) func() {
 		c.Core.Tasks.Add(c.bellTick(src), 90)
 	}
 }
-
-

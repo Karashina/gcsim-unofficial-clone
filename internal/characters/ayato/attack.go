@@ -1,8 +1,7 @@
-﻿package ayato
+package ayato
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -52,9 +51,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}
 
 	for i, mult := range attack[c.NormalCounter] {
-		ai := combat.AttackInfo{
+		ai := info.AttackInfo{
 			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
-			ActorIndex:         c.Index,
+			ActorIndex:         c.Index(),
 			AttackTag:          attacks.AttackTagNormal,
 			ICDTag:             attacks.ICDTagNormalAttack,
 			ICDGroup:           attacks.ICDGroupDefault,
@@ -96,9 +95,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 }
 
 func (c *char) SoukaiKanka(p map[string]int) (action.Info, error) {
-	ai := combat.AttackInfo{
+	ai := info.AttackInfo{
 		Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
-		ActorIndex:         c.Index,
+		ActorIndex:         c.Index(),
 		AttackTag:          attacks.AttackTagNormal,
 		ICDTag:             attacks.ICDTagNormalAttack,
 		ICDGroup:           attacks.ICDGroupDefault,

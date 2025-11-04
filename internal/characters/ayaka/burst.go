@@ -1,4 +1,4 @@
-﻿package ayaka
+package ayaka
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -22,9 +22,9 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	ai := combat.AttackInfo{
+	ai := info.AttackInfo{
 		Abil:       "Soumetsu",
-		ActorIndex: c.Index,
+		ActorIndex: c.Index(),
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -50,7 +50,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	)
 
 	// C2 mini-frostflake bloom
-	var aiC2 combat.AttackInfo
+	var aiC2 info.AttackInfo
 	if c.Base.Cons >= 2 {
 		aiC2 = ai
 		aiC2.Mult = burstBloom[c.TalentLvlBurst()] * .2

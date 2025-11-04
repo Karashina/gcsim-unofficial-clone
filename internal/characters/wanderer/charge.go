@@ -143,5 +143,3 @@ func (c *char) chargeWindupE() int {
 		return 0
 	}
 }
-
-

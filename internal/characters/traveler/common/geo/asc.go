@@ -41,5 +41,3 @@ func (c *Traveler) a4() {
 		)
 	}, a4Hitmark[c.gender])
 }
-
-

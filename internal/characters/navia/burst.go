@@ -144,5 +144,3 @@ func (c *char) calcCannonPos() info.Point {
 		c.Core.Rand,
 	)
 }
-
-

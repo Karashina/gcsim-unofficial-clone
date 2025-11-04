@@ -202,5 +202,3 @@ func (c *char) applyA4Buff() {
 		},
 	})
 }
-
-

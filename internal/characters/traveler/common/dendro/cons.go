@@ -70,5 +70,3 @@ func (c *Traveler) c6Buff(delay int) {
 		})
 	}, delay)
 }
-
-

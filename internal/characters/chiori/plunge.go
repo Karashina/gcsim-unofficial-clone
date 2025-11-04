@@ -71,5 +71,3 @@ func (c *char) lowPlungeC() action.Info {
 		State:           action.PlungeAttackState,
 	}
 }
-
-

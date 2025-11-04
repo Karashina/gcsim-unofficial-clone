@@ -155,5 +155,3 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	actionInfo.QueueAction(tryPerformAttack, adjustedHitmarks[c.NormalCounter])
 	return actionInfo, nil
 }
-
-

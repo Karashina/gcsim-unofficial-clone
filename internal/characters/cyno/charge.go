@@ -115,5 +115,3 @@ func (c *char) chargeB() (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
-
-

@@ -173,5 +173,3 @@ func (c *char) skillHold(glide int) action.Info {
 		State:           action.SkillState,
 	}
 }
-
-

@@ -210,5 +210,3 @@ func (c *char) surfingCB(a info.AttackCB) {
 	enemy.AddStatus(momentumIcdKey, momentumIcd, false)
 	c.momentumStacks = min(c.momentumStacks+1, 3)
 }
-
-

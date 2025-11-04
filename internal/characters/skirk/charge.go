@@ -118,5 +118,3 @@ func (c *char) ChargeAttackSkill(p map[string]int) (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
-
-

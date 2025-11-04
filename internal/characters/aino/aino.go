@@ -1,4 +1,4 @@
-﻿package aino
+package aino
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
@@ -17,6 +17,8 @@ type char struct {
 	*tmpl.Character
 	burstSrc int
 	c2IcdKey string
+	// whether Aino's Moonsign is Ascendant (affects burst interval and bonuses)
+	MoonsignAscendant bool
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -45,8 +47,8 @@ func (c *char) Init() error {
 	return nil
 }
 
-func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
-	if k == model.AnimationXingqiuN0StartDelay {
+func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
+	if k == info.AnimationDelayKey(model.AnimationXingqiuN0StartDelay) {
 		return 11
 	}
 	return c.Character.AnimationStartDelay(k)

@@ -217,5 +217,3 @@ func (c *char) particleCB(a info.AttackCB) {
 
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Dendro, c.ParticleDelay)
 }
-
-

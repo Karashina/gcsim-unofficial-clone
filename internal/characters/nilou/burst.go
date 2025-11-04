@@ -86,5 +86,3 @@ func (c *char) LingeringAeon(a info.AttackCB) {
 		)
 	}, burstAeonHitmark)
 }
-
-

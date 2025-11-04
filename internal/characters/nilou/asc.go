@@ -131,5 +131,3 @@ func (c *char) updateA4Bonus(src int) func() {
 		c.QueueCharTask(c.updateA4Bonus(src), 0.5*60)
 	}
 }
-
-

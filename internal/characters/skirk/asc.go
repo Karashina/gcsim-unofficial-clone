@@ -128,5 +128,3 @@ func (c *char) a4MultAttack() float64 {
 func (c *char) a4MultBurst() float64 {
 	return a4MultBurst[c.getA4Stacks()]
 }
-
-

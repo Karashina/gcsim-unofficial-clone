@@ -79,5 +79,3 @@ func (c *char) orbitalTickTask(src int) func() {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.2), -1, 1)
 	}
 }
-
-

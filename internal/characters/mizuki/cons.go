@@ -197,5 +197,3 @@ func (c *char) c6() {
 		return false
 	}, c6Key)
 }
-
-

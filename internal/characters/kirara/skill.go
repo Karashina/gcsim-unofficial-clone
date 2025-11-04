@@ -278,5 +278,3 @@ func (c *char) generateSkillShield() {
 	}
 	player.ApplySelfInfusion(attributes.Dendro, 25, 0.1*60)
 }
-
-

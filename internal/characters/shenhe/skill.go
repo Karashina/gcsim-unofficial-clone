@@ -263,5 +263,3 @@ func (c *char) quillDamageMod() {
 		return false
 	}, "shenhe-quill-hook")
 }
-
-

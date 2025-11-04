@@ -74,4 +74,3 @@ func (c *Character) CurrentHPDebt() float64 {
 func (c *Character) CurrentHPDebtRatio() float64 {
 	return c.currentHPDebt / c.MaxHP()
 }
-

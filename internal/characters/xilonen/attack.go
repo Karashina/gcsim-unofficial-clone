@@ -161,5 +161,3 @@ func (c *char) nightsoulAttack() action.Info {
 		},
 	}
 }
-
-

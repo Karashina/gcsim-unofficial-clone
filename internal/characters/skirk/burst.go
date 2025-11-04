@@ -144,5 +144,3 @@ func (c *char) BurstExtinction(p map[string]int) (action.Info, error) {
 		OnRemoved:       func(next action.AnimationState) { c.DeleteStatus(burstAbsorbRiftAnimKey) },
 	}, nil
 }
-
-

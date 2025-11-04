@@ -132,5 +132,3 @@ func (c *char) a1Ticks(startFrame int, snap info.Snapshot) {
 		c.a1Ticks(startFrame, snap)
 	}, sproutTickPeriod)
 }
-
-

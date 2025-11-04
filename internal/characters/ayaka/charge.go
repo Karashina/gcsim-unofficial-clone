@@ -1,4 +1,4 @@
-﻿package ayaka
+package ayaka
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -22,9 +22,9 @@ func init() {
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	ai := combat.AttackInfo{
+	ai := info.AttackInfo{
 		Abil:       "Charge",
-		ActorIndex: c.Index,
+		ActorIndex: c.Index(),
 		AttackTag:  attacks.AttackTagExtra,
 		ICDTag:     attacks.ICDTagExtraAttack,
 		ICDGroup:   attacks.ICDGroupAyakaExtraAttack,
@@ -53,7 +53,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		)
 	}
 
-	charge := func(target combat.Target) {
+	charge := func(target info.Target) {
 		for j := 0; j < 3; j++ {
 			// queue up ca hits because target could move
 			c.Core.Tasks.Add(func() {
@@ -64,7 +64,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 
 	c.Core.Tasks.Add(func() {
 		// look for enemies around the player
-		enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5), nil)
+	enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5), nil)
 
 		// don't do anything if there are no enemies in range
 		if enemies == nil {
@@ -74,7 +74,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		// check for enemies around the enemy found
 		anchorEnemy := enemies[0]
 		chargeArea := combat.NewCircleHitOnTarget(anchorEnemy, nil, 4)
-		enemies = c.Core.Combat.EnemiesWithinArea(chargeArea, func(t combat.Enemy) bool {
+		enemies = c.Core.Combat.EnemiesWithinArea(chargeArea, func(t info.Enemy) bool {
 			return t.Key() != anchorEnemy.Key() // don't want to target the same enemy twice
 		})
 		enemyCount := len(enemies)

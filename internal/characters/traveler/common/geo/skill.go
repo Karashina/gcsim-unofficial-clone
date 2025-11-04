@@ -188,5 +188,3 @@ func (s *stone) IsLimited() bool                  { return true }
 func (s *stone) Count() int                       { return 1 }
 func (s *stone) Direction() info.Point            { return s.dir }
 func (s *stone) Pos() info.Point                  { return s.pos }
-
-

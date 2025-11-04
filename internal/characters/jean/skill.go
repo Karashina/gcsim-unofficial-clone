@@ -88,5 +88,3 @@ func (c *char) extraParticleCB(a info.AttackCB) {
 		c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Anemo, c.ParticleDelay)
 	}
 }
-
-

@@ -79,5 +79,3 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
-
-

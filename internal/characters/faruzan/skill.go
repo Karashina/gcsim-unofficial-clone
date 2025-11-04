@@ -126,5 +126,3 @@ func (c *char) pressurizedCollapse(pos info.Point) {
 		)
 	}, vortexHitmark)
 }
-
-

@@ -147,5 +147,3 @@ func (c *char) onSwap() {
 		return false
 	}, "neuvillette-swap")
 }
-
-

@@ -59,5 +59,3 @@ func (c *char) a4() {
 
 	c.Core.Events.Subscribe(event.OnShatter, a4BuffFunc, "freminet-a4")
 }
-
-

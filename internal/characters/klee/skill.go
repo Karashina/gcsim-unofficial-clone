@@ -164,5 +164,3 @@ func (c *char) makeParticleCB() info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Pyro, c.ParticleDelay)
 	}
 }
-
-

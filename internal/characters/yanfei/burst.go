@@ -114,5 +114,3 @@ func (c *char) burstAddSealHook() func() {
 		c.Core.Tasks.Add(c.burstAddSealHook(), 60)
 	}
 }
-
-

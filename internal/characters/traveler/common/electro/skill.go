@@ -194,5 +194,3 @@ func (c *Traveler) collectAmulets(collector *character.CharWrapper) bool {
 
 	return true
 }
-
-

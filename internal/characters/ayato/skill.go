@@ -1,4 +1,4 @@
-﻿package ayato
+package ayato
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -28,9 +28,9 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		delay = 360
 	}
 
-	ai := combat.AttackInfo{
+	ai := info.AttackInfo{
 		Abil:       "Kamisato Art: Kyouka",
-		ActorIndex: c.Index,
+		ActorIndex: c.Index(),
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -63,7 +63,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-func (c *char) particleCB(a combat.AttackCB) {
+func (c *char) particleCB(a info.AttackCB) {
 	if a.Target.Type() != info.TargettableEnemy {
 		return
 	}
@@ -79,10 +79,10 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Hydro, c.ParticleDelay) // TODO: this used to be 80 for particle delay
 }
 
-func (c *char) skillStacks(ac combat.AttackCB) {
+func (c *char) skillStacks(ac info.AttackCB) {
 	if c.stacks < c.stacksMax {
 		c.stacks++
-		c.Core.Log.NewEvent("gained namisen stack", glog.LogCharacterEvent, c.Index).
+		c.Core.Log.NewEvent("gained namisen stack", glog.LogCharacterEvent, c.Index()).
 			Write("stacks", c.stacks)
 	}
 }
@@ -91,7 +91,7 @@ func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		// do nothing if previous char wasn't ayato
 		prev := args[0].(int)
-		if prev != c.Index {
+		if prev != c.Index() {
 			return false
 		}
 		// clear skill status on field exit

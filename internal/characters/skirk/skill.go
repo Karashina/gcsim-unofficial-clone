@@ -154,5 +154,3 @@ func (c *char) particleInit() {
 		return false
 	}, c.Base.Key.String()+"-particles")
 }
-
-

@@ -114,5 +114,3 @@ func (c *char) makeA4ParticleCB() info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Cryo, c.ParticleDelay)
 	}
 }
-
-

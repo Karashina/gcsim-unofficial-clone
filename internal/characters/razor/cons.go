@@ -109,5 +109,3 @@ func (c *char) c6cb(a info.AttackCB) {
 		sigilcb,
 	)
 }
-
-

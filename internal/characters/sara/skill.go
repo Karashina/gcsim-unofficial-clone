@@ -121,5 +121,3 @@ func (c *char) attackBuff(a info.AttackPattern, delay int) {
 		}
 	}, delay)
 }
-
-

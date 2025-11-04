@@ -92,5 +92,3 @@ func (c *char) burstHealCB(atk info.AttackCB) {
 	c.burstHealCount++
 	c.Core.Player.Heal(c.burstHealAmount)
 }
-
-

@@ -163,5 +163,3 @@ func (c *char) pawsPewPew(f, travel, pawCount int) {
 		)
 	}
 }
-
-

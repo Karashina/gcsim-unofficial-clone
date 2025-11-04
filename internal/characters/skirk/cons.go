@@ -204,5 +204,3 @@ func (c *char) c6Init() {
 
 	// TODO: OnCharacterHurt?
 }
-
-

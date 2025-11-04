@@ -89,5 +89,3 @@ func (c *char) cleanupKinu() {
 	}
 	c.kinus = c.kinus[:n]
 }
-
-

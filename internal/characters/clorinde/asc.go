@@ -127,5 +127,3 @@ func (c *char) a4Amount() ([]float64, bool) {
 	c.a4bonus[attributes.CR] = float64(c.a4stacks.Count()) * a4CritBuff
 	return c.a4bonus, true
 }
-
-

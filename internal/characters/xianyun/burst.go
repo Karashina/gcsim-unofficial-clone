@@ -180,5 +180,3 @@ func (c *char) burstHealDoT() {
 		Bonus:   c.Stat(attributes.Heal),
 	})
 }
-
-

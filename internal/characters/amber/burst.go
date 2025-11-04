@@ -1,4 +1,4 @@
-﻿package amber
+package amber
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -24,9 +24,9 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	ai := combat.AttackInfo{
+	ai := info.AttackInfo{
 		Abil:       "Fiery Rain",
-		ActorIndex: c.Index,
+		ActorIndex: c.Index(),
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagElementalBurst,
 		ICDGroup:   attacks.ICDGroupAmber,

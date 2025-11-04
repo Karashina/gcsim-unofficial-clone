@@ -123,5 +123,3 @@ func (g *GrinMalkinHat) SetDirectionToClosestEnemy() {}
 func (g *GrinMalkinHat) CalcTempDirection(trg info.Point) info.Point {
 	return info.DefaultDirection()
 }
-
-

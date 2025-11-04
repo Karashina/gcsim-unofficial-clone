@@ -66,8 +66,8 @@ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 	return c.Character.ActionStam(a, p)
 }
 
-func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
-	if k == model.AnimationXingqiuN0StartDelay {
+func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
+	if k == info.AnimationDelayKey(model.AnimationXingqiuN0StartDelay) {
 		return 7
 	}
 	return c.Character.AnimationStartDelay(k)
@@ -83,19 +83,19 @@ func (c *char) WeaponReactionHandler() {
 		index := args[0].(int)
 		ele := args[1].(attributes.Element)
 		dur := args[2].(int)
-		if c.Core.Player.ActiveChar().Index != c.Index {
+		if c.Core.Player.ActiveChar().Index() != c.Index() {
 			return false
 		}
-		if index != c.Index {
+		if index != c.Index() {
 			return false
 		}
-		infai := combat.AttackInfo{
+		infai := info.AttackInfo{
 			ActorIndex: index,
 			Abil:       "Weapon Infusion",
 			Element:    ele,
 			Durability: 25,
 		}
-		infae := combat.AttackEvent{
+		infae := info.AttackEvent{
 			Info:        infai,
 			Pattern:     combat.NewSingleTargetHit(0),
 			SourceFrame: c.Core.F,

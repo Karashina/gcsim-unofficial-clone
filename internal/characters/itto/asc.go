@@ -67,5 +67,3 @@ func (c *char) a4(ai *info.AttackInfo) {
 	ai.FlatDmg = c.TotalDef(false) * 0.35
 	c.Core.Log.NewEvent("itto-a4 applied", glog.LogCharacterEvent, c.Index())
 }
-
-

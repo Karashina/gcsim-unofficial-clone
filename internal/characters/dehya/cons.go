@@ -158,5 +158,3 @@ func (c *char) c6CB() info.AttackCBFunc {
 		c.ExtendStatus(burstKey, 0.5*60)
 	}
 }
-
-

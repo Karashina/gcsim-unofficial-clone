@@ -236,5 +236,3 @@ func (c *char) skillBuff() {
 		}
 	}
 }
-
-

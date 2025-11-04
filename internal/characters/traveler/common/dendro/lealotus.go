@@ -258,5 +258,3 @@ func (s *LeaLotus) SetDirectionToClosestEnemy() {}
 func (s *LeaLotus) CalcTempDirection(trg info.Point) info.Point {
 	return info.DefaultDirection()
 }
-
-

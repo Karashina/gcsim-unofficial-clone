@@ -130,5 +130,3 @@ func (c *char) Condition(fields []string) (any, error) {
 		return c.Character.Condition(fields)
 	}
 }
-
-

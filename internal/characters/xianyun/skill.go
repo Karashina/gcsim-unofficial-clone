@@ -153,5 +153,3 @@ func (c *char) particleCB() func(info.AttackCB) {
 		c.Core.QueueParticle(c.Base.Key.String(), particleCount, attributes.Anemo, c.ParticleDelay)
 	}
 }
-
-

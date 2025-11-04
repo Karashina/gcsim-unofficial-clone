@@ -85,5 +85,3 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.particlesGenerated = true
 	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Electro, c.ParticleDelay)
 }
-
-

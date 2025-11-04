@@ -159,5 +159,3 @@ func (c *char) ppChargeAttack() action.Info {
 		},
 	}
 }
-
-

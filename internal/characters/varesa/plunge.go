@@ -364,5 +364,3 @@ func (c *char) getApexDrive() {
 		c.AddEnergy("varesa-c6", 30)
 	}
 }
-
-

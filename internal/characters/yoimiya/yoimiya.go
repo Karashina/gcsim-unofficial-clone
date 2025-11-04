@@ -68,5 +68,3 @@ func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
 	}
 	return c.Character.AnimationStartDelay(k)
 }
-
-

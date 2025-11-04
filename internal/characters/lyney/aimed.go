@@ -255,5 +255,3 @@ func (c *char) makeGrinMalkinHat(pos info.Point, hpDrained bool) func() {
 		}
 	}
 }
-
-

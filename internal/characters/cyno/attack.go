@@ -187,5 +187,3 @@ func (c *char) attackB() (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-
-

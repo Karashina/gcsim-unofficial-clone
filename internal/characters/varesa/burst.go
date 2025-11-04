@@ -136,5 +136,3 @@ func (c *char) volcanicKablam() action.Info {
 		},
 	}
 }
-
-

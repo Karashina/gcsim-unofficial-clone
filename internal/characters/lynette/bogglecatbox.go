@@ -154,5 +154,3 @@ func (b *BogglecatBox) SetDirectionToClosestEnemy() {}
 func (b *BogglecatBox) CalcTempDirection(trg info.Point) info.Point {
 	return info.DefaultDirection()
 }
-
-

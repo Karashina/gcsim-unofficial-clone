@@ -35,5 +35,3 @@ func (n *xinyanShield) OnDamage(dmg float64, ele attributes.Element, bonus float
 	}
 	return taken, ok
 }
-
-

@@ -153,5 +153,3 @@ func (c *char) eyeOnDamage() {
 		return false
 	}, "raiden-eye")
 }
-
-

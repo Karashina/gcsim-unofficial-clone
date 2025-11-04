@@ -180,5 +180,3 @@ func (c *char) ppAttack() action.Info {
 
 	return act
 }
-
-

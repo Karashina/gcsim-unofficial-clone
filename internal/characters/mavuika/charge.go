@@ -823,5 +823,3 @@ func (c *char) ConvertAngleToFrame(theta float64) int {
 
 	return accumulatedFrames + int(math.Round(frameOffset))
 }
-
-

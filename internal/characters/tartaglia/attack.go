@@ -185,5 +185,3 @@ func (c *char) meleeAttack() action.Info {
 		State:           action.NormalAttackState,
 	}
 }
-
-

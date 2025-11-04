@@ -295,5 +295,3 @@ func (c *Traveler) absorbCheckE(src, count, maxcount int) func() {
 		}
 	}
 }
-
-

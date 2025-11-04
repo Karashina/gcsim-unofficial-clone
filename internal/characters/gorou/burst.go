@@ -182,5 +182,3 @@ func (c *char) gorouBurstHealField(src int) func() {
 		c.Core.Tasks.Add(c.gorouBurstHealField(src), 90)
 	}
 }
-
-

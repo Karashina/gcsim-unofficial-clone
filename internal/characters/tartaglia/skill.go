@@ -227,5 +227,3 @@ func (c *char) onExitMeleeStance(delay int) {
 	}
 	c.DeleteStatus(meleeKey)
 }
-
-

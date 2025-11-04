@@ -116,5 +116,3 @@ func (p *panda) Attack(atk *info.AttackEvent, evt glog.Event) (float64, bool) {
 
 	return 0, false
 }
-
-

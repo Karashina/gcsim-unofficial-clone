@@ -104,5 +104,3 @@ func (c *char) burstTick(src int) {
 		c.burstTick(src)
 	}, tick)
 }
-
-

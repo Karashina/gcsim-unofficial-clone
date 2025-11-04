@@ -86,5 +86,3 @@ func (c *char) starsSkill() {
 		return false
 	}, "stars-skill")
 }
-
-

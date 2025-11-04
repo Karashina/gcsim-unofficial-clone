@@ -173,5 +173,3 @@ func (c *char) plungeCollision(delay int) {
 
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), info.Point{Y: 1}, 1), delay, delay)
 }
-
-

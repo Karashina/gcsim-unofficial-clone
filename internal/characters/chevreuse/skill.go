@@ -249,5 +249,3 @@ func (c *char) overchargedBallEventSub() {
 		return false
 	}, "chev-overcharged-ball")
 }
-
-

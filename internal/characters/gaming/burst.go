@@ -115,5 +115,3 @@ func (c *char) onExitField() {
 		return false
 	}, "gaming-exit")
 }
-
-

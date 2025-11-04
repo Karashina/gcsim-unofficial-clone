@@ -101,5 +101,3 @@ func (c *char) c4() {
 		return false
 	}, "kaeya-c4")
 }
-
-

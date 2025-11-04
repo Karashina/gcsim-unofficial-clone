@@ -1,4 +1,4 @@
-﻿package albedo
+package albedo
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/construct"
@@ -29,5 +29,5 @@ func (c *skillConstruct) Type() construct.GeoConstructType { return construct.Ge
 func (c *skillConstruct) Expiry() int                      { return c.expiry }
 func (c *skillConstruct) IsLimited() bool                  { return true }
 func (c *skillConstruct) Count() int                       { return 1 }
-func (c *skillConstruct) Direction() info.Point        { return c.dir }
-func (c *skillConstruct) Pos() info.Point              { return c.pos }
+func (c *skillConstruct) Direction() info.Point            { return c.dir }
+func (c *skillConstruct) Pos() info.Point                  { return c.pos }

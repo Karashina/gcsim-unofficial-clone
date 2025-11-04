@@ -79,5 +79,3 @@ func (c *char) Attack(_ map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-
-

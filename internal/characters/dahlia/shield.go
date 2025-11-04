@@ -68,5 +68,3 @@ func (c *char) tryRegenShield(delay int) {
 		c.c2()
 	}, delay)
 }
-
-

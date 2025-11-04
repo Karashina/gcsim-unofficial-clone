@@ -286,5 +286,3 @@ func (c *char) randomElemFromBulletPool() attributes.Element {
 	c.bulletPool = c.bulletPool[:len(c.bulletPool)-1]
 	return ele
 }
-
-

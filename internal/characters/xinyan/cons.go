@@ -87,5 +87,3 @@ func (c *char) makeC4CB() info.AttackCBFunc {
 
 // Decreases the Stamina Consumption of Xinyan's Charged Attacks by 30%. Additionally, Xinyan's Charged Attacks gain an ATK Bonus equal to 50% of her DEF.
 // func (c *char) c6() {}
-
-

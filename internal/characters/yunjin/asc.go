@@ -35,5 +35,3 @@ func (c *char) a4() float64 {
 	}
 	return 0.025 * float64(c.partyElementalTypes)
 }
-
-

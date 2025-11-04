@@ -124,5 +124,3 @@ func (c *char) xingqiuN0Delay() int {
 		return 0
 	}
 }
-
-

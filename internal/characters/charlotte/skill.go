@@ -245,5 +245,3 @@ func (c *char) skillHoldMark(src int, t *enemy.Enemy) func() {
 		c.Core.Tasks.Add(c.skillHoldMark(src, t), 1.5*60)
 	}
 }
-
-

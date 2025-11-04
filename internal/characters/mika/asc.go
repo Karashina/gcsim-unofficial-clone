@@ -76,5 +76,3 @@ func (c *char) a4() {
 		return false
 	}, "mika-a4")
 }
-
-

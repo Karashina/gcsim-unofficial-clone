@@ -316,5 +316,3 @@ func (c *char) generateSkillSnapshot() {
 	}
 	c.skillSnapshot = c.Snapshot(&c.skillAttackInfo)
 }
-
-

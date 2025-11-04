@@ -179,5 +179,3 @@ func (yg *yuegui) SetDirectionToClosestEnemy()                          {}
 func (yg *yuegui) CalcTempDirection(trg info.Point) info.Point {
 	return info.DefaultDirection()
 }
-
-

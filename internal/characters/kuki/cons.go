@@ -96,5 +96,3 @@ func (c *char) c6() {
 		return false
 	}, "kuki-c6")
 }
-
-

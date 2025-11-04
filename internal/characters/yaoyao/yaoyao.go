@@ -71,5 +71,3 @@ func (c *char) Init() error {
 	c.a4Srcs = make([]int, 4)
 	return nil
 }
-
-

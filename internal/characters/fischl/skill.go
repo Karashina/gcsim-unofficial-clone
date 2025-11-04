@@ -213,5 +213,3 @@ func (c *char) removeOz(src int) func() {
 		c.ozActive = false
 	}
 }
-
-

@@ -95,5 +95,3 @@ func (c *char) onExit() {
 		return false
 	}, "wriothesley-exit")
 }
-
-

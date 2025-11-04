@@ -53,5 +53,3 @@ func (c *char) genShield(src string, shieldamt float64, shouldStack bool) {
 		}
 	}
 }
-
-

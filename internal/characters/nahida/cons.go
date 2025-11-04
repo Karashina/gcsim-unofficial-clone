@@ -170,5 +170,3 @@ func (c *char) makeC6CB() info.AttackCBFunc {
 		c.c6Count++
 	}
 }
-
-

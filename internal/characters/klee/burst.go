@@ -151,5 +151,3 @@ func (c *char) onExitField() {
 		return false
 	}, "klee-exit")
 }
-
-

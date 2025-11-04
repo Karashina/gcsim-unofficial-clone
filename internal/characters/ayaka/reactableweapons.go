@@ -1,4 +1,4 @@
-﻿package ayaka
+package ayaka
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
@@ -31,11 +31,11 @@ func (p *ReactableWeapon) Tick() {
 
 func (p *ReactableWeapon) Type() info.TargettableType { return info.TargettableGadget }
 
-func (p *ReactableWeapon) HandleAttack(atk *combat.AttackEvent) float64 {
+func (p *ReactableWeapon) HandleAttack(atk *info.AttackEvent) float64 {
 	return 0
 }
 
-func (p *ReactableWeapon) weaponreact(atk *combat.AttackEvent) (float64, bool) {
+func (p *ReactableWeapon) weaponreact(atk *info.AttackEvent) (float64, bool) {
 	if atk.Info.Abil != "Weapon Infusion" {
 		return 0, false
 	}

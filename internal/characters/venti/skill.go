@@ -93,5 +93,3 @@ func (c *char) makeParticleCB(count float64) info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Anemo, c.ParticleDelay)
 	}
 }
-
-

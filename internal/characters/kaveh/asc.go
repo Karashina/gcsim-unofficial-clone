@@ -87,5 +87,3 @@ func (c *char) a4AddStacksHandler() {
 		return false
 	}, "kaveh-a4")
 }
-
-

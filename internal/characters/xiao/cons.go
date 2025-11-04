@@ -78,5 +78,3 @@ func (c *char) c6cb() info.AttackCBFunc {
 		}
 	}
 }
-
-

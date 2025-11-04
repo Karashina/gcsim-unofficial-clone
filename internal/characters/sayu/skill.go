@@ -381,5 +381,3 @@ func (c *char) rollAbsorb() {
 		return false
 	}, "sayu-absorb-check")
 }
-
-

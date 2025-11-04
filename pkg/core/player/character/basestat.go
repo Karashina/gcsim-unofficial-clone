@@ -123,4 +123,3 @@ func WeaponBaseStat(weap info.WeaponProfile, data *model.WeaponData) ([]float64,
 	}
 	return res, nil
 }
-

@@ -90,4 +90,3 @@ func (c *Character) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
 
 	return heal
 }
-

@@ -1,8 +1,7 @@
-﻿package amber
+package amber
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -32,9 +31,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		travel = 10
 	}
 
-	ai := combat.AttackInfo{
+	ai := info.AttackInfo{
 		Abil:       fmt.Sprintf("Normal %v", c.NormalCounter),
-		ActorIndex: c.Index,
+		ActorIndex: c.Index(),
 		AttackTag:  attacks.AttackTagNormal,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupAmber,

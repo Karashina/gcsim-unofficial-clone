@@ -51,5 +51,3 @@ func (c *char) c6(ac info.AttackCB) {
 		char.ReduceActionCooldown(action.ActionBurst, 60)
 	}
 }
-
-

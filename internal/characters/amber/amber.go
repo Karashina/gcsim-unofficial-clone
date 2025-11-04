@@ -50,9 +50,10 @@ func (c *char) Init() error {
 	return nil
 }
 
-func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
-	if k == model.AnimationXingqiuN0StartDelay {
+func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
+	if k == info.AnimationDelayKey(model.AnimationXingqiuN0StartDelay) {
 		return 8
 	}
 	return c.Character.AnimationStartDelay(k)
 }
+

@@ -154,5 +154,3 @@ func (c *Traveler) fallingThunderEnergy() info.AttackCBFunc {
 		active.AddEnergy("travelerelectro-fallingthunder", burstRegen[c.TalentLvlBurst()])
 	}
 }
-
-

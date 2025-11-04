@@ -1,4 +1,4 @@
-﻿package aino
+package aino
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
@@ -30,7 +31,7 @@ func (c *char) c1() {
 	}
 
 	c.Core.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
-		if c.Core.Player.Active() != c.Index {
+		if c.Core.Player.Active() != c.Index() {
 			return false
 		}
 		c.applyC1Buff()
@@ -38,7 +39,7 @@ func (c *char) c1() {
 	}, "aino-c1-skill")
 
 	c.Core.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
-		if c.Core.Player.Active() != c.Index {
+		if c.Core.Player.Active() != c.Index() {
 			return false
 		}
 		c.applyC1Buff()
@@ -57,7 +58,7 @@ func (c *char) applyC1Buff() {
 			},
 		})
 	}
-	c.Core.Log.NewEvent("aino c1 em buff applied", glog.LogCharacterEvent, c.Index)
+	c.Core.Log.NewEvent("aino c1 em buff applied", glog.LogCharacterEvent, c.Index())
 }
 
 func (c *char) c1EMBuff() []float64 {
@@ -79,7 +80,7 @@ func (c *char) c2() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 
 		// Check if Aino is off-field
-		if c.Core.Player.Active() == c.Index {
+		if c.Core.Player.Active() == c.Index() {
 			return false
 		}
 
@@ -98,8 +99,8 @@ func (c *char) c2() {
 		em := c.Stat(attributes.EM)
 		flatDmg := 0.25*atk + 1.0*em
 
-		ai := combat.AttackInfo{
-			ActorIndex: c.Index,
+		ai := info.AttackInfo{
+			ActorIndex: c.Index(),
 			Abil:       "Precision Hydronic Cooler (C2)",
 			AttackTag:  attacks.AttackTagElementalBurst,
 			ICDTag:     attacks.ICDTagNone,
@@ -112,7 +113,7 @@ func (c *char) c2() {
 		}
 
 		// args[0] is the target (enemy) and args[1] is the attack event
-		tgt := args[0].(combat.Target)
+		tgt := args[0].(info.Target)
 		// Avoid generating a snapshot synchronously inside an OnEnemyHit event handler.
 		// Synchronous snapshots here can re-enter event handlers and cause unbounded recursion
 		// (see issue: stack overflow during sim runs). Schedule the snapshot+damage 1 frame
@@ -120,7 +121,7 @@ func (c *char) c2() {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(tgt, nil, 3), 1, 1)
 
 		c.AddStatus(c.c2IcdKey, 5*60, false)
-		c.Core.Log.NewEvent("aino c2 proc", glog.LogCharacterEvent, c.Index)
+		c.Core.Log.NewEvent("aino c2 proc", glog.LogCharacterEvent, c.Index())
 
 		return false
 	}, "aino-c2")
@@ -134,9 +135,9 @@ func (c *char) c4() {
 	}
 
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		ae := args[1].(*combat.AttackEvent)
+		ae := args[1].(*info.AttackEvent)
 
-		if ae.Info.ActorIndex != c.Index {
+		if ae.Info.ActorIndex != c.Index() {
 			return false
 		}
 
@@ -150,7 +151,7 @@ func (c *char) c4() {
 
 		c.AddEnergy("aino-c4", 10)
 		c.AddStatus("aino-c4-icd", 10*60, false)
-		c.Core.Log.NewEvent("aino c4 proc", glog.LogCharacterEvent, c.Index)
+		c.Core.Log.NewEvent("aino c4 proc", glog.LogCharacterEvent, c.Index())
 
 		return false
 	}, "aino-c4")
@@ -165,19 +166,19 @@ func (c *char) c6() {
 	}
 
 	c.Core.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
-		if c.Core.Player.Active() != c.Index {
+		if c.Core.Player.Active() != c.Index() {
 			return false
 		}
 
 		c.AddStatus(c6Key, c6Duration, false)
-		c.Core.Log.NewEvent("aino c6 buff applied", glog.LogCharacterEvent, c.Index)
+		c.Core.Log.NewEvent("aino c6 buff applied", glog.LogCharacterEvent, c.Index())
 
 		return false
 	}, "aino-c6")
 
 	// Apply reaction damage bonus for Electro-Charged
 	c.Core.Events.Subscribe(event.OnElectroCharged, func(args ...interface{}) bool {
-		atk := args[1].(*combat.AttackEvent)
+		atk := args[1].(*info.AttackEvent)
 
 		if !c.StatusIsActive(c6Key) {
 			return false
@@ -188,7 +189,7 @@ func (c *char) c6() {
 			bonus += c6ExtraBonus
 		}
 		atk.Info.FlatDmg += atk.Info.FlatDmg * bonus
-		c.Core.Log.NewEvent("aino c6 electro-charged dmg bonus", glog.LogCharacterEvent, c.Index).
+		c.Core.Log.NewEvent("aino c6 electro-charged dmg bonus", glog.LogCharacterEvent, c.Index()).
 			Write("bonus", bonus)
 
 		return false
@@ -196,7 +197,7 @@ func (c *char) c6() {
 
 	// Apply reaction damage bonus for Bloom
 	c.Core.Events.Subscribe(event.OnBloom, func(args ...interface{}) bool {
-		atk := args[1].(*combat.AttackEvent)
+		atk := args[1].(*info.AttackEvent)
 
 		if !c.StatusIsActive(c6Key) {
 			return false
@@ -207,7 +208,7 @@ func (c *char) c6() {
 			bonus += c6ExtraBonus
 		}
 		atk.Info.FlatDmg += atk.Info.FlatDmg * bonus
-		c.Core.Log.NewEvent("aino c6 bloom dmg bonus", glog.LogCharacterEvent, c.Index).
+		c.Core.Log.NewEvent("aino c6 bloom dmg bonus", glog.LogCharacterEvent, c.Index()).
 			Write("bonus", bonus)
 
 		return false

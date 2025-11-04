@@ -179,5 +179,3 @@ func (c *char) chain(src, count int) info.AttackCBFunc {
 		c.Core.QueueAttackEvent(&atk, 1)
 	}
 }
-
-

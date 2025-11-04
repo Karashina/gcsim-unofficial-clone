@@ -200,5 +200,3 @@ func (c *char) NextMoveIsInBlindSpot(direction int) (bool, float64) {
 	}
 	return false, -1
 }
-
-

@@ -70,5 +70,3 @@ func (c *char) a4() {
 	}
 	c.Core.Log.NewEvent("heizou a4 triggered", glog.LogCharacterEvent, c.Index()).Write("em snapshot", c.a4Buff[attributes.EM]).Write("expiry", c.Core.F+dur)
 }
-
-

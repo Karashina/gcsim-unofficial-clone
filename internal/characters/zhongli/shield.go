@@ -99,5 +99,3 @@ func (s *shd) OnDamage(dmg float64, ele attributes.Element, bonus float64) (floa
 	}
 	return taken, ok
 }
-
-

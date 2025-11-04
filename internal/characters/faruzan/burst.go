@@ -156,5 +156,3 @@ func applyBurstShred(trg info.Target) {
 		Value: -0.3,
 	})
 }
-
-

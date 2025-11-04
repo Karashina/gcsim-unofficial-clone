@@ -127,5 +127,3 @@ func (c *char) gorouSkillBuffField(src int) func() {
 		c.Core.Tasks.Add(c.gorouSkillBuffField(src), 18)
 	}
 }
-
-

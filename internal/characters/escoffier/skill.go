@@ -137,5 +137,3 @@ func (c *char) skillTick(src int) func() {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5), 0, c.skillTravel, c.makeA4CB())
 	}
 }
-
-

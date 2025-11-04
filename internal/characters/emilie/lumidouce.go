@@ -152,5 +152,3 @@ func (c *char) generateScent() {
 		Write("level", c.Tag(lumidouceLevel)).
 		Write("scent", c.Tag(lumidouceScent))
 }
-
-

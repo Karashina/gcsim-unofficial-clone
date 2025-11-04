@@ -247,5 +247,3 @@ func (c *char) particleCBLv4(a info.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), particles, attributes.Cryo, c.ParticleDelay)
 }
-
-

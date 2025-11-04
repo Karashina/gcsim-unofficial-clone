@@ -16,6 +16,7 @@ const (
 
 	OnAuraDurabilityAdded    // target, ele, durability
 	OnAuraDurabilityDepleted // target, ele
+	OnInfusion               // charIndex, element, duration
 	// OnReaction               // target, AttackEvent, ReactionType
 	ReactionEventStartDelim
 	OnOverload           // target, AttackEvent

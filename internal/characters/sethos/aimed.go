@@ -191,5 +191,3 @@ func (c *char) ShadowPierce(p map[string]int) (action.Info, error) {
 		State:           action.AimState,
 	}, nil
 }
-
-

@@ -78,5 +78,3 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.AddStatus(particleICDKey, 1*60, false)
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Pyro, c.ParticleDelay)
 }
-
-

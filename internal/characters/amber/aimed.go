@@ -1,8 +1,7 @@
-﻿package amber
+package amber
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -65,9 +64,9 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		}, nil
 	}
 
-	ai := combat.AttackInfo{
+	ai := info.AttackInfo{
 		Abil:         "Fully-Charged Aimed Shot",
-		ActorIndex:   c.Index,
+		ActorIndex:   c.Index(),
 		AttackTag:    attacks.AttackTagExtra,
 		ICDTag:       attacks.ICDTagExtraAttack,
 		ICDGroup:     attacks.ICDGroupAmber,

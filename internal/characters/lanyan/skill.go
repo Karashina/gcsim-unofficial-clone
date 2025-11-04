@@ -123,5 +123,3 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.particleGenerated = true
 	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Anemo, c.ParticleDelay)
 }
-
-

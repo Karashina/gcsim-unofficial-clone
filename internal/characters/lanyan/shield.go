@@ -45,5 +45,3 @@ func (c *char) hasShield() bool {
 func (c *char) shieldHP() float64 {
 	return shieldAmt[c.TalentLvlSkill()]*c.TotalAtk() + shieldFlat[c.TalentLvlSkill()]
 }
-
-

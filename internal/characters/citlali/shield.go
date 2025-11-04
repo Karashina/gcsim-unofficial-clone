@@ -27,5 +27,3 @@ func (c *char) addShield() {
 	}
 	c.Core.Player.Shields.Add(c.skillShield)
 }
-
-

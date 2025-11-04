@@ -151,5 +151,3 @@ func (c *char) bbtickfunc(src int, trg *enemy.Enemy) func() {
 		trg.QueueEnemyTask(c.bbtickfunc(src, trg), 240)
 	}
 }
-
-

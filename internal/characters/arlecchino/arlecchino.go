@@ -70,11 +70,11 @@ func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]i
 	return c.Character.NextQueueItemIsValid(k, a, p)
 }
 
-func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
+func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
 	switch k {
-	case model.AnimationXingqiuN0StartDelay:
+	case info.AnimationDelayKey(model.AnimationXingqiuN0StartDelay):
 		return 15
-	case model.AnimationYelanN0StartDelay:
+	case info.AnimationDelayKey(model.AnimationYelanN0StartDelay):
 		return 7
 	default:
 		return c.Character.AnimationStartDelay(k)
@@ -83,7 +83,7 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 
 func (c *char) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
 	// ignore all healing except hers
-	if hi.Caller == c.Index && hi.Message == balemoonRisingHealAbil {
+	if hi.Caller == c.Index() && hi.Message == balemoonRisingHealAbil {
 		return c.Character.ReceiveHeal(hi, healAmt)
 	}
 	return 0

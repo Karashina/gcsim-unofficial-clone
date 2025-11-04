@@ -95,5 +95,3 @@ func (c *char) c4() {
 		return false
 	}, "hutao-c4")
 }
-
-

@@ -1,4 +1,4 @@
-﻿package ayaka
+package ayaka
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -28,9 +28,9 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 	}
 
 	// no dmg attack at end of dash
-	ai := combat.AttackInfo{
+	ai := info.AttackInfo{
 		Abil:       "Dash",
-		ActorIndex: c.Index,
+		ActorIndex: c.Index(),
 		AttackTag:  attacks.AttackTagNone,
 		ICDTag:     attacks.ICDTagDash,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -51,7 +51,7 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 	//TODO: check weapon infuse timing; this SHOULD be ok?
 	c.Core.Tasks.Add(func() {
 		c.Core.Player.AddWeaponInfuse(
-			c.Index,
+			c.Index(),
 			"ayaka-dash",
 			attributes.Cryo,
 			300,
@@ -59,7 +59,7 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 			attacks.AttackTagNormal, attacks.AttackTagExtra, attacks.AttackTagPlunge,
 		)
 	}, dashHitmark+f)
-	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Cryo, 300)
+	c.Core.Events.Emit(event.OnInfusion, c.Index(), attributes.Cryo, 300)
 
 	// handle stamina usage, avoid default dash implementation since dont want CD
 	c.QueueDashStaminaConsumption(p)

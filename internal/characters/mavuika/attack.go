@@ -186,5 +186,3 @@ func (c *char) bikeAttack() action.Info {
 		State:           action.NormalAttackState,
 	}
 }
-
-

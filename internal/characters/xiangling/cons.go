@@ -80,5 +80,3 @@ func (c *char) c6(dur int) {
 		})
 	}
 }
-
-

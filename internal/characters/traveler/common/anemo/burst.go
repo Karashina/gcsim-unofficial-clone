@@ -128,5 +128,3 @@ func (c *Traveler) absorbCheckQ(src, count, maxcount int) func() {
 		}
 	}
 }
-
-

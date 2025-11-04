@@ -42,5 +42,3 @@ func (c *char) a4(a4Delay int) {
 		)
 	}, a4Delay)
 }
-
-

@@ -144,5 +144,3 @@ func (c *char) explodeShield() {
 	// center on player
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 4), 0, 0)
 }
-
-

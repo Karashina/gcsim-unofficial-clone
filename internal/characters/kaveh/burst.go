@@ -88,5 +88,3 @@ func (c *char) addBurstExitHandler() {
 		return false
 	}, "kaveh-exit")
 }
-
-

@@ -1,14 +1,12 @@
-﻿package alhaitham
+package alhaitham
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 )
@@ -61,9 +59,9 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	c.Core.Tasks.Add(c.skillMirrorGain, 15)
 
-	ai := combat.AttackInfo{
+	ai := info.AttackInfo{
 		Abil:               "Universality: An Elaboration on Form",
-		ActorIndex:         c.Index,
+		ActorIndex:         c.Index(),
 		AttackTag:          attacks.AttackTagElementalArt,
 		ICDTag:             attacks.ICDTagNone,
 		ICDGroup:           attacks.ICDGroupDefault,
@@ -90,9 +88,9 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 func (c *char) SkillHold() (action.Info, error) {
 	c.Core.Tasks.Add(c.skillMirrorGain, 23)
 
-	ai := combat.AttackInfo{
+	ai := info.AttackInfo{
 		Abil:               "Universality: An Elaboration on Form (Hold)",
-		ActorIndex:         c.Index,
+		ActorIndex:         c.Index(),
 		AttackTag:          attacks.AttackTagElementalArt,
 		ICDTag:             attacks.ICDTagNone,
 		ICDGroup:           attacks.ICDGroupDefault,
@@ -132,7 +130,7 @@ func (c *char) mirrorGain(generated int) {
 	if c.mirrorCount == 0 {
 		c.lastInfusionSrc = c.Core.F
 		c.Core.Tasks.Add(c.mirrorLoss(c.Core.F, 1), mirrorInterval)
-		c.Core.Log.NewEvent("infusion added", glog.LogCharacterEvent, c.Index)
+		c.Core.Log.NewEvent("infusion added", glog.LogCharacterEvent, c.Index())
 	}
 
 	c.mirrorCount += generated
@@ -149,13 +147,13 @@ func (c *char) mirrorGain(generated int) {
 			c.lastInfusionSrc = c.Core.F
 			c.Core.Tasks.Add(c.mirrorLoss(c.Core.F, 1), mirrorInterval)
 		}
-		c.Core.Log.NewEvent("mirror overflowed", glog.LogCharacterEvent, c.Index).
+		c.Core.Log.NewEvent("mirror overflowed", glog.LogCharacterEvent, c.Index()).
 			Write("mirrors gained", generated).
 			Write("current mirrors", c.mirrorCount)
 
 		return
 	}
-	c.Core.Log.NewEvent(fmt.Sprintf("Gained %v mirror(s)", generated), glog.LogCharacterEvent, c.Index).
+	c.Core.Log.NewEvent(fmt.Sprintf("Gained %v mirror(s)", generated), glog.LogCharacterEvent, c.Index()).
 		Write("current mirrors", c.mirrorCount)
 }
 
@@ -165,13 +163,13 @@ func (c *char) mirrorLoss(src, consumed int) func() {
 			return
 		}
 		if c.lastInfusionSrc != src {
-			c.Core.Log.NewEvent("mirror decrease ignored, src diff", glog.LogCharacterEvent, c.Index).
+			c.Core.Log.NewEvent("mirror decrease ignored, src diff", glog.LogCharacterEvent, c.Index()).
 				Write("src", src).
 				Write("new src", c.lastInfusionSrc)
 			return
 		}
 		if c.mirrorCount == 0 { // just in case
-			c.Core.Log.NewEvent("Mirror count is 0, omitting reduction", glog.LogCharacterEvent, c.Index)
+			c.Core.Log.NewEvent("Mirror count is 0, omitting reduction", glog.LogCharacterEvent, c.Index())
 			return
 		}
 
@@ -180,7 +178,7 @@ func (c *char) mirrorLoss(src, consumed int) func() {
 			c.mirrorCount = 0
 		}
 
-		c.Core.Log.NewEvent(fmt.Sprintf("Consumed %v mirror(s)", consumed), glog.LogCharacterEvent, c.Index).
+		c.Core.Log.NewEvent(fmt.Sprintf("Consumed %v mirror(s)", consumed), glog.LogCharacterEvent, c.Index()).
 			Write("current mirrors", c.mirrorCount)
 
 		// queue up again if we still have mirrors
@@ -190,7 +188,7 @@ func (c *char) mirrorLoss(src, consumed int) func() {
 	}
 }
 
-func (c *char) particleCB(a combat.AttackCB) {
+func (c *char) particleCB(a info.AttackCB) {
 	if a.Target.Type() != info.TargettableEnemy {
 		return
 	}
@@ -201,14 +199,14 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Dendro, c.ParticleDelay)
 }
 
-func (c *char) projectionAttack(a combat.AttackCB) {
+func (c *char) projectionAttack(a info.AttackCB) {
 	ae := a.AttackEvent
 	// ignore if projection on icd
 	if c.StatusIsActive(projectionICDKey) {
 		return
 	}
 	// ignore if alhaitham is not on field
-	if c.Core.Player.Active() != c.Index {
+	if c.Core.Player.Active() != c.Index() {
 		return
 	}
 	// ignore if it doesn't have at least a mirror
@@ -223,7 +221,7 @@ func (c *char) projectionAttack(a combat.AttackCB) {
 		return
 	}
 
-	var c1cb combat.AttackCBFunc
+	var c1cb info.AttackCBFunc
 	if c.Base.Cons >= 1 {
 		c1cb = c.c1
 	}
@@ -234,8 +232,8 @@ func (c *char) projectionAttack(a combat.AttackCB) {
 		strikeType = attacks.StrikeTypeSpear
 	}
 
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
+	ai := info.AttackInfo{
+		ActorIndex: c.Index(),
 		Abil:       fmt.Sprintf("Chisel-Light Mirror: Projection Attack %v", c.mirrorCount),
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagElementalArt,
@@ -248,7 +246,7 @@ func (c *char) projectionAttack(a combat.AttackCB) {
 	}
 
 	player := c.Core.Combat.Player()
-	var ap combat.AttackPattern
+	var ap info.AttackPattern
 	var mirrorsHitmark []int
 	switch c.mirrorCount {
 	case 3:

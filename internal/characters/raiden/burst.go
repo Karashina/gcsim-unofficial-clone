@@ -153,5 +153,3 @@ func (c *char) onBurstStackCount() {
 		return false
 	}, "raiden-stacks")
 }
-
-

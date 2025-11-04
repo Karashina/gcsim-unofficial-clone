@@ -164,5 +164,3 @@ func (c *char) swordAttack() action.Info {
 		State:           action.NormalAttackState,
 	}
 }
-
-

@@ -17,5 +17,3 @@ func (c *char) absorbA1() attributes.Element {
 	}
 	return ele
 }
-
-

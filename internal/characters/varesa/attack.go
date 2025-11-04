@@ -178,5 +178,3 @@ func (c *char) fieryAttack() action.Info {
 		State:           action.NormalAttackState,
 	}
 }
-
-

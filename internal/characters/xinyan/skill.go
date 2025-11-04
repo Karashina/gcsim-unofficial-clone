@@ -157,5 +157,3 @@ func (c *char) updateShield(level int, defFactor float64) {
 		Write("level", c.shieldLevel).
 		Write("expiry", shd.Expiry())
 }
-
-

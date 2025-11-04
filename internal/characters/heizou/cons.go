@@ -64,5 +64,3 @@ func (c *char) c6() (float64, float64) {
 
 	return cr, cd
 }
-
-

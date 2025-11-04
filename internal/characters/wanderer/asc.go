@@ -195,5 +195,3 @@ func (c *char) deleteFromValidBuffs(ele attributes.Element) {
 	}
 	c.a1ValidBuffs = results
 }
-
-

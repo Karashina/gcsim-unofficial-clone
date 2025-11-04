@@ -113,5 +113,3 @@ func (c *char) swordCharge() action.Info {
 		State:           action.ChargeAttackState,
 	}
 }
-
-

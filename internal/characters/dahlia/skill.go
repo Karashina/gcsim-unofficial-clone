@@ -88,5 +88,3 @@ func (c *char) particleCB(a info.AttackCB) {
 
 	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Hydro, c.ParticleDelay)
 }
-
-

@@ -157,5 +157,3 @@ func (c *char) triggerBubbleBurst(t *enemy.Enemy) {
 	}
 	c.Core.QueueAttack(ai, combat.NewSingleTargetHit(t.Key()), 1, 1)
 }
-
-

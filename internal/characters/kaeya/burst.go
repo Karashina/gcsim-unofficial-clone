@@ -105,5 +105,3 @@ func (c *char) burstTickerFunc(ai info.AttackInfo, snap info.Snapshot, src int) 
 		c.Core.Tasks.Add(c.burstTickerFunc(ai, snap, src), 120)
 	}
 }
-
-

@@ -122,5 +122,3 @@ func (c *char) updateA4() {
 
 	c.a4Buff[attributes.HydroP] = hydroDmgBuff
 }
-
-

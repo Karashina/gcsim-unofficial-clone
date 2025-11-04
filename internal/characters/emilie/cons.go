@@ -159,5 +159,3 @@ func (c *char) c6ScentCB() func(info.AttackCB) {
 		}
 	}
 }
-
-

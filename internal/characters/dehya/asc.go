@@ -91,5 +91,3 @@ func (c *char) a4DotHeal(count int) func() {
 		c.QueueCharTask(c.a4DotHeal(count+1), a4DoTHealInterval)
 	}
 }
-
-

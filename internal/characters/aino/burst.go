@@ -1,4 +1,4 @@
-﻿package aino
+package aino
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -6,6 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
 var burstFrames []int
@@ -62,8 +63,8 @@ func (c *char) burstTick(src int, radius float64) func() {
 			return
 		}
 
-		ai := combat.AttackInfo{
-			ActorIndex: c.Index,
+		ai := info.AttackInfo{
+			ActorIndex: c.Index(),
 			Abil:       "Precision Hydronic Cooler (Water Ball)",
 			AttackTag:  attacks.AttackTagElementalBurst,
 			ICDTag:     attacks.ICDTagElementalBurst,

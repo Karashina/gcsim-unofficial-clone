@@ -96,5 +96,3 @@ func (c *char) skillHold(createStele bool) action.Info {
 		State:           action.SkillState,
 	}
 }
-
-

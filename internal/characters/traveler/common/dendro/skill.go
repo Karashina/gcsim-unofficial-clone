@@ -85,5 +85,3 @@ func (c *Traveler) particleCB(a info.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Dendro, c.ParticleDelay)
 }
-
-

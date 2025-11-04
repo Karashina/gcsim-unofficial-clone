@@ -152,5 +152,3 @@ func (c *char) c6ChargeTime(count int) int {
 	}
 	return cumuSkillAimLoadFramesC6[count-1]
 }
-
-

@@ -349,5 +349,3 @@ func (c *char) pullCrystals(firingTimeF, i int) {
 		}
 	}, i)
 }
-
-

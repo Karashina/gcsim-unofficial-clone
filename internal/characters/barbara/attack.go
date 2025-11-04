@@ -1,14 +1,12 @@
-﻿package barbara
+package barbara
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
@@ -49,8 +47,8 @@ func init() {
 
 // Standard attack function with seal handling
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
+	ai := info.AttackInfo{
+		ActorIndex: c.Index(),
 		Abil:       fmt.Sprintf("Normal %v", c.NormalCounter),
 		AttackTag:  attacks.AttackTagNormal,
 		ICDTag:     attacks.ICDTagNormalAttack,
@@ -61,7 +59,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		Mult:       attack[c.NormalCounter][c.TalentLvlAttack()],
 	}
 	done := false
-	cb := func(a combat.AttackCB) {
+	cb := func(a info.AttackCB) {
 		if a.Target.Type() != info.TargettableEnemy {
 			return
 		}
@@ -71,7 +69,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		// check for healing
 		if c.Core.Status.Duration(barbSkillKey) > 0 {
 			c.Core.Player.Heal(info.HealInfo{
-				Caller:  c.Index,
+				Caller:  c.Index(),
 				Target:  -1,
 				Message: "Melody Loop (Normal Attack)",
 				Src:     prochpp[c.TalentLvlSkill()]*c.MaxHP() + prochp[c.TalentLvlSkill()],

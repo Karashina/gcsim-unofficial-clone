@@ -228,5 +228,3 @@ func (c *char) skillDrain(count int) func() {
 		c.QueueCharTask(c.skillDrain(count), 1*60)
 	}
 }
-
-

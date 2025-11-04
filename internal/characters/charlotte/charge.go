@@ -105,5 +105,3 @@ func (c *char) arkhe(pos info.Point) func() {
 		)
 	}
 }
-
-

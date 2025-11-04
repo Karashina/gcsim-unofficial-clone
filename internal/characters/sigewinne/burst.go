@@ -164,5 +164,3 @@ func getBurstHitmark(tick int) int {
 		return 25
 	}
 }
-
-

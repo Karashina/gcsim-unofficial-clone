@@ -75,5 +75,3 @@ func (c *Traveler) nightsoulGainFunc(count int) func() {
 		}
 	}
 }
-
-

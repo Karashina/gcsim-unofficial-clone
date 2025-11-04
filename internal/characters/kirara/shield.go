@@ -34,5 +34,3 @@ func (c *char) shieldHP() float64 {
 func (c *char) maxShieldHP() float64 {
 	return maxShieldPP[c.TalentLvlSkill()]*c.MaxHP() + maxShieldFlat[c.TalentLvlSkill()]
 }
-
-

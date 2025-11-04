@@ -82,5 +82,3 @@ func (c *Traveler) newDroplet() *sourcewaterdroplet.Gadget {
 	droplet := sourcewaterdroplet.New(c.Core, pos, info.GadgetTypSourcewaterDropletHydroTrav)
 	return droplet
 }
-
-

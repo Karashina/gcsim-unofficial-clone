@@ -40,5 +40,3 @@ func (c *char) a4() {
 	}
 	c.AddEnergy("jean-a4", 16)
 }
-
-

@@ -270,5 +270,3 @@ func (c *char) onDefeatTargets() {
 		return false
 	}, "tartaglia-on-enemy-death")
 }
-
-

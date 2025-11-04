@@ -77,5 +77,3 @@ func (c *char) a4() {
 	c.Core.Events.Subscribe(event.OnQuicken, a4cbNoGadget, "fischl-a4")
 	c.Core.Events.Subscribe(event.OnAggravate, a4cbNoGadget, "fischl-a4")
 }
-
-

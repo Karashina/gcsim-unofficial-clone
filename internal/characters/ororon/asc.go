@@ -208,5 +208,3 @@ func (c *char) makeA4cb() func(info.AttackCB) {
 		c.SetTag(a4Key, 0)
 	}
 }
-
-

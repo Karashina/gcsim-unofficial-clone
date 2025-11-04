@@ -223,5 +223,3 @@ func (c *char) WreathAimed(p map[string]int) (action.Info, error) {
 		State:           action.AimState,
 	}, nil
 }
-
-

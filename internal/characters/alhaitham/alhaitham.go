@@ -5,7 +5,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
@@ -48,20 +47,20 @@ func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		// do nothing if previous char wasn't alhaitham
 		prev := args[0].(int)
-		if prev != c.Index {
+		if prev != c.Index() {
 			return false
 		}
 		c.lastInfusionSrc = -1 // Might prevent undesired behaviour
 		if c.mirrorCount > 0 {
 			c.mirrorCount = 0
-			c.Core.Log.NewEvent("Alhaitham left the field, mirror lost", glog.LogCharacterEvent, c.Index)
+			c.Core.Log.NewEvent("Alhaitham left the field, mirror lost", glog.LogCharacterEvent, c.Index())
 		}
 
 		return false
 	}, "alhaitham-exit")
 }
 
-func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
+func (c *char) Snapshot(ai *info.AttackInfo) info.Snapshot {
 	ds := c.Character.Snapshot(ai)
 
 	if c.mirrorCount > 0 { // weapon infusion can't be overriden for haitham
@@ -93,11 +92,11 @@ func (c *char) Condition(fields []string) (any, error) {
 	}
 }
 
-func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
+func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
 	switch k {
-	case model.AnimationXingqiuN0StartDelay:
+	case info.AnimationDelayKey(model.AnimationXingqiuN0StartDelay):
 		return 14
-	case model.AnimationYelanN0StartDelay:
+	case info.AnimationDelayKey(model.AnimationYelanN0StartDelay):
 		return 7
 	default:
 		return c.Character.AnimationStartDelay(k)

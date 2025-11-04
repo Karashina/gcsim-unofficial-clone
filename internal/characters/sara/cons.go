@@ -35,5 +35,3 @@ func (c *char) c6(char *character.CharWrapper) {
 		},
 	})
 }
-
-

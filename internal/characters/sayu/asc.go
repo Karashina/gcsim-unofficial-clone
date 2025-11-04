@@ -68,5 +68,3 @@ func (c *char) a4() {
 	}
 	c.qTickRadius = 3.5
 }
-
-

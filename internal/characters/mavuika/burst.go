@@ -143,5 +143,3 @@ func (c *char) burstInit() {
 		return false
 	}, "mavuika-fighting-spirit-na")
 }
-
-

@@ -166,5 +166,3 @@ func (c *char) onExitField() {
 		return false
 	}, "eula-exit")
 }
-
-

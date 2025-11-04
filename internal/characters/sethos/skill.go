@@ -95,5 +95,3 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.AddStatus(skillParticleICDKey, 0.5*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 2, attributes.Electro, c.ParticleDelay)
 }
-
-

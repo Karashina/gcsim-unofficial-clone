@@ -14,7 +14,7 @@ func (c *CharWrapper) ConsumeEnergyPartial(delay int, amount float64) {
 	f := func() {
 		preEnergy := c.Energy
 		post := max(c.Energy-amount, 0)
-	c.log.NewEvent("draining energy", glog.LogEnergyEvent, c.Index()).
+		c.log.NewEvent("draining energy", glog.LogEnergyEvent, c.Index()).
 			Write("pre_drain", preEnergy).
 			Write("post_drain", post).
 			Write("source", c.Base.Key.String()+"-burst-energy-drain").
@@ -80,11 +80,11 @@ func (c *CharWrapper) ReceiveParticle(p Particle, isActive bool, partyCount int)
 	}
 
 	c.events.Emit(event.OnEnergyChange, c, pre, amt, p.Source, true)
-		c.log.NewEvent(
-			"particle",
-			glog.LogEnergyEvent,
-			c.Index(),
-		).
+	c.log.NewEvent(
+		"particle",
+		glog.LogEnergyEvent,
+		c.Index(),
+	).
 		Write("source", p.Source).
 		Write("count", p.Num).
 		Write("ele", p.Ele).
@@ -96,4 +96,3 @@ func (c *CharWrapper) ReceiveParticle(p Particle, isActive bool, partyCount int)
 		Write("post_recovery", c.Energy).
 		Write("max_energy", c.EnergyMax)
 }
-

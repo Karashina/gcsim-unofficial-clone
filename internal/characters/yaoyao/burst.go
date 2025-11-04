@@ -101,5 +101,3 @@ func (c *char) removeBurst() {
 	}
 	c.numYueguiJumping = 0
 }
-
-

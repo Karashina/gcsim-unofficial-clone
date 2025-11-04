@@ -138,5 +138,3 @@ func (c *char) calculateSnackSpawnLocation() info.Point {
 	}
 	return finalPosition
 }
-
-

@@ -54,5 +54,3 @@ func (c *char) c4() {
 		Expires:    c.Core.F + 15*60,
 	})
 }
-
-

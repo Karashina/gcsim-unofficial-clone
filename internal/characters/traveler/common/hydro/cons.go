@@ -88,5 +88,3 @@ func (c *Traveler) c6() {
 		Bonus:   c.Stat(attributes.Heal),
 	})
 }
-
-

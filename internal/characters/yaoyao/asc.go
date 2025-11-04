@@ -83,5 +83,3 @@ func (c *char) a4(index, src int) func() {
 		c.QueueCharTask(c.a4(index, src), 60)
 	}
 }
-
-

@@ -356,5 +356,3 @@ func (c *char) consumeAlliesHealth(hpDrainRatio float64) int {
 
 	return alliesWithDrainedHPCounter
 }
-
-

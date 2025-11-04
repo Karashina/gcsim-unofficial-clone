@@ -84,5 +84,3 @@ func (c *char) c6(src string) {
 		},
 	})
 }
-
-

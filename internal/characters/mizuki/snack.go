@@ -150,5 +150,3 @@ func (p *snack) SetDirectionToClosestEnemy() {}
 func (p *snack) CalcTempDirection(trg info.Point) info.Point {
 	return info.DefaultDirection()
 }
-
-

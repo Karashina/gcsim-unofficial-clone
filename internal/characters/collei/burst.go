@@ -106,5 +106,3 @@ func (c *char) burstA4Ticks() {
 	c.Core.Player.ActiveChar().AddStatus(a4Key, 60, true)
 	c.Core.Tasks.Add(func() { c.burstA4Ticks() }, 30)
 }
-
-

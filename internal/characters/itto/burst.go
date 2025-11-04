@@ -131,5 +131,3 @@ func (c *char) onExitField() {
 		return false
 	}, "itto-exit")
 }
-
-

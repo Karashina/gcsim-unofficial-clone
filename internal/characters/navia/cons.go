@@ -85,5 +85,3 @@ func (c *char) c4() info.AttackCBFunc {
 		})
 	}
 }
-
-

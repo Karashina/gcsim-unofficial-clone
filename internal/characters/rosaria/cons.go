@@ -97,5 +97,3 @@ func (c *char) makeC6CB() info.AttackCBFunc {
 		})
 	}
 }
-
-

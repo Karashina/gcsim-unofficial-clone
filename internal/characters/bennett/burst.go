@@ -157,5 +157,3 @@ func (c *char) applyBennettField(stats [attributes.EndStatType]float64, firstTic
 		}
 	}
 }
-
-

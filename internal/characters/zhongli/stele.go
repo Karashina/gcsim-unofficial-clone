@@ -150,5 +150,3 @@ func (c *char) particleCB() info.AttackCBFunc {
 		}
 	}
 }
-
-

@@ -5,8 +5,8 @@ import (
 
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/modifier"
 )
@@ -18,7 +18,7 @@ const (
 
 // When a Projection Attack hits an opponent, Universality: An Elaboration on Form's CD is decreased by 1.2s.
 // This effect can be triggered once every 1s.
-func (c *char) c1(a combat.AttackCB) {
+func (c *char) c1(a info.AttackCB) {
 	// ignore if c1 on icd
 	if c.StatusIsActive(c1IcdKey) {
 		return
@@ -52,8 +52,8 @@ func c2ModName(num int) string {
 
 // When Particular Field: Fetters of Phenomena is unleashed, the following effects will become active
 // based on the number of Chisel-Light Mirrors consumed and created this time around:
-// ﾂｷEach Mirror consumed will increase the Elemental Mastery of all other nearby party members by 30 for 15s.
-// ﾂｷEach Mirror generated will grant Alhaitham a 10% Dendro DMG Bonus for 15s.
+// ·Each Mirror consumed will increase the Elemental Mastery of all other nearby party members by 30 for 15s.
+// ·Each Mirror generated will grant Alhaitham a 10% Dendro DMG Bonus for 15s.
 // The pre-existing duration of the aforementioned effects will be cleared if you use Particular Field: Fetters of Phenomena again while they are in effect
 func (c *char) c4Loss(consumed int) {
 	if consumed <= 0 {
@@ -63,7 +63,7 @@ func (c *char) c4Loss(consumed int) {
 	m[attributes.EM] = 30.0 * float64(consumed)
 	for i, char := range c.Core.Player.Chars() {
 		// skip Alhaitham
-		if i == c.Index {
+		if i == c.Index() {
 			continue
 		}
 		char.AddStatMod(character.StatMod{
@@ -92,10 +92,10 @@ func (c *char) c4Gain(generated int) {
 }
 
 // Alhaitham gains the following effects:
-// ﾂｷ 2 seconds after Particular Field: Fetters of Phenomena is unleashed,
+// · 2 seconds after Particular Field: Fetters of Phenomena is unleashed,
 // he will generate 3 Chisel-Light Mirrors regardless of the number of mirrors consumed.
 //
-// ﾂｷ If Alhaitham generates Chisel-Light Mirrors when their numbers have already maxed out,
+// · If Alhaitham generates Chisel-Light Mirrors when their numbers have already maxed out,
 // his CRIT Rate and CRIT DMG will increase by 10% and 70% respectively for 6s.
 // If this effect is triggered again during its initial duration, the duration remaining will be increased by 6s.
 const c6key = "alhaitham-c6"
@@ -107,7 +107,7 @@ func (c *char) c6(generated int) {
 	for i := 0; i < generated; i++ {
 		if c.StatModIsActive(c6key) {
 			c.ExtendStatus(c6key, 360)
-			c.Core.Log.NewEvent("c6 buff extended", glog.LogCharacterEvent, c.Index).Write("c6 expiry on", c.StatusExpiry(c6key))
+			c.Core.Log.NewEvent("c6 buff extended", glog.LogCharacterEvent, c.Index()).Write("c6 expiry on", c.StatusExpiry(c6key))
 		} else {
 			c.AddStatMod(character.StatMod{
 				Base:         modifier.NewBaseWithHitlag((c6key), 360), // 6s

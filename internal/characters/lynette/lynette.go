@@ -74,5 +74,3 @@ func (c *char) Init() error {
 
 	return nil
 }
-
-

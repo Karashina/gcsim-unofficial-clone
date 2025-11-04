@@ -157,5 +157,3 @@ func (c *char) onNACAHitHook() {
 		return false
 	}, "qiqi-onhit-naca-hook")
 }
-
-

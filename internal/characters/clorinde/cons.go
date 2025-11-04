@@ -166,5 +166,3 @@ func (c *char) c6() {
 	}
 	c.Core.QueueAttack(c6AI, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 8), 0, 0)
 }
-
-

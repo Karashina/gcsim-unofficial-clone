@@ -126,5 +126,3 @@ func (c *char) getRandomEnemyPosition(area info.AttackPattern) info.Point {
 	}
 	return pos
 }
-
-

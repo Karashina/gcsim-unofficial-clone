@@ -110,5 +110,3 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.AddStatus(particleICDKey, particleICD, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Dendro, c.ParticleDelay)
 }
-
-

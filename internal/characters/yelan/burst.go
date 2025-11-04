@@ -137,5 +137,3 @@ func (c *char) summonExquisiteThrow() {
 		)
 	}
 }
-
-

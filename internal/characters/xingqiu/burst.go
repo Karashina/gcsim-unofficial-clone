@@ -160,5 +160,3 @@ func (c *char) summonSwordWave() {
 
 	c.AddStatus(burstICDKey, 60, true)
 }
-
-

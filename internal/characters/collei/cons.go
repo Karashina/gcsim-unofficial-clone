@@ -96,5 +96,3 @@ func (c *char) c6(t info.Target) {
 		22,
 	)
 }
-
-

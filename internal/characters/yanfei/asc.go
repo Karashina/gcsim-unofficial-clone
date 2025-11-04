@@ -67,5 +67,3 @@ func (c *char) makeA4CB() info.AttackCBFunc {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(trg, nil, 3.5), 10, 10)
 	}
 }
-
-

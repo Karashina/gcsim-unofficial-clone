@@ -141,5 +141,3 @@ func (c *char) attackSkillTap(_ map[string]int) action.Info {
 		State:           action.NormalAttackState,
 	}
 }
-
-

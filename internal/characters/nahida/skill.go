@@ -232,5 +232,3 @@ func (c *char) triggerTriKarmaDamageIfAvail(t *enemy.Enemy) {
 		)
 	}
 }
-
-

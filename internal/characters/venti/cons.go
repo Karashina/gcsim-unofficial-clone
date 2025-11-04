@@ -94,5 +94,3 @@ func (c *char) c6(ele attributes.Element) func(a info.AttackCB) {
 		})
 	}
 }
-
-

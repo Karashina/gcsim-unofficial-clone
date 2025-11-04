@@ -104,5 +104,3 @@ func (c *char) c6mod(snap *info.Snapshot) {
 		Write("old", old).
 		Write("new", snap.Stats[attributes.CD])
 }
-
-

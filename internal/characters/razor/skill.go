@@ -234,5 +234,3 @@ func (c *char) clearSigil() {
 		c.DeleteStatus(skillSigilKey)
 	}
 }
-
-

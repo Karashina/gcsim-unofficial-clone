@@ -58,5 +58,3 @@ func (c *char) c4CB(a info.AttackCB) {
 	}
 	c.AddStatus(c4BuffKey, 3600, true) // 60 s
 }
-
-

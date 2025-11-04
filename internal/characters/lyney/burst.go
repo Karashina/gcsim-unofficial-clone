@@ -120,5 +120,3 @@ func (c *char) explosiveFirework() {
 
 	c.increasePropSurplusStacks()
 }
-
-

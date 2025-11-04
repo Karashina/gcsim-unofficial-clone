@@ -152,5 +152,3 @@ func (c *char) makeDropletCB() info.AttackCBFunc {
 		c.Core.Combat.Log.NewEvent("Skill: Spawned 3 droplets", glog.LogCharacterEvent, c.Index())
 	}
 }
-
-

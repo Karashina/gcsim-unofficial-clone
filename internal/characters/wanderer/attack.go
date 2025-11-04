@@ -207,5 +207,3 @@ func (c *char) attackWindupE() int {
 		return 0
 	}
 }
-
-

@@ -201,5 +201,3 @@ func (c *char) addC6Buff(snap *info.Snapshot) {
 	snap.Stats[attributes.CD] += cd
 	c.Core.Log.NewEvent("adding c6", glog.LogCharacterEvent, c.Index()).Write("cr", cr).Write("cd", cd)
 }
-
-

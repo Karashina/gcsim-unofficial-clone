@@ -21,5 +21,3 @@ func (c *char) c6() {
 		return false
 	}, "lisa-c6")
 }
-
-

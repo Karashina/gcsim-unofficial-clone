@@ -93,5 +93,3 @@ func (c *char) makeC6Callback() func(cb info.AttackCB) {
 		)
 	}
 }
-
-

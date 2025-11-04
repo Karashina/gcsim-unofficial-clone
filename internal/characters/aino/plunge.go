@@ -1,8 +1,7 @@
-﻿package aino
+package aino
 
 import (
 	"errors"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -50,8 +49,8 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 		if _, ok := p["collision"]; ok {
 			c.plungeCollision(collisionHitmark)
 		}
-		ai := combat.AttackInfo{
-			ActorIndex: c.Index,
+		ai := info.AttackInfo{
+			ActorIndex: c.Index(),
 			Abil:       "Low Plunge",
 			AttackTag:  attacks.AttackTagPlunge,
 			ICDTag:     attacks.ICDTagNone,
@@ -92,8 +91,8 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 		if _, ok := p["collision"]; ok {
 			c.plungeCollision(collisionHitmark)
 		}
-		ai := combat.AttackInfo{
-			ActorIndex: c.Index,
+		ai := info.AttackInfo{
+			ActorIndex: c.Index(),
 			Abil:       "High Plunge",
 			AttackTag:  attacks.AttackTagPlunge,
 			ICDTag:     attacks.ICDTagNone,
@@ -121,8 +120,8 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 }
 
 func (c *char) plungeCollision(delay int) {
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
+	ai := info.AttackInfo{
+		ActorIndex: c.Index(),
 		Abil:       "Plunge Collision",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,

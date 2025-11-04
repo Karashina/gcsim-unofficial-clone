@@ -101,5 +101,3 @@ func (c *char) makeParticleCB(counter int) info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 2+float64(counter), attributes.Electro, c.ParticleDelay)
 	}
 }
-
-

@@ -183,5 +183,3 @@ func (c *char) c6NAIncrease(ai *info.AttackInfo, snap *info.Snapshot) {
 	ai.FlatDmg = snap.Stats.TotalDEF()
 	ai.FlatDmg *= 2.35
 }
-
-

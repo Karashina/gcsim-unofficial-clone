@@ -198,5 +198,3 @@ func (c *char) c6TimerReset() {
 		c.Core.Log.NewEvent(fmt.Sprintf("%v stacks reset via timer", c6Key), glog.LogCharacterEvent, c.Index())
 	}
 }
-
-

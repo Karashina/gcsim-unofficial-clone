@@ -100,5 +100,3 @@ func (c *char) burstProc() {
 		return false
 	}, "yunjin-burst")
 }
-
-

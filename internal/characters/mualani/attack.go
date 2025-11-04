@@ -202,5 +202,3 @@ func (c *char) removeEnemyMarkCB(a info.AttackCB) {
 	}
 	enemy.DeleteStatus(markedAsPreyKey)
 }
-
-

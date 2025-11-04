@@ -356,5 +356,3 @@ func (c *char) skillSelfDoT() {
 		})
 	}
 }
-
-

@@ -154,5 +154,3 @@ func (c *char) burstInit(char *character.CharWrapper) {
 		},
 	})
 }
-
-

@@ -124,5 +124,5 @@ var CharKeyToEle = map[Char]attributes.Element{
 
 // Backwards compatibility aliases (some codebases refer to Dahlia)
 const (
-    Dahlia = Dhalia
+	Dahlia = Dhalia
 )

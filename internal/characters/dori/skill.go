@@ -124,5 +124,3 @@ func (c *char) afterSales() info.AttackCBFunc {
 		}
 	}
 }
-
-

@@ -59,5 +59,3 @@ func (c *char) makeC4Callback() info.AttackCBFunc {
 		c.Core.QueueAttack(ai, combat.NewSingleTargetHit(trg.Key()), 0, 1)
 	}
 }
-
-

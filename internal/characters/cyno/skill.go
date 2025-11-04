@@ -184,5 +184,3 @@ func (c *char) makeParticleCB(burst bool) info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Electro, c.ParticleDelay)
 	}
 }
-
-

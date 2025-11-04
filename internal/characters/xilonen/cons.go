@@ -226,5 +226,3 @@ func (c *char) c6FlatDmg() {
 		},
 	})
 }
-
-

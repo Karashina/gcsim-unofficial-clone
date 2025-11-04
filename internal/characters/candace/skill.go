@@ -133,5 +133,3 @@ func (c *char) makeParticleCB(particleCount float64) info.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), particleCount, attributes.Hydro, c.ParticleDelay)
 	}
 }
-
-

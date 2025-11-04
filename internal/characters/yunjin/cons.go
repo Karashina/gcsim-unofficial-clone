@@ -106,5 +106,3 @@ func (c *char) deleteC6() {
 		char.DeleteStatus(c6Key)
 	}
 }
-
-

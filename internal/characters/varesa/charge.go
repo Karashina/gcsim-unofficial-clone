@@ -141,5 +141,3 @@ func quickAbilFunc(slice []int, skip int) func(action.Action) int {
 		return slice[next]
 	}
 }
-
-

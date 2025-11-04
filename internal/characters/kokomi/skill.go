@@ -150,5 +150,3 @@ func (c *char) skillTickTask(originalSnapshot *info.AttackEvent, src int) func()
 		c.Core.Tasks.Add(c.skillTickTask(originalSnapshot, src), 120)
 	}
 }
-
-

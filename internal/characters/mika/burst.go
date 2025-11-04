@@ -88,5 +88,3 @@ func (c *char) onBurstHeal() {
 		return false
 	}, "mika-eagleplume")
 }
-
-

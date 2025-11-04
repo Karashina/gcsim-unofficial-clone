@@ -194,5 +194,3 @@ func (c *char) skillHoldMult() {
 		return false
 	}, "lisa-skill-hold-mul")
 }
-
-

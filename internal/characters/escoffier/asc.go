@@ -84,5 +84,3 @@ func (c *char) makeA4CB() info.AttackCBFunc {
 		})
 	}
 }
-
-

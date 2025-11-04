@@ -95,5 +95,3 @@ func (yg *yuegui) c6(target info.Point) {
 	yg.Core.Tasks.Add(yg.c.heal(c6MegaRadishAoE, hi), c6TravelDelay)
 	yg.Core.QueueAttackWithSnap(ai, yg.snap, c6MegaRadishAoE, c6TravelDelay)
 }
-
-

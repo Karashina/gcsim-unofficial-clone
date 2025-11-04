@@ -339,5 +339,3 @@ func (c *Traveler) skillLosingHP(ai *info.AttackInfo) {
 	}
 	c.AddStatus(skillLosingHPICDKey, 0.9*60, true)
 }
-
-

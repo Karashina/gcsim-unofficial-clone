@@ -172,5 +172,3 @@ func (c *char) infuse(active *character.CharWrapper) {
 		return
 	}
 }
-
-

@@ -210,5 +210,3 @@ func (c *char) c6() {
 	}
 	c.c6Count = c6Limit
 }
-
-

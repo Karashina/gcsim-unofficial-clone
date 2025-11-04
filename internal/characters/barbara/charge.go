@@ -1,4 +1,4 @@
-﻿package barbara
+package barbara
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -6,8 +6,6 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
@@ -26,8 +24,8 @@ func init() {
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	ai := combat.AttackInfo{
-		ActorIndex: c.Index,
+	ai := info.AttackInfo{
+		ActorIndex: c.Index(),
 		Abil:       "Charge Attack",
 		AttackTag:  attacks.AttackTagExtra,
 		ICDTag:     attacks.ICDTagNone,
@@ -39,7 +37,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}
 
 	done := false
-	cb := func(a combat.AttackCB) {
+	cb := func(a info.AttackCB) {
 		if a.Target.Type() != info.TargettableEnemy {
 			return
 		}
@@ -50,7 +48,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		if c.Core.Status.Duration(barbSkillKey) > 0 {
 			// heal target
 			c.Core.Player.Heal(info.HealInfo{
-				Caller:  c.Index,
+				Caller:  c.Index(),
 				Target:  -1,
 				Message: "Melody Loop (Charged Attack)",
 				Src:     4 * (prochpp[c.TalentLvlSkill()]*c.MaxHP() + prochp[c.TalentLvlSkill()]),
@@ -59,10 +57,10 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 			done = true
 		}
 	}
-	var c4CB combat.AttackCBFunc
+	var c4CB info.AttackCBFunc
 	if c.Base.Cons >= 4 {
 		energyCount := 0
-		c4CB = func(a combat.AttackCB) {
+		c4CB = func(a info.AttackCB) {
 			if a.Target.Type() != info.TargettableEnemy {
 				return
 			}

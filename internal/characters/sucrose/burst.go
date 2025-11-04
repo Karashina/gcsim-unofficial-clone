@@ -116,5 +116,3 @@ func (c *char) absorbCheck(src, count, maxcount int) func() {
 		c.Core.Tasks.Add(c.absorbCheck(src, count+1, maxcount), 18)
 	}
 }
-
-

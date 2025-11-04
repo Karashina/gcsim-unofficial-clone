@@ -165,5 +165,3 @@ func (c *char) particleCB(a info.AttackCB) {
 	c.skillParticleICD = true
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Anemo, c.ParticleDelay)
 }
-
-

@@ -64,5 +64,3 @@ func (c *char) a4CB(a info.AttackCB) {
 		Value: -0.10,
 	})
 }
-
-

@@ -117,5 +117,3 @@ func (c *char) particleCB(a info.AttackCB) {
 }
 
 // TODO: skill hold
-
-

@@ -6,6 +6,6 @@ package attacks
 // entries are imported.
 
 const (
-    // Upstream added this specialized group; map to Default for now.
-    ICDGroupAinoBurstEnhanced ICDGroup = ICDGroupDefault
+	// Upstream added this specialized group; map to Default for now.
+	ICDGroupAinoBurstEnhanced ICDGroup = ICDGroupDefault
 )

@@ -80,5 +80,3 @@ func (c *char) makeA4CB() info.AttackCBFunc {
 		c.AddEnergy("dori-a4", a4Energy)
 	}
 }
-
-

@@ -268,5 +268,3 @@ func (c *Traveler) exitNightsoul() {
 	c.nightsoulState.ClearPoints()
 	c.nightsoulSrc = -1
 }
-
-

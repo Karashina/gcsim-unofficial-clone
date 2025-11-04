@@ -137,5 +137,3 @@ func (c *char) createBurstSnapshot() *info.AttackEvent {
 	}
 	return &ae
 }
-
-

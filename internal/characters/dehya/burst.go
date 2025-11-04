@@ -175,5 +175,3 @@ func (c *char) burstKick(src int) action.Info {
 		State:           action.Idle,                   // TODO: cannot use burst state because burst state implies iframes
 	}
 }
-
-

@@ -131,5 +131,3 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		State:           action.AimState,
 	}, nil
 }
-
-

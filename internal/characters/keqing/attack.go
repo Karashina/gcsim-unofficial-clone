@@ -104,5 +104,3 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 
 	return act, nil
 }
-
-

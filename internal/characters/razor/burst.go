@@ -131,5 +131,3 @@ func (c *char) onSwapClearBurst() {
 		return false
 	}, "razor-burst-clear")
 }
-
-

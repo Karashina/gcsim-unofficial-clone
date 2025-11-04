@@ -51,5 +51,3 @@ func (c *char) c2(a info.AttackCB) {
 		Value: -0.233,
 	})
 }
-
-

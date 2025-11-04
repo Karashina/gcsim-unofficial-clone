@@ -282,5 +282,3 @@ func (c *char) holdParticleCB(a info.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Cryo, c.ParticleDelay)
 }
-
-

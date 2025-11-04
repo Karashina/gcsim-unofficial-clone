@@ -80,5 +80,3 @@ func (c *Traveler) a4() {
 		return false
 	}, "traveleranemo-a4")
 }
-
-

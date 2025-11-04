@@ -219,5 +219,3 @@ func (c *char) caStaminaTask(src int, startF *int, ended *bool) {
 		c.caStaminaTask(src, startF, ended)
 	}, 60*tickInterval)
 }
-
-

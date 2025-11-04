@@ -270,4 +270,3 @@ type Particle struct {
 	Num    float64
 	Ele    attributes.Element
 }
-

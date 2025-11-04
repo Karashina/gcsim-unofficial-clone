@@ -1,8 +1,7 @@
-﻿package ayaka
+package ayaka
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/internal/frames"
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
@@ -51,9 +50,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			icdGroup = attacks.ICDGroupPoleExtraAttack   // N5 has a different ICDGroup
 			centerTarget = c.Core.Combat.PrimaryTarget() // N5 is a bullet
 		}
-		ai := combat.AttackInfo{
+		ai := info.AttackInfo{
 			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
-			ActorIndex:         c.Index,
+			ActorIndex:         c.Index(),
 			AttackTag:          attacks.AttackTagNormal,
 			ICDTag:             attacks.ICDTagNormalAttack,
 			ICDGroup:           icdGroup,

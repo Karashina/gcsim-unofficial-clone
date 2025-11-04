@@ -101,5 +101,3 @@ func (c *char) QueueLaser(step, src int) func() {
 		c.Core.Tasks.Add(c.QueueLaser(step+1, src), ajawHitmarks[c.Core.Rand.Intn(2)])
 	}
 }
-
-
