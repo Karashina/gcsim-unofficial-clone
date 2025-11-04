@@ -1,10 +1,9 @@
 package reactable
 
 import (
-	"testing"
-
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/info"
+	"testing"
 )
 
 func TestFreezePlusCryoHydro(t *testing.T) {

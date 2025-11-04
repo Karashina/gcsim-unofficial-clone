@@ -1,13 +1,12 @@
 package reactable
 
 import (
-	"strconv"
-
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
+	"strconv"
 )
 
 type Reactable struct {

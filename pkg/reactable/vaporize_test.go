@@ -1,12 +1,11 @@
 package reactable
 
 import (
-	"testing"
-
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/info"
+	"testing"
 )
 
 func TestHydroVaporize(t *testing.T) {

@@ -2,7 +2,6 @@ package reactable
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/internal/template/crystallize"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/event"

@@ -1,9 +1,8 @@
 package reactable
 
 import (
-	"testing"
-
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"testing"
 )
 
 func TestOverload(t *testing.T) {

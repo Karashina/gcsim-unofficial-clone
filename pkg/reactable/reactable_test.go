@@ -1,10 +1,6 @@
 package reactable
 
 import (
-	"os"
-	"testing"
-	"time"
-
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
@@ -14,6 +10,9 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/target"
 	"github.com/genshinsim/gcsim/pkg/testhelper"
+	"os"
+	"testing"
+	"time"
 )
 
 func init() {

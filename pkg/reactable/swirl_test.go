@@ -2,11 +2,10 @@ package reactable
 
 import (
 	"fmt"
-	"math"
-	"testing"
-
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/info"
+	"math"
+	"testing"
 )
 
 const swirlAbil = "swirl-pyro (aoe)"
