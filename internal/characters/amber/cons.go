@@ -1,4 +1,4 @@
-﻿package amber
+package amber
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"

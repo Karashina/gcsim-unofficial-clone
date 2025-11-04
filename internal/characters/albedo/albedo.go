@@ -1,4 +1,4 @@
-﻿package albedo
+package albedo
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"

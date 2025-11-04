@@ -1,4 +1,4 @@
-﻿package baizhu
+package baizhu
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"

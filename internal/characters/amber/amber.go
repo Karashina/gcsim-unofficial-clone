@@ -1,4 +1,4 @@
-﻿package amber
+package amber
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
@@ -56,4 +56,3 @@ func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
 	}
 	return c.Character.AnimationStartDelay(k)
 }
-

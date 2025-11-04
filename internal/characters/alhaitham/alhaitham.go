@@ -1,4 +1,4 @@
-﻿package alhaitham
+package alhaitham
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"

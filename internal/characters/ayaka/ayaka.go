@@ -1,4 +1,4 @@
-﻿package ayaka
+package ayaka
 
 import (
 	tmpl "github.com/genshinsim/gcsim/internal/template/character"

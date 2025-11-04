@@ -64,7 +64,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 
 	c.Core.Tasks.Add(func() {
 		// look for enemies around the player
-	enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5), nil)
+		enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5), nil)
 
 		// don't do anything if there are no enemies in range
 		if enemies == nil {

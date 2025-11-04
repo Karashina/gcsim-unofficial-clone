@@ -1,4 +1,4 @@
-﻿package baizhu
+package baizhu
 
 import (
 	"github.com/genshinsim/gcsim/internal/frames"

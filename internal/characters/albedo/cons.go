@@ -1,4 +1,4 @@
-﻿package albedo
+package albedo
 
 import (
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
