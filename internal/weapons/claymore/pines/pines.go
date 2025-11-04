@@ -2,7 +2,6 @@ package pines
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/internal/weapons/common"
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/action"

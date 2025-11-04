@@ -2,7 +2,6 @@ package sunnymorning
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/pkg/core"
 	"github.com/genshinsim/gcsim/pkg/core/attacks"
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
@@ -28,7 +27,7 @@ type Weapon struct {
 }
 
 func (w *Weapon) SetIndex(idx int) {
-	w.Index = idx
+	w.Index() = idx
 }
 
 func (w *Weapon) Init() error {

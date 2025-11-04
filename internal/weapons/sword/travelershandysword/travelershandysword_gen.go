@@ -3,7 +3,6 @@ package travelershandysword
 
 import (
 	_ "embed"
-
 	"github.com/genshinsim/gcsim/pkg/model"
 	"google.golang.org/protobuf/encoding/prototext"
 )
