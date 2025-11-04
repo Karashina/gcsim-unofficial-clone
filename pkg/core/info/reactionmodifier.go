@@ -3,9 +3,8 @@ package info
 import (
 	"encoding/json"
 	"errors"
-	"strings"
-
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"strings"
 )
 
 // TODO: this needs to be eventually refactored into just generic modifier keys but for now

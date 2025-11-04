@@ -4,9 +4,8 @@ package action
 import (
 	"encoding/json"
 	"errors"
-	"strings"
-
 	"github.com/genshinsim/gcsim/pkg/core/keys"
+	"strings"
 )
 
 // TODO: add a sync.Pool here to save some memory allocs

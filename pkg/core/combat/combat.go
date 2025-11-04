@@ -6,12 +6,11 @@
 package combat
 
 import (
-	"math/rand"
-
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"
 	"github.com/genshinsim/gcsim/pkg/core/task"
+	"math/rand"
 )
 
 type CharHandler interface {

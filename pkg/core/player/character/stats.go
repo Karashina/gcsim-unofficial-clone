@@ -1,11 +1,10 @@
 package character
 
 import (
+	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"slices"
 	"strconv"
 	"strings"
-
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
 )
 
 func (c *CharWrapper) Stats() ([attributes.EndStatType]float64, []any) {

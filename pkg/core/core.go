@@ -9,8 +9,6 @@ package core
 
 import (
 	"fmt"
-	"math/rand"
-
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/construct"
@@ -21,6 +19,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/player/character"
 	"github.com/genshinsim/gcsim/pkg/core/status"
 	"github.com/genshinsim/gcsim/pkg/core/task"
+	"math/rand"
 )
 
 type Core struct {

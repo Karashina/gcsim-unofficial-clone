@@ -3,10 +3,9 @@ package info
 import (
 	"encoding/json"
 	"errors"
-	"strings"
-
 	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"github.com/genshinsim/gcsim/pkg/model"
+	"strings"
 )
 
 type WeaponClass int

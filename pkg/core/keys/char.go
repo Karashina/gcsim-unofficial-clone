@@ -3,9 +3,8 @@ package keys
 import (
 	"encoding/json"
 	"errors"
-	"strings"
-
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"strings"
 )
 
 type Char int

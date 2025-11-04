@@ -1,5 +1,5 @@
 param(
-  [string]$Root = "internal/characters"
+    [string]$Root = "internal/characters"
 )
 
 # Generic pass: normalize imports, replace combat.* -> info.*, fix .Index usages for all .go files under $Root
@@ -24,7 +24,8 @@ function Normalize-ImportBlock([string]$text) {
         $newInner = $uniq -join "`n"
         $newImp = "import(`n`t$newInner`n)"
         return ($pre + $newImp + $post)
-    } else {
+    }
+    else {
         return $text
     }
 }
@@ -57,12 +58,13 @@ if ($changedFiles.Count -gt 0) {
     Write-Host "Files changed:`n"; $changedFiles | ForEach-Object { Write-Host $_ }
     Write-Host "Running gofmt on changed files..."
     foreach ($f in $changedFiles) { & gofmt -w $f }
-} else {
+}
+else {
     Write-Host "No files changed by the pass"
 }
 
 Write-Host "Running: go build ./..."
 & go build ./...
-$exit=$LASTEXITCODE
+$exit = $LASTEXITCODE
 if ($exit -ne 0) { Write-Host "go build exit code: $exit"; exit $exit }
 Write-Host "Build succeeded"

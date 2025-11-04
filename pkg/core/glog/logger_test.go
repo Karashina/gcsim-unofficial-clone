@@ -1,9 +1,8 @@
 package glog
 
 import (
-	"testing"
-
 	easyjson "github.com/mailru/easyjson"
+	"testing"
 )
 
 func TestEventWriteKeyOnlyPanic(t *testing.T) {

@@ -8,8 +8,6 @@ package player
 
 import (
 	"fmt"
-	"math"
-
 	"github.com/genshinsim/gcsim/pkg/core/action"
 	"github.com/genshinsim/gcsim/pkg/core/combat"
 	"github.com/genshinsim/gcsim/pkg/core/event"
@@ -21,6 +19,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/player/infusion"
 	"github.com/genshinsim/gcsim/pkg/core/player/shield"
 	"github.com/genshinsim/gcsim/pkg/core/task"
+	"math"
 )
 
 const (

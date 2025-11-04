@@ -2,10 +2,9 @@ package info
 
 import (
 	"encoding/json"
-	"log"
-
 	"github.com/genshinsim/gcsim/pkg/core/attributes"
 	"github.com/genshinsim/gcsim/pkg/core/keys"
+	"log"
 )
 
 type ActionList struct {

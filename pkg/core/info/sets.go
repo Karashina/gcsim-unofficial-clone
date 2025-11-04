@@ -1,10 +1,9 @@
 package info
 
 import (
+	"github.com/genshinsim/gcsim/pkg/core/keys"
 	"strconv"
 	"strings"
-
-	"github.com/genshinsim/gcsim/pkg/core/keys"
 )
 
 type Sets map[keys.Set]int

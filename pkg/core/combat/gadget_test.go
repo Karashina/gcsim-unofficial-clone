@@ -1,10 +1,9 @@
 package combat
 
 import (
+	"github.com/genshinsim/gcsim/pkg/core/info"
 	"log"
 	"testing"
-
-	"github.com/genshinsim/gcsim/pkg/core/info"
 )
 
 //nolint:unparam // all calls currently have y = 0 but that can change

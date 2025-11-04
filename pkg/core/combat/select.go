@@ -1,9 +1,8 @@
 package combat
 
 import (
-	"sort"
-
 	"github.com/genshinsim/gcsim/pkg/core/info"
+	"sort"
 )
 
 // all targets

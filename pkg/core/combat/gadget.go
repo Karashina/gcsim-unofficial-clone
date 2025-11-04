@@ -1,9 +1,8 @@
 package combat
 
 import (
-	"math"
-
 	"github.com/genshinsim/gcsim/pkg/core/info"
+	"math"
 )
 
 var gadgetLimits []int

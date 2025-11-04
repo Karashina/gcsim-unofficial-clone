@@ -1,10 +1,9 @@
 package glog
 
 import (
+	easyjson "github.com/mailru/easyjson"
 	"log"
 	"strings"
-
-	easyjson "github.com/mailru/easyjson"
 )
 
 // Debugw

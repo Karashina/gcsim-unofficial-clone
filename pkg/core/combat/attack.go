@@ -2,7 +2,6 @@ package combat
 
 import (
 	"fmt"
-
 	"github.com/genshinsim/gcsim/pkg/core/event"
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 	"github.com/genshinsim/gcsim/pkg/core/info"

@@ -2,9 +2,8 @@ package character
 
 import (
 	"fmt"
-	"math"
-
 	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"math"
 )
 
 func (c *CharWrapper) QueueCharTask(f func(), delay int) {
