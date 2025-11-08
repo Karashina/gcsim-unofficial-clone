@@ -53,7 +53,6 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 					return mEM, true
 				},
 			})
-			char.AddStatus("dawningfrost-charge", 10*60, true)
 		}
 		// Elemental Skill hit -> EM for 10s
 		if atk.Info.AttackTag == attacks.AttackTagElementalArt {
@@ -66,7 +65,6 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 					return mEM, true
 				},
 			})
-			char.AddStatus("dawningfrost-skill", 10*60, true)
 		}
 		return false
 	}, fmt.Sprintf("dawningfrost-%v", char.Base.Key.String()))
