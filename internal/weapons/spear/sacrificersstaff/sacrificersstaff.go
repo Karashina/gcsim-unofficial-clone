@@ -80,8 +80,6 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 				w.stacks--
 			}
 		}, 6*60)
-
-		char.AddStatus("sacrificersstaff-buff", 6*60, true)
 		return false
 	}, fmt.Sprintf("sacrificersstaff-%v", char.Base.Key.String()))
 
