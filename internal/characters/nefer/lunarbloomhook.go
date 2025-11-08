@@ -48,12 +48,13 @@ func (c *char) onLunarBloomNeferSpecial(args ...interface{}) bool {
 func (c *char) queueLunarBloomAttack(target combat.Target, mult float64, abilName string, delay int) {
 	atk := combat.AttackInfo{ActorIndex: c.Index, Abil: abilName, AttackTag: attacks.AttackTagLBDamage, StrikeType: attacks.StrikeTypeDefault, Element: attributes.Dendro, IgnoreDefPercent: 1}
 	em := c.Stat(attributes.EM)
-	baseDmg := em * mult * (1 + c.LBBaseReactBonus(atk))
+	c1mult := 0.0
+	if c.Base.Cons >= 1 { // C1
+		c1mult = 0.6
+	}
+	baseDmg := em * (mult + c1mult) * (1 + c.LBBaseReactBonus(atk))
 	emBonus := (6 * em) / (2000 + em)
 	atk.FlatDmg = baseDmg * (1 + emBonus + c.LBReactBonus(atk)) * (1 + c.ElevationBonus(atk))
-	if c.Base.Cons >= 1 { // C1
-		atk.FlatDmg += em * 0.6
-	}
 	snap := combat.Snapshot{CharLvl: c.Base.Level}
 	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 	snap.Stats[attributes.CD] = c.Stat(attributes.CD)

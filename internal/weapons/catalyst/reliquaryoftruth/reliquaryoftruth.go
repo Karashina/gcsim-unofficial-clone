@@ -73,7 +73,6 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 				return mEM, true
 			},
 		})
-		char.AddStatus(secretKey, 12*60, true)
 		return false
 	}, fmt.Sprintf("reliquaryoftruth-skill-%v", char.Base.Key.String()))
 
@@ -106,8 +105,6 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 				return mCD, true
 			},
 		})
-		char.AddStatus(moonKey, 4*60, true)
-
 		return false
 	}, fmt.Sprintf("reliquaryoftruth-lb-%v", char.Base.Key.String()))
 

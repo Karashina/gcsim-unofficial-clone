@@ -1,7 +1,6 @@
 package nefer
 
 import (
-	"math"
 	"reflect"
 
 	"github.com/genshinsim/gcsim/internal/frames"
@@ -53,8 +52,12 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			c.particleCB,
 		)
 
-		// Enter Shadow Dance state
-		c.AddStatus(skillKey, 10*60, true) // 10s duration
+		if c.Base.Cons >= 2 {
+			// Enter Shadow Dance state
+			c.AddStatus(skillKey, 15*60, true) // 15s duration
+		} else {
+			c.AddStatus(skillKey, 10*60, true) // 10s duration
+		}
 
 		// If Moonsign Ascendant: convert existing Dendro Cores to Seeds of Deceit and set 15s conversion window
 		// Log moonsign state for debugging
@@ -108,8 +111,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		// C2: Gain 2 stacks of Veil of Falsehood when using Elemental Skill
 		if c.Base.Cons >= 2 && c.Base.Ascension >= 1 {
 			// Add up to 2 stacks, capped at 5
-			c.a1count = math.Min(5.0, c.a1count+2)
-			c.AddStatus("veil-of-falsehood", 14*60, true) // 9s base + 5s from C2
+			c.a1count = min(5.0, c.a1count+2)
 		}
 	}, skillHitmark)
 

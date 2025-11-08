@@ -91,12 +91,3 @@ func (c *char) Condition(fields []string) (any, error) {
 		return c.Character.Condition(fields)
 	}
 }
-
-func (c *char) Condition(fields []string) (any, error) {
-	switch fields[0] {
-	case "northlandup":
-		return c.StatusIsActive(northlandCdKey), nil
-	default:
-		return c.Character.Condition(fields)
-	}
-}
