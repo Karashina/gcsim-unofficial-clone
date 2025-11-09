@@ -123,8 +123,8 @@ func fmtHist(sortedArr []float64, start, binSize float64) []string {
 		// The ASCII block elements come in chunks of 8, so we work out how
 		// many fractions of 8 we need.
 		// https://en.wikipedia.org/wiki/Block_Elements
-		barChunks := int(math.Round(binCount[i] / valPerBlock))
-		bar := strings.Repeat("笆・, barChunks)
+	barChunks := int(math.Round(binCount[i] / valPerBlock))
+	bar := strings.Repeat("#", barChunks)
 
 		// Currently the default PowerShell font doesn't support the partial blocks
 		// Cascadia Mono, the default font for Windows Terminal, supports it
@@ -139,5 +139,3 @@ func fmtHist(sortedArr []float64, start, binSize float64) []string {
 
 	return output
 }
-
-

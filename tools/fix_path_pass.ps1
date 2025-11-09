@@ -10,7 +10,7 @@ if ($files.Count -eq 0) { Write-Host "No .go files under $Root"; exit 0 }
 
 $changedFiles = @()
 
-function Normalize-ImportBlock([string]$text) {
+function Convert-ImportBlock([string]$text) {
     if ($text -match "import\s*\(") {
         $pre, $impBlock, $post = $text -split '(?s)(import\s*\([^)]*\))', 3
         if (-not $impBlock) { return $text }
@@ -46,7 +46,7 @@ foreach ($path in $files) {
     }
     $text = $lines -join "`n"
 
-    $text = Normalize-ImportBlock $text
+    $text = Convert-ImportBlock $text
 
     if ($text -ne $orig) {
         Set-Content -LiteralPath $path -Value $text -Encoding UTF8

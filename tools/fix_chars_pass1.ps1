@@ -10,7 +10,7 @@ $dirs = Get-ChildItem -Path 'internal/characters' -Directory -Recurse | ForEach-
 
 $changedFiles = @()
 
-function Normalize-ImportBlock([string]$text) {
+function Convert-ImportBlock([string]$text) {
     if ($text -match "import\s*\(") {
         # Extract import block
         $pre, $impBlock, $post = $text -split '(?s)(import\s*\([^)]*\))', 3
@@ -58,7 +58,7 @@ foreach ($d in $dirs) {
         $text = $lines -join "`n"
 
         # Normalize import block (dedupe imports)
-        $text = Normalize-ImportBlock $text
+        $text = Convert-ImportBlock $text
 
         # If changed, write back
         if ($text -ne $orig) {
