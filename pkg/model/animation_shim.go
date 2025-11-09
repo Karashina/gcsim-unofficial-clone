@@ -7,8 +7,8 @@ package model
 type AnimationDelayKey int
 
 const (
-    AnimationXingqiuN0StartDelay AnimationDelayKey = iota
-    AnimationYelanN0StartDelay
-    AnimationPlaceholderA
-    AnimationPlaceholderB
+	AnimationXingqiuN0StartDelay AnimationDelayKey = iota
+	AnimationYelanN0StartDelay
+	AnimationPlaceholderA
+	AnimationPlaceholderB
 )

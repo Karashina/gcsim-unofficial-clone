@@ -1,5 +1,5 @@
 param(
-    [string]$Root = "internal/characters"
+    [Alias("RootPath")][string]$Root = "internal/characters"
 )
 
 # Generic pass: normalize imports, replace combat.* -> info.*, fix .Index usages for all .go files under $Root
