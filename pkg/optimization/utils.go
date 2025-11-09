@@ -140,3 +140,4 @@ func fmtHist(sortedArr []float64, start, binSize float64) []string {
 	return output
 }
 
+

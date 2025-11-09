@@ -6,7 +6,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/core/glog"
 )
 
-// The Stamina Consumption of characters within Let the Show Begin笙ｪ's Melody Loop is reduced by 12%.
+// The Stamina Consumption of characters within Let the Show Begin隨呻ｽｪ's Melody Loop is reduced by 12%.
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -17,7 +17,7 @@ func (c *char) a1() {
 	})
 }
 
-// When your active character gains an Elemental Orb/Particle, the duration of the Melody Loop of Let the Show Begin笙ｪ is extended by 1s.
+// When your active character gains an Elemental Orb/Particle, the duration of the Melody Loop of Let the Show Begin隨呻ｽｪ is extended by 1s.
 // The maximum extension is 5s.
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {

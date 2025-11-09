@@ -9,8 +9,8 @@ import (
 )
 
 // Baizhu gains different effects according to the current HP of your current active character:
-// ﾂｷWhen their HP is less than 50%, Baizhu gains 20% Healing Bonus.
-// ﾂｷWhen their HP is equal to or more than 50%, Baizhu gains 25% Dendro DMG Bonus.
+// ・ゑｽｷWhen their HP is less than 50%, Baizhu gains 20% Healing Bonus.
+// ・ゑｽｷWhen their HP is equal to or more than 50%, Baizhu gains 25% Dendro DMG Bonus.
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return

@@ -28,7 +28,7 @@ func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
 // 2-Piece Bonus: Dendro DMG Bonus +15%.
-// 4-Piece Bonus: After Elemental Skills or Bursts hit opponents, the targets窶・Dendro RES will be decreased by 30% for 8s.
+// 4-Piece Bonus: After Elemental Skills or Bursts hit opponents, the targets遯ｶ繝ｻDendro RES will be decreased by 30% for 8s.
 // This effect can be triggered even if the equipping character is not on the field.
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}

@@ -17,7 +17,7 @@ type ReactableWeapon struct {
 func (c *char) newReactableWeapons() *ReactableWeapon {
 	p := &ReactableWeapon{}
 	p.Reactable = &reactable.Reactable{}
-	p.Gadget = gadget.New(c.Core, c.Core.Combat.Player().Pos(), 0.5, combat.GadgetTypReactableweapon)
+	p.Gadget = gadget.New(c.Core, c.Core.Combat.Player().Pos(), 0.5, info.GadgetTypTest)
 	p.Gadget.Duration = -1
 	c.Core.Combat.AddGadget(p)
 	p.Reactable.Init(p, c.Core)

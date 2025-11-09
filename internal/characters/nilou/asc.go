@@ -17,14 +17,14 @@ const (
 )
 
 // When all characters in the party are all Dendro or Hydro, and there are at least one Dendro character and one Hydro character:
-// The completion of the third dance step of Nilou窶冱 Dance of Haftkarsvar will grant all nearby characters the Golden Chalice窶冱 Bounty
+// The completion of the third dance step of Nilou遯ｶ蜀ｱ Dance of Haftkarsvar will grant all nearby characters the Golden Chalice遯ｶ蜀ｱ Bounty
 // for 30s upon its completion.
-// Characters under the effect of Golden Chalice窶冱 Bounty will increase the Elemental Mastery of all nearby characters by 100 for 10s
+// Characters under the effect of Golden Chalice遯ｶ蜀ｱ Bounty will increase the Elemental Mastery of all nearby characters by 100 for 10s
 // whenever they are hit by Dendro attacks. Also, triggering the Bloom reaction will create Bountiful Cores instead of Dendro Cores.
 // Such Cores will burst very quickly after being created, and they have larger AoEs.
 // Bountiful Cores cannot trigger Hyperbloom or Burgeon, and they share an upper numerical limit with Dendro Cores. Bountiful Core DMG
 // is considered DMG dealt by Dendro Cores produced by Bloom.
-// Should the party not meet the conditions for this Passive Talent, any existing Golden Chalice窶冱 Bounty effects will be canceled.
+// Should the party not meet the conditions for this Passive Talent, any existing Golden Chalice遯ｶ蜀ｱ Bounty effects will be canceled.
 func (c *char) a1() {
 	if c.Base.Ascension < 1 || !c.onlyBloomTeam {
 		return
@@ -84,8 +84,8 @@ func (c *char) a1() {
 	}, "nilou-a1")
 }
 
-// Every 1,000 points of Nilou窶冱 Max HP above 30,000 will cause the DMG dealt by Bountiful Cores created by characters affected
-// by Golden Chalice窶冱 Bounty to increase by 9%.
+// Every 1,000 points of Nilou遯ｶ蜀ｱ Max HP above 30,000 will cause the DMG dealt by Bountiful Cores created by characters affected
+// by Golden Chalice遯ｶ蜀ｱ Bounty to increase by 9%.
 // The maximum increase in Bountiful Core DMG that can be achieved this way is 400%.
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {

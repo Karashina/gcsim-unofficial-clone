@@ -42,8 +42,8 @@ func (c *char) c2(travel int) {
 }
 
 // The character connected to the Jinni will obtain the following buffs based on their current HP and Energy:
-// ﾂｷWhen their HP is lower than 50%, they gain 50% Incoming Healing Bonus.
-// ﾂｷWhen their Energy is less than 50%, they gain 30% Energy Recharge.
+// ・ゑｽｷWhen their HP is lower than 50%, they gain 50% Incoming Healing Bonus.
+// ・ゑｽｷWhen their Energy is less than 50%, they gain 30% Energy Recharge.
 func (c *char) c4() {
 	active := c.Core.Player.ActiveChar()
 	if active.CurrentHPRatio() < 0.5 {

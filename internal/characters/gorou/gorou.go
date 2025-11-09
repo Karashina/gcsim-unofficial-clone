@@ -65,9 +65,9 @@ func (c *char) Init() error {
 
 	/**
 	Provides up to 3 buffs to active characters within the skill's AoE based on the number of Geo characters in the party at the time of casting:
-	窶｢ 1 Geo character: Adds "Standing Firm" - DEF Bonus.
-	窶｢ 2 Geo characters: Adds "Impregnable" - Increased resistance to interruption.
-	窶｢ 3 Geo characters: Adds "Crunch" - Geo DMG Bonus.
+	遯ｶ・｢ 1 Geo character: Adds "Standing Firm" - DEF Bonus.
+	遯ｶ・｢ 2 Geo characters: Adds "Impregnable" - Increased resistance to interruption.
+	遯ｶ・｢ 3 Geo characters: Adds "Crunch" - Geo DMG Bonus.
 	**/
 	c.gorouBuff[attributes.DEF] = skillDefBonus[c.TalentLvlSkill()]
 	if c.geoCharCount > 2 {
@@ -76,9 +76,9 @@ func (c *char) Init() error {
 
 	/**
 	For 12s after using Inuzaka All-Round Defense or Juuga: Forward Unto Victory, increases the CRIT DMG of all nearby party members' Geo DMG based on the buff level of the skill's field at the time of use:
-	窶｢ "Standing Firm": +10%
-	窶｢ "Impregnable": +20%
-	窶｢ "Crunch": +40%
+	遯ｶ・｢ "Standing Firm": +10%
+	遯ｶ・｢ "Impregnable": +20%
+	遯ｶ・｢ "Crunch": +40%
 	This effect cannot stack and will take reference from the last instance of the effect that is triggered.
 	**/
 	switch c.geoCharCount {

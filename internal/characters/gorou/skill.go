@@ -29,9 +29,9 @@ func init() {
 *
 Provides up to 3 buffs to active characters within the skill's AoE based on the number of Geo characters in
 the party at the time of casting:
-窶｢ 1 Geo character: Adds "Standing Firm" - DEF Bonus.
-窶｢ 2 Geo characters: Adds "Impregnable" - Increased resistance to interruption.
-窶｢ 3 Geo characters: Adds "Crunch" - Geo DMG Bonus.
+遯ｶ・｢ 1 Geo character: Adds "Standing Firm" - DEF Bonus.
+遯ｶ・｢ 2 Geo characters: Adds "Impregnable" - Increased resistance to interruption.
+遯ｶ・｢ 3 Geo characters: Adds "Crunch" - Geo DMG Bonus.
 Gorou can deploy only 1 General's War Banner on the field at any one time. Characters can only benefit from
 1 General's War Banner at a time. When a party member leaves the field, the active buff will last for 2s.
 *

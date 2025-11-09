@@ -76,7 +76,7 @@ func (c *char) makeC6Callback() func(cb info.AttackCB) {
 
 		ai := info.AttackInfo{
 			ActorIndex: c.Index(),
-			Abil:       "Shugen: The Curtains窶・Melancholic Sway",
+			Abil:       "Shugen: The Curtains遯ｶ繝ｻMelancholic Sway",
 			AttackTag:  attacks.AttackTagNormal,
 			ICDTag:     attacks.ICDTagWandererC6,
 			ICDGroup:   attacks.ICDGroupWandererC6,

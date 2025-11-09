@@ -16,9 +16,9 @@ func init() {
 }
 
 // HP increased by 20%. When an Elemental Skill hits opponents, you gain the Grand Hymn effect for 20s.
-// This effect increases the equipping character窶冱 Elemental Mastery by 0.12% of their Max HP. This effect can trigger once every 0.3s.
-// Max 3 stacks. When this effect gains 3 stacks, or when the third stack窶冱 duration is refreshed, the Elemental Mastery
-// of all nearby party members will be increased by 0.2% of the equipping character窶冱 max HP for 20s.
+// This effect increases the equipping character遯ｶ蜀ｱ Elemental Mastery by 0.12% of their Max HP. This effect can trigger once every 0.3s.
+// Max 3 stacks. When this effect gains 3 stacks, or when the third stack遯ｶ蜀ｱ duration is refreshed, the Elemental Mastery
+// of all nearby party members will be increased by 0.2% of the equipping character遯ｶ蜀ｱ max HP for 20s.
 type Weapon struct {
 	stacks int
 	Index  int
