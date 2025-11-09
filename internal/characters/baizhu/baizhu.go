@@ -46,9 +46,9 @@ func (c *char) Init() error {
 
 func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
 	switch k {
-	case info.AnimationDelayKey(model.AnimationXingqiuN0StartDelay):
+	case info.AnimationDelayKey(info.AnimationXingqiuN0StartDelay):
 		return 8
-	case info.AnimationDelayKey(model.AnimationYelanN0StartDelay):
+	case info.AnimationDelayKey(info.AnimationYelanN0StartDelay):
 		return 5
 	default:
 		return c.Character.AnimationStartDelay(k)

@@ -104,7 +104,7 @@ func (c *char) Snapshot(ai *info.AttackInfo) info.Snapshot {
 
 func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
 	switch k {
-	case info.AnimationDelayKey(model.AnimationXingqiuN0StartDelay):
+	case info.AnimationDelayKey(info.AnimationXingqiuN0StartDelay):
 		if c.StatusIsActive(skillBuffKey) {
 			return 17
 		}

@@ -11,8 +11,8 @@ import (
 )
 
 // Dance of Haftkarsvar will be enhanced as follows:
-// · Luminous Illusion DMG is increased by 65%.
-// · The Tranquility Aura’s duration is extended by 6s.
+// ﾂｷ Luminous Illusion DMG is increased by 65%.
+// ﾂｷ The Tranquility Aura窶冱 duration is extended by 6s.
 func (c *char) c1() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DmgP] = 0.65
@@ -28,9 +28,9 @@ func (c *char) c1() {
 	})
 }
 
-// After characters affected by the Golden Chalice’s Bounty deal Hydro DMG to opponents, that opponent’s Hydro RES will be decreased by 35% for 10s.
+// After characters affected by the Golden Chalice窶冱 Bounty deal Hydro DMG to opponents, that opponent窶冱 Hydro RES will be decreased by 35% for 10s.
 // After a triggered Bloom reaction deals DMG to opponents, their Dendro RES will be decreased by 35% for 10s.
-// You need to have unlocked the “Court of Dancing Petals” Talent.
+// You need to have unlocked the 窶廚ourt of Dancing Petals窶・Talent.
 func (c *char) c2() {
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...any) bool {
 		atk := args[1].(*info.AttackEvent)
@@ -66,7 +66,7 @@ func (c *char) c2() {
 	}, "nilou-c2")
 }
 
-// After the third dance step of Dance of Haftkarsvar‘s Pirouette hits opponents, Nilou will gain 15 Elemental Energy,
+// After the third dance step of Dance of Haftkarsvar窶・ Pirouette hits opponents, Nilou will gain 15 Elemental Energy,
 // and DMG from her Dance of Abzendegi: Distant Dreams, Listening Spring will be increased by 50% for 8s.
 func (c *char) c4() {
 	c.AddEnergy("nilou-c4", 15)
@@ -105,7 +105,7 @@ func (c *char) c4cb() info.AttackCBFunc {
 	}
 }
 
-// For every 1,000 points of Max HP, Nilou’s CRIT Rate and CRIT DMG will increase by 0.6% and 1.2% respectively.
+// For every 1,000 points of Max HP, Nilou窶冱 CRIT Rate and CRIT DMG will increase by 0.6% and 1.2% respectively.
 // The maximum increase in CRIT Rate and CRIT DMG is 30% and 60% respectively.
 func (c *char) c6() {
 	// cr and cd separately to avoid stack overflow due to NoStat attribute

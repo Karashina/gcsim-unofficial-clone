@@ -29,7 +29,7 @@ func init() {
 
 /**
 The number of Hydro Swords summoned per wave follows a specific pattern, usually alternating between 2 and 3 swords.
-At C6, this is upgraded and follows a pattern of 2 ↁE3 ↁE5… which then repeats.
+At C6, this is upgraded and follows a pattern of 2 竊・3 竊・5窶ｦ which then repeats.
 
 There is an approximately 1 second interval between summoned Hydro Sword waves, so that means a theoretical maximum of 15 or 18 waves.
 

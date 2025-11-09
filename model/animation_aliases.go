@@ -9,6 +9,6 @@ import "github.com/genshinsim/gcsim/pkg/core/info"
 type AnimationDelayKey = info.AnimationDelayKey
 
 const (
-    AnimationXingqiuN0StartDelay = info.AnimationXingqiuN0StartDelay
-    AnimationYelanN0StartDelay    = info.AnimationYelanN0StartDelay
+	AnimationXingqiuN0StartDelay = info.AnimationXingqiuN0StartDelay
+	AnimationYelanN0StartDelay   = info.AnimationYelanN0StartDelay
 )

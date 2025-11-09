@@ -11,8 +11,8 @@ import (
 )
 
 // Dehya's Max HP is increased by 20%, and she deals bonus DMG based on her Max HP when using the following attacks:
-// ·Molten Inferno's DMG will be increased by 3.6% of her Max HP.
-// ·Leonine Bite's DMG will be increased by 6% of her Max HP.
+// ﾂｷMolten Inferno's DMG will be increased by 3.6% of her Max HP.
+// ﾂｷLeonine Bite's DMG will be increased by 6% of her Max HP.
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return

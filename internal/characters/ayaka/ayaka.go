@@ -67,7 +67,7 @@ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 }
 
 func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
-	if k == info.AnimationDelayKey(model.AnimationXingqiuN0StartDelay) {
+	if k == info.AnimationDelayKey(info.AnimationXingqiuN0StartDelay) {
 		return 7
 	}
 	return c.Character.AnimationStartDelay(k)

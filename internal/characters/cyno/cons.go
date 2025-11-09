@@ -84,7 +84,7 @@ func (c *char) makeC2CB() info.AttackCBFunc {
 // Overloaded, Quicken, Aggravate, Hyperbloom, or an Electro Swirl reaction, he
 // will restore 3 Elemental Energy for all nearby party members (except
 // himself.)
-// This effect can occur 5 times within one use of Sacred Rite: Wolf’s Swiftness.
+// This effect can occur 5 times within one use of Sacred Rite: Wolf窶冱 Swiftness.
 func (c *char) c4() {
 	//nolint:unparam // ignoring for now, event refactor should get rid of bool return of event sub
 	restore := func(args ...any) bool {

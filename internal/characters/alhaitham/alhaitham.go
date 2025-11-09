@@ -94,9 +94,9 @@ func (c *char) Condition(fields []string) (any, error) {
 
 func (c *char) AnimationStartDelay(k info.AnimationDelayKey) int {
 	switch k {
-	case info.AnimationDelayKey(model.AnimationXingqiuN0StartDelay):
+	case info.AnimationDelayKey(info.AnimationXingqiuN0StartDelay):
 		return 14
-	case info.AnimationDelayKey(model.AnimationYelanN0StartDelay):
+	case info.AnimationDelayKey(info.AnimationYelanN0StartDelay):
 		return 7
 	default:
 		return c.Character.AnimationStartDelay(k)
