@@ -271,12 +271,12 @@ function displayCharacters(result) {
             
             console.log(`[WebUI] ${name} final stats: HP=${Math.round(finalHP)}, ATK=${Math.round(finalATK)}, DEF=${Math.round(finalDEF)}, EM=${Math.round(finalEM)}, CR=${(finalCR*100).toFixed(1)}%, CD=${(finalCD*100).toFixed(1)}%, ER=${(finalER*100).toFixed(1)}%`);
             
-            statsHTML = '<div class="char-stats-row">';
+            statsHTML = '<div class="char-stats-list"><div style="margin: 6px 0; font-size: 0.85rem;"><strong>ステータス詳細:</strong></div>';
             statDefs.forEach(({name, value, format}) => {
                 if (value !== undefined && value !== 0) {
-                    statsHTML += `<div class="stat-item">
-                        <span class="stat-label">${name}:</span>
-                        <span class="stat-value">${format(value)}</span>
+                    statsHTML += `<div class="info-row">
+                        <span class="info-label">${name}</span>
+                        <span class="info-value">${format(value)}</span>
                     </div>`;
                 }
             });

@@ -158,33 +158,30 @@
             border-bottom: none;
         }
         
-        .char-stats-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+        .char-stats-list {
             margin-top: 8px;
-            padding: 8px;
-            background: #f9f9f9;
-            border-radius: 4px;
         }
         
-        .char-stats-row .stat-item {
+        .char-stats-list .info-row {
             display: flex;
-            gap: 4px;
+            justify-content: space-between;
+            padding: 4px 8px;
             font-size: 0.85rem;
-            padding: 2px 6px;
-            background: white;
-            border-radius: 3px;
-            border: 1px solid #e0e0e0;
+            border-bottom: 1px solid #f0f0f0;
         }
         
-        .char-stats-row .stat-label {
+        .char-stats-list .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .char-stats-list .info-label {
             font-weight: 600;
             color: #555;
         }
         
-        .char-stats-row .stat-value {
+        .char-stats-list .info-value {
             color: #333;
+            font-weight: 500;
         }
         
         .chart-container {
