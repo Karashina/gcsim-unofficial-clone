@@ -25,15 +25,11 @@ go.work
 backend/
 pipeline/
 containers/
-cmd/
 protos/
 scripts/
 ui/
 doc.go
-.golangci
 todo.md
-go.mod
-go.sum
 tsconfig.json
 Taskfile.yml
 serve_data.json.gz
