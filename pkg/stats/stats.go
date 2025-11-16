@@ -1,9 +1,9 @@
-package stats
+﻿package stats
 
 import (
 	"sync"
 
-	"github.com/genshinsim/gcsim/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
 )
 
 type Config struct {
@@ -34,3 +34,4 @@ func Register(cfg Config) {
 func Collectors() map[string]Config {
 	return collectors
 }
+

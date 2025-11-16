@@ -1,9 +1,9 @@
-package character
+﻿package character
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 func (c *CharWrapper) ConsumeEnergy(delay int) {
@@ -96,3 +96,4 @@ func (c *CharWrapper) ReceiveParticle(p Particle, isActive bool, partyCount int)
 		Write("post_recovery", c.Energy).
 		Write("max_energy", c.EnergyMax)
 }
+

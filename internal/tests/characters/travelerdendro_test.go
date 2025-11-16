@@ -1,19 +1,19 @@
-package characters
+﻿package characters
 
 import (
 	"log"
 	"testing"
 
-	"github.com/genshinsim/gcsim/internal/characters/traveler/common/dendro"
-	_ "github.com/genshinsim/gcsim/internal/characters/traveler/dendro/aether"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/reactable"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/common/dendro"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/dendro/aether"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/reactable"
 )
 
 func TestTravelerDendroBurstAttach(t *testing.T) {
@@ -284,3 +284,4 @@ func TestTravelerDendroBurstElectroTicks(t *testing.T) {
 		t.Errorf("expecting %v ticks, got %v", expectedCount, dmgCount)
 	}
 }
+

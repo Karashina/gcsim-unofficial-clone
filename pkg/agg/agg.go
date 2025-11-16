@@ -1,11 +1,11 @@
-package agg
+﻿package agg
 
 import (
 	"sync"
 
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/model"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 type Config struct {
@@ -38,3 +38,4 @@ func Register(cfg Config) {
 func Aggregators() map[string]Config {
 	return aggregators
 }
+

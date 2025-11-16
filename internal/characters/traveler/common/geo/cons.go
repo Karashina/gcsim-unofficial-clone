@@ -1,11 +1,11 @@
-package geo
+﻿package geo
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/construct"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/construct"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 // C1:
@@ -51,3 +51,4 @@ func (c *Traveler) c1(ticks int) func() {
 		c.Core.Tasks.Add(c.c1(ticks), 60)
 	}
 }
+

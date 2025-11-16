@@ -1,15 +1,15 @@
-package chasca
+﻿package chasca
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/genshinsim/gcsim/internal/frames"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 )
 
 // Aim keeps charging
@@ -280,3 +280,4 @@ func (c *char) randomElemFromBulletPool() attributes.Element {
 	c.bulletPool = c.bulletPool[:len(c.bulletPool)-1]
 	return ele
 }
+

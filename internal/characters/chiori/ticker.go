@@ -1,7 +1,7 @@
-package chiori
+﻿package chiori
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
 )
 
 func (c *char) kill(t *ticker) {
@@ -69,3 +69,4 @@ func (g *ticker) tick() {
 		g.queuer(g.tick, g.interval)
 	}
 }
+

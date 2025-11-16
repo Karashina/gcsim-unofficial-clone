@@ -1,15 +1,15 @@
-package simulation
+﻿package simulation
 
 import (
 	"errors"
 	"fmt"
 	"runtime/debug"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/player"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 type stateFn func(*Simulation) (stateFn, error)
@@ -328,3 +328,4 @@ func (s *Simulation) Run() (res stats.Result, err error) {
 	res, err = s.run()
 	return
 }
+

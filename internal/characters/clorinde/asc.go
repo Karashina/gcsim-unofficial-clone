@@ -1,17 +1,17 @@
-package clorinde
+﻿package clorinde
 
 import (
 	"math"
 
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/core/stacks"
-	"github.com/genshinsim/gcsim/pkg/enemy"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/stacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 const (
@@ -127,3 +127,4 @@ func (c *char) a4Amount() ([]float64, bool) {
 	c.a4bonus[attributes.CR] = float64(c.a4stacks.Count()) * a4CritBuff
 	return c.a4bonus, true
 }
+

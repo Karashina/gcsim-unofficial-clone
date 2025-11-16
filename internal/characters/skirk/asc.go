@@ -1,13 +1,13 @@
-package skirk
+﻿package skirk
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
 )
 
 const a1Dur = 1054
@@ -124,3 +124,4 @@ func (c *char) a4MultAttack() float64 {
 func (c *char) a4MultBurst() float64 {
 	return a4MultBurst[c.getA4Stacks()]
 }
+

@@ -1,10 +1,10 @@
-package energy
+﻿package energy
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 func init() {
@@ -55,3 +55,4 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 		result.Characters[c].EnergyEvents = b.events[c]
 	}
 }
+

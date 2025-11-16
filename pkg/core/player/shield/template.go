@@ -1,6 +1,6 @@
-package shield
+﻿package shield
 
-import "github.com/genshinsim/gcsim/pkg/core/attributes"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 
 type Tmpl struct {
 	ActorIndex int
@@ -82,3 +82,4 @@ func (t *Tmpl) OnExpire() {
 }
 
 func (t *Tmpl) OnOverwrite() {}
+

@@ -1,16 +1,16 @@
-package sigewinne
+﻿package sigewinne
 
 import (
 	"fmt"
 	"math"
 
-	"github.com/genshinsim/gcsim/internal/frames"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/player"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player"
 )
 
 var endLag []int
@@ -164,3 +164,4 @@ func getBurstHitmark(tick int) int {
 		return 25
 	}
 }
+

@@ -1,9 +1,9 @@
-package combat
+﻿package combat
 
 import (
 	"math"
 
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 type GadgetTyp int
@@ -108,3 +108,4 @@ func (h *Handler) GadgetCount() int {
 
 	return count
 }
+

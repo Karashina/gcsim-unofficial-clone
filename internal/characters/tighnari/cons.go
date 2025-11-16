@@ -1,13 +1,13 @@
-package tighnari
+﻿package tighnari
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/enemy"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 // Tighnari's Charged Attack CRIT Rate is increased by 15%.
@@ -102,3 +102,4 @@ func (c *char) c4() {
 	c.Core.Events.Subscribe(event.OnQuicken, f, "tighnari-c4-quicken")
 	c.Core.Events.Subscribe(event.OnSpread, f, "tighnari-c4-spread")
 }
+

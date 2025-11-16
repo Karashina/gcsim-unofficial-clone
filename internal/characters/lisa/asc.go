@@ -1,9 +1,9 @@
-package lisa
+﻿package lisa
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/enemy"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 // Hits by Charged Attacks apply Violet Arc's Conductive status to opponents.
@@ -39,3 +39,4 @@ func (c *char) makeA4CB() combat.AttackCBFunc {
 		})
 	}
 }
+

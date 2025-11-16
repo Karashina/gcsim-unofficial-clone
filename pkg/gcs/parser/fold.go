@@ -1,8 +1,8 @@
-package parser
+﻿package parser
 
 import (
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/gcs/constant"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/constant"
 )
 
 func evalConstant(ex ast.Expr) constant.Value {
@@ -83,3 +83,4 @@ func foldConstants(ex ast.Expr) (ast.Expr, error) {
 		return ex, nil
 	}
 }
+

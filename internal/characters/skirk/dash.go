@@ -1,7 +1,7 @@
-package skirk
+﻿package skirk
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
 )
 
 const skillDashLength = 11
@@ -35,3 +35,4 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 		State:           action.DashState,
 	}, nil
 }
+

@@ -1,12 +1,12 @@
-package enemy
+﻿package enemy
 
 import (
 	"strconv"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 // Add.
@@ -148,3 +148,4 @@ func (e *Enemy) defAdj(evt glog.Event) float64 {
 
 	return r
 }
+

@@ -1,9 +1,9 @@
-package gorou
+﻿package gorou
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 // After using Juuga: Forward Unto Victory, all nearby party members' DEF is increased by 25% for 12s.
@@ -41,3 +41,4 @@ func (c *char) a4Burst() float64 {
 	}
 	return c.TotalDef(false) * 0.156
 }
+

@@ -1,10 +1,10 @@
-package constant
+﻿package constant
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 )
 
 func ToBool(v Value) bool {
@@ -189,3 +189,4 @@ func BinaryOp(op ast.Token, left, right Value) (Value, error) {
 
 	return nil, fmt.Errorf("invalid binary operator %v%v%v", left.Inspect(), op, right.Inspect())
 }
+

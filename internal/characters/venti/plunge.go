@@ -1,14 +1,14 @@
-package venti
+﻿package venti
 
 import (
 	"errors"
 
-	"github.com/genshinsim/gcsim/internal/frames"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/player"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player"
 )
 
 var highPlungeFrames []int
@@ -55,3 +55,4 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 		State:           action.PlungeAttackState,
 	}, nil
 }
+

@@ -1,10 +1,10 @@
-package optimization
+﻿package optimization
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 )
 
 // Calculate per-character per-substat "gradients" at initial state using finite differences
@@ -116,3 +116,4 @@ func (stats *SubstatOptimizerDetails) optimizeNonErSubstatsForChar(
 	stats.optimizer.logger.Debug(char.Base.Key, " has relevant substats:", stats.charRelevantSubstats[idxChar])
 	return opDebug
 }
+

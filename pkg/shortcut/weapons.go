@@ -1,6 +1,6 @@
-package shortcut
+﻿package shortcut
 
-import "github.com/genshinsim/gcsim/pkg/core/keys"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 
 var WeaponNameToKey = map[string]keys.Weapon{
 	"absolution":                      keys.Absolution,
@@ -407,3 +407,4 @@ var WeaponNameToKey = map[string]keys.Weapon{
 	"reliquaryoftruth":                keys.ReliquaryOfTruth,
 	"reliquary":                       keys.ReliquaryOfTruth,
 }
+

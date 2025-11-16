@@ -1,9 +1,9 @@
-package kuki
+﻿package kuki
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 // When Shinobu's HP is not higher than 50%, her Healing Bonus is increased by 15%.
@@ -44,3 +44,4 @@ func (c *char) a4Damage() float64 {
 	}
 	return c.Stat(attributes.EM) * 0.25
 }
+

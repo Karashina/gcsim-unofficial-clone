@@ -1,9 +1,9 @@
-// package modifier provides a universal way of handling a slice
+﻿// package modifier provides a universal way of handling a slice
 // of modifiers
 package modifier
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 type Mod interface {
@@ -155,3 +155,4 @@ func LogAdd[K Mod](prefix string, index int, mod K, logger glog.Logger, overwrot
 	evt.SetEnded(mod.Expiry())
 	mod.SetEvent(evt)
 }
+

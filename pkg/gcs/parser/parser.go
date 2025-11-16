@@ -1,4 +1,4 @@
-package parser
+﻿package parser
 
 import (
 	"errors"
@@ -6,9 +6,9 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 )
 
 type Parser struct {
@@ -169,3 +169,4 @@ func (p *Parser) parseFloat64Const() (float64, error) {
 // 	}
 // 	return int(result), err
 // }
+

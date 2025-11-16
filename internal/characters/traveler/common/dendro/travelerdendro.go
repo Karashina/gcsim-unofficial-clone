@@ -1,14 +1,14 @@
-package dendro
+﻿package dendro
 
 import (
-	"github.com/genshinsim/gcsim/internal/characters/traveler/common"
-	tmpl "github.com/genshinsim/gcsim/internal/template/character"
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/common"
+	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 type Traveler struct {
@@ -60,3 +60,4 @@ func (c *Traveler) AnimationStartDelay(k model.AnimationDelayKey) int {
 		return c.Character.AnimationStartDelay(k)
 	}
 }
+

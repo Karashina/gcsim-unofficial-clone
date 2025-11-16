@@ -1,8 +1,8 @@
-package target
+﻿package target
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 func (t *Target) WillApplyEle(tag attacks.ICDTag, grp attacks.ICDGroup, char int) float64 {
@@ -86,3 +86,4 @@ func (t *Target) ResetTagCounterAfterDelay(tag attacks.ICDTag, grp attacks.ICDGr
 		Write("grp", grp).
 		Write("reset", t.Core.F+attacks.ICDGroupResetTimer[grp]-1)
 }
+

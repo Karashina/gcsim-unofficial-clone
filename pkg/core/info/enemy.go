@@ -1,8 +1,8 @@
-package info
+﻿package info
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 type EnemyProfile struct {
@@ -30,3 +30,4 @@ func (e *EnemyProfile) Clone() EnemyProfile {
 	}
 	return r
 }
+

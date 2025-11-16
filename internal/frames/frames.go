@@ -1,9 +1,9 @@
-package frames
+﻿package frames
 
 import (
-	"github.com/genshinsim/gcsim/internal/template/character"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 )
 
 func InitNormalCancelSlice(hitmark, animation int) []int {
@@ -48,3 +48,4 @@ func NewAbilFunc(slice []int) func(action.Action) int {
 		return slice[next]
 	}
 }
+

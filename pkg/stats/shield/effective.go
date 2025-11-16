@@ -1,11 +1,11 @@
-package shield
+﻿package shield
 
 import (
 	"math"
 	"sort"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 type endpoint struct {
@@ -156,3 +156,4 @@ func computeEffective(shields map[string][]stats.ShieldInterval) map[string][]st
 	}
 	return out
 }
+

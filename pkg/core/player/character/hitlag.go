@@ -1,10 +1,10 @@
-package character
+﻿package character
 
 import (
 	"fmt"
 	"math"
 
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 func (c *CharWrapper) QueueCharTask(f func(), delay int) {
@@ -71,3 +71,4 @@ func (c *CharWrapper) ApplyHitlag(factor, dur float64) {
 		evt.Write("mods affected", logs)
 	}
 }
+

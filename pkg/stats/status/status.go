@@ -1,12 +1,12 @@
-package status
+﻿package status
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/enemy"
-	"github.com/genshinsim/gcsim/pkg/reactable"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/reactable"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 // 6 = .1s. TODO: figure out best bucket size
@@ -193,3 +193,4 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 		result.Enemies[e].ReactionUptime = b.reactionUptime[e]
 	}
 }
+

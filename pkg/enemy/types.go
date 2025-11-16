@@ -1,12 +1,12 @@
-package enemy
+﻿package enemy
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/model"
-	"github.com/genshinsim/gcsim/pkg/shortcut"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
 )
 
 type TargetParams struct {
@@ -54,7 +54,7 @@ func ConfigureTarget(profile *info.EnemyProfile, name string, params TargetParam
 	return nil
 }
 
-//go:generate go run github.com/genshinsim/gcsim/scripts/enemystat
+//go:generate go run github.com/Karashina/gcsim-unofficial-clone/scripts/enemystat
 func getMonsterInfo(name string) (info.EnemyProfile, error) {
 	id, ok := shortcut.MonsterNameToID[name]
 	if !ok {
@@ -94,3 +94,4 @@ func getMonsterInfo(name string) (info.EnemyProfile, error) {
 		MonsterName:   result.Key,
 	}, nil
 }
+

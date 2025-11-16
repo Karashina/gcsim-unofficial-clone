@@ -1,8 +1,8 @@
-package klee
+﻿package klee
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 const (
@@ -54,3 +54,4 @@ func (c *char) makeA4CB() combat.AttackCBFunc {
 		}
 	}
 }
+

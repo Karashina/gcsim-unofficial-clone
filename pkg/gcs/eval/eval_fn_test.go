@@ -1,11 +1,11 @@
-package eval
+﻿package eval
 
 import (
 	"fmt"
 	"log"
 	"testing"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/parser"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/parser"
 )
 
 func TestFib(t *testing.T) {
@@ -299,3 +299,4 @@ func TestIsEven(t *testing.T) {
 		t.Errorf("expecting result to be 0, got %v", val.ival)
 	}
 }
+

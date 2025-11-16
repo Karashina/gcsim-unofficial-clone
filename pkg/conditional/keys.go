@@ -1,11 +1,11 @@
-package conditional
+﻿package conditional
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/shortcut"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
 )
 
 func evalKeys(fields []string) (int, error) {
@@ -73,3 +73,4 @@ func evalAction(fields []string) (int, error) {
 	}
 	return int(a), nil
 }
+

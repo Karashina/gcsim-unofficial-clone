@@ -1,6 +1,6 @@
-package venti
+﻿package venti
 
-import "github.com/genshinsim/gcsim/pkg/core/attributes"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 
 // A1 is not implemented and will likely never be implemented:
 // Holding Skyward Sonnet creates an upcurrent that lasts for 20s.
@@ -20,3 +20,4 @@ func (c *char) a4() {
 		}
 	}
 }
+

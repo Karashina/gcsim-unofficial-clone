@@ -1,11 +1,11 @@
-// package endstats collects a snapshot of relevant information right when a simulation
+﻿// package endstats collects a snapshot of relevant information right when a simulation
 // ends, such as ending energy etc..
 package endstats
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 func init() {
@@ -39,3 +39,4 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 		result.EndStats[c].EndingEnergy = b.endingEnergy[c]
 	}
 }
+

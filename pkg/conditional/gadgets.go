@@ -1,12 +1,12 @@
-package conditional
+﻿package conditional
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/internal/template/sourcewaterdroplet"
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/reactable"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/template/sourcewaterdroplet"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/reactable"
 )
 
 func evalGadgets(c *core.Core, fields []string) (int, error) {
@@ -93,3 +93,4 @@ func countElementalCrystallizeShards(c *core.Core, ele string) int {
 	}
 	return count
 }
+

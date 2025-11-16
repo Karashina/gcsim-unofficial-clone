@@ -1,8 +1,8 @@
-package noelle
+﻿package noelle
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
 type noelleShield struct {
@@ -43,3 +43,4 @@ func (n *noelleShield) OnDamage(dmg float64, ele attributes.Element, bonus float
 	}
 	return taken, ok
 }
+

@@ -1,9 +1,9 @@
-package barbara
+﻿package barbara
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 // The Stamina Consumption of characters within Let the Show Begin♪'s Melody Loop is reduced by 12%.
@@ -39,3 +39,4 @@ func (c *char) a4() {
 		return false
 	}, "barbara-a4")
 }
+

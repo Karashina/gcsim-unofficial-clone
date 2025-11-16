@@ -1,8 +1,8 @@
-package lanyan
+﻿package lanyan
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
 func (c *char) genShield(ele attributes.Element) {
@@ -45,3 +45,4 @@ func (c *char) hasShield() bool {
 func (c *char) shieldHP() float64 {
 	return shieldAmt[c.TalentLvlSkill()]*c.TotalAtk() + shieldFlat[c.TalentLvlSkill()]
 }
+

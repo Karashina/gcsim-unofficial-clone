@@ -1,6 +1,6 @@
-package shortcut
+﻿package shortcut
 
-import "github.com/genshinsim/gcsim/pkg/core/keys"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 
 var SetNameToKey = map[string]keys.Set{
 	"adventurer":                         keys.Adventurer,
@@ -137,3 +137,4 @@ var SetNameToKey = map[string]keys.Set{
 	"wanderers":                          keys.WanderersTroupe,
 	"wt":                                 keys.WanderersTroupe,
 }
+

@@ -1,8 +1,8 @@
-package sigewinne
+﻿package sigewinne
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
 // need to rewrite Expires
@@ -39,3 +39,4 @@ func (c *char) removeC2Shield() {
 	c.c2Shield.Expires = c.Core.F + 1
 	c.c2Shield = nil
 }
+

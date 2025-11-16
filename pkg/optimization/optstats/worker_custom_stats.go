@@ -1,11 +1,11 @@
-package optstats
+﻿package optstats
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/gcs/eval"
-	"github.com/genshinsim/gcsim/pkg/simulation"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/eval"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulation"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 type PoolCustomStats[T any] struct {
@@ -82,3 +82,4 @@ func (p *PoolCustomStats[T]) worker() {
 		}
 	}
 }
+

@@ -1,11 +1,11 @@
-package combat
+﻿package combat
 
 import (
 	"log"
 	"testing"
 
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 //nolint:unparam // all calls currently have y = 0 but that can change
@@ -243,3 +243,4 @@ func TestKillGadgetOnCollision(t *testing.T) {
 		t.FailNow()
 	}
 }
+

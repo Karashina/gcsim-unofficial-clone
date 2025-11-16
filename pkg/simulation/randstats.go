@@ -1,12 +1,12 @@
-package simulation
+﻿package simulation
 
 import (
 	"errors"
 	"log"
 	"math/rand"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 )
 
 var subDist [attributes.DelimBaseStat]float64
@@ -121,3 +121,4 @@ func randSub(weights [attributes.DelimBaseStat]float64, rng *rand.Rand) attribut
 	}
 	return attributes.NoStat
 }
+

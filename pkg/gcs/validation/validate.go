@@ -1,8 +1,8 @@
-package validation
+﻿package validation
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
 func ValidateCharParamKeys(c keys.Char, a action.Action, keys []string) error {
@@ -13,3 +13,4 @@ func ValidateCharParamKeys(c keys.Char, a action.Action, keys []string) error {
 	}
 	return f(a, keys)
 }
+

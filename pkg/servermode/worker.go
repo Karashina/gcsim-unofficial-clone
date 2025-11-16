@@ -1,15 +1,15 @@
-package servermode
+﻿package servermode
 
 import (
 	"log/slog"
 
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/gcs/eval"
-	"github.com/genshinsim/gcsim/pkg/model"
-	"github.com/genshinsim/gcsim/pkg/simulation"
-	"github.com/genshinsim/gcsim/pkg/simulator"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/eval"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulation"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulator"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 type worker struct {
@@ -171,3 +171,4 @@ func (w *worker) iter(work chan job, res chan stats.Result, errChan chan error) 
 		}
 	}
 }
+

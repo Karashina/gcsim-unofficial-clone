@@ -1,4 +1,4 @@
-// Package cooldown provides default implementation for SetCD, SetCDWithDelay, ResetActionCooldown, ReduceActionCooldown, ActionReady,
+﻿// Package cooldown provides default implementation for SetCD, SetCDWithDelay, ResetActionCooldown, ReduceActionCooldown, ActionReady,
 package character
 
 import (
@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 // SetCD takes two parameters:
@@ -201,3 +201,4 @@ func (c *Character) startCooldownQueueWorker(a action.Action) {
 	// wait for c.cooldownQueue[a][0], then add a stack
 	c.Core.Tasks.Add(worker, c.cdQueue[a][0])
 }
+

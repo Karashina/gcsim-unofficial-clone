@@ -1,10 +1,10 @@
-package conditional
+﻿package conditional
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/construct"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/construct"
 )
 
 func evalConstruct(c *core.Core, fields []string) (int, error) {
@@ -29,3 +29,4 @@ func evalConstruct(c *core.Core, fields []string) (int, error) {
 		return 0, fmt.Errorf("bad construct condition: invalid criteria %v", v)
 	}
 }
+

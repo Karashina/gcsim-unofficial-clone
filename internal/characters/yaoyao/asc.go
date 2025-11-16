@@ -1,11 +1,11 @@
-package yaoyao
+﻿package yaoyao
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 )
 
 const a4Status = "yaoyao-a4"
@@ -83,3 +83,4 @@ func (c *char) a4(index, src int) func() {
 		c.QueueCharTask(c.a4(index, src), 60)
 	}
 }
+

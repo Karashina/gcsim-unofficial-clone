@@ -1,11 +1,11 @@
-package keys
+﻿package keys
 
 import (
 	"encoding/json"
 	"errors"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 )
 
 type Char int
@@ -121,3 +121,4 @@ var CharKeyToEle = map[Char]attributes.Element{
 	LumineCryo:       attributes.Cryo,
 	TestCharDoNotUse: attributes.Geo,
 }
+

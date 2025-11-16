@@ -1,7 +1,7 @@
-package character
+﻿package character
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
 func (c *Character) clampHPRatio() {
@@ -74,3 +74,4 @@ func (c *Character) CurrentHPDebt() float64 {
 func (c *Character) CurrentHPDebtRatio() float64 {
 	return c.currentHPDebt / c.MaxHP()
 }
+

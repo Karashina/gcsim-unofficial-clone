@@ -1,12 +1,12 @@
-package eval
+﻿package eval
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/conditional"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/gcs/constant"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/conditional"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/constant"
 )
 
 func (e *Eval) evalExpr(ex ast.Expr, env *Env) (Obj, error) {
@@ -232,3 +232,4 @@ func fromConstant(x constant.Value) Obj {
 		return &null{}
 	}
 }
+

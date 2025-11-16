@@ -1,11 +1,11 @@
-package reactable
+﻿package reactable
 
 import (
 	"testing"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
 func TestHydroVaporize(t *testing.T) {
@@ -91,3 +91,4 @@ func TestPyroVaporize(t *testing.T) {
 		t.Error("expecting target to not contain any remaining hydro or pyro aura")
 	}
 }
+

@@ -1,9 +1,9 @@
-package reactable
+﻿package reactable
 
 import (
 	"testing"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 )
 
 func TestOverload(t *testing.T) {
@@ -22,3 +22,4 @@ func TestOverload(t *testing.T) {
 		t.Errorf("expecting overload, got %v", trg[0].last.Info.Abil)
 	}
 }
+

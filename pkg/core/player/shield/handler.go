@@ -1,9 +1,9 @@
-package shield
+﻿package shield
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 // Handler keeps track of all the active shields
@@ -146,3 +146,4 @@ func (h *Handler) Tick() {
 	}
 	h.shields = h.shields[:n]
 }
+

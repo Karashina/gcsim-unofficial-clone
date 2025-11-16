@@ -1,9 +1,9 @@
-package verdant
+﻿package verdant
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/task"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/task"
 )
 
 // Verdant Dew charging system
@@ -154,3 +154,4 @@ func (h *Handler) Consume(n int) int {
 	h.count = int(h.verdantPart) / 150
 	return toConsume
 }
+

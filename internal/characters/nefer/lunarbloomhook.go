@@ -1,12 +1,12 @@
-package nefer
+﻿package nefer
 
 import (
 	_ "embed"
 
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
 // onLunarBloomNeferSpecial resolves PP shade dummies and C6 dummies into Lunar-Bloom attacks.
@@ -66,3 +66,4 @@ func (c *char) queueLunarBloomAttack(target combat.Target, mult float64, abilNam
 func (c *char) InitLCallback() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.onLunarBloomNeferSpecial, "lb-nefer-special")
 }
+

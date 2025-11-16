@@ -1,8 +1,8 @@
-package combat
+﻿package combat
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 func (h *Handler) AbsorbCheck(idx int, p AttackPattern, prio ...attributes.Element) attributes.Element {
@@ -54,3 +54,4 @@ func (h *Handler) AbsorbCheck(idx int, p AttackPattern, prio ...attributes.Eleme
 	}
 	return attributes.NoElement
 }
+

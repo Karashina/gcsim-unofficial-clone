@@ -1,8 +1,8 @@
-package combat
+﻿package combat
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 type AttackPattern struct {
@@ -92,3 +92,4 @@ func NewBoxHit(src, center, offset positional, w, h float64) AttackPattern {
 func NewBoxHitOnTarget(trg, offset positional, w, h float64) AttackPattern {
 	return NewBoxHit(trg, trg, offset, w, h)
 }
+

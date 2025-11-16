@@ -1,14 +1,14 @@
-package kinich
+﻿package kinich
 
 import (
 	"slices"
 
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/enemy"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 const (
@@ -98,3 +98,4 @@ func (c *char) c6(ai combat.AttackInfo, s *combat.Snapshot, radius float64, targ
 	ap := combat.NewCircleHitOnTarget(next, nil, radius)
 	c.Core.QueueAttackWithSnap(ai, *s, ap, travel, c.particleCB, c.a1CB, c.c2ResShredCB)
 }
+

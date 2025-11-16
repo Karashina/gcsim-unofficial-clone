@@ -1,14 +1,14 @@
-// Package simulation provide the functionality required to run one simulation
+﻿// Package simulation provide the functionality required to run one simulation
 package simulation
 
 import (
 	"slices"
 
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 type Simulation struct {
@@ -87,3 +87,4 @@ func New(cfg *info.ActionList, eval action.Evaluator, c *core.Core) (*Simulation
 
 	return s, nil
 }
+

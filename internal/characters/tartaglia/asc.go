@@ -1,8 +1,8 @@
-package tartaglia
+﻿package tartaglia
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
 )
 
 // Extends Riptide duration by 8s.
@@ -29,3 +29,4 @@ func (c *char) makeA4CB() combat.AttackCBFunc {
 		}
 	}
 }
+

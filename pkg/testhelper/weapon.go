@@ -1,12 +1,12 @@
-package testhelper
+﻿package testhelper
 
 import (
 	_ "embed"
 
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 	"google.golang.org/protobuf/encoding/prototext"
 )
 
@@ -33,3 +33,4 @@ func (b *Weapon) Data() *model.WeaponData { return bweap }
 func NewFakeWeapon(_ *core.Core, _ *character.CharWrapper, _ info.WeaponProfile) (info.Weapon, error) {
 	return &Weapon{}, nil
 }
+

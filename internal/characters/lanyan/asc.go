@@ -1,8 +1,8 @@
-package lanyan
+﻿package lanyan
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
 )
 
 func (c *char) absorbA1() attributes.Element {
@@ -17,3 +17,4 @@ func (c *char) absorbA1() attributes.Element {
 	}
 	return ele
 }
+

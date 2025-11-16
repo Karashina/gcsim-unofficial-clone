@@ -1,8 +1,8 @@
-// Package shield provide a handler to keep track of shields and
+﻿// Package shield provide a handler to keep track of shields and
 // add shields etc...
 package shield
 
-import "github.com/genshinsim/gcsim/pkg/core/attributes"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 
 type Type int
 
@@ -48,3 +48,4 @@ type Shield interface {
 	Element() attributes.Element
 	Desc() string
 }
+

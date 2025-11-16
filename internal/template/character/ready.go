@@ -1,8 +1,8 @@
-package character
+﻿package character
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 func (c *Character) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
@@ -45,3 +45,4 @@ func (c *Character) ActionReady(a action.Action, p map[string]int) (bool, action
 	}
 	return true, action.NoFailure
 }
+

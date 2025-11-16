@@ -1,9 +1,9 @@
-package sigewinne
+﻿package sigewinne
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
 )
 
 func (c *char) Walk(p map[string]int) (action.Info, error) {
@@ -12,3 +12,4 @@ func (c *char) Walk(p map[string]int) (action.Info, error) {
 	}
 	return c.Character.Walk(p)
 }
+

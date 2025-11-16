@@ -1,8 +1,8 @@
-package kachina
+﻿package kachina
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/construct"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/construct"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 )
 
 type TurboTwirly struct {
@@ -23,3 +23,4 @@ func (s *TurboTwirly) IsLimited() bool                  { return true }
 func (s *TurboTwirly) Count() int                       { return 1 }
 func (s *TurboTwirly) Direction() geometry.Point        { return s.dir }
 func (s *TurboTwirly) Pos() geometry.Point              { return s.pos }
+

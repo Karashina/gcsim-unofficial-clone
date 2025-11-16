@@ -1,14 +1,14 @@
-package metadata
+﻿package metadata
 
 import (
 	"math"
 	"slices"
 	"strconv"
 
-	"github.com/genshinsim/gcsim/pkg/agg"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/model"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/agg"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 func init() {
@@ -61,3 +61,4 @@ func (b buffer) Flush(result *model.SimulationStatistics) {
 	result.P50Seed = strconv.FormatUint(agg.Median(b.runs).seed, 10)
 	result.P75Seed = strconv.FormatUint(agg.Median(b.runs[c2:]).seed, 10)
 }
+

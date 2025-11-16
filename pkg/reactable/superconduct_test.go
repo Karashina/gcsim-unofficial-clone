@@ -1,9 +1,9 @@
-package reactable
+﻿package reactable
 
 import (
 	"testing"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 )
 
 func TestSuperconduct(t *testing.T) {
@@ -42,3 +42,4 @@ func TestFrozenSuperconduct(t *testing.T) {
 		t.Errorf("expecting superconduct, got %v", trg[0].last.Info.Abil)
 	}
 }
+

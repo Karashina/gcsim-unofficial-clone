@@ -1,9 +1,9 @@
-package parser
+﻿package parser
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 )
 
 // expecting let ident = expr;
@@ -42,3 +42,4 @@ func (p *Parser) parseLet() (ast.Stmt, error) {
 
 	return stmt, err
 }
+

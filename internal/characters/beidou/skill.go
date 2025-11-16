@@ -1,13 +1,13 @@
-package beidou
+﻿package beidou
 
 import (
-	"github.com/genshinsim/gcsim/internal/frames"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 var (
@@ -96,3 +96,4 @@ func (c *char) makeParticleCB(counter int) combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 2+float64(counter), attributes.Electro, c.ParticleDelay)
 	}
 }
+

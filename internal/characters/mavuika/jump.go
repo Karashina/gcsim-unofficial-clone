@@ -1,9 +1,9 @@
-package mavuika
+﻿package mavuika
 
 import (
-	"github.com/genshinsim/gcsim/internal/frames"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/player"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player"
 )
 
 var bikeJumpFrames []int
@@ -31,3 +31,4 @@ func (c *char) Jump(p map[string]int) (action.Info, error) {
 	}
 	return c.Character.Jump(p)
 }
+

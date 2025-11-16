@@ -1,14 +1,14 @@
-package pyro
+﻿package pyro
 
 import (
-	"github.com/genshinsim/gcsim/internal/characters/traveler/common"
-	tmpl "github.com/genshinsim/gcsim/internal/template/character"
-	"github.com/genshinsim/gcsim/internal/template/nightsoul"
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/common"
+	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/template/nightsoul"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 type Traveler struct {
@@ -69,3 +69,4 @@ func (c *Traveler) Condition(fields []string) (any, error) {
 		return c.Character.Condition(fields)
 	}
 }
+

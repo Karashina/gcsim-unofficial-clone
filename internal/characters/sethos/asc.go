@@ -1,9 +1,9 @@
-package sethos
+﻿package sethos
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 const a1Key = "sethos-a1"
@@ -79,3 +79,4 @@ func (c *char) startA4Icd() {
 	c.AddStatus(a4IcdKey, a4Icd, true)
 	c.QueueCharTask(c.a4, a4Icd)
 }
+

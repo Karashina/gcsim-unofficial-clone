@@ -1,10 +1,10 @@
-package qiqi
+﻿package qiqi
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 // When a character under the effects of Adeptus Art: Herald of Frost triggers an Elemental Reaction,
@@ -48,3 +48,4 @@ func (c *char) a1() {
 // she has a 50% chance to apply a Fortune-Preserving Talisman to them for 6s.
 // This effect can only occur once every 30s.
 const a4ICDKey = "qiqi-a4-icd"
+

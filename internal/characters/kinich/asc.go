@@ -1,11 +1,11 @@
-package kinich
+﻿package kinich
 
 import (
-	"github.com/genshinsim/gcsim/internal/template/nightsoul"
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/template/nightsoul"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
 )
 
 const (
@@ -79,3 +79,4 @@ func (c *char) a4Amount() float64 {
 	c.DeleteStatus(a4StackKey)
 	return 3.2 * float64(stacks) * c.TotalAtk()
 }
+

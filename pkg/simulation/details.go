@@ -1,14 +1,14 @@
-package simulation
+﻿package simulation
 
 import (
 	"fmt"
 	"strconv"
 
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 func (s *Simulation) CharacterDetails() []*model.Character {
@@ -73,3 +73,4 @@ func (s *Simulation) CharacterDetails() []*model.Character {
 
 	return out
 }
+

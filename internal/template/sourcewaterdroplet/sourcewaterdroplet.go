@@ -1,12 +1,12 @@
-package sourcewaterdroplet
+﻿package sourcewaterdroplet
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/gadget"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gadget"
 )
 
 type Gadget struct {
@@ -30,3 +30,4 @@ func (s *Gadget) CalcTempDirection(trg geometry.Point) geometry.Point {
 
 func (s *Gadget) Type() targets.TargettableType                          { return targets.TargettableGadget }
 func (s *Gadget) Attack(*combat.AttackEvent, glog.Event) (float64, bool) { return 0, false }
+

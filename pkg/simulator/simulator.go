@@ -1,4 +1,4 @@
-package simulator
+﻿package simulator
 
 import (
 	"context"
@@ -16,14 +16,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/genshinsim/gcsim/pkg/agg"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/gcs/parser"
-	"github.com/genshinsim/gcsim/pkg/model"
-	"github.com/genshinsim/gcsim/pkg/result"
-	"github.com/genshinsim/gcsim/pkg/stats"
-	"github.com/genshinsim/gcsim/pkg/worker"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/agg"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/parser"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/result"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/worker"
 )
 
 // Options sets out the settings to run the sim by (such as debug mode, etc..)
@@ -311,3 +311,4 @@ func ReadConfig(fpath string) (string, error) {
 
 	return data.String(), nil
 }
+

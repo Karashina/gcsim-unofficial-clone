@@ -1,8 +1,8 @@
-package info
+﻿package info
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 func ConvertProtoStat(s model.StatType) attributes.Stat {
@@ -167,3 +167,4 @@ func ConvertRarity(q model.QualityType) int {
 		return 4
 	}
 }
+

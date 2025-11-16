@@ -1,15 +1,15 @@
-package conditional
+﻿package conditional
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/reactions"
-	"github.com/genshinsim/gcsim/pkg/enemy"
-	"github.com/genshinsim/gcsim/pkg/reactable"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/reactions"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/reactable"
 )
 
 func evalDebuff(c *core.Core, fields []string) (bool, error) {
@@ -88,3 +88,4 @@ func parseTarget(c *core.Core, trg string) (*enemy.Enemy, error) {
 	}
 	return e, nil
 }
+

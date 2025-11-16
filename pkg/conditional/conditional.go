@@ -1,11 +1,11 @@
-package conditional
+﻿package conditional
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/player"
-	"github.com/genshinsim/gcsim/pkg/shortcut"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
 )
 
 const countField = "count"
@@ -60,3 +60,4 @@ func Eval(c *core.Core, fields []string) (any, error) {
 		return 0, fmt.Errorf("invalid character %v in character condition", name)
 	}
 }
+

@@ -1,12 +1,12 @@
-package simulator
+﻿package simulator
 
 import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/eval"
-	"github.com/genshinsim/gcsim/pkg/model"
-	"github.com/genshinsim/gcsim/pkg/simulation"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/eval"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulation"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -96,3 +96,4 @@ func GenerateSampleWithSeed(cfg string, seed uint64, opts Options) (*model.Sampl
 	}
 	return sample, err
 }
+

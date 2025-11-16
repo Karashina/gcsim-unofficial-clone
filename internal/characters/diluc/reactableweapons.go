@@ -1,11 +1,11 @@
-package diluc
+﻿package diluc
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/gadget"
-	"github.com/genshinsim/gcsim/pkg/reactable"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gadget"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/reactable"
 )
 
 type ReactableWeapon struct {
@@ -113,3 +113,4 @@ func (p *ReactableWeapon) resetgauge() {
 	p.Durability[reactable.Geo] = 0
 	p.Durability[reactable.Dendro] = 0
 }
+

@@ -1,9 +1,9 @@
-package character
+﻿package character
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 )
 
 func (c *Character) CalcHealAmount(hi *info.HealInfo) (float64, float64) {
@@ -90,3 +90,4 @@ func (c *Character) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
 
 	return heal
 }
+

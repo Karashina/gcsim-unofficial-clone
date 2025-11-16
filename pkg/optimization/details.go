@@ -1,16 +1,16 @@
-package optimization
+﻿package optimization
 
 import (
 	"context"
 	"sort"
 	"time"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/optimization/optstats"
-	"github.com/genshinsim/gcsim/pkg/simulator"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/optimization/optstats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulator"
 )
 
 type Ordered interface {
@@ -135,3 +135,4 @@ func (stats *SubstatOptimizerDetails) cloneStatsWithFixedAllocations(fixedSubsta
 		}
 	}
 }
+

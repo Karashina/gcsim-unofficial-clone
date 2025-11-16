@@ -1,12 +1,12 @@
-package info
+﻿package info
 
 import (
 	"encoding/json"
 	"errors"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 type WeaponClass int
@@ -65,3 +65,4 @@ type Weapon interface {
 	Init() error
 	Data() *model.WeaponData
 }
+

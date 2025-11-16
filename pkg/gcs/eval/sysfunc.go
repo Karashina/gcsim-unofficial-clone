@@ -1,4 +1,4 @@
-package eval
+﻿package eval
 
 import (
 	"errors"
@@ -6,15 +6,15 @@ import (
 	"math"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/reactable"
-	"github.com/genshinsim/gcsim/pkg/shortcut"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/reactable"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
 )
 
 func (e *Eval) initSysFuncs(env *Env) {
@@ -473,3 +473,4 @@ func (e *Eval) executeAction(c *ast.CallExpr, env *Env) (Obj, error) {
 
 	return &null{}, nil
 }
+

@@ -1,7 +1,7 @@
-package layla
+﻿package layla
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
 // While the Curtain of Slumber is active, the Deep Sleep effect will activate each time the Curtain gains 1 Night Star:
@@ -28,3 +28,4 @@ func (c *char) a4() float64 {
 	}
 	return 0.015 * c.MaxHP()
 }
+

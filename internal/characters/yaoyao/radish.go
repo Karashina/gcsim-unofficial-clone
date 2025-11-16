@@ -1,6 +1,6 @@
-package yaoyao
+﻿package yaoyao
 
-import "github.com/genshinsim/gcsim/pkg/core/info"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 
 func (c *char) radishHeal(hi info.HealInfo) {
 	c.Core.Player.Heal(hi)
@@ -19,3 +19,4 @@ func (c *char) radishHeal(hi info.HealInfo) {
 		c.QueueCharTask(c.a4(active.Index, c.Core.F), 60)
 	}
 }
+

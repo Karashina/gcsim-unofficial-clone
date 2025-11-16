@@ -1,13 +1,13 @@
-package player
+﻿package player
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
 // ErrActionNotReady is returned if the requested action is not ready; this could be
@@ -212,3 +212,4 @@ func (h *Handler) useAbility(
 		Write("swap_cd_post", h.SwapCD)
 	return nil
 }
+

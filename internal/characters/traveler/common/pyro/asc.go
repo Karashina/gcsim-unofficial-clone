@@ -1,8 +1,8 @@
-package pyro
+﻿package pyro
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
 const a4OnReactICD = "travelerpyro-a4-icd"
@@ -43,3 +43,4 @@ func (c *Traveler) a4Init() {
 	c.Core.Events.Subscribe(event.OnCrystallizePyro, fReactionHook, "travelerpyro-a4-oncrystallizepyro")
 	c.Core.Events.Subscribe(event.OnNightsoulBurst, fNSHook, "travelerpyro-a4-onnsburst")
 }
+

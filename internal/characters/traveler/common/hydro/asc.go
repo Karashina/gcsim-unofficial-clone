@@ -1,12 +1,12 @@
-package hydro
+﻿package hydro
 
 import (
-	"github.com/genshinsim/gcsim/internal/template/sourcewaterdroplet"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/template/sourcewaterdroplet"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 const a1ICDKey = "sourcewater-droplet-icd"
@@ -85,3 +85,4 @@ func (c *Traveler) newDroplet() *sourcewaterdroplet.Gadget {
 	droplet := sourcewaterdroplet.New(c.Core, pos, combat.GadgetTypSourcewaterDropletHydroTrav)
 	return droplet
 }
+

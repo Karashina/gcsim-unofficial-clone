@@ -1,10 +1,10 @@
-package parser
+﻿package parser
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 )
 
 func parseHurt(p *Parser) (parseFn, error) {
@@ -158,3 +158,4 @@ func parseHurtElement(p *Parser) error {
 	p.res.HurtSettings.Element = ast.EleKeys[n.Val]
 	return nil
 }
+

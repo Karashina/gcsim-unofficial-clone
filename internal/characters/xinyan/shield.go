@@ -1,8 +1,8 @@
-package xinyan
+﻿package xinyan
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
 type xinyanShield struct {
@@ -35,3 +35,4 @@ func (n *xinyanShield) OnDamage(dmg float64, ele attributes.Element, bonus float
 	}
 	return taken, ok
 }
+

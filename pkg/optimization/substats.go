@@ -1,15 +1,15 @@
-package optimization
+﻿package optimization
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/shortcut"
-	"github.com/genshinsim/gcsim/pkg/simulator"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulator"
 	"go.uber.org/zap"
 )
 
@@ -349,3 +349,4 @@ func PrettyPrintStatsCounts(statsCounts []int) string {
 	}
 	return strings.Trim(sb.String(), " ")
 }
+

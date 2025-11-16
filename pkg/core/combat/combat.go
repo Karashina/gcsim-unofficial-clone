@@ -1,4 +1,4 @@
-// Package combat handles all combat related functionalities including
+﻿// Package combat handles all combat related functionalities including
 //   - target tracking
 //   - target selection
 //   - hitbox collision checking
@@ -8,10 +8,10 @@ package combat
 import (
 	"math/rand"
 
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/core/task"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/task"
 )
 
 type CharHandler interface {
@@ -104,3 +104,4 @@ func (h *Handler) Tick() {
 		h.gccount = 0
 	}
 }
+

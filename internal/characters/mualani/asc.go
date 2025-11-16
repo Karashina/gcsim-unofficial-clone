@@ -1,9 +1,9 @@
-package mualani
+﻿package mualani
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 const a1Delay = 20
@@ -44,3 +44,4 @@ func (c *char) a4() {
 		return false
 	}, "maulani-a4-nightsoul")
 }
+

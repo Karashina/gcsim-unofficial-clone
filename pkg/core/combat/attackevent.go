@@ -1,10 +1,10 @@
-package combat
+﻿package combat
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/reactions"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/reactions"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 type AttackEvent struct {
@@ -73,3 +73,4 @@ type Snapshot struct {
 	SourceFrame int           // frame snapshot was generated at
 	Logs        []interface{} // logs for the snapshot
 }
+

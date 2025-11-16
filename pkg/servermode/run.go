@@ -1,4 +1,4 @@
-package servermode
+﻿package servermode
 
 import (
 	"crypto/rand"
@@ -8,11 +8,11 @@ import (
 	"log"
 	"slices"
 
-	"github.com/genshinsim/gcsim/pkg/agg"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/gcs/parser"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/agg"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/parser"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 func errorRecover(r interface{}) error {
@@ -89,3 +89,4 @@ func cryptoRandSeed() int64 {
 	}
 	return int64(binary.LittleEndian.Uint64(b[:]))
 }
+

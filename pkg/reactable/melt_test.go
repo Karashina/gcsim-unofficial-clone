@@ -1,10 +1,10 @@
-package reactable
+﻿package reactable
 
 import (
 	"testing"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
 )
 
 func TestCryoMelt(t *testing.T) {
@@ -108,3 +108,4 @@ func TestPyroFrozenCryoMelt(t *testing.T) {
 		t.Error("expecting target to not contain any remaining hydro or pyro aura")
 	}
 }
+

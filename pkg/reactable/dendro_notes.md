@@ -1,4 +1,4 @@
-This is to keep track Dendro implementation notes/thoughts:
+﻿This is to keep track Dendro implementation notes/thoughts:
 
 ## Gadgets
 
@@ -104,7 +104,7 @@ The reaction has a 1:1 multiplier between `electro` and `dendro`
 
 ### Duration and durability
 
-Quicken have different formula than normal "attachment". Existing code uses [this function](https://github.com/genshinsim/gcsim/blob/40b1617647c1dbcd541e684b7f5b09d9dd424851/pkg/reactable/reactable.go#L182) to handle attachment:
+Quicken have different formula than normal "attachment". Existing code uses [this function](https://github.com/Karashina/gcsim-unofficial-clone/blob/40b1617647c1dbcd541e684b7f5b09d9dd424851/pkg/reactable/reactable.go#L182) to handle attachment:
 
 ```go
 func (r *Reactable) attach(e attributes.Element, dur reactions.Durability, m reactions.Durability) {
@@ -126,7 +126,7 @@ Probably best to just not use the `attach` function call and leave as is. Realis
 
 When `quicken` reacts with `electro` or `dendro`, aggravate and and spread is triggered respectively. Both reactions adds to the `AttackInfo.FlatDmg` of the triggering attack.
 
-The amount of damage added follows the same base [reaction damage formula](https://github.com/genshinsim/gcsim/blob/40b1617647c1dbcd541e684b7f5b09d9dd424851/pkg/reactable/reactable.go#L170) but uses a different EM multiplier. Calculation should be as follows:
+The amount of damage added follows the same base [reaction damage formula](https://github.com/Karashina/gcsim-unofficial-clone/blob/40b1617647c1dbcd541e684b7f5b09d9dd424851/pkg/reactable/reactable.go#L170) but uses a different EM multiplier. Calculation should be as follows:
 
 ```go
 func (r *Reactable) calcQuickenReactionDmgBase(atk combat.AttackInfo, em float64) float64 {
@@ -316,3 +316,4 @@ AttackInfo is as follows:
 TODO: it's possible that if burning ends early before the next tick happens then the next tick happens right away? not sure
 
 POST STILL WIP
+

@@ -1,9 +1,9 @@
-package eval
+﻿package eval
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 )
 
 func (e *Eval) evalStmt(s ast.Stmt, env *Env) (Obj, error) {
@@ -260,3 +260,4 @@ func (e *Eval) evalSwitchStmt(swt *ast.SwitchStmt, env *Env) (Obj, error) {
 	}
 	return &null{}, nil
 }
+

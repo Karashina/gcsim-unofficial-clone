@@ -1,11 +1,11 @@
-package info
+﻿package info
 
 import (
 	"encoding/json"
 	"log"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
 type ActionList struct {
@@ -88,3 +88,4 @@ func (a *ActionList) PrettyPrint() string {
 	}
 	return string(prettyJSON)
 }
+

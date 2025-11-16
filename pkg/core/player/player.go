@@ -1,4 +1,4 @@
-// Package player contains player related tracking and functionalities:
+﻿// Package player contains player related tracking and functionalities:
 // - tracking characters on the team
 // - handling animations state
 // - handling normal attack state
@@ -10,18 +10,18 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/player/animation"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/core/player/infusion"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
-	"github.com/genshinsim/gcsim/pkg/core/player/verdant"
-	"github.com/genshinsim/gcsim/pkg/core/task"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/animation"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/infusion"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/verdant"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/task"
 )
 
 const (
@@ -366,3 +366,4 @@ func (h *Handler) Airborne() AirborneSource {
 const (
 	XianyunAirborneBuff = "xianyun-airborne-buff"
 )
+

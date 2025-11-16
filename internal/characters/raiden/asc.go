@@ -1,11 +1,11 @@
-package raiden
+﻿package raiden
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 // When nearby party members gain Elemental Orbs or Particles, Chakra Desiderata gains 2 Resolve stacks.
@@ -70,3 +70,4 @@ func (c *char) a4() {
 	c.a4Stats[attributes.ElectroP] = (max(c.NonExtraStat(attributes.ER)-1, 0)) * 0.4 // 100 * 0.004
 	c.QueueCharTask(c.a4, 30)
 }
+

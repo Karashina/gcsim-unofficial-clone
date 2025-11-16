@@ -1,8 +1,8 @@
-package kachina
+﻿package kachina
 
 import (
-	"github.com/genshinsim/gcsim/internal/frames"
-	"github.com/genshinsim/gcsim/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
 )
 
 const (
@@ -99,3 +99,4 @@ func (c *char) depleteNightsoulPoints(t string) {
 		c.skillEndRoutine()
 	}
 }
+

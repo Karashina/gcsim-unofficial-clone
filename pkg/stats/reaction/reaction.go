@@ -1,11 +1,11 @@
-package reaction
+﻿package reaction
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/reactions"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/reactions"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 var eventToReaction = map[event.Event]reactions.ReactionType{
@@ -79,3 +79,4 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 		result.Characters[c].ReactionEvents = b.events[c]
 	}
 }
+

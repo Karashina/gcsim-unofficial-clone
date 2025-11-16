@@ -1,15 +1,15 @@
-package reactable
+﻿package reactable
 
 import (
 	"fmt"
 	"sort"
 
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/reactions"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/reactions"
 )
 
 // HasLCCloud returns true if LC Cloud is currently active and this is the global LC Cloud holder.
@@ -452,3 +452,4 @@ func (r *Reactable) nextTickLC(src int, lcActorIndex int) func() {
 		r.core.Tasks.Add(r.nextTickLC(src, lcActorIndex), 122+r.core.Rand.Intn(9))
 	}
 }
+

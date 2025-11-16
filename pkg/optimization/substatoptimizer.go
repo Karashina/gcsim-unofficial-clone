@@ -1,4 +1,4 @@
-package optimization
+﻿package optimization
 
 import (
 	"errors"
@@ -8,8 +8,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/parser"
-	"github.com/genshinsim/gcsim/pkg/simulator"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/parser"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulator"
 )
 
 // Additional runtime option to optimize substats according to KQM standards
@@ -111,3 +111,4 @@ func RunSubstatOptim(simopt simulator.Options, verbose bool, additionalOptions s
 		sugarLog.Infof("Saved to the following location: %v", simopt.ResultSaveToPath)
 	}
 }
+

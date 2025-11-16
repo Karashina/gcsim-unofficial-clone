@@ -1,9 +1,9 @@
-package eval
+﻿package eval
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 )
 
 func validateNumberParams(c *ast.CallExpr, count int) error {
@@ -43,3 +43,4 @@ func (e *Eval) validateArguments(c *ast.CallExpr, env *Env, objTypes ...ObjTyp) 
 	}
 	return objs, nil
 }
+

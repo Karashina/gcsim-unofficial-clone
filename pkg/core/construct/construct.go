@@ -1,7 +1,7 @@
-package construct
+﻿package construct
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 )
 
 type GeoConstructType int
@@ -53,3 +53,4 @@ type Construct interface {
 	Direction() geometry.Point
 	Pos() geometry.Point
 }
+

@@ -1,4 +1,4 @@
-// package animation provides a simple way of tracking the current
+﻿// package animation provides a simple way of tracking the current
 // animation state at any given frame, as well as if the current frame
 // is in animation lock or not
 package animation
@@ -6,10 +6,10 @@ package animation
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/task"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/task"
 )
 
 type AnimationHandler struct { //nolint:revive // cannot just name this Handler because then there is a conflict with Handler in player package
@@ -125,3 +125,4 @@ func (h *AnimationHandler) logEnded() {
 		h.char,
 	)
 }
+

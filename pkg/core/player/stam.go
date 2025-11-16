@@ -1,8 +1,8 @@
-package player
+﻿package player
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 type StamPercentModFunc func(action.Action) (float64, bool)
@@ -94,3 +94,4 @@ func (h *Handler) AddStamPercentMod(key string, dur int, f StamPercentModFunc) {
 	mod.Event.SetEnded(mod.Expiry)
 	h.stamPercentMods[ind] = mod
 }
+

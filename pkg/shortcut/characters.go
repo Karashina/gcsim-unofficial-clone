@@ -1,6 +1,6 @@
-package shortcut
+﻿package shortcut
 
-import "github.com/genshinsim/gcsim/pkg/core/keys"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 
 var CharNameToKey = map[string]keys.Char{
 	"traveleranemo":   keys.LumineAnemo,
@@ -197,3 +197,4 @@ var CharNameToKey = map[string]keys.Char{
 	"lauma":                   keys.Lauma,
 	"nefer":                   keys.Nefer,
 }
+

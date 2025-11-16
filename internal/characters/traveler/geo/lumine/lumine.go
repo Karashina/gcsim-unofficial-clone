@@ -1,11 +1,11 @@
-package lumine
+﻿package lumine
 
 import (
-	"github.com/genshinsim/gcsim/internal/characters/traveler/common/geo"
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/common/geo"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
 )
 
 type char struct {
@@ -28,3 +28,4 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 func init() {
 	core.RegisterCharFunc(keys.LumineGeo, NewChar)
 }
+

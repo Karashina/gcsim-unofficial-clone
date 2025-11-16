@@ -1,6 +1,6 @@
-package shield
+﻿package shield
 
-import "github.com/genshinsim/gcsim/pkg/core/glog"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 
 //nolint:revive // stat name should be at the front for readibility so cannot just strip Shield in the front, will be changed as part of mod rewrite someday
 type ShieldBonusModFunc func() (float64, bool)
@@ -95,3 +95,4 @@ func (h *Handler) AddShieldBonusMod(key string, dur int, f ShieldBonusModFunc) {
 	mod.Event.SetEnded(mod.Expiry)
 	h.shieldBonusMods[ind] = mod
 }
+

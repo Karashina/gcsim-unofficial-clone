@@ -1,10 +1,10 @@
-package info
+﻿package info
 
 import (
 	"strconv"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
 type Sets map[keys.Set]int
@@ -31,3 +31,4 @@ type Set interface {
 	GetCount() int
 	Init() error
 }
+

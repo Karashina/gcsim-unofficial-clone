@@ -1,11 +1,11 @@
-package info
+﻿package info
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
 type CharacterProfile struct {
@@ -133,3 +133,4 @@ const (
 	ZoneSnezhnaya
 	ZoneNodkrai
 )
+

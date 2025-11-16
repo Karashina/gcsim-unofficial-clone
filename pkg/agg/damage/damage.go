@@ -1,15 +1,15 @@
-package damage
+﻿package damage
 
 import (
 	"math"
 	"slices"
 
 	calc "github.com/aclements/go-moremath/stats"
-	"github.com/genshinsim/gcsim/pkg/agg"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/model"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/agg"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 // 30 = .5s
@@ -384,3 +384,4 @@ func expandBuckets(arr []*calc.StreamStats, size int) []*calc.StreamStats {
 	}
 	return arr
 }
+

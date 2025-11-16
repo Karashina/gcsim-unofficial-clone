@@ -1,12 +1,12 @@
-package flins
+﻿package flins
 
 import (
 	_ "embed"
 
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
 // Lunar Charged damage ("DMG considered as Lunar-Charged DMG") handler for Flins
@@ -158,3 +158,4 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 func (c *char) InitLCallback() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.onSpecialLunarChargedFlins, "lc-flins-special")
 }
+

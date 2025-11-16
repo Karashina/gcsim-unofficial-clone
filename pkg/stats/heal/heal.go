@@ -1,10 +1,10 @@
-package heal
+﻿package heal
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 func init() {
@@ -47,3 +47,4 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 		result.Characters[c].HealEvents = b.events[c]
 	}
 }
+

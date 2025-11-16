@@ -1,12 +1,12 @@
-package eval
+﻿package eval
 
 import (
 	"fmt"
 	"log"
 	"testing"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/gcs/parser"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/parser"
 )
 
 func TestType(t *testing.T) {
@@ -170,3 +170,4 @@ func TestDoneCheck(t *testing.T) {
 		}
 	}
 }
+

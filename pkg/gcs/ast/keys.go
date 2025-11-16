@@ -1,8 +1,8 @@
-package ast
+﻿package ast
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 )
 
 var key = map[string]TokenType{
@@ -102,3 +102,4 @@ var actionKeys = map[string]action.Action{
 	"walk":        action.ActionWalk,
 	"swap":        action.ActionSwap,
 }
+

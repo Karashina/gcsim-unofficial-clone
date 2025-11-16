@@ -1,11 +1,11 @@
-package core
+﻿package core
 
 import (
 	"sync"
 
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
 )
 
 var (
@@ -45,3 +45,4 @@ func RegisterWeaponFunc(weap keys.Weapon, f NewWeaponFunc) {
 	}
 	weaponMap[weap] = f
 }
+

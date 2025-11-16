@@ -1,9 +1,9 @@
-package dhalia
+﻿package dhalia
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
 func (c *char) genShield(src string, shieldamt float64) {
@@ -70,3 +70,4 @@ func (c *char) regenShirld() {
 		return false
 	}, "dhalia-shield-regen")
 }
+

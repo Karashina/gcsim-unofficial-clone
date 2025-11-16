@@ -1,6 +1,6 @@
-package hydro
+﻿package hydro
 
-import "github.com/genshinsim/gcsim/pkg/core/action"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
 
 func (c *Traveler) Dash(p map[string]int) (action.Info, error) {
 	if c.Base.Ascension >= 1 {
@@ -13,3 +13,4 @@ func (c *Traveler) Dash(p map[string]int) (action.Info, error) {
 
 	return c.Character.Dash(p)
 }
+

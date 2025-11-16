@@ -1,9 +1,9 @@
-package parser
+﻿package parser
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 )
 
 func (p *Parser) parseOptionalType() (ast.ExprType, error) {
@@ -115,3 +115,4 @@ func (p *Parser) parseFnType() (ast.ExprType, error) {
 	}
 	return res, nil
 }
+

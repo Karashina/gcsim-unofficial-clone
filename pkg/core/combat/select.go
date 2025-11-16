@@ -1,9 +1,9 @@
-package combat
+﻿package combat
 
 import (
 	"sort"
 
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 )
 
 // all targets
@@ -285,3 +285,4 @@ func (h *Handler) ClosestGadgetsWithinArea(a AttackPattern, filter func(t Gadget
 	}
 	return result
 }
+

@@ -1,10 +1,10 @@
-package character
+﻿package character
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/player"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player"
 )
 
 // ActionStam provides default implementation for stam cost for charge and dash
@@ -186,3 +186,4 @@ func (c *Character) Walk(p map[string]int) (action.Info, error) {
 		State:           action.WalkState,
 	}, nil
 }
+

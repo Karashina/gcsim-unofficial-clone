@@ -1,4 +1,4 @@
-package combat
+﻿package combat
 
 import (
 	"math/rand"
@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 type (
@@ -141,3 +141,4 @@ func newCombatCtrl() *Handler {
 		EnableHitlag: true,
 	})
 }
+

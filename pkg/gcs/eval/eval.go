@@ -1,4 +1,4 @@
-package eval
+﻿package eval
 
 import (
 	"errors"
@@ -7,9 +7,9 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 )
 
 type Eval struct {
@@ -315,3 +315,4 @@ func (e *Eval) evalNode(n ast.Node, env *Env) (Obj, error) {
 		return &null{}, nil
 	}
 }
+

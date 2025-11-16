@@ -1,9 +1,9 @@
-package simulator
+﻿package simulator
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/model"
-	"github.com/genshinsim/gcsim/pkg/simulation"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulation"
 )
 
 func GenerateCharacterDetails(cfg *info.ActionList) ([]*model.Character, error) {
@@ -22,3 +22,4 @@ func GenerateCharacterDetails(cfg *info.ActionList) ([]*model.Character, error) 
 
 	return sim.CharacterDetails(), nil
 }
+

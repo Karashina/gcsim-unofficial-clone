@@ -1,12 +1,12 @@
-package character
+﻿package character
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 func (c *CharWrapper) UpdateBaseStats() error {
@@ -135,3 +135,4 @@ func WeaponBaseStat(weap info.WeaponProfile, data *model.WeaponData) ([]float64,
 	}
 	return res, nil
 }
+

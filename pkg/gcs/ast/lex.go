@@ -1,4 +1,4 @@
-package ast
+﻿package ast
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/genshinsim/gcsim/pkg/shortcut"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
 )
 
 const eof = -1
@@ -429,3 +429,4 @@ func (l *Lexer) atTerminator() bool {
 	}
 	return false
 }
+

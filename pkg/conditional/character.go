@@ -1,14 +1,14 @@
-package conditional
+﻿package conditional
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/shortcut"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
 )
 
 func evalCharacter(c *core.Core, key keys.Char, fields []string) (any, error) {
@@ -142,3 +142,4 @@ func evalCharacterAbil(c *core.Core, char *character.CharWrapper, act action.Act
 		return 0, fmt.Errorf("bad character ability condition: invalid type %v", typ)
 	}
 }
+

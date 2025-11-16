@@ -1,4 +1,4 @@
-// Package action describes the valid actions that any character may take
+﻿// Package action describes the valid actions that any character may take
 package action
 
 import (
@@ -6,7 +6,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
 // TODO: add a sync.Pool here to save some memory allocs
@@ -208,3 +208,4 @@ var statestr = []string{
 func (a AnimationState) String() string {
 	return statestr[a]
 }
+

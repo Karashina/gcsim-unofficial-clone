@@ -1,7 +1,7 @@
-package thoma
+﻿package thoma
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
 // When your current active character obtains or refreshes a Blazing Barrier,
@@ -34,3 +34,4 @@ func (c *char) a4() float64 {
 	}
 	return 0.022 * c.MaxHP()
 }
+

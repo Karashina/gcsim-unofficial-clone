@@ -1,12 +1,12 @@
-package reactable
+﻿package reactable
 
 import (
 	"fmt"
 	"math"
 	"testing"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/reactions"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/reactions"
 )
 
 const swirlAbil = "swirl-pyro (aoe)"
@@ -194,3 +194,4 @@ func TestSwirl50to10(t *testing.T) {
 		t.Errorf("expected durability to be %v, got %v", expected, trg[1].last.Info.Durability)
 	}
 }
+

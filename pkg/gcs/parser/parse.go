@@ -1,4 +1,4 @@
-package parser
+﻿package parser
 
 import (
 	"errors"
@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/shortcut"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
 )
 
 // Parse returns the ActionList and any error that prevents the ActionList from being parsed
@@ -793,3 +793,4 @@ func (p *Parser) parseMap() (ast.Expr, error) {
 		}
 	}
 }
+

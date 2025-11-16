@@ -1,13 +1,13 @@
-package reactable_test
+﻿package reactable_test
 
 import (
 	"math"
 	"testing"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/reactable"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/reactable"
 )
 
 func TestHydroBloom(t *testing.T) {
@@ -216,3 +216,4 @@ func TestBloomOldestDeleted(t *testing.T) {
 		t.Errorf("expecting oldest gadget to be from frame %v, got %v", reactable.DendroCoreDelay+3, og.Src())
 	}
 }
+

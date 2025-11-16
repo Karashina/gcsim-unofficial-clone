@@ -1,18 +1,18 @@
-package characters
+﻿package characters
 
 import (
 	"errors"
 	"testing"
 
-	_ "github.com/genshinsim/gcsim/internal/characters/beidou"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/player"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/enemy"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/beidou"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
 )
 
 // Test to make sure in 2 target scenario, Beidou burst bounces between the 2 targets
@@ -84,3 +84,4 @@ func TestBeidouBounce(t *testing.T) {
 		t.Errorf("expecting target 1 (key %v) to take 2 hits, got %v", trg[1].Key(), dmgCount[trg[1].Key()])
 	}
 }
+

@@ -1,15 +1,15 @@
-package reactable_test
+﻿package reactable_test
 
 import (
 	"fmt"
 	"log"
 	"testing"
 
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/reactable"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/reactable"
 )
 
 func TestBurningTicks(t *testing.T) {
@@ -433,3 +433,4 @@ func TestQuickenBurningDecay(t *testing.T) {
 		fmt.Printf("%v: %v\n", i, trg[0].ActiveAuraString())
 	}
 }
+

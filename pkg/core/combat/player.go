@@ -1,6 +1,6 @@
-package combat
+﻿package combat
 
-import "github.com/genshinsim/gcsim/pkg/core/geometry"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 
 func (h *Handler) SetPlayer(t Target) {
 	h.player = t
@@ -14,3 +14,4 @@ func (h *Handler) Player() Target {
 func (h *Handler) SetPlayerPos(p geometry.Point) {
 	h.player.SetPos(p)
 }
+

@@ -1,14 +1,14 @@
-package reactable
+﻿package reactable
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/reactions"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/reactions"
 )
 
 func (r *Reactable) TryAddEC(a *combat.AttackEvent) bool {
@@ -177,3 +177,4 @@ func (r *Reactable) nextTick(src int) func() {
 		r.core.Tasks.Add(r.nextTick(src), 60)
 	}
 }
+

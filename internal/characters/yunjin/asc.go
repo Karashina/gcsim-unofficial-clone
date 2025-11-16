@@ -1,8 +1,8 @@
-package yunjin
+﻿package yunjin
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 // A1 is not implemented:
@@ -35,3 +35,4 @@ func (c *char) a4() float64 {
 	}
 	return 0.025 * float64(c.partyElementalTypes)
 }
+

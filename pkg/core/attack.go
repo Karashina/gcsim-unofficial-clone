@@ -1,6 +1,6 @@
-package core
+﻿package core
 
-import "github.com/genshinsim/gcsim/pkg/core/combat"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
 
 func (c *Core) QueueAttackWithSnap(
 	a combat.AttackInfo,
@@ -93,3 +93,4 @@ func (c *Core) queueDmg(a *combat.AttackEvent, delay int) {
 		c.Combat.ApplyAttack(a)
 	}, delay)
 }
+

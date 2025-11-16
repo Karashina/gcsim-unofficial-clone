@@ -1,4 +1,4 @@
-package servermode
+﻿package servermode
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/genshinsim/gcsim/pkg/simulator"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulator"
 	"github.com/go-chi/chi"
 )
 
@@ -273,3 +273,4 @@ func (s *Server) info() http.HandlerFunc {
 
 	}
 }
+

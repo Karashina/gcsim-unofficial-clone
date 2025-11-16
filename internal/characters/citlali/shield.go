@@ -1,8 +1,8 @@
-package citlali
+﻿package citlali
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
 // need to rewrite Expires
@@ -27,3 +27,4 @@ func (c *char) addShield() {
 	}
 	c.Core.Player.Shields.Add(c.skillShield)
 }
+

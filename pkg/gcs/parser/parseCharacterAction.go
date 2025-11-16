@@ -1,12 +1,12 @@
-package parser
+﻿package parser
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
-	"github.com/genshinsim/gcsim/pkg/gcs/validation"
-	"github.com/genshinsim/gcsim/pkg/shortcut"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/validation"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
 )
 
 // parseAction returns a node contain a character action, or a block of node containing
@@ -158,3 +158,4 @@ func (p *Parser) acceptOptionalRepeaterReturnCount() (int, error) {
 	count, err := itemNumberToInt(n)
 	return count, err
 }
+

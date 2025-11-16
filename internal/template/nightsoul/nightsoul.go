@@ -1,14 +1,14 @@
-package nightsoul
+﻿package nightsoul
 
 import (
 	"fmt"
 	"slices"
 
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
 )
 
 const NightsoulBlessingStatus = "nightsoul-blessing"
@@ -177,3 +177,4 @@ func (s *State) Condition(fields []string) (any, error) {
 		return nil, fmt.Errorf("invalid nightsoul condition: %v", fields[1])
 	}
 }
+

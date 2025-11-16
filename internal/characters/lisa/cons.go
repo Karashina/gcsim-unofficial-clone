@@ -1,8 +1,8 @@
-package lisa
+﻿package lisa
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
 func (c *char) c6() {
@@ -21,3 +21,4 @@ func (c *char) c6() {
 		return false
 	}, "lisa-c6")
 }
+

@@ -1,9 +1,9 @@
-package infusion
+﻿package infusion
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 type WeaponInfusion struct {
@@ -84,3 +84,4 @@ func (i *Handler) Infused(char int, a attacks.AttackTag) attributes.Element {
 	}
 	return attributes.NoElement
 }
+

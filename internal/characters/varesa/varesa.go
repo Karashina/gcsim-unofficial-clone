@@ -1,15 +1,15 @@
-package varesa
+﻿package varesa
 
 import (
-	tmpl "github.com/genshinsim/gcsim/internal/template/character"
-	"github.com/genshinsim/gcsim/internal/template/nightsoul"
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/core/stacks"
-	"github.com/genshinsim/gcsim/pkg/model"
+	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/template/nightsoul"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/stacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 func init() {
@@ -135,3 +135,4 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 		return c.Character.AnimationStartDelay(k)
 	}
 }
+

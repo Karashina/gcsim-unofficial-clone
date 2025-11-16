@@ -1,10 +1,10 @@
-package parser
+﻿package parser
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/ast"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 )
 
 func parseEnergy(p *Parser) (parseFn, error) {
@@ -120,3 +120,4 @@ func parseEnergyEvery(p *Parser) (parseFn, error) {
 	}
 	return nil, errors.New("unexpected end of line while parsing energy event")
 }
+

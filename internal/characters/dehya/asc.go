@@ -1,9 +1,9 @@
-package dehya
+﻿package dehya
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 )
 
 const (
@@ -91,3 +91,4 @@ func (c *char) a4DotHeal(count int) func() {
 		c.QueueCharTask(c.a4DotHeal(count+1), a4DoTHealInterval)
 	}
 }
+

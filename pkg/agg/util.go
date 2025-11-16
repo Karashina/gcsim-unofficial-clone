@@ -1,10 +1,10 @@
-package agg
+﻿package agg
 
 import (
 	"math"
 
 	"github.com/aclements/go-moremath/stats"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 // If the count is smaller than ss.Count, nothing will happen.
@@ -144,3 +144,4 @@ func Median[T any](a []T) T {
 	// since need an element that was used, a[l/2] is close enough
 	return a[l/2]
 }
+

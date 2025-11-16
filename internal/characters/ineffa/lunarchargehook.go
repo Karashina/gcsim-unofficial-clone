@@ -1,12 +1,12 @@
-package ineffa
+﻿package ineffa
 
 import (
 	_ "embed"
 
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
 // Special Lunar Charged damage handler for Ineffa
@@ -100,3 +100,4 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 func (c *char) InitLCallback() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.onLunarChargedIneffaSpecial, "lc-ineffa-special")
 }
+

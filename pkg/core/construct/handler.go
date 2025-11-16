@@ -1,8 +1,8 @@
-package construct
+﻿package construct
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 const destroyedMsg = "construct destroyed: "
@@ -247,3 +247,4 @@ func (h *Handler) Destroy(key int) bool {
 	h.consNoLimit = h.consNoLimit[:n]
 	return ok
 }
+

@@ -1,12 +1,12 @@
-package warnings
+﻿package warnings
 
 import (
 	calc "github.com/aclements/go-moremath/stats"
-	"github.com/genshinsim/gcsim/pkg/agg"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/model"
-	"github.com/genshinsim/gcsim/pkg/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/agg"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
 func init() {
@@ -80,3 +80,4 @@ func (b *buffer) Flush(result *model.SimulationStatistics) {
 		BurstCd:             b.burstcd.Mean() >= 1.0,
 	}
 }
+

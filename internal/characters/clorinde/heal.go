@@ -1,10 +1,10 @@
-package clorinde
+﻿package clorinde
 
 import (
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 )
 
 func (c *char) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
@@ -31,3 +31,4 @@ func (c *char) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
 
 	return 0
 }
+

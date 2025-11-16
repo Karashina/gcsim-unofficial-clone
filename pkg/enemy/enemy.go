@@ -1,17 +1,17 @@
-// Package enemy implements an enemey target
+﻿// Package enemy implements an enemey target
 package enemy
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/core/task"
-	"github.com/genshinsim/gcsim/pkg/modifier"
-	"github.com/genshinsim/gcsim/pkg/reactable"
-	"github.com/genshinsim/gcsim/pkg/target"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/task"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/reactable"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/target"
 )
 
 type Enemy struct {
@@ -82,3 +82,4 @@ func (e *Enemy) SetDirectionToClosestEnemy()     {}
 func (e *Enemy) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
+

@@ -1,9 +1,9 @@
-package sara
+﻿package sara
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 // A1 is implemented in aimed.go:
@@ -36,3 +36,4 @@ func (c *char) makeA4CB() combat.AttackCBFunc {
 		}
 	}
 }
+

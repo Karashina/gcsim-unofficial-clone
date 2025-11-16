@@ -1,4 +1,4 @@
-package repl
+﻿package repl
 
 import (
 	"bufio"
@@ -6,8 +6,8 @@ import (
 	"io"
 	"log"
 
-	"github.com/genshinsim/gcsim/pkg/gcs/eval"
-	"github.com/genshinsim/gcsim/pkg/gcs/parser"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/eval"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/parser"
 )
 
 const Prompt = ">> "
@@ -80,3 +80,4 @@ func Start(in io.Reader, out io.Writer, log *log.Logger, showProgram bool) {
 		Eval(scanner.Text(), log)
 	}
 }
+

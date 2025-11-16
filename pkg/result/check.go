@@ -1,7 +1,7 @@
-package result
+﻿package result
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
 // adding a character to this list will make the "incomplete warning" appear on the viewer
@@ -17,3 +17,4 @@ func IsCharacterComplete(char keys.Char) bool {
 	}
 	return true
 }
+

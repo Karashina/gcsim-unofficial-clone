@@ -1,10 +1,10 @@
-package chasca
+﻿package chasca
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attacks"
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 const c6key = "chasca-c6"
@@ -149,3 +149,4 @@ func (c *char) c6ChargeTime(count int) int {
 	}
 	return cumuSkillAimLoadFramesC6[count-1]
 }
+

@@ -1,14 +1,14 @@
-package characters
+﻿package characters
 
 import (
 	"testing"
 
-	_ "github.com/genshinsim/gcsim/internal/characters/aino"
-	_ "github.com/genshinsim/gcsim/internal/characters/flins"
-	_ "github.com/genshinsim/gcsim/internal/characters/ineffa"
-	_ "github.com/genshinsim/gcsim/internal/characters/lauma"
-	_ "github.com/genshinsim/gcsim/internal/characters/nefer"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/aino"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/flins"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/ineffa"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/lauma"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/nefer"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
 // Test moonsign party initialization for 0/1/2+ moonsignKey holders.
@@ -79,3 +79,4 @@ func TestMoonsignPartyInit(t *testing.T) {
 		}
 	}
 }
+

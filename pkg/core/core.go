@@ -1,4 +1,4 @@
-// Package core provides core functionality for a simulation:
+﻿// Package core provides core functionality for a simulation:
 //   - combat
 //   - tasks
 //   - event handling
@@ -11,16 +11,16 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/construct"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/player"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/core/status"
-	"github.com/genshinsim/gcsim/pkg/core/task"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/construct"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/status"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/task"
 )
 
 type Core struct {
@@ -230,3 +230,4 @@ func (c *Core) AddChar(p info.CharacterProfile) (int, error) {
 
 	return index, nil
 }
+

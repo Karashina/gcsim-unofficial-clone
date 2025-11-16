@@ -1,10 +1,10 @@
-package enemy
+﻿package enemy
 
 import (
 	"fmt"
 	"math"
 
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 func (e *Enemy) ApplyHitlag(factor, dur float64) {
@@ -73,3 +73,4 @@ func (e *Enemy) Tick() {
 	e.queue.Run()
 	e.Reactable.Tick()
 }
+

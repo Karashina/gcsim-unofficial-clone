@@ -1,10 +1,10 @@
-package sigewinne
+﻿package sigewinne
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
 const (
@@ -33,3 +33,4 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 
 	return c.Character.Dash(p)
 }
+

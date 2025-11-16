@@ -1,10 +1,10 @@
-package validation
+﻿package validation
 
 import (
 	"sync"
 
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
 var (
@@ -22,3 +22,4 @@ func RegisterCharParamValidationFunc(char keys.Char, f CharParamKeysValidationFu
 	}
 	charValidParamKeys[char] = f
 }
+

@@ -1,11 +1,11 @@
-package akuoumaru
+﻿package akuoumaru
 
 import (
-	"github.com/genshinsim/gcsim/internal/weapons/common"
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/weapons/common"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
 )
 
 func init() {
@@ -16,3 +16,4 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	w := common.NewWavebreaker(base)
 	return w.NewWeapon(c, char, p)
 }
+

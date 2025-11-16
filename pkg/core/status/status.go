@@ -1,6 +1,6 @@
-package status
+﻿package status
 
-import "github.com/genshinsim/gcsim/pkg/core/glog"
+import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 
 type status struct {
 	expiry int
@@ -83,3 +83,4 @@ func (t *Handler) Delete(key string) {
 	}
 	delete(t.status, key)
 }
+

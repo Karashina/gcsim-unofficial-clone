@@ -1,4 +1,4 @@
-package optimization
+﻿package optimization
 
 import (
 	"context"
@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/optimization/optstats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/optimization/optstats"
 )
 
 const FavCritRateBias = 8
@@ -112,3 +112,4 @@ func (stats *SubstatOptimizerDetails) findOptimalERforChars() {
 	}
 	stats.simcfg.Settings.IgnoreBurstEnergy = false
 }
+

@@ -1,9 +1,9 @@
-package ningguang
+﻿package ningguang
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/construct"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/construct"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 )
 
 type screen struct {
@@ -43,3 +43,4 @@ func (c *screen) IsLimited() bool                  { return true }
 func (c *screen) Count() int                       { return 1 }
 func (c *screen) Direction() geometry.Point        { return c.dir }
 func (c *screen) Pos() geometry.Point              { return c.pos }
+

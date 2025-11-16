@@ -1,4 +1,4 @@
-// package minazuki provides common implementation for abilities that trigger
+﻿// package minazuki provides common implementation for abilities that trigger
 // based on normal animation state, i.e. xingqiu burst
 package minazuki
 
@@ -6,13 +6,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/action"
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
-	"github.com/genshinsim/gcsim/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
 // Watcher watches state change and triggers accordingly
@@ -220,3 +220,4 @@ func (w *Watcher) tickerFunc(src int) func() {
 		w.queueTick(src)
 	}
 }
+

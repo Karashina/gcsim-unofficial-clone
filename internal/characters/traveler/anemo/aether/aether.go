@@ -1,12 +1,12 @@
-package aether
+﻿package aether
 
 import (
-	"github.com/genshinsim/gcsim/internal/characters/traveler/common/anemo"
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/hacks"
-	"github.com/genshinsim/gcsim/pkg/core/info"
-	"github.com/genshinsim/gcsim/pkg/core/keys"
-	"github.com/genshinsim/gcsim/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/common/anemo"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/hacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
 )
 
 type char struct {
@@ -30,3 +30,4 @@ func init() {
 	core.RegisterCharFunc(keys.AetherAnemo, NewChar)
 	hacks.RegisterNOSpecialChar(keys.AetherAnemo)
 }
+

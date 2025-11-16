@@ -1,14 +1,14 @@
-// gadget provides a skeleton implementation for gadgets and is
+﻿// gadget provides a skeleton implementation for gadgets and is
 // basically a thin wrapper around target.Target and adds some
 // helper functionalities
 package gadget
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/core/combat"
-	"github.com/genshinsim/gcsim/pkg/core/geometry"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
-	"github.com/genshinsim/gcsim/pkg/target"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/target"
 )
 
 type Gadget struct {
@@ -67,3 +67,4 @@ func (g *Gadget) Tick() {
 		}
 	}
 }
+

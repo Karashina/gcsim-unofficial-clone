@@ -1,8 +1,8 @@
-package kirara
+﻿package kirara
 
 import (
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
-	"github.com/genshinsim/gcsim/pkg/core/player/shield"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
 func (c *char) genShield(src string, shieldamt float64) {
@@ -34,3 +34,4 @@ func (c *char) shieldHP() float64 {
 func (c *char) maxShieldHP() float64 {
 	return maxShieldPP[c.TalentLvlSkill()]*c.MaxHP() + maxShieldFlat[c.TalentLvlSkill()]
 }
+

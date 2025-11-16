@@ -1,11 +1,11 @@
-package character
+﻿package character
 
 import (
 	"slices"
 	"strconv"
 	"strings"
 
-	"github.com/genshinsim/gcsim/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 )
 
 func (c *CharWrapper) Stats() ([attributes.EndStatType]float64, []interface{}) {
@@ -170,3 +170,4 @@ func (c *CharWrapper) TotalDef(nonExtra bool) float64 {
 	stats := c.SelectStat(nonExtra, attributes.BaseDEF, attributes.DEFP, attributes.DEF)
 	return stats.TotalDEF()
 }
+

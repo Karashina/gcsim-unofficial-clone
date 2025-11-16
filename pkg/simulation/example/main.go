@@ -1,13 +1,13 @@
-package main
+﻿package main
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/genshinsim/gcsim/pkg/core"
-	"github.com/genshinsim/gcsim/pkg/gcs/eval"
-	"github.com/genshinsim/gcsim/pkg/gcs/parser"
-	"github.com/genshinsim/gcsim/pkg/simulation"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/eval"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/parser"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulation"
 )
 
 const cfg = `target lvl=100 resist=0.1;
@@ -108,3 +108,4 @@ func main() {
 
 	// do stuff
 }
+

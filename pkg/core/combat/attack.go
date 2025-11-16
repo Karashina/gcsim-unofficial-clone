@@ -1,11 +1,11 @@
-package combat
+﻿package combat
 
 import (
 	"fmt"
 
-	"github.com/genshinsim/gcsim/pkg/core/event"
-	"github.com/genshinsim/gcsim/pkg/core/glog"
-	"github.com/genshinsim/gcsim/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
 // attack returns true if the attack lands
@@ -84,3 +84,4 @@ func (h *Handler) ApplyAttack(a *AttackEvent) float64 {
 	}
 	return total
 }
+
