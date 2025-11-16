@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gcsim WebUI - シミュレーター</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans JP', sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        
+        .container-main {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .editor-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        textarea, #config-editor {
+            width: 100%;
+            min-height: 400px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            background-color: #263238;
+            color: #eeffff;
+        }
+        
+        .btn-run {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        
+        .btn-run:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-run:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .results-container {
+            display: none;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .char-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .char-name {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .error-line {
+            background: #ffe0e0;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .info-value {
+            color: #333;
+        }
+        
+        .tabs {
+            background: white;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tabs .tab a {
+            color: #667eea;
+        }
+        
+        .tabs .tab a:hover {
+            color: #764ba2;
+        }
+        
+        .tabs .tab a.active {
+            color: #667eea;
+        }
+        
+        .tabs .indicator {
+            background-color: #667eea;
+        }
+        
+        canvas {
+            max-height: 400px;
+        }
+        
+        .tab-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            background: white;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-btn:hover {
+            background: #f9f9f9;
+        }
+        
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .chip {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 2px;
+            background: #667eea;
+            color: white;
+            border-radius: 16px;
+            font-size: 12px;
+        }
+        
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: -10px;
+        }
+        
+        .col {
+            padding: 10px;
+        }
+        
+        .col.s12 { width: 100%; }
+        .col.m6 { width: 50%; }
+        .col.l2 { width: 16.666%; }
+        .col.l6 { width: 50%; }
+        
+        @media (max-width: 768px) {
+            .col.m6, .col.l2, .col.l6 { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-main">
+        <div class="header">
+            <h3 style="margin: 0;">
+                ⚡ gcsim WebUI
+            </h3>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">原神シミュレーター - GCSLコンフィグからダメージシミュレーションを実行</p>
+        </div>
+        
+        <div class="editor-container">
+            <h5>📝 コンフィグ入力</h5>
+            <p style="color: #666; margin-bottom: 15px;">GCSLフォーマットでコンフィグを入力してください。</p>
+            <textarea id="config-editor"></textarea>
+            <button class="btn-run" onclick="runSimulation()">
+                ▶️ シミュレーション実行
+            </button>
+            <div class="error-message" id="error-message"></div>
+            <div class="loading" id="loading">
+                <div style="text-align: center; padding: 40px;">
+                    <div style="border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    <p style="margin-top: 15px;">シミュレーション実行中...</p>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+        
+        <div class="results-container" id="results-container">
+            <h5 style="margin: 20px 0;">
+                📊 シミュレーション結果
+            </h5>
+            
+            <!-- Statistics -->
+            <div class="row">
+                <div class="col s12 m6 l2">
+                    <div class="stat-card center-align">
+                        <div class="stat-label">DPS</div>
+                        <div class="stat-value" id="stat-dps">-</div>
+                    </div>
+                </div>
+                <div class="col s12 m6 l2">
+                    <div class="stat-card center-align">
+                        <div class="stat-label">EPS</div>
+                        <div class="stat-value" id="stat-eps">-</div>
+                    </div>
+                </div>
+                <div class="col s12 m6 l2">
+                    <div class="stat-card center-align">
+                        <div class="stat-label">RPS</div>
+                        <div class="stat-value" id="stat-rps">-</div>
+                    </div>
+                </div>
+                <div class="col s12 m6 l2">
+                    <div class="stat-card center-align">
+                        <div class="stat-label">HPS</div>
+                        <div class="stat-value" id="stat-hps">-</div>
+                    </div>
+                </div>
+                <div class="col s12 m6 l2">
+                    <div class="stat-card center-align">
+                        <div class="stat-label">SHP</div>
+                        <div class="stat-value" id="stat-shp">-</div>
+                    </div>
+                </div>
+                <div class="col s12 m6 l2">
+                    <div class="stat-card center-align">
+                        <div class="stat-label">期間 (秒)</div>
+                        <div class="stat-value" id="stat-dur">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabs for different sections -->
+            <div class="tab-container">
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="switchTab('characters')">キャラクター情報</button>
+                    <button class="tab-btn" onclick="switchTab('target-info')">ターゲット情報</button>
+                    <button class="tab-btn" onclick="switchTab('dps-charts')">DPS分析</button>
+                    <button class="tab-btn" onclick="switchTab('distribution')">分布</button>
+                    <button class="tab-btn" onclick="switchTab('energy')">エネルギー</button>
+                    <button class="tab-btn" onclick="switchTab('reactions')">元素反応</button>
+                </div>
+            
+                <div id="characters" class="card tab-content active">
+                    <div class="card-content">
+                        <span class="card-title">キャラクター情報</span>
+                        <div id="characters-list"></div>
+                    </div>
+                </div>
+                
+                <div id="target-info" class="card tab-content">
+                    <div class="card-content">
+                        <span class="card-title">ターゲット情報</span>
+                        <div id="target-details"></div>
+                    </div>
+                </div>
+                
+                <div id="dps-charts" class="card tab-content">
+                    <div class="card-content">
+                        <span class="card-title">DPS分析</span>
+                        <div class="row">
+                            <div class="col s12 l6">
+                                <div class="chart-container">
+                                    <h6>キャラクター別DPS</h6>
+                                    <canvas id="char-dps-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col s12 l6">
+                                <div class="chart-container">
+                                    <h6>ソース別DPS</h6>
+                                    <canvas id="source-dps-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="distribution" class="card tab-content">
+                    <div class="card-content">
+                        <span class="card-title">ダメージ分布</span>
+                        <div class="chart-container">
+                            <canvas id="damage-dist-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="energy" class="card tab-content">
+                    <div class="card-content">
+                        <span class="card-title">エネルギー情報</span>
+                        <div class="chart-container">
+                            <canvas id="energy-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="reactions" class="card tab-content">
+                    <div class="card-content">
+                        <span class="card-title">元素反応</span>
+                        <div class="row">
+                            <div class="col s12 l6">
+                                <div class="chart-container">
+                                    <h6>反応回数</h6>
+                                    <canvas id="reaction-count-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col s12 l6">
+                                <div class="chart-container">
+                                    <h6>ターゲット付着時間</h6>
+                                    <canvas id="aura-uptime-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chart.js -->
+    <script>
+    // Minimal Chart.js implementation - simplified for basic charts
+    class Chart {
+        constructor(ctx, config) {
+            this.canvas = ctx.canvas || ctx;
+            this.config = config;
+            this.draw();
+        }
+        
+        draw() {
+            const ctx = this.canvas.getContext('2d');
+            const width = this.canvas.width = this.canvas.offsetWidth;
+            const height = this.canvas.height = 300;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const data = this.config.data;
+            const labels = data.labels || [];
+            const values = data.datasets[0]?.data || [];
+            
+            if (values.length === 0) return;
+            
+            const maxValue = Math.max(...values) * 1.1;
+            const padding = 40;
+            const chartWidth = width - padding * 2;
+            const chartHeight = height - padding * 2;
+            
+            // Draw axes
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            if (this.config.type === 'bar') {
+                const barWidth = chartWidth / values.length * 0.8;
+                const spacing = chartWidth / values.length;
+                
+                values.forEach((value, i) => {
+                    const barHeight = (value / maxValue) * chartHeight;
+                    const x = padding + i * spacing + spacing * 0.1;
+                    const y = height - padding - barHeight;
+                    
+                    ctx.fillStyle = data.datasets[0].backgroundColor || '#667eea';
+                    ctx.fillRect(x, y, barWidth, barHeight);
+                    
+                    // Label
+                    ctx.fillStyle = '#333';
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(labels[i], x + barWidth / 2, height - padding + 15);
+                });
+            } else if (this.config.type === 'line') {
+                ctx.beginPath();
+                ctx.strokeStyle = data.datasets[0].borderColor || '#667eea';
+                ctx.lineWidth = 2;
+                
+                values.forEach((value, i) => {
+                    const x = padding + (i / (values.length - 1)) * chartWidth;
+                    const y = height - padding - (value / maxValue) * chartHeight;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.stroke();
+            }
+        }
+        
+        destroy() {
+            const ctx = this.canvas.getContext('2d');
+            ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+    }
+    </script>
+    
+    <script src="app.js"></script>
+</body>
+</html>
