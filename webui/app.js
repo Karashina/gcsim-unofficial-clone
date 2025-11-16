@@ -241,7 +241,8 @@ function displayCharacters(result) {
             setsHTML = `<div style="margin: 6px 0;"><strong>聖遺物セット:</strong> ${setsList}</div>`;
         }
         
-        // Stats display using snapshot_stats array (actual stats at time of damage calculation)
+        // Stats display - the stats array already contains final calculated values
+        // Final stat = Base * (1 + %) + Flat (already calculated in indices 3, 5, 2)
         let statsHTML = '';
         const statsArray = char.snapshot_stats || char.stats;
         if (statsArray && statsArray.length > 0) {
@@ -249,23 +250,35 @@ function displayCharacters(result) {
             statsHTML = '<div style="margin-top: 8px;"><strong>ステータス詳細:</strong>';
             statsHTML += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 0.85rem; margin-top: 4px;">';
             
-            // Stats array based on gcsim core/attributes:
-            // 1=DEFP, 2=DEF, 3=HP, 4=HPP, 5=ATK, 6=ATKP, 7=ER, 8=EM, 9=CR, 10=CD, 11=Heal, ...
+            // Stats array indices based on gcsim core/attributes:
+            // The values at indices 3, 5, 2 are already the FINAL calculated stats (Base * (1 + %) + Flat)
+            // 1=DEFP%, 2=DEF(final), 3=HP(final), 4=HPP%, 5=ATK(final), 6=ATKP%, 7=ER%, 8=EM, 9=CR, 10=CD
+            
+            const finalHP = statsArray[3] || 0;
+            const finalATK = statsArray[5] || 0;
+            const finalDEF = statsArray[2] || 0;
+            const em = statsArray[8] || 0;
+            const cr = statsArray[9] || 0;
+            const cd = statsArray[10] || 0;
+            const er = statsArray[7] || 0;
+            
             const statDefs = [
-                { idx: 3, name: 'HP', format: (v) => Math.round(v) },
-                { idx: 5, name: '攻撃力', format: (v) => Math.round(v) },
-                { idx: 2, name: '防御力', format: (v) => Math.round(v) },
-                { idx: 8, name: '元素熟知', format: (v) => Math.round(v) },
-                { idx: 9, name: '会心率', format: (v) => (v * 100).toFixed(1) + '%' },
-                { idx: 10, name: '会心ダメージ', format: (v) => (v * 100).toFixed(1) + '%' },
-                { idx: 7, name: '元素チャージ効率', format: (v) => (v * 100).toFixed(1) + '%' },
+                { name: 'HP', value: finalHP, format: (v) => Math.round(v) },
+                { name: '攻撃力', value: finalATK, format: (v) => Math.round(v) },
+                { name: '防御力', value: finalDEF, format: (v) => Math.round(v) },
+                { name: '元素熟知', value: em, format: (v) => Math.round(v) },
+                { name: '会心率', value: cr, format: (v) => (v * 100).toFixed(1) + '%' },
+                { name: '会心ダメージ', value: cd, format: (v) => (v * 100).toFixed(1) + '%' },
+                { name: '元素チャージ効率', value: er, format: (v) => (v * 100).toFixed(1) + '%' },
             ];
             
-            statDefs.forEach(({idx, name, format}) => {
-                if (statsArray[idx] !== undefined && statsArray[idx] !== 0) {
+            console.log(`[WebUI] ${name} final stats: HP=${Math.round(finalHP)}, ATK=${Math.round(finalATK)}, DEF=${Math.round(finalDEF)}, EM=${Math.round(em)}, CR=${(cr*100).toFixed(1)}%, CD=${(cd*100).toFixed(1)}%, ER=${(er*100).toFixed(1)}%`);
+            
+            statDefs.forEach(({name, value, format}) => {
+                if (value !== undefined && value !== 0) {
                     statsHTML += `<div class="info-row" style="padding: 2px 0;">
                         <span class="info-label">${name}:</span>
-                        <span class="info-value">${format(statsArray[idx])}</span>
+                        <span class="info-value">${format(value)}</span>
                     </div>`;
                 }
             });
