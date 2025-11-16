@@ -269,24 +269,26 @@ function displayCharacters(result) {
             const cd = statsArray[10] || 0;
             const er = statsArray[7] || 0;
             
-            // Use snapshot_stats which contains final calculated values
-            // After details.go processing, snapshot_stats[3]=FinalHP, [5]=FinalATK, [2]=FinalDEF
-            const snapshotStats = char.snapshot_stats || char.snapshot || [];
-            const finalHP = snapshotStats[3] || 0;   // Final HP (calculated)
-            const finalATK = snapshotStats[5] || 0;  // Final ATK (calculated)
-            const finalDEF = snapshotStats[2] || 0;  // Final DEF (calculated)
+            // Use final_* fields directly exported from backend
+            const finalHP = char.final_hp || 0;
+            const finalATK = char.final_atk || 0;
+            const finalDEF = char.final_def || 0;
+            const finalEM = char.final_em || 0;
+            const finalCR = char.final_cr || 0;
+            const finalCD = char.final_cd || 0;
+            const finalER = char.final_er || 0;
             
             const statDefs = [
                 { name: 'HP', value: finalHP, format: (v) => Math.round(v) },
                 { name: '攻撃力', value: finalATK, format: (v) => Math.round(v) },
                 { name: '防御力', value: finalDEF, format: (v) => Math.round(v) },
-                { name: '元素熟知', value: em, format: (v) => Math.round(v) },
-                { name: '会心率', value: cr, format: (v) => (v * 100).toFixed(1) + '%' },
-                { name: '会心ダメージ', value: cd, format: (v) => (v * 100).toFixed(1) + '%' },
-                { name: '元素チャージ効率', value: er, format: (v) => (v * 100).toFixed(1) + '%' },
+                { name: '元素熟知', value: finalEM, format: (v) => Math.round(v) },
+                { name: '会心率', value: finalCR, format: (v) => (v * 100).toFixed(1) + '%' },
+                { name: '会心ダメージ', value: finalCD, format: (v) => (v * 100).toFixed(1) + '%' },
+                { name: '元素チャージ効率', value: finalER, format: (v) => (v * 100).toFixed(1) + '%' },
             ];
             
-            console.log(`[WebUI] ${name} final stats (from snapshot_stats): HP=${Math.round(finalHP)}, ATK=${Math.round(finalATK)}, DEF=${Math.round(finalDEF)}, EM=${Math.round(em)}, CR=${(cr*100).toFixed(1)}%, CD=${(cd*100).toFixed(1)}%, ER=${(er*100).toFixed(1)}%`);
+            console.log(`[WebUI] ${name} final stats (from final_* fields): HP=${Math.round(finalHP)}, ATK=${Math.round(finalATK)}, DEF=${Math.round(finalDEF)}, EM=${Math.round(finalEM)}, CR=${(finalCR*100).toFixed(1)}%, CD=${(finalCD*100).toFixed(1)}%, ER=${(finalER*100).toFixed(1)}%`);
             
             statDefs.forEach(({name, value, format}) => {
                 if (value !== undefined && value !== 0) {
