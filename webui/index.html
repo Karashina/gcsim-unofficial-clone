@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gcsim WebUI - シミュレーター</title>
+    <title>gcsim-uoc WebUI - シミュレーター</title>
     
     <style>
         * {
@@ -179,9 +179,22 @@
             border-bottom: 1px solid #eee;
         }
         
+        /* Make info labels bolder for better readability */
         .info-label {
-            font-weight: 500;
-            color: #666;
+            font-weight: 700;
+            color: #444;
+        }
+
+        /* Compact character info: wrap each row in a subtle box */
+        .char-info-compact .info-row {
+            border-bottom: none;
+            border: 1px solid #e8e8e8;
+            padding: 8px;
+            margin: 6px 0;
+            border-radius: 6px;
+            background: #ffffff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            align-items: center;
         }
         
         .info-value {
@@ -310,9 +323,9 @@
     <div class="container-main">
         <div class="header">
             <h3 style="margin: 0;">
-                ⚡ gcsim WebUI
+                ⚡ gcsim-uoc WebUI
             </h3>
-            <p style="margin: 5px 0 0 0; opacity: 0.9;">原神シミュレーター - GCSLコンフィグからダメージシミュレーションを実行</p>
+            <!-- header subtitle removed per request -->
         </div>
         
         <div class="editor-container">
