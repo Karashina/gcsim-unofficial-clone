@@ -59,8 +59,7 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload struct {
-		Config  string                 `json:"config"`
-		Options map[string]interface{} `json:"options,omitempty"`
+		Config string `json:"config"`
 	}
 	body, err := io.ReadAll(r.Body)
 	if err != nil {

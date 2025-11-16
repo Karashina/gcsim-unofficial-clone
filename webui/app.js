@@ -1,29 +1,17 @@
-// Initialize editor
-let editor;
+// Initialize charts storage
 let charts = {};
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('[WebUI] Initializing...');
     // Get textarea element
     const textarea = document.getElementById('config-editor');
     
-    // Set default config
+    // Set default config - simpler version for reliable execution
     const defaultConfig = `ineffa char lvl=90/90 cons=0 talent=9,9,9;
 ineffa add weapon="deathmatch" refine=1 lvl=90/90;
 ineffa add set="gt" count=4;
 ineffa add stats hp=4780 atk=311 em=187 atk%=0.466 cd=0.622;
 ineffa add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;
-
-sucrose char lvl=90/90 cons=6 talent=9,9,9;
-sucrose add weapon="hakushin" refine=5 lvl=90/90;
-sucrose add set="vv" count=5;
-sucrose add stats hp=4780 atk=311 em=560;
-sucrose add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*3 er=0.0551*3 em=19.82*6 cr=0.0331*11 cd=0.0662*7;
-
-flins char lvl=90/90 cons=0 talent=9,9,9;
-flins add weapon="bloodsoakedruins" refine=1 lvl=90/90;
-flins add set="notsu" count=4;
-flins add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622;
-flins add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*5 er=0.0551*2 em=19.82*2 cr=0.0331*9 cd=0.0662*12;
 
 xingqiu char lvl=90/90 cons=6 talent=9,9,9;
 xingqiu add weapon="favsword" refine=3 lvl=90/90;
@@ -31,39 +19,20 @@ xingqiu add set="sms" count=4;
 xingqiu add stats hp=4780 atk=311 er=0.518 cr=0.311 hydro%=0.466;
 xingqiu add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*5 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*11;
 
-options swap_delay=12 iteration=1000;
+options swap_delay=12 iteration=50;
 target lvl=100 resist=0.1 radius=2 pos=2.1,1.5 hp=999999999;
 energy every interval=480,720 amount=1;
 
 active ineffa;
 
-for let i=0; i<4; i=i+1 {
-  let r = rand();
-  ineffa skill;
-  if .ineffa.burst.ready && .ineffa.energymax {
-    ineffa burst;
-  }
-  xingqiu skill, dash, burst, attack:1;
-  sucrose attack, skill, jump;
-  flins skill, skill, burst;
-  while !.flins.northlandup {
-    flins attack;
-    if .flins.normal < 4 {
-      flins dash;
-    }
-  }
-  flins skill, burst;
-  while !.flins.northlandup {
-    flins attack;
-    if .flins.normal < 4 {
-      flins dash;
-    }
-  }
-  flins skill, burst;
-  flins attack:4, dash, attack:5;
-}`;
+ineffa skill, burst;
+xingqiu skill, burst, attack:3;
+ineffa attack:5;
+xingqiu attack:3;
+ineffa skill, attack:5;`;
     
     textarea.value = defaultConfig;
+    console.log('[WebUI] Default config loaded');
     
     // Add keyboard shortcuts
     textarea.addEventListener('keydown', function(e) {
@@ -105,12 +74,15 @@ function clearErrorHighlights() {
 }
 
 async function runSimulation() {
+    console.log('[WebUI] Starting simulation...');
     const textarea = document.getElementById('config-editor');
     const config = textarea.value;
     const errorMsg = document.getElementById('error-message');
     const loading = document.getElementById('loading');
     const resultsContainer = document.getElementById('results-container');
     const runButton = document.querySelector('.btn-run');
+    
+    console.log('[WebUI] Config length:', config.length);
     
     // Hide previous results and errors
     errorMsg.style.display = 'none';
@@ -120,6 +92,7 @@ async function runSimulation() {
     clearErrorHighlights();
     
     try {
+        console.log('[WebUI] Sending request to /api/simulate');
         const response = await fetch('/api/simulate', {
             method: 'POST',
             headers: {
@@ -128,19 +101,24 @@ async function runSimulation() {
             body: JSON.stringify({ config })
         });
         
+        console.log('[WebUI] Response status:', response.status);
+        
         loading.style.display = 'none';
         runButton.disabled = false;
         
         if (!response.ok) {
             const error = await response.json();
+            console.error('[WebUI] Error response:', error);
             handleError(error);
             return;
         }
         
         const result = await response.json();
+        console.log('[WebUI] Simulation result:', result);
         displayResults(result);
         
     } catch (err) {
+        console.error('[WebUI] Exception:', err);
         loading.style.display = 'none';
         runButton.disabled = false;
         errorMsg.textContent = 'エラー: ' + err.message;
@@ -149,6 +127,7 @@ async function runSimulation() {
 }
 
 function handleError(error) {
+    console.log('[WebUI] Handling error:', error);
     const errorMsg = document.getElementById('error-message');
     let message = error.message || error.error || 'シミュレーションに失敗しました';
     
@@ -168,6 +147,7 @@ function handleError(error) {
 }
 
 function displayResults(result) {
+    console.log('[WebUI] Displaying results...');
     const resultsContainer = document.getElementById('results-container');
     resultsContainer.style.display = 'block';
     
@@ -183,11 +163,14 @@ function displayResults(result) {
     // Display charts
     displayCharts(result);
     
+    console.log('[WebUI] Results displayed successfully');
+    
     // Scroll to results
     resultsContainer.scrollIntoView({ behavior: 'smooth' });
 }
 
 function displayStatistics(result) {
+    console.log('[WebUI] Displaying statistics...');
     const stats = result.statistics || {};
     
     // Extract main statistics
@@ -197,6 +180,8 @@ function displayStatistics(result) {
     const hps = stats.hps?.mean || 0;
     const shp = stats.shp?.mean || 0;
     const duration = stats.duration?.mean || result.simulator_settings?.duration || 0;
+    
+    console.log('[WebUI] Stats:', { dps, eps, rps, hps, shp, duration });
     
     document.getElementById('stat-dps').textContent = formatNumber(dps);
     document.getElementById('stat-eps').textContent = formatNumber(eps);
