@@ -204,6 +204,10 @@ function displayCharacters(result) {
     const container = document.getElementById('characters-list');
     container.innerHTML = '';
     
+    // Add grid wrapper
+    const gridDiv = document.createElement('div');
+    gridDiv.className = 'characters-grid';
+    
     if (!result.character_details || result.character_details.length === 0) {
         container.innerHTML = '<p>キャラクター情報がありません</p>';
         return;
@@ -238,47 +242,15 @@ function displayCharacters(result) {
             const setsList = Object.entries(char.sets).map(([set, count]) => 
                 `<span class="chip">${set} (${count})</span>`
             ).join(' ');
-            setsHTML = `<div style="margin: 6px 0;"><strong>聖遺物セット:</strong> ${setsList}</div>`;
+            setsHTML = `<div style="margin: 6px 0; font-size: 0.85rem;"><strong>聖遺物:</strong> ${setsList}</div>`;
         }
         
-        // Stats display - calculate final stats from base stats
-        // Final stat = Base * (1 + %) + Flat
+        // Stats display - use snapshot_stats for final values
         let statsHTML = '';
-        const statsArray = char.snapshot_stats || char.stats;
-        if (statsArray && statsArray.length > 0) {
-            console.log(`[WebUI] Character ${name} stats array (using ${char.snapshot_stats ? 'snapshot_stats' : 'stats'}):`, statsArray);
-            console.log(`[WebUI] Base stats: HP=${char.base_hp}, ATK=${char.base_atk}, DEF=${char.base_def}`);
-            statsHTML = '<div style="margin-top: 8px;"><strong>ステータス詳細:</strong>';
-            statsHTML += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 0.85rem; margin-top: 4px;">';
+        const snapshotStats = char.snapshot_stats || char.snapshot || [];
+        if (snapshotStats && snapshotStats.length > 0) {
+            console.log(`[WebUI] Character ${name} snapshot_stats:`, snapshotStats);
             
-            // Stats array indices based on gcsim core/attributes:
-            // 1=DEFP%, 2=DEF(flat), 3=HP(flat), 4=HPP%, 5=ATK(flat), 6=ATKP%, 7=ER%, 8=EM, 9=CR, 10=CD
-            // Base stats are now exported separately as base_hp, base_atk, base_def
-            
-            const baseHP = char.base_hp || 0;
-            const baseATK = char.base_atk || 0;
-            const baseDEF = char.base_def || 0;
-            const flatHP = statsArray[3] || 0;
-            const flatATK = statsArray[5] || 0;
-            const flatDEF = statsArray[2] || 0;
-            const hpp = statsArray[4] || 0;
-            const atkp = statsArray[6] || 0;
-            const defp = statsArray[1] || 0;
-            const em = statsArray[8] || 0;
-            const cr = statsArray[9] || 0;
-            const cd = statsArray[10] || 0;
-            const er = statsArray[7] || 0;
-            
-            // Use snapshot_stats array which contains final calculated values
-            // After details.go processing:
-            // snapshot_stats[3] = Final HP (MaxHP())
-            // snapshot_stats[5] = Final ATK (TotalATK())
-            // snapshot_stats[2] = Final DEF (TotalDEF())
-            // snapshot_stats[8] = EM
-            // snapshot_stats[9] = CR
-            // snapshot_stats[10] = CD
-            // snapshot_stats[7] = ER
-            const snapshotStats = char.snapshot_stats || char.snapshot || [];
             const finalHP = snapshotStats[3] || 0;
             const finalATK = snapshotStats[5] || 0;
             const finalDEF = snapshotStats[2] || 0;
@@ -297,20 +269,20 @@ function displayCharacters(result) {
                 { name: '元素チャージ効率', value: finalER, format: (v) => (v * 100).toFixed(1) + '%' },
             ];
             
-            console.log(`[WebUI] ${name} final stats (from snapshot_stats): HP=${Math.round(finalHP)}, ATK=${Math.round(finalATK)}, DEF=${Math.round(finalDEF)}, EM=${Math.round(finalEM)}, CR=${(finalCR*100).toFixed(1)}%, CD=${(finalCD*100).toFixed(1)}%, ER=${(finalER*100).toFixed(1)}%`);
+            console.log(`[WebUI] ${name} final stats: HP=${Math.round(finalHP)}, ATK=${Math.round(finalATK)}, DEF=${Math.round(finalDEF)}, EM=${Math.round(finalEM)}, CR=${(finalCR*100).toFixed(1)}%, CD=${(finalCD*100).toFixed(1)}%, ER=${(finalER*100).toFixed(1)}%`);
             
+            statsHTML = '<div class="char-stats-row">';
             statDefs.forEach(({name, value, format}) => {
                 if (value !== undefined && value !== 0) {
-                    statsHTML += `<div class="info-row" style="padding: 2px 0;">
-                        <span class="info-label">${name}:</span>
-                        <span class="info-value">${format(value)}</span>
+                    statsHTML += `<div class="stat-item">
+                        <span class="stat-label">${name}:</span>
+                        <span class="stat-value">${format(value)}</span>
                     </div>`;
                 }
             });
-            
-            statsHTML += '</div></div>';
+            statsHTML += '</div>';
         } else {
-            console.log('[WebUI] No stats array found for character:', name);
+            console.log('[WebUI] No snapshot_stats found for character:', name);
         }
         
         charDiv.innerHTML = `
@@ -337,8 +309,10 @@ function displayCharacters(result) {
             ${statsHTML}
         `;
         
-        container.appendChild(charDiv);
+        gridDiv.appendChild(charDiv);
     });
+    
+    container.appendChild(gridDiv);
 }
 
 function displayTargetInfo(result) {
@@ -612,7 +586,7 @@ function createStackedBarChart(ctx, categories, [charNames, charValues], title) 
         borderWidth: 1
     }));
     
-    return new Chart(ctx, {
+    const chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: categories,
@@ -654,10 +628,39 @@ function createStackedBarChart(ctx, categories, [charNames, charValues], title) 
             }
         }
     });
+    
+    // Add data table with character names, DPS values, and percentages
+    const container = ctx.parentElement;
+    let tableDiv = container.querySelector('.chart-data-table-container');
+    
+    if (!tableDiv) {
+        tableDiv = document.createElement('div');
+        tableDiv.className = 'chart-data-table-container';
+        container.appendChild(tableDiv);
+    }
+    
+    let html = '<table class="chart-data-table">';
+    html += '<thead><tr><th>キャラクター</th><th>DPS</th><th>割合</th></tr></thead>';
+    html += '<tbody>';
+    
+    charNames.forEach((name, idx) => {
+        const dps = charValues[idx];
+        const pct = percentages[idx];
+        html += `<tr>
+            <td>${name}</td>
+            <td>${Math.round(dps).toLocaleString('ja-JP')}</td>
+            <td>${pct.toFixed(1)}%</td>
+        </tr>`;
+    });
+    
+    html += '</tbody></table>';
+    tableDiv.innerHTML = html;
+    
+    return chart;
 }
 
 function createBarChart(ctx, labels, data, label) {
-    return new Chart(ctx, {
+    const chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
@@ -684,10 +687,15 @@ function createBarChart(ctx, labels, data, label) {
             }
         }
     });
+    
+    // Add data table
+    addChartDataTable(ctx, labels, data, label);
+    
+    return chart;
 }
 
 function createLineChart(ctx, labels, data, label) {
-    return new Chart(ctx, {
+    const chart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
@@ -715,6 +723,59 @@ function createLineChart(ctx, labels, data, label) {
             }
         }
     });
+    
+    // Add data table
+    addChartDataTable(ctx, labels, data, label);
+    
+    return chart;
+}
+
+function addChartLegend(ctx, labels, colors) {
+    const container = ctx.parentElement;
+    let legendDiv = container.querySelector('.chart-legend');
+    
+    if (!legendDiv) {
+        legendDiv = document.createElement('div');
+        legendDiv.className = 'chart-legend';
+        container.appendChild(legendDiv);
+    }
+    
+    let html = '<div class="chart-legend-title">凡例</div>';
+    labels.forEach((label, idx) => {
+        const color = colors[idx % colors.length];
+        html += `<div class="chart-legend-item">
+            <div class="chart-legend-color" style="background-color: ${color};"></div>
+            <span>${label}</span>
+        </div>`;
+    });
+    
+    legendDiv.innerHTML = html;
+}
+
+function addChartDataTable(ctx, labels, data, columnLabel) {
+    const container = ctx.parentElement;
+    let tableDiv = container.querySelector('.chart-data-table-container');
+    
+    if (!tableDiv) {
+        tableDiv = document.createElement('div');
+        tableDiv.className = 'chart-data-table-container';
+        container.appendChild(tableDiv);
+    }
+    
+    let html = '<table class="chart-data-table">';
+    html += '<thead><tr><th>項目</th><th>値</th></tr></thead>';
+    html += '<tbody>';
+    
+    labels.forEach((label, idx) => {
+        const value = Array.isArray(data) ? data[idx] : data;
+        const formattedValue = typeof value === 'number' ? 
+            (value % 1 === 0 ? value.toLocaleString('ja-JP') : value.toFixed(2)) : 
+            value;
+        html += `<tr><td>${label}</td><td>${formattedValue}</td></tr>`;
+    });
+    
+    html += '</tbody></table>';
+    tableDiv.innerHTML = html;
 }
 
 function formatNumber(num) {
