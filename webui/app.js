@@ -200,6 +200,7 @@ function displayStatistics(result) {
 
 function displayCharacters(result) {
     console.log('[WebUI] Displaying characters...');
+    console.log('[WebUI] Full result keys:', Object.keys(result));
     const container = document.getElementById('characters-list');
     container.innerHTML = '';
     
@@ -208,7 +209,10 @@ function displayCharacters(result) {
         return;
     }
     
-    result.character_details.forEach(char => {
+    result.character_details.forEach((char, idx) => {
+        console.log(`[WebUI] Character ${idx} keys:`, Object.keys(char));
+        console.log(`[WebUI] Character ${idx} data:`, JSON.stringify(char, null, 2));
+        
         const charDiv = document.createElement('div');
         charDiv.className = 'char-card';
         
@@ -237,69 +241,38 @@ function displayCharacters(result) {
             setsHTML = `<div style="margin: 6px 0;"><strong>聖遺物セット:</strong> ${setsList}</div>`;
         }
         
-        // Stats display with proper names using final_stats
+        // Stats display using snapshot_stats array (actual stats at time of damage calculation)
         let statsHTML = '';
-        // Check multiple possible locations for stats
-        const finalStats = char.stats || char.final_stats || {};
-        
-        if (Object.keys(finalStats).length > 0) {
+        const statsArray = char.snapshot_stats || char.stats;
+        if (statsArray && statsArray.length > 0) {
+            console.log(`[WebUI] Character ${name} stats array (using ${char.snapshot_stats ? 'snapshot_stats' : 'stats'}):`, statsArray);
             statsHTML = '<div style="margin-top: 8px;"><strong>ステータス詳細:</strong>';
             statsHTML += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 0.85rem; margin-top: 4px;">';
             
-            // Display final stats - HP, ATK, DEF, EM, CR, CD, ER
-            if (finalStats.hp || finalStats.HP) {
-                const hp = finalStats.hp || finalStats.HP;
-                statsHTML += `<div class="info-row" style="padding: 2px 0;">
-                    <span class="info-label">HP:</span>
-                    <span class="info-value">${Math.round(hp)}</span>
-                </div>`;
-            }
-            if (finalStats.atk || finalStats.ATK) {
-                const atk = finalStats.atk || finalStats.ATK;
-                statsHTML += `<div class="info-row" style="padding: 2px 0;">
-                    <span class="info-label">攻撃力:</span>
-                    <span class="info-value">${Math.round(atk)}</span>
-                </div>`;
-            }
-            if (finalStats.def || finalStats.DEF) {
-                const def = finalStats.def || finalStats.DEF;
-                statsHTML += `<div class="info-row" style="padding: 2px 0;">
-                    <span class="info-label">防御力:</span>
-                    <span class="info-value">${Math.round(def)}</span>
-                </div>`;
-            }
-            if (finalStats.em !== undefined || finalStats.EM !== undefined) {
-                const em = finalStats.em ?? finalStats.EM;
-                statsHTML += `<div class="info-row" style="padding: 2px 0;">
-                    <span class="info-label">元素熟知:</span>
-                    <span class="info-value">${Math.round(em)}</span>
-                </div>`;
-            }
-            if (finalStats.cr !== undefined || finalStats.CR !== undefined) {
-                const cr = finalStats.cr ?? finalStats.CR;
-                statsHTML += `<div class="info-row" style="padding: 2px 0;">
-                    <span class="info-label">会心率:</span>
-                    <span class="info-value">${(cr * 100).toFixed(1)}%</span>
-                </div>`;
-            }
-            if (finalStats.cd !== undefined || finalStats.CD !== undefined) {
-                const cd = finalStats.cd ?? finalStats.CD;
-                statsHTML += `<div class="info-row" style="padding: 2px 0;">
-                    <span class="info-label">会心ダメージ:</span>
-                    <span class="info-value">${(cd * 100).toFixed(1)}%</span>
-                </div>`;
-            }
-            if (finalStats.er !== undefined || finalStats.ER !== undefined) {
-                const er = finalStats.er ?? finalStats.ER;
-                statsHTML += `<div class="info-row" style="padding: 2px 0;">
-                    <span class="info-label">元素チャージ効率:</span>
-                    <span class="info-value">${(er * 100).toFixed(1)}%</span>
-                </div>`;
-            }
+            // Stats array based on gcsim core/attributes:
+            // 1=DEFP, 2=DEF, 3=HP, 4=HPP, 5=ATK, 6=ATKP, 7=ER, 8=EM, 9=CR, 10=CD, 11=Heal, ...
+            const statDefs = [
+                { idx: 3, name: 'HP', format: (v) => Math.round(v) },
+                { idx: 5, name: '攻撃力', format: (v) => Math.round(v) },
+                { idx: 2, name: '防御力', format: (v) => Math.round(v) },
+                { idx: 8, name: '元素熟知', format: (v) => Math.round(v) },
+                { idx: 9, name: '会心率', format: (v) => (v * 100).toFixed(1) + '%' },
+                { idx: 10, name: '会心ダメージ', format: (v) => (v * 100).toFixed(1) + '%' },
+                { idx: 7, name: '元素チャージ効率', format: (v) => (v * 100).toFixed(1) + '%' },
+            ];
+            
+            statDefs.forEach(({idx, name, format}) => {
+                if (statsArray[idx] !== undefined && statsArray[idx] !== 0) {
+                    statsHTML += `<div class="info-row" style="padding: 2px 0;">
+                        <span class="info-label">${name}:</span>
+                        <span class="info-value">${format(statsArray[idx])}</span>
+                    </div>`;
+                }
+            });
             
             statsHTML += '</div></div>';
         } else {
-            console.log('[WebUI] No stats found for character:', name, 'Available fields:', Object.keys(char));
+            console.log('[WebUI] No stats array found for character:', name);
         }
         
         charDiv.innerHTML = `
