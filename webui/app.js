@@ -241,26 +241,38 @@ function displayCharacters(result) {
             setsHTML = `<div style="margin: 6px 0;"><strong>聖遺物セット:</strong> ${setsList}</div>`;
         }
         
-        // Stats display - the stats array already contains final calculated values
-        // Final stat = Base * (1 + %) + Flat (already calculated in indices 3, 5, 2)
+        // Stats display - calculate final stats from base stats
+        // Final stat = Base * (1 + %) + Flat
         let statsHTML = '';
         const statsArray = char.snapshot_stats || char.stats;
         if (statsArray && statsArray.length > 0) {
             console.log(`[WebUI] Character ${name} stats array (using ${char.snapshot_stats ? 'snapshot_stats' : 'stats'}):`, statsArray);
+            console.log(`[WebUI] Base stats: HP=${char.base_hp}, ATK=${char.base_atk}, DEF=${char.base_def}`);
             statsHTML = '<div style="margin-top: 8px;"><strong>ステータス詳細:</strong>';
             statsHTML += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 0.85rem; margin-top: 4px;">';
             
             // Stats array indices based on gcsim core/attributes:
-            // The values at indices 3, 5, 2 are already the FINAL calculated stats (Base * (1 + %) + Flat)
-            // 1=DEFP%, 2=DEF(final), 3=HP(final), 4=HPP%, 5=ATK(final), 6=ATKP%, 7=ER%, 8=EM, 9=CR, 10=CD
+            // 1=DEFP%, 2=DEF(flat), 3=HP(flat), 4=HPP%, 5=ATK(flat), 6=ATKP%, 7=ER%, 8=EM, 9=CR, 10=CD
+            // Base stats are now exported separately as base_hp, base_atk, base_def
             
-            const finalHP = statsArray[3] || 0;
-            const finalATK = statsArray[5] || 0;
-            const finalDEF = statsArray[2] || 0;
+            const baseHP = char.base_hp || 0;
+            const baseATK = char.base_atk || 0;
+            const baseDEF = char.base_def || 0;
+            const flatHP = statsArray[3] || 0;
+            const flatATK = statsArray[5] || 0;
+            const flatDEF = statsArray[2] || 0;
+            const hpp = statsArray[4] || 0;
+            const atkp = statsArray[6] || 0;
+            const defp = statsArray[1] || 0;
             const em = statsArray[8] || 0;
             const cr = statsArray[9] || 0;
             const cd = statsArray[10] || 0;
             const er = statsArray[7] || 0;
+            
+            // Calculate final stats: Base * (1 + %) + Flat
+            const finalHP = baseHP * (1 + hpp) + flatHP;
+            const finalATK = baseATK * (1 + atkp) + flatATK;
+            const finalDEF = baseDEF * (1 + defp) + flatDEF;
             
             const statDefs = [
                 { name: 'HP', value: finalHP, format: (v) => Math.round(v) },
@@ -272,7 +284,7 @@ function displayCharacters(result) {
                 { name: '元素チャージ効率', value: er, format: (v) => (v * 100).toFixed(1) + '%' },
             ];
             
-            console.log(`[WebUI] ${name} final stats: HP=${Math.round(finalHP)}, ATK=${Math.round(finalATK)}, DEF=${Math.round(finalDEF)}, EM=${Math.round(em)}, CR=${(cr*100).toFixed(1)}%, CD=${(cd*100).toFixed(1)}%, ER=${(er*100).toFixed(1)}%`);
+            console.log(`[WebUI] ${name} calculated final stats: HP=${Math.round(finalHP)} (${Math.round(baseHP)}*(1+${hpp.toFixed(3)})+${Math.round(flatHP)}), ATK=${Math.round(finalATK)} (${Math.round(baseATK)}*(1+${atkp.toFixed(3)})+${Math.round(flatATK)}), DEF=${Math.round(finalDEF)}`);
             
             statDefs.forEach(({name, value, format}) => {
                 if (value !== undefined && value !== 0) {
