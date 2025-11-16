@@ -1,5 +1,12 @@
 ﻿package servermode
 
+// package servermode has been removed. This file is an empty placeholder
+// to allow the repository to build while servermode-related code is
+// cleaned up. It contains no logic.
+
+
+
+
 import (
 	"log/slog"
 
@@ -156,19 +163,8 @@ func (w *worker) iter(work chan job, res chan stats.Result, errChan chan error) 
 			if err != nil {
 				errChan <- err
 				break
-			}
-			s, err := simulation.New(job.cfg, eval, c)
-			if err != nil {
-				errChan <- err
+			package servermode
+
+			// servermode removed: placeholder file
 				break
-			}
-			r, err := s.Run()
-			if err != nil {
-				errChan <- err
-				break
-			}
-			res <- r
-		}
-	}
-}
 
