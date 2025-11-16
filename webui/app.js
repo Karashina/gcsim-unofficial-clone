@@ -173,22 +173,29 @@ function displayStatistics(result) {
     console.log('[WebUI] Displaying statistics...');
     const stats = result.statistics || {};
     
-    // Extract main statistics
+    // Extract main statistics with stdev
     const dps = stats.dps?.mean || 0;
+    const dpsStd = stats.dps?.sd || 0;
     const eps = stats.eps?.mean || 0;
+    const epsStd = stats.eps?.sd || 0;
     const rps = stats.rps?.mean || 0;
+    const rpsStd = stats.rps?.sd || 0;
     const hps = stats.hps?.mean || 0;
+    const hpsStd = stats.hps?.sd || 0;
     const shp = stats.shp?.mean || 0;
+    const shpStd = stats.shp?.sd || 0;
     const duration = stats.duration?.mean || result.simulator_settings?.duration || 0;
+    const durationStd = stats.duration?.sd || 0;
     
     console.log('[WebUI] Stats:', { dps, eps, rps, hps, shp, duration });
     
-    document.getElementById('stat-dps').textContent = formatNumber(dps);
-    document.getElementById('stat-eps').textContent = formatNumber(eps);
-    document.getElementById('stat-rps').textContent = formatNumber(rps);
-    document.getElementById('stat-hps').textContent = formatNumber(hps);
-    document.getElementById('stat-shp').textContent = formatNumber(shp);
-    document.getElementById('stat-dur').textContent = formatNumber(duration);
+    // Display with 2 decimal places and stdev
+    document.getElementById('stat-dps').innerHTML = formatStatWithStdev(dps, dpsStd);
+    document.getElementById('stat-eps').innerHTML = formatStatWithStdev(eps, epsStd);
+    document.getElementById('stat-rps').innerHTML = formatStatWithStdev(rps, rpsStd);
+    document.getElementById('stat-hps').innerHTML = formatStatWithStdev(hps, hpsStd);
+    document.getElementById('stat-shp').innerHTML = formatStatWithStdev(shp, shpStd);
+    document.getElementById('stat-dur').innerHTML = formatStatWithStdev(duration, durationStd);
 }
 
 function displayCharacters(result) {
@@ -230,33 +237,69 @@ function displayCharacters(result) {
             setsHTML = `<div style="margin: 6px 0;"><strong>聖遺物セット:</strong> ${setsList}</div>`;
         }
         
-        // Stats display with proper names
+        // Stats display with proper names using final_stats
         let statsHTML = '';
-        if (char.snapshot && char.snapshot.length > 0) {
+        // Check multiple possible locations for stats
+        const finalStats = char.stats || char.final_stats || {};
+        
+        if (Object.keys(finalStats).length > 0) {
             statsHTML = '<div style="margin-top: 8px;"><strong>ステータス詳細:</strong>';
             statsHTML += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 0.85rem; margin-top: 4px;">';
             
-            const statMapping = [
-                { idx: 0, name: 'HP', format: (v) => Math.round(v) },
-                { idx: 2, name: '基礎HP', format: (v) => Math.round(v) },
-                { idx: 3, name: '攻撃力', format: (v) => Math.round(v) },
-                { idx: 5, name: '基礎攻撃力', format: (v) => Math.round(v) },
-                { idx: 4, name: '防御力', format: (v) => Math.round(v) },
-                { idx: 7, name: '元素熟知', format: (v) => Math.round(v) },
-                { idx: 9, name: '会心率', format: (v) => (v * 100).toFixed(1) + '%' },
-                { idx: 10, name: '会心ダメージ', format: (v) => (v * 100).toFixed(1) + '%' },
-                { idx: 8, name: '元素チャージ効率', format: (v) => (v * 100).toFixed(1) + '%' },
-            ];
+            // Display final stats - HP, ATK, DEF, EM, CR, CD, ER
+            if (finalStats.hp || finalStats.HP) {
+                const hp = finalStats.hp || finalStats.HP;
+                statsHTML += `<div class="info-row" style="padding: 2px 0;">
+                    <span class="info-label">HP:</span>
+                    <span class="info-value">${Math.round(hp)}</span>
+                </div>`;
+            }
+            if (finalStats.atk || finalStats.ATK) {
+                const atk = finalStats.atk || finalStats.ATK;
+                statsHTML += `<div class="info-row" style="padding: 2px 0;">
+                    <span class="info-label">攻撃力:</span>
+                    <span class="info-value">${Math.round(atk)}</span>
+                </div>`;
+            }
+            if (finalStats.def || finalStats.DEF) {
+                const def = finalStats.def || finalStats.DEF;
+                statsHTML += `<div class="info-row" style="padding: 2px 0;">
+                    <span class="info-label">防御力:</span>
+                    <span class="info-value">${Math.round(def)}</span>
+                </div>`;
+            }
+            if (finalStats.em !== undefined || finalStats.EM !== undefined) {
+                const em = finalStats.em ?? finalStats.EM;
+                statsHTML += `<div class="info-row" style="padding: 2px 0;">
+                    <span class="info-label">元素熟知:</span>
+                    <span class="info-value">${Math.round(em)}</span>
+                </div>`;
+            }
+            if (finalStats.cr !== undefined || finalStats.CR !== undefined) {
+                const cr = finalStats.cr ?? finalStats.CR;
+                statsHTML += `<div class="info-row" style="padding: 2px 0;">
+                    <span class="info-label">会心率:</span>
+                    <span class="info-value">${(cr * 100).toFixed(1)}%</span>
+                </div>`;
+            }
+            if (finalStats.cd !== undefined || finalStats.CD !== undefined) {
+                const cd = finalStats.cd ?? finalStats.CD;
+                statsHTML += `<div class="info-row" style="padding: 2px 0;">
+                    <span class="info-label">会心ダメージ:</span>
+                    <span class="info-value">${(cd * 100).toFixed(1)}%</span>
+                </div>`;
+            }
+            if (finalStats.er !== undefined || finalStats.ER !== undefined) {
+                const er = finalStats.er ?? finalStats.ER;
+                statsHTML += `<div class="info-row" style="padding: 2px 0;">
+                    <span class="info-label">元素チャージ効率:</span>
+                    <span class="info-value">${(er * 100).toFixed(1)}%</span>
+                </div>`;
+            }
             
-            statMapping.forEach(({idx, name, format}) => {
-                if (char.snapshot[idx] !== undefined && char.snapshot[idx] !== 0) {
-                    statsHTML += `<div class="info-row" style="padding: 2px 0;">
-                        <span class="info-label">${name}:</span>
-                        <span class="info-value">${format(char.snapshot[idx])}</span>
-                    </div>`;
-                }
-            });
             statsHTML += '</div></div>';
+        } else {
+            console.log('[WebUI] No stats found for character:', name, 'Available fields:', Object.keys(char));
         }
         
         charDiv.innerHTML = `
@@ -335,96 +378,137 @@ function displayTargetInfo(result) {
 
 function displayCharts(result) {
     console.log('[WebUI] Displaying charts...');
+    console.log('[WebUI] Result structure:', Object.keys(result));
+    console.log('[WebUI] Statistics:', result.statistics);
+    
     // Destroy existing charts
     Object.values(charts).forEach(chart => {
-        if (chart) chart.destroy();
+        if (chart && typeof chart.destroy === 'function') chart.destroy();
     });
     charts = {};
     
     const stats = result.statistics || {};
     
     // Character DPS Chart (100% Stacked Bar Chart)
-    if (stats.character_dps || (result.character_details && result.character_details.length > 0)) {
+    if (result.character_details && result.character_details.length > 0) {
         const ctx = document.getElementById('char-dps-chart');
-        const charDpsData = [];
-        const charNames = [];
-        
-        if (result.character_details) {
+        if (!ctx) {
+            console.error('[WebUI] Canvas element char-dps-chart not found');
+        } else {
+            const charDpsData = [];
+            const charNames = [];
+            
             result.character_details.forEach((char, idx) => {
                 charNames.push(char.name || `キャラ${idx+1}`);
-                const dpsValue = stats.character_dps?.[idx]?.mean || 
-                               stats.character_dps?.[char.name]?.mean || 0;
+                // Try multiple possible locations for character DPS data
+                let dpsValue = 0;
+                if (stats.character_dps && Array.isArray(stats.character_dps)) {
+                    dpsValue = stats.character_dps[idx]?.mean || 0;
+                } else if (stats.character_dps && typeof stats.character_dps === 'object') {
+                    dpsValue = stats.character_dps[char.name]?.mean || 0;
+                }
                 charDpsData.push(dpsValue);
             });
-        }
-        
-        if (charDpsData.length > 0) {
-            charts.charDps = createStackedBarChart(ctx, ['チーム'], [charNames, charDpsData], 'キャラクター別DPS');
+            
+            console.log('[WebUI] Character DPS data:', charNames, charDpsData);
+            
+            if (charDpsData.length > 0 && charDpsData.some(v => v > 0)) {
+                charts.charDps = createStackedBarChart(ctx, ['チーム'], [charNames, charDpsData], 'キャラクター別DPS');
+            } else {
+                console.log('[WebUI] No character DPS data to display');
+            }
         }
     }
     
     // Source DPS Chart
-    if (stats.dps_by_element || stats.source_dps) {
-        const ctx = document.getElementById('source-dps-chart');
+    const ctx2 = document.getElementById('source-dps-chart');
+    if (!ctx2) {
+        console.error('[WebUI] Canvas element source-dps-chart not found');
+    } else {
         let sourceData = {};
         
-        if (stats.dps_by_element && stats.dps_by_element.length > 0) {
-            // Extract from character DPS by element
+        // Try to extract source DPS data
+        if (stats.dps_by_element && Array.isArray(stats.dps_by_element)) {
             stats.dps_by_element.forEach((charData, idx) => {
                 const charName = result.character_details?.[idx]?.name || `キャラ${idx+1}`;
-                if (charData.elements) {
-                    Object.entries(charData.elements).forEach(([element, data]) => {
+                if (charData && typeof charData === 'object') {
+                    Object.entries(charData).forEach(([element, data]) => {
                         const key = `${charName} (${element})`;
-                        sourceData[key] = data.mean || data;
+                        sourceData[key] = data?.mean || data;
                     });
                 }
             });
+        } else if (stats.source_damage_instances) {
+            // Alternative data source
+            Object.entries(stats.source_damage_instances).forEach(([source, count]) => {
+                if (count > 0) sourceData[source] = count;
+            });
         }
+        
+        console.log('[WebUI] Source DPS data:', sourceData);
         
         const data = extractChartData(sourceData);
         if (data.labels.length > 0) {
-            charts.sourceDps = createBarChart(ctx, data.labels, data.values, 'ソース別DPS');
+            charts.sourceDps = createBarChart(ctx2, data.labels, data.values, 'ソース別DPS');
+        } else {
+            console.log('[WebUI] No source DPS data to display');
         }
     }
     
     // Damage Distribution Chart (Time-based line chart)
-    if (stats.damage_buckets) {
-        const ctx = document.getElementById('damage-dist-chart');
+    const ctx3 = document.getElementById('damage-dist-chart');
+    if (!ctx3) {
+        console.error('[WebUI] Canvas element damage-dist-chart not found');
+    } else if (stats.damage_buckets) {
         const buckets = stats.damage_buckets;
         const bucketSize = buckets.bucket_size || 30;
         const bucketData = buckets.buckets || [];
         
         const timeLabels = bucketData.map((_, idx) => `${(idx * bucketSize).toFixed(0)}s`);
-        const damageValues = bucketData.map(bucket => bucket.mean || 0);
+        const damageValues = bucketData.map(bucket => bucket?.mean || 0);
+        
+        console.log('[WebUI] Damage distribution data:', timeLabels.length, 'buckets');
         
         if (timeLabels.length > 0) {
-            charts.damageDist = createLineChart(ctx, timeLabels, damageValues, 'ダメージ');
+            charts.damageDist = createLineChart(ctx3, timeLabels, damageValues, 'ダメージ');
         }
+    } else {
+        console.log('[WebUI] No damage distribution data');
     }
     
     // Energy Chart (Source-based)
-    if (stats.total_source_energy && stats.total_source_energy.length > 0) {
-        const ctx = document.getElementById('energy-chart');
+    const ctx4 = document.getElementById('energy-chart');
+    if (!ctx4) {
+        console.error('[WebUI] Canvas element energy-chart not found');
+    } else if (stats.total_source_energy && Array.isArray(stats.total_source_energy)) {
         const energyData = {};
         
         stats.total_source_energy.forEach((charEnergy, idx) => {
             const charName = result.character_details?.[idx]?.name || `キャラ${idx+1}`;
             if (charEnergy && typeof charEnergy === 'object') {
                 Object.entries(charEnergy).forEach(([source, value]) => {
-                    energyData[`${charName}: ${source}`] = value;
+                    if (value > 0) {
+                        energyData[`${charName}: ${source}`] = value;
+                    }
                 });
             }
         });
         
+        console.log('[WebUI] Energy data:', energyData);
+        
         const data = extractChartData(energyData);
         if (data.labels.length > 0) {
-            charts.energy = createBarChart(ctx, data.labels, data.values, 'エネルギー');
+            charts.energy = createBarChart(ctx4, data.labels, data.values, 'エネルギー');
         }
+    } else {
+        console.log('[WebUI] No energy data');
     }
     
     // Reaction Count Chart
-    if (stats.source_reactions && stats.source_reactions.length > 0) {
-        const ctx = document.getElementById('reaction-count-chart');
+    const ctx5 = document.getElementById('reaction-count-chart');
+    if (!ctx5) {
+        console.error('[WebUI] Canvas element reaction-count-chart not found');
+    } else if (stats.source_reactions && Array.isArray(stats.source_reactions)) {
         const reactionData = {};
         
         stats.source_reactions.forEach((charReactions, idx) => {
@@ -438,15 +522,21 @@ function displayCharts(result) {
             }
         });
         
+        console.log('[WebUI] Reaction data:', reactionData);
+        
         const data = extractChartData(reactionData);
         if (data.labels.length > 0) {
-            charts.reactions = createBarChart(ctx, data.labels, data.values, '反応回数');
+            charts.reactions = createBarChart(ctx5, data.labels, data.values, '反応回数');
         }
+    } else {
+        console.log('[WebUI] No reaction data');
     }
     
     // Aura Uptime Chart
-    if (stats.target_aura_uptime && stats.target_aura_uptime.length > 0) {
-        const ctx = document.getElementById('aura-uptime-chart');
+    const ctx6 = document.getElementById('aura-uptime-chart');
+    if (!ctx6) {
+        console.error('[WebUI] Canvas element aura-uptime-chart not found');
+    } else if (stats.target_aura_uptime && Array.isArray(stats.target_aura_uptime)) {
         const auraData = {};
         
         stats.target_aura_uptime.forEach((targetAura, idx) => {
@@ -459,13 +549,17 @@ function displayCharts(result) {
             }
         });
         
+        console.log('[WebUI] Aura uptime data:', auraData);
+        
         const data = extractChartData(auraData);
         if (data.labels.length > 0) {
-            charts.aura = createBarChart(ctx, data.labels, data.values, '付着時間 (%)');
+            charts.aura = createBarChart(ctx6, data.labels, data.values, '付着時間 (%)');
         }
+    } else {
+        console.log('[WebUI] No aura uptime data');
     }
     
-    console.log('[WebUI] Charts displayed');
+    console.log('[WebUI] Charts displayed, active charts:', Object.keys(charts));
 }
 
 function extractChartData(dataObj) {
@@ -618,6 +712,19 @@ function formatNumber(num) {
     
     // Format without K/M suffixes
     return Math.round(num).toLocaleString('ja-JP');
+}
+
+function formatStatWithStdev(mean, stdev) {
+    if (mean === undefined || mean === null) return '-';
+    
+    // Format mean with 2 decimal places
+    const meanFormatted = mean.toFixed(2);
+    
+    // Format stdev with 2 decimal places
+    const stdevFormatted = stdev ? stdev.toFixed(2) : '0.00';
+    
+    // Return HTML with main value and small stdev below
+    return `${meanFormatted}<br><small style="font-size: 0.5em; font-weight: 400; color: #999;">±${stdevFormatted}</small>`;
 }
 
 function formatStatName(statKey) {
