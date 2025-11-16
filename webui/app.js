@@ -192,6 +192,7 @@ function displayStatistics(result) {
 }
 
 function displayCharacters(result) {
+    console.log('[WebUI] Displaying characters...');
     const container = document.getElementById('characters-list');
     container.innerHTML = '';
     
@@ -209,48 +210,77 @@ function displayCharacters(result) {
         const maxLevel = char.max_level || 90;
         const constellation = char.cons || 0;
         const weapon = char.weapon?.name || 'Unknown';
+        const weaponLevel = char.weapon?.level || 1;
+        const weaponMaxLevel = char.weapon?.max_level || 90;
         const weaponRefine = char.weapon?.refine || 1;
+        const talents = char.talents || {};
         
-        let statsHTML = '<div style="margin-top: 10px;">';
-        statsHTML += '<strong>ステータス:</strong><br>';
-        
-        if (char.stats) {
-            for (const [key, value] of Object.entries(char.stats)) {
-                if (value && value !== 0) {
-                    statsHTML += `<div class="info-row">
-                        <span class="info-label">${formatStatName(key)}</span>
-                        <span class="info-value">${formatStatValue(key, value)}</span>
-                    </div>`;
-                }
-            }
+        // Talents display
+        let talentsText = '-';
+        if (talents.attack || talents.skill || talents.burst) {
+            talentsText = `${talents.attack || 1}/${talents.skill || 1}/${talents.burst || 1}`;
         }
-        statsHTML += '</div>';
         
+        // Sets display
         let setsHTML = '';
         if (char.sets && Object.keys(char.sets).length > 0) {
-            setsHTML = '<div style="margin-top: 10px;"><strong>聖遺物セット:</strong><br>';
-            for (const [set, count] of Object.entries(char.sets)) {
-                setsHTML += `<span class="chip">${set} (${count})</span> `;
-            }
-            setsHTML += '</div>';
+            const setsList = Object.entries(char.sets).map(([set, count]) => 
+                `<span class="chip">${set} (${count})</span>`
+            ).join(' ');
+            setsHTML = `<div style="margin: 6px 0;"><strong>聖遺物セット:</strong> ${setsList}</div>`;
+        }
+        
+        // Stats display with proper names
+        let statsHTML = '';
+        if (char.snapshot && char.snapshot.length > 0) {
+            statsHTML = '<div style="margin-top: 8px;"><strong>ステータス詳細:</strong>';
+            statsHTML += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 0.85rem; margin-top: 4px;">';
+            
+            const statMapping = [
+                { idx: 0, name: 'HP', format: (v) => Math.round(v) },
+                { idx: 2, name: '基礎HP', format: (v) => Math.round(v) },
+                { idx: 3, name: '攻撃力', format: (v) => Math.round(v) },
+                { idx: 5, name: '基礎攻撃力', format: (v) => Math.round(v) },
+                { idx: 4, name: '防御力', format: (v) => Math.round(v) },
+                { idx: 7, name: '元素熟知', format: (v) => Math.round(v) },
+                { idx: 9, name: '会心率', format: (v) => (v * 100).toFixed(1) + '%' },
+                { idx: 10, name: '会心ダメージ', format: (v) => (v * 100).toFixed(1) + '%' },
+                { idx: 8, name: '元素チャージ効率', format: (v) => (v * 100).toFixed(1) + '%' },
+            ];
+            
+            statMapping.forEach(({idx, name, format}) => {
+                if (char.snapshot[idx] !== undefined && char.snapshot[idx] !== 0) {
+                    statsHTML += `<div class="info-row" style="padding: 2px 0;">
+                        <span class="info-label">${name}:</span>
+                        <span class="info-value">${format(char.snapshot[idx])}</span>
+                    </div>`;
+                }
+            });
+            statsHTML += '</div></div>';
         }
         
         charDiv.innerHTML = `
             <div class="char-name">${name}</div>
-            <div class="info-row">
-                <span class="info-label">レベル</span>
-                <span class="info-value">${level}/${maxLevel}</span>
+            <div class="char-info-compact">
+                <div class="info-row">
+                    <span class="info-label">Lv.</span>
+                    <span class="info-value">${level}/${maxLevel}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">天賦Lv.</span>
+                    <span class="info-value">${talentsText}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">星座</span>
+                    <span class="info-value">C${constellation}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">武器</span>
+                    <span class="info-value">${weapon} Lv.${weaponLevel}/${weaponMaxLevel} (R${weaponRefine})</span>
+                </div>
             </div>
-            <div class="info-row">
-                <span class="info-label">凸数</span>
-                <span class="info-value">C${constellation}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">武器</span>
-                <span class="info-value">${weapon} (R${weaponRefine})</span>
-            </div>
-            ${statsHTML}
             ${setsHTML}
+            ${statsHTML}
         `;
         
         container.appendChild(charDiv);
@@ -304,6 +334,7 @@ function displayTargetInfo(result) {
 }
 
 function displayCharts(result) {
+    console.log('[WebUI] Displaying charts...');
     // Destroy existing charts
     Object.values(charts).forEach(chart => {
         if (chart) chart.destroy();
@@ -312,52 +343,129 @@ function displayCharts(result) {
     
     const stats = result.statistics || {};
     
-    // Character DPS Chart
-    if (stats.character_dps) {
+    // Character DPS Chart (100% Stacked Bar Chart)
+    if (stats.character_dps || (result.character_details && result.character_details.length > 0)) {
         const ctx = document.getElementById('char-dps-chart');
-        const data = extractChartData(stats.character_dps);
-        charts.charDps = createBarChart(ctx, data.labels, data.values, 'DPS');
+        const charDpsData = [];
+        const charNames = [];
+        
+        if (result.character_details) {
+            result.character_details.forEach((char, idx) => {
+                charNames.push(char.name || `キャラ${idx+1}`);
+                const dpsValue = stats.character_dps?.[idx]?.mean || 
+                               stats.character_dps?.[char.name]?.mean || 0;
+                charDpsData.push(dpsValue);
+            });
+        }
+        
+        if (charDpsData.length > 0) {
+            charts.charDps = createStackedBarChart(ctx, ['チーム'], [charNames, charDpsData], 'キャラクター別DPS');
+        }
     }
     
     // Source DPS Chart
-    if (stats.source_dps || stats.damage_by_source) {
+    if (stats.dps_by_element || stats.source_dps) {
         const ctx = document.getElementById('source-dps-chart');
-        const sourceData = stats.source_dps || stats.damage_by_source || {};
+        let sourceData = {};
+        
+        if (stats.dps_by_element && stats.dps_by_element.length > 0) {
+            // Extract from character DPS by element
+            stats.dps_by_element.forEach((charData, idx) => {
+                const charName = result.character_details?.[idx]?.name || `キャラ${idx+1}`;
+                if (charData.elements) {
+                    Object.entries(charData.elements).forEach(([element, data]) => {
+                        const key = `${charName} (${element})`;
+                        sourceData[key] = data.mean || data;
+                    });
+                }
+            });
+        }
+        
         const data = extractChartData(sourceData);
-        charts.sourceDps = createBarChart(ctx, data.labels, data.values, 'DPS');
+        if (data.labels.length > 0) {
+            charts.sourceDps = createBarChart(ctx, data.labels, data.values, 'ソース別DPS');
+        }
     }
     
-    // Damage Distribution Chart
-    if (stats.damage_buckets || stats.dps_by_target) {
+    // Damage Distribution Chart (Time-based line chart)
+    if (stats.damage_buckets) {
         const ctx = document.getElementById('damage-dist-chart');
-        const distData = stats.damage_buckets || stats.dps_by_target || {};
-        const data = extractChartData(distData);
-        charts.damageDist = createLineChart(ctx, data.labels, data.values, 'ダメージ');
+        const buckets = stats.damage_buckets;
+        const bucketSize = buckets.bucket_size || 30;
+        const bucketData = buckets.buckets || [];
+        
+        const timeLabels = bucketData.map((_, idx) => `${(idx * bucketSize).toFixed(0)}s`);
+        const damageValues = bucketData.map(bucket => bucket.mean || 0);
+        
+        if (timeLabels.length > 0) {
+            charts.damageDist = createLineChart(ctx, timeLabels, damageValues, 'ダメージ');
+        }
     }
     
-    // Energy Chart
-    if (stats.energy_stats || stats.particle_count) {
+    // Energy Chart (Source-based)
+    if (stats.total_source_energy && stats.total_source_energy.length > 0) {
         const ctx = document.getElementById('energy-chart');
-        const energyData = stats.energy_stats || {};
+        const energyData = {};
+        
+        stats.total_source_energy.forEach((charEnergy, idx) => {
+            const charName = result.character_details?.[idx]?.name || `キャラ${idx+1}`;
+            if (charEnergy && typeof charEnergy === 'object') {
+                Object.entries(charEnergy).forEach(([source, value]) => {
+                    energyData[`${charName}: ${source}`] = value;
+                });
+            }
+        });
+        
         const data = extractChartData(energyData);
-        charts.energy = createBarChart(ctx, data.labels, data.values, 'エネルギー');
+        if (data.labels.length > 0) {
+            charts.energy = createBarChart(ctx, data.labels, data.values, 'エネルギー');
+        }
     }
     
     // Reaction Count Chart
-    if (stats.reactions || stats.reaction_count) {
+    if (stats.source_reactions && stats.source_reactions.length > 0) {
         const ctx = document.getElementById('reaction-count-chart');
-        const reactionData = stats.reactions || stats.reaction_count || {};
+        const reactionData = {};
+        
+        stats.source_reactions.forEach((charReactions, idx) => {
+            const charName = result.character_details?.[idx]?.name || `キャラ${idx+1}`;
+            if (charReactions && typeof charReactions === 'object') {
+                Object.entries(charReactions).forEach(([reaction, value]) => {
+                    if (value && value !== 0) {
+                        reactionData[`${charName}: ${reaction}`] = value;
+                    }
+                });
+            }
+        });
+        
         const data = extractChartData(reactionData);
-        charts.reactions = createBarChart(ctx, data.labels, data.values, '回数');
+        if (data.labels.length > 0) {
+            charts.reactions = createBarChart(ctx, data.labels, data.values, '反応回数');
+        }
     }
     
     // Aura Uptime Chart
-    if (stats.element_uptime || stats.aura_uptime) {
+    if (stats.target_aura_uptime && stats.target_aura_uptime.length > 0) {
         const ctx = document.getElementById('aura-uptime-chart');
-        const auraData = stats.element_uptime || stats.aura_uptime || {};
+        const auraData = {};
+        
+        stats.target_aura_uptime.forEach((targetAura, idx) => {
+            if (targetAura && typeof targetAura === 'object') {
+                Object.entries(targetAura).forEach(([element, value]) => {
+                    if (value && value !== 0) {
+                        auraData[`ターゲット${idx+1}: ${element}`] = value * 100; // Convert to percentage
+                    }
+                });
+            }
+        });
+        
         const data = extractChartData(auraData);
-        charts.aura = createBarChart(ctx, data.labels, data.values, '時間 (%)');
+        if (data.labels.length > 0) {
+            charts.aura = createBarChart(ctx, data.labels, data.values, '付着時間 (%)');
+        }
     }
+    
+    console.log('[WebUI] Charts displayed');
 }
 
 function extractChartData(dataObj) {
@@ -377,6 +485,70 @@ function extractChartData(dataObj) {
     }
     
     return { labels, values };
+}
+
+function createStackedBarChart(ctx, categories, [charNames, charValues], title) {
+    // Calculate percentages
+    const total = charValues.reduce((a, b) => a + b, 0);
+    const percentages = charValues.map(v => total > 0 ? (v / total) * 100 : 0);
+    
+    const colors = [
+        'rgba(102, 126, 234, 0.8)',
+        'rgba(118, 75, 162, 0.8)',
+        'rgba(237, 100, 166, 0.8)',
+        'rgba(255, 154, 158, 0.8)',
+    ];
+    
+    const datasets = charNames.map((name, idx) => ({
+        label: name,
+        data: [percentages[idx]],
+        backgroundColor: colors[idx % colors.length],
+        borderColor: colors[idx % colors.length].replace('0.8', '1'),
+        borderWidth: 1
+    }));
+    
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: categories,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const charIdx = context.datasetIndex;
+                            const dps = charValues[charIdx];
+                            const pct = percentages[charIdx];
+                            return `${context.dataset.label}: ${pct.toFixed(1)}% (DPS: ${Math.round(dps).toLocaleString('ja-JP')})`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
 function createBarChart(ctx, labels, data, label) {
@@ -444,13 +616,8 @@ function formatNumber(num) {
     if (num === undefined || num === null) return '-';
     if (typeof num !== 'number') return num;
     
-    if (num >= 1000000) {
-        return (num / 1000000).toFixed(2) + 'M';
-    } else if (num >= 1000) {
-        return (num / 1000).toFixed(2) + 'K';
-    } else {
-        return num.toFixed(2);
-    }
+    // Format without K/M suffixes
+    return Math.round(num).toLocaleString('ja-JP');
 }
 
 function formatStatName(statKey) {
