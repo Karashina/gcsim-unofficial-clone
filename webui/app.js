@@ -269,10 +269,12 @@ function displayCharacters(result) {
             const cd = statsArray[10] || 0;
             const er = statsArray[7] || 0;
             
-            // Calculate final stats: Base * (1 + %) + Flat
-            const finalHP = baseHP * (1 + hpp) + flatHP;
-            const finalATK = baseATK * (1 + atkp) + flatATK;
-            const finalDEF = baseDEF * (1 + defp) + flatDEF;
+            // Use snapshot_stats which contains final calculated values
+            // After details.go processing, snapshot_stats[3]=FinalHP, [5]=FinalATK, [2]=FinalDEF
+            const snapshotStats = char.snapshot_stats || char.snapshot || [];
+            const finalHP = snapshotStats[3] || 0;   // Final HP (calculated)
+            const finalATK = snapshotStats[5] || 0;  // Final ATK (calculated)
+            const finalDEF = snapshotStats[2] || 0;  // Final DEF (calculated)
             
             const statDefs = [
                 { name: 'HP', value: finalHP, format: (v) => Math.round(v) },
@@ -284,7 +286,7 @@ function displayCharacters(result) {
                 { name: '元素チャージ効率', value: er, format: (v) => (v * 100).toFixed(1) + '%' },
             ];
             
-            console.log(`[WebUI] ${name} calculated final stats: HP=${Math.round(finalHP)} (${Math.round(baseHP)}*(1+${hpp.toFixed(3)})+${Math.round(flatHP)}), ATK=${Math.round(finalATK)} (${Math.round(baseATK)}*(1+${atkp.toFixed(3)})+${Math.round(flatATK)}), DEF=${Math.round(finalDEF)}`);
+            console.log(`[WebUI] ${name} final stats (from snapshot_stats): HP=${Math.round(finalHP)}, ATK=${Math.round(finalATK)}, DEF=${Math.round(finalDEF)}, EM=${Math.round(em)}, CR=${(cr*100).toFixed(1)}%, CD=${(cd*100).toFixed(1)}%, ER=${(er*100).toFixed(1)}%`);
             
             statDefs.forEach(({name, value, format}) => {
                 if (value !== undefined && value !== 0) {

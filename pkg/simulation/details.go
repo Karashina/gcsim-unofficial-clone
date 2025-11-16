@@ -55,6 +55,11 @@ func (s *Simulation) CharacterDetails() []*model.Character {
 		out[i].BaseATK = snap.Stats[attributes.BaseATK]
 		out[i].BaseDEF = snap.Stats[attributes.BaseDEF]
 		
+		// Calculate and store final stats at simulation start
+		out[i].FinalHP = snap.Stats.MaxHP()
+		out[i].FinalATK = snap.Stats.TotalATK()
+		out[i].FinalDEF = snap.Stats.TotalDEF()
+		
 		// convert all atk%, def% and hp% into flat amounts by tacking on base
 		snap.Stats[attributes.HP] = snap.Stats.MaxHP()
 		snap.Stats[attributes.DEF] = snap.Stats.TotalDEF()

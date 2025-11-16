@@ -37,6 +37,10 @@ type Character struct {
 	BaseHP        float64 `json:"base_hp,omitempty" bson:"base_hp,omitempty"`
 	BaseATK       float64 `json:"base_atk,omitempty" bson:"base_atk,omitempty"`
 	BaseDEF       float64 `json:"base_def,omitempty" bson:"base_def,omitempty"`
+	// Final calculated stats at simulation start
+	FinalHP       float64 `json:"final_hp,omitempty" bson:"final_hp,omitempty"`
+	FinalATK      float64 `json:"final_atk,omitempty" bson:"final_atk,omitempty"`
+	FinalDEF      float64 `json:"final_def,omitempty" bson:"final_def,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
