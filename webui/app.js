@@ -1,54 +1,207 @@
 // Initialize charts storage
 let charts = {};
+// Global reference to CodeMirror editor (if initialized)
+var cmEditor = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('[WebUI] Initializing...');
-    // Get textarea element
+    // Editor setup: CodeMirror preferred; fallback to textarea
     const textarea = document.getElementById('config-editor');
+    // Initialize CodeMirror with updated settings
+    try {
+        cmEditor = CodeMirror.fromTextArea(textarea, {
+            mode: 'javascript',
+            lineNumbers: true,
+            lineWrapping: true,
+            theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'material' : 'default',
+            tabSize: 2,
+            indentWithTabs: false,
+            autofocus: true
+        });
+
+        // Bind Ctrl/Cmd+Enter to run
+        cmEditor.addKeyMap({ 'Ctrl-Enter': runSimulation, 'Cmd-Enter': runSimulation });
+
+        // Keep textarea fallback in sync
+        cmEditor.on('change', () => {
+            textarea.value = cmEditor.getValue();
+        });
+        // Enforce visual sizing on CodeMirror after init
+        const cmWrapper = cmEditor.getWrapperElement();
+        if (cmWrapper) {
+            cmWrapper.style.height = '720px';
+            cmWrapper.style.fontSize = '13px';
+        }
+        // ensure inner scroller matches
+        const scroller = cmWrapper.querySelector('.CodeMirror-scroll');
+        if (scroller) scroller.style.height = '720px';
+        // Refresh to apply sizing
+        cmEditor.refresh();
+    } catch (e) {
+        console.warn('CodeMirror init failed, falling back to textarea', e);
+        cmEditor = null;
+    }
+    // Apply saved theme if any
+    const savedTheme = localStorage.getItem('gcsim_theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+    // Theme toggle button
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const cur = document.documentElement.getAttribute('data-theme');
+            const next = cur === 'dark' ? '' : 'dark';
+            if (next) {
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('gcsim_theme', next);
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.removeItem('gcsim_theme');
+            }
+        });
+    }
     
     // Set default config - simpler version for reliable execution
-    const defaultConfig = `ineffa char lvl=90/90 cons=0 talent=9,9,9;
-ineffa add weapon="deathmatch" refine=1 lvl=90/90;
-ineffa add set="gt" count=4;
-ineffa add stats hp=4780 atk=311 em=187 atk%=0.466 cd=0.622;
-ineffa add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;
-
-xingqiu char lvl=90/90 cons=6 talent=9,9,9;
-xingqiu add weapon="favsword" refine=3 lvl=90/90;
-xingqiu add set="sms" count=4;
-xingqiu add stats hp=4780 atk=311 er=0.518 cr=0.311 hydro%=0.466;
-xingqiu add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*5 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*11;
-
-options swap_delay=12 iteration=50;
-target lvl=100 resist=0.1 radius=2 pos=2.1,1.5 hp=999999999;
-energy every interval=480,720 amount=1;
-
-active ineffa;
-
-ineffa skill, burst;
-xingqiu skill, burst, attack:3;
-ineffa attack:5;
-xingqiu attack:3;
-ineffa skill, attack:5;`;
+    const defaultConfig = ``;
     
     textarea.value = defaultConfig;
+    if (cmEditor) cmEditor.setValue(defaultConfig);
     console.log('[WebUI] Default config loaded');
     
-    // Add keyboard shortcuts
-    textarea.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            e.preventDefault();
-            runSimulation();
+    // If CodeMirror not available, attach keyboard shortcuts to textarea
+    if (!cmEditor) {
+        textarea.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                runSimulation();
+            }
+            // Tab key support
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 2;
+            }
+        });
+    }
+
+    // Syntax highlight: update highlight pre to mirror textarea with spans
+    const highlightEl = document.getElementById('config-highlight');
+    // Register a minimal Prism language for GCSL so Prism can produce tokens.
+    // This is intentionally small: comments (#...), strings, numbers, keywords, identifiers, operators.
+    try {
+        if (window.Prism && !window.Prism.languages.gcsl) {
+            window.Prism.languages.gcsl = {
+                'comment': /#.*/,
+                'string': /(?:"(?:\\.|[^"])*"|'(?:\\.|[^'])*')/,
+                'number': /\b\d+(?:\.\d+)?\b/,
+                'keyword': new RegExp('\\b(?:' + ['char','add','set','stats','target','energy','active','options','if','else','for','while','return','break','continue','let','fn','skill','burst','attack','dash','charge','active','options'].join('|') + ')\\b'),
+                'operator': /[+\-*/=<>!:,;(){}\[\].]/,
+                'ident': /[A-Za-z_][A-Za-z0-9_]*/
+            };
         }
-        // Tab key support
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            const start = this.selectionStart;
-            const end = this.selectionEnd;
-            this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
-            this.selectionStart = this.selectionEnd = start + 2;
+    } catch (e) {
+        // ignore if Prism not available yet
+        console.warn('Prism gcsl language registration failed', e);
+    }
+    function escapeHtml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function highlightGcsl(text) {
+        if (!text) return '';
+        const rules = [
+            {regex: /(?:\/\*[\s\S]*?\*\/|\/\/.*?(?:\n|$))/y, cls: 'gcsl-comment'},
+            {regex: /(?:\"(?:[^\\\"]|\\.)*\"|\'(?:[^\\\']|\\.)*\')/y, cls: 'gcsl-string'},
+            {regex: /\b\d+(?:\.\d+)?\b/y, cls: 'gcsl-number'},
+            {regex: new RegExp('\\b(?:' + ['char','add','set','stats','target','energy','active','options','if','else','for','while','return','break','continue','let','fn','skill','burst','attack','dash','charge'].join('|') + ')\\b','y'), cls: 'gcsl-keyword'},
+            {regex: /\b([A-Za-z_][A-Za-z0-9_]*)\s*(?=\()/y, cls: 'gcsl-fn'},
+            {regex: /[+\-*/=<>!:]+/y, cls: 'gcsl-operator'},
+            {regex: /\s+/y, cls: null},
+            {regex: /./y, cls: null}
+        ];
+
+        let pos = 0;
+        let out = '';
+        const src = text;
+
+        while (pos < src.length) {
+            let matched = false;
+            for (let r of rules) {
+                r.regex.lastIndex = pos;
+                const m = r.regex.exec(src);
+                if (m && m.index === pos) {
+                    const tok = m[0];
+                    const escaped = escapeHtml(tok);
+                    if (r.cls) {
+                        out += `<span class="${r.cls}">${escaped}</span>`;
+                    } else {
+                        out += escaped;
+                    }
+                    pos += tok.length;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                // shouldn't happen, but advance one char to avoid infinite loop
+                out += escapeHtml(src[pos]);
+                pos++;
+            }
         }
-    });
+
+        return out;
+    }
+
+    function updateHighlight() {
+        const val = (typeof cmEditor !== 'undefined' && cmEditor) ? cmEditor.getValue() : textarea.value;
+        if (highlightEl) {
+            // If Prism is loaded and has highlightElement, use it on the <code> child
+            const codeEl = highlightEl.querySelector('code');
+            if (window.Prism && typeof window.Prism.highlightElement === 'function' && codeEl) {
+                // Update raw text inside code element and let Prism process it
+                codeEl.textContent = val + '\n';
+                try {
+                    window.Prism.highlightElement(codeEl);
+                    // If Prism didn't produce any token spans (unknown language), fallback to local highlighter
+                    if (!codeEl.querySelector('.token')) {
+                        codeEl.innerHTML = highlightGcsl(val) + '\n';
+                    }
+                } catch (e) {
+                    // Fallback to local highlighter if Prism fails
+                    codeEl.innerHTML = highlightGcsl(val) + '\n';
+                }
+            } else {
+                // No Prism: use existing scanner-based highlighter
+                // put result into the code element to keep DOM structure consistent
+                const code = highlightEl.querySelector('code');
+                if (code) {
+                    code.innerHTML = highlightGcsl(val) + '\n';
+                } else {
+                    highlightEl.innerHTML = highlightGcsl(val) + '\n';
+                }
+            }
+        }
+    }
+
+    // If using textarea fallback, sync scroll and input
+    if (!cmEditor) {
+        textarea.addEventListener('scroll', () => {
+            if (highlightEl) highlightEl.scrollTop = textarea.scrollTop;
+        });
+
+        // update on input
+        textarea.addEventListener('input', updateHighlight);
+    } else {
+        cmEditor.on('change', updateHighlight);
+        cmEditor.on('scroll', () => {
+            if (highlightEl) highlightEl.scrollTop = cmEditor.getScrollInfo().top;
+        });
+    }
+    // initial highlight
+    updateHighlight();
 });
 
 function switchTab(tabId) {
@@ -76,7 +229,7 @@ function clearErrorHighlights() {
 async function runSimulation() {
     console.log('[WebUI] Starting simulation...');
     const textarea = document.getElementById('config-editor');
-    const config = textarea.value;
+    const config = (typeof cmEditor !== 'undefined' && cmEditor) ? cmEditor.getValue() : textarea.value;
     const errorMsg = document.getElementById('error-message');
     const loading = document.getElementById('loading');
     const resultsContainer = document.getElementById('results-container');

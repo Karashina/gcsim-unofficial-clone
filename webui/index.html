@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gcsim-uoc WebUI - シミュレーター</title>
+    <title>gcsim-uoc WebUI</title>
     
     <style>
         * {
@@ -12,10 +12,40 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --primary-1: #ffc14d; /* user requested */
+            --primary-2: #ffb347; /* replaced purple with orange variant */
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text: #222;
+            --header-text: #000000; /* black text over orange */
+            --button-text: #000000;
+            --hover-bg: #f9f9f9;
+            --muted-border: #e8e8e8;
+            --chip-text: #000000;
+            --muted: #666;
+            --disabled-bg: #ccc;
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --card-bg: #1e1e2a;
+            --text: #e6e6e6;
+            --header-text: #000000; /* keep header text black over orange header */
+            --button-text: #000000;
+            --hover-bg: rgba(255,255,255,0.02);
+            --muted-border: rgba(255,255,255,0.06);
+            --chip-text: #000000;
+            --muted: #cfcfcf;
+            --disabled-bg: rgba(255,255,255,0.06);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans JP', sans-serif;
-            background-color: #f5f5f5;
+            background-color: var(--bg);
+            color: var(--text);
             line-height: 1.6;
+            transition: background-color 200ms ease, color 200ms ease;
         }
         
         .container-main {
@@ -25,13 +55,27 @@
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--primary-1) 0%, var(--primary-2) 100%);
+            color: var(--header-text, white);
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
+
+        .theme-toggle {
+            background: rgba(255,255,255,0.12);
+            border: none;
+            color: var(--header-text, white);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .theme-toggle:focus { outline: none; }
         
         .card {
             border-radius: 8px;
@@ -40,53 +84,107 @@
         }
         
         .editor-container {
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
         }
         
-        textarea, #config-editor {
+        textarea {
             width: 100%;
-            min-height: 600px;
+            min-height: 720px; /* taller editor */
             padding: 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px; /* slightly smaller */
+            line-height: 1.9; /* slightly more vertical spacing */
+            resize: vertical;
+            background-color: transparent; /* allow pre behind to show */
+            color: var(--text);
+        }
+
+        .editor-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        /* Make sure textarea and highlighted code share exact metrics */
+        textarea#config-editor, pre#config-highlight, pre#config-highlight code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.9;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        /* CodeMirror specific sizing */
+        .CodeMirror {
+            height: 720px !important;
+            font-size: 13px !important;
+            line-height: 1.9 !important;
+        }
+        .CodeMirror pre { line-height: 1.9 !important; }
+          /* NOTE: overlay highlighter can cause visual issues in some browsers.
+              Hide it for now to ensure textarea is readable. Re-enable when
+              overlay behavior is stable. */
+          #config-highlight {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 0;
+            padding: 15px;
+            pointer-events: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 14px;
             line-height: 1.8;
-            resize: vertical;
-            background-color: #263238;
-            color: #eeffff;
+            color: var(--text); /* default text color; token spans override this */
+            z-index: 1;
+            overflow: auto; 
+            background: var(--card-bg);
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
+        /* hide pre scrollbar so only textarea scrollbar is visible */
+        pre#config-highlight::-webkit-scrollbar { display: none; }
+        pre#config-highlight { -ms-overflow-style: none; scrollbar-width: none; }
+    pre#config-highlight code { display: block; white-space: pre-wrap; word-wrap: break-word; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 14px; line-height: 1.8; color: var(--text); }
+        #config-highlight .gcsl-keyword { color: #c792ea; }
+        #config-highlight .gcsl-string { color: #c3e88d; }
+        #config-highlight .gcsl-number { color: #f78c6c; }
+        #config-highlight .gcsl-comment { color: var(--muted); font-style: italic; }
+        #config-highlight .gcsl-operator { color: var(--primary-1); }
+        /* Keep caret visible in textarea */
+    textarea#config-editor { background: var(--card-bg); color: var(--text); caret-color: var(--text); position: relative; z-index: 2; }
         
         /* GCSL Syntax Highlighting */
         .gcsl-keyword { color: #c792ea; }
-        .gcsl-string { color: #c3e88d; }
+    .gcsl-string { color: #c3e88d; }
         .gcsl-number { color: #f78c6c; }
-        .gcsl-comment { color: #546e7a; font-style: italic; }
-        .gcsl-operator { color: #89ddff; }
+    .gcsl-comment { color: var(--muted); font-style: italic; }
+    .gcsl-operator { color: var(--primary-1); }
         
         .btn-run {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--primary-1) 0%, var(--primary-2) 100%);
+            color: var(--button-text);
             border: none;
             padding: 12px 30px;
             font-size: 16px;
             border-radius: 4px;
             cursor: pointer;
             margin-top: 15px;
-            transition: all 0.3s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        
+
         .btn-run:hover {
-            background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
         }
         
         .btn-run:disabled {
-            background: #ccc;
+            background: var(--disabled-bg);
             cursor: not-allowed;
         }
         
@@ -95,7 +193,7 @@
         }
         
         .stat-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 15px;
@@ -105,19 +203,19 @@
         .stat-value {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #667eea;
+            color: var(--primary-2);
             margin: 10px 0;
         }
         
         .stat-label {
             font-size: 0.9rem;
-            color: #666;
+            color: var(--muted);
             text-transform: uppercase;
             font-weight: 500;
         }
         
         .char-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px;
             padding: 12px 15px;
             margin-bottom: 12px;
@@ -139,10 +237,10 @@
         .char-name {
             font-size: 1.2rem;
             font-weight: 600;
-            color: #333;
+            color: var(--text);
             margin-bottom: 8px;
             padding-bottom: 8px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid var(--primary-2);
         }
         
         .char-info-compact {
@@ -185,7 +283,7 @@
         }
         
         .chart-container {
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
@@ -287,39 +385,40 @@
         /* Compact character info: wrap each row in a subtle box */
         .char-info-compact .info-row {
             border-bottom: none;
-            border: 1px solid #e8e8e8;
+            border: 1px solid var(--muted-border);
             padding: 8px;
             margin: 6px 0;
             border-radius: 6px;
-            background: #ffffff;
+            background: var(--card-bg);
             box-shadow: 0 1px 2px rgba(0,0,0,0.03);
             align-items: center;
         }
         
         .info-value {
-            color: #333;
+            color: var(--text);
         }
+        .muted-note { color: var(--muted); }
         
         .tabs {
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px 8px 0 0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .tabs .tab a {
-            color: #667eea;
+            color: var(--primary-2);
         }
         
         .tabs .tab a:hover {
-            color: #764ba2;
+            color: var(--primary-2);
         }
         
         .tabs .tab a.active {
-            color: #667eea;
+            color: var(--primary-2);
         }
         
         .tabs .indicator {
-            background-color: #667eea;
+            background-color: var(--primary-2);
         }
         
         canvas {
@@ -327,7 +426,7 @@
         }
         
         .tab-container {
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -335,29 +434,29 @@
         
         .tabs-header {
             display: flex;
-            border-bottom: 2px solid #eee;
-            background: white;
+            border-bottom: 2px solid var(--muted-border);
+            background: var(--card-bg);
         }
         
         .tab-btn {
             flex: 1;
             padding: 15px;
             border: none;
-            background: white;
+            background: var(--card-bg);
             cursor: pointer;
             font-size: 14px;
-            color: #666;
+            color: var(--muted);
             transition: all 0.3s;
             border-bottom: 3px solid transparent;
         }
         
         .tab-btn:hover {
-            background: #f9f9f9;
+            background: var(--hover-bg);
         }
         
         .tab-btn.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
+            color: var(--primary-2);
+            border-bottom-color: var(--primary-2);
             font-weight: 500;
         }
         
@@ -373,8 +472,8 @@
             display: inline-block;
             padding: 4px 12px;
             margin: 2px;
-            background: #667eea;
-            color: white;
+            background: linear-gradient(90deg, var(--primary-1) 0%, var(--primary-2) 100%);
+            color: var(--chip-text);
             border-radius: 16px;
             font-size: 12px;
         }
@@ -417,27 +516,57 @@
             .col.m6, .col.l2, .col.l6 { width: 100%; }
         }
     </style>
+    <!-- Prism.js for syntax highlighting (CDN). app.js will prefer Prism if available. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        /* Map Prism token classes to the existing gcsl color scheme */
+        /* Ensure default code text uses our theme colors (override Prism's theme)
+           and token classes follow our color palette. Use !important to beat
+           the theme loaded from CDN which appears after the page <style>. */
+        pre#config-highlight,
+        pre#config-highlight code,
+        pre#config-highlight[class*="language-"],
+        pre#config-highlight[class*="language-"] code {
+            color: var(--text) !important;
+            background: transparent !important;
+        }
+        pre#config-highlight .token { color: inherit !important; }
+        pre#config-highlight .token.keyword { color: #c792ea !important; }
+        pre#config-highlight .token.string { color: #c3e88d !important; }
+        pre#config-highlight .token.number { color: #f78c6c !important; }
+        pre#config-highlight .token.comment { color: var(--muted) !important; font-style: italic; }
+        pre#config-highlight .token.operator { color: var(--primary-1) !important; }
+    </style>
 </head>
 <body>
     <div class="container-main">
         <div class="header">
             <h3 style="margin: 0;">
-                ⚡ gcsim-uoc WebUI
+                gcsim-uoc WebUI
             </h3>
+                <div style="flex:1"></div>
+                <button id="theme-toggle" class="theme-toggle">Toggle Theme</button>
+            </div>
             <!-- header subtitle removed per request -->
         </div>
         
         <div class="editor-container">
             <h5>📝 コンフィグ入力</h5>
-            <p style="color: #666; margin-bottom: 15px;">GCSLフォーマットでコンフィグを入力してください。</p>
-            <textarea id="config-editor"></textarea>
+        <div class="editor-wrapper">
+            <!-- Monaco editor will be mounted into this div -->
+            <div id="monaco-editor" style="height:600px;border:1px solid #ddd;border-radius:4px;background:var(--card-bg); display:none;"></div>
+            <!-- Keep textarea hidden as a fallback for non-JS scenarios -->
+            <textarea id="config-editor" placeholder="GCSL config をここに貼り付けてください"></textarea>
+        </div>
             <button class="btn-run" onclick="runSimulation()">
                 ▶️ シミュレーション実行
             </button>
             <div class="error-message" id="error-message"></div>
             <div class="loading" id="loading">
                 <div style="text-align: center; padding: 40px;">
-                    <div style="border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    <div style="border: 4px solid rgba(0,0,0,0.06); border-top: 4px solid var(--primary-2); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
                     <p style="margin-top: 15px;">シミュレーション実行中...</p>
                 </div>
             </div>
@@ -458,27 +587,27 @@
             <!-- Statistics in 2-column layout -->
             <div class="stats-grid">
                 <div class="stat-card center-align">
-                    <div class="stat-label">DPS</div>
+                    <div class="stat-label">DPS (ダメージ/秒)</div>
                     <div class="stat-value" id="stat-dps">-</div>
                 </div>
                 <div class="stat-card center-align">
-                    <div class="stat-label">EPS</div>
+                    <div class="stat-label">EPS (エネルギー/秒)</div>
                     <div class="stat-value" id="stat-eps">-</div>
                 </div>
                 <div class="stat-card center-align">
-                    <div class="stat-label">RPS</div>
+                    <div class="stat-label">RPS (元素反応/秒)</div>
                     <div class="stat-value" id="stat-rps">-</div>
                 </div>
                 <div class="stat-card center-align">
-                    <div class="stat-label">HPS</div>
+                    <div class="stat-label">HPS (回復/秒)</div>
                     <div class="stat-value" id="stat-hps">-</div>
                 </div>
                 <div class="stat-card center-align">
-                    <div class="stat-label">SHP</div>
+                    <div class="stat-label">SHP (シールド/秒)</div>
                     <div class="stat-value" id="stat-shp">-</div>
                 </div>
                 <div class="stat-card center-align">
-                    <div class="stat-label">期間 (秒)</div>
+                    <div class="stat-label">シミュレーション時間 (秒)</div>
                     <div class="stat-value" id="stat-dur">-</div>
                 </div>
             </div>
@@ -570,8 +699,94 @@
     </div>
     
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+    // Minimal Chart.js implementation - simplified for basic charts
+    class Chart {
+        constructor(ctx, config) {
+            this.canvas = ctx.canvas || ctx;
+            this.config = config;
+            this.draw();
+        }
+        
+        draw() {
+            const ctx = this.canvas.getContext('2d');
+            const width = this.canvas.width = this.canvas.offsetWidth;
+            const height = this.canvas.height = 300;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const data = this.config.data;
+            const labels = data.labels || [];
+            const values = data.datasets[0]?.data || [];
+            
+            if (values.length === 0) return;
+            
+            const maxValue = Math.max(...values) * 1.1;
+            const padding = 40;
+            const chartWidth = width - padding * 2;
+            const chartHeight = height - padding * 2;
+            
+            // Draw axes
+            const __computed = getComputedStyle(document.documentElement);
+            const __borderColor = __computed.getPropertyValue('--muted-border') || '#ccc';
+            const __textColor = __computed.getPropertyValue('--text') || '#222';
+            ctx.strokeStyle = __borderColor;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            if (this.config.type === 'bar') {
+                const barWidth = chartWidth / values.length * 0.8;
+                const spacing = chartWidth / values.length;
+                
+                const paletteColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-2') || '#ffb347';
+                values.forEach((value, i) => {
+                    const barHeight = (value / maxValue) * chartHeight;
+                    const x = padding + i * spacing + spacing * 0.1;
+                    const y = height - padding - barHeight;
+                    
+                    ctx.fillStyle = data.datasets[0].backgroundColor || paletteColor;
+                    ctx.fillRect(x, y, barWidth, barHeight);
+                    
+                    // Label
+                    ctx.fillStyle = __textColor;
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(labels[i], x + barWidth / 2, height - padding + 15);
+                });
+            } else if (this.config.type === 'line') {
+                ctx.beginPath();
+                ctx.strokeStyle = data.datasets[0].borderColor || paletteColor;
+                ctx.lineWidth = 2;
+                
+                values.forEach((value, i) => {
+                    const x = padding + (i / (values.length - 1)) * chartWidth;
+                    const y = height - padding - (value / maxValue) * chartHeight;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.stroke();
+            }
+        }
+        
+        destroy() {
+            const ctx = this.canvas.getContext('2d');
+            ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+    }
+    </script>
     
+    <!-- CodeMirror (simple integration) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
