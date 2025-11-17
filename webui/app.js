@@ -376,10 +376,14 @@ function displayCharts(result) {
     
     // Character DPS Chart (100% Stacked Bar Chart)
     if (result.character_details && result.character_details.length > 0) {
-        const ctx = document.getElementById('char-dps-chart');
-        if (!ctx) {
+        const canvas = document.getElementById('char-dps-chart');
+        if (!canvas) {
             console.error('[WebUI] Canvas element char-dps-chart not found');
         } else {
+            console.log('[WebUI] Found canvas element:', canvas);
+            const ctx = canvas.getContext('2d');
+            console.log('[WebUI] Got 2d context:', ctx);
+            
             const charDpsData = [];
             const charNames = [];
             
@@ -406,10 +410,11 @@ function displayCharts(result) {
     }
     
     // Source DPS Chart
-    const ctx2 = document.getElementById('source-dps-chart');
-    if (!ctx2) {
+    const canvas2 = document.getElementById('source-dps-chart');
+    if (!canvas2) {
         console.error('[WebUI] Canvas element source-dps-chart not found');
     } else {
+        const ctx2 = canvas2.getContext('2d');
         let sourceData = {};
         
         // Try to extract source DPS data
@@ -441,10 +446,12 @@ function displayCharts(result) {
     }
     
     // Damage Distribution Chart (Time-based line chart)
-    const ctx3 = document.getElementById('damage-dist-chart');
-    if (!ctx3) {
+    const canvas3 = document.getElementById('damage-dist-chart');
+    if (!canvas3) {
         console.error('[WebUI] Canvas element damage-dist-chart not found');
-    } else if (stats.damage_buckets) {
+    } else {
+        const ctx3 = canvas3.getContext('2d');
+        if (stats.damage_buckets) {
         const buckets = stats.damage_buckets;
         const bucketSize = buckets.bucket_size || 30;
         const bucketData = buckets.buckets || [];
@@ -462,10 +469,12 @@ function displayCharts(result) {
     }
     
     // Energy Chart (Source-based)
-    const ctx4 = document.getElementById('energy-chart');
-    if (!ctx4) {
+    const canvas4 = document.getElementById('energy-chart');
+    if (!canvas4) {
         console.error('[WebUI] Canvas element energy-chart not found');
-    } else if (stats.total_source_energy && Array.isArray(stats.total_source_energy)) {
+    } else {
+        const ctx4 = canvas4.getContext('2d');
+        if (stats.total_source_energy && Array.isArray(stats.total_source_energy)) {
         const energyData = {};
         
         stats.total_source_energy.forEach((charEnergy, idx) => {
@@ -490,10 +499,12 @@ function displayCharts(result) {
     }
     
     // Reaction Count Chart
-    const ctx5 = document.getElementById('reaction-count-chart');
-    if (!ctx5) {
+    const canvas5 = document.getElementById('reaction-count-chart');
+    if (!canvas5) {
         console.error('[WebUI] Canvas element reaction-count-chart not found');
-    } else if (stats.source_reactions && Array.isArray(stats.source_reactions)) {
+    } else {
+        const ctx5 = canvas5.getContext('2d');
+        if (stats.source_reactions && Array.isArray(stats.source_reactions)) {
         const reactionData = {};
         
         stats.source_reactions.forEach((charReactions, idx) => {
@@ -518,10 +529,12 @@ function displayCharts(result) {
     }
     
     // Aura Uptime Chart
-    const ctx6 = document.getElementById('aura-uptime-chart');
-    if (!ctx6) {
+    const canvas6 = document.getElementById('aura-uptime-chart');
+    if (!canvas6) {
         console.error('[WebUI] Canvas element aura-uptime-chart not found');
-    } else if (stats.target_aura_uptime && Array.isArray(stats.target_aura_uptime)) {
+    } else {
+        const ctx6 = canvas6.getContext('2d');
+        if (stats.target_aura_uptime && Array.isArray(stats.target_aura_uptime)) {
         const auraData = {};
         
         stats.target_aura_uptime.forEach((targetAura, idx) => {
@@ -540,8 +553,9 @@ function displayCharts(result) {
         if (data.labels.length > 0) {
             charts.aura = createBarChart(ctx6, data.labels, data.values, '付着時間 (%)');
         }
-    } else {
-        console.log('[WebUI] No aura uptime data');
+        } else {
+            console.log('[WebUI] No aura uptime data');
+        }
     }
     
     console.log('[WebUI] Charts displayed, active charts:', Object.keys(charts));
@@ -567,9 +581,20 @@ function extractChartData(dataObj) {
 }
 
 function createStackedBarChart(ctx, categories, [charNames, charValues], title) {
+    console.log('[WebUI] createStackedBarChart called', {
+        ctx: ctx,
+        categories: categories,
+        charNames: charNames,
+        charValues: charValues,
+        title: title,
+        isChartDefined: typeof Chart !== 'undefined'
+    });
+    
     // Calculate percentages
     const total = charValues.reduce((a, b) => a + b, 0);
     const percentages = charValues.map(v => total > 0 ? (v / total) * 100 : 0);
+    
+    console.log('[WebUI] Calculated percentages:', percentages);
     
     const colors = [
         'rgba(102, 126, 234, 0.8)',
@@ -585,6 +610,8 @@ function createStackedBarChart(ctx, categories, [charNames, charValues], title) 
         borderColor: colors[idx % colors.length].replace('0.8', '1'),
         borderWidth: 1
     }));
+    
+    console.log('[WebUI] Creating Chart.js chart with datasets:', datasets);
     
     const chart = new Chart(ctx, {
         type: 'bar',
@@ -655,6 +682,8 @@ function createStackedBarChart(ctx, categories, [charNames, charValues], title) 
     
     html += '</tbody></table>';
     tableDiv.innerHTML = html;
+    
+    console.log('[WebUI] Chart created successfully, returning chart object');
     
     return chart;
 }
@@ -837,3 +866,7 @@ function formatStatValue(statKey, value) {
         return value.toFixed(0);
     }
 }
+
+// Make functions available globally for onclick handlers
+window.runSimulation = runSimulation;
+window.switchTab = switchTab;

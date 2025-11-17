@@ -190,6 +190,14 @@
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            min-height: 400px;
+        }
+        
+        .chart-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 350px !important;
         }
         
         .chart-legend {
@@ -562,85 +570,7 @@
     </div>
     
     <!-- Chart.js -->
-    <script>
-    // Minimal Chart.js implementation - simplified for basic charts
-    class Chart {
-        constructor(ctx, config) {
-            this.canvas = ctx.canvas || ctx;
-            this.config = config;
-            this.draw();
-        }
-        
-        draw() {
-            const ctx = this.canvas.getContext('2d');
-            const width = this.canvas.width = this.canvas.offsetWidth;
-            const height = this.canvas.height = 300;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            const data = this.config.data;
-            const labels = data.labels || [];
-            const values = data.datasets[0]?.data || [];
-            
-            if (values.length === 0) return;
-            
-            const maxValue = Math.max(...values) * 1.1;
-            const padding = 40;
-            const chartWidth = width - padding * 2;
-            const chartHeight = height - padding * 2;
-            
-            // Draw axes
-            ctx.strokeStyle = '#ccc';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding, height - padding);
-            ctx.lineTo(width - padding, height - padding);
-            ctx.stroke();
-            
-            if (this.config.type === 'bar') {
-                const barWidth = chartWidth / values.length * 0.8;
-                const spacing = chartWidth / values.length;
-                
-                values.forEach((value, i) => {
-                    const barHeight = (value / maxValue) * chartHeight;
-                    const x = padding + i * spacing + spacing * 0.1;
-                    const y = height - padding - barHeight;
-                    
-                    ctx.fillStyle = data.datasets[0].backgroundColor || '#667eea';
-                    ctx.fillRect(x, y, barWidth, barHeight);
-                    
-                    // Label
-                    ctx.fillStyle = '#333';
-                    ctx.font = '11px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(labels[i], x + barWidth / 2, height - padding + 15);
-                });
-            } else if (this.config.type === 'line') {
-                ctx.beginPath();
-                ctx.strokeStyle = data.datasets[0].borderColor || '#667eea';
-                ctx.lineWidth = 2;
-                
-                values.forEach((value, i) => {
-                    const x = padding + (i / (values.length - 1)) * chartWidth;
-                    const y = height - padding - (value / maxValue) * chartHeight;
-                    
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                });
-                ctx.stroke();
-            }
-        }
-        
-        destroy() {
-            const ctx = this.canvas.getContext('2d');
-            ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        }
-    }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <script src="app.js"></script>
 </body>
