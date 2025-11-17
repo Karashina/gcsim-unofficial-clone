@@ -3,14 +3,210 @@ let charts = {};
 // Global reference to CodeMirror editor (if initialized)
 var cmEditor = null;
 
+// Global helper to convert hex color to rgba string with alpha
+function hexToRgba(hex, alpha) {
+    if (!hex) return `rgba(0,0,0,${alpha})`;
+    const h = hex.replace('#', '');
+    const bigint = parseInt(h, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Global character palette (kept consistent across charts)
+const CHAR_PALETTE = ['#4e79a7','#59a14f','#f28e2b','#e15759','#76b7b2','#edc949','#af7aa1','#ff9da7'];
+function getCharColor(i) {
+    return CHAR_PALETTE[i % CHAR_PALETTE.length];
+}
+
+// Debug flag: set to true to enable verbose debug logging
+const DEBUG = false;
+function debugLog(...args) { if (DEBUG && console && console.log) console.log(...args); }
+
+// Small deterministic string hash used to derive a hue for element coloring
+function hashCode(str) {
+    let h = 0;
+    if (!str) return h;
+    for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) - h) + str.charCodeAt(i);
+        h |= 0; // convert to 32bit int
+    }
+    return h;
+}
+
+// Helper: extract numeric value from Chart.js tooltip context in a version-agnostic way
+function ctxRawValue(context) {
+    if (context === undefined || context === null) return 0;
+    if (typeof context.raw === 'number') return context.raw;
+    if (context.parsed) return context.parsed.x || context.parsed || 0;
+    return context.raw || 0;
+}
+
+// Helper: set canvas drawing buffer and reserve parent height to avoid layout shifts
+function setCanvasVisualSize(ctx, desiredHeightPx, minWidth = 300) {
+    try {
+        const canvas = ctx && ctx.canvas ? ctx.canvas : null;
+        if (!canvas) return;
+        const parent = canvas.parentElement;
+        const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+        try { canvas.style.width = '100%'; } catch (e) {}
+        const rect = parent && parent.getBoundingClientRect ? parent.getBoundingClientRect() : canvas.getBoundingClientRect();
+        const visualWidth = rect && rect.width ? Math.max(minWidth, Math.floor(rect.width)) : Math.max(minWidth, Math.floor(canvas.offsetWidth || 600));
+        const heightPx = Math.max(120, Math.floor(desiredHeightPx || 140));
+        try { if (parent) parent.style.setProperty('min-height', heightPx + 'px', 'important'); } catch (e) {}
+        canvas.width = Math.floor(visualWidth * dpr);
+        canvas.height = Math.floor(heightPx * dpr);
+        ensureContainerHeight(ctx, heightPx);
+    } catch (e) { /* ignore sizing errors */ }
+}
+
+// Format numeric values for tooltips consistently. If value is integral, show integer; otherwise fixed decimals.
+function formatValue(v, decimals = 2, suffix = '') {
+    const n = Number(v) || 0;
+    const isInt = Math.abs(n - Math.round(n)) < 1e-9;
+    const body = isInt ? Math.round(n).toString() : n.toFixed(decimals);
+    return body + (suffix || '');
+}
+
+// Extract a damage/DPS numeric value from various possible statistic shapes.
+// Prefers .mean, then .damage, then .dps, then numeric leaves. Avoid returning
+// pure "count/instances" objects by detecting key names like 'count' or 'instances'.
+function extractDamageValue(v) {
+    if (v === null || v === undefined) return 0;
+    if (typeof v === 'number') return v;
+    if (typeof v === 'object') {
+        if (typeof v.mean === 'number') return v.mean;
+        if (typeof v.damage === 'number') return v.damage;
+        if (typeof v.dps === 'number') return v.dps;
+
+        // Aggregate numeric leaves but avoid using pure count-only structures.
+        let sum = 0;
+        let numericCount = 0;
+        let countLikeOnly = true;
+        for (const [k, val] of Object.entries(v)) {
+            if (typeof val === 'number') {
+                sum += val;
+                numericCount++;
+                // if key doesn't look like a count, mark as not count-only
+                if (!/count|counts|instances|uses|times|occur/i.test(k)) countLikeOnly = false;
+            } else if (typeof val === 'object') {
+                const nested = extractDamageValue(val);
+                if (nested && typeof nested === 'number') {
+                    sum += nested;
+                    numericCount++;
+                    countLikeOnly = false;
+                }
+            }
+        }
+        if (numericCount === 0) return 0;
+        if (countLikeOnly) {
+            // Looks like we only found counts; don't treat counts as damage
+            return 0;
+        }
+        return sum;
+    }
+    return 0;
+}
+
+// Convert various statistic shapes into DPS (damage per second).
+// If the incoming object already contains a dps field, use it directly.
+// If it contains mean/damage as total damage per iteration, divide by durationMean.
+// Return DescriptiveStats.mean when present. Do not attempt to convert totals to DPS by dividing
+// by duration here — mean is the canonical numeric statistic returned by the simulator.
+function extractDescriptiveMean(v) {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'object' && typeof v.mean === 'number') return v.mean;
+    return null;
+}
+
+// Generic numeric extractor: prefer DescriptiveStats.mean, then number, then sum numeric leaves.
+function extractNumber(v) {
+    if (v === null || v === undefined) return 0;
+    if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
+    if (typeof v === 'object') {
+        if (typeof v.mean === 'number' && Number.isFinite(v.mean)) return v.mean;
+        if (typeof v.value === 'number' && Number.isFinite(v.value)) return v.value;
+        // sum numeric leaves
+        let s = 0;
+        let found = false;
+        for (const vv of Object.values(v)) {
+            if (typeof vv === 'number' && Number.isFinite(vv)) { s += vv; found = true; }
+            else if (typeof vv === 'object') {
+                const nested = extractNumber(vv);
+                if (nested) { s += nested; found = true; }
+            }
+        }
+        return found ? s : 0;
+    }
+    return 0;
+}
+
+// Ensure Chart.js (if loaded) uses UDEV Gothic as default font for canvas text
+try {
+    if (typeof Chart !== 'undefined' && Chart.defaults && Chart.defaults.font) {
+        Chart.defaults.font.family = "'UDEV Gothic', 'Segoe UI', Arial, sans-serif";
+    }
+} catch (e) {
+    // no-op if Chart not yet loaded; display code that will run once Chart is available
+}
+
+// Register a minimal CodeMirror mode for GCSL if CodeMirror is available.
+// This mode highlights comments, strings, numbers, keywords and identifiers.
+try {
+    if (typeof CodeMirror !== 'undefined' && !CodeMirror.modes['gcsl']) {
+        CodeMirror.defineMode('gcsl', function(config, parserConfig) {
+            const keywords = new Set(['char','add','set','stats','target','energy','active','options','if','else','for','while','return','break','continue','let','fn','skill','burst','attack','dash','charge']);
+
+            return {
+                token: function(stream, state) {
+                    if (stream.match('//') || stream.match('/*')) {
+                        // line or block comment
+                        if (stream.match('//')) {
+                            stream.skipToEnd();
+                            return 'comment';
+                        }
+                        // block comment start
+                        while (!stream.eol()) {
+                            if (stream.match('*/')) break;
+                            stream.next();
+                        }
+                        return 'comment';
+                    }
+
+                    if (stream.match(/^(?:"(?:[^\\"]|\\.)*"|\'(?:[^\\']|\\.)*\')/)) {
+                        return 'string';
+                    }
+
+                    if (stream.match(/^\d+(?:\.\d+)?/)) {
+                        return 'number';
+                    }
+
+                    if (stream.match(/^[A-Za-z_][A-Za-z0-9_]*/)) {
+                        const cur = stream.current();
+                        if (keywords.has(cur)) return 'keyword';
+                        return 'variable';
+                    }
+
+                    // operators / punctuation
+                    stream.next();
+                    return null;
+                }
+            };
+        });
+    }
+} catch (e) {
+    console.warn('CodeMirror GCSL mode registration failed', e);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('[WebUI] Initializing...');
+    debugLog('[WebUI] Initializing...');
     // Editor setup: CodeMirror preferred; fallback to textarea
     const textarea = document.getElementById('config-editor');
     // Initialize CodeMirror with updated settings
     try {
         cmEditor = CodeMirror.fromTextArea(textarea, {
-            mode: 'javascript',
+            mode: 'gcsl',
             lineNumbers: true,
             lineWrapping: true,
             theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'material' : 'default',
@@ -63,11 +259,63 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Set default config - simpler version for reliable execution
-    const defaultConfig = ``;
+    const defaultConfig = `nefer char lvl=90/90 cons=0 talent=9,9,9;
+nefer add weapon="blackmarrowlantern" refine=5 lvl=90/90;
+nefer add set="notsu" count=4;
+nefer add stats hp=4780 atk=311 em=187 em=187 cd=0.622; #main
+nefer add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*12 cd=0.0662*10;
+
+aino char lvl=90/90 cons=6 talent=9,9,9;
+aino add weapon="flameforgedinsight" refine=5 lvl=90/90;
+aino add set="ins" count=4;
+aino add stats hp=3571 er=0.511 em=139 cr=0.249; #main
+aino add stats def%=0.05208*2 def=16.5312*2 hp=213.31*2 hp%=0.041664*2 atk=13.8936*2 atk%=0.041664*2 er=0.046284*2 em=16.6488*2 cr=0.027804*7 cd=0.055608*9;
+
+lauma char lvl=90/90 cons=0 talent=9,9,9;
+lauma add weapon="etherlightspindlelute" refine=5 lvl=90/90;
+lauma add set="sms" count=4;
+lauma add stats hp=4780 atk=311 em=187 em=187 em=187; #main
+lauma add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*8 em=19.82*6 cr=0.0331*10 cd=0.0662*4;
+
+nahida char lvl=90/90 cons=0 talent=9,9,9;
+nahida add weapon="widsith" refine=3 lvl=90/90;
+nahida add set="deepwood" count=4;
+nahida add stats hp=4780 atk=311 em=187 dendro%=0.466 cr=0.311; #main
+nahida add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*11 em=19.82*2 cr=0.0331*8 cd=0.0662*7;
+
+options swap_delay=12 iteration=1000; 
+target lvl=100 resist=0.1 radius=2 pos=2.1,1.5 hp=999999999; 
+energy every interval=480,720 amount=1;
+
+active nahida;
+
+
+for let i=0; i<4; i=i+1 {
+  nahida skill;
+  if .nahida.burst.ready && .nahida.energymax {
+	nahida burst;
+  } else {
+	nahida attack:2;
+  }
+  aino skill, burst;
+  lauma skill;
+  if .lauma.burst.ready && .lauma.energymax {
+	lauma burst;
+  } else {
+	lauma attack:2;
+  }
+  nefer skill, charge, dash, charge, dash, charge;
+  nahida attack, skill, charge, attack;
+  nefer skill, charge, dash, charge, dash, charge;
+  if .nefer.burst.ready && .nefer.energymax {
+    nefer dash, burst;
+  }
+}
+`;
     
     textarea.value = defaultConfig;
     if (cmEditor) cmEditor.setValue(defaultConfig);
-    console.log('[WebUI] Default config loaded');
+    debugLog('[WebUI] Default config loaded');
     
     // If CodeMirror not available, attach keyboard shortcuts to textarea
     if (!cmEditor) {
@@ -89,23 +337,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Syntax highlight: update highlight pre to mirror textarea with spans
     const highlightEl = document.getElementById('config-highlight');
-    // Register a minimal Prism language for GCSL so Prism can produce tokens.
-    // This is intentionally small: comments (#...), strings, numbers, keywords, identifiers, operators.
-    try {
-        if (window.Prism && !window.Prism.languages.gcsl) {
-            window.Prism.languages.gcsl = {
-                'comment': /#.*/,
-                'string': /(?:"(?:\\.|[^"])*"|'(?:\\.|[^'])*')/,
-                'number': /\b\d+(?:\.\d+)?\b/,
-                'keyword': new RegExp('\\b(?:' + ['char','add','set','stats','target','energy','active','options','if','else','for','while','return','break','continue','let','fn','skill','burst','attack','dash','charge','active','options'].join('|') + ')\\b'),
-                'operator': /[+\-*/=<>!:,;(){}\[\].]/,
-                'ident': /[A-Za-z_][A-Za-z0-9_]*/
-            };
-        }
-    } catch (e) {
-        // ignore if Prism not available yet
-        console.warn('Prism gcsl language registration failed', e);
-    }
+    // Prism language registration disabled: use local scanner fallback for highlighting.
+    // The previous complex inline RegExp caused parsing issues in some environments, so
+    // we simply prefer the local highlighter implementation below. If Prism is available
+    // and you want custom language support, add a safe registration script separately.
     function escapeHtml(s) {
         return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
@@ -116,8 +351,8 @@ document.addEventListener('DOMContentLoaded', function() {
             {regex: /(?:\/\*[\s\S]*?\*\/|\/\/.*?(?:\n|$))/y, cls: 'gcsl-comment'},
             {regex: /(?:\"(?:[^\\\"]|\\.)*\"|\'(?:[^\\\']|\\.)*\')/y, cls: 'gcsl-string'},
             {regex: /\b\d+(?:\.\d+)?\b/y, cls: 'gcsl-number'},
-            {regex: new RegExp('\\b(?:' + ['char','add','set','stats','target','energy','active','options','if','else','for','while','return','break','continue','let','fn','skill','burst','attack','dash','charge'].join('|') + ')\\b','y'), cls: 'gcsl-keyword'},
-            {regex: /\b([A-Za-z_][A-Za-z0-9_]*)\s*(?=\()/y, cls: 'gcsl-fn'},
+            {regex: /\b(?:char|add|set|stats|target|energy|active|options|if|else|for|while|return|break|continue|let|fn|skill|burst|attack|dash|charge)\b/g, cls: 'gcsl-keyword'},
+            {regex: /\b([A-Za-z_][A-Za-z0-9_]*)/y, cls: 'gcsl-fn'},
             {regex: /[+\-*/=<>!:]+/y, cls: 'gcsl-operator'},
             {regex: /\s+/y, cls: null},
             {regex: /./y, cls: null}
@@ -227,7 +462,7 @@ function clearErrorHighlights() {
 }
 
 async function runSimulation() {
-    console.log('[WebUI] Starting simulation...');
+    debugLog('[WebUI] Starting simulation...');
     const textarea = document.getElementById('config-editor');
     const config = (typeof cmEditor !== 'undefined' && cmEditor) ? cmEditor.getValue() : textarea.value;
     const errorMsg = document.getElementById('error-message');
@@ -235,7 +470,7 @@ async function runSimulation() {
     const resultsContainer = document.getElementById('results-container');
     const runButton = document.querySelector('.btn-run');
     
-    console.log('[WebUI] Config length:', config.length);
+    debugLog('[WebUI] Config length:', config.length);
     
     // Hide previous results and errors
     errorMsg.style.display = 'none';
@@ -245,7 +480,7 @@ async function runSimulation() {
     clearErrorHighlights();
     
     try {
-        console.log('[WebUI] Sending request to /api/simulate');
+    debugLog('[WebUI] Sending request to /api/simulate');
         const response = await fetch('/api/simulate', {
             method: 'POST',
             headers: {
@@ -254,7 +489,7 @@ async function runSimulation() {
             body: JSON.stringify({ config })
         });
         
-        console.log('[WebUI] Response status:', response.status);
+    debugLog('[WebUI] Response status:', response.status);
         
         loading.style.display = 'none';
         runButton.disabled = false;
@@ -267,7 +502,7 @@ async function runSimulation() {
         }
         
         const result = await response.json();
-        console.log('[WebUI] Simulation result:', result);
+    debugLog('[WebUI] Simulation result:', result);
         displayResults(result);
         
     } catch (err) {
@@ -280,7 +515,7 @@ async function runSimulation() {
 }
 
 function handleError(error) {
-    console.log('[WebUI] Handling error:', error);
+    debugLog('[WebUI] Handling error:', error);
     const errorMsg = document.getElementById('error-message');
     let message = error.message || error.error || 'シミュレーションに失敗しました';
     
@@ -300,7 +535,7 @@ function handleError(error) {
 }
 
 function displayResults(result) {
-    console.log('[WebUI] Displaying results...');
+    debugLog('[WebUI] Displaying results...');
     const resultsContainer = document.getElementById('results-container');
     resultsContainer.style.display = 'block';
     
@@ -316,14 +551,14 @@ function displayResults(result) {
     // Display charts
     displayCharts(result);
     
-    console.log('[WebUI] Results displayed successfully');
+    debugLog('[WebUI] Results displayed successfully');
     
     // Scroll to results
     resultsContainer.scrollIntoView({ behavior: 'smooth' });
 }
 
 function displayStatistics(result) {
-    console.log('[WebUI] Displaying statistics...');
+    debugLog('[WebUI] Displaying statistics...');
     const stats = result.statistics || {};
     
     // Extract main statistics with stdev
@@ -340,7 +575,7 @@ function displayStatistics(result) {
     const duration = stats.duration?.mean || result.simulator_settings?.duration || 0;
     const durationStd = stats.duration?.sd || 0;
     
-    console.log('[WebUI] Stats:', { dps, eps, rps, hps, shp, duration });
+    debugLog('[WebUI] Stats:', { dps, eps, rps, hps, shp, duration });
     
     // Display with 2 decimal places and stdev
     document.getElementById('stat-dps').innerHTML = formatStatWithStdev(dps, dpsStd);
@@ -352,8 +587,8 @@ function displayStatistics(result) {
 }
 
 function displayCharacters(result) {
-    console.log('[WebUI] Displaying characters...');
-    console.log('[WebUI] Full result keys:', Object.keys(result));
+    debugLog('[WebUI] Displaying characters...');
+    debugLog('[WebUI] Full result keys:', Object.keys(result));
     const container = document.getElementById('characters-list');
     container.innerHTML = '';
     
@@ -466,10 +701,25 @@ function displayCharacters(result) {
     });
     
     container.appendChild(gridDiv);
+
+    // Append the target info block once under the characters list
+    try {
+        const targetsBlockHtml = buildTargetsHTML(result);
+        if (targetsBlockHtml && targetsBlockHtml.trim().length > 0) {
+            const targetsDiv = document.createElement('div');
+            // Reuse card styles so visuals match character cards exactly
+            targetsDiv.className = 'card';
+            targetsDiv.style.marginTop = '12px';
+            targetsDiv.innerHTML = `<div class="card-content"><span class="card-title">ターゲット情報</span>${targetsBlockHtml}</div>`;
+            container.appendChild(targetsDiv);
+        }
+    } catch (e) { console.warn('[WebUI] Could not append targets under characters', e); }
 }
 
 function displayTargetInfo(result) {
     const container = document.getElementById('target-details');
+    // If the target info tab/element was removed from the DOM, skip rendering.
+    if (!container) return;
     container.innerHTML = '';
     
     if (!result.target_details || result.target_details.length === 0) {
@@ -514,6 +764,32 @@ function displayTargetInfo(result) {
     });
 }
 
+// Build HTML block for all targets so it can be embedded under each character card
+function buildTargetsHTML(result) {
+    if (!result.target_details || result.target_details.length === 0) return '';
+    let html = '<div style="margin-top:10px;"><strong>ターゲット情報:</strong>';
+    result.target_details.forEach((target, idx) => {
+        const name = target.name || `ターゲット ${idx + 1}`;
+        const level = target.level || 1;
+        const hp = target.hp || 0;
+        let resistHTML = '';
+        if (target.resist && Object.keys(target.resist).length > 0) {
+            resistHTML = '<div style="margin-top:6px;">';
+            for (const [element, resist] of Object.entries(target.resist)) {
+                resistHTML += `<div class="info-row"><span class="info-label">${element}</span><span class="info-value">${(resist * 100).toFixed(1)}%</span></div>`;
+            }
+            resistHTML += '</div>';
+        }
+        html += `<div style="margin-top:8px; padding:8px; border:1px solid var(--muted-border); border-radius:6px; background:var(--card-bg);">
+            <div class="info-row"><span class="info-label">${name}</span><span class="info-value">Lv.${level}</span></div>
+            <div class="info-row"><span class="info-label">HP</span><span class="info-value">${formatNumber(hp)}</span></div>
+            ${resistHTML}
+        </div>`;
+    });
+    html += '</div>';
+    return html;
+}
+
 function displayCharts(result) {
     console.log('[WebUI] Displaying charts...');
     console.log('[WebUI] Result structure:', Object.keys(result));
@@ -527,6 +803,31 @@ function displayCharts(result) {
     
     const stats = result.statistics || {};
     
+    
+    // Insert or update a raw statistics dump to help debugging field shapes
+    try {
+        let rawPanel = document.getElementById('raw-stats-panel');
+        if (!rawPanel) {
+            rawPanel = document.createElement('details');
+            rawPanel.id = 'raw-stats-panel';
+            rawPanel.style.margin = '10px 0';
+            const summary = document.createElement('summary');
+            summary.textContent = 'Raw statistics JSON (debug)';
+            rawPanel.appendChild(summary);
+            const pre = document.createElement('pre');
+            pre.id = 'raw-stats-pre';
+            pre.style.maxHeight = '300px';
+            pre.style.overflow = 'auto';
+            pre.style.background = 'var(--card-bg)';
+            pre.style.border = '1px solid var(--muted-border)';
+            pre.style.padding = '8px';
+            rawPanel.appendChild(pre);
+            resultsContainer.insertBefore(rawPanel, resultsContainer.firstChild);
+        }
+        const preEl = document.getElementById('raw-stats-pre');
+        if (preEl) preEl.textContent = JSON.stringify(result.statistics || {}, null, 2);
+    } catch (e) { console.warn('[WebUI] Could not render raw stats panel', e); }
+
     // Character DPS Chart (100% Stacked Bar Chart)
     if (result.character_details && result.character_details.length > 0) {
         const canvas = document.getElementById('char-dps-chart');
@@ -537,26 +838,42 @@ function displayCharts(result) {
             const ctx = canvas.getContext('2d');
             console.log('[WebUI] Got 2d context:', ctx);
             
-            const charDpsData = [];
+            // Build arrays for characters and their DPS, then compute a canonical ordering
             const charNames = [];
-            
+            const charDpsData = [];
+            const charDpsSd = [];
+
             result.character_details.forEach((char, idx) => {
-                charNames.push(char.name || `キャラ${idx+1}`);
+                const name = char.name || `キャラ${idx+1}`;
+                charNames.push(name);
                 // Try multiple possible locations for character DPS data
                 let dpsValue = 0;
+                let sdValue = 0;
                 if (stats.character_dps && Array.isArray(stats.character_dps)) {
                     dpsValue = stats.character_dps[idx]?.mean || 0;
+                    sdValue = (typeof stats.character_dps[idx]?.sd !== 'undefined') ? stats.character_dps[idx].sd : 0;
                 } else if (stats.character_dps && typeof stats.character_dps === 'object') {
-                    dpsValue = stats.character_dps[char.name]?.mean || 0;
+                    dpsValue = stats.character_dps[name]?.mean || 0;
+                    sdValue = (typeof stats.character_dps[name]?.sd !== 'undefined') ? stats.character_dps[name].sd : 0;
                 }
                 charDpsData.push(dpsValue);
+                charDpsSd.push(sdValue);
             });
             
             console.log('[WebUI] Character DPS data:', charNames, charDpsData);
             
-            if (charDpsData.length > 0 && charDpsData.some(v => v > 0)) {
-                charts.charDps = createStackedBarChart(ctx, ['チーム'], [charNames, charDpsData], 'キャラクター別DPS');
-            } else {
+                if (charDpsData.length > 0 && charDpsData.some(v => v > 0)) {
+                    // Compute canonical ordering by DPS descending so other charts can follow the same order
+                    const order = charDpsData.map((v, i) => ({ idx: i, dps: v }));
+                    order.sort((a,b) => b.dps - a.dps);
+                    const orderedCharNames = order.map(o => charNames[o.idx]);
+                    const orderedCharDps = order.map(o => charDpsData[o.idx]);
+                    const orderedCharSd = order.map(o => charDpsSd[o.idx]);
+                    // store canonical ordering on the stats object for use by other charts
+                    stats.__char_order = { order, orderedCharNames, orderedCharDps, orderedCharSd };
+                    // pass an empty labels array so no 'チーム' label appears on the axis
+                    charts.charDps = createStackedBarChart(ctx, [''], [orderedCharNames, orderedCharDps, orderedCharSd], 'キャラクター別DPS');
+                } else {
                 console.log('[WebUI] No character DPS data to display');
             }
         }
@@ -569,33 +886,103 @@ function displayCharts(result) {
     } else {
         const ctx2 = canvas2.getContext('2d');
         let sourceData = {};
-        
-        // Try to extract source DPS data
+
+
+
+        // Try to extract source DPS data (flatten nested objects and sum values)
+        const durationMean = (stats.duration && (typeof stats.duration.mean === 'number')) ? stats.duration.mean : (result.simulator_settings && result.simulator_settings.duration) || 0;
         if (stats.dps_by_element && Array.isArray(stats.dps_by_element)) {
             stats.dps_by_element.forEach((charData, idx) => {
                 const charName = result.character_details?.[idx]?.name || `キャラ${idx+1}`;
                 if (charData && typeof charData === 'object') {
                     Object.entries(charData).forEach(([element, data]) => {
                         const key = `${charName} (${element})`;
-                        sourceData[key] = data?.mean || data;
+                        const mean = extractDescriptiveMean(data);
+                        if (typeof mean === 'number' && mean > 0) sourceData[key] = mean;
                     });
                 }
             });
-        } else if (stats.source_damage_instances) {
-            // Alternative data source
-            Object.entries(stats.source_damage_instances).forEach(([source, count]) => {
-                if (count > 0) sourceData[source] = count;
+        } else if (stats.source_dps && Array.isArray(stats.source_dps)) {
+            // Prefer explicit SourceDps if provided: array per-character SourceStats
+            stats.source_dps.forEach((sa, idx) => {
+                const charName = result.character_details?.[idx]?.name || `キャラ${idx+1}`;
+                if (sa && sa.sources) {
+                    Object.entries(sa.sources).forEach(([source, ds]) => {
+                        // ds may be a DescriptiveStats or numeric; extract intelligently
+                        const mean = extractDescriptiveMean(ds);
+                        const num = (mean !== null) ? mean : extractNumber(ds);
+                        if (typeof num === 'number' && num > 0) sourceData[`${charName}: ${source}`] = num;
+                    });
+                }
             });
+        } else {
+            // Note: stats.source_damage_instances often contains raw instance counts rather than DPS.
+            // To avoid plotting count-only data as DPS, we skip using source_damage_instances as a fallback.
+            if (stats.source_damage_instances) console.log('[WebUI] source_damage_instances present but ignored (counts only)');
         }
         
         console.log('[WebUI] Source DPS data:', sourceData);
         
-        const data = extractChartData(sourceData);
-        if (data.labels.length > 0) {
+    const data = extractChartData(sourceData);
+    // Prefer stats.source_dps (per-character SourceStats) for per-character ability DPS
+    if (stats.source_dps && Array.isArray(stats.source_dps) && stats.source_dps.length > 0) {
+    // Use the canonical ordering computed from character DPS if available so colors/order match
+    const charNamesRaw = (result.character_details && Array.isArray(result.character_details)) ? result.character_details.map(c => c.name) : stats.source_dps.map((_,i) => `キャラ${i+1}`);
+    const charNames = (stats.__char_order && stats.__char_order.orderedCharNames) ? stats.__char_order.orderedCharNames : charNamesRaw;
+        // Collect ability/source keys from source_dps
+        const abilitySet = new Set();
+        stats.source_dps.forEach(sa => { if (sa && sa.sources) Object.keys(sa.sources).forEach(k => abilitySet.add(k)); });
+        const abilities = Array.from(abilitySet);
+
+        if (abilities.length > 0) {
+            // Create a matrix matching sorted charNames order. source_dps is indexed by original character index,
+            // so we need to map canonical ordering indices back to original indices in source_dps.
+            const originalCharNames = (result.character_details && Array.isArray(result.character_details)) ? result.character_details.map(c => c.name) : stats.source_dps.map((_,i) => `キャラ${i+1}`);
+            // Build a mapping from canonical position -> original index
+            const canonicalToOriginal = [];
+            if (stats.__char_order && stats.__char_order.order) {
+                // order: array of {idx, dps} where idx is original index
+                stats.__char_order.order.forEach(o => canonicalToOriginal.push(o.idx));
+            } else {
+                // default mapping: identity
+                for (let i = 0; i < originalCharNames.length; i++) canonicalToOriginal.push(i);
+            }
+
+            const matrix = abilities.map(() => Array(canonicalToOriginal.length).fill(0));
+            const metaMatrix = abilities.map(() => Array(canonicalToOriginal.length).fill(null));
+
+            abilities.forEach((ability, aIdx) => {
+                canonicalToOriginal.forEach((origIdx, cCanonicalIdx) => {
+                    const sa = stats.source_dps[origIdx];
+                    if (!sa || !sa.sources) return;
+                    const ds = sa.sources[ability];
+                    if (!ds) return;
+                    const mean = (typeof ds.mean === 'number') ? ds.mean : 0;
+                    const sd = (typeof ds.sd === 'number') ? ds.sd : 0;
+                    const min = (typeof ds.min === 'number') ? ds.min : 0;
+                    const max = (typeof ds.max === 'number') ? ds.max : 0;
+                    matrix[aIdx][cCanonicalIdx] = mean;
+                    metaMatrix[aIdx][cCanonicalIdx] = { mean, sd, min, max };
+                });
+            });
+
+            // Request the abilities chart use a slightly thicker bar and 5px vertical gap
+            charts.sourceDps = createStackedAbilitiesChart(ctx2, charNames, abilities, matrix, 'キャラクター別 能力DPS', metaMatrix, { barThickness: 24, verticalPadding: 5 });
+        } else if (data.labels.length > 0) {
             charts.sourceDps = createBarChart(ctx2, data.labels, data.values, 'ソース別DPS');
         } else {
             console.log('[WebUI] No source DPS data to display');
+            try { showEmptyChartPlaceholder(ctx2.canvas.parentElement, 'ソース別DPS のデータがありません'); } catch(e) {}
         }
+    } else if (stats.character_actions && Array.isArray(stats.character_actions) && stats.character_actions.length > 0) {
+        // character_actions usually contains action counts (not DPS). Do not use it for DPS plotting.
+        console.log('[WebUI] character_actions present but ignored for DPS (contains counts)');
+        if (data.labels.length > 0) charts.sourceDps = createBarChart(ctx2, data.labels, data.values, 'ソース別DPS');
+        else console.log('[WebUI] No source DPS data to display');
+    } else {
+        if (data.labels.length > 0) charts.sourceDps = createBarChart(ctx2, data.labels, data.values, 'ソース別DPS');
+        else console.log('[WebUI] No source DPS data to display');
+    }
     }
     
     // Damage Distribution Chart (Time-based line chart)
@@ -606,110 +993,226 @@ function displayCharts(result) {
         const ctx3 = canvas3.getContext('2d');
         if (stats.damage_buckets) {
         const buckets = stats.damage_buckets;
-        const bucketSize = buckets.bucket_size || 30;
+        const bucketSize = buckets.bucket_size || 30; // bucket size in frames
         const bucketData = buckets.buckets || [];
-        
-        const timeLabels = bucketData.map((_, idx) => `${(idx * bucketSize).toFixed(0)}s`);
+
+        // Convert frame-based bucket indices to seconds. 1s = 60 frames.
+        const timeLabels = bucketData.map((_, idx) => {
+            const frames = idx * bucketSize;
+            const secs = frames / 60;
+            // show integer seconds when >=1s, otherwise show 2 decimals
+            return secs >= 1 ? `${secs.toFixed(0)}s` : `${secs.toFixed(2)}s`;
+        });
         const damageValues = bucketData.map(bucket => bucket?.mean || 0);
         
         console.log('[WebUI] Damage distribution data:', timeLabels.length, 'buckets');
         
         if (timeLabels.length > 0) {
-            charts.damageDist = createLineChart(ctx3, timeLabels, damageValues, 'ダメージ');
+            // Render distribution with much larger vertical footprint per user request
+            charts.damageDist = createLineChart(ctx3, timeLabels, damageValues, 'ダメージ', { heightPx: 480 });
         }
     } else {
         console.log('[WebUI] No damage distribution data');
     }
-    
-    // Energy Chart (Source-based)
-    const canvas4 = document.getElementById('energy-chart');
-    if (!canvas4) {
-        console.error('[WebUI] Canvas element energy-chart not found');
-    } else {
-        const ctx4 = canvas4.getContext('2d');
-        if (stats.total_source_energy && Array.isArray(stats.total_source_energy)) {
-        const energyData = {};
-        
-        stats.total_source_energy.forEach((charEnergy, idx) => {
-            const charName = result.character_details?.[idx]?.name || `キャラ${idx+1}`;
-            if (charEnergy && typeof charEnergy === 'object') {
-                Object.entries(charEnergy).forEach(([source, value]) => {
-                    if (value > 0) {
-                        energyData[`${charName}: ${source}`] = value;
-                    }
-                });
-            }
-        });
-        
-        console.log('[WebUI] Energy data:', energyData);
-        
-        const data = extractChartData(energyData);
-        if (data.labels.length > 0) {
-            charts.energy = createBarChart(ctx4, data.labels, data.values, 'エネルギー');
-        }
-    } else {
-        console.log('[WebUI] No energy data');
     }
     
-    // Reaction Count Chart
-    const canvas5 = document.getElementById('reaction-count-chart');
-    if (!canvas5) {
-        console.error('[WebUI] Canvas element reaction-count-chart not found');
-    } else {
+    // Energy chart removed (per request)
+    
+    // Reaction Count Chart: show per-reaction bars where each bar is stacked by character counts
+    (function() {
+        const canvas5 = document.getElementById('reaction-count-chart');
+        if (!canvas5) {
+            console.error('[WebUI] Canvas element reaction-count-chart not found');
+            return;
+        }
         const ctx5 = canvas5.getContext('2d');
-        if (stats.source_reactions && Array.isArray(stats.source_reactions)) {
-        const reactionData = {};
-        
+        if (!(stats.source_reactions && Array.isArray(stats.source_reactions))) {
+            try { showEmptyChartPlaceholder(ctx5.canvas.parentElement, '反応回数のデータがありません'); } catch(e) {}
+            return;
+        }
+
+        // Collect reaction types and per-character counts
+        const reactionsSet = new Set();
+        const charNames = [];
+        const perCharReactions = []; // array of maps { reaction -> count }
+
         stats.source_reactions.forEach((charReactions, idx) => {
             const charName = result.character_details?.[idx]?.name || `キャラ${idx+1}`;
+            charNames.push(charName);
+            const map = {};
             if (charReactions && typeof charReactions === 'object') {
-                Object.entries(charReactions).forEach(([reaction, value]) => {
-                    if (value && value !== 0) {
-                        reactionData[`${charName}: ${reaction}`] = value;
+                Object.entries(charReactions).forEach(([reaction, rawVal]) => {
+                    const num = extractNumber(rawVal) || 0;
+                    if (num !== 0) {
+                        map[reaction] = num;
+                        reactionsSet.add(reaction);
                     }
                 });
             }
+            perCharReactions.push(map);
         });
-        
-        console.log('[WebUI] Reaction data:', reactionData);
-        
-        const data = extractChartData(reactionData);
-        if (data.labels.length > 0) {
-            charts.reactions = createBarChart(ctx5, data.labels, data.values, '反応回数');
+
+        const reactions = Array.from(reactionsSet);
+        if (reactions.length === 0) {
+            try { showEmptyChartPlaceholder(ctx5.canvas.parentElement, '反応回数のデータがありません'); } catch(e) {}
+            return;
         }
-    } else {
-        console.log('[WebUI] No reaction data');
-    }
-    
-    // Aura Uptime Chart
-    const canvas6 = document.getElementById('aura-uptime-chart');
-    if (!canvas6) {
-        console.error('[WebUI] Canvas element aura-uptime-chart not found');
-    } else {
+
+        // Build datasets: one dataset per character so each character has a consistent color across reaction bars
+        const datasets = charNames.map((cn, ci) => {
+            const data = reactions.map(r => perCharReactions[ci][r] || 0);
+            return {
+                label: cn,
+                data,
+                backgroundColor: getCharColor(ci),
+                stack: 'Stack 0',
+            };
+        });
+
+        // Ensure container height and create stacked bar chart (vertical categories = reactions)
+        ensureContainerHeight(ctx5, Math.max(200, reactions.length * 30));
+        charts.reactions = new Chart(ctx5, {
+            type: 'bar',
+            data: { labels: reactions, datasets },
+            options: {
+                // Horizontal bars: categories on Y axis
+                indexAxis: 'y',
+                plugins: { 
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                // Reaction chart should show raw counts (not percents).
+                                const raw = ctxRawValue(context);
+                                return `${context.dataset.label || ''}: ${formatValue(raw, 2)}`;
+                            }
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true, beginAtZero: true },
+                    y: { stacked: true }
+                }
+            }
+        });
+        try { scheduleChartResize(charts.reactions, ctx5); } catch(e) {}
+    })();
+
+    // Aura Uptime Chart: per-target stacked bars where each element is a segment.
+    (function() {
+        const canvas6 = document.getElementById('aura-uptime-chart');
+        if (!canvas6) {
+            console.error('[WebUI] Canvas element aura-uptime-chart not found');
+            return;
+        }
         const ctx6 = canvas6.getContext('2d');
-        if (stats.target_aura_uptime && Array.isArray(stats.target_aura_uptime)) {
-        const auraData = {};
-        
-        stats.target_aura_uptime.forEach((targetAura, idx) => {
+        if (!(stats.target_aura_uptime && Array.isArray(stats.target_aura_uptime))) {
+            try { showEmptyChartPlaceholder(ctx6.canvas.parentElement, '付着時間のデータがありません'); } catch(e) {}
+            return;
+        }
+
+        // Each entry in target_aura_uptime represents a target: map of element->value (0..10000)
+        const targetLabels = [];
+        const elementSet = new Set();
+        const perTarget = []; // array of maps element->value
+
+        stats.target_aura_uptime.forEach((targetAura, tidx) => {
+            const label = `ターゲット${tidx+1}`;
+            targetLabels.push(label);
+            const map = {};
             if (targetAura && typeof targetAura === 'object') {
-                Object.entries(targetAura).forEach(([element, value]) => {
-                    if (value && value !== 0) {
-                        auraData[`ターゲット${idx+1}: ${element}`] = value * 100; // Convert to percentage
+                // The proto defines TargetAuraUptime as []*SourceStats, where SourceStats
+                // has a `sources` map of element->DescriptiveStats. Some serializations
+                // therefore nest elements under `sources`. Prefer that shape; fall back
+                // to treating top-level keys as element names if `sources` isn't present.
+                const inner = (targetAura.sources && typeof targetAura.sources === 'object') ? targetAura.sources : targetAura;
+                Object.entries(inner).forEach(([element, rawVal]) => {
+                    // value may be a numeric or a DescriptiveStats-like object
+                    const num = extractNumber(rawVal) || 0;
+                    if (num !== 0) {
+                        // clamp between 0 and 10000
+                        const clamped = Math.max(0, Math.min(10000, num));
+                        map[element] = clamped;
+                        elementSet.add(element);
                     }
                 });
             }
+            perTarget.push(map);
         });
-        
-        console.log('[WebUI] Aura uptime data:', auraData);
-        
-        const data = extractChartData(auraData);
-        if (data.labels.length > 0) {
-            charts.aura = createBarChart(ctx6, data.labels, data.values, '付着時間 (%)');
+
+        const elements = Array.from(elementSet);
+        if (elements.length === 0) {
+            try { showEmptyChartPlaceholder(ctx6.canvas.parentElement, '付着時間のデータがありません'); } catch(e) {}
+            return;
         }
-        } else {
-            console.log('[WebUI] No aura uptime data');
-        }
-    }
+
+        // Detect numeric scale and convert to percent robustly. Server may return:
+        // - fractions (0..1),
+        // - percentages (0..100), or
+        // - scaled integers (0..10000) as earlier code assumed.
+        let globalMax = 0;
+        perTarget.forEach(pt => {
+            Object.values(pt).forEach(v => {
+                if (typeof v === 'number' && Number.isFinite(v)) globalMax = Math.max(globalMax, Math.abs(v));
+            });
+        });
+
+        const toPercent = (v) => {
+            if (!v || !Number.isFinite(v)) return 0;
+            // if values look like fractions (<= 1.01) -> multiply by 100
+            if (globalMax <= 1.01) return v * 100;
+            // if values look like percents already (<= 100.5) -> leave as-is
+            if (globalMax <= 100.5) return v;
+            // if values look like 0..10000 scale -> convert
+            if (globalMax <= 10000) return v / 10000 * 100;
+            // fallback: clamp to 0..100
+            return Math.max(0, Math.min(100, v));
+        };
+
+        // Build datasets: one dataset per element, data is per-target percent values
+        const datasets = elements.map((el, ei) => {
+            const data = perTarget.map(pt => toPercent(pt[el] || 0));
+            // color scheme: derive from element name via hash -> hue
+            const hue = Math.abs(hashCode(el)) % 360;
+            return {
+                label: el,
+                data,
+                backgroundColor: `hsl(${hue}deg 70% 50%)`,
+                stack: 'Stack 0',
+            };
+        });
+
+        ensureContainerHeight(ctx6, Math.max(200, targetLabels.length * 50));
+        charts.aura = new Chart(ctx6, {
+            type: 'bar',
+            data: { labels: targetLabels, datasets },
+            options: {
+                // Horizontal bars: categories (targets) on Y axis, percent on X axis
+                indexAxis: 'y',
+                plugins: { 
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                // Aura uptime values are already converted to percent by toPercent
+                                const raw = ctxRawValue(context);
+                                return `${context.dataset.label || ''}: ${formatValue(raw, 2, '%')}`;
+                            }
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true, beginAtZero: true, max: 100, ticks: { callback: function(v){ return v + '%'; } } },
+                    y: { stacked: true, grid: { display: false } }
+                }
+            }
+        });
+        try { scheduleChartResize(charts.aura, ctx6); } catch(e) {}
+    })();
     
     console.log('[WebUI] Charts displayed, active charts:', Object.keys(charts));
 }
@@ -721,9 +1224,11 @@ function extractChartData(dataObj) {
     if (typeof dataObj === 'object' && dataObj !== null) {
         for (const [key, value] of Object.entries(dataObj)) {
             if (typeof value === 'number') {
+                if (!Number.isFinite(value)) continue;
                 labels.push(key);
                 values.push(value);
-            } else if (typeof value === 'object' && value.mean !== undefined) {
+            } else if (typeof value === 'object' && value !== null && typeof value.mean === 'number') {
+                if (!Number.isFinite(value.mean)) continue;
                 labels.push(key);
                 values.push(value.mean);
             }
@@ -733,15 +1238,24 @@ function extractChartData(dataObj) {
     return { labels, values };
 }
 
-function createStackedBarChart(ctx, categories, [charNames, charValues], title) {
-    console.log('[WebUI] createStackedBarChart called', {
-        ctx: ctx,
-        categories: categories,
-        charNames: charNames,
-        charValues: charValues,
-        title: title,
-        isChartDefined: typeof Chart !== 'undefined'
-    });
+function showEmptyChartPlaceholder(containerEl, text) {
+    try {
+        if (!containerEl) return;
+        // remove any existing placeholder
+        const existing = containerEl.querySelector('.chart-empty-placeholder');
+        if (existing) existing.remove();
+        const div = document.createElement('div');
+        div.className = 'chart-empty-placeholder';
+        div.style.padding = '24px';
+        div.style.color = 'var(--muted)';
+        div.style.fontSize = '0.95rem';
+        div.style.textAlign = 'left';
+        div.textContent = text || 'データがありません';
+        containerEl.appendChild(div);
+    } catch (e) { /* ignore */ }
+}
+
+function createStackedBarChart(ctx, categories, [charNames, charValues, charSd], title) {
     
     // Calculate percentages
     const total = charValues.reduce((a, b) => a + b, 0);
@@ -749,23 +1263,38 @@ function createStackedBarChart(ctx, categories, [charNames, charValues], title) 
     
     console.log('[WebUI] Calculated percentages:', percentages);
     
-    const colors = [
-        'rgba(102, 126, 234, 0.8)',
-        'rgba(118, 75, 162, 0.8)',
-        'rgba(237, 100, 166, 0.8)',
-        'rgba(255, 154, 158, 0.8)',
-    ];
+    // Use global character palette so colors are consistent across charts
+    const palette = CHAR_PALETTE;
+
+    const datasets = charNames.map((name, idx) => {
+        const hex = palette[idx % palette.length];
+        const bg = hexToRgba(hex, 0.85);
+        const border = hexToRgba(hex, 1);
+        return {
+            label: name,
+            data: [percentages[idx]],
+            stack: 'stack1',
+            backgroundColor: bg,
+            borderColor: border,
+            borderWidth: 1,
+            hoverBackgroundColor: hexToRgba(hex, 0.95),
+            // Make the bar thickness approximately 24px
+            barThickness: 48,
+            maxBarThickness: 48
+            ,categoryPercentage: 1.0
+            ,barPercentage: 1.0
+        };
+    });
     
-    const datasets = charNames.map((name, idx) => ({
-        label: name,
-        data: [percentages[idx]],
-        backgroundColor: colors[idx % colors.length],
-        borderColor: colors[idx % colors.length].replace('0.8', '1'),
-        borderWidth: 1
-    }));
-    
-    console.log('[WebUI] Creating Chart.js chart with datasets:', datasets);
-    
+    // Prepare datasets; avoid verbose debug logging in production
+    // Compute desired visual height using bar thickness and category count, and set canvas size
+    const numRows = (Array.isArray(categories) && categories.length > 0) ? categories.length : 1;
+    const barThickness = 48;
+    const verticalPadding = 6;
+    const legendSpace = 20;
+    const desiredHeightPx = Math.max(120, (barThickness + verticalPadding) * numRows + legendSpace);
+    setCanvasVisualSize(ctx, desiredHeightPx);
+
     const chart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -773,110 +1302,182 @@ function createStackedBarChart(ctx, categories, [charNames, charValues], title) 
             datasets: datasets
         },
         options: {
+            // Render horizontally: categories on the Y axis, values (percent) on the X axis
+            indexAxis: 'y',
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 0, bottom: 0, left: 0, right: 0 } },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'bottom'
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 4 }
+                },
+                title: {
+                    display: false
                 },
                 tooltip: {
                     callbacks: {
+                        title: function() { return ''; },
                         label: function(context) {
                             const charIdx = context.datasetIndex;
-                            const dps = charValues[charIdx];
+                            const dps = charValues[charIdx] || 0;
+                            const sd = (charSd && typeof charSd[charIdx] !== 'undefined' && charSd[charIdx] !== null) ? charSd[charIdx] : null;
                             const pct = percentages[charIdx];
-                            return `${context.dataset.label}: ${pct.toFixed(1)}% (DPS: ${Math.round(dps).toLocaleString('ja-JP')})`;
+                            // Show percentage with 2 decimals, DPS with thousands separator, stdev with 2 decimals or 'n/a'
+                            const pctStr = pct.toFixed(2) + '%';
+                            const sdStr = (sd === null) ? 'n/a' : sd.toFixed(2);
+                            // DPS with 2 decimal places and locale formatting
+                            const dpsStr = Number(dps).toLocaleString('ja-JP', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            return `${context.dataset.label}: ${pctStr} (DPS: ${dpsStr} ± ${sdStr})`;
                         }
                     }
                 }
             },
             scales: {
                 x: {
-                    stacked: true
-                },
-                y: {
                     stacked: true,
                     beginAtZero: true,
                     max: 100,
                     ticks: {
-                        callback: function(value) {
-                            return value + '%';
-                        }
+                        callback: function(value) { return value + '%'; },
+                        padding: 4
                     }
+                ,grid: { drawBorder: false, display: false }
+                },
+                y: {
+                    stacked: true,
+                    display: false,
+                    grid: { display: false }
                 }
             }
         }
     });
-    
-    // Add data table with character names, DPS values, and percentages
-    const container = ctx.parentElement;
-    let tableDiv = container.querySelector('.chart-data-table-container');
-    
-    if (!tableDiv) {
-        tableDiv = document.createElement('div');
-        tableDiv.className = 'chart-data-table-container';
-        container.appendChild(tableDiv);
-    }
-    
-    let html = '<table class="chart-data-table">';
-    html += '<thead><tr><th>キャラクター</th><th>DPS</th><th>割合</th></tr></thead>';
-    html += '<tbody>';
-    
-    charNames.forEach((name, idx) => {
-        const dps = charValues[idx];
-        const pct = percentages[idx];
-        html += `<tr>
-            <td>${name}</td>
-            <td>${Math.round(dps).toLocaleString('ja-JP')}</td>
-            <td>${pct.toFixed(1)}%</td>
-        </tr>`;
-    });
-    
-    html += '</tbody></table>';
-    tableDiv.innerHTML = html;
+    // force a resize/update in case Chart computed wrong initial size
+    try { chart.resize(); chart.update(); } catch (e) { /* ignore */ }
+    // No data table is added beneath the chart (user requested removal)
     
     console.log('[WebUI] Chart created successfully, returning chart object');
     
     return chart;
 }
 
-function createBarChart(ctx, labels, data, label) {
+// Ensure parent/ancestor container reserves a given height (px) to prevent overlapping charts
+function ensureContainerHeight(ctx, desiredHeightPx) {
+    try {
+        const canvas = ctx && ctx.canvas ? ctx.canvas : null;
+        if (!canvas) return;
+        const parent = canvas.parentElement;
+        if (parent) {
+            parent.style.setProperty('min-height', Math.max(120, desiredHeightPx) + 'px', 'important');
+        }
+        // ensure ancestor columns (common .col) also have some reserved height
+        let el = parent;
+        let depth = 0;
+        while (el && depth < 4) {
+            if (el.classList && el.classList.contains('col')) {
+                el.style.setProperty('min-height', Math.max(120, desiredHeightPx) + 'px', 'important');
+                break;
+            }
+            el = el.parentElement;
+            depth++;
+        }
+    } catch (e) { /* ignore */ }
+}
+
+// When a chart is created while its container is hidden, Chart.js may compute sizes as 0.
+// Retry resize/update a few times until the canvas has a non-zero width.
+function scheduleChartResize(chart, ctx, maxAttempts = 8) {
+    try {
+        let attempts = 0;
+        const tryResize = () => {
+            attempts++;
+            const w = (ctx && ctx.canvas) ? ctx.canvas.offsetWidth : 0;
+            if (w > 0 || attempts >= maxAttempts) {
+                try { if (chart && typeof chart.resize === 'function') { chart.resize(); chart.update(); } } catch(e) {}
+            } else {
+                setTimeout(tryResize, 120);
+            }
+        };
+        setTimeout(tryResize, 120);
+    } catch (e) { /* ignore */ }
+}
+
+function createBarChart(ctx, labels, data, label, meta) {
+    // Use global palette and compute simple colors
+    const palette = CHAR_PALETTE;
+    const bgColors = labels.map((_, i) => hexToRgba(palette[i % palette.length], 0.75));
+    const borderColors = labels.map((_, i) => hexToRgba(palette[i % palette.length], 1));
+
+    // Compute desired canvas height and set buffer via helper
+    const numRows = labels.length || 1;
+    const barThickness = 48;
+    const verticalPadding = 6;
+    const legendSpace = 8;
+    const desiredHeightPx = Math.max(120, (barThickness + verticalPadding) * numRows + legendSpace);
+    setCanvasVisualSize(ctx, desiredHeightPx);
+
+    const datasets = [{
+        label: label,
+        data: data,
+        backgroundColor: bgColors,
+        borderColor: borderColors,
+        borderWidth: 1,
+        barThickness: 48,
+        maxBarThickness: 48,
+        categoryPercentage: 1.0,
+        barPercentage: 0.9
+    }];
+
     const chart = new Chart(ctx, {
         type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: label,
-                data: data,
-                backgroundColor: 'rgba(102, 126, 234, 0.6)',
-                borderColor: 'rgba(102, 126, 234, 1)',
-                borderWidth: 1
-            }]
-        },
+        data: { labels: labels, datasets: datasets },
         options: {
+            indexAxis: 'y',
             responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
+            maintainAspectRatio: false,
+            layout: { padding: { top:0, bottom:0, left:0, right:0 } },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const idx = context.dataIndex;
+                            const val = data[idx] || 0;
+                            // if meta provided and has descriptive stats for this label, show them
+                            if (meta && meta[idx]) {
+                                const m = meta[idx];
+                                const mean = (typeof m.mean === 'number') ? m.mean : val;
+                                const sd = (typeof m.sd === 'number') ? m.sd : null;
+                                const min = (typeof m.min === 'number') ? m.min : null;
+                                const max = (typeof m.max === 'number') ? m.max : null;
+                                const sdStr = sd === null ? 'n/a' : sd.toFixed(2);
+                                return `${context.label}: ${mean.toFixed(2)} ± ${sdStr}`;
+                            }
+                            return `${context.label}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
+                        }
+                    }
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true
-                }
+                x: { beginAtZero: true, grid: { display: false }, ticks: { padding: 4 } },
+                y: { grid: { display: false }, ticks: { padding: 6 } }
             }
         }
     });
-    
-    // Add data table
-    addChartDataTable(ctx, labels, data, label);
+    try { chart.resize(); chart.update(); } catch (e) { /* ignore */ }
+    // No data table is added beneath the chart (user requested removal)
     
     return chart;
 }
 
-function createLineChart(ctx, labels, data, label) {
+function createLineChart(ctx, labels, data, label, options) {
+    // options.heightPx: desired visual height in pixels (default small for distribution)
+    const opts = Object.assign({ heightPx: 140 }, options || {});
+
+    // Set canvas visual size using helper to avoid duplication
+    setCanvasVisualSize(ctx, opts.heightPx);
+
     const chart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -892,7 +1493,7 @@ function createLineChart(ctx, labels, data, label) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     display: false
@@ -905,15 +1506,105 @@ function createLineChart(ctx, labels, data, label) {
             }
         }
     });
-    
-    // Add data table
-    addChartDataTable(ctx, labels, data, label);
-    
+    try { chart.resize(); chart.update(); } catch (e) { /* ignore */ }
+    // No data table is added beneath the chart (user requested removal)
+
+    return chart;
+}
+
+// Create a horizontal stacked bar chart where each stack segment is an ability and bars are characters
+function createStackedAbilitiesChart(ctx, charNames, abilities, matrix, title, metaMatrix, options) {
+    // abilities: array of ability/source labels (bars)
+    // matrix: abilities.length x charNames.length numeric matrix
+    // metaMatrix: abilities.length x charNames.length metadata
+
+    // Sort abilities by total DPS descending
+    const totalByAbility = abilities.map((ab, aIdx) => ({ idx: aIdx, total: matrix[aIdx].reduce((s,v) => s + (v||0), 0) }));
+    totalByAbility.sort((a,b) => b.total - a.total);
+    const sortedAbilities = totalByAbility.map(t => abilities[t.idx]);
+    const sortedMatrix = totalByAbility.map(t => matrix[t.idx]);
+    const sortedMeta = metaMatrix ? totalByAbility.map(t => metaMatrix[t.idx]) : null;
+
+    // Options with sensible defaults
+    const opts = Object.assign({ barThickness: 18, verticalPadding: 6 }, options || {});
+
+    // Build datasets per character so each stack segment uses character color
+    const datasets = charNames.map((char, cIdx) => {
+        const hex = getCharColor(cIdx);
+        const bg = hexToRgba(hex, 0.85);
+        const border = hexToRgba(hex, 1);
+        // extract values across sorted abilities
+        const data = sortedMatrix.map(row => row[cIdx] || 0);
+        return {
+            label: char,
+            data: data,
+            stack: 'stack1',
+            backgroundColor: bg,
+            borderColor: border,
+            borderWidth: 1,
+            barThickness: opts.barThickness,
+            maxBarThickness: opts.barThickness,
+            categoryPercentage: 1.0,
+            barPercentage: 1.0
+        };
+    });
+
+    // compute desired height and set canvas size via helper
+    const numRows = sortedAbilities.length || 1;
+    const barThickness = opts.barThickness || 18;
+    const verticalPadding = (typeof opts.verticalPadding === 'number') ? opts.verticalPadding : 6;
+    const legendSpace = 8;
+    const desiredHeightPx = Math.max(120, (barThickness + verticalPadding) * numRows + legendSpace);
+    setCanvasVisualSize(ctx, desiredHeightPx);
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: sortedAbilities, datasets: datasets },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top:0, bottom:0, left:0, right:0 } },
+            plugins: {
+                legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 4 } },
+                tooltip: {
+                    callbacks: {
+                        title: function() { return ''; },
+                        label: function(context) {
+                            const charIdx = context.datasetIndex;
+                            const abilityIdx = context.dataIndex;
+                            const ability = context.chart.data.labels[abilityIdx];
+                            const val = context.dataset.data[abilityIdx] || 0;
+                            // metaMatrix is abilities x chars; ability order is sortedAbilities
+                            if (sortedMeta && sortedMeta[abilityIdx] && sortedMeta[abilityIdx][charIdx]) {
+                                const m = sortedMeta[abilityIdx][charIdx];
+                                const lines = [];
+                                lines.push(`${charNames[charIdx]}: ${ability}`);
+                                lines.push(`mean ${m.mean.toFixed(2)}`);
+                                lines.push(`min ${m.min.toFixed(2)}`);
+                                lines.push(`max ${m.max.toFixed(2)}`);
+                                lines.push(`std ${m.sd.toFixed(2)}`);
+                                return lines;
+                            }
+                            return `${charNames[charIdx]}: ${ability}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
+                        }
+                    }
+                }
+            },
+            scales: { x: { stacked: true, grid: { display: false }, ticks: { padding: 4 } }, y: { stacked: true, grid: { display: false }, ticks: { padding: 6 } } }
+        }
+    });
+
+    try { chart.resize(); chart.update(); } catch (e) { /* ignore */ }
     return chart;
 }
 
 function addChartLegend(ctx, labels, colors) {
-    const container = ctx.parentElement;
+    const container = (ctx && ctx.canvas && ctx.canvas.parentElement) ? ctx.canvas.parentElement : (ctx && ctx.parentElement) ? ctx.parentElement : null;
+    if (!container) {
+        console.warn('[WebUI] Chart container not found for addChartLegend');
+        return;
+    }
     let legendDiv = container.querySelector('.chart-legend');
     
     if (!legendDiv) {
@@ -934,31 +1625,7 @@ function addChartLegend(ctx, labels, colors) {
     legendDiv.innerHTML = html;
 }
 
-function addChartDataTable(ctx, labels, data, columnLabel) {
-    const container = ctx.parentElement;
-    let tableDiv = container.querySelector('.chart-data-table-container');
-    
-    if (!tableDiv) {
-        tableDiv = document.createElement('div');
-        tableDiv.className = 'chart-data-table-container';
-        container.appendChild(tableDiv);
-    }
-    
-    let html = '<table class="chart-data-table">';
-    html += '<thead><tr><th>項目</th><th>値</th></tr></thead>';
-    html += '<tbody>';
-    
-    labels.forEach((label, idx) => {
-        const value = Array.isArray(data) ? data[idx] : data;
-        const formattedValue = typeof value === 'number' ? 
-            (value % 1 === 0 ? value.toLocaleString('ja-JP') : value.toFixed(2)) : 
-            value;
-        html += `<tr><td>${label}</td><td>${formattedValue}</td></tr>`;
-    });
-    
-    html += '</tbody></table>';
-    tableDiv.innerHTML = html;
-}
+// chart data tables under canvases were intentionally removed per user request
 
 function formatNumber(num) {
     if (num === undefined || num === null) return '-';

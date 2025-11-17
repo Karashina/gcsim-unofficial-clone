@@ -12,6 +12,26 @@
             box-sizing: border-box;
         }
         
+    /* CodeMirror GCSL token colors using theme variables */
+    .cm-s-default .cm-keyword { color: var(--primary-1); font-weight: 600; }
+    .cm-s-default .cm-comment { color: var(--muted); font-style: italic; }
+    .cm-s-default .cm-string { color: #9c6; }
+    .cm-s-default .cm-number { color: #f08; }
+    .cm-s-default .cm-variable { color: var(--text); }
+
+    /* Dark theme adjustments when using material theme (bright but no glow) */
+    [data-theme="dark"] .cm-s-material .cm-keyword { color: #00ffff; }
+    [data-theme="dark"] .cm-s-material .cm-comment { color: #c7d8de; }
+    [data-theme="dark"] .cm-s-material .cm-string { color: #bfff00; }
+    [data-theme="dark"] .cm-s-material .cm-number { color: #ff6aff; }
+    [data-theme="dark"] .cm-s-material .cm-variable { color: #ffffff; }
+    /* Also target generic CodeMirror token classes to ensure coverage */
+    [data-theme="dark"] .CodeMirror .cm-keyword { color: #00ffff; }
+    [data-theme="dark"] .CodeMirror .cm-string { color: #bfff00; }
+    [data-theme="dark"] .CodeMirror .cm-number { color: #ff6aff; }
+    [data-theme="dark"] .CodeMirror .cm-comment { color: #c7d8de; }
+    [data-theme="dark"] .CodeMirror .cm-variable { color: #ffffff; }
+
         :root {
             --primary-1: #ffc14d; /* user requested */
             --primary-2: #ffb347; /* replaced purple with orange variant */
@@ -27,21 +47,74 @@
             --disabled-bg: #ccc;
         }
 
-        [data-theme="dark"] {
-            --bg: #121212;
-            --card-bg: #1e1e2a;
-            --text: #e6e6e6;
-            --header-text: #000000; /* keep header text black over orange header */
-            --button-text: #000000;
-            --hover-bg: rgba(255,255,255,0.02);
-            --muted-border: rgba(255,255,255,0.06);
-            --chip-text: #000000;
-            --muted: #cfcfcf;
-            --disabled-bg: rgba(255,255,255,0.06);
+            [data-theme="dark"] {
+                /* brighter, bluish dark theme */
+                --bg: #0f2a36; /* darker bluish background but slightly brighter visually */
+                --card-bg: #213544; /* blue-gray cards */
+                --text: #eaf6ff; /* slight blue tint to text */
+                    --header-text: #0f2a36; /* text on yellow/orange backgrounds */
+                    --button-text: #0f2a36;
+                --hover-bg: rgba(234,246,255,0.04);
+                --muted-border: rgba(234,246,255,0.10);
+                --chip-text: #0f2a36;
+                --muted: #bcd3de; /* bluish muted */
+                --disabled-bg: rgba(234,246,255,0.06);
+            }
+
+        /* Ensure header text stands out on orange header in dark mode */
+        [data-theme="dark"] .header {
+            color: var(--header-text);
         }
 
+        /* Make info labels light in dark mode where needed */
+        [data-theme="dark"] .char-stats-list .info-label,
+        [data-theme="dark"] .chart-legend-title,
+        [data-theme="dark"] .chart-data-table th {
+            color: var(--muted);
+        }
+
+        /* Input & editor explicit dark-mode styling */
+        [data-theme="dark"] textarea#config-editor,
+        [data-theme="dark"] .CodeMirror {
+            background: var(--card-bg) !important;
+            color: var(--text) !important;
+            caret-color: var(--text) !important;
+            border: 1px solid var(--muted-border) !important;
+        }
+
+        /* Load UDEV Gothic supplied in webui/assets and apply globally. */
+        @font-face {
+            font-family: 'UDEV Gothic';
+            src: url('./assets/UDEVGothic_v2.1.0/UDEVGothic-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'UDEV Gothic';
+            src: url('./assets/UDEVGothic_v2.1.0/UDEVGothic-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'UDEV Gothic';
+            src: url('./assets/UDEVGothic_v2.1.0/UDEVGothic-Italic.ttf') format('truetype');
+            font-weight: 400;
+            font-style: italic;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'UDEV Gothic';
+            src: url('./assets/UDEVGothic_v2.1.0/UDEVGothic-BoldItalic.ttf') format('truetype');
+            font-weight: 700;
+            font-style: italic;
+            font-display: swap;
+        }
+
+        /* Apply font globally for UI. Keep monospace for code blocks and editor where specified below. */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans JP', sans-serif;
+            font-family: 'UDEV Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans JP', sans-serif;
             background-color: var(--bg);
             color: var(--text);
             line-height: 1.6;
@@ -82,6 +155,20 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
+
+        /* Chart container: reserve space and prevent layout jumps when tooltips render */
+        .chart-container {
+            position: relative;
+            min-height: 160px; /* default reserve */
+            overflow: hidden; /* prevent children from expanding layout */
+            padding: 12px;
+            background: transparent;
+        }
+        .chart-container canvas {
+            display: block;
+            width: 100% !important;
+            height: auto !important;
+        }
         
         .editor-container {
             background: var(--card-bg);
@@ -94,9 +181,10 @@
             width: 100%;
             min-height: 720px; /* taller editor */
             padding: 15px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--muted-border);
             border-radius: 4px;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            /* Apply UDEV Gothic to all text inputs as requested. Keep monospace as fallback. */
+            font-family: 'UDEV Gothic', 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 13px; /* slightly smaller */
             line-height: 1.9; /* slightly more vertical spacing */
             resize: vertical;
@@ -109,8 +197,9 @@
             width: 100%;
         }
         /* Make sure textarea and highlighted code share exact metrics */
+        /* Apply UDEV Gothic everywhere including highlighted pre/code blocks */
         textarea#config-editor, pre#config-highlight, pre#config-highlight code {
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-family: 'UDEV Gothic', 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 13px;
             line-height: 1.9;
             padding: 15px;
@@ -121,12 +210,14 @@
             height: 720px !important;
             font-size: 13px !important;
             line-height: 1.9 !important;
+            /* Use UDEV Gothic everywhere per request */
+            font-family: 'UDEV Gothic', 'Consolas', 'Monaco', 'Courier New', monospace !important;
         }
-        .CodeMirror pre { line-height: 1.9 !important; }
+        .CodeMirror pre { line-height: 1.9 !important; font-family: inherit !important; }
           /* NOTE: overlay highlighter can cause visual issues in some browsers.
               Hide it for now to ensure textarea is readable. Re-enable when
               overlay behavior is stable. */
-          #config-highlight {
+                    #config-highlight {
             position: absolute;
             top: 0;
             left: 0;
@@ -137,34 +228,44 @@
             pointer-events: none;
             white-space: pre-wrap;
             word-wrap: break-word;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-family: 'UDEV Gothic', 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 14px;
             line-height: 1.8;
             color: var(--text); /* default text color; token spans override this */
             z-index: 1;
             overflow: auto; 
-            background: var(--card-bg);
-            border: 1px solid #ddd;
+                        background: var(--card-bg);
+                        border: 1px solid var(--muted-border);
             border-radius: 4px;
         }
         /* hide pre scrollbar so only textarea scrollbar is visible */
         pre#config-highlight::-webkit-scrollbar { display: none; }
         pre#config-highlight { -ms-overflow-style: none; scrollbar-width: none; }
-    pre#config-highlight code { display: block; white-space: pre-wrap; word-wrap: break-word; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 14px; line-height: 1.8; color: var(--text); }
-        #config-highlight .gcsl-keyword { color: #c792ea; }
-        #config-highlight .gcsl-string { color: #c3e88d; }
-        #config-highlight .gcsl-number { color: #f78c6c; }
-        #config-highlight .gcsl-comment { color: var(--muted); font-style: italic; }
-        #config-highlight .gcsl-operator { color: var(--primary-1); }
+    pre#config-highlight code { display: block; white-space: pre-wrap; word-wrap: break-word; font-family: 'UDEV Gothic', 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 14px; line-height: 1.8; color: var(--text); }
+    #config-highlight .gcsl-keyword { color: #00ffff; font-weight: 700; }
+    #config-highlight .gcsl-string { color: #bfff00; }
+    #config-highlight .gcsl-number { color: #ff6aff; }
+    #config-highlight .gcsl-comment { color: var(--muted); font-style: italic; }
+    #config-highlight .gcsl-operator { color: var(--primary-1); }
         /* Keep caret visible in textarea */
     textarea#config-editor { background: var(--card-bg); color: var(--text); caret-color: var(--text); position: relative; z-index: 2; }
         
         /* GCSL Syntax Highlighting */
-        .gcsl-keyword { color: #c792ea; }
-    .gcsl-string { color: #c3e88d; }
-        .gcsl-number { color: #f78c6c; }
+        .gcsl-keyword { color: #00ffff; font-weight: 700; }
+    .gcsl-string { color: #bfff00; }
+        .gcsl-number { color: #ff6aff; }
     .gcsl-comment { color: var(--muted); font-style: italic; }
     .gcsl-operator { color: var(--primary-1); }
+
+        /* Ensure chart canvases fill their parent; JS will set visual height to preserve aspect ratio */
+        .chart-card, .chart-container {
+            width: 100%;
+        }
+        .chart-card canvas, .chart-container canvas, canvas.chart-canvas {
+            display: block;
+            width: 100%;
+            height: auto; /* allow JS-controlled height */
+        }
         
         .btn-run {
             background: linear-gradient(135deg, var(--primary-1) 0%, var(--primary-2) 100%);
@@ -274,43 +375,64 @@
         
         .char-stats-list .info-label {
             font-weight: 600;
-            color: #555;
+            color: var(--muted);
         }
         
         .char-stats-list .info-value {
-            color: #333;
+            color: var(--text);
             font-weight: 500;
         }
         
         .chart-container {
             background: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            padding: 6px; /* further reduced padding per request */
+            margin-bottom: 12px; /* increased spacing between stacked charts */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
             position: relative;
-            min-height: 400px;
+            min-height: 160px; /* sensible default reserve */
+            overflow: hidden; /* prevent children (tooltips, overlays) from expanding layout */
         }
         
+        /* Position canvas absolutely so Chart.js drawing or inline height changes
+           don't affect document flow and won't expand the parent container when
+           tooltips/overlays are drawn. JS will still set the canvas drawing buffer
+           via attributes; CSS keeps layout stable. */
         .chart-container canvas {
-            display: block;
-            width: 100% !important;
-            height: 350px !important;
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+            width: auto !important;
+            height: auto !important;
+            max-width: none !important;
+            max-height: none !important;
         }
         
         .chart-legend {
-            margin-top: 15px;
-            padding: 10px;
-            background: #f9f9f9;
+            margin-top: 6px;
+            padding: 6px;
+            background: var(--card-bg);
             border-radius: 4px;
             font-size: 0.85rem;
+            border: 1px solid var(--muted-border);
         }
-        
+
         .chart-legend-title {
             font-weight: 600;
             margin-bottom: 8px;
-            color: #333;
+            color: var(--text);
         }
+
+        /* Force Chart.js canvas text to use our UI font where possible */
+        canvas { font-family: 'UDEV Gothic', sans-serif; }
+
+
+    /* Reduce margin for chart titles to save vertical space */
+    .chart-container h6 { margin: 0; font-size: 0.95rem; padding: 4px 0; }
+    /* Make canvas sit flush with surrounding content */
+    .chart-container canvas { margin: 0; display: block; }
         
         .chart-legend-item {
             display: inline-flex;
@@ -328,7 +450,7 @@
         
         .chart-data-table {
             width: 100%;
-            margin-top: 15px;
+            margin-top: 8px;
             border-collapse: collapse;
             font-size: 0.85rem;
         }
@@ -341,13 +463,13 @@
         }
         
         .chart-data-table th {
-            background: #f5f5f5;
+            background: var(--card-bg);
             font-weight: 600;
-            color: #555;
+            color: var(--muted);
         }
         
         .chart-data-table tr:hover {
-            background: #f9f9f9;
+            background: var(--hover-bg);
         }
         
         .loading {
@@ -379,7 +501,7 @@
         /* Make info labels bolder for better readability */
         .info-label {
             font-weight: 700;
-            color: #444;
+            color: var(--text);
         }
 
         /* Compact character info: wrap each row in a subtle box */
@@ -422,7 +544,18 @@
         }
         
         canvas {
-            max-height: 400px;
+            /* allow charts to grow taller when JS sets explicit height */
+            max-height: none;
+        }
+
+        /* Ensure chart containers reserve vertical space and allow visible overflow
+           (JS will set explicit heights per chart based on bar count). */
+        .chart-container {
+            overflow: visible;
+        }
+
+        .chart-container canvas {
+            height: auto !important;
         }
         
         .tab-container {
@@ -544,10 +677,10 @@
     <div class="container-main">
         <div class="header">
             <h3 style="margin: 0;">
-                gcsim-uoc WebUI
+                gcsim-unofficial-clone WebUI
             </h3>
                 <div style="flex:1"></div>
-                <button id="theme-toggle" class="theme-toggle">Toggle Theme</button>
+                <button id="theme-toggle" class="theme-toggle">テーマ切替</button>
             </div>
             <!-- header subtitle removed per request -->
         </div>
@@ -616,10 +749,8 @@
             <div class="tab-container">
                 <div class="tabs-header">
                     <button class="tab-btn active" onclick="switchTab('characters')">キャラクター情報</button>
-                    <button class="tab-btn" onclick="switchTab('target-info')">ターゲット情報</button>
+                    <!-- Target info tab removed: target details are now shown under characters list -->
                     <button class="tab-btn" onclick="switchTab('dps-charts')">DPS分析</button>
-                    <button class="tab-btn" onclick="switchTab('distribution')">分布</button>
-                    <button class="tab-btn" onclick="switchTab('energy')">エネルギー</button>
                     <button class="tab-btn" onclick="switchTab('reactions')">元素反応</button>
                 </div>
             
@@ -630,50 +761,42 @@
                     </div>
                 </div>
                 
-                <div id="target-info" class="card tab-content">
-                    <div class="card-content">
-                        <span class="card-title">ターゲット情報</span>
-                        <div id="target-details"></div>
-                    </div>
-                </div>
+                <!-- target-info tab removed -->
                 
                 <div id="dps-charts" class="card tab-content">
                     <div class="card-content">
                         <span class="card-title">DPS分析</span>
+                        <!-- Stack all DPS-related charts vertically, full width -->
                         <div class="row">
-                            <div class="col s12 l6">
+                            <div class="col s12">
                                 <div class="chart-container">
                                     <h6>キャラクター別DPS</h6>
                                     <canvas id="char-dps-chart"></canvas>
                                 </div>
                             </div>
-                            <div class="col s12 l6">
+                        </div>
+                        <div class="row">
+                            <div class="col s12">
                                 <div class="chart-container">
                                     <h6>ソース別DPS</h6>
                                     <canvas id="source-dps-chart"></canvas>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <div id="distribution" class="card tab-content">
-                    <div class="card-content">
-                        <span class="card-title">ダメージ分布</span>
-                        <div class="chart-container">
-                            <canvas id="damage-dist-chart"></canvas>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="chart-container">
+                                    <h6>ダメージ分布</h6>
+                                    <canvas id="damage-dist-chart"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div id="energy" class="card tab-content">
-                    <div class="card-content">
-                        <span class="card-title">エネルギー情報</span>
-                        <div class="chart-container">
-                            <canvas id="energy-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
+                <!-- distribution tab removed; its chart merged into DPS analysis -->
+                
+                <!-- Energy tab removed per user request -->
                 
                 <div id="reactions" class="card tab-content">
                     <div class="card-content">
@@ -698,90 +821,8 @@
         </div>
     </div>
     
-    <!-- Chart.js -->
-    <script>
-    // Minimal Chart.js implementation - simplified for basic charts
-    class Chart {
-        constructor(ctx, config) {
-            this.canvas = ctx.canvas || ctx;
-            this.config = config;
-            this.draw();
-        }
-        
-        draw() {
-            const ctx = this.canvas.getContext('2d');
-            const width = this.canvas.width = this.canvas.offsetWidth;
-            const height = this.canvas.height = 300;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            const data = this.config.data;
-            const labels = data.labels || [];
-            const values = data.datasets[0]?.data || [];
-            
-            if (values.length === 0) return;
-            
-            const maxValue = Math.max(...values) * 1.1;
-            const padding = 40;
-            const chartWidth = width - padding * 2;
-            const chartHeight = height - padding * 2;
-            
-            // Draw axes
-            const __computed = getComputedStyle(document.documentElement);
-            const __borderColor = __computed.getPropertyValue('--muted-border') || '#ccc';
-            const __textColor = __computed.getPropertyValue('--text') || '#222';
-            ctx.strokeStyle = __borderColor;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding, height - padding);
-            ctx.lineTo(width - padding, height - padding);
-            ctx.stroke();
-            
-            if (this.config.type === 'bar') {
-                const barWidth = chartWidth / values.length * 0.8;
-                const spacing = chartWidth / values.length;
-                
-                const paletteColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-2') || '#ffb347';
-                values.forEach((value, i) => {
-                    const barHeight = (value / maxValue) * chartHeight;
-                    const x = padding + i * spacing + spacing * 0.1;
-                    const y = height - padding - barHeight;
-                    
-                    ctx.fillStyle = data.datasets[0].backgroundColor || paletteColor;
-                    ctx.fillRect(x, y, barWidth, barHeight);
-                    
-                    // Label
-                    ctx.fillStyle = __textColor;
-                    ctx.font = '11px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(labels[i], x + barWidth / 2, height - padding + 15);
-                });
-            } else if (this.config.type === 'line') {
-                ctx.beginPath();
-                ctx.strokeStyle = data.datasets[0].borderColor || paletteColor;
-                ctx.lineWidth = 2;
-                
-                values.forEach((value, i) => {
-                    const x = padding + (i / (values.length - 1)) * chartWidth;
-                    const y = height - padding - (value / maxValue) * chartHeight;
-                    
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                });
-                ctx.stroke();
-            }
-        }
-        
-        destroy() {
-            const ctx = this.canvas.getContext('2d');
-            ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        }
-    }
-    </script>
+    <!-- Load Chart.js from CDN so full features (stacking, per-dataset colors) are available -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <!-- CodeMirror (simple integration) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
