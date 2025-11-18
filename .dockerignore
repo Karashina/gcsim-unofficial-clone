@@ -1,0 +1,23 @@
+# Ignore Go build outputs
+**/bin/
+**/out/
+**/*.exe
+**/*.test
+
+# Ignore node_modules or other local artifacts
+node_modules
+
+# Git
+.git
+.gitignore
+
+# Editor directories
+.vscode
+.idea
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated mapping file - build will produce it inside image if needed
+webui/jp_mappings.generated.js

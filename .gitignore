@@ -41,3 +41,6 @@ gcsim-cli
 # WebUI logs
 webui.log
 *.log
+
+# Docker things
+*docker*

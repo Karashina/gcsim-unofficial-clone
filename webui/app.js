@@ -43,6 +43,405 @@ function ctxRawValue(context) {
     return context.raw || 0;
 }
 
+// --- Localization maps (from cmd/gcsim CSVs) ---------------------------------
+// character name map: english key -> Japanese display name
+// Build CHAR_TO_JP from authoritative CSV: cmd/gcsim/chatracterData/charactertoJP.csv
+const CHAR_TO_JP = {
+    "aino": "アイノ",
+    "aloy": "アーロイ",
+    "itto": "荒瀧一斗",
+    "alhaitham": "アルハイゼン",
+    "albedo": "アルベド",
+    "arlecchino": "アルレッキーノ",
+    "amber": "アンバー",
+    "iansan": "イアンサ",
+    "yelan": "夜蘭",
+    "ineffa": "イネファ",
+    "ifa": "イファ",
+    "varesa": "ヴァレサ",
+    "venti": "ウェンティ",
+    "yunjin": "雲菫",
+    "eula": "エウルア",
+    "escoffier": "エスコフィエ",
+    "emilie": "エミリエ",
+    "yanfei": "煙緋",
+    "ororon": "オロルン",
+    "kaveh": "カーヴェ",
+    "kaeya": "ガイア",
+    "kazuha": "楓原万葉",
+    "kachina": "カチーナ",
+    "ayaka": "神里綾華",
+    "ayato": "神里綾人",
+    "gaming": "嘉明",
+    "ganyu": "甘雨",
+    "xianyun": "閑雲",
+    "kinich": "キィニチ",
+    "candace": "キャンディス",
+    "ningguang": "凝光",
+    "kirara": "綺良々",
+    "kuki": "久岐忍",
+    "sara": "九条裟羅",
+    "klee": "クレー",
+    "clorinde": "クロリンデ",
+    "keqing": "刻晴",
+    "collei": "コレイ",
+    "gorou": "ゴロー",
+    "sayu": "早柚",
+    "kokomi": "珊瑚宮心海",
+    "heizou": "鹿野院平蔵",
+    "sigewinne": "シグウィン",
+    "citlali": "シトラリ",
+    "charlotte": "シャルロット",
+    "xiangling": "香菱",
+    "chevreuse": "シュヴルーズ",
+    "xiao": "魈",
+    "zhongli": "鍾離",
+    "xilonen": "シロネン",
+    "jean": "ジン",
+    "xinyan": "辛炎",
+    "shenhe": "申鶴",
+    "skirk": "スカーク",
+    "sucrose": "スクロース",
+    "sethos": "セトス",
+    "cyno": "セノ",
+    "dahlia": "ダリア",
+    "tartaglia": "タルタリヤ",
+    "chiori": "千織",
+    "chasca": "チャスカ",
+    "chongyun": "重雲",
+    "diona": "ディオナ",
+    "dehya": "ディシア",
+    "tighnari": "ティナリ",
+    "diluc": "ディルック",
+    "thoma": "トーマ",
+    "dori": "ドリー",
+    "qiqi": "七七",
+    "navia": "ナヴィア",
+    "nahida": "ナヒーダ",
+    "nefer" : "ネフェル",
+    "nilou": "ニィロウ",
+    "neuvillette": "ヌヴィレット",
+    "noelle": "ノエル",
+    "barbara": "バーバラ",
+    "baizhu": "白朮",
+    "faruzan": "ファルザン",
+    "fischl": "フィッシュル",
+    "hutao": "胡桃",
+    "furina": "フリーナ",
+    "flins": "フリンズ",
+    "freminet": "フレミネ",
+    "bennett": "ベネット",
+    "wanderer": "放浪者",
+    "beidou": "北斗",
+    "mavuika": "マーヴィカ",
+    "mika": "ミカ",
+    "mualani": "ムアラニ",
+    "mona": "モナ",
+    "yaemiko": "八重神子",
+    "xingqiu": "行秋",
+    "yumemizukimizuki": "夢見月瑞希",
+    "mizuki": "夢見月瑞希",
+    "yoimiya": "宵宮",
+    "yaoyao": "ヨォーヨ",
+    "raiden": "雷電将軍",
+    "lauma": "ラウマ",
+    "lanyan": "藍硯",
+    "wriothesley": "リオセスリ",
+    "lisa": "リサ",
+    "lyney": "リネ",
+    "lynette": "リネット",
+    "layla": "レイラ",
+    "razor": "レザー",
+    "rosaria": "ロサリア",
+    "lumineanemo": "蛍(風)",
+    "luminegeo": "蛍(岩)",
+    "lumineelectro": "蛍(雷)",
+    "luminedendro": "蛍(草)",
+    "luminehydro": "蛍(水)",
+    "luminepyro": "蛍(炎)",
+    "luminecryo": "蛍(氷)",
+    "aethergeo": "空(岩)",
+    "aetherelectro": "空(雷)",
+    "aetherdendro": "空(草)",
+    "aetherhydro": "空(水)",
+    "aetherpyro": "空(炎)",
+    "aethercryo": "空(氷)"
+};
+
+// weapon name map: weapon key -> Japanese name (subset loaded from csv)
+const WEAPON_TO_JP = {
+    "mistsplitterreforged": "霧切の廻光",
+    "aquilafavonia": "風鷹剣",
+    "summitshaper": "斬山の刃",
+    "skywardblade": "天空の刃",
+    "freedomsworn": "蒼古なる自由への誓い",
+    "primordialjadecutter": "磐岩結緑",
+    "harangeppakufutsu": "波乱月白経津",
+    "keyofkhajnisut": "聖顕の鍵",
+    "lightoffoliarincision": "萃光の裁葉",
+    "splendoroftranquilwaters": "静水流転の輝き",
+    "uraku": "有楽御簾切",
+    "absolution": "赦罪",
+    "peakpatrolsong": "岩峰を巡る歌",
+    "theflute": "笛の剣",
+    "theblacksword": "黒剣",
+    "thealleyflash": "ダークアレイの閃光",
+    "swordofdescension": "降臨の剣",
+    "sacrificialsword": "祭礼の剣",
+    "royallongsword": "旧貴族長剣",
+    "prototyperancour": "斬岩・試作",
+    "amenomakageuchi": "天目影打",
+    "lionsroar": "匣中龍吟",
+    "ironsting": "鉄蜂の刺し",
+    "festeringdesire": "腐植の剣",
+    "favoniussword": "西風剣",
+    "cinnabarspindle": "シナバースピンドル",
+    "blackclifflongsword": "黒岩の長剣",
+    "sapwoodblade": "原木刀",
+    "xiphosmoonlight": "サイフォスの月明かり",
+    "kagotsurubeisshin": "籠釣瓶一心",
+    "wolffang": "狼牙",
+    "finaleofthedeep": "海淵のフィナーレ",
+    "moonweaversdawn": "月紡ぎの曙光",
+    "harbingerofdawn": "黎明の神剣",
+    "darkironsword": "暗鉄剣",
+    "travelershandysword": "旅道の剣",
+    "fluteofezpitzal": "エズピツァルの笛",
+    "calamityofeshu": "厄水の災い",
+    "serenityscall": "静謐の笛",
+    "filletblade": "チ虎魚の刀",
+    "skyridersword": "飛天御剣",
+    "coolsteel": "冷刃",
+    "toukaboushigure": "東花坊時雨",
+    "fleuvecendreferryman": "サーンドルの渡し守",
+    "dockhand": "船渠剣",
+
+    // -- bows (weaponData/bow.csv) --
+    "polarstar": "冬極の白星",
+    "thunderingpulse": "飛雷の鳴弦",
+    "elegyfortheend": "終焉を嘆く詩",
+    "skywardharp": "天空の翼",
+    "amosbow": "アモスの弓",
+    "hunterspath": "狩人の道",
+    "aquasimulacra": "若水",
+    "thefirstgreatmagic": "始まりの大魔術",
+    "heartstrings": "白雨心弦",
+    "astralvulturescrimsonplumage": "星鷲の紅き羽",
+    "alleyhunter": "ダークアレイの狩人",
+    "theviridescenthunt": "蒼翠の狩猟弓",
+    "thestringless": "絶弦",
+    "sacrificialbow": "祭礼の弓",
+    "rust": "弓蔵",
+    "royalbow": "旧貴族長弓",
+    "prototypecrescent": "澹月・試作",
+    "predator": "プレデター",
+    "mouunsmoon": "曚雲の月",
+    "mitternachtswaltz": "幽夜のワルツ",
+    "hamayumi": "破魔の弓",
+    "favoniuswarbow": "西風猟弓",
+    "compoundbow": "リングボウ",
+    "blackcliffwarbow": "黒岩の戦弓",
+    "windblumeode": "風花の頌歌",
+    "endoftheline": "竭沢",
+    "fadingtwilight": "落霞",
+    "kingssquire": "王の近侍",
+    "ibispiercer": "トキの嘴",
+    "scionoftheblazingsun": "烈日の後嗣",
+    "songofstillness": "静寂の唄",
+    "cloudforged": "築雲",
+    "chainbreaker": "チェーンブレイカー",
+    "flowerwreathedfeathers": "花飾りの羽",
+    "snarehook": "羅網の針",
+    "ravenbow": "鴉羽の弓",
+    "recurvebow": "リカーブボウ",
+    "messenger": "文使い",
+    "sharpshootersoath": "シャープシューターの誓い",
+    "slingshot": "弾弓",
+
+    // -- polearms (weaponData/polearm.csv) --
+    "engulfinglightning": "草薙の稲光",
+    "skywardspine": "天空の脊",
+    "pjws": "和璞鳶",
+    "calamityqueller": "息災",
+    "staffofhoma": "護摩の杖",
+    "vortexvanquisher": "破天の槍",
+    "staffofthescarletsands": "赤砂の杖",
+    "crimsonmoonssemblance": "赤月のシルエット",
+    "lumidouceelegy": "ルミドゥースの挽歌",
+    "fracturedhalo": "砕け散る光輪",
+    "bloodsoakedruins": "血染めの荒れ地",
+    "prototypestarglitter": "星鎌・試作",
+    "lithicspear": "千岩長槍",
+    "kitaincrossspear": "喜多院十文字槍",
+    "thecatch": "「漁獲」",
+    "favoniuslance": "西風長槍",
+    "dragonspinespear": "ドラゴンスピア",
+    "dragonsbane": "匣中滅龍",
+    "deathmatch": "死闘の槍",
+    "crescentpike": "流月の針",
+    "blackcliffpole": "黒岩の突槍",
+    "wavebreakersfin": "斬波のひれ長",
+    "royalspear": "旧貴族猟槍",
+    "moonpiercer": "ムーンピアサー",
+    "missivewindspear": "風信の矛",
+    "balladofthefjords": "フィヨルドの歌",
+    "rightfulreward": "正義の報酬",
+    "dialogues": "砂中の賢者達の問答",
+    "footprintoftherainbow": "虹の行方",
+    "tamayuratei": "玉響停の御噺",
+    "prospectorsshovel": "金掘りのシャベル",
+    "halberd": "鉾槍",
+    "blacktassel": "黒纓槍",
+    "whitetassel": "白纓槍",
+
+    // -- claymores (weaponData/claymore.csv) --
+    "wolfsgravestone": "狼の末路",
+    "redhornstonethresher": "赤角石塵滅砕",
+    "theunforged": "無工の剣",
+    "songofbrokenpines": "松韻の響く頃",
+    "skywardpride": "天空の傲",
+    "beaconofthereedsea": "葦海の標",
+    "verdict": "裁断",
+    "fangofthemountainking": "山の王の長牙",
+    "athousandblazingsuns": "千烈の日輪",
+    "whiteblind": "白影の剣",
+    "thebell": "鐘の剣",
+    "snowtombedstarsilver": "雪葬の星銀",
+    "serpentspine": "螭龍の剣",
+    "sacrificialgreatsword": "祭礼の大剣",
+    "blackcliffslasher": "黒岩の斬刀",
+    "akuoumaru": "惡王丸",
+    "rainslasher": "雨裁",
+    "prototypearchaic": "古華・試作",
+    "luxurioussealord": "銜玉の海皇",
+    "lithicblade": "千岩古剣",
+    "katsuragikirinagamasa": "桂木斬長正",
+    "favoniusgreatsword": "西風大剣",
+    "royalgreatsword": "旧貴族大剣",
+    "forestregalia": "深林のレガリア",
+    "makhairaaquamarine": "マカイラの水色",
+    "mailedflower": "鉄彩の花",
+    "talkingstick": "話死合い棒",
+    "tidalshadow": "タイダル・シャドー",
+    "portablepowersaw": "携帯型チェーンソー",
+    "ultimateoverlordsmegamagicsword": "「スーパーアルティメット覇王魔剣」",
+    "earthshaker": "アースシェイカー",
+    "flameforgedinsight": "知恵の溶炎",
+    "masterkey": "万能の鍵",
+    "skyridergreatsword": "飛天大御剣",
+    "ferrousshadow": "鉄影段平",
+    "debateclub": "理屈責め",
+    "whiteirongreatsword": "白鉄の大剣",
+     "bloodtaintedgreatsword": "龍血を浴びた剣",
+     // -- catalyst (weaponData/catalyst.csv) --
+     "memoryofdust": "浮世の錠",
+     "everlastingmoonglow": "不滅の月華",
+     "skywardatlas": "天空の巻",
+     "kagurasverity": "神楽の真意",
+     "lostprayertothesacredwinds": "四風原典",
+     "athousandfloatingdreams": "千夜に浮かぶ夢",
+     "tulaytullahsremembrance": "トゥライトゥーラの記憶",
+     "eternalflow": "久遠流転の大典",
+     "jadefallssplendor": "碧落の瓏",
+     "cashflowsupervision": "凛流の監視者",
+     "cranesechoingcall": "鶴鳴の余韻",
+     "surfsup": "サーフィンタイム",
+     "starcallerswatch": "祭星者の眺め",
+     "sunnymorningsleepin": "寝正月の初晴",
+     "nightweaverslookingglass": "夜を紡ぐ天鏡",
+     "blackcliffagate": "黒岩の緋玉",
+     "thewidsith": "流浪楽章",
+     "solarpearl": "匣中日月",
+     "sacrificialfragments": "祭礼の断片",
+     "royalgrimoire": "旧貴族秘法録",
+     "prototypeamber": "金珀・試作",
+     "oathsworneye": "誓いの明瞳",
+     "wineandsong": "ダークアレイの酒と詩",
+     "mappamare": "万国諸海の図譜",
+     "hakushinring": "白辰の輪",
+     "frostbearer": "冬忍びの実",
+     "favoniuscodex": "西風秘典",
+     "eyeofperception": "昭心",
+     "dodocotales": "ドドコの物語",
+     "fruitoffulfillment": "満悦の実",
+     "wanderingevenstar": "彷徨える星",
+     "sacrificialjade": "古祠の瓏",
+     "flowingpurity": "純水流華",
+     "ringofyaxche": "ヤシュチェの環",
+     "ashgravendrinkinghorn": "蒼紋の角杯",
+     "waveridingwhirl": "波乗りの旋回",
+     "blackmarrowlantern": "烏髄の孤灯",
+     "etherlightspindlelute": "天光のリュート",
+     "magicguide": "魔導緒論",
+     "otherworldlystory": "異世界旅行記",
+     "emeraldorb": "翡玉法珠",
+     "thrillingtalesofdragonslayers": "龍殺しの英傑譚",
+     "twinnephrite": "特級の宝玉"
+ };
+
+// artifact name map (artifact set key -> Japanese name)
+const ARTIFACT_TO_JP = {
+    "maidenbeloved": "愛される少女",
+    "songofdayspast": "在りし日の歌",
+    "oceanhuedclam": "海染硨磲",
+    "goldentroupe": "黄金の劇団",
+    "scrolloftheheroofcindercity": "灰燼の都に立つ英雄の絵巻",
+    "fragmentofharmonicwhimsy": "諧律奇想の断章",
+    "vourukashasglow": "花海甘露の光",
+    "huskofopulentdreams": "華館夢醒形骸記",
+    "thunderingfury": "雷のような怒り",
+    "thundersoother": "雷を鎮める尊者",
+    "noblesseoblige": "旧貴族のしつけ",
+    "instructor": "教官",
+    "gildeddreams": "金メッキの夢",
+    "gladiatorsfinale": "剣闘士のフィナーレ",
+    "obsidiancodex": "黒曜の秘典",
+    "retracingbolide": "逆飛びの流星",
+    "desertpavilionchronicle": "砂上の楼閣の史話",
+    "nighttimewhispersintheechoingwoods": "残響の森で囁かれる夜話",
+    "vermillionhereafter": "辰砂往生録",
+    "deepwoodmemories": "深林の記憶",
+    "finaleofthedeepgalleries": "深廊の終曲",
+    "nymphsdream": "水仙の夢",
+    "viridescentvenerer": "翠緑の影",
+    "emblemofseveredfate": "絶縁の旗印",
+    "tenacityofthemillelith": "千岩牢固",
+    "paleflame": "蒼白の炎",
+    "wandererstroupe": "大地を流浪する楽団",
+    "bloodstainedchivalry": "血染めの騎士道",
+    "heartofdepth": "沈淪の心",
+    "shimenawasreminiscence": "追憶のしめ縄",
+    "silkenmoonsserenade": "月を紡ぐ夜の歌",
+    "nightoftheskysunveiling": "天穹の顕現せし夜",
+    "unfinishedreverie": "遂げられなかった想い",
+    "longnightsoath": "長き夜の誓い",
+    "blizzardstrayer": "氷風を彷徨う勇士",
+    "marechausseehunter": "ファントムハンター",
+    "theexile": "亡命者",
+    "crimsonwitchofflames": "燃え盛る炎の魔女",
+    "archaicpetra": "悠久の磐岩",
+    "echoesofanoffering": "来歆の余響",
+    "flowerofparadiselost": "楽園の絶花",
+    "lavawalker": "烈火を渡る賢者"
+};
+
+function toJPCharacter(key) {
+    if (!key) return key;
+    return CHAR_TO_JP[key] || key;
+}
+
+function toJPWeapon(key) {
+    if (!key) return key;
+    return WEAPON_TO_JP[key] || key;
+}
+
+function toJPArtifact(key) {
+    if (!key) return key;
+    return ARTIFACT_TO_JP[key] || key;
+}
+
+// -----------------------------------------------------------------------------
+
 // Helper: set canvas drawing buffer and reserve parent height to avoid layout shifts
 function setCanvasVisualSize(ctx, desiredHeightPx, minWidth = 300) {
     try {
@@ -54,11 +453,122 @@ function setCanvasVisualSize(ctx, desiredHeightPx, minWidth = 300) {
         const rect = parent && parent.getBoundingClientRect ? parent.getBoundingClientRect() : canvas.getBoundingClientRect();
         const visualWidth = rect && rect.width ? Math.max(minWidth, Math.floor(rect.width)) : Math.max(minWidth, Math.floor(canvas.offsetWidth || 600));
         const heightPx = Math.max(120, Math.floor(desiredHeightPx || 140));
-        try { if (parent) parent.style.setProperty('min-height', heightPx + 'px', 'important'); } catch (e) {}
+        // Cap visual height to a sensible absolute maximum to avoid runaway sizes
+        const viewportH = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+        const absoluteMax = Math.max(800, Math.floor(viewportH * 2.5)); // allow tall charts but bounded
+        const cappedHeight = Math.min(heightPx, absoluteMax);
+        try { if (parent) parent.style.setProperty('min-height', cappedHeight + 'px', 'important'); } catch (e) {}
         canvas.width = Math.floor(visualWidth * dpr);
-        canvas.height = Math.floor(heightPx * dpr);
-        ensureContainerHeight(ctx, heightPx);
+        canvas.height = Math.floor(cappedHeight * dpr);
+        // Store the intended visual height (capped) on the canvas element to avoid measuring
+        // live layout which can cause circular sizing increases.
+        try { canvas.dataset.visualHeight = String(cappedHeight); } catch (e) {}
+        try { ensureContainerHeight(ctx, cappedHeight); } catch(e) {}
+        // Try to set an initial top inset immediately to avoid canvas appearing at top of container
+        try {
+            // setCanvasTopInset is safe to call; it will measure any title/legend already present
+            setCanvasTopInset(canvas);
+        } catch(e) {}
+        // Hide the canvas until insets and parent heights are applied to avoid a brief overlay flicker
+        try { canvas.style.visibility = 'hidden'; canvas.dataset.needUnhide = '1'; } catch(e) {}
     } catch (e) { /* ignore sizing errors */ }
+}
+
+// Measure title/legend area inside a chart container and set canvas.style.top so
+// the canvas doesn't overlap the title/legend. Leaves a small padding gap.
+function setCanvasTopInset(canvas) {
+    if (!canvas || !canvas.parentElement) return;
+    const container = canvas.parentElement;
+    // measure any title/legend/table height inside container
+    let height = 0;
+    const title = container.querySelector('h6');
+    const legend = container.querySelector('.chart-legend');
+    const table = container.querySelector('.chart-data-table');
+    [title, legend, table].forEach(el => {
+        if (el && el.getBoundingClientRect) {
+            const rect = el.getBoundingClientRect();
+            if (rect && rect.height) height += Math.ceil(rect.height);
+        }
+    });
+    // add small padding
+    const padding = 12;
+    let top = Math.max(8, height + padding);
+    // Cap top inset to avoid excessive offset (use a fraction of viewport)
+    const vp = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+    const topCap = Math.max(48, Math.floor(vp * 0.25));
+    if (top > topCap) top = topCap;
+    try { canvas.style.top = top + 'px'; } catch (e) { /* ignore */ }
+    return top;
+}
+
+function adjustAllChartInsets() {
+    try {
+        document.querySelectorAll('.chart-container canvas').forEach(c => {
+            const top = setCanvasTopInset(c) || 0;
+            try {
+                // compute visual canvas height (device-independent pixels)
+                const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+                // Prefer the visual height stored by setCanvasVisualSize to avoid reading
+                // live layout which may reflect transient values.
+                const stored = c.dataset && c.dataset.visualHeight ? parseFloat(c.dataset.visualHeight) : NaN;
+                let visualCanvasH = 0;
+                if (!Number.isNaN(stored) && stored > 0) {
+                    visualCanvasH = Math.round(stored);
+                } else {
+                    const bufHeight = c.height || parseFloat(c.getAttribute('height')) || 0; // actual drawing buffer height
+                    visualCanvasH = bufHeight ? Math.round(bufHeight / dpr) : Math.ceil((c.getBoundingClientRect && c.getBoundingClientRect().height) || 0);
+                }
+                // bottom inset from CSS (fallback to 6px)
+                const cs = window.getComputedStyle ? window.getComputedStyle(c) : null;
+                const bottomInset = cs ? (parseFloat(cs.bottom) || 6) : 6;
+                const required = Math.max(120, Math.ceil(top + visualCanvasH + bottomInset + 2));
+                // Prevent exploding required values by capping to an absolute maximum
+                const viewportH = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+                const absoluteMax = Math.max(1000, Math.floor(viewportH * 3));
+                const finalRequired = Math.min(required, absoluteMax);
+                const parent = c.parentElement;
+                if (parent) {
+                    try {
+                        // Read existing min-height (inline style first, fallback to computed)
+                        const existingInline = parent.style && parent.style.minHeight ? parseFloat(parent.style.minHeight) : NaN;
+                        const computed = window.getComputedStyle ? parseFloat(window.getComputedStyle(parent).minHeight) : NaN;
+                        const existing = (!Number.isNaN(existingInline) && existingInline > 0) ? existingInline : (Number.isNaN(computed) ? 0 : computed);
+                        // Only increase min-height; cap per-step increase to avoid big jumps
+                        const maxStep = Math.max(200, Math.floor(existing * 0.5)); // at most +50% or +200px
+                        let newHeight = finalRequired;
+                        if (finalRequired > existing && finalRequired - existing > maxStep) {
+                            newHeight = existing + maxStep;
+                        }
+                        if (newHeight > existing) parent.style.setProperty('min-height', Math.ceil(newHeight) + 'px', 'important');
+                    } catch (e) { /* ignore */ }
+                }
+                // ensure ancestor .col also reserves height (only increase)
+                let el = parent; let depth = 0;
+                while (el && depth < 4) {
+                    if (el.classList && el.classList.contains('col')) {
+                        try {
+                            const existingInline = el.style && el.style.minHeight ? parseFloat(el.style.minHeight) : NaN;
+                            const computed = window.getComputedStyle ? parseFloat(window.getComputedStyle(el).minHeight) : NaN;
+                            const existing = (!Number.isNaN(existingInline) && existingInline > 0) ? existingInline : (Number.isNaN(computed) ? 0 : computed);
+                            if (required > existing) el.style.setProperty('min-height', required + 'px', 'important');
+                        } catch(e) { /* ignore */ }
+                        break;
+                    }
+                    el = el.parentElement; depth++;
+                }
+                    // If this canvas was hidden pending inset application, unhide it now
+                    try {
+                        if (c && c.dataset && c.dataset.needUnhide) {
+                            c.style.visibility = 'visible';
+                            delete c.dataset.needUnhide;
+                        } else if (c && (!c.dataset || !c.dataset.needUnhide)) {
+                            // If canvas was hidden via CSS initial state, make it visible now that layout is stable
+                            c.style.visibility = 'visible';
+                        }
+                    } catch(e) { /* ignore */ }
+            } catch (e) { /* ignore per-chart errors */ }
+        });
+    } catch (e) { /* ignore */ }
 }
 
 // Format numeric values for tooltips consistently. If value is integral, show integer; otherwise fixed decimals.
@@ -150,6 +660,18 @@ try {
 } catch (e) {
     // no-op if Chart not yet loaded; display code that will run once Chart is available
 }
+
+// If Chart is available, register a small plugin that triggers inset adjustment after rendering
+try {
+    if (typeof Chart !== 'undefined' && typeof Chart.register === 'function') {
+        Chart.register({
+            id: 'gcsim-adjust-inset',
+            afterRender: function(chart) {
+                try { if (typeof adjustAllChartInsets === 'function') adjustAllChartInsets(); } catch(e) {}
+            }
+        });
+    }
+} catch (e) { /* ignore if Chart isn't loaded yet */ }
 
 // Register a minimal CodeMirror mode for GCSL if CodeMirror is available.
 // This mode highlights comments, strings, numbers, keywords and identifiers.
@@ -439,6 +961,17 @@ for let i=0; i<4; i=i+1 {
     updateHighlight();
 });
 
+// Global flag to disable initial Chart.js animations to avoid layout shifts on first render
+const DISABLE_INITIAL_CHART_ANIMATION = true;
+try {
+    if (typeof Chart !== 'undefined' && Chart.defaults && Chart.defaults.plugins) {
+        if (DISABLE_INITIAL_CHART_ANIMATION) {
+            // Turn off animation for initial draw; keep hover/tooltip animations
+            Chart.defaults.animation = false;
+        }
+    }
+} catch(e) { /* ignore if Chart not present */ }
+
 function switchTab(tabId) {
     // Hide all tab contents
     document.querySelectorAll('.tab-content').forEach(content => {
@@ -537,7 +1070,8 @@ function handleError(error) {
 function displayResults(result) {
     debugLog('[WebUI] Displaying results...');
     const resultsContainer = document.getElementById('results-container');
-    resultsContainer.style.display = 'block';
+    // Keep results hidden until layout (charts/insets) is applied to avoid brief overlap
+    // We'll make it visible after charts are created and insets reserved.
     
     // Display statistics
     displayStatistics(result);
@@ -548,13 +1082,17 @@ function displayResults(result) {
     // Display target information
     displayTargetInfo(result);
     
-    // Display charts
+    // Display charts (this will set canvas sizes and schedule insets)
     displayCharts(result);
-    
-    debugLog('[WebUI] Results displayed successfully');
-    
-    // Scroll to results
-    resultsContainer.scrollIntoView({ behavior: 'smooth' });
+
+    // After charts are created and insets applied, make the results visible.
+    // Use a short timeout to allow Chart.js to run initial layout and our inset adjustments.
+    setTimeout(() => {
+        try { if (typeof adjustAllChartInsets === 'function') adjustAllChartInsets(); } catch(e) {}
+        try { resultsContainer.style.display = 'block'; resultsContainer.classList.add('visible'); } catch(e) {}
+        try { resultsContainer.scrollIntoView({ behavior: 'smooth' }); } catch(e) {}
+        debugLog('[WebUI] Results displayed successfully (post-layout)');
+    }, 80);
 }
 
 function displayStatistics(result) {
@@ -604,15 +1142,17 @@ function displayCharacters(result) {
     result.character_details.forEach((char, idx) => {
         console.log(`[WebUI] Character ${idx} keys:`, Object.keys(char));
         console.log(`[WebUI] Character ${idx} data:`, JSON.stringify(char, null, 2));
-        
+
         const charDiv = document.createElement('div');
         charDiv.className = 'char-card';
-        
-        const name = char.name || 'Unknown';
+
+        const rawName = char.name || 'Unknown';
+        const name = toJPCharacter(rawName);
         const level = char.level || 1;
         const maxLevel = char.max_level || 90;
         const constellation = char.cons || 0;
         const weapon = char.weapon?.name || 'Unknown';
+        const weaponJP = toJPWeapon(weapon);
         const weaponLevel = char.weapon?.level || 1;
         const weaponMaxLevel = char.weapon?.max_level || 90;
         const weaponRefine = char.weapon?.refine || 1;
@@ -628,7 +1168,7 @@ function displayCharacters(result) {
         let setsHTML = '';
         if (char.sets && Object.keys(char.sets).length > 0) {
             const setsList = Object.entries(char.sets).map(([set, count]) => 
-                `<span class="chip">${set} (${count})</span>`
+                `<span class="chip">${toJPArtifact(set)} (${count})<div class="small-en">${set}</div></span>`
             ).join(' ');
             setsHTML = `<div style="margin: 6px 0; font-size: 0.85rem;"><strong>聖遺物:</strong> ${setsList}</div>`;
         }
@@ -674,7 +1214,7 @@ function displayCharacters(result) {
         }
         
         charDiv.innerHTML = `
-            <div class="char-name">${name}</div>
+            <div class="char-name">${name} <span class="char-en">${rawName}</span></div>
             <div class="char-info-compact">
                 <div class="info-row">
                     <span class="info-label">Lv.</span>
@@ -690,7 +1230,7 @@ function displayCharacters(result) {
                 </div>
                 <div class="info-row">
                     <span class="info-label">武器</span>
-                    <span class="info-value">${weapon} Lv.${weaponLevel}/${weaponMaxLevel} (R${weaponRefine})</span>
+                    <span class="info-value">${weaponJP} Lv.${weaponLevel}/${weaponMaxLevel} (R${weaponRefine})<div class="small-en">${weapon}</div></span>
                 </div>
             </div>
             ${setsHTML}
@@ -726,40 +1266,50 @@ function displayTargetInfo(result) {
         container.innerHTML = '<p>ターゲット情報がありません</p>';
         return;
     }
-    
+
+    // Render as requested: plain label 'ターゲット情報:' and for each target a compact block
+    const header = document.createElement('div');
+    header.className = 'card';
+    header.style.padding = '8px';
+    header.style.marginBottom = '8px';
+    header.innerHTML = `<div style="font-weight:700;">ターゲット情報:</div>`;
+    container.appendChild(header);
+
+    // helper to remove ~~strike~~ tokens and their contents
+    function stripStrikeTokens(s) {
+        if (!s) return s;
+        // remove all occurrences of ~~...~~ (non-greedy)
+        return s.replace(/~~.*?~~/g, '').trim();
+    }
+
     result.target_details.forEach((target, idx) => {
         const targetDiv = document.createElement('div');
         targetDiv.className = 'char-card';
-        
-        const name = target.name || `ターゲット ${idx + 1}`;
+        targetDiv.style.display = 'block';
+        targetDiv.style.padding = '8px';
+        targetDiv.style.marginBottom = '8px';
+
+        const name = stripStrikeTokens(target.name) || `ターゲット ${idx + 1}`;
         const level = target.level || 1;
         const hp = target.hp || 0;
-        
-        let resistHTML = '';
+
+        // Build resist lines; element names may contain markdown-like ~~strikethrough~~ tokens; keep as-is
+        let resistLines = '';
         if (target.resist && Object.keys(target.resist).length > 0) {
-            resistHTML = '<div style="margin-top: 10px;"><strong>元素耐性:</strong><br>';
             for (const [element, resist] of Object.entries(target.resist)) {
-                resistHTML += `<div class="info-row">
-                    <span class="info-label">${element}</span>
-                    <span class="info-value">${(resist * 100).toFixed(1)}%</span>
-                </div>`;
+                const el = stripStrikeTokens(element);
+                if (!el) continue; // if the label was entirely struck out, skip it
+                resistLines += `<div class="info-row"><span class="info-label">${el}</span><span class="info-value">${(resist * 100).toFixed(1)}%</span></div>`;
             }
-            resistHTML += '</div>';
         }
-        
+
         targetDiv.innerHTML = `
-            <div class="char-name">${name}</div>
-            <div class="info-row">
-                <span class="info-label">レベル</span>
-                <span class="info-value">${level}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">HP</span>
-                <span class="info-value">${formatNumber(hp)}</span>
-            </div>
-            ${resistHTML}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div style="font-weight:600;">${name}</div><div>Lv.${level}</div></div>
+            <div class="info-row"><span class="info-label">HP</span><span class="info-value">${formatNumber(hp)}</span></div>
+            <div style="margin-top:6px;"><strong>耐性:</strong></div>
+            ${resistLines}
         `;
-        
+
         container.appendChild(targetDiv);
     });
 }
@@ -769,14 +1319,18 @@ function buildTargetsHTML(result) {
     if (!result.target_details || result.target_details.length === 0) return '';
     let html = '<div style="margin-top:10px;"><strong>ターゲット情報:</strong>';
     result.target_details.forEach((target, idx) => {
-        const name = target.name || `ターゲット ${idx + 1}`;
+        // reuse stripStrikeTokens if available, otherwise define a local fallback
+        const stripStrikeTokens = (typeof stripStrikeTokens === 'function') ? stripStrikeTokens : function(s) { return s ? s.replace(/~~.*?~~/g,'').trim() : s; };
+        const name = stripStrikeTokens(target.name) || `ターゲット ${idx + 1}`;
         const level = target.level || 1;
         const hp = target.hp || 0;
         let resistHTML = '';
         if (target.resist && Object.keys(target.resist).length > 0) {
             resistHTML = '<div style="margin-top:6px;">';
             for (const [element, resist] of Object.entries(target.resist)) {
-                resistHTML += `<div class="info-row"><span class="info-label">${element}</span><span class="info-value">${(resist * 100).toFixed(1)}%</span></div>`;
+                const el = stripStrikeTokens(element);
+                if (!el) continue;
+                resistHTML += `<div class="info-row"><span class="info-label">${el}</span><span class="info-value">${(resist * 100).toFixed(1)}%</span></div>`;
             }
             resistHTML += '</div>';
         }
@@ -844,7 +1398,8 @@ function displayCharts(result) {
             const charDpsSd = [];
 
             result.character_details.forEach((char, idx) => {
-                const name = char.name || `キャラ${idx+1}`;
+                const rawName = char.name || `キャラ${idx+1}`;
+                const name = toJPCharacter(rawName);
                 charNames.push(name);
                 // Try multiple possible locations for character DPS data
                 let dpsValue = 0;
@@ -927,7 +1482,7 @@ function displayCharts(result) {
     // Prefer stats.source_dps (per-character SourceStats) for per-character ability DPS
     if (stats.source_dps && Array.isArray(stats.source_dps) && stats.source_dps.length > 0) {
     // Use the canonical ordering computed from character DPS if available so colors/order match
-    const charNamesRaw = (result.character_details && Array.isArray(result.character_details)) ? result.character_details.map(c => c.name) : stats.source_dps.map((_,i) => `キャラ${i+1}`);
+    const charNamesRaw = (result.character_details && Array.isArray(result.character_details)) ? result.character_details.map(c => toJPCharacter(c.name)) : stats.source_dps.map((_,i) => `キャラ${i+1}`);
     const charNames = (stats.__char_order && stats.__char_order.orderedCharNames) ? stats.__char_order.orderedCharNames : charNamesRaw;
         // Collect ability/source keys from source_dps
         const abilitySet = new Set();
@@ -937,7 +1492,7 @@ function displayCharts(result) {
         if (abilities.length > 0) {
             // Create a matrix matching sorted charNames order. source_dps is indexed by original character index,
             // so we need to map canonical ordering indices back to original indices in source_dps.
-            const originalCharNames = (result.character_details && Array.isArray(result.character_details)) ? result.character_details.map(c => c.name) : stats.source_dps.map((_,i) => `キャラ${i+1}`);
+            const originalCharNames = (result.character_details && Array.isArray(result.character_details)) ? result.character_details.map(c => toJPCharacter(c.name)) : stats.source_dps.map((_,i) => `キャラ${i+1}`);
             // Build a mapping from canonical position -> original index
             const canonicalToOriginal = [];
             if (stats.__char_order && stats.__char_order.order) {
@@ -1069,9 +1624,11 @@ function displayCharts(result) {
             };
         });
 
-        // Ensure container height and create stacked bar chart (vertical categories = reactions)
-        ensureContainerHeight(ctx5, Math.max(200, reactions.length * 30));
-        charts.reactions = new Chart(ctx5, {
+    // Ensure container height and create stacked bar chart (vertical categories = reactions)
+    const reactionsDesired = Math.max(200, reactions.length * 30);
+    ensureContainerHeight(ctx5, reactionsDesired);
+    try { setCanvasVisualSize(ctx5, reactionsDesired); } catch(e) {}
+    charts.reactions = new Chart(ctx5, {
             type: 'bar',
             data: { labels: reactions, datasets },
             options: {
@@ -1097,7 +1654,8 @@ function displayCharts(result) {
                 }
             }
         });
-        try { scheduleChartResize(charts.reactions, ctx5); } catch(e) {}
+    try { scheduleChartResize(charts.reactions, ctx5); } catch(e) {}
+    try { adjustAllChartInsets(); } catch(e) {}
     })();
 
     // Aura Uptime Chart: per-target stacked bars where each element is a segment.
@@ -1184,8 +1742,10 @@ function displayCharts(result) {
             };
         });
 
-        ensureContainerHeight(ctx6, Math.max(200, targetLabels.length * 50));
-        charts.aura = new Chart(ctx6, {
+    const auraDesired = Math.max(200, targetLabels.length * 50);
+    ensureContainerHeight(ctx6, auraDesired);
+    try { setCanvasVisualSize(ctx6, auraDesired); } catch(e) {}
+    charts.aura = new Chart(ctx6, {
             type: 'bar',
             data: { labels: targetLabels, datasets },
             options: {
@@ -1212,6 +1772,7 @@ function displayCharts(result) {
             }
         });
         try { scheduleChartResize(charts.aura, ctx6); } catch(e) {}
+        try { adjustAllChartInsets(); } catch(e) {}
     })();
     
     console.log('[WebUI] Charts displayed, active charts:', Object.keys(charts));
@@ -1685,7 +2246,24 @@ function formatStatValue(statKey, value) {
     } else {
         return value.toFixed(0);
     }
+
+    // After all charts are created, adjust canvas top insets so titles/legends are not overlapped
+    try { 
+        adjustAllChartInsets();
+        // Chart.js may resize/update asynchronously; retry a few times to be safe
+        const retries = [120, 300, 600];
+        retries.forEach((delay, idx) => {
+            setTimeout(() => { try { adjustAllChartInsets(); } catch(e){} }, delay);
+        });
+    } catch (e) { /* ignore */ }
 }
+
+// Recompute insets on window resize (debounced)
+let _resizeTimer = null;
+window.addEventListener('resize', () => {
+    if (_resizeTimer) clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => { adjustAllChartInsets(); }, 150);
+});
 
 // Make functions available globally for onclick handlers
 window.runSimulation = runSimulation;

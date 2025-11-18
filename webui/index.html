@@ -155,19 +155,44 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
+        /* Fade-in helper for results to avoid abrupt layout flashes */
+        #results-container {
+            opacity: 0;
+            transition: opacity 220ms ease-in-out;
+        }
+        #results-container.visible {
+            opacity: 1;
+        }
 
-        /* Chart container: reserve space and prevent layout jumps when tooltips render */
+        /* Chart container: reserve space and prevent layout jumps when tooltips or overlays render.
+           Use an explicit min-height and hide overflow. The canvas is positioned absolutely inside
+           the container so Chart.js can control the drawing buffer without the canvas affecting
+           document flow (prevents infinite-height bugs while keeping layout stable). */
         .chart-container {
             position: relative;
             min-height: 160px; /* default reserve */
-            overflow: hidden; /* prevent children from expanding layout */
+            overflow: hidden; /* keep overlays from expanding the document */
             padding: 12px;
             background: transparent;
         }
+        /* Canvas will be inset to match container padding to avoid overlap with edges */
+        /* Reserve space at top for title/controls by offsetting canvas downward. */
         .chart-container canvas {
-            display: block;
-            width: 100% !important;
+            position: absolute;
+            top: 48px; /* leave room for chart title and controls */
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            width: auto !important;
             height: auto !important;
+            max-width: none !important;
+            max-height: none !important;
+            display: block;
+            margin: 0;
+            z-index: 1;
+            /* Hide canvas by default until JS has reserved layout space and applied insets.
+               This prevents a brief flash where the canvas overlaps surrounding text. */
+            visibility: hidden;
         }
         
         .editor-container {
@@ -257,14 +282,24 @@
     .gcsl-comment { color: var(--muted); font-style: italic; }
     .gcsl-operator { color: var(--primary-1); }
 
-        /* Ensure chart canvases fill their parent; JS will set visual height to preserve aspect ratio */
+        /* Ensure chart containers are full width. Canvas elements are positioned absolutely
+           inside their container (see .chart-container above) so they don't expand the page. */
         .chart-card, .chart-container {
             width: 100%;
         }
         .chart-card canvas, .chart-container canvas, canvas.chart-canvas {
+            position: absolute;
+            top: 48px; /* unified inset so titles/controls are not overlapped */
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+            width: auto !important;
+            height: auto !important;
+            max-width: none !important;
+            max-height: none !important;
             display: block;
-            width: 100%;
-            height: auto; /* allow JS-controlled height */
+            margin: 0;
+            z-index: 1;
         }
         
         .btn-run {
@@ -342,6 +377,21 @@
             margin-bottom: 8px;
             padding-bottom: 8px;
             border-bottom: 2px solid var(--primary-2);
+        }
+        /* Small, muted English label rendered alongside or beneath JP names */
+        .char-en {
+            font-size: 0.95rem; /* slightly smaller but inline */
+            color: var(--muted);
+            margin-left: 8px;
+            font-weight: 400;
+            vertical-align: middle;
+        }
+        .small-en {
+            font-size: 0.75rem;
+            color: var(--muted);
+            opacity: 0.85;
+            margin-top: 2px;
+            line-height: 1em;
         }
         
         .char-info-compact {
@@ -431,7 +481,7 @@
 
     /* Reduce margin for chart titles to save vertical space */
     .chart-container h6 { margin: 0; font-size: 0.95rem; padding: 4px 0; }
-    /* Make canvas sit flush with surrounding content */
+    /* Make canvas sit flush with surrounding content and avoid overlap */
     .chart-container canvas { margin: 0; display: block; }
         
         .chart-legend-item {
@@ -548,15 +598,32 @@
             max-height: none;
         }
 
-        /* Ensure chart containers reserve vertical space and allow visible overflow
-           (JS will set explicit heights per chart based on bar count). */
+        /* Keep reserved vertical space and hide overflow so that absolutely positioned
+           canvases cannot expand the document height unexpectedly. Chart.js will set
+           the canvas drawing buffer size via attributes (see app.js helper). */
         .chart-container {
-            overflow: visible;
+            overflow: hidden;
         }
 
         .chart-container canvas {
+            position: absolute;
+            top: 48px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
             height: auto !important;
+            z-index: 1;
         }
+
+        /* Ensure titles/legends render above the canvas */
+        .chart-container h6,
+        .chart-legend,
+        .chart-data-table {
+            position: relative;
+            z-index: 3;
+            margin: 0 0 6px 0;
+        }
+        .chart-container h6 { position: absolute; top: 12px; left: 12px; font-size: 0.95rem; padding: 0; }
         
         .tab-container {
             background: var(--card-bg);
@@ -609,6 +676,9 @@
             color: var(--chip-text);
             border-radius: 16px;
             font-size: 12px;
+            display: inline-flex;
+            align-items: center; /* vertically center contents */
+            gap: 8px;
         }
         
         .stats-grid {
@@ -829,5 +899,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
     <script src="app.js"></script>
+    <!-- Generated mappings (regenerate with: go run ./cmd/generate-webui-mappings) -->
+    <script src="jp_mappings.generated.js"></script>
 </body>
 </html>
