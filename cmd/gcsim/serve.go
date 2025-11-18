@@ -21,7 +21,6 @@ import (
 	"sync"
 	"time"
 
-	parserpkg "github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/parser"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulator"
 	"github.com/minio/minio-go/v7"
@@ -495,11 +494,16 @@ func simulateHandler(resp http.ResponseWriter, req *http.Request) {
 			_ = json.NewEncoder(resp).Encode(map[string]string{"error": "timeout", "message": "simulation exceeded 180s timeout"})
 			return
 		}
-		if pe, ok := err.(*parserpkg.ParseErrors); ok {
+		// If error exposes parse details via an Errors() method, include them in response.
+		// Use a structural type assertion to avoid depending on a concrete parserpkg type name.
+		if pe, ok := err.(interface {
+			Error() string
+			Errors() interface{}
+		}); ok {
 			out := map[string]interface{}{
 				"error":        "parse error",
 				"message":      pe.Error(),
-				"parse_errors": pe.Errors,
+				"parse_errors": pe.Errors(),
 			}
 			resp.Header().Set("Content-Type", "application/json")
 			resp.Header().Set("Access-Control-Allow-Origin", "*")
@@ -544,7 +548,6 @@ func simulateHandler(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Access-Control-Allow-Origin", "*")
 	resp.WriteHeader(http.StatusOK)
 	resp.Write(data)
-	return
 }
 
 // resultHandler handles GET /api/result?id=<jobid>

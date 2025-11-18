@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"time"
 
-	parserpkg "github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/parser"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulator"
 )
 
@@ -60,8 +59,7 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload struct {
-		Config  string                 `json:"config"`
-		Options map[string]interface{} `json:"options,omitempty"`
+		Config string `json:"config"`
 	}
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -112,19 +110,8 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 			_ = json.NewEncoder(w).Encode(map[string]string{"error": "timeout", "message": "simulation exceeded 180s timeout"})
 			return
 		}
-		// parser structured errors
-		if pe, ok := err.(*parserpkg.ParseErrors); ok {
-			out := map[string]interface{}{
-				"error":        "parse error",
-				"message":      pe.Error(),
-				"parse_errors": pe.Errors,
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.WriteHeader(http.StatusBadRequest)
-			_ = json.NewEncoder(w).Encode(out)
-			return
-		}
+		// parser structured errors - removed ParseErrors type check as it doesn't exist
+		// errors are now returned as plain error strings from simulator.Run
 		// fallback: try to extract lnN patterns
 		errStr := err.Error()
 		re := regexp.MustCompile(`ln(\d+):\s*(.+)`)

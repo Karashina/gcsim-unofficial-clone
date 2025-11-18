@@ -34,3 +34,10 @@ tsconfig.json
 Taskfile.yml
 serve_data.json.gz
 serve_sample.json.gz
+gcsim
+gcsim-webui
+gcsim-cli
+
+# WebUI logs
+webui.log
+*.log

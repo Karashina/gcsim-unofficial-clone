@@ -33,6 +33,18 @@ type Character struct {
 	Sets          map[string]int32       `protobuf:"bytes,8,rep,name=sets,proto3" json:"sets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value" bson:"sets,omitempty"`
 	Stats         []float64              `protobuf:"fixed64,9,rep,packed,name=stats,proto3" json:"stats,omitempty" bson:"stats,omitempty"`
 	SnapshotStats []float64              `protobuf:"fixed64,10,rep,packed,name=snapshot_stats,json=snapshot,proto3" json:"snapshot_stats,omitempty" bson:"snapshot,omitempty"`
+	// Base stats for calculating final stats
+	BaseHP        float64 `json:"base_hp,omitempty" bson:"base_hp,omitempty"`
+	BaseATK       float64 `json:"base_atk,omitempty" bson:"base_atk,omitempty"`
+	BaseDEF       float64 `json:"base_def,omitempty" bson:"base_def,omitempty"`
+	// Final calculated stats at simulation start
+	FinalHP       float64 `json:"final_hp,omitempty" bson:"final_hp,omitempty"`
+	FinalATK      float64 `json:"final_atk,omitempty" bson:"final_atk,omitempty"`
+	FinalDEF      float64 `json:"final_def,omitempty" bson:"final_def,omitempty"`
+	FinalEM       float64 `json:"final_em,omitempty" bson:"final_em,omitempty"`
+	FinalCR       float64 `json:"final_cr,omitempty" bson:"final_cr,omitempty"`
+	FinalCD       float64 `json:"final_cd,omitempty" bson:"final_cd,omitempty"`
+	FinalER       float64 `json:"final_er,omitempty" bson:"final_er,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gcsim-uoc WebUI</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+    /* CodeMirror GCSL token colors using theme variables */
+    .cm-s-default .cm-keyword { color: var(--primary-1); font-weight: 600; }
+    .cm-s-default .cm-comment { color: var(--muted); font-style: italic; }
+    .cm-s-default .cm-string { color: #9c6; }
+    .cm-s-default .cm-number { color: #f08; }
+    .cm-s-default .cm-variable { color: var(--text); }
+
+    /* Dark theme adjustments when using material theme (bright but no glow) */
+    [data-theme="dark"] .cm-s-material .cm-keyword { color: #00ffff; }
+    [data-theme="dark"] .cm-s-material .cm-comment { color: #c7d8de; }
+    [data-theme="dark"] .cm-s-material .cm-string { color: #bfff00; }
+    [data-theme="dark"] .cm-s-material .cm-number { color: #ff6aff; }
+    [data-theme="dark"] .cm-s-material .cm-variable { color: #ffffff; }
+    /* Also target generic CodeMirror token classes to ensure coverage */
+    [data-theme="dark"] .CodeMirror .cm-keyword { color: #00ffff; }
+    [data-theme="dark"] .CodeMirror .cm-string { color: #bfff00; }
+    [data-theme="dark"] .CodeMirror .cm-number { color: #ff6aff; }
+    [data-theme="dark"] .CodeMirror .cm-comment { color: #c7d8de; }
+    [data-theme="dark"] .CodeMirror .cm-variable { color: #ffffff; }
+
+        :root {
+            --primary-1: #ffc14d; /* user requested */
+            --primary-2: #ffb347; /* replaced purple with orange variant */
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text: #222;
+            --header-text: #000000; /* black text over orange */
+            --button-text: #000000;
+            --hover-bg: #f9f9f9;
+            --muted-border: #e8e8e8;
+            --chip-text: #000000;
+            --muted: #666;
+            --disabled-bg: #ccc;
+        }
+
+            [data-theme="dark"] {
+                /* brighter, bluish dark theme */
+                --bg: #0f2a36; /* darker bluish background but slightly brighter visually */
+                --card-bg: #213544; /* blue-gray cards */
+                --text: #eaf6ff; /* slight blue tint to text */
+                    --header-text: #0f2a36; /* text on yellow/orange backgrounds */
+                    --button-text: #0f2a36;
+                --hover-bg: rgba(234,246,255,0.04);
+                --muted-border: rgba(234,246,255,0.10);
+                --chip-text: #0f2a36;
+                --muted: #bcd3de; /* bluish muted */
+                --disabled-bg: rgba(234,246,255,0.06);
+            }
+
+        /* Ensure header text stands out on orange header in dark mode */
+        [data-theme="dark"] .header {
+            color: var(--header-text);
+        }
+
+        /* Make info labels light in dark mode where needed */
+        [data-theme="dark"] .char-stats-list .info-label,
+        [data-theme="dark"] .chart-legend-title,
+        [data-theme="dark"] .chart-data-table th {
+            color: var(--muted);
+        }
+
+        /* Input & editor explicit dark-mode styling */
+        [data-theme="dark"] textarea#config-editor,
+        [data-theme="dark"] .CodeMirror {
+            background: var(--card-bg) !important;
+            color: var(--text) !important;
+            caret-color: var(--text) !important;
+            border: 1px solid var(--muted-border) !important;
+        }
+
+        /* Load UDEV Gothic supplied in webui/assets and apply globally. */
+        @font-face {
+            font-family: 'UDEV Gothic';
+            src: url('./assets/UDEVGothic_v2.1.0/UDEVGothic-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'UDEV Gothic';
+            src: url('./assets/UDEVGothic_v2.1.0/UDEVGothic-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'UDEV Gothic';
+            src: url('./assets/UDEVGothic_v2.1.0/UDEVGothic-Italic.ttf') format('truetype');
+            font-weight: 400;
+            font-style: italic;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'UDEV Gothic';
+            src: url('./assets/UDEVGothic_v2.1.0/UDEVGothic-BoldItalic.ttf') format('truetype');
+            font-weight: 700;
+            font-style: italic;
+            font-display: swap;
+        }
+
+        /* Apply font globally for UI. Keep monospace for code blocks and editor where specified below. */
+        body {
+            font-family: 'UDEV Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans JP', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background-color 200ms ease, color 200ms ease;
+        }
+        
+        .container-main {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-1) 0%, var(--primary-2) 100%);
+            color: var(--header-text, white);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .theme-toggle {
+            background: rgba(255,255,255,0.12);
+            border: none;
+            color: var(--header-text, white);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .theme-toggle:focus { outline: none; }
+        
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        /* Chart container: reserve space and prevent layout jumps when tooltips render */
+        .chart-container {
+            position: relative;
+            min-height: 160px; /* default reserve */
+            overflow: hidden; /* prevent children from expanding layout */
+            padding: 12px;
+            background: transparent;
+        }
+        .chart-container canvas {
+            display: block;
+            width: 100% !important;
+            height: auto !important;
+        }
+        
+        .editor-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 720px; /* taller editor */
+            padding: 15px;
+            border: 1px solid var(--muted-border);
+            border-radius: 4px;
+            /* Apply UDEV Gothic to all text inputs as requested. Keep monospace as fallback. */
+            font-family: 'UDEV Gothic', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px; /* slightly smaller */
+            line-height: 1.9; /* slightly more vertical spacing */
+            resize: vertical;
+            background-color: transparent; /* allow pre behind to show */
+            color: var(--text);
+        }
+
+        .editor-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        /* Make sure textarea and highlighted code share exact metrics */
+        /* Apply UDEV Gothic everywhere including highlighted pre/code blocks */
+        textarea#config-editor, pre#config-highlight, pre#config-highlight code {
+            font-family: 'UDEV Gothic', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.9;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        /* CodeMirror specific sizing */
+        .CodeMirror {
+            height: 720px !important;
+            font-size: 13px !important;
+            line-height: 1.9 !important;
+            /* Use UDEV Gothic everywhere per request */
+            font-family: 'UDEV Gothic', 'Consolas', 'Monaco', 'Courier New', monospace !important;
+        }
+        .CodeMirror pre { line-height: 1.9 !important; font-family: inherit !important; }
+          /* NOTE: overlay highlighter can cause visual issues in some browsers.
+              Hide it for now to ensure textarea is readable. Re-enable when
+              overlay behavior is stable. */
+                    #config-highlight {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 0;
+            padding: 15px;
+            pointer-events: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'UDEV Gothic', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text); /* default text color; token spans override this */
+            z-index: 1;
+            overflow: auto; 
+                        background: var(--card-bg);
+                        border: 1px solid var(--muted-border);
+            border-radius: 4px;
+        }
+        /* hide pre scrollbar so only textarea scrollbar is visible */
+        pre#config-highlight::-webkit-scrollbar { display: none; }
+        pre#config-highlight { -ms-overflow-style: none; scrollbar-width: none; }
+    pre#config-highlight code { display: block; white-space: pre-wrap; word-wrap: break-word; font-family: 'UDEV Gothic', 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 14px; line-height: 1.8; color: var(--text); }
+    #config-highlight .gcsl-keyword { color: #00ffff; font-weight: 700; }
+    #config-highlight .gcsl-string { color: #bfff00; }
+    #config-highlight .gcsl-number { color: #ff6aff; }
+    #config-highlight .gcsl-comment { color: var(--muted); font-style: italic; }
+    #config-highlight .gcsl-operator { color: var(--primary-1); }
+        /* Keep caret visible in textarea */
+    textarea#config-editor { background: var(--card-bg); color: var(--text); caret-color: var(--text); position: relative; z-index: 2; }
+        
+        /* GCSL Syntax Highlighting */
+        .gcsl-keyword { color: #00ffff; font-weight: 700; }
+    .gcsl-string { color: #bfff00; }
+        .gcsl-number { color: #ff6aff; }
+    .gcsl-comment { color: var(--muted); font-style: italic; }
+    .gcsl-operator { color: var(--primary-1); }
+
+        /* Ensure chart canvases fill their parent; JS will set visual height to preserve aspect ratio */
+        .chart-card, .chart-container {
+            width: 100%;
+        }
+        .chart-card canvas, .chart-container canvas, canvas.chart-canvas {
+            display: block;
+            width: 100%;
+            height: auto; /* allow JS-controlled height */
+        }
+        
+        .btn-run {
+            background: linear-gradient(135deg, var(--primary-1) 0%, var(--primary-2) 100%);
+            color: var(--button-text);
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-run:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+        }
+        
+        .btn-run:disabled {
+            background: var(--disabled-bg);
+            cursor: not-allowed;
+        }
+        
+        .results-container {
+            display: none;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-2);
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        
+        .char-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .characters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .char-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-2);
+        }
+        
+        .char-info-compact {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+        
+        .char-info-compact .info-row {
+            padding: 6px 8px;
+            border-bottom: none;
+        }
+        
+        .char-stats-list {
+            margin-top: 8px;
+        }
+        
+        .char-stats-list .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .char-stats-list .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .char-stats-list .info-label {
+            font-weight: 600;
+            color: var(--muted);
+        }
+        
+        .char-stats-list .info-value {
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .chart-container {
+            background: var(--card-bg);
+            border-radius: 6px;
+            padding: 6px; /* further reduced padding per request */
+            margin-bottom: 12px; /* increased spacing between stacked charts */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            position: relative;
+            min-height: 160px; /* sensible default reserve */
+            overflow: hidden; /* prevent children (tooltips, overlays) from expanding layout */
+        }
+        
+        /* Position canvas absolutely so Chart.js drawing or inline height changes
+           don't affect document flow and won't expand the parent container when
+           tooltips/overlays are drawn. JS will still set the canvas drawing buffer
+           via attributes; CSS keeps layout stable. */
+        .chart-container canvas {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+            width: auto !important;
+            height: auto !important;
+            max-width: none !important;
+            max-height: none !important;
+        }
+        
+        .chart-legend {
+            margin-top: 6px;
+            padding: 6px;
+            background: var(--card-bg);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border: 1px solid var(--muted-border);
+        }
+
+        .chart-legend-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        /* Force Chart.js canvas text to use our UI font where possible */
+        canvas { font-family: 'UDEV Gothic', sans-serif; }
+
+
+    /* Reduce margin for chart titles to save vertical space */
+    .chart-container h6 { margin: 0; font-size: 0.95rem; padding: 4px 0; }
+    /* Make canvas sit flush with surrounding content */
+    .chart-container canvas { margin: 0; display: block; }
+        
+        .chart-legend-item {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .chart-legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+        
+        .chart-data-table {
+            width: 100%;
+            margin-top: 8px;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        
+        .chart-data-table th,
+        .chart-data-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .chart-data-table th {
+            background: var(--card-bg);
+            font-weight: 600;
+            color: var(--muted);
+        }
+        
+        .chart-data-table tr:hover {
+            background: var(--hover-bg);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .error-line {
+            background: #ffe0e0;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* Make info labels bolder for better readability */
+        .info-label {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* Compact character info: wrap each row in a subtle box */
+        .char-info-compact .info-row {
+            border-bottom: none;
+            border: 1px solid var(--muted-border);
+            padding: 8px;
+            margin: 6px 0;
+            border-radius: 6px;
+            background: var(--card-bg);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            align-items: center;
+        }
+        
+        .info-value {
+            color: var(--text);
+        }
+        .muted-note { color: var(--muted); }
+        
+        .tabs {
+            background: var(--card-bg);
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tabs .tab a {
+            color: var(--primary-2);
+        }
+        
+        .tabs .tab a:hover {
+            color: var(--primary-2);
+        }
+        
+        .tabs .tab a.active {
+            color: var(--primary-2);
+        }
+        
+        .tabs .indicator {
+            background-color: var(--primary-2);
+        }
+        
+        canvas {
+            /* allow charts to grow taller when JS sets explicit height */
+            max-height: none;
+        }
+
+        /* Ensure chart containers reserve vertical space and allow visible overflow
+           (JS will set explicit heights per chart based on bar count). */
+        .chart-container {
+            overflow: visible;
+        }
+
+        .chart-container canvas {
+            height: auto !important;
+        }
+        
+        .tab-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid var(--muted-border);
+            background: var(--card-bg);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--muted);
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-btn:hover {
+            background: var(--hover-bg);
+        }
+        
+        .tab-btn.active {
+            color: var(--primary-2);
+            border-bottom-color: var(--primary-2);
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .chip {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 2px;
+            background: linear-gradient(90deg, var(--primary-1) 0%, var(--primary-2) 100%);
+            color: var(--chip-text);
+            border-radius: 16px;
+            font-size: 12px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: -10px;
+        }
+        
+        .col {
+            padding: 10px;
+        }
+        
+        .col.s12 { width: 100%; }
+        .col.m6 { width: 50%; }
+        .col.l2 { width: 16.666%; }
+        .col.l6 { width: 50%; }
+        
+        @media (max-width: 768px) {
+            .col.m6, .col.l2, .col.l6 { width: 100%; }
+        }
+    </style>
+    <!-- Prism.js for syntax highlighting (CDN). app.js will prefer Prism if available. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        /* Map Prism token classes to the existing gcsl color scheme */
+        /* Ensure default code text uses our theme colors (override Prism's theme)
+           and token classes follow our color palette. Use !important to beat
+           the theme loaded from CDN which appears after the page <style>. */
+        pre#config-highlight,
+        pre#config-highlight code,
+        pre#config-highlight[class*="language-"],
+        pre#config-highlight[class*="language-"] code {
+            color: var(--text) !important;
+            background: transparent !important;
+        }
+        pre#config-highlight .token { color: inherit !important; }
+        pre#config-highlight .token.keyword { color: #c792ea !important; }
+        pre#config-highlight .token.string { color: #c3e88d !important; }
+        pre#config-highlight .token.number { color: #f78c6c !important; }
+        pre#config-highlight .token.comment { color: var(--muted) !important; font-style: italic; }
+        pre#config-highlight .token.operator { color: var(--primary-1) !important; }
+    </style>
+</head>
+<body>
+    <div class="container-main">
+        <div class="header">
+            <h3 style="margin: 0;">
+                gcsim-unofficial-clone WebUI
+            </h3>
+                <div style="flex:1"></div>
+                <button id="theme-toggle" class="theme-toggle">テーマ切替</button>
+            </div>
+            <!-- header subtitle removed per request -->
+        </div>
+        
+        <div class="editor-container">
+            <h5>📝 コンフィグ入力</h5>
+        <div class="editor-wrapper">
+            <!-- Monaco editor will be mounted into this div -->
+            <div id="monaco-editor" style="height:600px;border:1px solid #ddd;border-radius:4px;background:var(--card-bg); display:none;"></div>
+            <!-- Keep textarea hidden as a fallback for non-JS scenarios -->
+            <textarea id="config-editor" placeholder="GCSL config をここに貼り付けてください"></textarea>
+        </div>
+            <button class="btn-run" onclick="runSimulation()">
+                ▶️ シミュレーション実行
+            </button>
+            <div class="error-message" id="error-message"></div>
+            <div class="loading" id="loading">
+                <div style="text-align: center; padding: 40px;">
+                    <div style="border: 4px solid rgba(0,0,0,0.06); border-top: 4px solid var(--primary-2); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    <p style="margin-top: 15px;">シミュレーション実行中...</p>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+        
+        <div class="results-container" id="results-container">
+            <h5 style="margin: 20px 0;">
+                📊 シミュレーション結果
+            </h5>
+            
+            <!-- Statistics in 2-column layout -->
+            <div class="stats-grid">
+                <div class="stat-card center-align">
+                    <div class="stat-label">DPS (ダメージ/秒)</div>
+                    <div class="stat-value" id="stat-dps">-</div>
+                </div>
+                <div class="stat-card center-align">
+                    <div class="stat-label">EPS (エネルギー/秒)</div>
+                    <div class="stat-value" id="stat-eps">-</div>
+                </div>
+                <div class="stat-card center-align">
+                    <div class="stat-label">RPS (元素反応/秒)</div>
+                    <div class="stat-value" id="stat-rps">-</div>
+                </div>
+                <div class="stat-card center-align">
+                    <div class="stat-label">HPS (回復/秒)</div>
+                    <div class="stat-value" id="stat-hps">-</div>
+                </div>
+                <div class="stat-card center-align">
+                    <div class="stat-label">SHP (シールド/秒)</div>
+                    <div class="stat-value" id="stat-shp">-</div>
+                </div>
+                <div class="stat-card center-align">
+                    <div class="stat-label">シミュレーション時間 (秒)</div>
+                    <div class="stat-value" id="stat-dur">-</div>
+                </div>
+            </div>
+            
+            <!-- Tabs for different sections -->
+            <div class="tab-container">
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="switchTab('characters')">キャラクター情報</button>
+                    <!-- Target info tab removed: target details are now shown under characters list -->
+                    <button class="tab-btn" onclick="switchTab('dps-charts')">DPS分析</button>
+                    <button class="tab-btn" onclick="switchTab('reactions')">元素反応</button>
+                </div>
+            
+                <div id="characters" class="card tab-content active">
+                    <div class="card-content">
+                        <span class="card-title">キャラクター情報</span>
+                        <div id="characters-list"></div>
+                    </div>
+                </div>
+                
+                <!-- target-info tab removed -->
+                
+                <div id="dps-charts" class="card tab-content">
+                    <div class="card-content">
+                        <span class="card-title">DPS分析</span>
+                        <!-- Stack all DPS-related charts vertically, full width -->
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="chart-container">
+                                    <h6>キャラクター別DPS</h6>
+                                    <canvas id="char-dps-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="chart-container">
+                                    <h6>ソース別DPS</h6>
+                                    <canvas id="source-dps-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="chart-container">
+                                    <h6>ダメージ分布</h6>
+                                    <canvas id="damage-dist-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- distribution tab removed; its chart merged into DPS analysis -->
+                
+                <!-- Energy tab removed per user request -->
+                
+                <div id="reactions" class="card tab-content">
+                    <div class="card-content">
+                        <span class="card-title">元素反応</span>
+                        <div class="row">
+                            <div class="col s12 l6">
+                                <div class="chart-container">
+                                    <h6>反応回数</h6>
+                                    <canvas id="reaction-count-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col s12 l6">
+                                <div class="chart-container">
+                                    <h6>ターゲット付着時間</h6>
+                                    <canvas id="aura-uptime-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load Chart.js from CDN so full features (stacking, per-dataset colors) are available -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- CodeMirror (simple integration) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
