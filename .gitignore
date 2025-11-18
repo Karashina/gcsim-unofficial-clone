@@ -43,4 +43,5 @@ webui.log
 *.log
 
 # Docker things
-*docker*
+.dockerignore
+Dockerfile
