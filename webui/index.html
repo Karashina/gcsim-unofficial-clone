@@ -901,17 +901,190 @@
         .screen#screen-results .results-container {
             display: block;
             opacity: 1;
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Results sections */
+        .results-section {
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin: 8px 0 6px 0;
+            color: var(--text);
+            border-bottom: 2px solid var(--primary-2);
+            padding-bottom: 4px;
+        }
+
+        /* Compact stats grid - horizontal layout */
+        .stats-grid-compact {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .stat-card-compact {
+            background: var(--card-bg);
+            border-radius: 6px;
+            padding: 8px 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+        }
+
+        .stat-label-compact {
+            font-size: 0.7rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .stat-value-compact {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-2);
+        }
+
+        /* Compact chart containers */
+        .chart-container-compact {
+            background: var(--card-bg);
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            position: relative;
+            min-height: 120px;
+        }
+
+        .chart-title-compact {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+            padding: 4px 8px;
+        }
+
+        .chart-container-compact canvas {
+            max-height: 140px !important;
+        }
+
+        /* Reactions grid - side by side */
+        .reactions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Character cards - smaller fonts */
+        .char-card {
+            background: var(--card-bg);
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .char-name {
+            font-size: 1.0rem; /* Reduced from 1.2rem */
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid var(--primary-2);
+        }
+
+        .char-en {
+            font-size: 0.75rem; /* Reduced from 0.95rem */
+            color: var(--muted);
+            margin-left: 6px;
+            font-weight: 400;
+            vertical-align: middle;
+        }
+
+        .char-info-compact {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4px;
+            font-size: 0.75rem; /* Reduced from 0.85rem */
+            margin-bottom: 6px;
+        }
+
+        .char-info-compact .info-row {
+            padding: 4px 6px;
+            border-bottom: none;
+        }
+
+        .char-stats-list {
+            margin-top: 6px;
+        }
+
+        .char-stats-list .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 6px;
+            font-size: 0.75rem; /* Reduced from 0.85rem */
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .char-stats-list .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .char-stats-list .info-label {
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .char-stats-list .info-value {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .small-en {
+            font-size: 0.65rem; /* Reduced from 0.75rem */
+            color: var(--muted);
+            opacity: 0.85;
+            margin-top: 2px;
+            line-height: 1em;
         }
 
         /* Adjust character grid for 900px+ screens */
         @media (min-width: 900px) {
             .characters-grid {
                 grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+            }
+
+            .stats-grid-compact {
+                grid-template-columns: repeat(6, 1fr);
             }
         }
 
         @media (max-width: 899px) {
             .characters-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-grid-compact {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .reactions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid-compact {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -1034,108 +1207,75 @@
         <!-- Screen 3: Results Display -->
         <div class="screen" id="screen-results">
             <div class="results-container" id="results-container">
-                <h5 style="margin: 20px 0;">
+                <h5 style="margin: 15px 0 10px 0; font-size: 1.1rem;">
                     📊 シミュレーション結果
                 </h5>
             
-            <!-- Statistics in 2-column layout -->
-            <div class="stats-grid">
-                <div class="stat-card center-align">
-                    <div class="stat-label">DPS (ダメージ/秒)</div>
-                    <div class="stat-value" id="stat-dps">-</div>
-                </div>
-                <div class="stat-card center-align">
-                    <div class="stat-label">EPS (エネルギー/秒)</div>
-                    <div class="stat-value" id="stat-eps">-</div>
-                </div>
-                <div class="stat-card center-align">
-                    <div class="stat-label">RPS (元素反応/秒)</div>
-                    <div class="stat-value" id="stat-rps">-</div>
-                </div>
-                <div class="stat-card center-align">
-                    <div class="stat-label">HPS (回復/秒)</div>
-                    <div class="stat-value" id="stat-hps">-</div>
-                </div>
-                <div class="stat-card center-align">
-                    <div class="stat-label">SHP (シールド/秒)</div>
-                    <div class="stat-value" id="stat-shp">-</div>
-                </div>
-                <div class="stat-card center-align">
-                    <div class="stat-label">シミュレーション時間 (秒)</div>
-                    <div class="stat-value" id="stat-dur">-</div>
+            <!-- 1. Character Information (top) -->
+            <div class="results-section">
+                <h6 class="section-title">キャラクター情報</h6>
+                <div id="characters-list"></div>
+            </div>
+            
+            <!-- 2. Statistics (compact layout) -->
+            <div class="results-section">
+                <h6 class="section-title">シミュレーション結果</h6>
+                <div class="stats-grid-compact">
+                    <div class="stat-card-compact">
+                        <span class="stat-label-compact">DPS</span>
+                        <span class="stat-value-compact" id="stat-dps">-</span>
+                    </div>
+                    <div class="stat-card-compact">
+                        <span class="stat-label-compact">EPS</span>
+                        <span class="stat-value-compact" id="stat-eps">-</span>
+                    </div>
+                    <div class="stat-card-compact">
+                        <span class="stat-label-compact">RPS</span>
+                        <span class="stat-value-compact" id="stat-rps">-</span>
+                    </div>
+                    <div class="stat-card-compact">
+                        <span class="stat-label-compact">HPS</span>
+                        <span class="stat-value-compact" id="stat-hps">-</span>
+                    </div>
+                    <div class="stat-card-compact">
+                        <span class="stat-label-compact">SHP</span>
+                        <span class="stat-value-compact" id="stat-shp">-</span>
+                    </div>
+                    <div class="stat-card-compact">
+                        <span class="stat-label-compact">時間</span>
+                        <span class="stat-value-compact" id="stat-dur">-</span>
+                    </div>
                 </div>
             </div>
             
-            <!-- Tabs for different sections -->
-            <div class="tab-container">
-                <div class="tabs-header">
-                    <button class="tab-btn active" onclick="switchTab('characters')">キャラクター情報</button>
-                    <!-- Target info tab removed: target details are now shown under characters list -->
-                    <button class="tab-btn" onclick="switchTab('dps-charts')">DPS分析</button>
-                    <button class="tab-btn" onclick="switchTab('reactions')">元素反応</button>
+            <!-- 3. DPS Analysis -->
+            <div class="results-section">
+                <h6 class="section-title">DPS分析</h6>
+                <div class="chart-container-compact">
+                    <div class="chart-title-compact">キャラクター別DPS</div>
+                    <canvas id="char-dps-chart"></canvas>
                 </div>
+                <div class="chart-container-compact">
+                    <div class="chart-title-compact">ソース別DPS</div>
+                    <canvas id="source-dps-chart"></canvas>
+                </div>
+                <div class="chart-container-compact">
+                    <div class="chart-title-compact">ダメージ分布</div>
+                    <canvas id="damage-dist-chart"></canvas>
+                </div>
+            </div>
             
-                <div id="characters" class="card tab-content active">
-                    <div class="card-content">
-                        <span class="card-title">キャラクター情報</span>
-                        <div id="characters-list"></div>
+            <!-- 4. Element Reactions -->
+            <div class="results-section">
+                <h6 class="section-title">元素反応</h6>
+                <div class="reactions-grid">
+                    <div class="chart-container-compact">
+                        <div class="chart-title-compact">反応回数</div>
+                        <canvas id="reaction-count-chart"></canvas>
                     </div>
-                </div>
-                
-                <!-- target-info tab removed -->
-                
-                <div id="dps-charts" class="card tab-content">
-                    <div class="card-content">
-                        <span class="card-title">DPS分析</span>
-                        <!-- Stack all DPS-related charts vertically, full width -->
-                        <div class="row">
-                            <div class="col s12">
-                                <div class="chart-container">
-                                    <h6>キャラクター別DPS</h6>
-                                    <canvas id="char-dps-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col s12">
-                                <div class="chart-container">
-                                    <h6>ソース別DPS</h6>
-                                    <canvas id="source-dps-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col s12">
-                                <div class="chart-container">
-                                    <h6>ダメージ分布</h6>
-                                    <canvas id="damage-dist-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- distribution tab removed; its chart merged into DPS analysis -->
-                
-                <!-- Energy tab removed per user request -->
-                
-                <div id="reactions" class="card tab-content">
-                    <div class="card-content">
-                        <span class="card-title">元素反応</span>
-                        <div class="row">
-                            <div class="col s12 l6">
-                                <div class="chart-container">
-                                    <h6>反応回数</h6>
-                                    <canvas id="reaction-count-chart"></canvas>
-                                </div>
-                            </div>
-                            <div class="col s12 l6">
-                                <div class="chart-container">
-                                    <h6>ターゲット付着時間</h6>
-                                    <canvas id="aura-uptime-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="chart-container-compact">
+                        <div class="chart-title-compact">ターゲット付着時間</div>
+                        <canvas id="aura-uptime-chart"></canvas>
                     </div>
                 </div>
             </div>
