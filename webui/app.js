@@ -2,6 +2,147 @@
 let charts = {};
 // Global reference to CodeMirror editor (if initialized)
 var cmEditor = null;
+// Global references for optimizer mode editors
+var cmEditorOriginal = null;
+var cmEditorOptimized = null;
+
+// Screen navigation function
+function setupScreenNavigation() {
+    const navButtons = document.querySelectorAll('.navbar-tab');
+    const screens = document.querySelectorAll('.screen');
+    
+    navButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const screenId = this.getAttribute('data-screen');
+            
+            // Remove active class from all buttons
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Hide all screens
+            screens.forEach(screen => screen.classList.remove('active'));
+            // Show selected screen
+            const targetScreen = document.getElementById('screen-' + screenId);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
+        });
+    });
+}
+
+// Mode switching function for config manual input
+function setupModeSwitch() {
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const modes = document.querySelectorAll('.config-mode');
+    
+    modeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const modeId = this.getAttribute('data-mode');
+            
+            // Remove active class from all buttons
+            modeButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Hide all modes
+            modes.forEach(mode => mode.classList.remove('active'));
+            // Show selected mode
+            const targetMode = document.getElementById('mode-' + modeId);
+            if (targetMode) {
+                targetMode.classList.add('active');
+            }
+        });
+    });
+}
+
+// Function to run optimizer simulation
+async function runOptimizerSimulation() {
+    debugLog('[WebUI] Starting optimizer simulation...');
+    const originalTextarea = document.getElementById('config-editor-original');
+    const optimizedTextarea = document.getElementById('config-editor-optimized');
+    const errorMsg = document.getElementById('error-message-optimizer');
+    const loading = document.getElementById('loading-optimizer');
+    const runButton = document.querySelector('#mode-optimizer .btn-run');
+    
+    // Get config from the appropriate editor
+    let config = '';
+    if (optimizedTextarea.value.trim()) {
+        // Priority: use optimized config if it exists
+        config = (typeof cmEditorOptimized !== 'undefined' && cmEditorOptimized) ? 
+                 cmEditorOptimized.getValue() : optimizedTextarea.value;
+    } else if (originalTextarea.value.trim()) {
+        // Fallback: use original config
+        config = (typeof cmEditorOriginal !== 'undefined' && cmEditorOriginal) ? 
+                 cmEditorOriginal.getValue() : originalTextarea.value;
+    }
+    
+    if (!config.trim()) {
+        errorMsg.textContent = 'エラー: コンフィグを入力してください';
+        errorMsg.style.display = 'block';
+        return;
+    }
+    
+    debugLog('[WebUI] Config length:', config.length);
+    
+    // Hide previous results and errors
+    errorMsg.style.display = 'none';
+    loading.style.display = 'block';
+    runButton.disabled = true;
+    
+    try {
+        debugLog('[WebUI] Sending request to /api/optimize');
+        const response = await fetch('/api/optimize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ config })
+        });
+        
+        debugLog('[WebUI] Response status:', response.status);
+        
+        loading.style.display = 'none';
+        runButton.disabled = false;
+        
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('[WebUI] Error response:', error);
+            errorMsg.textContent = 'エラー: ' + (error.message || error.error || 'Optimizer実行に失敗しました');
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        const result = await response.json();
+        debugLog('[WebUI] Optimizer result:', result);
+        
+        // Display optimized config in right panel
+        if (result.optimized_config) {
+            if (cmEditorOptimized) {
+                cmEditorOptimized.setValue(result.optimized_config);
+            } else {
+                optimizedTextarea.value = result.optimized_config;
+            }
+        }
+        
+        // If results are available, display them
+        if (result.statistics) {
+            // Switch to results screen
+            const resultsTab = document.querySelector('.navbar-tab[data-screen="results"]');
+            if (resultsTab) {
+                resultsTab.click();
+            }
+            displayResults(result);
+        }
+        
+    } catch (err) {
+        console.error('[WebUI] Exception:', err);
+        loading.style.display = 'none';
+        runButton.disabled = false;
+        errorMsg.textContent = 'エラー: ' + err.message;
+        errorMsg.style.display = 'block';
+    }
+}
 
 // Global helper to convert hex color to rgba string with alpha
 function hexToRgba(hex, alpha) {
@@ -723,6 +864,13 @@ try {
 
 document.addEventListener('DOMContentLoaded', function() {
     debugLog('[WebUI] Initializing...');
+    
+    // Screen navigation setup
+    setupScreenNavigation();
+    
+    // Mode switching setup
+    setupModeSwitch();
+    
     // Editor setup: CodeMirror preferred; fallback to textarea
     const textarea = document.getElementById('config-editor');
     // Initialize CodeMirror with updated settings
@@ -1036,6 +1184,13 @@ async function runSimulation() {
         
         const result = await response.json();
     debugLog('[WebUI] Simulation result:', result);
+        
+        // Switch to results screen
+        const resultsTab = document.querySelector('.navbar-tab[data-screen="results"]');
+        if (resultsTab) {
+            resultsTab.click();
+        }
+        
         displayResults(result);
         
     } catch (err) {
@@ -1070,6 +1225,16 @@ function handleError(error) {
 function displayResults(result) {
     debugLog('[WebUI] Displaying results...');
     const resultsContainer = document.getElementById('results-container');
+    // Make sure the results screen is visible
+    const resultsScreen = document.getElementById('screen-results');
+    if (resultsScreen && !resultsScreen.classList.contains('active')) {
+        // Switch to results screen
+        const resultsTab = document.querySelector('.navbar-tab[data-screen="results"]');
+        if (resultsTab) {
+            resultsTab.click();
+        }
+    }
+    
     // Keep results hidden until layout (charts/insets) is applied to avoid brief overlap
     // We'll make it visible after charts are created and insets reserved.
     
@@ -2268,3 +2433,4 @@ window.addEventListener('resize', () => {
 // Make functions available globally for onclick handlers
 window.runSimulation = runSimulation;
 window.switchTab = switchTab;
+window.runOptimizerSimulation = runOptimizerSimulation;
