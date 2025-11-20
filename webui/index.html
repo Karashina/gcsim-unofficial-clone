@@ -719,7 +719,7 @@
             .col.m6, .col.l2, .col.l6 { width: 100%; }
         }
 
-        /* Top Navigation Bar Styles */
+        /* Top Navigation Bar Styles (responsive) */
         .top-navbar {
             background: linear-gradient(135deg, var(--primary-1) 0%, var(--primary-2) 100%);
             color: var(--header-text);
@@ -728,51 +728,81 @@
             top: 0;
             z-index: 1000;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            /* keep height bounded to avoid huge header on tall/narrow screens */
+            min-height: 48px;
+            /* allow content to determine height up to a safe maximum */
+            max-height: 96px;
+            overflow: hidden;
         }
 
         .navbar-content {
             max-width: 100%;
-            padding: 15px 30px;
+            /* reduce default padding and allow it to scale on small screens */
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 20px;
+            gap: 12px;
+            flex-wrap: wrap; /* allow items to wrap rather than force big height */
         }
 
         .navbar-title {
             margin: 0;
-            font-size: 1.3rem;
+            /* scale title between 1rem and 1.3rem depending on viewport */
+            font-size: clamp(1rem, 3.2vw, 1.3rem);
             font-weight: 600;
             white-space: nowrap;
         }
 
         .navbar-tabs {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
-            flex: 1;
+            flex: 1 1 auto;
             justify-content: center;
+            align-items: center;
+            min-width: 0; /* allow shrinking on narrow screens */
         }
 
         .navbar-tab {
             background: rgba(255,255,255,0.1);
             border: none;
             color: var(--header-text);
-            padding: 10px 20px;
+            /* smaller padding by default so header stays compact */
+            padding: 8px 12px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
+            font-size: clamp(12px, 2.4vw, 14px);
+            transition: all 0.18s;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .navbar-tab:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.16);
         }
 
         .navbar-tab.active {
-            background: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.26);
             font-weight: 600;
+        }
+
+        /* Tighten layout on narrow viewports (phones) */
+        @media (max-width: 600px) {
+            .navbar-content { padding: 8px 10px; }
+            .navbar-tabs { justify-content: flex-start; gap: 6px; }
+            .navbar-tab { padding: 6px 10px; font-size: 12px; }
+            .navbar-title { font-size: 1rem; }
+            /* Force tabs to full width row to avoid multi-line wrapping increasing height */
+            .navbar-tabs { width: 100%; order: 2; }
+            .navbar-title { order: 1; }
+            #theme-toggle { order: 3; margin-left: auto; }
+        }
+
+        /* For very tall or small-height displays cap the header content to prevent oversize */
+        @media (max-height: 720px) {
+            .top-navbar { max-height: 72px; }
+            .navbar-content { padding-top: 8px; padding-bottom: 8px; }
         }
 
         /* Screen Management */
@@ -1119,12 +1149,12 @@
         <div class="navbar-content">
             <h3 class="navbar-title">gcsim-unofficial-clone WebUI</h3>
             <div class="navbar-tabs">
-                <button class="navbar-tab" data-screen="config-builder">コンフィグ作成</button>
-                <button class="navbar-tab active" data-screen="config-manual">コンフィグ手動入力</button>
+                <button class="navbar-tab" data-screen="config-builder">コンフィグ作�??</button>
+                <button class="navbar-tab active" data-screen="config-manual">コンフィグ手動入�?</button>
                 <button class="navbar-tab" data-screen="results">結果表示</button>
-                <button class="navbar-tab" data-screen="debug">デバッグ</button>
+                <button class="navbar-tab" data-screen="debug">�?バッグ</button>
             </div>
-            <button id="theme-toggle" class="theme-toggle">テーマ切替</button>
+            <button id="theme-toggle" class="theme-toggle">�?ーマ�??替</button>
         </div>
     </nav>
 
@@ -1133,22 +1163,22 @@
         <!-- Screen 1: Config Builder (Under Construction) -->
         <div class="screen" id="screen-config-builder">
             <div class="construction-message">
-                <h2>🚧 工事中です！ 🚧</h2>
-                <p>この機能は現在開発中です。</p>
+                <h2>?�� 工事中です�? ?��</h2>
+                <p>こ�?�機�?�は現在開発中です�?</p>
             </div>
         </div>
 
         <!-- Screen 2: Manual Config Input -->
         <div class="screen active" id="screen-config-manual">
             <div class="mode-selector">
-                <button class="mode-btn active" data-mode="normal">通常実行</button>
-                <button class="mode-btn" data-mode="optimizer">Optimizerモード実行</button>
+                <button class="mode-btn active" data-mode="normal">通常実�?</button>
+                <button class="mode-btn" data-mode="optimizer">Optimizerモード実�?</button>
             </div>
 
             <!-- Normal Mode -->
             <div class="config-mode active" id="mode-normal">
                 <div class="editor-container">
-                    <h5>📝 コンフィグ入力</h5>
+                    <h5>?�� コンフィグ入�?</h5>
                     <div class="editor-wrapper">
                         <!-- Monaco editor will be mounted into this div -->
                         <div id="monaco-editor" style="height:600px;border:1px solid #ddd;border-radius:4px;background:var(--card-bg); display:none;"></div>
@@ -1156,7 +1186,7 @@
                         <textarea id="config-editor" placeholder="GCSL config をここに貼り付けてください"></textarea>
                     </div>
                     <button class="btn-run" onclick="runSimulation()">
-                        ▶️ シミュレーション実行
+                        ▶?�? シミュレーション実�?
                     </button>
                     <div class="error-message" id="error-message"></div>
                     <div class="loading" id="loading">
@@ -1172,20 +1202,20 @@
             <div class="config-mode" id="mode-optimizer">
                 <div class="optimizer-panels">
                     <div class="optimizer-panel">
-                        <h5>📝 元コンフィグ</h5>
+                        <h5>?�� �?コンフィグ</h5>
                         <div class="editor-wrapper">
-                            <textarea id="config-editor-original" placeholder="元となるGCSL configをここに貼り付けてください"></textarea>
+                            <textarea id="config-editor-original" placeholder="�?となるGCSL configをここに貼り付けてください"></textarea>
                         </div>
                     </div>
                     <div class="optimizer-panel">
                         <h5>✨ 最適化済みコンフィグ</h5>
                         <div class="editor-wrapper">
-                            <textarea id="config-editor-optimized" placeholder="最適化済みコンフィグがここに表示されます"></textarea>
+                            <textarea id="config-editor-optimized" placeholder="最適化済みコンフィグがここに表示されま�?"></textarea>
                         </div>
                     </div>
                 </div>
                 <button class="btn-run" onclick="runOptimizerSimulation()">
-                    ▶️ Optimizer実行
+                    ▶?�? Optimizer実�?
                 </button>
                 <div class="error-message" id="error-message-optimizer"></div>
                 <div class="loading" id="loading-optimizer">
@@ -1208,12 +1238,12 @@
         <div class="screen" id="screen-results">
             <div class="results-container" id="results-container">
                 <h5 style="margin: 15px 0 10px 0; font-size: 1.1rem;">
-                    📊 シミュレーション結果
+                    ?�� シミュレーション結果
                 </h5>
             
             <!-- 1. Character Information (top) -->
             <div class="results-section">
-                <h6 class="section-title">キャラクター情報</h6>
+                <h6 class="section-title">キャラクター�?報</h6>
                 <div id="characters-list"></div>
             </div>
             
@@ -1250,7 +1280,7 @@
             
             <!-- 3. DPS Analysis -->
             <div class="results-section">
-                <h6 class="section-title">DPS分析</h6>
+                <h6 class="section-title">DPS�?�?</h6>
                 <div class="chart-container-compact">
                     <div class="chart-title-compact">キャラクター別DPS</div>
                     <canvas id="char-dps-chart"></canvas>
@@ -1260,21 +1290,21 @@
                     <canvas id="source-dps-chart"></canvas>
                 </div>
                 <div class="chart-container-compact">
-                    <div class="chart-title-compact">ダメージ分布</div>
+                    <div class="chart-title-compact">ダメージ�?�?</div>
                     <canvas id="damage-dist-chart"></canvas>
                 </div>
             </div>
             
             <!-- 4. Element Reactions -->
             <div class="results-section">
-                <h6 class="section-title">元素反応</h6>
+                <h6 class="section-title">�?�?反�?</h6>
                 <div class="reactions-grid">
                     <div class="chart-container-compact">
                         <div class="chart-title-compact">反応回数</div>
                         <canvas id="reaction-count-chart"></canvas>
                     </div>
                     <div class="chart-container-compact">
-                        <div class="chart-title-compact">ターゲット付着時間</div>
+                        <div class="chart-title-compact">ターゲ�?ト付着時間</div>
                         <canvas id="aura-uptime-chart"></canvas>
                     </div>
                 </div>
@@ -1284,8 +1314,8 @@
         <!-- Screen 4: Debug (Under Construction) -->
         <div class="screen" id="screen-debug">
             <div class="construction-message">
-                <h2>🚧 工事中です！ 🚧</h2>
-                <p>この機能は現在開発中です。</p>
+                <h2>?�� 工事中です�? ?��</h2>
+                <p>こ�?�機�?�は現在開発中です�?</p>
             </div>
         </div>
     </div>
