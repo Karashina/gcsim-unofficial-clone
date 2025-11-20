@@ -45,3 +45,5 @@ webui.log
 # Docker things
 .dockerignore
 Dockerfile
+docs/substat_optimizer_spec.md
+cmd/deploy-webui/README.md
