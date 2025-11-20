@@ -294,8 +294,19 @@ func optimizeHandler(w http.ResponseWriter, r *http.Request) {
 
 	resultMap["optimized_config"] = string(optimizedConfig)
 
+	// Marshal the modified result map to JSON
+	finalData, err := json.Marshal(resultMap)
+	if err != nil {
+		log.Printf("optimizeHandler: cannot marshal final result: %v", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(`{"error":"cannot marshal final result"}`))
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(resultMap)
+	w.Write(finalData)
 }
