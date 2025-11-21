@@ -44,6 +44,7 @@
             --muted-border: #e8e8e8;
             --chip-text: #000000;
             --muted: #666;
+            --muted-2: #8a8a8a; /* slightly lighter/more muted for secondary labels (talents) */
             --disabled-bg: #ccc;
         }
 
@@ -58,6 +59,7 @@
                 --muted-border: rgba(234,246,255,0.10);
                 --chip-text: #0f2a36;
                 --muted: #bcd3de; /* bluish muted */
+                    --muted-2: rgba(234,246,255,0.65);
                 --disabled-bg: rgba(234,246,255,0.06);
             }
 
@@ -1331,8 +1333,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
-    <script src="app.js"></script>
     <!-- Generated mappings (regenerate with: go run ./cmd/generate-webui-mappings) -->
+    <!-- Cache-bust query param added to ensure Cloudflare serves fresh file -->
     <script src="jp_mappings.generated.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
