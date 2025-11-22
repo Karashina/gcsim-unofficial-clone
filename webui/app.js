@@ -91,7 +91,7 @@ async function runOptimizerSimulation() {
     }
     
     if (!config.trim()) {
-        errorMsg.textContent = 'エラー: コンフィグを�?�力してください';
+        errorMsg.textContent = 'エラー: コンフィグを入力してください';
         errorMsg.style.display = 'block';
         return;
     }
@@ -408,7 +408,7 @@ function extractDamageValue(v) {
 // If the incoming object already contains a dps field, use it directly.
 // If it contains mean/damage as total damage per iteration, divide by durationMean.
 // Return DescriptiveStats.mean when present. Do not attempt to convert totals to DPS by dividing
-// by duration here �? mean is the canonical numeric statistic returned by the simulator.
+// by duration here — mean is the canonical numeric statistic returned by the simulator.
 function extractDescriptiveMean(v) {
     if (v === null || v === undefined) return null;
     if (typeof v === 'object' && typeof v.mean === 'number') return v.mean;
@@ -852,10 +852,10 @@ function handleError(error) {
     let message = error.message || error.error || 'シミュレーションに失敗しました';
     
     if (error.parse_errors && error.parse_errors.length > 0) {
-        message = 'パ�?�スエラー:\n';
+        message = 'パースエラー:\n';
         error.parse_errors.forEach(pe => {
             if (pe.line) {
-                message += `�? ${pe.line}: ${pe.message}\n`;
+                message += `行 ${pe.line}: ${pe.message}\n`;
             } else {
                 message += `${pe.message}\n`;
             }
@@ -944,7 +944,7 @@ function displayCharacters(result) {
     gridDiv.className = 'characters-grid';
     
     if (!result.character_details || result.character_details.length === 0) {
-        container.innerHTML = '<p>キャラクター�?報がありません</p>';
+        container.innerHTML = '<p>キャラクター情報がありません</p>';
         return;
     }
     
@@ -1058,7 +1058,7 @@ function displayCharacters(result) {
             // Reuse card styles so visuals match character cards exactly
             targetsDiv.className = 'card';
             targetsDiv.style.marginTop = '12px';
-            targetsDiv.innerHTML = `<div class="card-content"><span class="card-title">ターゲ�?ト情報</span>${targetsBlockHtml}</div>`;
+            targetsDiv.innerHTML = `<div class="card-content"><span class="card-title">ターゲット情報</span>${targetsBlockHtml}</div>`;
             container.appendChild(targetsDiv);
         }
     } catch (e) { console.warn('[WebUI] Could not append targets under characters', e); }
@@ -1071,16 +1071,16 @@ function displayTargetInfo(result) {
     container.innerHTML = '';
     
     if (!result.target_details || result.target_details.length === 0) {
-        container.innerHTML = '<p>ターゲ�?ト情報がありません</p>';
+        container.innerHTML = '<p>ターゲット情報がありません</p>';
         return;
     }
 
-    // Render as requested: plain label 'ターゲ�?ト情報:' and for each target a compact block
+    // Render as requested: plain label 'ターゲット情報:' and for each target a compact block
     const header = document.createElement('div');
     header.className = 'card';
     header.style.padding = '8px';
     header.style.marginBottom = '8px';
-    header.innerHTML = `<div style="font-weight:700;">ターゲ�?ト情報:</div>`;
+    header.innerHTML = `<div style="font-weight:700;">ターゲット情報:</div>`;
     container.appendChild(header);
 
     // helper to remove ~~strike~~ tokens and their contents
@@ -1097,7 +1097,7 @@ function displayTargetInfo(result) {
         targetDiv.style.padding = '8px';
         targetDiv.style.marginBottom = '8px';
 
-        const name = stripStrikeTokens(target.name) || `ターゲ�?�? ${idx + 1}`;
+        const name = stripStrikeTokens(target.name) || `ターゲット ${idx + 1}`;
         const level = target.level || 1;
         const hp = target.hp || 0;
 
@@ -1125,11 +1125,11 @@ function displayTargetInfo(result) {
 // Build HTML block for all targets so it can be embedded under each character card
 function buildTargetsHTML(result) {
     if (!result.target_details || result.target_details.length === 0) return '';
-    let html = '<div style="margin-top:10px;"><strong>ターゲ�?ト情報:</strong>';
+    let html = '<div style="margin-top:10px;"><strong>ターゲット情報:</strong>';
     result.target_details.forEach((target, idx) => {
         // reuse stripStrikeTokens if available, otherwise define a local fallback
         const stripStrikeTokens = (typeof stripStrikeTokens === 'function') ? stripStrikeTokens : function(s) { return s ? s.replace(/~~.*?~~/g,'').trim() : s; };
-        const name = stripStrikeTokens(target.name) || `ターゲ�?�? ${idx + 1}`;
+        const name = stripStrikeTokens(target.name) || `ターゲット ${idx + 1}`;
         const level = target.level || 1;
         const hp = target.hp || 0;
         let resistHTML = '';
@@ -1234,7 +1234,7 @@ function displayCharts(result) {
                     const orderedCharSd = order.map(o => charDpsSd[o.idx]);
                     // store canonical ordering on the stats object for use by other charts
                     stats.__char_order = { order, orderedCharNames, orderedCharDps, orderedCharSd };
-                    // pass an empty labels array so no 'チ�?��?' label appears on the axis
+                    // pass an empty labels array so no dummy label appears on the axis
                     charts.charDps = createStackedBarChart(ctx, [''], [orderedCharNames, orderedCharDps, orderedCharSd], 'キャラクター別DPS');
                 } else {
                 console.log('[WebUI] No character DPS data to display');
@@ -1335,7 +1335,7 @@ function displayCharts(result) {
             charts.sourceDps = createBarChart(ctx2, data.labels, data.values, 'ソース別DPS');
         } else {
             console.log('[WebUI] No source DPS data to display');
-            try { showEmptyChartPlaceholder(ctx2.canvas.parentElement, 'ソース別DPS の�?ータがありません'); } catch(e) {}
+            try { showEmptyChartPlaceholder(ctx2.canvas.parentElement, 'ソース別DPS のデータがありません'); } catch(e) {}
         }
     } else if (stats.character_actions && Array.isArray(stats.character_actions) && stats.character_actions.length > 0) {
         // character_actions usually contains action counts (not DPS). Do not use it for DPS plotting.
@@ -1390,7 +1390,7 @@ function displayCharts(result) {
         }
         const ctx5 = canvas5.getContext('2d');
         if (!(stats.source_reactions && Array.isArray(stats.source_reactions))) {
-            try { showEmptyChartPlaceholder(ctx5.canvas.parentElement, '反応回数の�?ータがありません'); } catch(e) {}
+            try { showEmptyChartPlaceholder(ctx5.canvas.parentElement, '反応回数のデータがありません'); } catch(e) {}
             return;
         }
 
@@ -1417,7 +1417,7 @@ function displayCharts(result) {
 
         const reactions = Array.from(reactionsSet);
         if (reactions.length === 0) {
-            try { showEmptyChartPlaceholder(ctx5.canvas.parentElement, '反応回数の�?ータがありません'); } catch(e) {}
+            try { showEmptyChartPlaceholder(ctx5.canvas.parentElement, '反応回数のデータがありません'); } catch(e) {}
             return;
         }
 
@@ -1475,7 +1475,7 @@ function displayCharts(result) {
         }
         const ctx6 = canvas6.getContext('2d');
         if (!(stats.target_aura_uptime && Array.isArray(stats.target_aura_uptime))) {
-            try { showEmptyChartPlaceholder(ctx6.canvas.parentElement, '付着時間の�?ータがありません'); } catch(e) {}
+            try { showEmptyChartPlaceholder(ctx6.canvas.parentElement, '付着時間のデータがありません'); } catch(e) {}
             return;
         }
 
@@ -1485,7 +1485,7 @@ function displayCharts(result) {
         const perTarget = []; // array of maps element->value
 
         stats.target_aura_uptime.forEach((targetAura, tidx) => {
-            const label = `ターゲ�?�?${tidx+1}`;
+            const label = `ターゲット ${tidx+1}`;
             targetLabels.push(label);
             const map = {};
             if (targetAura && typeof targetAura === 'object') {
@@ -1510,7 +1510,7 @@ function displayCharts(result) {
 
         const elements = Array.from(elementSet);
         if (elements.length === 0) {
-            try { showEmptyChartPlaceholder(ctx6.canvas.parentElement, '付着時間の�?ータがありません'); } catch(e) {}
+            try { showEmptyChartPlaceholder(ctx6.canvas.parentElement, '付着時間のデータがありません'); } catch(e) {}
             return;
         }
 
@@ -1619,7 +1619,7 @@ function showEmptyChartPlaceholder(containerEl, text) {
         div.style.color = 'var(--muted)';
         div.style.fontSize = '0.95rem';
         div.style.textAlign = 'left';
-        div.textContent = text || '�?ータがありません';
+        div.textContent = text || 'データがありません';
         containerEl.appendChild(div);
     } catch (e) { /* ignore */ }
 }
@@ -1982,7 +1982,7 @@ function addChartLegend(ctx, labels, colors) {
         container.appendChild(legendDiv);
     }
     
-    let html = '<div class="chart-legend-title">凡�?</div>';
+    let html = '<div class="chart-legend-title">凡例</div>';
     labels.forEach((label, idx) => {
         const color = colors[idx % colors.length];
         html += `<div class="chart-legend-item">
@@ -2021,23 +2021,23 @@ function formatStatName(statKey) {
     const statNames = {
         'hp': 'HP',
         'hp%': 'HP%',
-        'atk': '攻�?�?',
-        'atk%': '攻�?�?%',
-        'def': '防御�?',
-        'def%': '防御�?%',
-        'em': '�?�?熟知',
-        'er': '�?�?チャージ効�?',
-        'cr': '会�?�?',
-        'cd': '会�?ダメージ',
-        'heal': '治療効�?',
-        'pyro%': '炎�??�?ダメージ',
-        'hydro%': '水�?�?ダメージ',
-        'cryo%': '氷�?�?ダメージ',
-        'electro%': '雷�?�?ダメージ',
-        'anemo%': '風�?�?ダメージ',
-        'geo%': '岩�?�?ダメージ',
-        'dendro%': '草�??�?ダメージ',
-        'phys%': '物�?ダメージ'
+        'atk': '攻撃力',
+        'atk%': '攻撃%',
+        'def': '防御力',
+        'def%': '防御%',
+        'em': '元素熟知',
+        'er': '元素チャージ効率',
+        'cr': '会心率',
+        'cd': '会心ダメージ',
+        'heal': '回復量',
+        'pyro%': '炎元素ダメージ',
+        'hydro%': '水元素ダメージ',
+        'cryo%': '氷元素ダメージ',
+        'electro%': '雷元素ダメージ',
+        'anemo%': '風元素ダメージ',
+        'geo%': '岩元素ダメージ',
+        'dendro%': '草元素ダメージ',
+        'phys%': '物理ダメージ'
     };
     
     return statNames[statKey] || statKey;
