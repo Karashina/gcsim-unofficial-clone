@@ -1,0 +1,10 @@
+{
+  "name": "gcsim-webui-src",
+  "private": true,
+  "devDependencies": {
+    "esbuild": "^0.18.0"
+  },
+  "scripts": {
+    "build": "node build.js"
+  }
+}
