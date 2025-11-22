@@ -1148,6 +1148,9 @@
         pre#config-highlight .token.comment { color: var(--muted) !important; font-style: italic; }
         pre#config-highlight .token.operator { color: var(--primary-1) !important; }
     </style>
+    
+    <!-- Results Screen Styles (extracted from inline styles) -->
+    <link rel="stylesheet" href="results.css">
 </head>
 <body>
     <!-- Top Navigation Bar -->
@@ -1241,62 +1244,66 @@
         </style>
         
         <!-- Screen 3: Results Display -->
+        <!-- Screen 3: Results Display -->
         <div class="screen" id="screen-results">
             <div class="results-container" id="results-container">
                 <h5 style="margin: 15px 0 10px 0; font-size: 1.1rem;">
                     📊 シミュレーション結果
                 </h5>
             
-            <!-- 1. Character Information (top) -->
-            <div class="results-section">
+            <!-- 1. Character Information (4-column grid) -->
+            <div class="results-section characters-section">
                 <h6 class="section-title">キャラクター情報</h6>
                 <div id="characters-list"></div>
             </div>
             
-            <!-- 2. Statistics (compact layout) -->
-            <div class="results-section">
-                <h6 class="section-title">シミュレーション結果</h6>
-                <div class="stats-grid-compact">
-                    <div class="stat-card-compact">
-                        <span class="stat-label-compact">DPS</span>
-                        <span class="stat-value-compact" id="stat-dps">-</span>
+            <!-- 2. Statistics (horizontal grid) -->
+            <div class="results-section stats-summary-section">
+                <h6 class="section-title">統計情報</h6>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">DPS</span>
+                        <span class="stat-value" id="stat-dps">-</span>
                     </div>
-                    <div class="stat-card-compact">
-                        <span class="stat-label-compact">EPS</span>
-                        <span class="stat-value-compact" id="stat-eps">-</span>
+                    <div class="stat-card">
+                        <span class="stat-label">EPS</span>
+                        <span class="stat-value" id="stat-eps">-</span>
                     </div>
-                    <div class="stat-card-compact">
-                        <span class="stat-label-compact">RPS</span>
-                        <span class="stat-value-compact" id="stat-rps">-</span>
+                    <div class="stat-card">
+                        <span class="stat-label">RPS</span>
+                        <span class="stat-value" id="stat-rps">-</span>
                     </div>
-                    <div class="stat-card-compact">
-                        <span class="stat-label-compact">HPS</span>
-                        <span class="stat-value-compact" id="stat-hps">-</span>
+                    <div class="stat-card">
+                        <span class="stat-label">HPS</span>
+                        <span class="stat-value" id="stat-hps">-</span>
                     </div>
-                    <div class="stat-card-compact">
-                        <span class="stat-label-compact">SHP</span>
-                        <span class="stat-value-compact" id="stat-shp">-</span>
+                    <div class="stat-card">
+                        <span class="stat-label">SHP</span>
+                        <span class="stat-value" id="stat-shp">-</span>
                     </div>
-                    <div class="stat-card-compact">
-                        <span class="stat-label-compact">時間</span>
-                        <span class="stat-value-compact" id="stat-dur">-</span>
+                    <div class="stat-card">
+                        <span class="stat-label">時間</span>
+                        <span class="stat-value" id="stat-dur">-</span>
                     </div>
                 </div>
             </div>
             
-            <!-- 3. DPS Analysis -->
-            <div class="results-section">
-                <h6 class="section-title">DPS分析</h6>
-                <div class="chart-container-compact">
-                    <div class="chart-title-compact">キャラクター別DPS</div>
-                    <canvas id="char-dps-chart"></canvas>
+            <!-- 3. DPS Analysis Charts (side-by-side) -->
+            <div class="results-section charts-section">
+                <h6 class="section-title">キャラクター別DPS・ソース別DPS</h6>
+                <div class="charts-grid">
+                    <div class="chart-container" id="char-dps-chart-container">
+                        <div class="chart-title">キャラクター別DPS</div>
+                        <canvas id="char-dps-chart"></canvas>
+                    </div>
+                    <div class="chart-container" id="source-dps-chart-container">
+                        <div class="chart-title">ソース別DPS</div>
+                        <canvas id="source-dps-chart"></canvas>
+                    </div>
                 </div>
-                <div class="chart-container-compact">
-                    <div class="chart-title-compact">ソース別DPS</div>
-                    <canvas id="source-dps-chart"></canvas>
-                </div>
-                <div class="chart-container-compact">
-                    <div class="chart-title-compact">ダメージ分布</div>
+                <!-- Damage Distribution Chart (full width) -->
+                <div class="chart-container chart-full-width" id="damage-dist-chart-container">
+                    <div class="chart-title">ダメージ分布</div>
                     <canvas id="damage-dist-chart"></canvas>
                 </div>
             </div>
@@ -1305,16 +1312,17 @@
             <div class="results-section">
                 <h6 class="section-title">元素反応</h6>
                 <div class="reactions-grid">
-                    <div class="chart-container-compact">
-                        <div class="chart-title-compact">反応回数</div>
+                    <div class="chart-container">
+                        <div class="chart-title">反応回数</div>
                         <canvas id="reaction-count-chart"></canvas>
                     </div>
-                    <div class="chart-container-compact">
-                        <div class="chart-title-compact">ターゲット付着時間</div>
+                    <div class="chart-container">
+                        <div class="chart-title">ターゲット付着時間</div>
                         <canvas id="aura-uptime-chart"></canvas>
                     </div>
                 </div>
             </div>
+        </div>
         </div>
 
         <!-- Screen 4: Debug (Under Construction) -->

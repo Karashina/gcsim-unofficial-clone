@@ -867,23 +867,23 @@ for let i=0; i<4; i=i+1 {
         console.log("[WebUI] No snapshot_stats found for character:", name);
       }
       charDiv.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <div style="font-size: 1.0rem; font-weight: 600;">${name} <span style="font-size: 0.85rem; color: var(--muted); font-weight: 400;">C${constellation}</span></div>
-                <div style="font-size: 0.85rem; color: var(--muted-2);">${talentsText}</div>
+            <div class="char-header">
+                <div class="char-name-line">${name} <span class="char-constellation">C${constellation}</span></div>
+                <div class="char-talents">${talentsText}</div>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <div class="small-en">${rawName}</div>
-                <div style="font-size: 0.85rem;">Lv. ${level}/${maxLevel}</div>
+            <div class="char-subheader">
+                <div class="char-en-name">${rawName}</div>
+                <div class="char-level">Lv. ${level}/${maxLevel}</div>
             </div>
-            <div style="margin: 8px 0;">
+            <div class="char-artifact">
                 ${firstSetBadge}
             </div>
-            <div style="margin: 8px 0; font-size: 0.85rem;">
-                <div style="margin-bottom: 4px;"><strong>${weaponJP} Lv.${weaponLevel}/${weaponMaxLevel} (R${weaponRefine})</strong></div>
-                <div class="small-en">${weapon}</div>
+            <div class="char-weapon">
+                <div class="char-weapon-name">${weaponJP} Lv.${weaponLevel}/${weaponMaxLevel} (R${weaponRefine})</div>
+                <div class="char-weapon-en">${weapon}</div>
             </div>
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--muted-border);">
-                <div style="font-weight: 600; margin-bottom: 6px;">\u30B9\u30C6\u30FC\u30BF\u30B9\u8A73\u7D30:</div>
+            <div class="char-stats">
+                <div class="char-stats-title">\u30B9\u30C6\u30FC\u30BF\u30B9\u8A73\u7D30:</div>
                 <div class="char-stats-list">
                     ${statsHTML}
                 </div>
@@ -956,18 +956,19 @@ for let i=0; i<4; i=i+1 {
     if (!result.target_details || result.target_details.length === 0)
       return "";
     let html = '<div style="margin-top:10px;"><strong>\u30BF\u30FC\u30B2\u30C3\u30C8\u60C5\u5831:</strong>';
+    // Local helper to strip strikethrough tokens - use different name to avoid TDZ
+    const _stripStrikeTokens = function(s) {
+      return s ? s.replace(/~~.*?~~/g, "").trim() : s;
+    };
     result.target_details.forEach((target, idx) => {
-      const stripStrikeTokens = typeof stripStrikeTokens === "function" ? stripStrikeTokens : function(s) {
-        return s ? s.replace(/~~.*?~~/g, "").trim() : s;
-      };
-      const name = stripStrikeTokens(target.name) || `\u30BF\u30FC\u30B2\u30C3\u30C8 ${idx + 1}`;
+      const name = _stripStrikeTokens(target.name) || `\u30BF\u30FC\u30B2\u30C3\u30C8 ${idx + 1}`;
       const level = target.level || 1;
       const hp = target.hp || 0;
       let resistHTML = "";
       if (target.resist && Object.keys(target.resist).length > 0) {
         resistHTML = '<div style="margin-top:6px;">';
         for (const [element, resist] of Object.entries(target.resist)) {
-          const el = stripStrikeTokens(element);
+          const el = _stripStrikeTokens(element);
           if (!el)
             continue;
           resistHTML += `<div class="info-row"><span class="info-label">${el}</span><span class="info-value">${(resist * 100).toFixed(1)}%</span></div>`;
@@ -987,6 +988,14 @@ for let i=0; i<4; i=i+1 {
     console.log("[WebUI] Displaying charts...");
     console.log("[WebUI] Result structure:", Object.keys(result));
     console.log("[WebUI] Statistics:", result.statistics);
+    
+    // Ensure resultsContainer is available at the start (fix for TDZ issue)
+    const resultsContainer = document.getElementById('results-container');
+    if (!resultsContainer) {
+      console.error('[WebUI] results-container not found');
+      return;
+    }
+    
     try {
       resetChartContainerHeights();
     } catch (e) {
