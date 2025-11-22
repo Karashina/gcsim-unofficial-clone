@@ -240,6 +240,42 @@
     }
     return top;
   }
+  function resetChartContainerHeights() {
+    try {
+      document.querySelectorAll(".chart-container, .chart-container-compact").forEach((el) => {
+        try {
+          el.style.removeProperty("min-height");
+        } catch (e) {
+        }
+      });
+      document.querySelectorAll(".chart-container canvas, .chart-container-compact canvas").forEach((c) => {
+        try {
+          if (c && c.dataset) {
+            delete c.dataset.visualHeight;
+            delete c.dataset.needUnhide;
+          }
+          try {
+            c.style.removeProperty("top");
+          } catch (e) {
+          }
+          try {
+            c.style.removeProperty("width");
+          } catch (e) {
+          }
+          try {
+            c.style.removeProperty("height");
+          } catch (e) {
+          }
+          try {
+            c.style.visibility = "";
+          } catch (e) {
+          }
+        } catch (e) {
+        }
+      });
+    } catch (e) {
+    }
+  }
   function adjustAllChartInsets() {
     try {
       document.querySelectorAll(".chart-container canvas").forEach((c) => {
@@ -951,11 +987,19 @@ for let i=0; i<4; i=i+1 {
     console.log("[WebUI] Displaying charts...");
     console.log("[WebUI] Result structure:", Object.keys(result));
     console.log("[WebUI] Statistics:", result.statistics);
+    try {
+      resetChartContainerHeights();
+    } catch (e) {
+    }
     Object.values(charts).forEach((chart) => {
       if (chart && typeof chart.destroy === "function")
         chart.destroy();
     });
     charts = {};
+    try {
+      resetChartContainerHeights();
+    } catch (e) {
+    }
     const stats = result.statistics || {};
     try {
       let rawPanel = document.getElementById("raw-stats-panel");
@@ -1492,13 +1536,34 @@ for let i=0; i<4; i=i+1 {
         return;
       const parent = canvas.parentElement;
       if (parent) {
-        parent.style.setProperty("min-height", Math.max(120, desiredHeightPx) + "px", "important");
+        try {
+          const computed = window.getComputedStyle ? parseFloat(window.getComputedStyle(parent).minHeight) : NaN;
+          const existingInline = parent.style && parent.style.minHeight ? parseFloat(parent.style.minHeight) : NaN;
+          const existing = !Number.isNaN(existingInline) && existingInline > 0 ? existingInline : Number.isNaN(computed) ? 0 : computed;
+          const vp = typeof window !== "undefined" && window.innerHeight ? window.innerHeight : 800;
+          const absoluteMax = Math.max(800, Math.floor(vp * 1.5));
+          const target = Math.max(120, Math.min(desiredHeightPx, absoluteMax));
+          if (target > existing + 4) {
+            parent.style.setProperty("min-height", Math.ceil(target) + "px", "important");
+          }
+        } catch (e) {
+        }
       }
       let el = parent;
       let depth = 0;
       while (el && depth < 4) {
         if (el.classList && el.classList.contains("col")) {
-          el.style.setProperty("min-height", Math.max(120, desiredHeightPx) + "px", "important");
+          try {
+            const computed = window.getComputedStyle ? parseFloat(window.getComputedStyle(el).minHeight) : NaN;
+            const existingInline = el.style && el.style.minHeight ? parseFloat(el.style.minHeight) : NaN;
+            const existing = !Number.isNaN(existingInline) && existingInline > 0 ? existingInline : Number.isNaN(computed) ? 0 : computed;
+            const vp = typeof window !== "undefined" && window.innerHeight ? window.innerHeight : 800;
+            const absoluteMax = Math.max(800, Math.floor(vp * 1.5));
+            const target = Math.max(120, Math.min(desiredHeightPx, absoluteMax));
+            if (target > existing + 4)
+              el.style.setProperty("min-height", Math.ceil(target) + "px", "important");
+          } catch (e) {
+          }
           break;
         }
         el = el.parentElement;

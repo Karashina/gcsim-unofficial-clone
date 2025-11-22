@@ -286,6 +286,35 @@ function setCanvasTopInset(canvas) {
     return top;
 }
 
+// Reset any inline min-height / sizing markers applied to chart containers and canvases.
+// This is used to avoid accumulated min-height increases when charts are rebuilt.
+function resetChartContainerHeights() {
+    try {
+        // Clear inline min-height on chart containers so subsequent sizing starts fresh
+        document.querySelectorAll('.chart-container, .chart-container-compact').forEach(el => {
+            try { el.style.removeProperty('min-height'); } catch(e) {}
+        });
+
+        // Clear dataset sizing hints and visibility flags on canvases
+        document.querySelectorAll('.chart-container canvas, .chart-container-compact canvas').forEach(c => {
+            try {
+                if (c && c.dataset) {
+                    delete c.dataset.visualHeight;
+                    delete c.dataset.needUnhide;
+                }
+                // remove any inline top/width/height that may have been set
+                try { c.style.removeProperty('top'); } catch(e) {}
+                try { c.style.removeProperty('width'); } catch(e) {}
+                try { c.style.removeProperty('height'); } catch(e) {}
+                // ensure canvas is visible (will be hidden again by sizing helper if needed)
+                try { c.style.visibility = ''; } catch(e) {}
+            } catch(e) {}
+        });
+    } catch (e) {
+        /* ignore */
+    }
+}
+
 function adjustAllChartInsets() {
     try {
         document.querySelectorAll('.chart-container canvas').forEach(c => {
@@ -1157,11 +1186,17 @@ function displayCharts(result) {
     console.log('[WebUI] Result structure:', Object.keys(result));
     console.log('[WebUI] Statistics:', result.statistics);
     
+    // Reset any previous inline container heights / sizing hints before destroying charts
+    try { resetChartContainerHeights(); } catch(e) {}
+
     // Destroy existing charts
     Object.values(charts).forEach(chart => {
         if (chart && typeof chart.destroy === 'function') chart.destroy();
     });
     charts = {};
+
+    // Clear sizing hints again after destruction to ensure fresh layout
+    try { resetChartContainerHeights(); } catch(e) {}
     
     const stats = result.statistics || {};
     
@@ -1738,14 +1773,33 @@ function ensureContainerHeight(ctx, desiredHeightPx) {
         if (!canvas) return;
         const parent = canvas.parentElement;
         if (parent) {
-            parent.style.setProperty('min-height', Math.max(120, desiredHeightPx) + 'px', 'important');
+            try {
+                const computed = window.getComputedStyle ? parseFloat(window.getComputedStyle(parent).minHeight) : NaN;
+                const existingInline = parent.style && parent.style.minHeight ? parseFloat(parent.style.minHeight) : NaN;
+                const existing = (!Number.isNaN(existingInline) && existingInline > 0) ? existingInline : (Number.isNaN(computed) ? 0 : computed);
+                const vp = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+                const absoluteMax = Math.max(800, Math.floor(vp * 1.5));
+                const target = Math.max(120, Math.min(desiredHeightPx, absoluteMax));
+                // Only update inline min-height if it meaningfully increases the existing (avoid oscillation)
+                if (target > existing + 4) {
+                    parent.style.setProperty('min-height', Math.ceil(target) + 'px', 'important');
+                }
+            } catch (e) { /* ignore */ }
         }
         // ensure ancestor columns (common .col) also have some reserved height
         let el = parent;
         let depth = 0;
         while (el && depth < 4) {
             if (el.classList && el.classList.contains('col')) {
-                el.style.setProperty('min-height', Math.max(120, desiredHeightPx) + 'px', 'important');
+                try {
+                    const computed = window.getComputedStyle ? parseFloat(window.getComputedStyle(el).minHeight) : NaN;
+                    const existingInline = el.style && el.style.minHeight ? parseFloat(el.style.minHeight) : NaN;
+                    const existing = (!Number.isNaN(existingInline) && existingInline > 0) ? existingInline : (Number.isNaN(computed) ? 0 : computed);
+                    const vp = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+                    const absoluteMax = Math.max(800, Math.floor(vp * 1.5));
+                    const target = Math.max(120, Math.min(desiredHeightPx, absoluteMax));
+                    if (target > existing + 4) el.style.setProperty('min-height', Math.ceil(target) + 'px', 'important');
+                } catch(e) { /* ignore */ }
                 break;
             }
             el = el.parentElement;
