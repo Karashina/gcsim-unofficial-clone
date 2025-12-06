@@ -5,6 +5,17 @@
 
 import { toJPCharacter, toJPWeapon, toJPArtifact } from '../localization.js';
 
+// Simple HTML escaper for safe attribute insertion
+function escapeHtml(str) {
+    if (!str && str !== 0) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 /**
  * Display character information cards
  * @param {Object} result - Simulation result object
@@ -111,19 +122,26 @@ function createArtifactBadge(sets) {
     if (!sets || Object.keys(sets).length === 0) {
         return '<div class="char-artifact"></div>';
     }
-    
-    const firstSet = Object.entries(sets)[0];
-    const [setKey, count] = firstSet;
-    const setName = toJPArtifact(setKey);
-    
-    return `
-        <div class="char-artifact">
-            <span class="chip">
-                ${setName} (${count})
-                <div class="small-en">${setKey}</div>
-            </span>
-        </div>
-    `;
+    // Render artifact icons horizontally. Each icon shows a tooltip with
+    // the Japanese name and the raw key (fallback when no icon image exists).
+    // If you have image assets later, set `data-icon-src` to point to them.
+    const parts = [];
+    Object.entries(sets).forEach(([setKey, count]) => {
+        const setName = toJPArtifact(setKey);
+        // Use title attribute for tooltip: "日本語名 (key) — x個"
+        const title = `${setName} (${setKey})` + (count ? ` — ${count}` : '');
+        // Attempt to use an icon file under /ui/assets/artifacts/<setKey>.png if present.
+        // We don't require it; CSS will display a fallback pill.
+        const iconPath = `assets/artifacts/${setKey}.png`;
+        // Build icon span; include an <img> that hides itself on error, and a text
+        // fallback that will be visible when no image is available.
+        parts.push(`\n            <span class=\"artifact-icon\" title=\"${escapeHtml(title)}\">` +
+            `<img class=\"artifact-img\" src=\"${iconPath}\" onerror=\"this.style.display='none'\" alt=\"${escapeHtml(setKey)}\"/>` +
+            `<span class=\"artifact-fallback\">${escapeHtml(setKey.slice(0,2).toUpperCase())}</span>` +
+            `</span>`);
+    });
+
+    return `\n        <div class=\"char-artifact artifacts-inline\">${parts.join('')}\n        </div>\n    `;
 }
 
 /**
