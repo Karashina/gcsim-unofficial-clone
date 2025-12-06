@@ -127,7 +127,7 @@
   function getCharColor(i) {
     return CHAR_PALETTE[i % CHAR_PALETTE.length];
   }
-  var DEBUG = false;
+  var DEBUG = true;
   function debugLog(...args) {
     if (DEBUG && console && console.log)
       console.log(...args);
@@ -176,38 +176,48 @@
         return;
       const parent = canvas.parentElement;
       const dpr = typeof window !== "undefined" && window.devicePixelRatio ? window.devicePixelRatio : 1;
-      try {
-        canvas.style.width = "100%";
-      } catch (e) {
-      }
       const rect = parent && parent.getBoundingClientRect ? parent.getBoundingClientRect() : canvas.getBoundingClientRect();
       const visualWidth = rect && rect.width ? Math.max(minWidth, Math.floor(rect.width)) : Math.max(minWidth, Math.floor(canvas.offsetWidth || 600));
       const heightPx = Math.max(120, Math.floor(desiredHeightPx || 140));
+      try {
+        debugLog("[WebUI][Sizing] setCanvasVisualSize", {
+          id: canvas.id || "(no-id)",
+          desiredHeightPx,
+          heightPx,
+          visualWidth,
+          dpr,
+          parentExists: !!parent,
+          parentRect: rect ? { width: rect.width, height: rect.height } : null,
+          barThicknessOverride: canvas.dataset ? canvas.dataset.barThicknessOverride : void 0
+        });
+      } catch (e) {
+      }
       const viewportH = typeof window !== "undefined" && window.innerHeight ? window.innerHeight : 800;
       const absoluteMax = Math.max(800, Math.floor(viewportH * 2.5));
       const cappedHeight = Math.min(heightPx, absoluteMax);
       try {
-        if (parent)
-          parent.style.setProperty("min-height", cappedHeight + "px", "important");
+        canvas.style.width = "100%";
+        canvas.style.maxWidth = "100%";
       } catch (e) {
       }
       canvas.width = Math.floor(visualWidth * dpr);
       canvas.height = Math.floor(cappedHeight * dpr);
       try {
-        canvas.dataset.visualHeight = String(cappedHeight);
+        if (parent) {
+          parent.style.setProperty("height", cappedHeight + "px", "important");
+          parent.style.setProperty("min-height", cappedHeight + "px", "important");
+        }
       } catch (e) {
       }
       try {
-        ensureContainerHeight(ctx, cappedHeight);
-      } catch (e) {
-      }
-      try {
-        setCanvasTopInset(canvas);
-      } catch (e) {
-      }
-      try {
-        canvas.style.visibility = "hidden";
-        canvas.dataset.needUnhide = "1";
+        debugLog("[WebUI][Sizing] setCanvasVisualSize applied", {
+          id: canvas.id || "(no-id)",
+          cappedHeight,
+          canvasWidthBuf: canvas.width,
+          canvasHeightBuf: canvas.height,
+          parentInlineHeight: parent && parent.style ? parent.style.height : void 0,
+          parentInlineMinHeight: parent && parent.style ? parent.style.minHeight : void 0
+        });
       } catch (e) {
       }
     } catch (e) {
@@ -247,6 +257,10 @@
           el.style.removeProperty("min-height");
         } catch (e) {
         }
+        try {
+          el.style.removeProperty("height");
+        } catch (e) {
+        }
       });
       document.querySelectorAll(".chart-container canvas, .chart-container-compact canvas").forEach((c) => {
         try {
@@ -267,6 +281,16 @@
           } catch (e) {
           }
           try {
+            if (c.parentElement)
+              c.parentElement.style.removeProperty("height");
+          } catch (e) {
+          }
+          try {
+            if (c.parentElement)
+              c.parentElement.style.removeProperty("min-height");
+          } catch (e) {
+          }
+          try {
             c.style.visibility = "";
           } catch (e) {
           }
@@ -278,25 +302,48 @@
   }
   function adjustAllChartInsets() {
     try {
-      document.querySelectorAll(".chart-container canvas").forEach((c) => {
+      const canvasInfos = [];
+      const canvases = Array.from(document.querySelectorAll(".chart-container canvas"));
+      const dpr = typeof window !== "undefined" && window.devicePixelRatio ? window.devicePixelRatio : 1;
+      canvases.forEach((c) => {
         const top = setCanvasTopInset(c) || 0;
+        let visualCanvasH = 0;
         try {
-          const dpr = typeof window !== "undefined" && window.devicePixelRatio ? window.devicePixelRatio : 1;
-          const stored = c.dataset && c.dataset.visualHeight ? parseFloat(c.dataset.visualHeight) : NaN;
-          let visualCanvasH = 0;
-          if (!Number.isNaN(stored) && stored > 0) {
-            visualCanvasH = Math.round(stored);
-          } else {
+          const parentHInline = c.parentElement && c.parentElement.style && c.parentElement.style.height ? parseFloat(c.parentElement.style.height) : NaN;
+          const parentHComputed = window.getComputedStyle && c.parentElement ? parseFloat(window.getComputedStyle(c.parentElement).height) : NaN;
+          const parentH = !Number.isNaN(parentHInline) && parentHInline > 0 ? parentHInline : Number.isNaN(parentHComputed) ? NaN : parentHComputed;
+          if (!Number.isNaN(parentH) && parentH > 0)
+            visualCanvasH = Math.round(parentH);
+          else {
             const bufHeight = c.height || parseFloat(c.getAttribute("height")) || 0;
             visualCanvasH = bufHeight ? Math.round(bufHeight / dpr) : Math.ceil(c.getBoundingClientRect && c.getBoundingClientRect().height || 0);
           }
-          const cs = window.getComputedStyle ? window.getComputedStyle(c) : null;
-          const bottomInset = cs ? parseFloat(cs.bottom) || 6 : 6;
-          const required = Math.max(120, Math.ceil(top + visualCanvasH + bottomInset + 2));
-          const viewportH = typeof window !== "undefined" && window.innerHeight ? window.innerHeight : 800;
-          const absoluteMax = Math.max(1e3, Math.floor(viewportH * 3));
-          const finalRequired = Math.min(required, absoluteMax);
-          const parent = c.parentElement;
+        } catch (e) {
+          const bufHeight = c.height || parseFloat(c.getAttribute("height")) || 0;
+          visualCanvasH = bufHeight ? Math.round(bufHeight / dpr) : Math.ceil(c.getBoundingClientRect && c.getBoundingClientRect().height || 0);
+        }
+        const required = Math.max(120, Math.ceil(top + visualCanvasH + 12));
+        canvasInfos.push({ canvas: c, top, visualCanvasH, required });
+        try {
+          debugLog("[WebUI][Sizing] adjustAllChartInsets collect", { id: c.id || "(no-id)", top, visualCanvasH, required });
+        } catch (e) {
+        }
+      });
+      const viewportH = typeof window !== "undefined" && window.innerHeight ? window.innerHeight : 800;
+      const totalRequired = canvasInfos.reduce((s, i) => s + i.required, 0);
+      const allowedTotal = Math.max(300, Math.floor(viewportH * 0.7));
+      let scale = 1;
+      if (totalRequired > allowedTotal && totalRequired > 0) {
+        scale = allowedTotal / totalRequired;
+      }
+      try {
+        debugLog("[WebUI][Sizing] adjustAllChartInsets totals", { totalRequired, allowedTotal, scale });
+      } catch (e) {
+      }
+      canvasInfos.forEach((info) => {
+        try {
+          const finalRequired = Math.max(120, Math.floor(info.required * scale));
+          const parent = info.canvas.parentElement;
           if (parent) {
             try {
               const existingInline = parent.style && parent.style.minHeight ? parseFloat(parent.style.minHeight) : NaN;
@@ -304,9 +351,8 @@
               const existing = !Number.isNaN(existingInline) && existingInline > 0 ? existingInline : Number.isNaN(computed) ? 0 : computed;
               const maxStep = Math.max(200, Math.floor(existing * 0.5));
               let newHeight = finalRequired;
-              if (finalRequired > existing && finalRequired - existing > maxStep) {
+              if (finalRequired > existing && finalRequired - existing > maxStep)
                 newHeight = existing + maxStep;
-              }
               if (newHeight > existing)
                 parent.style.setProperty("min-height", Math.ceil(newHeight) + "px", "important");
             } catch (e) {
@@ -320,8 +366,8 @@
                 const existingInline = el.style && el.style.minHeight ? parseFloat(el.style.minHeight) : NaN;
                 const computed = window.getComputedStyle ? parseFloat(window.getComputedStyle(el).minHeight) : NaN;
                 const existing = !Number.isNaN(existingInline) && existingInline > 0 ? existingInline : Number.isNaN(computed) ? 0 : computed;
-                if (required > existing)
-                  el.style.setProperty("min-height", required + "px", "important");
+                if (finalRequired > existing)
+                  el.style.setProperty("min-height", finalRequired + "px", "important");
               } catch (e) {
               }
               break;
@@ -330,11 +376,11 @@
             depth++;
           }
           try {
-            if (c && c.dataset && c.dataset.needUnhide) {
-              c.style.visibility = "visible";
-              delete c.dataset.needUnhide;
-            } else if (c && (!c.dataset || !c.dataset.needUnhide)) {
-              c.style.visibility = "visible";
+            if (info.canvas && info.canvas.dataset && info.canvas.dataset.needUnhide) {
+              info.canvas.style.visibility = "visible";
+              delete info.canvas.dataset.needUnhide;
+            } else if (info.canvas && (!info.canvas.dataset || !info.canvas.dataset.needUnhide)) {
+              info.canvas.style.visibility = "visible";
             }
           } catch (e) {
           }
@@ -445,10 +491,26 @@
   } catch (e) {
     console.warn("CodeMirror GCSL mode registration failed", e);
   }
+  function setupCollapsibleSections() {
+    document.addEventListener("click", function(e) {
+      const sectionTitle = e.target.closest(".section-title");
+      if (!sectionTitle)
+        return;
+      const section = sectionTitle.closest(".results-section");
+      if (!section)
+        return;
+      section.classList.toggle("collapsed");
+      const content = section.querySelector(".section-content");
+      if (content && !section.classList.contains("collapsed")) {
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+    });
+  }
   document.addEventListener("DOMContentLoaded", function() {
     debugLog("[WebUI] Initializing...");
     setupScreenNavigation();
     setupModeSwitch();
+    setupCollapsibleSections();
     const textarea = document.getElementById("config-editor");
     try {
       cmEditor = CodeMirror.fromTextArea(textarea, {
@@ -678,11 +740,11 @@ for let i=0; i<4; i=i+1 {
     const config = typeof cmEditor !== "undefined" && cmEditor ? cmEditor.getValue() : textarea.value;
     const errorMsg = document.getElementById("error-message");
     const loading = document.getElementById("loading");
-    const resultsContainer2 = document.getElementById("results-container");
+    const resultsContainer = document.getElementById("results-container");
     const runButton = document.querySelector(".btn-run");
     debugLog("[WebUI] Config length:", config.length);
     errorMsg.style.display = "none";
-    resultsContainer2.style.display = "none";
+    resultsContainer.style.display = "none";
     loading.style.display = "block";
     runButton.disabled = true;
     clearErrorHighlights();
@@ -691,21 +753,54 @@ for let i=0; i<4; i=i+1 {
       const response = await fetch("/api/simulate", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "text/plain"
         },
-        body: JSON.stringify({ config })
+        body: config
       });
       debugLog("[WebUI] Response status:", response.status);
-      loading.style.display = "none";
-      runButton.disabled = false;
       if (!response.ok) {
         const error = await response.json();
         console.error("[WebUI] Error response:", error);
+        loading.style.display = "none";
+        runButton.disabled = false;
         handleError(error);
         return;
       }
-      const result = await response.json();
-      debugLog("[WebUI] Simulation result:", result);
+      const submitResult = await response.json();
+      debugLog("[WebUI] Submit result:", submitResult);
+      if (!submitResult.job_id) {
+        throw new Error("No job_id returned from server");
+      }
+      debugLog("[WebUI] Polling for result with job_id:", submitResult.job_id);
+      let attempts = 0;
+      const maxAttempts = 60;
+      const pollInterval = 1e3;
+      let result = null;
+      while (attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
+        attempts++;
+        debugLog("[WebUI] Poll attempt", attempts);
+        const resultResponse = await fetch(`/api/result?id=${submitResult.job_id}`);
+        if (!resultResponse.ok) {
+          console.error("[WebUI] Error fetching result");
+          continue;
+        }
+        const jobStatus = await resultResponse.json();
+        debugLog("[WebUI] Job status:", jobStatus.status);
+        if (jobStatus.status === "done") {
+          result = jobStatus.result;
+          debugLog("[WebUI] Simulation complete!");
+          break;
+        } else if (jobStatus.status === "error") {
+          throw new Error(jobStatus.error || "Simulation failed");
+        }
+      }
+      loading.style.display = "none";
+      runButton.disabled = false;
+      if (!result) {
+        throw new Error("Simulation timed out");
+      }
+      debugLog("[WebUI] Final result:", result);
       const resultsTab = document.querySelector('.navbar-tab[data-screen="results"]');
       if (resultsTab) {
         resultsTab.click();
@@ -740,7 +835,7 @@ for let i=0; i<4; i=i+1 {
   }
   function displayResults(result) {
     debugLog("[WebUI] Displaying results...");
-    const resultsContainer2 = document.getElementById("results-container");
+    const resultsContainer = document.getElementById("results-container");
     const resultsScreen = document.getElementById("screen-results");
     if (resultsScreen && !resultsScreen.classList.contains("active")) {
       const resultsTab = document.querySelector('.navbar-tab[data-screen="results"]');
@@ -759,12 +854,8 @@ for let i=0; i<4; i=i+1 {
       } catch (e) {
       }
       try {
-        resultsContainer2.style.display = "block";
-        resultsContainer2.classList.add("visible");
-      } catch (e) {
-      }
-      try {
-        resultsContainer2.scrollIntoView({ behavior: "smooth" });
+        resultsContainer.style.display = "block";
+        resultsContainer.classList.add("visible");
       } catch (e) {
       }
       debugLog("[WebUI] Results displayed successfully (post-layout)");
@@ -826,12 +917,12 @@ for let i=0; i<4; i=i+1 {
       if (talents.attack || talents.skill || talents.burst) {
         talentsText = `${talents.attack || 1}/${talents.skill || 1}/${talents.burst || 1}`;
       }
-      let firstSetBadge = "";
-      let weaponBadgeHTML = "";
+      let setsBadgesHTML = "";
       if (char.sets && Object.keys(char.sets).length > 0) {
-        const firstSet = Object.entries(char.sets)[0];
-        const [set, count] = firstSet;
-        firstSetBadge = `<span class="chip">${toJPArtifact(set)} (${count})<div class="small-en">${set}</div></span>`;
+        const setsArray = Object.entries(char.sets);
+        setsBadgesHTML = setsArray.map(([set, count]) => {
+          return `<span class="chip">${toJPArtifact(set)} (${count})<div class="small-en">${set}</div></span>`;
+        }).join(" ");
       }
       let statsHTML = "";
       const snapshotStats = char.snapshot_stats || char.snapshot || [];
@@ -867,43 +958,35 @@ for let i=0; i<4; i=i+1 {
         console.log("[WebUI] No snapshot_stats found for character:", name);
       }
       charDiv.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <div style="font-size: 1.0rem; font-weight: 600;">${name} <span style="font-size: 0.85rem; color: var(--muted); font-weight: 400;">C${constellation}</span></div>
-                <div style="font-size: 0.85rem; color: var(--muted-2);">${talentsText}</div>
+            <div class="char-card-summary">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="font-size: 1.0rem; font-weight: 600;">${name} <span style="font-size: 0.85rem; color: var(--muted); font-weight: 400;">C${constellation}</span></div>
+                    <div style="font-size: 0.85rem; color: var(--muted-2);">${talentsText}</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="small-en">${rawName}</div>
+                    <div style="font-size: 0.85rem;">Lv. ${level}/${maxLevel}</div>
+                </div>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <div class="small-en">${rawName}</div>
-                <div style="font-size: 0.85rem;">Lv. ${level}/${maxLevel}</div>
-            </div>
-            <div style="margin: 8px 0;">
-                ${firstSetBadge}
-            </div>
-            <div style="margin: 8px 0; font-size: 0.85rem;">
-                <div style="margin-bottom: 4px;"><strong>${weaponJP} Lv.${weaponLevel}/${weaponMaxLevel} (R${weaponRefine})</strong></div>
-                <div class="small-en">${weapon}</div>
-            </div>
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--muted-border);">
-                <div style="font-weight: 600; margin-bottom: 6px;">\u30B9\u30C6\u30FC\u30BF\u30B9\u8A73\u7D30:</div>
-                <div class="char-stats-list">
-                    ${statsHTML}
+            <div class="char-card-details">
+                <div style="margin: 8px 0; display: flex; flex-wrap: wrap; gap: 4px;">
+                    ${setsBadgesHTML}
+                </div>
+                <div style="margin: 8px 0; font-size: 0.85rem;">
+                    <div style="margin-bottom: 4px;"><strong>${weaponJP} Lv.${weaponLevel}/${weaponMaxLevel} (R${weaponRefine})</strong></div>
+                    <div class="small-en">${weapon}</div>
+                </div>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--muted-border); flex-grow: 1;">
+                    <div style="font-weight: 600; margin-bottom: 6px;">\u30B9\u30C6\u30FC\u30BF\u30B9\u8A73\u7D30:</div>
+                    <div class="char-stats-list">
+                        ${statsHTML}
+                    </div>
                 </div>
             </div>
         `;
       gridDiv.appendChild(charDiv);
     });
     container.appendChild(gridDiv);
-    try {
-      const targetsBlockHtml = buildTargetsHTML(result);
-      if (targetsBlockHtml && targetsBlockHtml.trim().length > 0) {
-        const targetsDiv = document.createElement("div");
-        targetsDiv.className = "card";
-        targetsDiv.style.marginTop = "12px";
-        targetsDiv.innerHTML = `<div class="card-content"><span class="card-title">\u30BF\u30FC\u30B2\u30C3\u30C8\u60C5\u5831</span>${targetsBlockHtml}</div>`;
-        container.appendChild(targetsDiv);
-      }
-    } catch (e) {
-      console.warn("[WebUI] Could not append targets under characters", e);
-    }
   }
   function displayTargetInfo(result) {
     const container = document.getElementById("target-details");
@@ -952,39 +1035,9 @@ for let i=0; i<4; i=i+1 {
       container.appendChild(targetDiv);
     });
   }
-  function buildTargetsHTML(result) {
-    if (!result.target_details || result.target_details.length === 0)
-      return "";
-    let html = '<div style="margin-top:10px;"><strong>\u30BF\u30FC\u30B2\u30C3\u30C8\u60C5\u5831:</strong>';
-    result.target_details.forEach((target, idx) => {
-      const stripStrikeTokens = typeof stripStrikeTokens === "function" ? stripStrikeTokens : function(s) {
-        return s ? s.replace(/~~.*?~~/g, "").trim() : s;
-      };
-      const name = stripStrikeTokens(target.name) || `\u30BF\u30FC\u30B2\u30C3\u30C8 ${idx + 1}`;
-      const level = target.level || 1;
-      const hp = target.hp || 0;
-      let resistHTML = "";
-      if (target.resist && Object.keys(target.resist).length > 0) {
-        resistHTML = '<div style="margin-top:6px;">';
-        for (const [element, resist] of Object.entries(target.resist)) {
-          const el = stripStrikeTokens(element);
-          if (!el)
-            continue;
-          resistHTML += `<div class="info-row"><span class="info-label">${el}</span><span class="info-value">${(resist * 100).toFixed(1)}%</span></div>`;
-        }
-        resistHTML += "</div>";
-      }
-      html += `<div style="margin-top:8px; padding:8px; border:1px solid var(--muted-border); border-radius:6px; background:var(--card-bg);">
-            <div class="info-row"><span class="info-label">${name}</span><span class="info-value">Lv.${level}</span></div>
-            <div class="info-row"><span class="info-label">HP</span><span class="info-value">${formatNumber(hp)}</span></div>
-            ${resistHTML}
-        </div>`;
-    });
-    html += "</div>";
-    return html;
-  }
   function displayCharts(result) {
     console.log("[WebUI] Displaying charts...");
+    const resultsContainer = document.getElementById("results-container");
     console.log("[WebUI] Result structure:", Object.keys(result));
     console.log("[WebUI] Statistics:", result.statistics);
     try {
@@ -1001,31 +1054,6 @@ for let i=0; i<4; i=i+1 {
     } catch (e) {
     }
     const stats = result.statistics || {};
-    try {
-      let rawPanel = document.getElementById("raw-stats-panel");
-      if (!rawPanel) {
-        rawPanel = document.createElement("details");
-        rawPanel.id = "raw-stats-panel";
-        rawPanel.style.margin = "10px 0";
-        const summary = document.createElement("summary");
-        summary.textContent = "Raw statistics JSON (debug)";
-        rawPanel.appendChild(summary);
-        const pre = document.createElement("pre");
-        pre.id = "raw-stats-pre";
-        pre.style.maxHeight = "300px";
-        pre.style.overflow = "auto";
-        pre.style.background = "var(--card-bg)";
-        pre.style.border = "1px solid var(--muted-border)";
-        pre.style.padding = "8px";
-        rawPanel.appendChild(pre);
-        resultsContainer.insertBefore(rawPanel, resultsContainer.firstChild);
-      }
-      const preEl = document.getElementById("raw-stats-pre");
-      if (preEl)
-        preEl.textContent = JSON.stringify(result.statistics || {}, null, 2);
-    } catch (e) {
-      console.warn("[WebUI] Could not render raw stats panel", e);
-    }
     if (result.character_details && result.character_details.length > 0) {
       const canvas = document.getElementById("char-dps-chart");
       if (!canvas) {
@@ -1062,7 +1090,7 @@ for let i=0; i<4; i=i+1 {
           const orderedCharDps = order.map((o) => charDpsData[o.idx]);
           const orderedCharSd = order.map((o) => charDpsSd[o.idx]);
           stats.__char_order = { order, orderedCharNames, orderedCharDps, orderedCharSd };
-          charts.charDps = createStackedBarChart(ctx, [""], [orderedCharNames, orderedCharDps, orderedCharSd], "\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u5225DPS");
+          charts.charDps = createPieChart(ctx, orderedCharNames, orderedCharDps, orderedCharSd, "\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u5225DPS");
         } else {
           console.log("[WebUI] No character DPS data to display");
         }
@@ -1143,7 +1171,7 @@ for let i=0; i<4; i=i+1 {
               metaMatrix[aIdx][cCanonicalIdx] = { mean, sd, min, max };
             });
           });
-          charts.sourceDps = createStackedAbilitiesChart(ctx2, charNames, abilities, matrix, "\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u5225 \u80FD\u529BDPS", metaMatrix, { barThickness: 24, verticalPadding: 5 });
+          charts.sourceDps = createStackedAbilitiesChart(ctx2, charNames, abilities, matrix, "\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u5225 \u80FD\u529BDPS", metaMatrix, { barThickness: 18, verticalPadding: 8 });
         } else if (data.labels.length > 0) {
           charts.sourceDps = createBarChart(ctx2, data.labels, data.values, "\u30BD\u30FC\u30B9\u5225DPS");
         } else {
@@ -1183,7 +1211,7 @@ for let i=0; i<4; i=i+1 {
         const damageValues = bucketData.map((bucket) => (bucket == null ? void 0 : bucket.mean) || 0);
         console.log("[WebUI] Damage distribution data:", timeLabels.length, "buckets");
         if (timeLabels.length > 0) {
-          charts.damageDist = createLineChart(ctx3, timeLabels, damageValues, "\u30C0\u30E1\u30FC\u30B8", { heightPx: 480 });
+          charts.damageDist = createLineChart(ctx3, timeLabels, damageValues, "\u30C0\u30E1\u30FC\u30B8", { heightPx: 700 });
         }
       } else {
         console.log("[WebUI] No damage distribution data");
@@ -1251,6 +1279,7 @@ for let i=0; i<4; i=i+1 {
         options: {
           // Horizontal bars: categories on Y axis
           indexAxis: "y",
+          layout: { padding: { top: 15, bottom: 30, left: 15, right: 15 } },
           plugins: {
             legend: { position: "top" },
             tooltip: {
@@ -1265,8 +1294,8 @@ for let i=0; i<4; i=i+1 {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { stacked: true, beginAtZero: true },
-            y: { stacked: true }
+            x: { stacked: true, beginAtZero: true, ticks: { padding: 8 } },
+            y: { stacked: true, ticks: { padding: 8 } }
           }
         }
       });
@@ -1361,6 +1390,7 @@ for let i=0; i<4; i=i+1 {
         options: {
           // Horizontal bars: categories (targets) on Y axis, percent on X axis
           indexAxis: "y",
+          layout: { padding: { top: 15, bottom: 30, left: 15, right: 15 } },
           plugins: {
             legend: { position: "top" },
             tooltip: {
@@ -1377,8 +1407,8 @@ for let i=0; i<4; i=i+1 {
           scales: {
             x: { stacked: true, beginAtZero: true, max: 100, ticks: { callback: function(v) {
               return v + "%";
-            } } },
-            y: { stacked: true, grid: { display: false } }
+            }, padding: 8 } },
+            y: { stacked: true, grid: { display: false }, ticks: { padding: 8 } }
           }
         }
       });
@@ -1431,92 +1461,65 @@ for let i=0; i<4; i=i+1 {
     } catch (e) {
     }
   }
-  function createStackedBarChart(ctx, categories, [charNames, charValues, charSd], title) {
+  function createPieChart(ctx, charNames, charValues, charSd, title) {
     const total = charValues.reduce((a, b) => a + b, 0);
     const percentages = charValues.map((v) => total > 0 ? v / total * 100 : 0);
-    console.log("[WebUI] Calculated percentages:", percentages);
+    console.log("[WebUI] Creating pie chart:", title);
     const palette = CHAR_PALETTE;
-    const datasets = charNames.map((name, idx) => {
-      const hex = palette[idx % palette.length];
-      const bg = hexToRgba(hex, 0.85);
-      const border = hexToRgba(hex, 1);
-      return {
-        label: name,
-        data: [percentages[idx]],
-        stack: "stack1",
-        backgroundColor: bg,
-        borderColor: border,
-        borderWidth: 1,
-        hoverBackgroundColor: hexToRgba(hex, 0.95),
-        // Make the bar thickness approximately 24px
-        barThickness: 48,
-        maxBarThickness: 48,
-        categoryPercentage: 1,
-        barPercentage: 1
-      };
-    });
-    const numRows = Array.isArray(categories) && categories.length > 0 ? categories.length : 1;
-    const barThickness = 48;
-    const verticalPadding = 6;
-    const legendSpace = 20;
-    const desiredHeightPx = Math.max(120, (barThickness + verticalPadding) * numRows + legendSpace);
-    setCanvasVisualSize(ctx, desiredHeightPx);
+    const backgroundColors = charNames.map((_, idx) => hexToRgba(palette[idx % palette.length], 0.85));
+    const borderColors = charNames.map((_, idx) => hexToRgba(palette[idx % palette.length], 1));
+    setCanvasVisualSize(ctx, 450);
     const chart = new Chart(ctx, {
-      type: "bar",
+      type: "pie",
       data: {
-        labels: categories,
-        datasets
+        labels: charNames,
+        datasets: [{
+          data: charValues,
+          backgroundColor: backgroundColors,
+          borderColor: borderColors,
+          borderWidth: 2
+        }]
       },
       options: {
-        // Render horizontally: categories on the Y axis, values (percent) on the X axis
-        indexAxis: "y",
         responsive: true,
         maintainAspectRatio: false,
-        layout: { padding: { top: 0, bottom: 0, left: 0, right: 0 } },
+        layout: {
+          padding: {
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10
+          }
+        },
         plugins: {
           legend: {
             display: true,
-            position: "bottom",
-            labels: { boxWidth: 12, padding: 4 }
+            position: "right",
+            labels: {
+              boxWidth: 15,
+              padding: 10,
+              font: {
+                size: 12
+              }
+            }
           },
           title: {
             display: false
           },
           tooltip: {
             callbacks: {
-              title: function() {
-                return "";
-              },
               label: function(context) {
-                const charIdx = context.datasetIndex;
-                const dps = charValues[charIdx] || 0;
-                const sd = charSd && typeof charSd[charIdx] !== "undefined" && charSd[charIdx] !== null ? charSd[charIdx] : null;
-                const pct = percentages[charIdx];
-                const pctStr = pct.toFixed(2) + "%";
+                const idx = context.dataIndex;
+                const name = charNames[idx];
+                const dps = charValues[idx] || 0;
+                const sd = charSd && typeof charSd[idx] !== "undefined" && charSd[idx] !== null ? charSd[idx] : null;
+                const pct = percentages[idx];
+                const pctStr = pct.toFixed(1) + "%";
                 const sdStr = sd === null ? "n/a" : sd.toFixed(2);
                 const dpsStr = Number(dps).toLocaleString("ja-JP", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                return `${context.dataset.label}: ${pctStr} (DPS: ${dpsStr} \xB1 ${sdStr})`;
+                return `${name}: ${pctStr} (DPS: ${dpsStr} \xB1 ${sdStr})`;
               }
             }
-          }
-        },
-        scales: {
-          x: {
-            stacked: true,
-            beginAtZero: true,
-            max: 100,
-            ticks: {
-              callback: function(value) {
-                return value + "%";
-              },
-              padding: 4
-            },
-            grid: { drawBorder: false, display: false }
-          },
-          y: {
-            stacked: true,
-            display: false,
-            grid: { display: false }
           }
         }
       }
@@ -1526,7 +1529,7 @@ for let i=0; i<4; i=i+1 {
       chart.update();
     } catch (e) {
     }
-    console.log("[WebUI] Chart created successfully, returning chart object");
+    console.log("[WebUI] Pie chart created successfully");
     return chart;
   }
   function ensureContainerHeight(ctx, desiredHeightPx) {
@@ -1601,8 +1604,23 @@ for let i=0; i<4; i=i+1 {
     const numRows = labels.length || 1;
     const barThickness = 48;
     const verticalPadding = 6;
-    const legendSpace = 8;
-    const desiredHeightPx = Math.max(120, (barThickness + verticalPadding) * numRows + legendSpace);
+    const legendSpace = 60;
+    let desiredHeightPx = Math.max(160, (barThickness + verticalPadding) * numRows + legendSpace);
+    try {
+      const vp = typeof window !== "undefined" && window.innerHeight ? window.innerHeight : 800;
+      const allowedMax = Math.max(360, Math.floor(vp * 0.75));
+      if (desiredHeightPx > allowedMax) {
+        const availableForRows = Math.max(60, allowedMax - legendSpace);
+        const effBar = Math.max(6, Math.floor(availableForRows / Math.max(1, numRows) - verticalPadding));
+        desiredHeightPx = Math.max(120, (effBar + verticalPadding) * numRows + legendSpace);
+        try {
+          if (ctx && ctx.canvas)
+            ctx.canvas.dataset.barThicknessOverride = String(effBar);
+        } catch (e) {
+        }
+      }
+    } catch (e) {
+    }
     setCanvasVisualSize(ctx, desiredHeightPx);
     const datasets = [{
       label,
@@ -1610,10 +1628,10 @@ for let i=0; i<4; i=i+1 {
       backgroundColor: bgColors,
       borderColor: borderColors,
       borderWidth: 1,
-      barThickness: 48,
-      maxBarThickness: 48,
-      categoryPercentage: 1,
-      barPercentage: 0.9
+      barThickness: ctx && ctx.canvas && ctx.canvas.dataset && ctx.canvas.dataset.barThicknessOverride ? parseInt(ctx.canvas.dataset.barThicknessOverride, 10) : 48,
+      maxBarThickness: ctx && ctx.canvas && ctx.canvas.dataset && ctx.canvas.dataset.barThicknessOverride ? parseInt(ctx.canvas.dataset.barThicknessOverride, 10) : 48,
+      categoryPercentage: 0.92,
+      barPercentage: 0.86
     }];
     const chart = new Chart(ctx, {
       type: "bar",
@@ -1622,7 +1640,7 @@ for let i=0; i<4; i=i+1 {
         indexAxis: "y",
         responsive: true,
         maintainAspectRatio: false,
-        layout: { padding: { top: 0, bottom: 0, left: 0, right: 0 } },
+        layout: { padding: { top: 15, bottom: 15, left: 10, right: 10 } },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -1658,7 +1676,7 @@ for let i=0; i<4; i=i+1 {
     return chart;
   }
   function createLineChart(ctx, labels, data, label, options) {
-    const opts = Object.assign({ heightPx: 140 }, options || {});
+    const opts = Object.assign({ heightPx: 200 }, options || {});
     setCanvasVisualSize(ctx, opts.heightPx);
     const chart = new Chart(ctx, {
       type: "line",
@@ -1676,6 +1694,7 @@ for let i=0; i<4; i=i+1 {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        layout: { padding: { top: 20, bottom: 40, left: 15, right: 15 } },
         plugins: {
           legend: {
             display: false
@@ -1683,7 +1702,15 @@ for let i=0; i<4; i=i+1 {
         },
         scales: {
           y: {
-            beginAtZero: true
+            beginAtZero: true,
+            ticks: {
+              padding: 8
+            }
+          },
+          x: {
+            ticks: {
+              padding: 8
+            }
           }
         }
       }
@@ -1701,7 +1728,7 @@ for let i=0; i<4; i=i+1 {
     const sortedAbilities = totalByAbility.map((t) => abilities[t.idx]);
     const sortedMatrix = totalByAbility.map((t) => matrix[t.idx]);
     const sortedMeta = metaMatrix ? totalByAbility.map((t) => metaMatrix[t.idx]) : null;
-    const opts = Object.assign({ barThickness: 18, verticalPadding: 6 }, options || {});
+    const opts = Object.assign({ barThickness: 28, verticalPadding: 14 }, options || {});
     const datasets = charNames.map((char, cIdx) => {
       const hex = getCharColor(cIdx);
       const bg = hexToRgba(hex, 0.85);
@@ -1714,17 +1741,32 @@ for let i=0; i<4; i=i+1 {
         backgroundColor: bg,
         borderColor: border,
         borderWidth: 1,
-        barThickness: opts.barThickness,
-        maxBarThickness: opts.barThickness,
-        categoryPercentage: 1,
-        barPercentage: 1
+        barThickness: ctx && ctx.canvas && ctx.canvas.dataset && ctx.canvas.dataset.barThicknessOverride ? parseInt(ctx.canvas.dataset.barThicknessOverride, 10) : opts.barThickness,
+        maxBarThickness: ctx && ctx.canvas && ctx.canvas.dataset && ctx.canvas.dataset.barThicknessOverride ? parseInt(ctx.canvas.dataset.barThicknessOverride, 10) : opts.barThickness,
+        categoryPercentage: 0.92,
+        barPercentage: 0.86
       };
     });
     const numRows = sortedAbilities.length || 1;
-    const barThickness = opts.barThickness || 18;
-    const verticalPadding = typeof opts.verticalPadding === "number" ? opts.verticalPadding : 6;
-    const legendSpace = 8;
-    const desiredHeightPx = Math.max(120, (barThickness + verticalPadding) * numRows + legendSpace);
+    const barThickness = opts.barThickness || 28;
+    const verticalPadding = typeof opts.verticalPadding === "number" ? opts.verticalPadding : 14;
+    const legendSpace = 100;
+    let desiredHeightPx = Math.max(240, (barThickness + verticalPadding) * numRows + legendSpace);
+    try {
+      const vp = typeof window !== "undefined" && window.innerHeight ? window.innerHeight : 800;
+      const allowedMax = Math.max(360, Math.floor(vp * 0.75));
+      if (desiredHeightPx > allowedMax) {
+        const availableForRows = Math.max(60, allowedMax - legendSpace);
+        const effBar = Math.max(6, Math.floor(availableForRows / Math.max(1, numRows) - verticalPadding));
+        desiredHeightPx = Math.max(140, (effBar + verticalPadding) * numRows + legendSpace);
+        try {
+          if (ctx && ctx.canvas)
+            ctx.canvas.dataset.barThicknessOverride = String(effBar);
+        } catch (e) {
+        }
+      }
+    } catch (e) {
+    }
     setCanvasVisualSize(ctx, desiredHeightPx);
     const chart = new Chart(ctx, {
       type: "bar",
@@ -1733,7 +1775,7 @@ for let i=0; i<4; i=i+1 {
         indexAxis: "y",
         responsive: true,
         maintainAspectRatio: false,
-        layout: { padding: { top: 0, bottom: 0, left: 0, right: 0 } },
+        layout: { padding: { top: 15, bottom: 15, left: 10, right: 10 } },
         plugins: {
           legend: { display: true, position: "bottom", labels: { boxWidth: 12, padding: 4 } },
           tooltip: {

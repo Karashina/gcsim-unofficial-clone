@@ -46,6 +46,10 @@
             --muted: #666;
             --muted-2: #8a8a8a; /* slightly lighter/more muted for secondary labels (talents) */
             --disabled-bg: #ccc;
+            
+            /* Spacing variables for consistent gaps */
+            --card-gap: 6px;
+            --section-gap: 8px;
         }
 
             [data-theme="dark"] {
@@ -134,7 +138,7 @@
             color: var(--header-text, white);
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: var(--section-gap);
             box-shadow: 0 4px 6px rgba(0,0,0,0.08);
             display: flex;
             align-items: center;
@@ -155,7 +159,7 @@
         .card {
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            margin-bottom: var(--section-gap);
         }
         /* Fade-in helper for results to avoid abrupt layout flashes */
         #results-container {
@@ -172,26 +176,19 @@
            document flow (prevents infinite-height bugs while keeping layout stable). */
         .chart-container {
             position: relative;
-            min-height: 160px; /* default reserve */
-            overflow: hidden; /* keep overlays from expanding the document */
+            min-height: 450px; /* restore default to keep balance */
+            overflow: visible; /* allow legends to display properly */
             padding: 12px;
             background: transparent;
         }
         /* Canvas will be inset to match container padding to avoid overlap with edges */
         /* Reserve space at top for title/controls by offsetting canvas downward. */
         .chart-container canvas {
-            position: absolute;
-            top: 48px; /* leave room for chart title and controls */
-            left: 12px;
-            right: 12px;
-            bottom: 12px;
-            width: auto !important;
-            height: auto !important;
-            max-width: none !important;
-            max-height: none !important;
+            position: relative;
+            width: 100% !important;
+            max-width: 100% !important;
             display: block;
-            margin: 0;
-            z-index: 1;
+        }
             /* Hide canvas by default until JS has reserved layout space and applied insets.
                This prevents a brief flash where the canvas overlaps surrounding text. */
             visibility: hidden;
@@ -201,7 +198,7 @@
             background: var(--card-bg);
             border-radius: 8px;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: var(--section-gap);
         }
         
         textarea {
@@ -290,14 +287,14 @@
             width: 100%;
         }
         .chart-card canvas, .chart-container canvas, canvas.chart-canvas {
-            position: absolute;
-            top: 48px; /* unified inset so titles/controls are not overlapped */
-            left: 6px;
-            right: 6px;
-            bottom: 6px;
-            width: auto !important;
+            /* Use relative positioning and let JS control the visual height
+               via inline style setCanvasVisualSize. Removing absolute
+               top/bottom avoids conflicts that can cause the canvas to
+               expand indefinitely in some layouts. */
+            position: relative;
+            width: 100% !important;
             height: auto !important;
-            max-width: none !important;
+            max-width: 100% !important;
             max-height: none !important;
             display: block;
             margin: 0;
@@ -332,21 +329,22 @@
         
         .stat-card {
             background: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            padding: 6px 4px;
+            margin-bottom: var(--card-gap);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            text-align: center;
         }
         
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--primary-2);
-            margin: 10px 0;
+            margin: 2px 0;
         }
         
         .stat-label {
-            font-size: 0.9rem;
+            font-size: 0.6rem;
             color: var(--muted);
             text-transform: uppercase;
             font-weight: 500;
@@ -354,16 +352,84 @@
         
         .char-card {
             background: var(--card-bg);
-            border-radius: 8px;
-            padding: 12px 15px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: var(--card-gap);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .char-card-summary {
+            /* Always visible part */
+        }
+
+        .char-card-details {
+            margin-top: 4px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* When section is collapsed, hide only the details of each card, but keep the summary visible */
+        .results-section.collapsed .char-card-details {
+            max-height: 0 !important;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 4px 0 4px 0;
+            color: var(--text);
+            border-bottom: 2px solid var(--primary-2);
+            padding-bottom: 3px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .section-title:hover {
+            background-color: var(--hover-bg);
+            padding-left: 4px;
+            margin-left: -4px;
+        }
+
+        .section-expand-icon {
+            font-size: 1.0rem;
+            color: var(--muted);
+            transition: transform 0.3s ease;
+        }
+
+        .results-section.collapsed .section-expand-icon {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+
+        .results-section.collapsed .section-content {
+            max-height: 0 !important;
+            opacity: 0;
+        }
+
+        /* Exception: Character section should show cards even when collapsed, just hide details */
+        .results-section.characters-section.collapsed .section-content {
+            max-height: none !important;
+            opacity: 1;
+            overflow: visible;
         }
         
         .characters-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 8px;
         }
         
         @media (max-width: 768px) {
@@ -373,51 +439,51 @@
         }
         
         .char-name {
-            font-size: 1.2rem;
+            font-size: 0.85rem;
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 8px;
-            padding-bottom: 8px;
+            margin-bottom: 3px;
+            padding-bottom: 3px;
             border-bottom: 2px solid var(--primary-2);
         }
         /* Small, muted English label rendered alongside or beneath JP names */
         .char-en {
-            font-size: 0.95rem; /* slightly smaller but inline */
+            font-size: 0.7rem;
             color: var(--muted);
-            margin-left: 8px;
+            margin-left: 6px;
             font-weight: 400;
             vertical-align: middle;
         }
         .small-en {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: var(--muted);
             opacity: 0.85;
-            margin-top: 2px;
+            margin-top: 1px;
             line-height: 1em;
         }
         
         .char-info-compact {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
+            gap: 3px;
+            font-size: 0.7rem;
+            margin-bottom: 3px;
         }
         
         .char-info-compact .info-row {
-            padding: 6px 8px;
+            padding: 2px 4px;
             border-bottom: none;
         }
         
         .char-stats-list {
-            margin-top: 8px;
+            margin-top: 3px;
         }
         
         .char-stats-list .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 4px 8px;
-            font-size: 0.85rem;
+            padding: 2px 4px;
+            font-size: 0.7rem;
             border-bottom: 1px solid #f0f0f0;
         }
         
@@ -438,28 +504,19 @@
         .chart-container {
             background: var(--card-bg);
             border-radius: 6px;
-            padding: 6px; /* further reduced padding per request */
-            margin-bottom: 12px; /* increased spacing between stacked charts */
+            padding: 8px;
+            margin-bottom: var(--card-gap);
             box-shadow: 0 1px 2px rgba(0,0,0,0.04);
             position: relative;
-            min-height: 160px; /* sensible default reserve */
-            overflow: hidden; /* prevent children (tooltips, overlays) from expanding layout */
+            min-height: 180px;
+            overflow: visible;
         }
         
-        /* Position canvas absolutely so Chart.js drawing or inline height changes
-           don't affect document flow and won't expand the parent container when
-           tooltips/overlays are drawn. JS will still set the canvas drawing buffer
-           via attributes; CSS keeps layout stable. */
         .chart-container canvas {
-            position: absolute;
-            top: 6px;
-            left: 6px;
-            right: 6px;
-            bottom: 6px;
-            width: auto !important;
-            height: auto !important;
-            max-width: none !important;
-            max-height: none !important;
+            position: relative;
+            width: 100% !important;
+            max-width: 100% !important;
+            display: block;
         }
         
         .chart-legend {
@@ -473,7 +530,7 @@
 
         .chart-legend-title {
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: var(--card-gap);
             color: var(--text);
         }
 
@@ -490,7 +547,7 @@
             display: inline-flex;
             align-items: center;
             margin-right: 15px;
-            margin-bottom: 5px;
+            margin-bottom: var(--card-gap);
         }
         
         .chart-legend-color {
@@ -604,16 +661,13 @@
            canvases cannot expand the document height unexpectedly. Chart.js will set
            the canvas drawing buffer size via attributes (see app.js helper). */
         .chart-container {
-            overflow: hidden;
+            overflow: visible;
         }
 
         .chart-container canvas {
-            position: absolute;
-            top: 48px;
-            left: 6px;
-            right: 6px;
-            bottom: 6px;
-            height: auto !important;
+            position: relative;
+            width: 100% !important;
+            display: block;
             z-index: 1;
         }
 
@@ -625,7 +679,7 @@
             z-index: 3;
             margin: 0 0 6px 0;
         }
-        .chart-container h6 { position: absolute; top: 12px; left: 12px; font-size: 0.95rem; padding: 0; }
+        .chart-container h6 { position: relative; margin-bottom: var(--card-gap); font-size: 0.95rem; padding: 0; }
         
         .tab-container {
             background: var(--card-bg);
@@ -685,9 +739,9 @@
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: var(--card-gap);
         }
         
         @media (max-width: 1024px) {
@@ -744,7 +798,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: var(--card-gap);
             flex-wrap: wrap; /* allow items to wrap rather than force big height */
         }
 
@@ -826,7 +880,7 @@
 
         .construction-message h2 {
             font-size: 2.5rem;
-            margin-bottom: 20px;
+            margin-bottom: var(--section-gap);
             color: var(--primary-1);
         }
 
@@ -839,7 +893,7 @@
         .mode-selector {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: var(--section-gap);
             background: var(--card-bg);
             padding: 15px;
             border-radius: 8px;
@@ -884,8 +938,8 @@
         .optimizer-panels {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: var(--section-gap);
+            margin-bottom: var(--section-gap);
         }
 
         .optimizer-panel {
@@ -896,7 +950,7 @@
         }
 
         .optimizer-panel h5 {
-            margin-bottom: 15px;
+            margin-bottom: var(--card-gap);
             color: var(--text);
         }
 
@@ -933,23 +987,23 @@
         .screen#screen-results .results-container {
             display: block;
             opacity: 1;
-            max-width: 1080px;
+            max-width: 1260px;
             margin: 0 auto;
-            padding: 0 15px;
+            padding: 0 10px;
         }
 
         /* Results sections */
         .results-section {
-            margin-bottom: 15px;
+            margin-bottom: var(--card-gap);
         }
 
         .section-title {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            margin: 8px 0 6px 0;
+            margin: 4px 0 4px 0;
             color: var(--text);
             border-bottom: 2px solid var(--primary-2);
-            padding-bottom: 4px;
+            padding-bottom: 3px;
         }
 
         /* Compact stats grid - horizontal layout */
@@ -977,7 +1031,7 @@
             color: var(--muted);
             text-transform: uppercase;
             font-weight: 500;
-            margin-bottom: 2px;
+            margin-bottom: 2px; /* Keep minimal spacing for compact stat labels */
         }
 
         .stat-value-compact {
@@ -990,26 +1044,35 @@
         .chart-container-compact {
             background: var(--card-bg);
             border-radius: 6px;
-            padding: 8px;
-            margin-bottom: 10px;
+            padding: 6px;
+            margin-bottom: var(--card-gap);
             box-shadow: 0 1px 3px rgba(0,0,0,0.06);
             position: relative;
-            min-height: 120px;
+            min-height: 100px;
+        }
+
+        .chart-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+            padding: 4px 0;
+            text-align: center;
         }
 
         .chart-title-compact {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 6px;
-            padding: 4px 8px;
+            margin-bottom: 4px;
+            padding: 3px 6px;
         }
 
         .chart-container-compact canvas {
             position: relative;
             width: 100% !important;
-            height: 140px !important;
-            max-height: 140px !important;
+            height: 120px !important;
+            max-height: 120px !important;
             display: block;
         }
 
@@ -1017,24 +1080,27 @@
         .reactions-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: var(--card-gap);
         }
 
         /* Character cards - smaller fonts */
         .char-card {
             background: var(--card-bg);
             border-radius: 6px;
-            padding: 8px 10px;
-            margin-bottom: 8px;
+            padding: 6px 8px;
+            margin-bottom: var(--card-gap);
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .char-name {
-            font-size: 1.0rem; /* Reduced from 1.2rem */
+            font-size: 0.85rem;
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 6px;
-            padding-bottom: 4px;
+            margin-bottom: 3px;
+            padding-bottom: 3px;
             border-bottom: 2px solid var(--primary-2);
         }
 
@@ -1049,25 +1115,25 @@
         .char-info-compact {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 4px;
-            font-size: 0.75rem; /* Reduced from 0.85rem */
-            margin-bottom: 6px;
+            gap: 3px;
+            font-size: 0.7rem;
+            margin-bottom: 3px;
         }
 
         .char-info-compact .info-row {
-            padding: 4px 6px;
+            padding: 2px 4px;
             border-bottom: none;
         }
 
         .char-stats-list {
-            margin-top: 6px;
+            margin-top: 3px;
         }
 
         .char-stats-list .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 3px 6px;
-            font-size: 0.75rem; /* Reduced from 0.85rem */
+            padding: 2px 4px;
+            font-size: 0.7rem;
             border-bottom: 1px solid #f0f0f0;
         }
 
@@ -1093,15 +1159,14 @@
             line-height: 1em;
         }
 
-        /* Adjust character grid for 900px+ screens */
-        @media (min-width: 900px) {
+        /* Adjust character grid for smaller screens */
+        @media (max-width: 900px) {
             .characters-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 10px;
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            .stats-grid-compact {
-                grid-template-columns: repeat(6, 1fr);
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
@@ -1247,20 +1312,22 @@
         <!-- Screen 3: Results Display -->
         <div class="screen" id="screen-results">
             <div class="results-container" id="results-container">
-                <h5 style="margin: 15px 0 10px 0; font-size: 1.1rem;">
-                    📊 シミュレーション結果
-                </h5>
-            
             <!-- 1. Character Information (4-column grid) -->
-            <div class="results-section characters-section">
-                <h6 class="section-title">キャラクター情報</h6>
-                <div id="characters-list"></div>
+            <div class="results-section characters-section collapsed">
+                <h6 class="section-title">
+                    <span>キャラクター情報</span>
+                    <span class="section-expand-icon">▼</span>
+                </h6>
+                <div class="section-content" id="characters-list"></div>
             </div>
             
             <!-- 2. Statistics (horizontal grid) -->
             <div class="results-section stats-summary-section">
-                <h6 class="section-title">統計情報</h6>
-                <div class="stats-grid">
+                <h6 class="section-title">
+                    <span>統計情報</span>
+                    <span class="section-expand-icon">▼</span>
+                </h6>
+                <div class="section-content stats-grid">
                     <div class="stat-card">
                         <span class="stat-label">DPS</span>
                         <span class="stat-value" id="stat-dps">-</span>
@@ -1290,39 +1357,48 @@
             
             <!-- 3. DPS Analysis Charts (side-by-side) -->
             <div class="results-section charts-section">
-                <h6 class="section-title">キャラクター別DPS・ソース別DPS</h6>
-                <div class="charts-grid">
-                    <div class="chart-container" id="char-dps-chart-container">
-                        <div class="chart-title">キャラクター別DPS</div>
-                        <canvas id="char-dps-chart"></canvas>
+                <h6 class="section-title">
+                    <span>DPS分析</span>
+                    <span class="section-expand-icon">▼</span>
+                </h6>
+                <div class="section-content">
+                    <div class="charts-grid" style="grid-template-columns: 1fr 2fr;">
+                        <div class="chart-container" id="char-dps-chart-container" style="min-height: 350px;">
+                            <div class="chart-title">キャラクター別DPS</div>
+                            <canvas id="char-dps-chart"></canvas>
+                        </div>
+                        <div class="chart-container" id="source-dps-chart-container" style="min-height: 350px;">
+                            <div class="chart-title">ソース別DPS</div>
+                            <canvas id="source-dps-chart"></canvas>
+                        </div>
                     </div>
-                    <div class="chart-container" id="source-dps-chart-container">
-                        <div class="chart-title">ソース別DPS</div>
-                        <canvas id="source-dps-chart"></canvas>
+                    <!-- Damage Distribution Chart (full width) -->
+                    <div class="chart-container chart-full-width" id="damage-dist-chart-container">
+                        <div class="chart-title">ダメージ分布</div>
+                        <canvas id="damage-dist-chart"></canvas>
                     </div>
-                </div>
-                <!-- Damage Distribution Chart (full width) -->
-                <div class="chart-container chart-full-width" id="damage-dist-chart-container">
-                    <div class="chart-title">ダメージ分布</div>
-                    <canvas id="damage-dist-chart"></canvas>
                 </div>
             </div>
             
             <!-- 4. Element Reactions -->
             <div class="results-section">
-                <h6 class="section-title">元素反応</h6>
-                <div class="reactions-grid">
-                    <div class="chart-container">
+                <h6 class="section-title">
+                    <span>元素反応</span>
+                    <span class="section-expand-icon">▼</span>
+                </h6>
+                <div class="section-content reactions-grid">
+                    <div class="chart-container" style="min-height: 350px;">
                         <div class="chart-title">反応回数</div>
                         <canvas id="reaction-count-chart"></canvas>
                     </div>
-                    <div class="chart-container">
+                    <div class="chart-container" style="min-height: 350px;">
                         <div class="chart-title">ターゲット付着時間</div>
                         <canvas id="aura-uptime-chart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
         </div>
 
         <!-- Screen 4: Debug (Under Construction) -->

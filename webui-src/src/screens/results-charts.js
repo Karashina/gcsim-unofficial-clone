@@ -13,8 +13,7 @@ export function displayCharts(result, resultsContainer) {
     
     const stats = result.statistics || {};
     
-    // Create debug panel for raw stats
-    createDebugPanel(result, resultsContainer);
+    // Debug panel removed: do not inject raw JSON into the UI
     
     // Check if Chart.js is available
     if (typeof Chart === 'undefined') {
@@ -37,37 +36,7 @@ export function displayCharts(result, resultsContainer) {
     }
 }
 
-/**
- * Create debug panel showing raw statistics JSON
- * @param {Object} result - Simulation result
- * @param {HTMLElement} resultsContainer - Container element
- */
-function createDebugPanel(result, resultsContainer) {
-    try {
-        let rawPanel = document.getElementById('raw-stats-panel');
-        if (!rawPanel) {
-            rawPanel = document.createElement('details');
-            rawPanel.id = 'raw-stats-panel';
-            
-            const summary = document.createElement('summary');
-            summary.textContent = 'Raw statistics JSON (debug)';
-            rawPanel.appendChild(summary);
-            
-            const pre = document.createElement('pre');
-            pre.id = 'raw-stats-pre';
-            rawPanel.appendChild(pre);
-            
-            resultsContainer.insertBefore(rawPanel, resultsContainer.firstChild);
-        }
-        
-        const preEl = document.getElementById('raw-stats-pre');
-        if (preEl) {
-            preEl.textContent = JSON.stringify(result.statistics || {}, null, 2);
-        }
-    } catch (e) {
-        console.warn('[WebUI] Could not render raw stats panel', e);
-    }
-}
+// Note: Raw statistics debug panel removed to prevent exposing large JSON in the UI.
 
 /**
  * Show placeholder messages when Chart.js is not available

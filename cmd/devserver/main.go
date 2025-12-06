@@ -9,8 +9,12 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
+
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulator"
 )
 
 type jobStatus string
@@ -32,6 +36,34 @@ var (
 	jobsMu sync.Mutex
 )
 
+// corsMiddleware adds CORS headers for development
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// corsHandler wraps a HandlerFunc with CORS headers
+func corsHandler(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next(w, r)
+	}
+}
+
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	// static UI dir
@@ -40,28 +72,38 @@ func main() {
 		uiDir = "webui"
 	}
 
+	log.Printf("Using UI directory: %s", uiDir)
+
 	fs := http.FileServer(http.Dir(uiDir))
-	http.Handle("/ui/", http.StripPrefix("/ui/", fs))
+	http.Handle("/ui/", corsMiddleware(http.StripPrefix("/ui/", fs)))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/ui/", http.StatusFound)
 	})
 
-	http.HandleFunc("/api/simulate", simulateHandler)
-	http.HandleFunc("/api/result", resultHandler)
+	http.HandleFunc("/api/simulate", corsHandler(simulateHandler))
+	http.HandleFunc("/api/result", corsHandler(resultHandler))
 
 	addr := ":8381"
+	if port := os.Getenv("DEVSERVER_PORT"); port != "" {
+		addr = ":" + port
+	}
 	srv := &http.Server{Addr: addr}
 	go func() {
 		log.Printf("devserver listening on %s", addr)
+		log.Printf("Open your browser at http://localhost%s/ui/", addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("server error: %v", err)
 		}
 	}()
 
-	// wait for interrupt
+	// wait for interrupt signal
 	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
-	_ = srv.Shutdown(context.Background())
+	log.Println("Shutting down server...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_ = srv.Shutdown(ctx)
 }
 
 func simulateHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,21 +124,38 @@ func simulateHandler(w http.ResponseWriter, r *http.Request) {
 		// fallback: treat entire body as raw config text
 		payload.Config = string(bodyBytes)
 	}
-	q := r.URL.Query()
-	if q.Get("sync") == "true" {
-		// return a fake SimulationResult-like object
-		res := sampleResult()
+
+	log.Printf("[Simulate] Received config (length: %d)", len(payload.Config))
+
+	// Run actual simulation
+	result, err := runSimulation(payload.Config)
+	if err != nil {
+		log.Printf("[Simulate] Error: %v", err)
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(res)
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"error":   err.Error(),
+			"message": "Simulation failed",
+		})
 		return
 	}
-	// async: create job and immediately mark done (for dev)
+
+	q := r.URL.Query()
+	if q.Get("sync") == "true" {
+		// return result directly
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(result)
+		return
+	}
+
+	// async: create job and immediately mark done
 	id := fmt.Sprintf("job-%d", rand.Intn(1_000_000))
-	res := sampleResult()
-	j := &job{ID: id, Status: statusDone, Result: res}
+	j := &job{ID: id, Status: statusDone, Result: result}
 	jobsMu.Lock()
 	jobs[id] = j
 	jobsMu.Unlock()
+
+	log.Printf("[Simulate] Created job: %s", id)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 	_ = json.NewEncoder(w).Encode(map[string]string{"job_id": id})
@@ -125,6 +184,56 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(j)
+}
+
+func runSimulation(config string) (map[string]interface{}, error) {
+	if config == "" {
+		return nil, fmt.Errorf("empty configuration")
+	}
+
+	// Create temporary config file
+	tmpFile, err := os.CreateTemp("", "gcsim-config-*.txt")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create temp file: %w", err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	_, err = tmpFile.WriteString(config)
+	if err != nil {
+		tmpFile.Close()
+		return nil, fmt.Errorf("failed to write config: %w", err)
+	}
+	tmpFile.Close()
+
+	log.Printf("[Simulate] Running simulation with config file: %s", tmpFile.Name())
+
+	// Run simulation
+	ctx := context.Background()
+	opts := simulator.Options{
+		ConfigPath: tmpFile.Name(),
+	}
+
+	result, err := simulator.Run(ctx, opts)
+	if err != nil {
+		return nil, fmt.Errorf("simulation failed: %w", err)
+	}
+
+	log.Printf("[Simulate] Simulation completed successfully")
+
+	// Convert result to map for JSON encoding
+	// The simulator.Result is already compatible with JSON marshaling
+	resultBytes, err := json.Marshal(result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal result: %w", err)
+	}
+
+	var resultMap map[string]interface{}
+	err = json.Unmarshal(resultBytes, &resultMap)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal result: %w", err)
+	}
+
+	return resultMap, nil
 }
 
 func sampleResult() map[string]interface{} {

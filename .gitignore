@@ -47,3 +47,7 @@ webui.log
 Dockerfile
 docs/substat_optimizer_spec.md
 cmd/deploy-webui/README.md
+docs/ARCHITECTURE.md
+/docs
+.github/copilot-instructions.md
+/.github/work-logs

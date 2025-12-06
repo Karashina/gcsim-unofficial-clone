@@ -346,6 +346,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     position: relative;
     min-height: 200px;
+    overflow: hidden;
 }
 
 .chart-title {
@@ -358,29 +359,24 @@
 
 /* Canvas positioning for Chart.js */
 .chart-container canvas {
+    position: relative;
     width: 100% !important;
     height: auto !important;
     max-width: 100%;
     display: block;
-    /* Remove visibility: hidden to fix rendering issue */
+    /* canvas height is controlled by JS when needed */
 }
 
 /* Character DPS chart - pie chart */
 #char-dps-chart-container {
-    min-height: 300px;
-}
-
-#char-dps-chart {
-    max-height: 280px;
+    min-height: 500px;
+    overflow: hidden;
 }
 
 /* Source DPS chart - horizontal bar, reduced height as requested */
 #source-dps-chart-container {
-    min-height: 200px; /* Reduced from default */
-}
-
-#source-dps-chart {
-    max-height: 180px; /* Reduced height for better fit */
+    min-height: 280px;
+    overflow: hidden;
 }
 
 /* Damage distribution chart - full width */
@@ -389,11 +385,8 @@
 }
 
 #damage-dist-chart-container {
-    min-height: 250px;
-}
-
-#damage-dist-chart {
-    max-height: 230px;
+    min-height: 740px;
+    overflow: hidden;
 }
 
 /* Chart legend (if custom HTML legend is used) */

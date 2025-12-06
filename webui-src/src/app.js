@@ -175,7 +175,7 @@ function getCharColor(i) {
 }
 
 // Debug flag: set to true to enable verbose debug logging
-const DEBUG = false;
+const DEBUG = true; // Enable debug logging for development
 function debugLog(...args) { if (DEBUG && console && console.log) console.log(...args); }
 
 // Small deterministic string hash used to derive a hue for element coloring
@@ -234,28 +234,61 @@ function setCanvasVisualSize(ctx, desiredHeightPx, minWidth = 300) {
         if (!canvas) return;
         const parent = canvas.parentElement;
         const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
-        try { canvas.style.width = '100%'; } catch (e) {}
+        
         const rect = parent && parent.getBoundingClientRect ? parent.getBoundingClientRect() : canvas.getBoundingClientRect();
         const visualWidth = rect && rect.width ? Math.max(minWidth, Math.floor(rect.width)) : Math.max(minWidth, Math.floor(canvas.offsetWidth || 600));
         const heightPx = Math.max(120, Math.floor(desiredHeightPx || 140));
-        // Cap visual height to a sensible absolute maximum to avoid runaway sizes
+
+        try {
+            // Diagnostic logging for canvas sizing
+            debugLog('[WebUI][Sizing] setCanvasVisualSize', {
+                id: canvas.id || '(no-id)',
+                desiredHeightPx: desiredHeightPx,
+                heightPx: heightPx,
+                visualWidth: visualWidth,
+                dpr: dpr,
+                parentExists: !!parent,
+                parentRect: rect ? { width: rect.width, height: rect.height } : null,
+                barThicknessOverride: canvas.dataset ? canvas.dataset.barThicknessOverride : undefined
+            });
+        } catch (e) { /* ignore logging errors */ }
+        
+        // Cap visual height to a sensible maximum to avoid runaway sizes
         const viewportH = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
-        const absoluteMax = Math.max(800, Math.floor(viewportH * 2.5)); // allow tall charts but bounded
+        const absoluteMax = Math.max(800, Math.floor(viewportH * 2.5));
         const cappedHeight = Math.min(heightPx, absoluteMax);
-        try { if (parent) parent.style.setProperty('min-height', cappedHeight + 'px', 'important'); } catch (e) {}
+        
+        // Set explicit canvas width style; avoid setting canvas height inline
+        // (use parent element height instead to reserve layout space).
+        try {
+            canvas.style.width = '100%';
+            canvas.style.maxWidth = '100%';
+        } catch (e) {}
+        
+        // Set canvas drawing buffer size
         canvas.width = Math.floor(visualWidth * dpr);
         canvas.height = Math.floor(cappedHeight * dpr);
-        // Store the intended visual height (capped) on the canvas element to avoid measuring
-        // live layout which can cause circular sizing increases.
-        try { canvas.dataset.visualHeight = String(cappedHeight); } catch (e) {}
-        try { ensureContainerHeight(ctx, cappedHeight); } catch(e) {}
-        // Try to set an initial top inset immediately to avoid canvas appearing at top of container
+        
+        // Set parent explicit height to reserve space and avoid canvas-driven layout
         try {
-            // setCanvasTopInset is safe to call; it will measure any title/legend already present
-            setCanvasTopInset(canvas);
+            if (parent) {
+                parent.style.setProperty('height', cappedHeight + 'px', 'important');
+                parent.style.setProperty('min-height', cappedHeight + 'px', 'important');
+            }
+        } catch (e) {}
+
+        try {
+            // Log final applied sizes
+            debugLog('[WebUI][Sizing] setCanvasVisualSize applied', {
+                id: canvas.id || '(no-id)',
+                cappedHeight: cappedHeight,
+                canvasWidthBuf: canvas.width,
+                canvasHeightBuf: canvas.height,
+                parentInlineHeight: parent && parent.style ? parent.style.height : undefined,
+                parentInlineMinHeight: parent && parent.style ? parent.style.minHeight : undefined
+            });
         } catch(e) {}
-        // Hide the canvas until insets and parent heights are applied to avoid a brief overlay flicker
-        try { canvas.style.visibility = 'hidden'; canvas.dataset.needUnhide = '1'; } catch(e) {}
+        
     } catch (e) { /* ignore sizing errors */ }
 }
 
@@ -290,9 +323,10 @@ function setCanvasTopInset(canvas) {
 // This is used to avoid accumulated min-height increases when charts are rebuilt.
 function resetChartContainerHeights() {
     try {
-        // Clear inline min-height on chart containers so subsequent sizing starts fresh
+        // Clear inline min-height/height on chart containers so subsequent sizing starts fresh
         document.querySelectorAll('.chart-container, .chart-container-compact').forEach(el => {
             try { el.style.removeProperty('min-height'); } catch(e) {}
+            try { el.style.removeProperty('height'); } catch(e) {}
         });
 
         // Clear dataset sizing hints and visibility flags on canvases
@@ -302,10 +336,13 @@ function resetChartContainerHeights() {
                     delete c.dataset.visualHeight;
                     delete c.dataset.needUnhide;
                 }
-                // remove any inline top/width/height that may have been set
+                // remove any inline top/width that may have been set; height is managed on parent
                 try { c.style.removeProperty('top'); } catch(e) {}
                 try { c.style.removeProperty('width'); } catch(e) {}
                 try { c.style.removeProperty('height'); } catch(e) {}
+                // Also remove inline height on the parent container if present
+                try { if (c.parentElement) c.parentElement.style.removeProperty('height'); } catch(e) {}
+                try { if (c.parentElement) c.parentElement.style.removeProperty('min-height'); } catch(e) {}
                 // ensure canvas is visible (will be hidden again by sizing helper if needed)
                 try { c.style.visibility = ''; } catch(e) {}
             } catch(e) {}
@@ -317,46 +354,63 @@ function resetChartContainerHeights() {
 
 function adjustAllChartInsets() {
     try {
-        document.querySelectorAll('.chart-container canvas').forEach(c => {
+        // First pass: collect per-canvas requirements so we can scale collectively if needed
+        const canvasInfos = [];
+        const canvases = Array.from(document.querySelectorAll('.chart-container canvas'));
+        const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+        canvases.forEach(c => {
             const top = setCanvasTopInset(c) || 0;
+            let visualCanvasH = 0;
             try {
-                // compute visual canvas height (device-independent pixels)
-                const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
-                // Prefer the visual height stored by setCanvasVisualSize to avoid reading
-                // live layout which may reflect transient values.
-                const stored = c.dataset && c.dataset.visualHeight ? parseFloat(c.dataset.visualHeight) : NaN;
-                let visualCanvasH = 0;
-                if (!Number.isNaN(stored) && stored > 0) {
-                    visualCanvasH = Math.round(stored);
-                } else {
-                    const bufHeight = c.height || parseFloat(c.getAttribute('height')) || 0; // actual drawing buffer height
+                const parentHInline = c.parentElement && c.parentElement.style && c.parentElement.style.height ? parseFloat(c.parentElement.style.height) : NaN;
+                const parentHComputed = (window.getComputedStyle && c.parentElement) ? parseFloat(window.getComputedStyle(c.parentElement).height) : NaN;
+                const parentH = (!Number.isNaN(parentHInline) && parentHInline > 0) ? parentHInline : (Number.isNaN(parentHComputed) ? NaN : parentHComputed);
+                if (!Number.isNaN(parentH) && parentH > 0) visualCanvasH = Math.round(parentH);
+                else {
+                    const bufHeight = c.height || parseFloat(c.getAttribute('height')) || 0;
                     visualCanvasH = bufHeight ? Math.round(bufHeight / dpr) : Math.ceil((c.getBoundingClientRect && c.getBoundingClientRect().height) || 0);
                 }
-                // bottom inset from CSS (fallback to 6px)
-                const cs = window.getComputedStyle ? window.getComputedStyle(c) : null;
-                const bottomInset = cs ? (parseFloat(cs.bottom) || 6) : 6;
-                const required = Math.max(120, Math.ceil(top + visualCanvasH + bottomInset + 2));
-                // Prevent exploding required values by capping to an absolute maximum
-                const viewportH = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
-                const absoluteMax = Math.max(1000, Math.floor(viewportH * 3));
-                const finalRequired = Math.min(required, absoluteMax);
-                const parent = c.parentElement;
+            } catch (e) {
+                const bufHeight = c.height || parseFloat(c.getAttribute('height')) || 0;
+                visualCanvasH = bufHeight ? Math.round(bufHeight / dpr) : Math.ceil((c.getBoundingClientRect && c.getBoundingClientRect().height) || 0);
+            }
+            // Canvas should fit within parent; no bottom inset needed as canvas is positioned with top only
+            const required = Math.max(120, Math.ceil(top + visualCanvasH + 12));
+            canvasInfos.push({ canvas: c, top, visualCanvasH, required });
+            try {
+                debugLog('[WebUI][Sizing] adjustAllChartInsets collect', { id: c.id || '(no-id)', top, visualCanvasH, required });
+            } catch(e){}
+        });
+
+        // Determine if collective scaling is needed to fit viewport
+        const viewportH = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+        const totalRequired = canvasInfos.reduce((s,i) => s + i.required, 0);
+        // Conservative cap: allow charts to occupy at most 70% of the viewport height
+        const allowedTotal = Math.max(300, Math.floor(viewportH * 0.7));
+        let scale = 1;
+        if (totalRequired > allowedTotal && totalRequired > 0) {
+            scale = allowedTotal / totalRequired;
+        }
+        try { debugLog('[WebUI][Sizing] adjustAllChartInsets totals', { totalRequired, allowedTotal, scale }); } catch(e){}
+
+        // Second pass: apply scaled requirements to parents
+        canvasInfos.forEach(info => {
+            try {
+                const finalRequired = Math.max(120, Math.floor(info.required * scale));
+                const parent = info.canvas.parentElement;
                 if (parent) {
                     try {
-                        // Read existing min-height (inline style first, fallback to computed)
                         const existingInline = parent.style && parent.style.minHeight ? parseFloat(parent.style.minHeight) : NaN;
                         const computed = window.getComputedStyle ? parseFloat(window.getComputedStyle(parent).minHeight) : NaN;
                         const existing = (!Number.isNaN(existingInline) && existingInline > 0) ? existingInline : (Number.isNaN(computed) ? 0 : computed);
-                        // Only increase min-height; cap per-step increase to avoid big jumps
-                        const maxStep = Math.max(200, Math.floor(existing * 0.5)); // at most +50% or +200px
+                        const maxStep = Math.max(200, Math.floor(existing * 0.5));
                         let newHeight = finalRequired;
-                        if (finalRequired > existing && finalRequired - existing > maxStep) {
-                            newHeight = existing + maxStep;
-                        }
+                        if (finalRequired > existing && finalRequired - existing > maxStep) newHeight = existing + maxStep;
                         if (newHeight > existing) parent.style.setProperty('min-height', Math.ceil(newHeight) + 'px', 'important');
                     } catch (e) { /* ignore */ }
                 }
-                // ensure ancestor .col also reserves height (only increase)
+
+                // ensure ancestor .col also reserves a scaled height
                 let el = parent; let depth = 0;
                 while (el && depth < 4) {
                     if (el.classList && el.classList.contains('col')) {
@@ -364,23 +418,23 @@ function adjustAllChartInsets() {
                             const existingInline = el.style && el.style.minHeight ? parseFloat(el.style.minHeight) : NaN;
                             const computed = window.getComputedStyle ? parseFloat(window.getComputedStyle(el).minHeight) : NaN;
                             const existing = (!Number.isNaN(existingInline) && existingInline > 0) ? existingInline : (Number.isNaN(computed) ? 0 : computed);
-                            if (required > existing) el.style.setProperty('min-height', required + 'px', 'important');
+                            if (finalRequired > existing) el.style.setProperty('min-height', finalRequired + 'px', 'important');
                         } catch(e) { /* ignore */ }
                         break;
                     }
                     el = el.parentElement; depth++;
                 }
-                    // If this canvas was hidden pending inset application, unhide it now
-                    try {
-                        if (c && c.dataset && c.dataset.needUnhide) {
-                            c.style.visibility = 'visible';
-                            delete c.dataset.needUnhide;
-                        } else if (c && (!c.dataset || !c.dataset.needUnhide)) {
-                            // If canvas was hidden via CSS initial state, make it visible now that layout is stable
-                            c.style.visibility = 'visible';
-                        }
-                    } catch(e) { /* ignore */ }
-            } catch (e) { /* ignore per-chart errors */ }
+
+                // Unhide canvas if it was hidden
+                try {
+                    if (info.canvas && info.canvas.dataset && info.canvas.dataset.needUnhide) {
+                        info.canvas.style.visibility = 'visible';
+                        delete info.canvas.dataset.needUnhide;
+                    } else if (info.canvas && (!info.canvas.dataset || !info.canvas.dataset.needUnhide)) {
+                        info.canvas.style.visibility = 'visible';
+                    }
+                } catch(e){}
+            } catch(e) { /* ignore per-canvas errors */ }
         });
     } catch (e) { /* ignore */ }
 }
@@ -535,6 +589,25 @@ try {
     console.warn('CodeMirror GCSL mode registration failed', e);
 }
 
+// Setup collapsible sections
+function setupCollapsibleSections() {
+    document.addEventListener('click', function(e) {
+        const sectionTitle = e.target.closest('.section-title');
+        if (!sectionTitle) return;
+        
+        const section = sectionTitle.closest('.results-section');
+        if (!section) return;
+        
+        section.classList.toggle('collapsed');
+        
+        // Update max-height for smooth animation
+        const content = section.querySelector('.section-content');
+        if (content && !section.classList.contains('collapsed')) {
+            content.style.maxHeight = content.scrollHeight + 'px';
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     debugLog('[WebUI] Initializing...');
     
@@ -543,6 +616,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Mode switching setup
     setupModeSwitch();
+    
+    // Collapsible sections setup
+    setupCollapsibleSections();
     
     // Editor setup: CodeMirror preferred; fallback to textarea
     const textarea = document.getElementById('config-editor');
@@ -838,25 +914,68 @@ async function runSimulation() {
         const response = await fetch('/api/simulate', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'text/plain',
             },
-            body: JSON.stringify({ config })
+            body: config
         });
         
     debugLog('[WebUI] Response status:', response.status);
         
-        loading.style.display = 'none';
-        runButton.disabled = false;
-        
         if (!response.ok) {
             const error = await response.json();
             console.error('[WebUI] Error response:', error);
+            loading.style.display = 'none';
+            runButton.disabled = false;
             handleError(error);
             return;
         }
         
-        const result = await response.json();
-    debugLog('[WebUI] Simulation result:', result);
+        const submitResult = await response.json();
+    debugLog('[WebUI] Submit result:', submitResult);
+        
+        if (!submitResult.job_id) {
+            throw new Error('No job_id returned from server');
+        }
+        
+        // Poll for result
+        debugLog('[WebUI] Polling for result with job_id:', submitResult.job_id);
+        let attempts = 0;
+        const maxAttempts = 60; // 60 seconds max
+        const pollInterval = 1000; // 1 second
+        
+        let result = null;
+        while (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, pollInterval));
+            attempts++;
+            
+            debugLog('[WebUI] Poll attempt', attempts);
+            const resultResponse = await fetch(`/api/result?id=${submitResult.job_id}`);
+            
+            if (!resultResponse.ok) {
+                console.error('[WebUI] Error fetching result');
+                continue;
+            }
+            
+            const jobStatus = await resultResponse.json();
+            debugLog('[WebUI] Job status:', jobStatus.status);
+            
+            if (jobStatus.status === 'done') {
+                result = jobStatus.result;
+                debugLog('[WebUI] Simulation complete!');
+                break;
+            } else if (jobStatus.status === 'error') {
+                throw new Error(jobStatus.error || 'Simulation failed');
+            }
+        }
+        
+        loading.style.display = 'none';
+        runButton.disabled = false;
+        
+        if (!result) {
+            throw new Error('Simulation timed out');
+        }
+        
+    debugLog('[WebUI] Final result:', result);
         
         // Switch to results screen
         const resultsTab = document.querySelector('.navbar-tab[data-screen="results"]');
@@ -928,7 +1047,6 @@ function displayResults(result) {
     setTimeout(() => {
         try { if (typeof adjustAllChartInsets === 'function') adjustAllChartInsets(); } catch(e) {}
         try { resultsContainer.style.display = 'block'; resultsContainer.classList.add('visible'); } catch(e) {}
-        try { resultsContainer.scrollIntoView({ behavior: 'smooth' }); } catch(e) {}
         debugLog('[WebUI] Results displayed successfully (post-layout)');
     }, 80);
 }
@@ -1002,13 +1120,13 @@ function displayCharacters(result) {
             talentsText = `${talents.attack || 1}/${talents.skill || 1}/${talents.burst || 1}`;
         }
         
-        // Sets display - first set as badge
-        let firstSetBadge = '';
-        let weaponBadgeHTML = '';
+        // Sets display - show all sets as badges
+        let setsBadgesHTML = '';
         if (char.sets && Object.keys(char.sets).length > 0) {
-            const firstSet = Object.entries(char.sets)[0];
-            const [set, count] = firstSet;
-            firstSetBadge = `<span class="chip">${toJPArtifact(set)} (${count})<div class="small-en">${set}</div></span>`;
+            const setsArray = Object.entries(char.sets);
+            setsBadgesHTML = setsArray.map(([set, count]) => {
+                return `<span class="chip">${toJPArtifact(set)} (${count})<div class="small-en">${set}</div></span>`;
+            }).join(' ');
         }
         
         // Stats display - use snapshot_stats for final values
@@ -1051,25 +1169,29 @@ function displayCharacters(result) {
         }
         
         charDiv.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <div style="font-size: 1.0rem; font-weight: 600;">${name} <span style="font-size: 0.85rem; color: var(--muted); font-weight: 400;">C${constellation}</span></div>
-                <div style="font-size: 0.85rem; color: var(--muted-2);">${talentsText}</div>
+            <div class="char-card-summary">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="font-size: 1.0rem; font-weight: 600;">${name} <span style="font-size: 0.85rem; color: var(--muted); font-weight: 400;">C${constellation}</span></div>
+                    <div style="font-size: 0.85rem; color: var(--muted-2);">${talentsText}</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="small-en">${rawName}</div>
+                    <div style="font-size: 0.85rem;">Lv. ${level}/${maxLevel}</div>
+                </div>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <div class="small-en">${rawName}</div>
-                <div style="font-size: 0.85rem;">Lv. ${level}/${maxLevel}</div>
-            </div>
-            <div style="margin: 8px 0;">
-                ${firstSetBadge}
-            </div>
-            <div style="margin: 8px 0; font-size: 0.85rem;">
-                <div style="margin-bottom: 4px;"><strong>${weaponJP} Lv.${weaponLevel}/${weaponMaxLevel} (R${weaponRefine})</strong></div>
-                <div class="small-en">${weapon}</div>
-            </div>
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--muted-border);">
-                <div style="font-weight: 600; margin-bottom: 6px;">ステータス詳細:</div>
-                <div class="char-stats-list">
-                    ${statsHTML}
+            <div class="char-card-details">
+                <div style="margin: 8px 0; display: flex; flex-wrap: wrap; gap: 4px;">
+                    ${setsBadgesHTML}
+                </div>
+                <div style="margin: 8px 0; font-size: 0.85rem;">
+                    <div style="margin-bottom: 4px;"><strong>${weaponJP} Lv.${weaponLevel}/${weaponMaxLevel} (R${weaponRefine})</strong></div>
+                    <div class="small-en">${weapon}</div>
+                </div>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--muted-border); flex-grow: 1;">
+                    <div style="font-weight: 600; margin-bottom: 6px;">ステータス詳細:</div>
+                    <div class="char-stats-list">
+                        ${statsHTML}
+                    </div>
                 </div>
             </div>
         `;
@@ -1079,18 +1201,9 @@ function displayCharacters(result) {
     
     container.appendChild(gridDiv);
 
-    // Append the target info block once under the characters list
-    try {
-        const targetsBlockHtml = buildTargetsHTML(result);
-        if (targetsBlockHtml && targetsBlockHtml.trim().length > 0) {
-            const targetsDiv = document.createElement('div');
-            // Reuse card styles so visuals match character cards exactly
-            targetsDiv.className = 'card';
-            targetsDiv.style.marginTop = '12px';
-            targetsDiv.innerHTML = `<div class="card-content"><span class="card-title">ターゲット情報</span>${targetsBlockHtml}</div>`;
-            container.appendChild(targetsDiv);
-        }
-    } catch (e) { console.warn('[WebUI] Could not append targets under characters', e); }
+    // Automatic insertion of target info under characters has been disabled.
+    // If target information should be shown, call `displayTargetInfo(result)` from
+    // an explicit user action or a dedicated targets panel.
 }
 
 function displayTargetInfo(result) {
@@ -1156,16 +1269,16 @@ function buildTargetsHTML(result) {
     if (!result.target_details || result.target_details.length === 0) return '';
     let html = '<div style="margin-top:10px;"><strong>ターゲット情報:</strong>';
     result.target_details.forEach((target, idx) => {
-        // reuse stripStrikeTokens if available, otherwise define a local fallback
-        const stripStrikeTokens = (typeof stripStrikeTokens === 'function') ? stripStrikeTokens : function(s) { return s ? s.replace(/~~.*?~~/g,'').trim() : s; };
-        const name = stripStrikeTokens(target.name) || `ターゲット ${idx + 1}`;
+        // reuse global stripStrikeTokens if available, otherwise define a local fallback
+        const _stripStrike = (typeof globalThis !== 'undefined' && typeof globalThis.stripStrikeTokens === 'function') ? globalThis.stripStrikeTokens : function(s) { return s ? s.replace(/~~.*?~~/g,'').trim() : s; };
+        const name = _stripStrike(target.name) || `ターゲット ${idx + 1}`;
         const level = target.level || 1;
         const hp = target.hp || 0;
         let resistHTML = '';
         if (target.resist && Object.keys(target.resist).length > 0) {
             resistHTML = '<div style="margin-top:6px;">';
             for (const [element, resist] of Object.entries(target.resist)) {
-                const el = stripStrikeTokens(element);
+                const el = _stripStrike(element);
                 if (!el) continue;
                 resistHTML += `<div class="info-row"><span class="info-label">${el}</span><span class="info-value">${(resist * 100).toFixed(1)}%</span></div>`;
             }
@@ -1183,6 +1296,7 @@ function buildTargetsHTML(result) {
 
 function displayCharts(result) {
     console.log('[WebUI] Displaying charts...');
+    const resultsContainer = document.getElementById('results-container');
     console.log('[WebUI] Result structure:', Object.keys(result));
     console.log('[WebUI] Statistics:', result.statistics);
     
@@ -1201,29 +1315,7 @@ function displayCharts(result) {
     const stats = result.statistics || {};
     
     
-    // Insert or update a raw statistics dump to help debugging field shapes
-    try {
-        let rawPanel = document.getElementById('raw-stats-panel');
-        if (!rawPanel) {
-            rawPanel = document.createElement('details');
-            rawPanel.id = 'raw-stats-panel';
-            rawPanel.style.margin = '10px 0';
-            const summary = document.createElement('summary');
-            summary.textContent = 'Raw statistics JSON (debug)';
-            rawPanel.appendChild(summary);
-            const pre = document.createElement('pre');
-            pre.id = 'raw-stats-pre';
-            pre.style.maxHeight = '300px';
-            pre.style.overflow = 'auto';
-            pre.style.background = 'var(--card-bg)';
-            pre.style.border = '1px solid var(--muted-border)';
-            pre.style.padding = '8px';
-            rawPanel.appendChild(pre);
-            resultsContainer.insertBefore(rawPanel, resultsContainer.firstChild);
-        }
-        const preEl = document.getElementById('raw-stats-pre');
-        if (preEl) preEl.textContent = JSON.stringify(result.statistics || {}, null, 2);
-    } catch (e) { console.warn('[WebUI] Could not render raw stats panel', e); }
+    // Raw statistics debug panel removed — do not inject JSON into the UI.
 
     // Character DPS Chart (100% Stacked Bar Chart)
     if (result.character_details && result.character_details.length > 0) {
@@ -1269,8 +1361,8 @@ function displayCharts(result) {
                     const orderedCharSd = order.map(o => charDpsSd[o.idx]);
                     // store canonical ordering on the stats object for use by other charts
                     stats.__char_order = { order, orderedCharNames, orderedCharDps, orderedCharSd };
-                    // pass an empty labels array so no dummy label appears on the axis
-                    charts.charDps = createStackedBarChart(ctx, [''], [orderedCharNames, orderedCharDps, orderedCharSd], 'キャラクター別DPS');
+                    // Use pie chart for character DPS distribution
+                    charts.charDps = createPieChart(ctx, orderedCharNames, orderedCharDps, orderedCharSd, 'キャラクター別DPS');
                 } else {
                 console.log('[WebUI] No character DPS data to display');
             }
@@ -1364,8 +1456,8 @@ function displayCharts(result) {
                 });
             });
 
-            // Request the abilities chart use a slightly thicker bar and 5px vertical gap
-            charts.sourceDps = createStackedAbilitiesChart(ctx2, charNames, abilities, matrix, 'キャラクター別 能力DPS', metaMatrix, { barThickness: 24, verticalPadding: 5 });
+            // Request the abilities chart use thinner bars and more vertical gap to prevent overlap
+            charts.sourceDps = createStackedAbilitiesChart(ctx2, charNames, abilities, matrix, 'キャラクター別 能力DPS', metaMatrix, { barThickness: 18, verticalPadding: 8 });
         } else if (data.labels.length > 0) {
             charts.sourceDps = createBarChart(ctx2, data.labels, data.values, 'ソース別DPS');
         } else {
@@ -1407,7 +1499,7 @@ function displayCharts(result) {
         
         if (timeLabels.length > 0) {
             // Render distribution with much larger vertical footprint per user request
-            charts.damageDist = createLineChart(ctx3, timeLabels, damageValues, 'ダメージ', { heightPx: 480 });
+            charts.damageDist = createLineChart(ctx3, timeLabels, damageValues, 'ダメージ', { heightPx: 700 });
         }
     } else {
         console.log('[WebUI] No damage distribution data');
@@ -1477,6 +1569,7 @@ function displayCharts(result) {
             options: {
                 // Horizontal bars: categories on Y axis
                 indexAxis: 'y',
+                layout: { padding: { top: 15, bottom: 30, left: 15, right: 15 } },
                 plugins: { 
                     legend: { position: 'top' },
                     tooltip: {
@@ -1492,8 +1585,8 @@ function displayCharts(result) {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { stacked: true, beginAtZero: true },
-                    y: { stacked: true }
+                    x: { stacked: true, beginAtZero: true, ticks: { padding: 8 } },
+                    y: { stacked: true, ticks: { padding: 8 } }
                 }
             }
         });
@@ -1594,6 +1687,7 @@ function displayCharts(result) {
             options: {
                 // Horizontal bars: categories (targets) on Y axis, percent on X axis
                 indexAxis: 'y',
+                layout: { padding: { top: 15, bottom: 30, left: 15, right: 15 } },
                 plugins: { 
                     legend: { position: 'top' },
                     tooltip: {
@@ -1609,8 +1703,8 @@ function displayCharts(result) {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { stacked: true, beginAtZero: true, max: 100, ticks: { callback: function(v){ return v + '%'; } } },
-                    y: { stacked: true, grid: { display: false } }
+                    x: { stacked: true, beginAtZero: true, max: 100, ticks: { callback: function(v){ return v + '%'; }, padding: 8 } },
+                    y: { stacked: true, grid: { display: false }, ticks: { padding: 8 } }
                 }
             }
         });
@@ -1659,6 +1753,82 @@ function showEmptyChartPlaceholder(containerEl, text) {
     } catch (e) { /* ignore */ }
 }
 
+function createPieChart(ctx, charNames, charValues, charSd, title) {
+    // Calculate percentages
+    const total = charValues.reduce((a, b) => a + b, 0);
+    const percentages = charValues.map(v => total > 0 ? (v / total) * 100 : 0);
+    
+    console.log('[WebUI] Creating pie chart:', title);
+    
+    // Use global character palette
+    const palette = CHAR_PALETTE;
+    const backgroundColors = charNames.map((_, idx) => hexToRgba(palette[idx % palette.length], 0.85));
+    const borderColors = charNames.map((_, idx) => hexToRgba(palette[idx % palette.length], 1));
+    
+    // Set canvas size - increase to prevent cutoff
+    setCanvasVisualSize(ctx, 450);
+    
+    const chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: charNames,
+            datasets: [{
+                data: charValues,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { 
+                padding: { 
+                    top: 10, 
+                    bottom: 10, 
+                    left: 10, 
+                    right: 10 
+                } 
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: { 
+                        boxWidth: 15, 
+                        padding: 10,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                title: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const idx = context.dataIndex;
+                            const name = charNames[idx];
+                            const dps = charValues[idx] || 0;
+                            const sd = (charSd && typeof charSd[idx] !== 'undefined' && charSd[idx] !== null) ? charSd[idx] : null;
+                            const pct = percentages[idx];
+                            const pctStr = pct.toFixed(1) + '%';
+                            const sdStr = (sd === null) ? 'n/a' : sd.toFixed(2);
+                            const dpsStr = Number(dps).toLocaleString('ja-JP', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            return `${name}: ${pctStr} (DPS: ${dpsStr} ± ${sdStr})`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    try { chart.resize(); chart.update(); } catch (e) { /* ignore */ }
+    console.log('[WebUI] Pie chart created successfully');
+    return chart;
+}
+
 function createStackedBarChart(ctx, categories, [charNames, charValues, charSd], title) {
     
     // Calculate percentages
@@ -1683,8 +1853,8 @@ function createStackedBarChart(ctx, categories, [charNames, charValues, charSd],
             borderWidth: 1,
             hoverBackgroundColor: hexToRgba(hex, 0.95),
             // Make the bar thickness approximately 24px
-            barThickness: 48,
-            maxBarThickness: 48
+            barThickness: (ctx && ctx.canvas && ctx.canvas.dataset && ctx.canvas.dataset.barThicknessOverride) ? parseInt(ctx.canvas.dataset.barThicknessOverride,10) : 48,
+            maxBarThickness: (ctx && ctx.canvas && ctx.canvas.dataset && ctx.canvas.dataset.barThicknessOverride) ? parseInt(ctx.canvas.dataset.barThicknessOverride,10) : 48
             ,categoryPercentage: 1.0
             ,barPercentage: 1.0
         };
@@ -1695,8 +1865,22 @@ function createStackedBarChart(ctx, categories, [charNames, charValues, charSd],
     const numRows = (Array.isArray(categories) && categories.length > 0) ? categories.length : 1;
     const barThickness = 48;
     const verticalPadding = 6;
-    const legendSpace = 20;
-    const desiredHeightPx = Math.max(120, (barThickness + verticalPadding) * numRows + legendSpace);
+    const legendSpace = 60;
+    let desiredHeightPx = Math.max(200, (barThickness + verticalPadding) * numRows + legendSpace);
+    try {
+        const vp = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+        const maxAllowed = Math.max(360, Math.floor(vp * 0.9));
+        if (desiredHeightPx > maxAllowed) {
+            const neededForRows = (barThickness + verticalPadding) * numRows;
+            const availableForRows = Math.max(80, maxAllowed - legendSpace);
+            const scale = availableForRows / neededForRows;
+            if (scale < 1) {
+                const effBar = Math.max(8, Math.floor(barThickness * scale));
+                desiredHeightPx = Math.max(140, (effBar + verticalPadding) * numRows + legendSpace);
+                try { if (ctx && ctx.canvas) ctx.canvas.dataset.barThicknessOverride = String(effBar); } catch(e){}
+            }
+        }
+    } catch(e){}
     setCanvasVisualSize(ctx, desiredHeightPx);
 
     const chart = new Chart(ctx, {
@@ -1710,7 +1894,8 @@ function createStackedBarChart(ctx, categories, [charNames, charValues, charSd],
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top: 0, bottom: 0, left: 0, right: 0 } },
+            aspectRatio: 2.5,
+            layout: { padding: { top: 15, bottom: 15, left: 10, right: 10 } },
             plugins: {
                 legend: {
                     display: true,
@@ -1836,8 +2021,20 @@ function createBarChart(ctx, labels, data, label, meta) {
     const numRows = labels.length || 1;
     const barThickness = 48;
     const verticalPadding = 6;
-    const legendSpace = 8;
-    const desiredHeightPx = Math.max(120, (barThickness + verticalPadding) * numRows + legendSpace);
+    const legendSpace = 60;
+    // Base desired height
+    let desiredHeightPx = Math.max(160, (barThickness + verticalPadding) * numRows + legendSpace);
+    try {
+        const vp = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+        // Cap charts to a fraction of the viewport to avoid runaway growth
+        const allowedMax = Math.max(360, Math.floor(vp * 0.75));
+        if (desiredHeightPx > allowedMax) {
+            const availableForRows = Math.max(60, allowedMax - legendSpace);
+            const effBar = Math.max(6, Math.floor((availableForRows / Math.max(1, numRows)) - verticalPadding));
+            desiredHeightPx = Math.max(120, (effBar + verticalPadding) * numRows + legendSpace);
+            try { if (ctx && ctx.canvas) ctx.canvas.dataset.barThicknessOverride = String(effBar); } catch(e){}
+        }
+    } catch(e){}
     setCanvasVisualSize(ctx, desiredHeightPx);
 
     const datasets = [{
@@ -1846,10 +2043,10 @@ function createBarChart(ctx, labels, data, label, meta) {
         backgroundColor: bgColors,
         borderColor: borderColors,
         borderWidth: 1,
-        barThickness: 48,
-        maxBarThickness: 48,
-        categoryPercentage: 1.0,
-        barPercentage: 0.9
+        barThickness: (ctx && ctx.canvas && ctx.canvas.dataset && ctx.canvas.dataset.barThicknessOverride) ? parseInt(ctx.canvas.dataset.barThicknessOverride,10) : 48,
+        maxBarThickness: (ctx && ctx.canvas && ctx.canvas.dataset && ctx.canvas.dataset.barThicknessOverride) ? parseInt(ctx.canvas.dataset.barThicknessOverride,10) : 48,
+        categoryPercentage: 0.92,
+        barPercentage: 0.86
     }];
 
     const chart = new Chart(ctx, {
@@ -1859,7 +2056,7 @@ function createBarChart(ctx, labels, data, label, meta) {
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top:0, bottom:0, left:0, right:0 } },
+            layout: { padding: { top: 15, bottom: 15, left: 10, right: 10 } },
             plugins: { 
                 legend: { display: false },
                 tooltip: {
@@ -1896,7 +2093,7 @@ function createBarChart(ctx, labels, data, label, meta) {
 
 function createLineChart(ctx, labels, data, label, options) {
     // options.heightPx: desired visual height in pixels (default small for distribution)
-    const opts = Object.assign({ heightPx: 140 }, options || {});
+    const opts = Object.assign({ heightPx: 200 }, options || {});
 
     // Set canvas visual size using helper to avoid duplication
     setCanvasVisualSize(ctx, opts.heightPx);
@@ -1917,6 +2114,7 @@ function createLineChart(ctx, labels, data, label, options) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: { padding: { top: 20, bottom: 40, left: 15, right: 15 } },
             plugins: {
                 legend: {
                     display: false
@@ -1924,7 +2122,15 @@ function createLineChart(ctx, labels, data, label, options) {
             },
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        padding: 8
+                    }
+                },
+                x: {
+                    ticks: {
+                        padding: 8
+                    }
                 }
             }
         }
@@ -1948,8 +2154,8 @@ function createStackedAbilitiesChart(ctx, charNames, abilities, matrix, title, m
     const sortedMatrix = totalByAbility.map(t => matrix[t.idx]);
     const sortedMeta = metaMatrix ? totalByAbility.map(t => metaMatrix[t.idx]) : null;
 
-    // Options with sensible defaults
-    const opts = Object.assign({ barThickness: 18, verticalPadding: 6 }, options || {});
+    // Options with sensible defaults (barを太く、間隔も広く)
+    const opts = Object.assign({ barThickness: 28, verticalPadding: 14 }, options || {});
 
     // Build datasets per character so each stack segment uses character color
     const datasets = charNames.map((char, cIdx) => {
@@ -1965,19 +2171,36 @@ function createStackedAbilitiesChart(ctx, charNames, abilities, matrix, title, m
             backgroundColor: bg,
             borderColor: border,
             borderWidth: 1,
-            barThickness: opts.barThickness,
-            maxBarThickness: opts.barThickness,
-            categoryPercentage: 1.0,
-            barPercentage: 1.0
+            barThickness: (ctx && ctx.canvas && ctx.canvas.dataset && ctx.canvas.dataset.barThicknessOverride) ? parseInt(ctx.canvas.dataset.barThicknessOverride,10) : opts.barThickness,
+            maxBarThickness: (ctx && ctx.canvas && ctx.canvas.dataset && ctx.canvas.dataset.barThicknessOverride) ? parseInt(ctx.canvas.dataset.barThicknessOverride,10) : opts.barThickness,
+            categoryPercentage: 0.92,
+            barPercentage: 0.86
         };
     });
 
     // compute desired height and set canvas size via helper
     const numRows = sortedAbilities.length || 1;
-    const barThickness = opts.barThickness || 18;
-    const verticalPadding = (typeof opts.verticalPadding === 'number') ? opts.verticalPadding : 6;
-    const legendSpace = 8;
-    const desiredHeightPx = Math.max(120, (barThickness + verticalPadding) * numRows + legendSpace);
+    const barThickness = opts.barThickness || 28;
+    const verticalPadding = (typeof opts.verticalPadding === 'number') ? opts.verticalPadding : 14;
+    const legendSpace = 100;
+    // Base desired height (allow smaller base than before to be more compact)
+    let desiredHeightPx = Math.max(240, (barThickness + verticalPadding) * numRows + legendSpace);
+    // If desired height would overflow the viewport, compute an effective bar thickness
+    // that will fit the chart into a viewport-aware maximum (avoid inner scrolls)
+    try {
+        const vp = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 800;
+        // Allow at most 75% of the viewport height for a single chart
+        const allowedMax = Math.max(360, Math.floor(vp * 0.75));
+        if (desiredHeightPx > allowedMax) {
+            // determine available vertical pixels for rows after reserving legend space
+            const availableForRows = Math.max(60, allowedMax - legendSpace);
+            // compute an effective per-row bar height (subtract padding)
+            const effBar = Math.max(6, Math.floor((availableForRows / Math.max(1, numRows)) - verticalPadding));
+            // recompute desired height using the effective bar thickness
+            desiredHeightPx = Math.max(140, (effBar + verticalPadding) * numRows + legendSpace);
+            try { if (ctx && ctx.canvas) ctx.canvas.dataset.barThicknessOverride = String(effBar); } catch(e){}
+        }
+    } catch(e){}
     setCanvasVisualSize(ctx, desiredHeightPx);
 
     const chart = new Chart(ctx, {
@@ -1987,7 +2210,7 @@ function createStackedAbilitiesChart(ctx, charNames, abilities, matrix, title, m
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top:0, bottom:0, left:0, right:0 } },
+            layout: { padding: { top: 15, bottom: 15, left: 10, right: 10 } },
             plugins: {
                 legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 4 } },
                 tooltip: {
