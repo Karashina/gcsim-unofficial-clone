@@ -1121,13 +1121,24 @@ function displayCharacters(result) {
         }
         
         // Sets display - show all sets as badges
-        let setsBadgesHTML = '';
-        if (char.sets && Object.keys(char.sets).length > 0) {
-            const setsArray = Object.entries(char.sets);
-            setsBadgesHTML = setsArray.map(([set, count]) => {
-                return `<span class="chip">${toJPArtifact(set)} (${count})<div class="small-en">${set}</div></span>`;
-            }).join(' ');
-        }
+            let setsBadgesHTML = "";
+            if (char.sets && Object.keys(char.sets).length > 0) {
+                const parts = [];
+                const esc = (s) => {
+                    if (s === null || s === undefined) return '';
+                    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                };
+                Object.entries(char.sets).forEach(([setKey, count]) => {
+                    const setName = toJPArtifact(setKey);
+                    const title = `${setName} (${setKey})` + (count ? ` \u2014 ${count}` : '');
+                    const iconPath = `assets/artifacts/${setKey}.png`;
+                    parts.push(`\n            <span class="artifact-icon" title="${esc(title)}">` +
+                        `<img class="artifact-img" src="${iconPath}" onerror="this.style.display='none'" alt="${esc(setKey)}"/>` +
+                        `<span class="artifact-fallback">${esc(String(setKey).slice(0,2).toUpperCase())}</span>` +
+                        `</span>`);
+                });
+                setsBadgesHTML = `\n        <div class="char-artifact artifacts-inline">${parts.join('')}\n        </div>\n    `;
+            }
         
         // Stats display - use snapshot_stats for final values
         let statsHTML = '';

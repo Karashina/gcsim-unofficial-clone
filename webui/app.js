@@ -919,10 +919,23 @@ for let i=0; i<4; i=i+1 {
       }
       let setsBadgesHTML = "";
       if (char.sets && Object.keys(char.sets).length > 0) {
-        const setsArray = Object.entries(char.sets);
-        setsBadgesHTML = setsArray.map(([set, count]) => {
-          return `<span class="chip">${toJPArtifact(set)} (${count})<div class="small-en">${set}</div></span>`;
-        }).join(" ");
+        const parts = [];
+        const esc = (s) => {
+          if (s === null || s === void 0)
+            return "";
+          return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+        };
+        Object.entries(char.sets).forEach(([setKey, count]) => {
+          const setName = toJPArtifact(setKey);
+          const title = `${setName} (${setKey})` + (count ? ` \u2014 ${count}` : "");
+          const iconPath = `assets/artifacts/${setKey}.png`;
+          parts.push(`
+            <span class="artifact-icon" title="${esc(title)}"><img class="artifact-img" src="${iconPath}" onerror="this.style.display='none'" alt="${esc(setKey)}"/><span class="artifact-fallback">${esc(String(setKey).slice(0, 2).toUpperCase())}</span></span>`);
+        });
+        setsBadgesHTML = `
+        <div class="char-artifact artifacts-inline">${parts.join("")}
+        </div>
+    `;
       }
       let statsHTML = "";
       const snapshotStats = char.snapshot_stats || char.snapshot || [];
