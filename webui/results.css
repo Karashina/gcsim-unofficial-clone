@@ -1,0 +1,471 @@
+/* Generated CSS Bundle - DO NOT EDIT DIRECTLY */
+
+/* From: src/styles/results.css */
+/**
+ * Results Screen Styles
+ * Organized from top to bottom as they appear on the screen
+ */
+
+/* ============================================================================
+   1. DEBUG PANEL (Raw Statistics JSON - collapsible)
+   ============================================================================ */
+#raw-stats-panel {
+    margin: 10px 0;
+}
+
+#raw-stats-panel summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 8px;
+    background: var(--card-bg);
+    border-radius: 4px;
+}
+
+#raw-stats-pre {
+    max-height: 300px;
+    overflow: auto;
+    background: var(--card-bg);
+    border: 1px solid var(--muted-border);
+    padding: 8px;
+    font-family: 'UDEV Gothic', 'Consolas', 'Monaco', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* ============================================================================
+   2. TARGET INFORMATION SECTION
+   ============================================================================ */
+.target-info-section {
+    margin-bottom: 20px;
+}
+
+.target-info-section h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+}
+
+.target-card {
+    background: var(--card-bg);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.target-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.target-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.target-level {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+/* ============================================================================
+   3. CHARACTER CARDS SECTION
+   ============================================================================ */
+.characters-section {
+    margin-bottom: 20px;
+}
+
+.characters-section h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+}
+
+/* Character grid - 4 columns on desktop, responsive on mobile */
+.characters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 1200px) {
+    .characters-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .characters-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .characters-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Individual character card */
+.char-card {
+    background: var(--card-bg);
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Character header - name and constellation */
+.char-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.char-name-line {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.char-constellation {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: 6px;
+}
+
+.char-talents {
+    font-size: 0.75rem;
+    color: var(--muted-2);
+    white-space: nowrap;
+}
+
+/* Character subheader - english name and level */
+.char-subheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.char-en-name {
+    font-size: 0.7rem;
+    color: var(--muted);
+    opacity: 0.85;
+}
+
+.char-level {
+    font-size: 0.75rem;
+    color: var(--text);
+}
+
+/* Artifact set badge */
+.char-artifact {
+    margin: 6px 0;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: linear-gradient(90deg, var(--primary-1) 0%, var(--primary-2) 100%);
+    color: var(--chip-text);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.chip .small-en {
+    font-size: 0.65rem;
+    opacity: 0.9;
+}
+
+/* Weapon information */
+.char-weapon {
+    margin: 6px 0;
+}
+
+.char-weapon-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: var(--text);
+}
+
+.char-weapon-en {
+    font-size: 0.65rem;
+    color: var(--muted);
+    opacity: 0.85;
+}
+
+/* Stats section */
+.char-stats {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--muted-border);
+}
+
+.char-stats-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+}
+
+.char-stats-list .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    font-size: 0.75rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .char-stats-list .info-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.char-stats-list .info-row:last-child {
+    border-bottom: none;
+}
+
+.char-stats-list .info-label {
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.char-stats-list .info-value {
+    color: var(--text);
+    font-weight: 500;
+}
+
+/* ============================================================================
+   4. STATISTICS SUMMARY (DPS, EPS, RPS, etc.)
+   ============================================================================ */
+.stats-summary-section {
+    margin-bottom: 20px;
+}
+
+.stats-summary-section h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 900px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 6px;
+    padding: 12px 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary-2);
+    line-height: 1.2;
+}
+
+.stat-stdev {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+/* ============================================================================
+   5. CHARTS SECTION
+   ============================================================================ */
+.charts-section {
+    margin-bottom: 20px;
+}
+
+.charts-section h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+}
+
+/* Chart grid - side by side for Character DPS and Source DPS */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 900px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Individual chart container */
+.chart-container {
+    background: var(--card-bg);
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    position: relative;
+    min-height: 200px;
+}
+
+.chart-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+    text-align: center;
+}
+
+/* Canvas positioning for Chart.js */
+.chart-container canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100%;
+    display: block;
+    /* Remove visibility: hidden to fix rendering issue */
+}
+
+/* Character DPS chart - pie chart */
+#char-dps-chart-container {
+    min-height: 300px;
+}
+
+#char-dps-chart {
+    max-height: 280px;
+}
+
+/* Source DPS chart - horizontal bar, reduced height as requested */
+#source-dps-chart-container {
+    min-height: 200px; /* Reduced from default */
+}
+
+#source-dps-chart {
+    max-height: 180px; /* Reduced height for better fit */
+}
+
+/* Damage distribution chart - full width */
+.chart-full-width {
+    grid-column: 1 / -1;
+}
+
+#damage-dist-chart-container {
+    min-height: 250px;
+}
+
+#damage-dist-chart {
+    max-height: 230px;
+}
+
+/* Chart legend (if custom HTML legend is used) */
+.chart-legend {
+    margin-top: 10px;
+    padding: 8px;
+    background: var(--card-bg);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    border: 1px solid var(--muted-border);
+}
+
+.chart-legend-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 12px;
+    margin-bottom: 5px;
+}
+
+.chart-legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+/* Empty chart placeholder */
+.chart-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ============================================================================
+   6. UTILITY CLASSES
+   ============================================================================ */
+
+/* Fade-in animation for results */
+#results-container {
+    opacity: 0;
+    transition: opacity 220ms ease-in-out;
+}
+
+#results-container.visible {
+    opacity: 1;
+}
+
+/* Info row - generic key-value display */
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 0.85rem;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.info-value {
+    color: var(--text);
+    font-weight: 500;
+}
+
+
