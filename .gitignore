@@ -28,6 +28,8 @@ containers/
 protos/
 scripts/
 ui/
+webui/
+webuii-src/
 cmd/
 doc.go
 todo.md
