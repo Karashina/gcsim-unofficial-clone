@@ -54,3 +54,4 @@ docs/ARCHITECTURE.md
 /docs
 .github/copilot-instructions.md
 /.github/work-logs
+/webui-src
