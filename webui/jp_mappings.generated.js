@@ -105,6 +105,7 @@ window.CHAR_TO_JP = Object.assign(window.CHAR_TO_JP || {}, {
     "sethos": "セトス",
     "thoma": "トーマ",
     "neuvillette": "ヌヴィレット",
+    "nefer": "ネフェル",
     "flins": "フリンズ",
     "yanfei": "煙緋",
     "sucrose": "スクロース",

@@ -83,9 +83,9 @@ var weaponNames = []string{
 	"emeraldorb",
 	"endoftheline",
 	"engulfinglightning",
+	"etherlightspindlelute",
 	"everlastingmoonglow",
 	"eyeofperception",
-	"etherlightspindlelute",
 	"fadingtwilight",
 	"fangofthemountainking",
 	"favoniuscodex",
@@ -184,10 +184,10 @@ var weaponNames = []string{
 	"sacrificialjade",
 	"sacrificialsword",
 	"sapwoodblade",
+	"serenityscall",
 	"scionoftheblazingsun",
 	"seasonedhuntersbow",
 	"sequenceofsolitude",
-	"serenityscall",
 	"serpentspine",
 	"sharpshootersoath",
 	"silvershowerheartstrings",
@@ -254,14 +254,13 @@ var weaponNames = []string{
 	"wolffang",
 	"wolfsgravestone",
 	"xiphosmoonlight",
+	"reliquaryoftruth",
 	"sacrificersstaff",
 	"dawningfrost",
-	"reliquaryoftruth",
 }
 
 const (
 	NoWeapon Weapon = iota
-	Absolution
 	Akuoumaru
 	AlleyHunter
 	AmenomaKageuchi
