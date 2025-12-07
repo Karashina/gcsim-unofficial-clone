@@ -261,6 +261,7 @@ var weaponNames = []string{
 
 const (
 	NoWeapon Weapon = iota
+	Absolution
 	Akuoumaru
 	AlleyHunter
 	AmenomaKageuchi
