@@ -29,6 +29,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/diluc"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/diona"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/dori"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/durin"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/emilie"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/escoffier"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/eula"
@@ -120,4 +121,3 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/yunjin"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/zhongli"
 )
-

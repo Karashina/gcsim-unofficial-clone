@@ -55,3 +55,5 @@ docs/ARCHITECTURE.md
 .github/copilot-instructions.md
 /.github/work-logs
 /webui-src
+durin_implementation_comparison.md
+durin.md
