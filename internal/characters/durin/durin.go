@@ -3,6 +3,7 @@ package durin
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
@@ -24,6 +25,7 @@ type char struct {
 	dragonWhiteFlame bool // Whether Dragon of White Flame is summoned
 	dragonDarkDecay  bool // Whether Dragon of Dark Decay is summoned
 	dragonExpiry     int  // Expiration frame for active dragon
+	dragonSrc        int  // Source ID to track dragon instance (prevents old dragons from attacking)
 
 	// A4 Talent: Chaos Formed Like the Night (Primordial Fusion)
 	primordialFusionStacks int // Primordial Fusion stack count (max 10)
@@ -83,6 +85,22 @@ func (c *char) Init() error {
 	}
 
 	return nil
+}
+
+// ActionReady checks if an action is available
+// Handles double skill mechanics: Essential Transmutation can be recasted immediately
+func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
+	// Allow recasting skill immediately if in Essential Transmutation state and recast CD not active
+	if a == action.ActionSkill && c.StatusIsActive(essentialTransmutationKey) {
+		if c.StatusIsActive(skillRecastCDKey) {
+			// Already used recast, must wait for main skill CD
+			return false, action.SkillCD
+		}
+		// Recast allowed even if normal skill CD is active
+		return true, action.NoFailure
+	}
+
+	return c.Character.ActionReady(a, p)
 }
 
 // Condition responds to character state queries

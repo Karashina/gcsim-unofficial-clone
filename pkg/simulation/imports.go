@@ -73,6 +73,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/chainbreaker"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/cloudforged"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/compound"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/daybreak"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/elegy"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/endoftheline"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/favonius"
@@ -243,6 +244,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/alley"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/amenoma"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/aquila"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/athame"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/azurelight"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/blackcliff"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/blacksword"
@@ -290,4 +292,3 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/wolffang"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/xiphos"
 )
-

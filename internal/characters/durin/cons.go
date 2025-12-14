@@ -139,6 +139,11 @@ func (c *char) c1OnEnemyHit(args ...interface{}) bool {
 	}
 
 	// Other party members' stacks (Purity mode)
+	// Check if the character is the active character
+	if charIndex != c.Core.Player.Active() {
+		return false
+	}
+
 	// Check if valid attack type (NA, CA, Plunge, Skill, Burst)
 	validTag := atk.Info.AttackTag == attacks.AttackTagNormal ||
 		atk.Info.AttackTag == attacks.AttackTagExtra ||

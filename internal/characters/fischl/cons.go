@@ -34,4 +34,3 @@ func (c *char) c6Wave() {
 		c.ozTravel,
 	)
 }
-

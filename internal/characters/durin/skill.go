@@ -35,6 +35,7 @@ const (
 	essentialTransmutationKey = "durin-essential-transmutation" // Essential Transmutation state
 	confirmationStateKey      = "durin-confirmation-state"      // Confirmation of Purity state
 	denialStateKey            = "durin-denial-state"            // Denial of Darkness state
+	skillRecastCDKey          = "durin-skill-recast-cd"         // CD for second consecutive skill use
 )
 
 func init() {
@@ -117,7 +118,7 @@ func (c *char) skillConfirmation(p map[string]int) (action.Info, error) {
 	)
 
 	c.transitionToConfirmationState()
-	c.SetCDWithDelay(action.ActionSkill, skillCD, 0)
+	c.AddStatus(skillRecastCDKey, 0, true) // Mark recast as used
 
 	c.Core.Log.NewEvent("Durin uses Confirmation of Purity", glog.LogCharacterEvent, c.Index)
 
@@ -142,7 +143,7 @@ func (c *char) skillDenialOfDarkness(p map[string]int) (action.Info, error) {
 	}
 
 	c.transitionToDenialState()
-	c.SetCDWithDelay(action.ActionSkill, skillCD, 0)
+	c.AddStatus(skillRecastCDKey, 0, true) // Mark recast as used
 	c.Core.Log.NewEvent("Durin uses Denial of Darkness", glog.LogCharacterEvent, c.Index)
 
 	return action.Info{

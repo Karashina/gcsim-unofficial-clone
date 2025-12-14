@@ -135,9 +135,29 @@ func (c *char) applyBurstEffects() {
 	c.SetCDWithDelay(action.ActionBurst, burstCD, 2)
 }
 
+// clearExistingDragons clears any existing dragons when a new burst is used
+// This prevents overlapping dragon effects
+func (c *char) clearExistingDragons() {
+	// Clear dragon flags
+	c.dragonWhiteFlame = false
+	c.dragonDarkDecay = false
+	c.dragonExpiry = 0
+	c.dragonSrc++ // Increment source ID to invalidate old dragon tasks
+
+	// Delete status keys (will prevent scheduled attacks from executing)
+	c.DeleteStatus(dragonWhiteFlameKey)
+	c.DeleteStatus(dragonDarkDecayKey)
+
+	c.Core.Log.NewEvent("Cleared existing dragons", glog.LogCharacterEvent, c.Index).
+		Write("new_dragon_src", c.dragonSrc)
+}
+
 // burstPurity executes Principle of Purity: As the Light Shifts
 // 3 instances of AoE Pyro DMG + summon Dragon of White Flame (20 seconds duration, attacks every 59 frames in AoE)
 func (c *char) burstPurity(p map[string]int) (action.Info, error) {
+	// Clear any existing dragons before summoning new one
+	c.clearExistingDragons()
+
 	// Create 3 attack instances
 	ai1 := c.makeBurstAttackInfo("Principle of Purity: As the Light Shifts (Hit 1)", burstPurity1)
 	ai2 := c.makeBurstAttackInfo("Principle of Purity: As the Light Shifts (Hit 2)", burstPurity2)
@@ -174,6 +194,9 @@ func (c *char) burstPurity(p map[string]int) (action.Info, error) {
 // burstDarkness executes Principle of Darkness: As the Stars Smolder
 // 3 instances of AoE Pyro DMG + summon Dragon of Dark Decay (20 seconds duration, attacks every 74 frames in single-target)
 func (c *char) burstDarkness(p map[string]int) (action.Info, error) {
+	// Clear any existing dragons before summoning new one
+	c.clearExistingDragons()
+
 	// Create 3 attack instances
 	ai1 := c.makeBurstDarknessAttackInfo("Principle of Darkness: As the Stars Smolder (Hit 1)", burstDarkness1)
 	ai2 := c.makeBurstDarknessAttackInfo("Principle of Darkness: As the Stars Smolder (Hit 2)", burstDarkness2)
@@ -253,17 +276,25 @@ func (c *char) summonDragonWhiteFlame() {
 	c.AddStatus(dragonWhiteFlameKey, dragonDuration, true)
 	c.DeleteStatus(dragonDarkDecayKey)
 
-	c.Core.Log.NewEvent("Dragon of White Flame summoned", glog.LogCharacterEvent, c.Index)
+	// Capture current source ID for this dragon instance
+	dragonSrc := c.dragonSrc
+
+	c.Core.Log.NewEvent("Dragon of White Flame summoned", glog.LogCharacterEvent, c.Index).
+		Write("dragon_src", dragonSrc)
 
 	// 定期攻撃を開始
 	c.Core.Tasks.Add(func() {
-		c.dragonWhiteFlameAttack(0)
+		c.dragonWhiteFlameAttack(0, dragonSrc)
 	}, burstPurityFirstDragonHit)
 }
 
 // dragonWhiteFlameAttack executes periodic attacks of Dragon of White Flame
 // Automatically schedules next attack while duration is active
-func (c *char) dragonWhiteFlameAttack(attackNum int) {
+func (c *char) dragonWhiteFlameAttack(attackNum int, src int) {
+	// Check if this dragon instance is still valid
+	if src != c.dragonSrc {
+		return
+	}
 	if !c.StatusIsActive(dragonWhiteFlameKey) {
 		return
 	}
@@ -280,7 +311,7 @@ func (c *char) dragonWhiteFlameAttack(attackNum int) {
 	)
 
 	c.Core.Tasks.Add(func() {
-		c.dragonWhiteFlameAttack(attackNum + 1)
+		c.dragonWhiteFlameAttack(attackNum+1, src)
 	}, dragonWhiteFlameInterval)
 }
 
@@ -294,17 +325,25 @@ func (c *char) summonDragonDarkDecay() {
 	c.AddStatus(dragonDarkDecayKey, dragonDuration, true)
 	c.DeleteStatus(dragonWhiteFlameKey)
 
-	c.Core.Log.NewEvent("Dragon of Dark Decay summoned", glog.LogCharacterEvent, c.Index)
+	// Capture current source ID for this dragon instance
+	dragonSrc := c.dragonSrc
+
+	c.Core.Log.NewEvent("Dragon of Dark Decay summoned", glog.LogCharacterEvent, c.Index).
+		Write("dragon_src", dragonSrc)
 
 	// 定期攻撃を開始
 	c.Core.Tasks.Add(func() {
-		c.dragonDarkDecayAttack(0)
+		c.dragonDarkDecayAttack(0, dragonSrc)
 	}, burstDarknessFirstDragonHit)
 }
 
 // dragonDarkDecayAttack executes periodic attacks of Dragon of Dark Decay
 // Automatically schedules next attack while duration is active
-func (c *char) dragonDarkDecayAttack(attackNum int) {
+func (c *char) dragonDarkDecayAttack(attackNum int, src int) {
+	// Check if this dragon instance is still valid
+	if src != c.dragonSrc {
+		return
+	}
 	if !c.StatusIsActive(dragonDarkDecayKey) {
 		return
 	}
@@ -320,6 +359,6 @@ func (c *char) dragonDarkDecayAttack(attackNum int) {
 	)
 
 	c.Core.Tasks.Add(func() {
-		c.dragonDarkDecayAttack(attackNum + 1)
+		c.dragonDarkDecayAttack(attackNum+1, src)
 	}, dragonDarkDecayInterval)
 }

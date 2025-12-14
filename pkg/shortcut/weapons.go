@@ -406,5 +406,9 @@ var WeaponNameToKey = map[string]keys.Weapon{
 	"dawning":                         keys.DawningFrost,
 	"reliquaryoftruth":                keys.ReliquaryOfTruth,
 	"reliquary":                       keys.ReliquaryOfTruth,
+	"athameartis":                     keys.AthameArtis,
+	"athame":                          keys.AthameArtis,
+	"thedaybreakchronicles":           keys.TheDaybreakChronicles,
+	"daybreakchronicles":              keys.TheDaybreakChronicles,
+	"daybreak":                        keys.TheDaybreakChronicles,
 }
-

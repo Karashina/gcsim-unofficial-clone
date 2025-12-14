@@ -43,6 +43,7 @@ var weaponNames = []string{
 	"aquilafavonia",
 	"ashgravendrinkinghorn",
 	"astralvulturescrimsonplumage",
+	"athameartis",
 	"athousandblazingsuns",
 	"athousandfloatingdreams",
 	"azurelight",
@@ -222,6 +223,7 @@ var weaponNames = []string{
 	"thebell",
 	"theblacksword",
 	"thecatch",
+	"thedaybreakchronicles",
 	"thedockhandsassistant",
 	"thefirstgreatmagic",
 	"theflute",
@@ -271,6 +273,7 @@ const (
 	AquilaFavonia
 	AshGravenDrinkingHorn
 	AstralVulturesCrimsonPlumage
+	AthameArtis
 	AThousandBlazingSuns
 	AThousandFloatingDreams
 	Azurelight
@@ -450,6 +453,7 @@ const (
 	TheBell
 	TheBlackSword
 	TheCatch
+	TheDaybreakChronicles
 	TheDockhandsAssistant
 	TheFirstGreatMagic
 	TheFlute
