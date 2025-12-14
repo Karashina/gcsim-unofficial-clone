@@ -22,6 +22,11 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
+	// C6 Hexerei additional effect: destroy Silver Isotomas and buff Fatal Blossom
+	if c.Base.Cons >= 6 && c.isHexerei {
+		c.c6BlossomBuffOnBurst()
+	}
+
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Rite of Progeniture: Tectonic Tide",
@@ -72,6 +77,11 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			ai.FlatDmg = c.TotalDef(false) * float64(c2Count) * 0.3
 		}
 
+		// C6 Hexerei additional effect: add 250% DEF to Fatal Blossom DMG
+		if c.Base.Cons >= 6 && c.isHexerei && c.StatusIsActive(c6BlossomBuffKey) {
+			ai.FlatDmg += c.TotalDef(false) * 2.5 // 250% DEF
+		}
+
 		// generate 7 blossoms
 		maxBlossoms := 7
 		enemies := c.Core.Combat.RandomEnemiesWithinArea(c.skillArea, nil, maxBlossoms)
@@ -106,4 +116,3 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
-

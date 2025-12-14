@@ -52,6 +52,17 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 func (c *char) Init() error {
 	c.skillHook()
 	c.a1()
+
+	// C2 additional effect: auto-trigger Fatal Blossom when off-field and 4 stacks
+	if c.Base.Cons >= 2 {
+		c.c2AutoBlossom()
+	}
+
+	// C4 Hexerei effect: destroy Silver Isotoma on plunge
+	if c.Base.Cons >= 4 && c.isHexerei {
+		c.c4HexereiJumpBuff()
+	}
+
 	return nil
 }
 
