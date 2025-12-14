@@ -69,6 +69,15 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.skillActive = true
 		// Reset ICD after construct is created
 		c.DeleteStatus(skillICDKey)
+
+		// Apply Hexerei: Secret Rite buff to party
+		c.hexereiSecretRite()
+
+		// C1 additional buff: DEF +50% for 20s when using Skill
+		if c.Base.Cons >= 1 {
+			c.c1DEFBuff()
+		}
+
 		// add C4 and C6 checks
 		if c.Base.Cons >= 4 {
 			c.Core.Tasks.Add(c.c4(c.Core.F), 18) // start checking in 0.3s
@@ -156,4 +165,3 @@ func (c *char) skillHook() {
 		return false
 	}, "albedo-skill")
 }
-

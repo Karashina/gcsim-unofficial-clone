@@ -151,6 +151,9 @@ func (c *char) a1DarkDecayReactMod() {
 			if ai.ActorIndex != c.Index {
 				return 0, false
 			}
+			if !ai.Amped {
+				return 0, false
+			}
 			return reactMod, true
 		},
 	})
