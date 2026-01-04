@@ -41,9 +41,25 @@ gcsim
 gcsim-webui
 gcsim-cli
 
+# Authentication and user management
+internal/auth/
+internal/db/
+docs/AUTHENTICATION.md
+
 # WebUI logs
 webui.log
 *.log
+
+# Environment variables (contains secrets)
+.env
+.env.local
+.env.*.local
+
+# Database files
+data/
+*.db
+*.db-shm
+*.db-wal
 
 # Docker things
 .dockerignore
