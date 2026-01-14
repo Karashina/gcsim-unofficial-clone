@@ -1,0 +1,52 @@
+﻿package beidou
+
+import (
+	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/hacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+)
+
+func init() {
+	core.RegisterCharFunc(keys.Beidou, NewChar)
+	hacks.RegisterNOSpecialChar(keys.Beidou)
+}
+
+type char struct {
+	*tmpl.Character
+	burstAtk *combat.AttackEvent
+}
+
+func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
+	c := char{}
+	c.Character = tmpl.NewWithWrapper(s, w)
+
+	c.EnergyMax = 80
+	c.NormalHitNum = normalHitNum
+	c.SkillCon = 3
+	c.BurstCon = 5
+
+	w.Character = &c
+
+	return nil
+}
+
+func (c *char) Init() error {
+	c.burstProc()
+	if c.Base.Cons >= 4 {
+		c.c4Init()
+	}
+	return nil
+}
+
+func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
+	if k == model.AnimationXingqiuN0StartDelay {
+		return 22
+	}
+	return c.Character.AnimationStartDelay(k)
+}
+

@@ -1,0 +1,54 @@
+﻿package amos
+
+import (
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
+)
+
+func init() {
+	core.RegisterWeaponFunc(keys.AmosBow, NewWeapon)
+}
+
+type Weapon struct {
+	Index int
+}
+
+func (w *Weapon) SetIndex(idx int) { w.Index = idx }
+func (w *Weapon) Init() error      { return nil }
+
+func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
+	w := &Weapon{}
+	r := p.Refine
+
+	dmgpers := 0.06 + 0.02*float64(r)
+
+	m := make([]float64, attributes.EndStatType)
+	// m[attributes.DmgP] = 0.09 + 0.03*float64(r)
+	flat := 0.09 + 0.03*float64(r)
+
+	char.AddAttackMod(character.AttackMod{
+		Base: modifier.NewBase("amos", -1),
+		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+			if atk.Info.AttackTag != attacks.AttackTagNormal && atk.Info.AttackTag != attacks.AttackTagExtra {
+				return nil, false
+			}
+			m[attributes.DmgP] = flat
+			travel := float64(c.F-atk.Snapshot.SourceFrame) / 60
+			stacks := int(travel / 0.1)
+			if stacks > 5 {
+				stacks = 5
+			}
+			m[attributes.DmgP] += dmgpers * float64(stacks)
+			return m, true
+		},
+	})
+
+	return w, nil
+}
+

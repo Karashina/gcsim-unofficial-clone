@@ -1,0 +1,63 @@
+﻿package redhorn
+
+import (
+	"fmt"
+
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
+)
+
+func init() {
+	core.RegisterWeaponFunc(keys.RedhornStonethresher, NewWeapon)
+}
+
+type Weapon struct {
+	Index int
+}
+
+func (w *Weapon) SetIndex(idx int) { w.Index = idx }
+func (w *Weapon) Init() error      { return nil }
+
+func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
+	// DEF is increased by 28%. Normal and Charged Attack DMG is increased by 40% of DEF.
+	w := &Weapon{}
+	r := p.Refine
+
+	defBoost := .21 + 0.07*float64(r)
+	val := make([]float64, attributes.EndStatType)
+	val[attributes.DEFP] = defBoost
+	char.AddStatMod(character.StatMod{
+		Base:         modifier.NewBase("redhorn-stonethrasher-def-boost", -1),
+		AffectedStat: attributes.NoStat,
+		Amount: func() ([]float64, bool) {
+			return val, true
+		},
+	})
+
+	nacaBoost := .3 + .1*float64(r)
+	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+		atk := args[1].(*combat.AttackEvent)
+		if atk.Info.ActorIndex != char.Index {
+			return false
+		}
+		if !(atk.Info.AttackTag == attacks.AttackTagNormal || atk.Info.AttackTag == attacks.AttackTagExtra) {
+			return false
+		}
+		baseDmgAdd := char.TotalDef(false) * nacaBoost
+		atk.Info.FlatDmg += baseDmgAdd
+		c.Log.NewEvent("Redhorn proc dmg add", glog.LogPreDamageMod, char.Index).
+			Write("base_added_dmg", baseDmgAdd)
+		return false
+	}, fmt.Sprintf("redhorn-%v", char.Base.Key.String()))
+
+	return w, nil
+}
+
