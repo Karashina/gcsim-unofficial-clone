@@ -1,0 +1,14 @@
+c.Core.Combat.QueueAttack
+c.Core.QueueAttack
+
+core.NewDefCircHit(
+combat.NewCircleHit(c.Core.Combat.PrimaryTarget(), 
+
+c.Core.Status.AddStatus(
+c.Core.Status.Add(
+
+core.TargettableEnemy
+targets.TargettableEnemy
+
+core.AttackCB
+combat.AttackCB

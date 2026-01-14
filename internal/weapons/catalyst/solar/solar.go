@@ -1,0 +1,75 @@
+﻿package solar
+
+import (
+	"fmt"
+
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
+)
+
+func init() {
+	core.RegisterWeaponFunc(keys.SolarPearl, NewWeapon)
+}
+
+type Weapon struct {
+	Index int
+}
+
+func (w *Weapon) SetIndex(idx int) { w.Index = idx }
+func (w *Weapon) Init() error      { return nil }
+
+func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
+	w := &Weapon{}
+	r := p.Refine
+
+	val := make([]float64, attributes.EndStatType)
+	val[attributes.DmgP] = 0.15 + float64(r)*0.05
+
+	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		atk := args[1].(*combat.AttackEvent)
+		if atk.Info.ActorIndex != char.Index {
+			return false
+		}
+		if c.Player.Active() != char.Index {
+			return false
+		}
+		switch atk.Info.AttackTag {
+		case attacks.AttackTagElementalArt, attacks.AttackTagElementalArtHold, attacks.AttackTagElementalBurst:
+			char.AddAttackMod(character.AttackMod{
+				Base: modifier.NewBaseWithHitlag("solar-na-buff", 6*60),
+				Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+					if atk.Info.AttackTag == attacks.AttackTagNormal {
+						return val, true
+					}
+					return nil, false
+				},
+			})
+
+		case attacks.AttackTagNormal:
+			char.AddAttackMod(character.AttackMod{
+				Base: modifier.NewBaseWithHitlag("solar-skill-burst-buff", 6*60),
+				Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+					switch atk.Info.AttackTag {
+					case attacks.AttackTagElementalArt, attacks.AttackTagElementalArtHold, attacks.AttackTagElementalBurst:
+						return val, true
+					}
+					return nil, false
+				},
+			})
+
+		default:
+			return false
+		}
+		return false
+	}, fmt.Sprintf("solar-%v", char.Base.Key.String()))
+
+	return w, nil
+}
+
