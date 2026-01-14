@@ -1,0 +1,49 @@
+﻿package raven
+
+import (
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
+)
+
+func init() {
+	core.RegisterWeaponFunc(keys.RavenBow, NewWeapon)
+}
+
+type Weapon struct {
+	Index int
+}
+
+func (w *Weapon) SetIndex(idx int) { w.Index = idx }
+func (w *Weapon) Init() error      { return nil }
+
+// Increases DMG against opponents affected by Hydro or Pyro by 12/15/18/21/24%.
+func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
+	w := &Weapon{}
+	r := p.Refine
+
+	dmg := 0.09 + float64(r)*0.03
+	m := make([]float64, attributes.EndStatType)
+	m[attributes.DmgP] = dmg
+	char.AddAttackMod(character.AttackMod{
+		Base: modifier.NewBase("ravenbow", -1),
+		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+			x, ok := t.(*enemy.Enemy)
+			if !ok {
+				return nil, false
+			}
+			if x.AuraContains(attributes.Hydro, attributes.Pyro) {
+				return m, true
+			}
+			return nil, false
+		},
+	})
+
+	return w, nil
+}
+

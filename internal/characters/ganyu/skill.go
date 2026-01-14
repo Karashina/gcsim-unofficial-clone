@@ -1,0 +1,66 @@
+﻿package ganyu
+
+import (
+	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+)
+
+var skillFrames []int
+
+func init() {
+	skillFrames = frames.InitAbilSlice(28)
+	skillFrames[action.ActionSwap] = 27
+}
+
+func (c *char) Skill(p map[string]int) (action.Info, error) {
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "Ice Lotus",
+		AttackTag:  attacks.AttackTagElementalArt,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeDefault,
+		Element:    attributes.Cryo,
+		Durability: 25,
+		Mult:       lotus[c.TalentLvlSkill()],
+	}
+
+	snap := c.Snapshot(&ai)
+	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 4)
+	// flower damage immediately
+	c.Core.QueueAttackWithSnap(ai, snap, ap, 13, c.makeParticleCB())
+	// flower explosion is after 6 seconds
+	c.Core.QueueAttackWithSnap(ai, snap, ap, 373, c.makeParticleCB())
+
+	if c.Base.Cons == 6 {
+		c.Core.Status.Add(c6Key, 1800)
+	}
+
+	c.SetCDWithDelay(action.ActionSkill, 600, 10)
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(skillFrames),
+		AnimationLength: skillFrames[action.InvalidAction],
+		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		State:           action.SkillState,
+	}, nil
+}
+
+func (c *char) makeParticleCB() combat.AttackCBFunc {
+	done := false
+	return func(a combat.AttackCB) {
+		if a.Target.Type() != targets.TargettableEnemy {
+			return
+		}
+		if done {
+			return
+		}
+		done = true
+		c.Core.QueueParticle(c.Base.Key.String(), 2, attributes.Cryo, c.ParticleDelay)
+	}
+}
+

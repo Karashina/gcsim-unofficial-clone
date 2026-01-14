@@ -1,0 +1,81 @@
+﻿package xiangling
+
+import (
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
+)
+
+func (c *char) c1(a combat.AttackCB) {
+	if c.Base.Cons < 1 {
+		return
+	}
+	e, ok := a.Target.(*enemy.Enemy)
+	if !ok {
+		return
+	}
+	e.AddResistMod(combat.ResistMod{
+		Base:  modifier.NewBaseWithHitlag("xiangling-c1", 6*60),
+		Ele:   attributes.Pyro,
+		Value: -0.15,
+	})
+}
+
+func (c *char) c2(done bool) combat.AttackCBFunc {
+	return func(atk combat.AttackCB) {
+		if done {
+			return
+		}
+		trg, ok := atk.Target.(*enemy.Enemy)
+		if !ok {
+			return
+		}
+		if !trg.StatusIsActive(c2Debuff) {
+			trg.QueueEnemyTask(c.c2Explode(c.Core.F, trg), 120)
+			trg.AddStatus(c2Debuff, 120, true)
+		}
+		done = true
+	}
+}
+func (c *char) c2Explode(src int, trg *enemy.Enemy) func() {
+	return func() {
+		ai := combat.AttackInfo{
+			ActorIndex: c.Index,
+			Abil:       "Oil Meets Fire (C2)",
+			AttackTag:  attacks.AttackTagNone,
+			ICDTag:     attacks.ICDTagNone,
+			ICDGroup:   attacks.ICDGroupDefault,
+			StrikeType: attacks.StrikeTypeDefault,
+			Element:    attributes.Pyro,
+			Durability: 25,
+			Mult:       .75,
+		}
+
+		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(trg, nil, 2), 0, 0)
+
+		c.Core.Log.NewEvent("Triggered Xiangling C2 explosion", glog.LogCharacterEvent, c.Index).
+			Write("src", src)
+	}
+}
+
+func (c *char) c6(dur int) {
+	m := make([]float64, attributes.EndStatType)
+	m[attributes.PyroP] = 0.15
+
+	c.Core.Status.Add("xlc6", dur)
+
+	for _, char := range c.Core.Player.Chars() {
+		char.AddStatMod(character.StatMod{
+			Base:         modifier.NewBaseWithHitlag("xiangling-c6", dur),
+			AffectedStat: attributes.PyroP,
+			Amount: func() ([]float64, bool) {
+				return m, true
+			},
+		})
+	}
+}
+

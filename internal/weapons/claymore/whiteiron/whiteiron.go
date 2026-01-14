@@ -1,0 +1,57 @@
+﻿package whiteiron
+
+import (
+	"fmt"
+
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
+)
+
+func init() {
+	core.RegisterWeaponFunc(keys.WhiteIronGreatsword, NewWeapon)
+}
+
+type Weapon struct {
+	Index int
+}
+
+func (w *Weapon) SetIndex(idx int) { w.Index = idx }
+func (w *Weapon) Init() error      { return nil }
+
+// Defeating an opponent restores 8/10/12/14/16% HP.
+func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
+	w := &Weapon{}
+	r := p.Refine
+
+	c.Events.Subscribe(event.OnTargetDied, func(args ...interface{}) bool {
+		_, ok := args[0].(*enemy.Enemy)
+		// ignore if not an enemy
+		if !ok {
+			return false
+		}
+		atk := args[1].(*combat.AttackEvent)
+		// don't proc if someone else defeated the enemy
+		if atk.Info.ActorIndex != char.Index {
+			return false
+		}
+		// don't proc if off-field
+		if c.Player.Active() != char.Index {
+			return false
+		}
+		// heal
+		c.Player.Heal(info.HealInfo{
+			Type:    info.HealTypePercent,
+			Message: "White Iron Greatsword (Proc)",
+			Src:     0.06 + float64(r)*0.02,
+		})
+		return false
+	}, fmt.Sprintf("whiteirongreatsword-%v", char.Base.Key.String()))
+
+	return w, nil
+}
+
