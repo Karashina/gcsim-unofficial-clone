@@ -1,0 +1,27 @@
+package_name: dhalia
+genshin_id: 90000571
+key: dhalia
+skill_data_mapping:
+    attack:
+        attack_1:
+            - 0 
+        attack_2:
+            - 1 
+        attack_3:
+            - 2 
+            - 3 
+        attack_4:
+            - 4 
+        charge:
+            - 5 
+            - 6 
+    skill:
+        skill:
+            - 0
+    burst:
+        burst:
+            - 0 
+        shieldPct:
+            - 1 
+        shieldCst:
+            - 2

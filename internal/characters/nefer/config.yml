@@ -1,0 +1,59 @@
+package_name: nefer
+genshin_id: 10000610
+key: nefer
+action_param_keys:
+  charge:
+    - param: "hold"
+  low_plunge:
+    - param: "collision"
+  high_plunge:
+    - param: "collision"
+skill_data_mapping:
+  # Mappings follow the indices in internal/characters/nefer/nefer_gen.go comments
+  attack:
+    attack_1:
+      - 0 # 1-Hit DMG
+    attack_2:
+      - 1 # 2-Hit DMG
+    attack_3:
+      - 2 # 3-Hit DMG (×2)
+    attack_4:
+      - 3 # 4-Hit DMG
+    charge:
+      - 4 # Charged Attack DMG
+    collision:
+      - 5 # Plunge collision DMG
+    highPlunge:
+      - 6 # High Plunge DMG
+    lowPlunge:
+      - 7 # Low Plunge DMG
+  skill:
+    skillatk:
+      - 0 # Skill DMG (ATK)
+    skillem:
+      - 1 # Skill DMG (EM)
+    skillppn1atk:
+      - 2 # Phantasm Performance 1-Hit DMG (Nefer - ATK)
+    skillppn1em:
+      - 3 # Phantasm Performance 1-Hit DMG (Nefer - EM)
+    skillppn2atk:
+      - 4 # Phantasm Performance 2-Hit DMG (Nefer - ATK)
+    skillppn2em:
+      - 5 # Phantasm Performance 2-Hit DMG (Nefer - EM)
+    skillpps1:
+      - 6 # Phantasm Performance 1-Hit DMG (Shades)
+    skillpps2:
+      - 7 # Phantasm Performance 2-Hit DMG (Shades)
+    skillpps3:
+      - 8 # Phantasm Performance 3-Hit DMG (Shades)
+  burst:
+    burst1atk:
+      - 0 # Burst 1-Hit DMG (ATK)
+    burst1em:
+      - 1 # Burst 1-Hit DMG (EM)
+    burst2atk:
+      - 2 # Burst 2-Hit DMG (ATK)
+    burst2em:
+      - 3 # Burst 2-Hit DMG (EM)
+    burstbonus:
+      - 4 # Burst DMG Bonus

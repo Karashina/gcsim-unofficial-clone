@@ -1,0 +1,153 @@
+﻿package nefer
+
+import (
+	"errors"
+
+	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player"
+)
+
+var highPlungeFrames, lowPlungeFrames []int
+
+const (
+	lowPlungeHitmark  = 44
+	highPlungeHitmark = 47
+	collisionHitmark  = lowPlungeHitmark - 6
+)
+const (
+	lowPlungeRadius  = 3.0
+	highPlungeRadius = 3.5
+)
+
+func init() {
+	// low_plunge -> x
+	lowPlungeFrames = frames.InitAbilSlice(75)
+	lowPlungeFrames[action.ActionAttack] = 62
+	lowPlungeFrames[action.ActionSkill] = 63
+	lowPlungeFrames[action.ActionBurst] = 64
+	lowPlungeFrames[action.ActionDash] = lowPlungeHitmark
+	lowPlungeFrames[action.ActionSwap] = 49
+
+	// high_plunge -> x
+	highPlungeFrames = frames.InitAbilSlice(76)
+	highPlungeFrames[action.ActionAttack] = 65
+	highPlungeFrames[action.ActionSkill] = 64
+	highPlungeFrames[action.ActionBurst] = 63
+	highPlungeFrames[action.ActionDash] = highPlungeHitmark
+	highPlungeFrames[action.ActionSwap] = 51
+}
+
+// LowPlungeAttack: low plunge handling; optional "collision" arg triggers falling hit.
+func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
+	defer c.Core.Player.SetAirborne(player.Grounded)
+	switch c.Core.Player.Airborne() {
+	case player.AirborneXianyun:
+		return c.lowPlungeXY(p), nil
+	default:
+		return action.Info{}, errors.New("low_plunge can only be used while airborne")
+	}
+}
+
+func (c *char) lowPlungeXY(p map[string]int) action.Info {
+	collision, ok := p["collision"]
+	if !ok {
+		collision = 0 // Whether or not collision hit
+	}
+
+	if collision > 0 {
+		c.plungeCollision(collisionHitmark)
+	}
+
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "Low Plunge",
+		AttackTag:  attacks.AttackTagPlunge,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeDefault,
+		Element:    attributes.Dendro,
+		Durability: 25,
+		Mult:       lowPlunge[c.TalentLvlAttack()],
+	}
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, lowPlungeRadius),
+		lowPlungeHitmark,
+		lowPlungeHitmark,
+	)
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(lowPlungeFrames),
+		AnimationLength: lowPlungeFrames[action.InvalidAction],
+		CanQueueAfter:   lowPlungeFrames[action.ActionDash],
+		State:           action.PlungeAttackState,
+	}
+}
+
+// HighPlungeAttack: high plunge handling; optional "collision" arg triggers falling hit.
+func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
+	defer c.Core.Player.SetAirborne(player.Grounded)
+	switch c.Core.Player.Airborne() {
+	case player.AirborneXianyun:
+		return c.highPlungeXY(p), nil
+	default:
+		return action.Info{}, errors.New("high_plunge can only be used while airborne")
+	}
+}
+
+func (c *char) highPlungeXY(p map[string]int) action.Info {
+	collision, ok := p["collision"]
+	if !ok {
+		collision = 0 // Whether or not collision hit
+	}
+
+	if collision > 0 {
+		c.plungeCollision(collisionHitmark)
+	}
+
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "High Plunge",
+		AttackTag:  attacks.AttackTagPlunge,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeDefault,
+		Element:    attributes.Dendro,
+		Durability: 25,
+		Mult:       highPlunge[c.TalentLvlAttack()],
+	}
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, highPlungeRadius),
+		highPlungeHitmark,
+		highPlungeHitmark,
+	)
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(highPlungeFrames),
+		AnimationLength: highPlungeFrames[action.InvalidAction],
+		CanQueueAfter:   highPlungeFrames[action.ActionDash],
+		State:           action.PlungeAttackState,
+	}
+}
+
+// plungeCollision: common falling attack queued by low/high plunge when collision>0
+func (c *char) plungeCollision(delay int) {
+	ai := combat.AttackInfo{
+		ActorIndex: c.Index,
+		Abil:       "Plunge Collision",
+		AttackTag:  attacks.AttackTagPlunge,
+		ICDTag:     attacks.ICDTagNone,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeDefault,
+		Element:    attributes.Dendro,
+		Durability: 0,
+		Mult:       collision[c.TalentLvlAttack()],
+	}
+	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.5), delay, delay)
+}
+

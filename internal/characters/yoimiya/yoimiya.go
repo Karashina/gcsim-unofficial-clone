@@ -1,0 +1,73 @@
+﻿package yoimiya
+
+import (
+	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+)
+
+func init() {
+	core.RegisterCharFunc(keys.Yoimiya, NewChar)
+}
+
+type char struct {
+	*tmpl.Character
+	a1Stacks  int
+	a4Bonus   []float64
+	abApplied bool
+}
+
+func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
+	c := char{}
+	c.Character = tmpl.NewWithWrapper(s, w)
+
+	c.EnergyMax = 60
+	c.NormalHitNum = normalHitNum
+	c.BurstCon = 5
+	c.SkillCon = 3
+
+	w.Character = &c
+
+	return nil
+}
+
+func (c *char) Init() error {
+	c.a4Bonus = make([]float64, attributes.EndStatType)
+	c.onExit()
+	c.burstHook()
+	if c.Base.Cons >= 1 {
+		c.c1()
+	}
+	return nil
+}
+
+func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
+	ds := c.Character.Snapshot(ai)
+
+	// infusion to normal attack only
+	if c.StatusIsActive(skillKey) && ai.AttackTag == attacks.AttackTagNormal {
+		ai.Element = attributes.Pyro
+		ai.Mult = skill[c.TalentLvlSkill()] * ai.Mult
+		c.Core.Log.NewEvent("skill mult applied", glog.LogCharacterEvent, c.Index).
+			Write("prev", ai.Mult).
+			Write("next", skill[c.TalentLvlSkill()]*ai.Mult).
+			Write("char", c.Index)
+	}
+
+	return ds
+}
+
+func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
+	if k == model.AnimationXingqiuN0StartDelay {
+		return 17
+	}
+	return c.Character.AnimationStartDelay(k)
+}
+

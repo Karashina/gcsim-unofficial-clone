@@ -1,0 +1,75 @@
+﻿package ayaka
+
+import (
+	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+)
+
+var skillFrames []int
+
+const (
+	skillHitmark   = 33
+	particleICDKey = "ayaka-particle-icd"
+)
+
+func init() {
+	skillFrames = frames.InitAbilSlice(49)
+	skillFrames[action.ActionBurst] = 48
+	skillFrames[action.ActionDash] = 30
+	skillFrames[action.ActionJump] = 32
+	skillFrames[action.ActionSwap] = 48
+}
+
+func (c *char) Skill(p map[string]int) (action.Info, error) {
+	ai := combat.AttackInfo{
+		Abil:       "Hyouka",
+		ActorIndex: c.Index,
+		AttackTag:  attacks.AttackTagElementalArt,
+		ICDTag:     attacks.ICDTagElementalArt,
+		ICDGroup:   attacks.ICDGroupDefault,
+		StrikeType: attacks.StrikeTypeDefault,
+		Element:    attributes.Cryo,
+		Durability: 50,
+		Mult:       skill[c.TalentLvlSkill()],
+	}
+
+	c.a1()
+
+	c.Core.QueueAttack(
+		ai,
+		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 4.5),
+		0,
+		skillHitmark,
+		c.particleCB,
+	)
+
+	c.SetCD(action.ActionSkill, 600)
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(skillFrames),
+		AnimationLength: skillFrames[action.InvalidAction],
+		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		State:           action.SkillState,
+	}, nil
+}
+
+func (c *char) particleCB(a combat.AttackCB) {
+	if a.Target.Type() != targets.TargettableEnemy {
+		return
+	}
+	if c.StatusIsActive(particleICDKey) {
+		return
+	}
+	c.AddStatus(particleICDKey, 0.3*60, false)
+
+	count := 4.0
+	if c.Core.Rand.Float64() < 0.5 {
+		count = 5
+	}
+	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Cryo, c.ParticleDelay)
+}
+

@@ -1,0 +1,58 @@
+﻿package yaoyao
+
+import (
+	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+)
+
+var skillFrames []int
+
+const (
+	skillCDStart     = 15
+	yueguiThrowSpawn = 48
+)
+
+func init() {
+	skillFrames = frames.InitAbilSlice(52)
+	skillFrames[action.ActionDash] = 49
+	skillFrames[action.ActionJump] = 48
+	skillFrames[action.ActionSwap] = 50
+}
+
+func (c *char) Skill(p map[string]int) (action.Info, error) {
+	// yuegui spawns after 48f
+	c.Core.Status.Add("yuegui", 600+yueguiThrowSpawn)
+
+	c.Core.Tasks.Add(func() {
+		yuegui := c.newYueguiThrow()
+		c.Core.Combat.AddGadget(yuegui)
+	}, skillCDStart+yueguiThrowSpawn)
+
+	c.SetCDWithDelay(action.ActionSkill, 15*60, skillCDStart)
+
+	if c.Base.Cons >= 4 {
+		c.c4()
+	}
+
+	return action.Info{
+		Frames:          frames.NewAbilFunc(skillFrames),
+		AnimationLength: skillFrames[action.InvalidAction],
+		CanQueueAfter:   skillFrames[action.ActionJump], // earliest cancel
+		State:           action.SkillState,
+	}, nil
+}
+
+func (c *char) getSkillHealInfo(snap *combat.Snapshot) info.HealInfo {
+	maxhp := snap.Stats.MaxHP()
+	heal := skillRadishHealing[0][c.TalentLvlSkill()]*maxhp + skillRadishHealing[1][c.TalentLvlSkill()]
+	return info.HealInfo{
+		Caller:  c.Index,
+		Message: "Yuegui Skill",
+		Src:     heal,
+		Bonus:   snap.Stats[attributes.Heal],
+	}
+}
+
