@@ -1,0 +1,34 @@
+package_name: lauma
+genshin_id: 90000600
+key: lauma
+action_param_keys:
+  low_plunge:
+    - param: "collision"
+  high_plunge:
+    - param: "collision"
+  skill_data_mapping:
+      attack:
+        attack_1:
+          - 0 # 1-Hit DMG
+        attack_2:
+          - 1 # 2-Hit DMG
+        attack_3:
+          - 2 # 3-Hit DMG
+      skill:
+        skillPress:
+          - 0 # Press DMG
+        skillHold1:
+          - 1 # 1-Hit Hold DMG
+        skillHold2:
+          - 2 # 2-Hit Hold DMG (EM)
+        skillDotATK:
+          - 3 # Frostgrove Sanctuary Attack DMG (ATK)
+        skillDotEM:
+          - 4 # Frostgrove Sanctuary Attack DMG (EM)
+        skillRESShred:
+          - 5 # Frostgrove Sanctuary Dendro RES Shred (EM)
+      burst:
+        burstBuffBloom:
+          - 0 # Bloom, Hyperbloom, and Burgeon DMG Increase (EM)
+        burstBuffLBloom:
+          - 1 # Lunar-Bloom DMG Increase (EM)

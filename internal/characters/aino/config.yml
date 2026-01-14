@@ -1,0 +1,31 @@
+package_name: aino
+genshin_id: 90000603
+key: aino
+action_param_keys:
+  low_plunge:
+    - param: "collision"
+  high_plunge:
+    - param: "collision"
+skill_data_mapping:
+  attack:
+    attack_1:
+      - 0 # 1-Hit DMG
+    attack_2:
+      - 1 # 2-Hit DMG
+    attack_3:
+      - 2 # 3-Hit DMG (first hit)
+      - 3 # 3-Hit DMG (second hit)
+    collision:
+      - 4 # Plunge DMG
+    lowPlunge:
+      - 5 # Low Plunge DMG
+    highPlunge:
+      - 6 # High Plunge DMG
+  skill:
+    skillStage1:
+      - 0 # Stage 1 DMG
+    skillStage2:
+      - 1 # Stage 2 DMG
+  burst:
+    burst:
+      - 0 # Water Ball DMG

@@ -1,0 +1,70 @@
+﻿package emblem
+
+import (
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
+)
+
+func init() {
+	core.RegisterSetFunc(keys.EmblemOfSeveredFate, NewSet)
+}
+
+type Set struct {
+	Index int
+	Count int
+}
+
+func (s *Set) SetIndex(idx int) { s.Index = idx }
+func (s *Set) GetCount() int    { return s.Count }
+func (s *Set) Init() error      { return nil }
+
+func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
+	s := Set{Count: count}
+
+	if count >= 2 {
+		m := make([]float64, attributes.EndStatType)
+		m[attributes.ER] = 0.20
+		char.AddStatMod(character.StatMod{
+			Base:         modifier.NewBase("emblem-2pc", -1),
+			AffectedStat: attributes.ER,
+			Amount: func() ([]float64, bool) {
+				return m, true
+			},
+		})
+	}
+	if count >= 4 {
+		m := make([]float64, attributes.EndStatType)
+		er := char.NonExtraStat(attributes.ER)
+		amt := 0.25 * er
+		if amt > 0.75 {
+			amt = 0.75
+		}
+		m[attributes.DmgP] = amt
+
+		char.AddAttackMod(character.AttackMod{
+			Base: modifier.NewBase("emblem-4pc", -1),
+			Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+				if atk.Info.AttackTag != attacks.AttackTagElementalBurst {
+					return nil, false
+				}
+				// calc er
+				er := char.NonExtraStat(attributes.ER)
+				amt := 0.25 * er
+				if amt > 0.75 {
+					amt = 0.75
+				}
+				m[attributes.DmgP] = amt
+				return m, true
+			},
+		})
+	}
+
+	return &s, nil
+}
+

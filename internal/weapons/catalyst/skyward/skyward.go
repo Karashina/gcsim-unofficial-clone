@@ -1,0 +1,107 @@
+﻿package skyward
+
+import (
+	"fmt"
+
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
+)
+
+func init() {
+	core.RegisterWeaponFunc(keys.SkywardAtlas, NewWeapon)
+}
+
+type Weapon struct {
+	Index int
+}
+
+func (w *Weapon) SetIndex(idx int) { w.Index = idx }
+func (w *Weapon) Init() error      { return nil }
+
+func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
+	w := &Weapon{}
+	r := p.Refine
+
+	dmg := 0.09 + float64(r)*0.03
+	atk := 1.2 + float64(r)*0.4
+
+	const icdKey = "skyward-atlas-icd"
+	icd := 1800 // 30s * 60
+
+	travel, ok := p.Params["travel"]
+	if !ok {
+		travel = 10
+	}
+
+	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		ae := args[1].(*combat.AttackEvent)
+		if ae.Info.ActorIndex != char.Index {
+			return false
+		}
+		if c.Player.Active() != char.Index {
+			return false
+		}
+		if ae.Info.AttackTag != attacks.AttackTagNormal {
+			return false
+		}
+		if char.StatusIsActive(icdKey) {
+			return false
+		}
+		if c.Rand.Float64() < 0.5 {
+			return false
+		}
+		c.Log.NewEvent("skywardatlas proc'd", glog.LogWeaponEvent, char.Index)
+
+		ai := combat.AttackInfo{
+			ActorIndex: char.Index,
+			Abil:       "Skyward Atlas Proc",
+			AttackTag:  attacks.AttackTagWeaponSkill,
+			ICDTag:     attacks.ICDTagNone,
+			ICDGroup:   attacks.ICDGroupDefault,
+			StrikeType: attacks.StrikeTypeDefault,
+			Element:    attributes.Physical,
+			Durability: 100,
+			Mult:       atk,
+		}
+		snap := char.Snapshot(&ai)
+
+		for i := 1; i <= 6; i++ {
+			c.Tasks.Add(func() {
+				enemy := c.Combat.ClosestEnemyWithinArea(combat.NewCircleHitOnTarget(c.Combat.Player(), nil, 15), nil)
+				if enemy != nil {
+					c.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(enemy, nil, 1.2), travel)
+				}
+			}, i*147)
+		}
+		char.AddStatus(icdKey, icd, true)
+		return false
+	}, fmt.Sprintf("skyward-atlas-%v", char.Base.Key.String()))
+
+	// permanent stat buff
+	m := make([]float64, attributes.EndStatType)
+	m[attributes.PyroP] = dmg
+	m[attributes.HydroP] = dmg
+	m[attributes.CryoP] = dmg
+	m[attributes.ElectroP] = dmg
+	m[attributes.AnemoP] = dmg
+	m[attributes.GeoP] = dmg
+	m[attributes.DendroP] = dmg
+	char.AddStatMod(character.StatMod{
+		Base:         modifier.NewBase("skyward-atlas", -1),
+		AffectedStat: attributes.NoStat,
+		Amount: func() ([]float64, bool) {
+			return m, true
+		},
+	})
+
+	return w, nil
+}
+
