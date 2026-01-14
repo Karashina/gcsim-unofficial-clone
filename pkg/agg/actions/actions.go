@@ -1,0 +1,65 @@
+﻿package actions
+
+import (
+	calc "github.com/aclements/go-moremath/stats"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/agg"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
+)
+
+func init() {
+	agg.Register(agg.Config{
+		Name: "actions",
+		New:  NewAgg,
+	})
+}
+
+type buffer struct {
+	characterActions []map[string]*calc.StreamStats
+	iters            uint
+}
+
+func NewAgg(cfg *info.ActionList) (agg.Aggregator, error) {
+	out := buffer{
+		characterActions: make([]map[string]*calc.StreamStats, len(cfg.Characters)),
+	}
+
+	for i := 0; i < len(cfg.Characters); i++ {
+		out.characterActions[i] = make(map[string]*calc.StreamStats)
+	}
+
+	return &out, nil
+}
+
+func (b *buffer) Add(result stats.Result) {
+	for i := range result.Characters {
+		characterActions := make(map[string]float64)
+		for _, ev := range result.Characters[i].ActionEvents {
+			characterActions[ev.Action] += 1
+		}
+		for k, v := range characterActions {
+			if _, ok := b.characterActions[i][k]; !ok {
+				b.characterActions[i][k] = &calc.StreamStats{}
+			}
+			b.characterActions[i][k].Add(v)
+		}
+	}
+	b.iters++
+}
+
+func (b *buffer) Flush(result *model.SimulationStatistics) {
+	result.CharacterActions = make([]*model.SourceStats, len(b.characterActions))
+	for i, c := range b.characterActions {
+		source := make(map[string]*model.DescriptiveStats)
+		for k, s := range c {
+			agg.PadStreamStatToCount(s, b.iters)
+			source[k] = agg.ToDescriptiveStats(s)
+		}
+
+		result.CharacterActions[i] = &model.SourceStats{
+			Sources: source,
+		}
+	}
+}
+

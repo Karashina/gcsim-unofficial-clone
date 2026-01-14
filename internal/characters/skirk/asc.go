@@ -1,0 +1,127 @@
+﻿package skirk
+
+import (
+	"fmt"
+
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
+)
+
+const a1Dur = 1054
+const a1Key = "skirk-a1"
+const a1IcdKey = "skirk-a1-icd"
+const a4Key = "deaths-crossing"
+const a4Dur = 20 * 60
+
+var a4MultAttack = []float64{1, 1.1, 1.2, 1.7}
+var a4MultBurst = []float64{1, 1.05, 1.15, 1.60}
+
+func (c *char) a1Init() {
+	a1Hook := func(args ...interface{}) bool {
+		if _, ok := args[0].(*enemy.Enemy); !ok {
+			return false
+		}
+		if c.StatusIsActive(a1IcdKey) {
+			return false
+		}
+		c.AddStatus(a1IcdKey, 2.5*60, true)
+		c.createVoidRift()
+
+		return false
+	}
+	c.voidRifts = NewRingQueue[int](3)
+	c.Core.Events.Subscribe(event.OnFrozen, a1Hook, a1Key+"frozen")
+	c.Core.Events.Subscribe(event.OnSuperconduct, a1Hook, a1Key+"superconduct")
+	c.Core.Events.Subscribe(event.OnSwirlCryo, a1Hook, a1Key+"cryo-swirl")
+	c.Core.Events.Subscribe(event.OnCrystallizeCryo, a1Hook, a1Key+"cryo-crystallize")
+}
+
+func (c *char) absorbVoidRiftCB(a combat.AttackCB) {
+	if a.Target.Type() != targets.TargettableEnemy {
+		return
+	}
+	c.absorbVoidRifts()
+}
+
+func (c *char) absorbVoidRifts() int {
+	filter := func(src int) bool {
+		return src+a1Dur >= c.Core.F
+	}
+	count := c.voidRifts.Count(filter)
+	c.voidRifts.Clear()
+
+	c.onVoidAbsorb(count)
+	return count
+}
+
+func (c *char) onVoidAbsorb(count int) {
+	if count <= 0 {
+		return
+	}
+
+	c.AddSerpentsSubtlety("a1-void-rifts", float64(count)*8.0)
+
+	for range count {
+		c.c1()
+		c.c6OnVoidAbsorb()
+	}
+}
+
+func (c *char) createVoidRift() {
+	// absorb the rift immediately if currently in the hE/ or E-Burst animation
+	if c.StatusIsActive(skillAbsorbRiftAnimKey) {
+		c.onVoidAbsorb(1)
+	}
+	if c.StatusIsActive(burstAbsorbRiftAnimKey) {
+		c.onVoidAbsorb(1)
+		c.burstVoids = min(c.burstVoids+1, 3)
+	}
+	c.voidRifts.PushOverwrite(c.Core.F)
+}
+
+func (c *char) a4Init() {
+	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+		atk := args[1].(*combat.AttackEvent)
+		charElem := c.Core.Player.Chars()[atk.Info.ActorIndex].Base.Element
+		if atk.Info.ActorIndex == c.Index {
+			return false
+		}
+		if atk.Info.Element != charElem {
+			return false
+		}
+		switch charElem {
+		case attributes.Cryo:
+		case attributes.Hydro:
+		default:
+			return false
+		}
+		c.AddStatus(getA4StackName(atk.Info.ActorIndex), a4Dur, true)
+
+		return false
+	}, a4Key+"-hook")
+}
+
+func getA4StackName(index int) string {
+	return fmt.Sprintf("%s-char%d", a4Key, index)
+}
+
+func (c *char) getA4Stacks() int {
+	count := 0
+	for index := range c.Core.Player.Chars() {
+		if c.StatusIsActive(getA4StackName(index)) {
+			count++
+		}
+	}
+	return count
+}
+
+func (c *char) a4MultAttack() float64 {
+	return a4MultAttack[c.getA4Stacks()]
+}
+func (c *char) a4MultBurst() float64 {
+	return a4MultBurst[c.getA4Stacks()]
+}
+

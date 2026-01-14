@@ -1,0 +1,65 @@
+﻿package slingshot
+
+import (
+	"slices"
+
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
+)
+
+func init() {
+	core.RegisterWeaponFunc(keys.Slingshot, NewWeapon)
+}
+
+type Weapon struct {
+	Index int
+}
+
+func (w *Weapon) SetIndex(idx int) { w.Index = idx }
+func (w *Weapon) Init() error      { return nil }
+
+func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
+	w := &Weapon{}
+	r := p.Refine
+
+	m := make([]float64, attributes.EndStatType)
+
+	incrDmg := .3 + float64(r)*0.06
+	decrDmg := -0.10
+	passiveThresholdF := 18
+	travel := 0
+	char.AddAttackMod(character.AttackMod{
+		Base: modifier.NewBase("slingshot", -1),
+		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
+			if (atk.Info.AttackTag != attacks.AttackTagNormal) && (atk.Info.AttackTag != attacks.AttackTagExtra) {
+				return nil, false
+			}
+			active := c.Player.ByIndex(atk.Info.ActorIndex)
+			if active.Base.Key == keys.Tartaglia &&
+				atk.Info.StrikeType == attacks.StrikeTypeSlash {
+				return nil, false
+			}
+
+			// chasca E/A4 bullets and C2/C4 Aoe don't count
+			if char.Base.Key == keys.Chasca && slices.Contains(atk.Info.AdditionalTags, attacks.AdditionalTagNightsoul) {
+				return nil, false
+			}
+
+			travel = c.F - atk.Snapshot.SourceFrame
+			m[attributes.DmgP] = incrDmg
+			if travel > passiveThresholdF {
+				m[attributes.DmgP] = decrDmg
+			}
+			return m, true
+		},
+	})
+
+	return w, nil
+}
+
