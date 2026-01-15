@@ -83,7 +83,7 @@ func (p *ReactableWeapon) weaponreact(atk *combat.AttackEvent) (float64, bool) {
 			p.DecayRate[reactable.Electro] = 0
 		case attributes.Pyro:
 			p.Durability[reactable.Pyro] = atk.Info.Durability
-			p.DecayRate[reactable.Electro] = 0
+			p.DecayRate[reactable.Pyro] = 0
 		case attributes.Cryo:
 			p.Durability[reactable.Cryo] = atk.Info.Durability
 			p.DecayRate[reactable.Cryo] = 0
