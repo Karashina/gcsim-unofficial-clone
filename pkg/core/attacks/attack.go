@@ -29,6 +29,7 @@ const (
 	AttackTagHyperbloom
 	AttackTagLCDamage
 	AttackTagLBDamage
+	AttackTagLCrsDamage
 	AttackTagLength
 )
 

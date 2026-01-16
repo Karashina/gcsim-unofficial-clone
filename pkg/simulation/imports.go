@@ -14,7 +14,9 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/pkg/stats/swap"
 
 	// artifacts
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/adaycarvedfromrisingwinds"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/archaic"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/aubadeofmorningstarandmoon"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/berserker"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/blizzard"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/bloodstained"
@@ -135,6 +137,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/catalyst/memory"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/catalyst/moonglow"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/catalyst/nightweaverslookingglass"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/catalyst/nocturnescurtaincall"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/catalyst/oathsworneye"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/catalyst/otherworldly"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/catalyst/perception"

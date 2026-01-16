@@ -102,7 +102,6 @@ func (c *char) paleHymnReactionBonus(ae *combat.AttackEvent) bool {
 	}
 
 	ae.Info.FlatDmg += bonusDamage
-	ae.Info.FlatDmg *= c.c6mult
 
 	return false
 }
@@ -134,4 +133,3 @@ func (c *char) paleHymnLunarBloomBonus(ae *combat.AttackEvent) bool {
 	ae.Info.FlatDmg += bonusDamage
 	return false
 }
-

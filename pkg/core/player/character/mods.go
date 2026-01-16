@@ -77,6 +77,18 @@ type (
 	}
 	LBBaseReactBonusModFunc func(combat.AttackInfo) (float64, bool)
 
+	LCrsReactBonusMod struct {
+		Amount LCrsReactBonusModFunc
+		modifier.Base
+	}
+	LCrsReactBonusModFunc func(combat.AttackInfo) (float64, bool)
+
+	LCrsBaseReactBonusMod struct {
+		Amount LCrsBaseReactBonusModFunc
+		modifier.Base
+	}
+	LCrsBaseReactBonusModFunc func(combat.AttackInfo) (float64, bool)
+
 	StatMod struct {
 		AffectedStat attributes.Stat
 		Extra        bool
@@ -163,6 +175,18 @@ func (c *CharWrapper) AddLBBaseReactBonusMod(mod LBBaseReactBonusMod) {
 	mod.SetExpiry(*c.f)
 	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
 	modifier.LogAdd("lb base react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
+}
+
+func (c *CharWrapper) AddLCrsReactBonusMod(mod LCrsReactBonusMod) {
+	mod.SetExpiry(*c.f)
+	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
+	modifier.LogAdd("lcrs react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
+}
+
+func (c *CharWrapper) AddLCrsBaseReactBonusMod(mod LCrsBaseReactBonusMod) {
+	mod.SetExpiry(*c.f)
+	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
+	modifier.LogAdd("lcrs base react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
 }
 
 func (c *CharWrapper) AddStatMod(mod StatMod) {
@@ -527,3 +551,48 @@ func (c *CharWrapper) LBBaseReactBonus(atk combat.AttackInfo) float64 {
 	return amt
 }
 
+func (c *CharWrapper) LCrsReactBonus(atk combat.AttackInfo) float64 {
+	n := 0
+	amt := 0.0
+	for _, v := range c.mods {
+		m, ok := v.(*LCrsReactBonusMod)
+		if !ok {
+			c.mods[n] = v
+			n++
+			continue
+		}
+		if m.Expiry() > *c.f || m.Expiry() == -1 {
+			a, done := m.Amount(atk)
+			amt += a
+			if !done {
+				c.mods[n] = v
+				n++
+			}
+		}
+	}
+	c.mods = c.mods[:n]
+	return amt
+}
+
+func (c *CharWrapper) LCrsBaseReactBonus(atk combat.AttackInfo) float64 {
+	n := 0
+	amt := 0.0
+	for _, v := range c.mods {
+		m, ok := v.(*LCrsBaseReactBonusMod)
+		if !ok {
+			c.mods[n] = v
+			n++
+			continue
+		}
+		if m.Expiry() > *c.f || m.Expiry() == -1 {
+			a, done := m.Amount(atk)
+			amt += a
+			if !done {
+				c.mods[n] = v
+				n++
+			}
+		}
+	}
+	c.mods = c.mods[:n]
+	return amt
+}

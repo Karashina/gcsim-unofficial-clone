@@ -1,0 +1,135 @@
+id: 10000640
+key: "columbina"
+rarity: QUALITY_ORANGE
+body: BODY_GIRL
+region: ASSOC_TYPE_FATUI
+element: Water
+weapon_class: WEAPON_CATALYST
+icon_name: "UI_AvatarIcon_Columbina"
+stats {
+  base_hp: 1144.0
+  base_atk: 7.0
+  base_def: 40.0
+  hp_curve: GROW_CURVE_HP_S5
+  atk_curve: GROW_CURVE_ATTACK_S5
+  def_cruve: GROW_CURVE_HP_S5
+  promo_data {
+  }
+  promo_data {
+    max_level: 40
+    add_props {
+      prop_type: FIGHT_PROP_BASE_HP
+      value: 804.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_ATTACK
+      value: 7.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_DEFENSE
+      value: 31.0
+    }
+  }
+  promo_data {
+    max_level: 50
+    add_props {
+      prop_type: FIGHT_PROP_BASE_HP
+      value: 1657.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_ATTACK
+      value: 14.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_DEFENSE
+      value: 93.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_CRITICAL
+      value: 0.048
+    }
+  }
+  promo_data {
+    max_level: 60
+    add_props {
+      prop_type: FIGHT_PROP_BASE_HP
+      value: 2559.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_ATTACK
+      value: 30.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_DEFENSE
+      value: 161.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_CRITICAL
+      value: 0.096
+    }
+  }
+  promo_data {
+    max_level: 70
+    add_props {
+      prop_type: FIGHT_PROP_BASE_HP
+      value: 3412.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_ATTACK
+      value: 41.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_DEFENSE
+      value: 220.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_CRITICAL
+      value: 0.096
+    }
+  }
+  promo_data {
+    max_level: 80
+    add_props {
+      prop_type: FIGHT_PROP_BASE_HP
+      value: 4264.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_ATTACK
+      value: 52.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_DEFENSE
+      value: 280.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_CRITICAL
+      value: 0.144
+    }
+  }
+  promo_data {
+    max_level: 90
+    add_props {
+      prop_type: FIGHT_PROP_BASE_HP
+      value: 5117.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_ATTACK
+      value: 63.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_BASE_DEFENSE
+      value: 341.0
+    }
+    add_props {
+      prop_type: FIGHT_PROP_CRITICAL
+      value: 0.192
+    }
+  }
+}
+skill_details: {
+  skill: 10991
+  burst: 10992
+  attack: 10990
+  burst_energy_cost: 60
+}
+name_text_hash_map: 2900000099

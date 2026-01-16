@@ -133,6 +133,15 @@ type Reactable struct {
 	// Lunar Charged Cloud state
 	lcCloudActive bool
 	lcCloudExpiry int
+	// Lunar Crystallize state
+	lcrsContributor        []int
+	lcrsPrecalcDamages     []lcDamageRecord
+	lcrsPrecalcDamagesCRIT []lcDamageRecord
+	lcrsTickSrc            int
+	lcrsActiveExpiry       int
+	lcrsExpiryTaskMap      map[int]int
+	lcrsMoondriftCount     int
+	lcrsTriggerCount       int
 }
 
 type Enemy interface {
@@ -150,6 +159,7 @@ func (r *Reactable) Init(self combat.Target, c *core.Core) *Reactable {
 	r.DecayRate[Frozen] = frzDecayCap
 	r.ecTickSrc = -1
 	r.lcTickSrc = -1
+	r.lcrsTickSrc = -1
 	r.burningTickSrc = -1
 	r.overloadGCD = -1
 	r.shatterGCD = -1
@@ -584,4 +594,3 @@ var reactionLvlBase = []float64{
 	1405.09741210937,
 	1446.853515625,
 }
-

@@ -23,6 +23,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/citlali"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/clorinde"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/collei"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/columbina"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/cyno"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/dehya"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/dhalia"

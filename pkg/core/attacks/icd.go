@@ -41,6 +41,7 @@ const (
 	ICDTagBurgeonDamage
 	ICDTagHyperbloomDamage
 	ICDTagLCDamage
+	ICDTagLCrsDamage
 
 	EndDefaultICDTags
 )
