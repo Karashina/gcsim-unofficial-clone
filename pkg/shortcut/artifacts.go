@@ -3,9 +3,15 @@
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 
 var SetNameToKey = map[string]keys.Set{
+	"adaycarvedfromrisingwinds":          keys.ADayCarvedFromRisingWinds,
+	"daycarved":                          keys.ADayCarvedFromRisingWinds,
+	"adcfrw":                             keys.ADayCarvedFromRisingWinds,
 	"adventurer":                         keys.Adventurer,
 	"archaicpetra":                       keys.ArchaicPetra,
 	"ap":                                 keys.ArchaicPetra,
+	"aubadeofmorningstarandmoon":         keys.AubadeOfMorningstarAndMoon,
+	"aubade":                             keys.AubadeOfMorningstarAndMoon,
+	"aomam":                              keys.AubadeOfMorningstarAndMoon,
 	"berserker":                          keys.Berserker,
 	"blizzardstrayer":                    keys.BlizzardStrayer,
 	"blizzard":                           keys.BlizzardStrayer,

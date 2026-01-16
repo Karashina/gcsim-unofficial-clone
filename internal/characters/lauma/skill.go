@@ -77,7 +77,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			StrikeType:       attacks.StrikeTypeDefault,
 			Element:          attributes.Dendro,
 			IgnoreDefPercent: 1,
-			FlatDmg:          (skillHold2[c.TalentLvlSkill()]*em*(1+c.LBBaseReactBonus(ai1)))*(1+((6*em)/(2000+em))+c.LBReactBonus(ai1)) + c.burstLBBuff*c.c6mult,
+			FlatDmg:          (skillHold2[c.TalentLvlSkill()]*em*(1+c.LBBaseReactBonus(ai1)))*(1+((6*em)/(2000+em))+c.LBReactBonus(ai1)) + c.burstLBBuff,
 		}
 		snap := combat.Snapshot{
 			CharLvl: c.Base.Level,
@@ -190,7 +190,7 @@ func (c *char) skillTick(src int) func() {
 			snapc6 := combat.Snapshot{
 				CharLvl: c.Base.Level,
 			}
-			c6ai.FlatDmg = (1.85*em*(1+c.LBBaseReactBonus(c6ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(c6ai)) + c.burstLBBuff*c.c6mult // 185% of EM
+			c6ai.FlatDmg = (1.85*em*(1+c.LBBaseReactBonus(c6ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(c6ai)) + c.burstLBBuff // 185% of EM
 			snapc6.Stats[attributes.CR] = c.Stat(attributes.CR)
 			snapc6.Stats[attributes.CD] = c.Stat(attributes.CD)
 
@@ -222,4 +222,3 @@ func (c *char) shredCB(a combat.AttackCB) {
 		Value: -1 * skillRESShred[c.TalentLvlSkill()],
 	})
 }
-

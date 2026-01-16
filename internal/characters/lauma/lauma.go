@@ -21,7 +21,6 @@ type char struct {
 	verdantDew  int
 	moonSong    int
 	paleHymn    int
-	c6mult      float64
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -43,10 +42,10 @@ func (c *char) Init() error {
 	c.AddStatus("moonsignKey", -1, false)
 	c.setupPaleHymnEffects()
 	c.a0()
-	c.a4()                               // initialize A4 AddAttackMod
-	c.c6mult = c.c6AscendantMultiplier() // apply C6 ascendant multiplier if applicable
-	c.verdantDewCheck()                  // initialize Verdant Dew monitoring
-	c.applyResReduction()                // initialize RES reduction monitoring
+	c.a4()                // initialize A4 AddAttackMod
+	c.c6Init()            // initialize C6 Ascendant Elevation bonus
+	c.verdantDewCheck()   // initialize Verdant Dew monitoring
+	c.applyResReduction() // initialize RES reduction monitoring
 	return nil
 }
 
@@ -74,4 +73,3 @@ func (c *char) verdantDewCheck() {
 		return true
 	}, "lauma-verdant-dew")
 }
-

@@ -123,7 +123,7 @@ func (c *char) c6NormalAttackConversion() bool {
 		IgnoreDefPercent: 1,
 	}
 
-	ai.FlatDmg = (1.5*em*(1+c.LBBaseReactBonus(ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(ai)) + c.burstLBBuff*c.c6mult // 150% of EM
+	ai.FlatDmg = (1.5*em*(1+c.LBBaseReactBonus(ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(ai)) + c.burstLBBuff // 150% of EM
 	snap := combat.Snapshot{
 		CharLvl: c.Base.Level,
 	}
@@ -139,14 +139,26 @@ func (c *char) c6NormalAttackConversion() bool {
 	return true
 }
 
-// C6 helper for Moonsign: Ascendant Gleam multiplier
-func (c *char) c6AscendantMultiplier() float64 {
+// C6 Moonsign: Ascendant Gleam - All nearby party members' Lunar-Bloom DMG is multiplied by 1.25
+// This is implemented via ElevationMod (+25% Elevation for LB damage)
+func (c *char) c6Init() {
 	if c.Base.Cons < 6 {
-		return 1
+		return
 	}
 	if !c.MoonsignAscendant {
-		return 1
+		return
 	}
-	return 1.25
-}
 
+	// Apply 25% Elevation bonus to all party members for Lunar-Bloom DMG
+	for _, char := range c.Core.Player.Chars() {
+		char.AddElevationMod(character.ElevationMod{
+			Base: modifier.NewBase("lauma-c6-ascendant-elevation", -1),
+			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				if ai.AttackTag == attacks.AttackTagLBDamage {
+					return 0.25, false
+				}
+				return 0, false
+			},
+		})
+	}
+}

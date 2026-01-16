@@ -29,6 +29,11 @@ func (r *Reactable) TryCrystallizeElectro(a *combat.AttackEvent) bool {
 
 func (r *Reactable) TryCrystallizeHydro(a *combat.AttackEvent) bool {
 	if r.Durability[Hydro] > ZeroDur {
+		// Check if the character has LCrs-Key status for Lunar-Crystallize
+		char := r.core.Player.ByIndex(a.Info.ActorIndex)
+		if char.StatusIsActive("lcrs-key") {
+			return r.tryLunarCrystallize(a)
+		}
 		return r.tryCrystallizeWithEle(a, attributes.Hydro, reactions.CrystallizeHydro, event.OnCrystallizeHydro)
 	}
 	return false
@@ -56,6 +61,8 @@ func (r *Reactable) TryCrystallizeFrozen(a *combat.AttackEvent) bool {
 	}
 	return false
 }
+
+// Lunar-Crystallize functions moved to lunarcrystallize.go
 
 func (r *Reactable) tryCrystallizeWithEle(a *combat.AttackEvent, ele attributes.Element, rt reactions.ReactionType, evt event.Event) bool {
 	if a.Info.Durability < ZeroDur {
@@ -310,4 +317,3 @@ func (cs *CrystallizeShard) SetDirectionToClosestEnemy()                        
 func (cs *CrystallizeShard) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
-

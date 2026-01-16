@@ -41,6 +41,7 @@ const (
 	OnBurning            // target, AttackEvent
 	OnLunarCharged       // target, AttackEvent
 	OnLunarBloom         // target, AttackEvent
+	OnLunarCrystallize   // target, AttackEvent
 	OnShatter            // target, AttackEvent; at the end to simplify all reaction event subs since it's normally not considered as an elemental reaction
 	ReactionEventEndDelim
 	OnDendroCore // Gadget

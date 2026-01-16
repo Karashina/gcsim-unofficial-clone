@@ -33,6 +33,7 @@ var eventToReaction = map[event.Event]reactions.ReactionType{
 	event.OnBurning:            reactions.Burning,
 	event.OnLunarCharged:       reactions.LunarCharged,
 	event.OnLunarBloom:         reactions.LunarBloom,
+	event.OnLunarCrystallize:   reactions.LunarCrystallize,
 }
 
 func init() {
@@ -79,4 +80,3 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 		result.Characters[c].ReactionEvents = b.events[c]
 	}
 }
-

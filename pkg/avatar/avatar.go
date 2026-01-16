@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
@@ -166,6 +167,16 @@ func (p *Player) calc(atk *combat.AttackEvent) (float64, bool) {
 		damage *= (atk.Info.AmpMult * (1 + emBonus + reactBonus))
 	}
 
+	// apply elevation bonus
+	// Skip for Lunar Reaction damage (LC/LB/LCrs) as elevation is already applied in precalc
+	elevationBonus := 0.0
+	if atk.Info.AttackTag != attacks.AttackTagLCDamage &&
+		atk.Info.AttackTag != attacks.AttackTagLBDamage &&
+		atk.Info.AttackTag != attacks.AttackTagLCrsDamage {
+		elevationBonus = p.Core.Player.ByIndex(atk.Info.ActorIndex).ElevationBonus(atk.Info)
+	}
+	damage *= (1 + elevationBonus)
+
 	// reduce damage by damage group
 	x := 1.0
 	if !atk.Info.SourceIsSim {
@@ -285,4 +296,3 @@ func (p *Player) ReactWithSelf(atk *combat.AttackEvent) {
 		Write("existing", existing).
 		Write("after", p.Reactable.ActiveAuraString())
 }
-

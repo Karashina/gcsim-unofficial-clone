@@ -27,6 +27,7 @@ const (
 	Hyperbloom         ReactionType = "hyperbloom"
 	LunarCharged       ReactionType = "lunar-charged"
 	LunarBloom         ReactionType = "lunar-bloom"
+	LunarCrystallize   ReactionType = "lunar-crystallize"
 	NoReaction         ReactionType = ""
 	FreezeExtend       ReactionType = "freeze-extend"
 )
