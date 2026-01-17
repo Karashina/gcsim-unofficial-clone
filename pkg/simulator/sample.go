@@ -1,4 +1,4 @@
-﻿package simulator
+package simulator
 
 import (
 	"encoding/json"
@@ -97,3 +97,36 @@ func GenerateSampleWithSeed(cfg string, seed uint64, opts Options) (*model.Sampl
 	return sample, err
 }
 
+// GenerateRawDebugWithSeed runs one simulation with debug enabled using the given seed
+// and returns the raw debug log bytes (JSON array) so callers can convert to NDJSON.
+func GenerateRawDebugWithSeed(cfg string, seed uint64, opts Options) ([]byte, error) {
+	simcfg, gcsl, err := Parse(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := simulation.NewCore(int64(seed), true, simcfg)
+	if err != nil {
+		return nil, err
+	}
+	eval, err := eval.NewEvaluator(gcsl, c)
+	if err != nil {
+		return nil, err
+	}
+	// create a new simulation and run
+	s, err := simulation.New(simcfg, eval, c)
+	if err != nil {
+		return nil, err
+	}
+	_, err = s.Run()
+	if err != nil {
+		return nil, err
+	}
+
+	// capture the log as raw JSON array
+	logs, err := c.Log.Dump()
+	if err != nil {
+		return nil, err
+	}
+	return logs, nil
+}
