@@ -14,22 +14,15 @@ import (
 
 var burstFrames []int
 
-// TODO: Frame data not measured, using stub values
 const (
-	burstHitmark      = 999
-	lunarDomainDur    = 20 * 60 // 20 seconds
+	burstHitmark      = 111
+	lunarDomainDur    = 1288
 	lunarDomainKey    = "lunar-domain"
 	lunarDomainModKey = "lunar-domain-bonus"
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(999)
-	burstFrames[action.ActionAttack] = 999
-	burstFrames[action.ActionCharge] = 999
-	burstFrames[action.ActionSkill] = 999
-	burstFrames[action.ActionDash] = 999
-	burstFrames[action.ActionJump] = 999
-	burstFrames[action.ActionSwap] = 999
+	burstFrames = frames.InitAbilSlice(125)
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
@@ -70,8 +63,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}, lunarDomainDur)
 
 	// Energy and cooldown
-	c.ConsumeEnergy(5)
-	c.SetCDWithDelay(action.ActionBurst, 15*60, 2)
+	c.ConsumeEnergy(3)
+	c.SetCDWithDelay(action.ActionBurst, 15*60, 1)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),

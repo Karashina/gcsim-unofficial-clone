@@ -10,20 +10,14 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 )
 
-// TODO: Frame data not measured, using stub values
 var chargeFrames []int
 
-const chargeHitmark = 999
+const chargeHitmark = 45
 
 func init() {
 	// Based on Mona (Hydro Catalyst) pattern with stub values
-	chargeFrames = frames.InitAbilSlice(999) // CA -> N1
-	chargeFrames[action.ActionCharge] = 999  // CA -> CA
-	chargeFrames[action.ActionSkill] = 999   // CA -> E
-	chargeFrames[action.ActionBurst] = 999   // CA -> Q
-	chargeFrames[action.ActionDash] = 999    // CA -> D
-	chargeFrames[action.ActionJump] = 999    // CA -> J
-	chargeFrames[action.ActionSwap] = 999    // CA -> Swap
+	chargeFrames = frames.InitAbilSlice(45) // CA -> D
+	chargeFrames[action.ActionAttack] = 83  // CA -> N1
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {

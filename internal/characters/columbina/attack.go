@@ -10,25 +10,24 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
 )
 
-// TODO: Frame data not measured, using stub values
 var (
 	attackFrames   [][]int
-	attackHitmarks = []int{999, 999, 999}
+	attackHitmarks = []int{20, 16, 33}
 	attackRadius   = []float64{2.0, 2.2, 2.5}
 )
 
 func init() {
 	attackFrames = make([][]int, normalHitNum)
 
-	// Based on Mona (Hydro Catalyst) pattern with stub values
-	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 999) // N1 -> CA
-	attackFrames[0][action.ActionAttack] = 999                             // N1 -> N2
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 20) // N1 -> CA
+	attackFrames[0][action.ActionAttack] = 31                             // N1 -> N2
 
-	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 999) // N2 -> CA
-	attackFrames[1][action.ActionAttack] = 999                             // N2 -> N3
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 16) // N2 -> CA
+	attackFrames[1][action.ActionAttack] = 23                             // N2 -> N3
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 999) // N3 -> CA/N1
-	attackFrames[2][action.ActionCharge] = 500                             // N3 -> CA, TODO: this action is illegal
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 33) // N3 -> CA/N1
+	attackFrames[2][action.ActionAttack] = 74                             // N3 -> N1
+	attackFrames[2][action.ActionCharge] = 500                            // N3 -> CA, TODO: this action is illegal
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
