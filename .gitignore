@@ -29,6 +29,7 @@ protos/
 scripts/
 ui/
 webui/
+webui/server/
 webuii-src/
 tools/
 scripts/
