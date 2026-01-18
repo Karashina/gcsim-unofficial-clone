@@ -13,25 +13,18 @@ import (
 
 var skillFrames []int
 
-// TODO: Frame data not measured, using stub values
 const (
-	skillHitmark          = 999
-	gravityRippleDuration = 25 * 60 // 25 seconds
-	gravityRippleInterval = 4 * 60  // 4 seconds
+	skillHitmark          = 25
+	gravityRippleDuration = 1500 // 25 seconds
+	gravityRippleInterval = 240  // 4 seconds
 	gravityLimit          = 60
 	gravityPerTick        = 20
-	gravityTickInterval   = 2 * 60 // 2 seconds
+	gravityTickInterval   = 119
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(999)
-	skillFrames[action.ActionAttack] = 999
-	skillFrames[action.ActionCharge] = 999
-	skillFrames[action.ActionSkill] = 999
-	skillFrames[action.ActionBurst] = 999
-	skillFrames[action.ActionDash] = 999
-	skillFrames[action.ActionJump] = 999
-	skillFrames[action.ActionSwap] = 999
+	skillFrames = frames.InitAbilSlice(35)
+	skillFrames[action.ActionBurst] = 30
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
