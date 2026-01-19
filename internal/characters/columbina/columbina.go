@@ -31,6 +31,8 @@ type char struct {
 	moonridgeICD      int
 	c4ICD             int
 	c4DominantType    string // Track the dominant type for C4 bonus
+	// Gravity Accumulation state
+	activeGravityType string
 	// A4 tracking
 	a4LCSrc     int
 	a4LCCount   int
@@ -73,16 +75,9 @@ func (c *char) Init() error {
 	c.AddStatus("moonsignKey", -1, false)
 	c.AddStatus("lcrs-key", -1, false)
 
-	// Initialize Lunar-Crystallize callback
-	c.InitLCrsCallback()
-
 	// Initialize passives
 	c.a0Init()
 	c.a1Init()
-	if c.Base.Ascension >= 4 {
-		c.a4Init()
-	}
-
 	// Initialize constellations
 	if c.Base.Cons >= 1 {
 		c.c1Init()
@@ -96,9 +91,6 @@ func (c *char) Init() error {
 
 	// Subscribe to Lunar reaction events for Gravity accumulation
 	c.subscribeToLunarReactions()
-
-	// Subscribe to burst events
-	c.subscribeToBurst()
 
 	return nil
 }

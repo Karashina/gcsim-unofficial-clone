@@ -313,6 +313,14 @@ func (r *Reactable) fireMoondriftHarmony(lcrsAtk combat.AttackInfo, damageResult
 				combat.NewSingleTargetHit(closest.Key()),
 				0,
 			)
+			if char.StatusIsActive("law-of-new-moon") && r.core.Rand.Float64() < 0.33 {
+				r.core.QueueAttackWithSnap(
+					lcrsAtk,
+					snap,
+					combat.NewSingleTargetHit(closest.Key()),
+					0,
+				)
+			} // Double LCrs tick with 33% chance for extra attack if Columbina A4 is active
 		}, delay)
 	}
 

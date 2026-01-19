@@ -6,6 +6,13 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/task"
 )
 
+type MoonridgeInjector interface {
+	IsUnlocked() bool
+	HasLawOfNewMoon() bool
+	HasICD() bool
+	AddICD(dur int)
+}
+
 // Verdant Dew charging system
 type Handler struct {
 	f      *int
@@ -16,21 +23,26 @@ type Handler struct {
 	baseDur   int // in frames
 	gainBonus float64
 
-	expiryFrame   int
-	charging      bool
-	count         int     // 0..3
-	verdantPart   float64 // 0..450
-	tickScheduled bool
+	expiryFrame    int
+	charging       bool
+	count          int     // 0..3
+	verdantPart    float64 // 0..450
+	moonridgePart  float64 // 0..450
+	moonRidgeCount int
+	tickScheduled  bool
+
+	injector MoonridgeInjector
 }
 
-func New(f *int, events event.Eventter, tasks task.Tasker, log glog.Logger) *Handler {
+func New(f *int, events event.Eventter, tasks task.Tasker, log glog.Logger, injector MoonridgeInjector) *Handler {
 	h := &Handler{
-		f:       f,
-		events:  events,
-		tasks:   tasks,
-		log:     log,
-		baseDur: int(2.5 * 60), // 2.5s
-		count:   0,
+		f:        f,
+		events:   events,
+		tasks:    tasks,
+		log:      log,
+		baseDur:  int(2.5 * 60), // 2.5s
+		count:    0,
+		injector: injector,
 	}
 
 	// subscribe to Lunar Bloom events
@@ -45,7 +57,34 @@ func (h *Handler) onLunarBloom(args ...interface{}) bool {
 	// args: target, *AttackEvent
 	// we don't need attacker here, just start/reset charging for the party
 	h.StartCharge(h.baseDur)
+	h.tryAddMoonridge()
 	return false
+}
+
+func (h *Handler) tryAddMoonridge() {
+	if h.injector == nil || !h.injector.IsUnlocked() {
+		return
+	}
+	if !h.injector.HasLawOfNewMoon() {
+		return
+	}
+
+	hasICD := h.injector.HasICD()
+	if !hasICD {
+		h.moonRidgeCount = 0
+		h.injector.AddICD(15 * 60)
+		h.moonRidgeCount++
+	} else {
+		if h.moonRidgeCount >= 3 {
+			return
+		}
+		h.moonRidgeCount++
+	}
+
+	h.moonridgePart += 150
+	if h.moonridgePart > 450 {
+		h.moonridgePart = 450
+	}
 }
 
 // StartCharge begins or resets the charging timer
@@ -116,7 +155,7 @@ func (h *Handler) SetGainBonus(b float64) {
 }
 
 func (h *Handler) GetGainBonus() float64 { return h.gainBonus }
-func (h *Handler) Count() int            { return h.count }
+func (h *Handler) Count() int            { return h.count + int(h.moonridgePart)/150 }
 func (h *Handler) IsCharging() bool      { return h.charging }
 func (h *Handler) RemainingFrames() int {
 	if !h.charging || h.f == nil {
@@ -138,20 +177,45 @@ func (h *Handler) Consume(n int) int {
 	if n <= 0 {
 		return 0
 	}
-	maxDews := int(h.verdantPart) / 150
-	if maxDews == 0 {
+
+	vCount := int(h.verdantPart) / 150
+	mCount := int(h.moonridgePart) / 150
+	total := vCount + mCount
+
+	if total == 0 {
 		return 0
 	}
 	toConsume := n
-	if toConsume > maxDews {
-		toConsume = maxDews
+	if toConsume > total {
+		toConsume = total
 	}
-	h.verdantPart -= float64(toConsume * 150)
-	if h.verdantPart < 0 {
-		h.verdantPart = 0
+
+	satisfied := 0
+
+	// Consume from verdantPart first to allow passive recharging
+	fromVerdant := toConsume
+	if fromVerdant > vCount {
+		fromVerdant = vCount
 	}
-	// update count
+	if fromVerdant > 0 {
+		h.verdantPart -= float64(fromVerdant * 150)
+		if h.verdantPart < 0 {
+			h.verdantPart = 0
+		}
+		satisfied += fromVerdant
+	}
+
+	// Consume remaining from moonridgePart
+	remaining := toConsume - satisfied
+	if remaining > 0 {
+		h.moonridgePart -= float64(remaining * 150)
+		if h.moonridgePart < 0 {
+			h.moonridgePart = 0
+		}
+		satisfied += remaining
+	}
+
+	// update verdant count cache
 	h.count = int(h.verdantPart) / 150
 	return toConsume
 }
-
