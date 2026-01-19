@@ -264,6 +264,14 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			combat.NewSingleTargetHit(r.self.Key()),
 			9,
 		)
+		if r.core.Player.ByIndex(a.Info.ActorIndex).StatusIsActive("law-of-new-moon") && r.core.Rand.Float64() < 0.33 {
+			r.core.QueueAttackWithSnap(
+				atk,
+				snap,
+				combat.NewSingleTargetHit(r.self.Key()),
+				9,
+			)
+		} // Double LC tick with 33% chance for extra attack if Columbina A4 is active
 
 		r.core.Tasks.Add(r.nextTickLC(r.core.F, a.Info.ActorIndex), 70)
 		r.core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
@@ -448,8 +456,15 @@ func (r *Reactable) nextTickLC(src int, lcActorIndex int) func() {
 			combat.NewSingleTargetHit(closest.Key()),
 			9,
 		)
+		if r.core.Player.ByIndex(lcActorIndex).StatusIsActive("law-of-new-moon") && r.core.Rand.Float64() < 0.33 {
+			r.core.QueueAttackWithSnap(
+				atk,
+				snap,
+				combat.NewSingleTargetHit(closest.Key()),
+				9,
+			)
+		} // Double LC tick with 33% chance for extra attack if Columbina A4 is active
 		// Schedule the next LC tick.
 		r.core.Tasks.Add(r.nextTickLC(src, lcActorIndex), 122+r.core.Rand.Intn(9))
 	}
 }
-

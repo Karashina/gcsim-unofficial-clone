@@ -6,7 +6,6 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
-	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
@@ -76,64 +75,31 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 // applyLunarDomainBuff applies Lunar Reaction DMG Bonus to all party members
 func (c *char) applyLunarDomainBuff() {
+	if c.Base.Ascension >= 4 {
+		for _, char := range c.Core.Player.Chars() {
+			char.AddStatus(a4Key, lunarDomainDur, false)
+		}
+	}
+
 	bonus := burstBonus[c.TalentLvlBurst()]
 	dur := lunarDomainDur
 
 	for _, char := range c.Core.Player.Chars() {
 		// Add Lunar reaction bonus mods
 		char.AddReactBonusMod(character.ReactBonusMod{
-			Base: modifier.NewBaseWithHitlag(lunarDomainModKey+"-lc", dur),
+			Base: modifier.NewBaseWithHitlag(lunarDomainModKey, dur),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
-				if ai.AttackTag == attacks.AttackTagLCDamage {
+				switch ai.AttackTag {
+				case attacks.AttackTagLCDamage:
 					return bonus, false
-				}
-				return 0, false
-			},
-		})
-		char.AddReactBonusMod(character.ReactBonusMod{
-			Base: modifier.NewBaseWithHitlag(lunarDomainModKey+"-lb", dur),
-			Amount: func(ai combat.AttackInfo) (float64, bool) {
-				if ai.AttackTag == attacks.AttackTagLBDamage {
+				case attacks.AttackTagLBDamage:
 					return bonus, false
-				}
-				return 0, false
-			},
-		})
-		char.AddReactBonusMod(character.ReactBonusMod{
-			Base: modifier.NewBaseWithHitlag(lunarDomainModKey+"-lcrs", dur),
-			Amount: func(ai combat.AttackInfo) (float64, bool) {
-				if ai.AttackTag == attacks.AttackTagLCrsDamage {
+				case attacks.AttackTagLCrsDamage:
 					return bonus, false
+				default:
+					return 0, false
 				}
-				return 0, false
 			},
 		})
 	}
-}
-
-// subscribeToBurst subscribes to events for Lunar Domain interactions
-func (c *char) subscribeToBurst() {
-	// Subscribe to character switch to maintain Lunar Domain buff
-	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
-		prev := args[0].(int)
-		next := args[1].(int)
-
-		if !c.StatusIsActive(lunarDomainKey) {
-			return false
-		}
-
-		// Re-apply buff to new active character if needed
-		if prev != next {
-			c.Core.Log.NewEvent("Lunar Domain buff carried", glog.LogCharacterEvent, c.Index).
-				Write("from", c.Core.Player.Chars()[prev].Base.Key).
-				Write("to", c.Core.Player.Chars()[next].Base.Key)
-		}
-
-		return false
-	}, "columbina-lunar-domain-swap")
-}
-
-// isLunarDomainActive returns whether Lunar Domain is currently active
-func (c *char) isLunarDomainActive() bool {
-	return c.StatusIsActive(lunarDomainKey) && c.lunarDomainActive
 }

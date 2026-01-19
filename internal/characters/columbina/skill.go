@@ -155,44 +155,69 @@ func (c *char) subscribeToLunarReactions() {
 
 // accumulateGravity accumulates Gravity from Lunar reactions
 func (c *char) accumulateGravity(lunarType string) {
-	// Check if New Moon's Omen ICD allows accumulation (20 Gravity per 2s)
+	// If newMoonOmenKey is active, just refresh it and update the active type
+	// If not, start the accumulation process
 	if c.StatusIsActive(newMoonOmenKey) {
+		// Just refresh the duration to 120s max
+		// Also update the active type to the new trigger
+		c.activeGravityType = lunarType
+		c.AddStatus(newMoonOmenKey, 120, false)
 		return
 	}
 
-	// C2: Rate of accumulating Gravity increases by 34%
-	gravityGain := gravityPerTick
+	// First time trigger or expired
+	c.activeGravityType = lunarType
+	c.AddStatus(newMoonOmenKey, 120, false)
+
+	// Start the ticker
+	interval := 6
 	if c.Base.Cons >= 2 {
-		gravityGain = int(float64(gravityGain) * 1.34)
+		interval = 4
 	}
+	c.Core.Tasks.Add(c.gravityTicker(), interval)
+}
 
-	c.gravity += gravityGain
-	switch lunarType {
-	case "lc":
-		c.gravityLC += gravityGain
-	case "lb":
-		c.gravityLB += gravityGain
-	case "lcrs":
-		c.gravityLCrs += gravityGain
-	}
+func (c *char) gravityTicker() func() {
+	return func() {
+		// Stop if status expired
+		if !c.StatusIsActive(newMoonOmenKey) {
+			return
+		}
 
-	// Cap at gravity limit
-	if c.gravity > gravityLimit {
-		c.gravity = gravityLimit
-	}
+		// Gravity accumulation
+		// Rate of accumulating Gravity: 2 per 12 frames (Base)
+		// C2: 2 per 9 frames
+		addAmount := 2
 
-	c.AddStatus(newMoonOmenKey, gravityTickInterval, false)
+		c.gravity += addAmount
+		if c.gravity > gravityLimit {
+			c.gravity = gravityLimit
+		}
 
-	c.Core.Log.NewEvent("gravity accumulated", glog.LogCharacterEvent, c.Index).
-		Write("type", lunarType).
-		Write("gravity", c.gravity).
-		Write("lc", c.gravityLC).
-		Write("lb", c.gravityLB).
-		Write("lcrs", c.gravityLCrs)
+		// Add to specific type bucket
+		switch c.activeGravityType {
+		case "lc":
+			c.gravityLC += addAmount
+		case "lb":
+			c.gravityLB += addAmount
+		case "lcrs":
+			c.gravityLCrs += addAmount
+		}
 
-	// Check if Gravity is at limit
-	if c.gravity >= gravityLimit {
-		c.triggerGravityInterference()
+		// Trigger Gravity Interference if limit reached
+		// Note: The status (New Moon's Omen) persists, so accumulation continues after reset/trigger.
+		if c.gravity >= gravityLimit {
+			c.triggerGravityInterference()
+		}
+
+		// Schedule next tick
+		// Base: 2 per 12 frames
+		// C2: 2 per 9 frames
+		interval := 12
+		if c.Base.Cons >= 2 {
+			interval = 9
+		}
+		c.Core.Tasks.Add(c.gravityTicker(), interval)
 	}
 }
 

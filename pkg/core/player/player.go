@@ -90,8 +90,46 @@ func New(opt Opt) *Handler {
 	h.Shields = shield.New(opt.F, opt.Log, opt.Events)
 	h.Handler = infusion.New(opt.F, opt.Log, opt.Debug)
 	h.AnimationHandler = animation.New(opt.F, opt.Debug, opt.Log, opt.Events, opt.Tasks)
-	h.Verdant = verdant.New(opt.F, opt.Events, opt.Tasks, opt.Log)
+	h.Verdant = verdant.New(opt.F, opt.Events, opt.Tasks, opt.Log, &moonridgeImpl{h: h})
 	return h
+}
+
+type moonridgeImpl struct {
+	h *Handler
+}
+
+func (m *moonridgeImpl) IsUnlocked() bool {
+	for _, c := range m.h.chars {
+		if c.Base.Key == keys.Columbina && c.Base.Ascension >= 4 {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *moonridgeImpl) HasLawOfNewMoon() bool {
+	for _, c := range m.h.chars {
+		if c.StatusIsActive("law-of-new-moon") {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *moonridgeImpl) HasICD() bool {
+	for _, c := range m.h.chars {
+		if c.StatusIsActive("law-of-new-moon-icd") {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *moonridgeImpl) AddICD(dur int) {
+	// Add to active character
+	if m.h.active >= 0 && m.h.active < len(m.h.chars) {
+		m.h.chars[m.h.active].AddStatus("law-of-new-moon-icd", dur, false)
+	}
 }
 
 func (h *Handler) SetSwapICD(delay int) {
@@ -366,4 +404,3 @@ func (h *Handler) Airborne() AirborneSource {
 const (
 	XianyunAirborneBuff = "xianyun-airborne-buff"
 )
-
