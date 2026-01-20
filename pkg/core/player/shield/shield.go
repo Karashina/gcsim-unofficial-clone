@@ -31,6 +31,7 @@ const (
 	CitlaliSkill
 	DhaliaBurst
 	IneffaSkill
+	ColumbinaC1
 	EndType
 )
 
@@ -48,4 +49,3 @@ type Shield interface {
 	Element() attributes.Element
 	Desc() string
 }
-

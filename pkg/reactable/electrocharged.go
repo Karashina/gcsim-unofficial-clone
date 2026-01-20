@@ -177,4 +177,3 @@ func (r *Reactable) nextTick(src int) func() {
 		r.core.Tasks.Add(r.nextTick(src), 60)
 	}
 }
-

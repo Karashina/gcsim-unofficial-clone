@@ -7,33 +7,33 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 const (
 	// C1
-	c1Key       = "c1-gravity-interference"
-	c1ICD       = 15 * 60 // 15s ICD
-	c1Elevation = 0.015   // 1.5% Elevation bonus for all party members
+	c1Key            = "c1-gravity-interference"
+	c1GravitySkipKey = "c1-gravity-skip"
+	c1ICD            = 15 * 60 // 15s ICD
+	c1Elevation      = 0.015   // 1.5% Elevation bonus for all party members
 
 	// C2
-	c2Key          = "lunar-brilliance"
-	c2Dur          = 8 * 60 // 8s duration
-	c2GravityBonus = 0.34   // 34% faster gravity accumulation
+	c2Key = "lunar-brilliance"
+	c2Dur = 8 * 60 // 8s duration
 
 	// C4
-	c4Key         = "c4-gravity-bonus"
+	c4IcdKey      = "c4-gravity-bonus-icd"
 	c4Energy      = 4
 	c4HPBonusLC   = 0.125 // 12.5% Max HP
 	c4HPBonusLB   = 0.025 // 2.5% Max HP
 	c4HPBonusLCrs = 0.125 // 12.5% Max HP
 
 	// C6
-	c6Key          = "c6-crit-dmg"
-	c6ElevationKey = "c6-elevation"
-	c6Dur          = 8 * 60 // 8s duration
-	c6CDBonus      = 0.80   // 80% CRIT DMG
-	c6Elevation    = 0.07   // 7% Elevation
+	c6Key       = "c6-crit-dmg"
+	c6Dur       = 8 * 60 // 8s duration
+	c6CDBonus   = 0.80   // 80% CRIT DMG
+	c6Elevation = 0.07   // 7% Elevation
 )
 
 // C1: On skill cast, trigger Gravity Interference effect (once per 15s)
@@ -75,21 +75,45 @@ func (c *char) c1OnSkill() {
 	c.Core.Log.NewEvent("C1 Gravity Interference triggered on skill", glog.LogCharacterEvent, c.Index).
 		Write("dominant_type", dominantType)
 
+	c.AddStatus(c1GravitySkipKey, -1, false)
+	c.triggerGravityInterference()
+
+}
+
+func (c *char) c1OnGravityInterference() {
+	if c.Base.Cons < 1 {
+		return
+	}
+
+	dominantType := c.getDominantLunarType()
+
 	switch dominantType {
 	case "lc":
-		// Energy restoration (approximate effect)
-		c.AddEnergy("c1-energy", 5)
-	case "lb":
-		// Poise restoration (not directly modeled in gcsim, log for documentation)
-		c.Core.Log.NewEvent("C1 Poise restoration (Lunar-Bloom)", glog.LogCharacterEvent, c.Index)
+		// Energy restoration
+		c.AddEnergy("c1-energy", 6)
 	case "lcrs":
 		// Summon Rainsea Shield: 12% Max HP, 250% effectiveness vs Hydro DMG, 8s duration
 		shieldAmount := c.MaxHP() * 0.12
-		// Import shield package and use Core.Player.Shields
-		// For now, log the shield effect (full implementation would require shield system integration)
-		c.Core.Log.NewEvent("C1 Rainsea Shield applied", glog.LogCharacterEvent, c.Index).
-			Write("amount", shieldAmount).
-			Write("effectiveness_vs_hydro", 2.5)
+		// Rainsea Shield implementation
+		// 英語コメント: Apply Rainsea Shield (Hydro 250% effectiveness, 8s duration)
+		importShield := func() {
+			// gcsim標準のシールドAPIを使用
+			// ShieldType: use EndType+1 for custom (or define ColumbinaShield in shield.go if needed)
+			// Target: active character
+			c.Core.Player.Shields.Add(&shield.Tmpl{
+				ActorIndex: c.Index,
+				Target:     c.Core.Player.Active(),
+				Name:       "Rainsea Shield",
+				Src:        c.Index,
+				ShieldType: shield.ColumbinaC1,
+				Ele:        attributes.Hydro,
+				HP:         shieldAmount,
+				Expires:    c.Core.F + 8*60,
+			})
+			c.Core.Log.NewEvent("C1 Rainsea Shield applied", glog.LogCharacterEvent, c.Index).
+				Write("amount", shieldAmount)
+		}
+		importShield()
 	}
 }
 
@@ -183,9 +207,6 @@ func (c *char) c4OnGravityInterference(dominantType string) {
 	// Record dominant type for C4 bonus application
 	c.c4DominantType = dominantType
 
-	// Set ICD for C4 bonus (once every 15s)
-	c.c4ICD = c.Core.F + 60*15 // 15s ICD
-
 	c.Core.Log.NewEvent("C4 energy restored", glog.LogCharacterEvent, c.Index).
 		Write("energy", c4Energy).
 		Write("dominant_type", dominantType)
@@ -218,16 +239,19 @@ func (c *char) c6Init() {
 	// Subscribe to all Lunar reaction events to apply CRIT DMG buff
 	c.Core.Events.Subscribe(event.OnLunarCharged, func(args ...interface{}) bool {
 		c.c6ApplyBuffToAllChars(attributes.Electro)
+		c.c6ApplyBuffToAllChars(attributes.Hydro)
 		return false
 	}, "columbina-c6-lc-trigger")
 
 	c.Core.Events.Subscribe(event.OnLunarBloom, func(args ...interface{}) bool {
 		c.c6ApplyBuffToAllChars(attributes.Dendro)
+		c.c6ApplyBuffToAllChars(attributes.Hydro)
 		return false
 	}, "columbina-c6-lb-trigger")
 
 	c.Core.Events.Subscribe(event.OnLunarCrystallize, func(args ...interface{}) bool {
 		c.c6ApplyBuffToAllChars(attributes.Geo)
+		c.c6ApplyBuffToAllChars(attributes.Hydro)
 		return false
 	}, "columbina-c6-lcrs-trigger")
 }
