@@ -158,7 +158,6 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		var snap combat.Snapshot
 		snap.Stats[attributes.CR] = damageResult.HighestCR
 		snap.Stats[attributes.CD] = 0 // Prevent additional Crit DMG
-		snap.CharLvl = r.core.Player.ByIndex(damageResult.HighestCRIndex).Base.Level
 	}
 
 	// After 3 triggers, Moondrifts fire projectiles dealing 3 instances of Geo DMG

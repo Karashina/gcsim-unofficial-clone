@@ -31,7 +31,7 @@ func (r *Reactable) TryCrystallizeHydro(a *combat.AttackEvent) bool {
 	if r.Durability[Hydro] > ZeroDur {
 		// Check if the character has LCrs-Key status for Lunar-Crystallize
 		char := r.core.Player.ByIndex(a.Info.ActorIndex)
-		if char.StatusIsActive("LCrs-key") {
+		if char.StatusIsActive("LCrs-Key") {
 			return r.tryLunarCrystallize(a)
 		}
 		return r.tryCrystallizeWithEle(a, attributes.Hydro, reactions.CrystallizeHydro, event.OnCrystallizeHydro)

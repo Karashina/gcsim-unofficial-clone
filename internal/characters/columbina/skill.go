@@ -16,10 +16,8 @@ var skillFrames []int
 const (
 	skillHitmark          = 25
 	gravityRippleDuration = 1500 // 25 seconds
-	gravityRippleInterval = 240  // 4 seconds
+	gravityRippleInterval = 119
 	gravityLimit          = 60
-	gravityPerTick        = 20
-	gravityTickInterval   = 119
 )
 
 func init() {
@@ -253,11 +251,17 @@ func (c *char) triggerGravityInterference() {
 		c.gravityInterferenceLCrs()
 	}
 
-	// Reset gravity
-	c.gravity = 0
-	c.gravityLC = 0
-	c.gravityLB = 0
-	c.gravityLCrs = 0
+	c.c1OnGravityInterference()
+
+	if !c.StatusIsActive(c1GravitySkipKey) {
+		// Reset gravity
+		c.gravity = 0
+		c.gravityLC = 0
+		c.gravityLB = 0
+		c.gravityLCrs = 0
+	} else {
+		c.DeleteStatus(c1GravitySkipKey)
+	}
 }
 
 // gravityInterferenceLC deals Electro AoE DMG (considered Lunar-Charged DMG)
@@ -276,21 +280,17 @@ func (c *char) gravityInterferenceLC() {
 
 	// HP scaling with Lunar-Charged formula
 	em := c.Stat(attributes.EM)
-	baseDmg := c.MaxHP() * gravityInterfLC[c.TalentLvlSkill()] * (1 + c.LCBaseReactBonus(ai))
+	baseDmg := c.MaxHP() * gravityInterfLC[c.TalentLvlSkill()]
 	emBonus := (6 * em) / (2000 + em)
-	ai.FlatDmg = baseDmg * (1 + emBonus + c.LCReactBonus(ai)) * (1 + c.ElevationBonus(ai))
+	ai.FlatDmg = baseDmg * (1 + emBonus + c.LCReactBonus(ai))
 
-	// C4 bonus: LC=12.5%, LB=2.5%, LCrs=12.5% of Max HP
-	if c.Base.Cons >= 4 && c.c4ICD <= c.Core.F {
-		switch c.c4DominantType {
-		case "lc":
-			ai.FlatDmg += c.MaxHP() * 0.125
-		case "lb":
-			ai.FlatDmg += c.MaxHP() * 0.025
-		case "lcrs":
-			ai.FlatDmg += c.MaxHP() * 0.125
-		}
+	// C4 bonus
+	if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) && c.c4DominantType == "lc" {
+		ai.FlatDmg += c.MaxHP() * c4HPBonusLC
+		c.AddStatus(c4IcdKey, 15*60, false)
 	}
+
+	ai.FlatDmg *= (1 + c.ElevationBonus(ai))
 
 	snap := combat.Snapshot{CharLvl: c.Base.Level}
 	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
@@ -326,14 +326,17 @@ func (c *char) gravityInterferenceLB() {
 
 			// HP scaling with Lunar-Bloom formula
 			em := c.Stat(attributes.EM)
-			baseDmg := c.MaxHP() * gravityInterfLB[c.TalentLvlSkill()] * (1 + c.LBBaseReactBonus(ai))
+			baseDmg := c.MaxHP() * gravityInterfLB[c.TalentLvlSkill()]
 			emBonus := (6 * em) / (2000 + em)
-			ai.FlatDmg = baseDmg * (1 + emBonus + c.LBReactBonus(ai)) * (1 + c.ElevationBonus(ai))
+			ai.FlatDmg = baseDmg * (1 + emBonus + c.LBReactBonus(ai))
 
-			// C4 bonus: 2.5% of Max HP applies to each hit
-			if c.Base.Cons >= 4 && c.c4ICD <= c.Core.F {
-				ai.FlatDmg += c.MaxHP() * 0.025
+			// C4 bonus
+			if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) && c.c4DominantType == "lb" {
+				ai.FlatDmg += c.MaxHP() * c4HPBonusLB
+				c.AddStatus(c4IcdKey, 15*60, false)
 			}
+
+			ai.FlatDmg *= (1 + c.ElevationBonus(ai))
 
 			snap := combat.Snapshot{CharLvl: c.Base.Level}
 			snap.Stats[attributes.CR] = c.Stat(attributes.CR)
@@ -369,14 +372,17 @@ func (c *char) gravityInterferenceLCrs() {
 
 	// HP scaling with Lunar-Crystallize formula
 	em := c.Stat(attributes.EM)
-	baseDmg := c.MaxHP() * gravityInterfLCrs[c.TalentLvlSkill()] * (1 + c.LCrsBaseReactBonus(ai))
+	baseDmg := c.MaxHP() * gravityInterfLCrs[c.TalentLvlSkill()]
 	emBonus := (6 * em) / (2000 + em)
-	ai.FlatDmg = baseDmg * (1 + emBonus + c.LCrsReactBonus(ai)) * (1 + c.ElevationBonus(ai))
+	ai.FlatDmg = baseDmg * (1 + emBonus + c.LCrsReactBonus(ai))
 
 	// C4 bonus
-	if c.Base.Cons >= 4 && c.c4ICD <= c.Core.F {
-		ai.FlatDmg += c.MaxHP() * 0.125
+	if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) && c.c4DominantType == "lcrs" {
+		ai.FlatDmg += c.MaxHP() * c4HPBonusLCrs
+		c.AddStatus(c4IcdKey, 15*60, false)
 	}
+
+	ai.FlatDmg *= (1 + c.ElevationBonus(ai))
 
 	snap := combat.Snapshot{CharLvl: c.Base.Level}
 	snap.Stats[attributes.CR] = c.Stat(attributes.CR)

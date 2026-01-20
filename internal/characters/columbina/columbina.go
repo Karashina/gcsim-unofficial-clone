@@ -71,10 +71,6 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// Mark as moonsign holder and LCrs-Key holder for Lunar-Crystallize
-	c.AddStatus("moonsignKey", -1, false)
-	c.AddStatus("lcrs-key", -1, false)
-
 	// Initialize passives
 	c.a0Init()
 	c.a1Init()
@@ -136,6 +132,43 @@ func (c *char) Condition(fields []string) (any, error) {
 // getDominantLunarType returns the Lunar reaction type with the most accumulated Gravity
 // Returns: "lc" for Lunar-Charged, "lb" for Lunar-Bloom, "lcrs" for Lunar-Crystallize
 func (c *char) getDominantLunarType() string {
+	if c.gravityLB == 0 && c.gravityLCrs == 0 && c.gravityLC == 0 {
+		// Check teammates' element for priority: Electro->"lc", Dendro->"lb", Geo->"lcrs"
+		hasElectro, hasDendro, hasGeo := false, false, false
+		for _, ch := range c.Core.Player.Chars() {
+			if ch == nil || ch.Base.Key == c.Base.Key {
+				continue // skip self or nil
+			}
+			switch ch.Base.Element.String() {
+			case "Electro":
+				hasElectro = true
+			case "Dendro":
+				hasDendro = true
+			case "Geo":
+				hasGeo = true
+			}
+		}
+
+		if hasElectro {
+			return "lc"
+		}
+		if hasDendro {
+			return "lb"
+		}
+		if hasGeo {
+			return "lcrs"
+		}
+
+		// fallback: random
+		r := c.Core.Rand.Float64()
+		if r < 0.33 {
+			return "lc"
+		} else if r < 0.66 {
+			return "lb"
+		} else {
+			return "lcrs"
+		}
+	}
 	if c.gravityLC >= c.gravityLB && c.gravityLC >= c.gravityLCrs {
 		return "lc"
 	}

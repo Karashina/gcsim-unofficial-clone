@@ -11,9 +11,9 @@ import (
 const (
 	// A0: Moonsign Benediction
 	moonsignKey   = "moonsign"
-	lbKeyStatus   = "LB-key"
-	lcKeyStatus   = "LC-key"
-	lcrsKeyStatus = "LCrs-key"
+	lbKeyStatus   = "LB-Key"
+	lcKeyStatus   = "LC-Key"
+	lcrsKeyStatus = "LCrs-Key"
 
 	// A1: Lunacy
 	lunacyKey      = "lunacy"
@@ -26,7 +26,7 @@ const (
 )
 
 // A0: Moonsign Benediction
-// - Sets "moonsign" and "lcrs-key" status when Columbina is in party
+// - Sets "moonsign" and "lcrs-Key" status when Columbina is in party
 // - Converts Electro-Charged → Lunar-Charged, Bloom → Lunar-Bloom, Hydro Crystallize → Lunar-Crystallize
 // - Base DMG Bonus = 0.2% per 1000 Max HP, max 7%
 func (c *char) a0Init() {
@@ -35,27 +35,28 @@ func (c *char) a0Init() {
 		char.AddStatus(lbKeyStatus, -1, false)
 		char.AddStatus(lcKeyStatus, -1, false)
 		char.AddStatus(lcrsKeyStatus, -1, false)
-	}
 
-	maxval := 0.07
-	val := min(maxval, c.MaxHP()/1000*0.002)
-
-	for _, char := range c.Core.Player.Chars() {
 		char.AddLCBaseReactBonusMod(character.LCBaseReactBonusMod{
 			Base: modifier.NewBase("Moonlight, Lent Unto You (A0/LC)", -1),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				maxval := 0.07
+				val := min(maxval, c.MaxHP()/1000*0.002)
 				return val, false
 			},
 		})
 		char.AddLBBaseReactBonusMod(character.LBBaseReactBonusMod{
 			Base: modifier.NewBase("Moonlight, Lent Unto You (A0/LB)", -1),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				maxval := 0.07
+				val := min(maxval, c.MaxHP()/1000*0.002)
 				return val, false
 			},
 		})
 		char.AddLCrsBaseReactBonusMod(character.LCrsBaseReactBonusMod{
 			Base: modifier.NewBase("Moonlight, Lent Unto You (A0/LCrs)", -1),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				maxval := 0.07
+				val := min(maxval, c.MaxHP()/1000*0.002)
 				return val, false
 			},
 		})
