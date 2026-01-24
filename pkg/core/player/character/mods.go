@@ -273,7 +273,10 @@ func (c *CharWrapper) ExtendStatus(key string, ext int) bool { return c.extendMo
 
 func (c *CharWrapper) ApplyAttackMods(a *combat.AttackEvent, t combat.Target) []interface{} {
 	// skip if this is reaction damage
-	if a.Info.AttackTag >= attacks.AttackTagNoneStat {
+	if a.Info.AttackTag >= attacks.AttackTagNoneStat &&
+		a.Info.AttackTag != attacks.AttackTagLCDamage &&
+		a.Info.AttackTag != attacks.AttackTagLBDamage &&
+		a.Info.AttackTag != attacks.AttackTagLCrsDamage {
 		return nil
 	}
 
@@ -298,7 +301,14 @@ func (c *CharWrapper) ApplyAttackMods(a *combat.AttackEvent, t combat.Target) []
 
 		amt, ok := m.Amount(a, t)
 		if ok {
+			isLunar := a.Info.AttackTag == attacks.AttackTagLCDamage ||
+				a.Info.AttackTag == attacks.AttackTagLBDamage ||
+				a.Info.AttackTag == attacks.AttackTagLCrsDamage
 			for k, v := range amt {
+				// if lunar reaction then only apply CR/CD
+				if isLunar && attributes.Stat(k) != attributes.CR && attributes.Stat(k) != attributes.CD {
+					continue
+				}
 				a.Snapshot.Stats[k] += v
 			}
 		}

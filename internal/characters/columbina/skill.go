@@ -128,7 +128,9 @@ func (c *char) subscribeToLunarReactions() {
 		if !c.StatusIsActive(gravityRippleKey) {
 			return false
 		}
-		c.accumulateGravity("lc")
+		c.Core.Tasks.Add(func() {
+			c.accumulateGravity("lc")
+		}, 1)
 		return false
 	}, "columbina-gravity-lc")
 
@@ -137,7 +139,9 @@ func (c *char) subscribeToLunarReactions() {
 		if !c.StatusIsActive(gravityRippleKey) {
 			return false
 		}
-		c.accumulateGravity("lb")
+		c.Core.Tasks.Add(func() {
+			c.accumulateGravity("lb")
+		}, 1)
 		return false
 	}, "columbina-gravity-lb")
 
@@ -146,7 +150,9 @@ func (c *char) subscribeToLunarReactions() {
 		if !c.StatusIsActive(gravityRippleKey) {
 			return false
 		}
-		c.accumulateGravity("lcrs")
+		c.Core.Tasks.Add(func() {
+			c.accumulateGravity("lcrs")
+		}, 1)
 		return false
 	}, "columbina-gravity-lcrs")
 }
@@ -349,9 +355,6 @@ func (c *char) gravityInterferenceLB() {
 			ap := combat.NewCircleHitOnTarget(closest.Pos(), nil, 2)
 			c.Core.QueueAttackWithSnap(ai, snap, ap, 0)
 
-			// Emit event
-			ae := &combat.AttackEvent{Info: ai}
-			c.Core.Events.Emit(event.OnLunarBloom, closest, ae)
 		}, delay)
 	}
 }
@@ -390,11 +393,4 @@ func (c *char) gravityInterferenceLCrs() {
 
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 8)
 	c.Core.QueueAttackWithSnap(ai, snap, ap, 10)
-
-	// Emit event
-	enemies := c.Core.Combat.EnemiesWithinArea(ap, nil)
-	if len(enemies) > 0 {
-		ae := &combat.AttackEvent{Info: ai}
-		c.Core.Events.Emit(event.OnLunarCrystallize, enemies[0], ae)
-	}
 }
