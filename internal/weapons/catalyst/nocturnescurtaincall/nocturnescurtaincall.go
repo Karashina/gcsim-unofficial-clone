@@ -81,18 +81,14 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 
 		// Check ICD
-		if char.StatusIsActive(icdKey) {
-			return false
+		if !char.StatusIsActive(icdKey) {
+			// Recover energy
+			char.AddEnergy("nocturnes-curtain-call", energyAmt[r-1])
+			c.Log.NewEvent("nocturnes curtain call energy recovery", glog.LogWeaponEvent, char.Index).
+				Write("energy", energyAmt[r-1])
+				// Add ICD
+			char.AddStatus(icdKey, icdDuration, true)
 		}
-
-		// Recover energy
-		char.AddEnergy("nocturnes-curtain-call", energyAmt[r-1])
-
-		c.Log.NewEvent("nocturnes curtain call energy recovery", glog.LogWeaponEvent, char.Index).
-			Write("energy", energyAmt[r-1])
-
-		// Add ICD
-		char.AddStatus(icdKey, icdDuration, true)
 
 		// Apply buff (HP + CRIT DMG for Lunar reactions)
 		char.AddStatus(buffKey, buffDuration, true)
@@ -103,6 +99,35 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	c.Events.Subscribe(event.OnLunarCharged, lunarReactionTrigger, fmt.Sprintf("nocturnes-curtain-call-lc-%v", char.Base.Key.String()))
 	c.Events.Subscribe(event.OnLunarBloom, lunarReactionTrigger, fmt.Sprintf("nocturnes-curtain-call-lb-%v", char.Base.Key.String()))
 	c.Events.Subscribe(event.OnLunarCrystallize, lunarReactionTrigger, fmt.Sprintf("nocturnes-curtain-call-lcrs-%v", char.Base.Key.String()))
+	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		atk, ok := args[1].(*combat.AttackEvent)
+		if !ok {
+			return false
+		}
+		if atk.Info.ActorIndex != char.Index {
+			return false
+		}
+		if atk.Info.AttackTag != attacks.AttackTagLCDamage &&
+			atk.Info.AttackTag != attacks.AttackTagLBDamage &&
+			atk.Info.AttackTag != attacks.AttackTagLCrsDamage {
+			return false
+		}
+
+		// Check ICD
+		if !char.StatusIsActive(icdKey) {
+			// Recover energy
+			char.AddEnergy("nocturnes-curtain-call", energyAmt[r-1])
+			c.Log.NewEvent("nocturnes curtain call energy recovery", glog.LogWeaponEvent, char.Index).
+				Write("energy", energyAmt[r-1])
+				// Add ICD
+			char.AddStatus(icdKey, icdDuration, true)
+		}
+
+		// Apply buff (HP + CRIT DMG for Lunar reactions)
+		char.AddStatus(buffKey, buffDuration, true)
+
+		return false
+	}, "nocturnes-curtain-call-enemy-dmg-"+char.Base.Key.String())
 
 	// HP bonus from buff
 	buffVal := make([]float64, attributes.EndStatType)
