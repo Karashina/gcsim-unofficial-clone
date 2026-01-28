@@ -1,4 +1,4 @@
-﻿package mika
+package mika
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -89,4 +89,3 @@ func (c *char) onBurstHeal() {
 		return false
 	}, "mika-eagleplume")
 }
-

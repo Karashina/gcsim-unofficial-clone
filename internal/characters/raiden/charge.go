@@ -1,4 +1,4 @@
-﻿package raiden
+package raiden
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -109,4 +109,3 @@ func (c *char) swordCharge() action.Info {
 		State:           action.ChargeAttackState,
 	}
 }
-

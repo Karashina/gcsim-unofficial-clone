@@ -1,4 +1,4 @@
-﻿package sigewinne
+package sigewinne
 
 import (
 	"fmt"
@@ -71,4 +71,3 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-

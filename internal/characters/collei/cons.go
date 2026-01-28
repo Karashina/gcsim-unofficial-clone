@@ -1,4 +1,4 @@
-﻿package collei
+package collei
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -95,4 +95,3 @@ func (c *char) c6(t combat.Target) {
 		22,
 	)
 }
-

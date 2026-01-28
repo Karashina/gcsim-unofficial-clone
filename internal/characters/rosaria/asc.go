@@ -1,4 +1,4 @@
-﻿package rosaria
+package rosaria
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -72,4 +72,3 @@ func (c *char) a4() {
 		Write("ends_on", c.Core.F+600).
 		Write("crit_share", critShare)
 }
-

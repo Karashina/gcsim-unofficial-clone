@@ -1,4 +1,4 @@
-﻿package nefer
+package nefer
 
 import (
 	_ "embed"
@@ -66,4 +66,3 @@ func (c *char) queueLunarBloomAttack(target combat.Target, mult float64, abilNam
 func (c *char) InitLCallback() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.onLunarBloomNeferSpecial, "lb-nefer-special")
 }
-

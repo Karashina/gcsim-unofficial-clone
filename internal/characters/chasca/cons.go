@@ -1,4 +1,4 @@
-﻿package chasca
+package chasca
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -149,4 +149,3 @@ func (c *char) c6ChargeTime(count int) int {
 	}
 	return cumuSkillAimLoadFramesC6[count-1]
 }
-

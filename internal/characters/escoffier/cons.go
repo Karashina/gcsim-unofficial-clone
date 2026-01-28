@@ -1,4 +1,4 @@
-﻿package escoffier
+package escoffier
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -207,4 +207,3 @@ func (c *char) c6() {
 	}
 	c.c6Count = c6Limit
 }
-

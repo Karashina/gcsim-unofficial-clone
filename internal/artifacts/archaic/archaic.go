@@ -1,4 +1,4 @@
-﻿package archaic
+package archaic
 
 import (
 	"fmt"
@@ -89,4 +89,3 @@ func NewSet(core *core.Core, char *character.CharWrapper, count int, param map[s
 
 	return &s, nil
 }
-

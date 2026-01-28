@@ -1,4 +1,4 @@
-﻿package chasca
+package chasca
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -22,4 +22,3 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 	}
 	return c.Character.Dash(p)
 }
-

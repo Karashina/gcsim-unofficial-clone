@@ -1,4 +1,4 @@
-﻿package goldentroupe
+package goldentroupe
 
 import (
 	"fmt"
@@ -114,4 +114,3 @@ func (s *Set) clearBuff(src int) func() {
 		s.core.Log.NewEvent("golden troupe 4pc lost", glog.LogArtifactEvent, s.char.Index)
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package mona
+package mona
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"

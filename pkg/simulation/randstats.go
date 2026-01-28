@@ -1,4 +1,4 @@
-﻿package simulation
+package simulation
 
 import (
 	"errors"
@@ -121,4 +121,3 @@ func randSub(weights [attributes.DelimBaseStat]float64, rng *rand.Rand) attribut
 	}
 	return attributes.NoStat
 }
-

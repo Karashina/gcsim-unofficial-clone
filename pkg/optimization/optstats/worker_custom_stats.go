@@ -1,4 +1,4 @@
-﻿package optstats
+package optstats
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
@@ -82,4 +82,3 @@ func (p *PoolCustomStats[T]) worker() {
 		}
 	}
 }
-

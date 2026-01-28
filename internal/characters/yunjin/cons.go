@@ -1,4 +1,4 @@
-﻿package yunjin
+package yunjin
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -106,4 +106,3 @@ func (c *char) deleteC6() {
 		char.DeleteStatus(c6Key)
 	}
 }
-

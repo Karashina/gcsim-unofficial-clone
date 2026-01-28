@@ -1,4 +1,4 @@
-﻿package xiangling
+package xiangling
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -78,4 +78,3 @@ func (c *char) c6(dur int) {
 		})
 	}
 }
-

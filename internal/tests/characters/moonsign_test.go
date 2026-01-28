@@ -1,4 +1,4 @@
-﻿package characters
+package characters
 
 import (
 	"testing"
@@ -79,4 +79,3 @@ func TestMoonsignPartyInit(t *testing.T) {
 		}
 	}
 }
-

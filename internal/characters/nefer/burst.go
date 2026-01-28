@@ -1,4 +1,4 @@
-﻿package nefer
+package nefer
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -98,4 +98,3 @@ func (c *char) makeBurstBonus() {
 		},
 	})
 }
-

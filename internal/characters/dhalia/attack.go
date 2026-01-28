@@ -1,4 +1,4 @@
-﻿package dhalia
+package dhalia
 
 import (
 	"fmt"
@@ -82,4 +82,3 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package eval
+package eval
 
 import (
 	"fmt"
@@ -170,4 +170,3 @@ func TestDoneCheck(t *testing.T) {
 		}
 	}
 }
-

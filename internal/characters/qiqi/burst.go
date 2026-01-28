@@ -1,4 +1,4 @@
-﻿package qiqi
+package qiqi
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -157,4 +157,3 @@ func (c *char) onNACAHitHook() {
 		return false
 	}, "qiqi-onhit-naca-hook")
 }
-

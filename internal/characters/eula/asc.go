@@ -1,4 +1,4 @@
-﻿package eula
+package eula
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -56,4 +56,3 @@ func (c *char) a4() {
 	c.ResetActionCooldown(action.ActionSkill)
 	c.Core.Log.NewEvent("eula a4 reset skill cd", glog.LogCharacterEvent, c.Index)
 }
-

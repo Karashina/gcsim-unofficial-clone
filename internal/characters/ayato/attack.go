@@ -1,4 +1,4 @@
-﻿package ayato
+package ayato
 
 import (
 	"fmt"
@@ -132,4 +132,3 @@ func (c *char) SoukaiKanka(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-

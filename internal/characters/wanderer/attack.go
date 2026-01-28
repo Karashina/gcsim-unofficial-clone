@@ -1,4 +1,4 @@
-﻿package wanderer
+package wanderer
 
 import (
 	"fmt"
@@ -206,4 +206,3 @@ func (c *char) attackWindupE() int {
 		return 0
 	}
 }
-

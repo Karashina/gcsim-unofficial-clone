@@ -1,4 +1,4 @@
-﻿package collision_test
+package collision_test
 
 import (
 	"math/rand"
@@ -362,4 +362,3 @@ func rectangleAttackCollision(attackWidth, attackHeight float64, attackOffset ge
 	advanceCoreFrame(c)
 	return count
 }
-

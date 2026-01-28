@@ -1,4 +1,4 @@
-﻿package status
+package status
 
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 
@@ -83,4 +83,3 @@ func (t *Handler) Delete(key string) {
 	}
 	delete(t.status, key)
 }
-

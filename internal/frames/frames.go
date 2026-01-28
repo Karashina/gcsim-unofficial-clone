@@ -1,4 +1,4 @@
-﻿package frames
+package frames
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -48,4 +48,3 @@ func NewAbilFunc(slice []int) func(action.Action) int {
 		return slice[next]
 	}
 }
-

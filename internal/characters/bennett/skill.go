@@ -1,4 +1,4 @@
-﻿package bennett
+package bennett
 
 import (
 	"fmt"
@@ -242,4 +242,3 @@ func (c *char) holdParticleCB(a combat.AttackCB) {
 	c.AddStatus(holdParticleICDKey, 1.5*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Pyro, c.ParticleDelay)
 }
-

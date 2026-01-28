@@ -8,6 +8,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/reactions"
 )
@@ -148,25 +149,115 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		}
 	}, 360)
 
-	// Calculate final LCrs damage
-	damageResult := r.calcLCrsDamage(r.lcrsContributor, r.lcrsPrecalcDamages, r.lcrsPrecalcDamagesCRIT)
-	lcrsAtk.FlatDmg = damageResult.FinalDamage
-
-	// If LCrs tick is not active, start it
+	// Calculate individual LCrs damages and queue attacks per contributor
+	damageList, indexList, isCrit := r.calcLCrsDamageContrib(r.lcrsContributor, r.lcrsPrecalcDamages, r.lcrsPrecalcDamagesCRIT)
+	type damageWithIndex struct {
+		Dmg  float64
+		Idx  int
+		Crit bool
+	}
+	dwiList := make([]damageWithIndex, len(damageList))
+	for i := range damageList {
+		dwiList[i] = damageWithIndex{Dmg: damageList[i], Idx: indexList[i], Crit: isCrit[i]}
+	}
+	sort.SliceStable(dwiList, func(i, j int) bool {
+		return dwiList[i].Dmg > dwiList[j].Dmg
+	})
+	coefs := []float64{1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0}
 	if r.lcrsTickSrc == -1 {
 		r.lcrsTickSrc = r.core.F
-		var snap combat.Snapshot
-		snap.Stats[attributes.CR] = damageResult.HighestCR
-		snap.Stats[attributes.CD] = 0 // Prevent additional Crit DMG
+		// Columbina A4: single-roll for extra attack on LCrs creation
+		columbinaExtra := false
+		columbinaIdx := -1
+		for idx, p := range r.core.Player.Chars() {
+			if p.Base.Key == keys.Columbina {
+				columbinaIdx = idx
+				break
+			}
+		}
+		if columbinaIdx != -1 {
+			columbinaExtra = r.core.Rand.Float64() < 0.33
+		}
+		for i, dwi := range dwiList {
+			if i >= len(coefs) {
+				break
+			}
+			coef := coefs[i]
+			if coef == 0 {
+				continue
+			}
+			var snap combat.Snapshot
+			char := r.core.Player.ByIndex(dwi.Idx)
+			snap.Stats[attributes.CR] = char.Stat(attributes.CR)
+			snap.Stats[attributes.CD] = 0 // Prevent additional Crit DMG
+			snap.CharLvl = char.Base.Level
+			atkCopy := lcrsAtk
+			atkCopy.ActorIndex = dwi.Idx
+			atkCopy.FlatDmg = dwi.Dmg * coef
+			if i == 0 {
+				atkCopy.AttackTag = attacks.AttackTagLCrsDamage
+			} else {
+				atkCopy.AttackTag = attacks.AttackTagNone
+			}
+			r.core.QueueAttackWithSnap(
+				atkCopy,
+				snap,
+				combat.NewSingleTargetHit(r.self.Key()),
+				9,
+			)
+			if columbinaExtra && i == 0 {
+				if columbinaIdx != -1 {
+					colChar := r.core.Player.ByIndex(columbinaIdx)
+					atkExtra := atkCopy
+					atkExtra.ActorIndex = columbinaIdx
+					atkExtra.AttackTag = attacks.AttackTagNone
+					var snapExtra combat.Snapshot
+					snapExtra.Stats[attributes.CR] = colChar.Stat(attributes.CR)
+					snapExtra.Stats[attributes.CD] = 0
+					snapExtra.CharLvl = colChar.Base.Level
+					r.core.QueueAttackWithSnap(
+						atkExtra,
+						snapExtra,
+						combat.NewSingleTargetHit(r.self.Key()),
+						9,
+					)
+				}
+			}
+		}
 	}
-
-	// After 3 triggers, Moondrifts fire projectiles dealing 3 instances of Geo DMG
-	if r.lcrsTriggerCount >= 3 {
-		r.lcrsTriggerCount = 0
-		r.fireMoondriftHarmony(lcrsAtk, damageResult, actorIdx)
-	}
-
 	return true
+}
+
+// calcLCrsDamageContrib: contributorごとのダメージ・index・クリティカル判定を返す
+func (r *Reactable) calcLCrsDamageContrib(lcrsContributor []int, lcrsPrecalcDamages []lcDamageRecord, lcrsPrecalcDamagesCRIT []lcDamageRecord) (damageList []float64, indexList []int, isCrit []bool) {
+	isCrit = make([]bool, len(lcrsContributor))
+	damageList = make([]float64, len(lcrsContributor))
+	indexList = make([]int, len(lcrsContributor))
+	for i, idx := range lcrsContributor {
+		char := r.core.Player.ByIndex(idx)
+		cr := char.Stat(attributes.CR)
+		randVal := r.core.Rand.Float64()
+		isCrit[i] = randVal < cr
+		var dmg float64
+		if isCrit[i] {
+			for _, rec := range lcrsPrecalcDamagesCRIT {
+				if rec.Index == idx {
+					dmg = rec.Damage
+					break
+				}
+			}
+		} else {
+			for _, rec := range lcrsPrecalcDamages {
+				if rec.Index == idx {
+					dmg = rec.Damage
+					break
+				}
+			}
+		}
+		damageList[i] = dmg
+		indexList[i] = idx
+	}
+	return
 }
 
 // calcLunarCrystallizeDmg calculates Lunar-Crystallize damage (base coefficient 0.96)
@@ -293,8 +384,21 @@ func (r *Reactable) calcLCrsDamage(
 // fireMoondriftHarmony fires 3 projectiles from Moondrifts dealing Geo DMG
 func (r *Reactable) fireMoondriftHarmony(lcrsAtk combat.AttackInfo, damageResult lcDamageResult, actorIdx int) {
 	// Fire 3 instances of Geo DMG
+	// Columbina A4: single-roll extra charge across the 3 moondrift projectiles
+	columbinaExtra := false
+	columbinaIdx := -1
+	for idx, p := range r.core.Player.Chars() {
+		if p.Base.Key == keys.Columbina {
+			columbinaIdx = idx
+			break
+		}
+	}
+	if columbinaIdx != -1 {
+		columbinaExtra = r.core.Rand.Float64() < 0.33
+	}
 	for i := 0; i < 3; i++ {
 		delay := 10 + i*5 // Stagger the hits slightly
+		idx := i
 		r.core.Tasks.Add(func() {
 			closest := r.core.Combat.ClosestEnemy(r.self.Pos())
 			if closest == nil {
@@ -306,20 +410,36 @@ func (r *Reactable) fireMoondriftHarmony(lcrsAtk combat.AttackInfo, damageResult
 			snap.Stats[attributes.CD] = char.Stat(attributes.CD)
 			snap.CharLvl = char.Base.Level
 			lcrsAtk.FlatDmg = damageResult.FinalDamage
+			// Only the first moondrift projectile should carry the reaction tag to avoid duplicate triggers
+			lcrsAtkCopy := lcrsAtk
+			if idx == 0 {
+				lcrsAtkCopy.AttackTag = attacks.AttackTagLCrsDamage
+			} else {
+				lcrsAtkCopy.AttackTag = attacks.AttackTagNone
+			}
+			lcrsAtkCopy.ActorIndex = actorIdx
 			r.core.QueueAttackWithSnap(
-				lcrsAtk,
+				lcrsAtkCopy,
 				snap,
 				combat.NewSingleTargetHit(closest.Key()),
 				0,
 			)
-			if char.StatusIsActive("law-of-new-moon") && r.core.Rand.Float64() < 0.33 {
+			if columbinaExtra && idx == 0 && columbinaIdx != -1 {
+				colChar := r.core.Player.ByIndex(columbinaIdx)
+				atkExtra := lcrsAtkCopy
+				atkExtra.ActorIndex = columbinaIdx
+				atkExtra.AttackTag = attacks.AttackTagNone
+				var snapExtra combat.Snapshot
+				snapExtra.Stats[attributes.CR] = colChar.Stat(attributes.CR)
+				snapExtra.Stats[attributes.CD] = colChar.Stat(attributes.CD)
+				snapExtra.CharLvl = colChar.Base.Level
 				r.core.QueueAttackWithSnap(
-					lcrsAtk,
-					snap,
+					atkExtra,
+					snapExtra,
 					combat.NewSingleTargetHit(closest.Key()),
 					0,
 				)
-			} // Double LCrs tick with 33% chance for extra attack if Columbina A4 is active
+			}
 		}, delay)
 	}
 

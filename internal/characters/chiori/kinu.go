@@ -1,4 +1,4 @@
-﻿package chiori
+package chiori
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -89,4 +89,3 @@ func (c *char) cleanupKinu() {
 	}
 	c.kinus = c.kinus[:n]
 }
-

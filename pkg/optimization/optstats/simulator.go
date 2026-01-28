@@ -1,4 +1,4 @@
-﻿package optstats
+package optstats
 
 import (
 	"context"
@@ -90,4 +90,3 @@ func RunWithConfigCustomStats[T any](ctx context.Context, cfg string, simcfg *in
 
 	return result, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package flowerofparadiselost
+package flowerofparadiselost
 
 import (
 	"fmt"
@@ -125,4 +125,3 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 
 	return &s, nil
 }
-

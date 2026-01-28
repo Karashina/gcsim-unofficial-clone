@@ -1,4 +1,4 @@
-﻿package ifa
+package ifa
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -115,4 +115,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.skillParticleICD = true
 	c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Anemo, c.ParticleDelay)
 }
-

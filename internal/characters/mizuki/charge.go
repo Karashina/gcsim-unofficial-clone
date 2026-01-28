@@ -1,4 +1,4 @@
-﻿package mizuki
+package mizuki
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -62,4 +62,3 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
-

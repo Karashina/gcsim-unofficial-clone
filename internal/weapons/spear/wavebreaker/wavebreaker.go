@@ -1,4 +1,4 @@
-﻿package wavebreaker
+package wavebreaker
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/weapons/common"
@@ -16,4 +16,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	w := common.NewWavebreaker(base)
 	return w.NewWeapon(c, char, p)
 }
-

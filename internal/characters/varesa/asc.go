@@ -1,4 +1,4 @@
-﻿package varesa
+package varesa
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -76,4 +76,3 @@ func (c *char) a4() {
 		return false
 	}, "varesa-a4")
 }
-

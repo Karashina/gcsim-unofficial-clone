@@ -1,4 +1,4 @@
-﻿package chasca
+package chasca
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -162,4 +162,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.skillParticleICD = true
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Anemo, c.ParticleDelay)
 }
-

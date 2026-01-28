@@ -1,4 +1,4 @@
-﻿package ifa
+package ifa
 
 import (
 	"fmt"
@@ -187,4 +187,3 @@ func (c *char) attackSkillHold(p map[string]int) action.Info {
 		State:           action.NormalAttackState,
 	}
 }
-

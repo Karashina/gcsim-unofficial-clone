@@ -1,4 +1,4 @@
-﻿package ororon
+package ororon
 
 import (
 	"slices"
@@ -203,4 +203,3 @@ func (c *char) makeA4cb() func(combat.AttackCB) {
 		c.SetTag(a4Key, 0)
 	}
 }
-

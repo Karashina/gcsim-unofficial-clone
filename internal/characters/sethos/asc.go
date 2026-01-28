@@ -1,4 +1,4 @@
-﻿package sethos
+package sethos
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -79,4 +79,3 @@ func (c *char) startA4Icd() {
 	c.AddStatus(a4IcdKey, a4Icd, true)
 	c.QueueCharTask(c.a4, a4Icd)
 }
-

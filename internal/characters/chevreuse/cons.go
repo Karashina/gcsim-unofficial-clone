@@ -1,4 +1,4 @@
-﻿package chevreuse
+package chevreuse
 
 import (
 	"fmt"
@@ -163,4 +163,3 @@ func (c *char) c6(char *character.CharWrapper) {
 	})
 	c.c6StackCounts[char.Index] = (c.c6StackCounts[char.Index] + 1) % 3
 }
-

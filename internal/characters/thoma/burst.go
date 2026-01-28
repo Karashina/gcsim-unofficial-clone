@@ -1,4 +1,4 @@
-﻿package thoma
+package thoma
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -107,4 +107,3 @@ func (c *char) summonFieryCollapse() {
 
 	c.AddStatus(burstICDKey, 60, true)
 }
-

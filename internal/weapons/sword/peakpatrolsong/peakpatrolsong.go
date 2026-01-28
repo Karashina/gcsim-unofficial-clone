@@ -1,4 +1,4 @@
-﻿package peakpatrolsong
+package peakpatrolsong
 
 import (
 	"fmt"
@@ -101,4 +101,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	return w, nil
 }
-

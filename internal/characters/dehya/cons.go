@@ -1,4 +1,4 @@
-﻿package dehya
+package dehya
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -158,4 +158,3 @@ func (c *char) c6CB() combat.AttackCBFunc {
 		c.ExtendStatus(burstKey, 0.5*60)
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package lumine
+package lumine
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/common/anemo"
@@ -30,4 +30,3 @@ func init() {
 	core.RegisterCharFunc(keys.LumineAnemo, NewChar)
 	hacks.RegisterNOSpecialChar(keys.LumineAnemo)
 }
-

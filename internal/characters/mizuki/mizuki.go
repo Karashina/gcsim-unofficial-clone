@@ -1,4 +1,4 @@
-﻿package mizuki
+package mizuki
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -69,4 +69,3 @@ func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Fail
 
 	return c.Character.ActionReady(a, p)
 }
-

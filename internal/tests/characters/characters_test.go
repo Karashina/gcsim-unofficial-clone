@@ -1,4 +1,4 @@
-﻿package characters
+package characters
 
 import (
 	"time"
@@ -70,4 +70,3 @@ func advanceCoreFrame(c *core.Core) {
 	c.F++
 	c.Tick()
 }
-

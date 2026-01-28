@@ -1,4 +1,4 @@
-﻿package citlali
+package citlali
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -187,4 +187,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, 0.3*60, false)
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Cryo, c.ParticleDelay)
 }
-

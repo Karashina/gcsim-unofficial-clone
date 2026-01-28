@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/reactions"
 )
 
@@ -247,32 +248,82 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 		}
 	}, 360)
 
-	// Calculate final LC damage and get highest CR.
-	damageResult := r.calcLCDamage(r.lcContributor, r.lcPrecalcDamages, r.lcPrecalcDamagesCRIT)
-	atk.FlatDmg = damageResult.FinalDamage
-
-	// If LC tick is not active, start it and queue attack with calculated damage.
+	// Calculate individual LC damages and queue attacks per contributor
+	damageList, indexList, isCrit := r.calcLCDamageContrib(r.lcContributor, r.lcPrecalcDamages, r.lcPrecalcDamagesCRIT)
+	// Sort damages (and their indices) in descending order for coefficient assignment
+	type damageWithIndex struct {
+		Dmg  float64
+		Idx  int
+		Crit bool
+	}
+	dwiList := make([]damageWithIndex, len(damageList))
+	for i := range damageList {
+		dwiList[i] = damageWithIndex{Dmg: damageList[i], Idx: indexList[i], Crit: isCrit[i]}
+	}
+	sort.SliceStable(dwiList, func(i, j int) bool {
+		return dwiList[i].Dmg > dwiList[j].Dmg
+	})
+	// Coefficient: 1st=1.0, 2nd=0.5, 3rd/4th=1/12, 5th+=0
+	coefs := []float64{1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0}
 	if r.lcTickSrc == -1 {
 		r.lcTickSrc = r.core.F
-		var snap combat.Snapshot
-		snap.Stats[attributes.CR] = damageResult.HighestCR
-		snap.Stats[attributes.CD] = 0 // Prevent additional Crit DMG
-		snap.CharLvl = r.core.Player.ByIndex(damageResult.HighestCRIndex).Base.Level
-		r.core.QueueAttackWithSnap(
-			atk,
-			snap,
-			combat.NewSingleTargetHit(r.self.Key()),
-			9,
-		)
-		if r.core.Player.ByIndex(a.Info.ActorIndex).StatusIsActive("law-of-new-moon") && r.core.Rand.Float64() < 0.33 {
+		// Columbina A4: single-roll for extra attack on LC creation
+		columbinaExtra := false
+		columbinaIdx := -1
+		for idx, p := range r.core.Player.Chars() {
+			if p.Base.Key == keys.Columbina {
+				columbinaIdx = idx
+				break
+			}
+		}
+		if columbinaIdx != -1 {
+			columbinaExtra = r.core.Rand.Float64() < 0.33
+		}
+		for i, dwi := range dwiList {
+			if i >= len(coefs) {
+				break
+			}
+			coef := coefs[i]
+			if coef == 0 {
+				continue
+			}
+			var snap combat.Snapshot
+			char := r.core.Player.ByIndex(dwi.Idx)
+			snap.Stats[attributes.CR] = char.Stat(attributes.CR)
+			snap.Stats[attributes.CD] = 0 // Prevent additional Crit DMG
+			snap.CharLvl = char.Base.Level
+			atkCopy := atk
+			atkCopy.ActorIndex = dwi.Idx
+			atkCopy.FlatDmg = dwi.Dmg * coef
+			if i == 0 {
+				atkCopy.AttackTag = attacks.AttackTagLCDamage
+			} else {
+				atkCopy.AttackTag = attacks.AttackTagNone
+			}
 			r.core.QueueAttackWithSnap(
-				atk,
+				atkCopy,
 				snap,
 				combat.NewSingleTargetHit(r.self.Key()),
 				9,
 			)
-		} // Double LC tick with 33% chance for extra attack if Columbina A4 is active
-
+			// Columbina A4: if rolled, apply one extra attack for the top contributor only
+			if columbinaExtra && i == 0 && columbinaIdx != -1 {
+				colChar := r.core.Player.ByIndex(columbinaIdx)
+				atkExtra := atkCopy
+				atkExtra.ActorIndex = columbinaIdx
+				atkExtra.AttackTag = attacks.AttackTagNone
+				var snapExtra combat.Snapshot
+				snapExtra.Stats[attributes.CR] = colChar.Stat(attributes.CR)
+				snapExtra.Stats[attributes.CD] = 0
+				snapExtra.CharLvl = colChar.Base.Level
+				r.core.QueueAttackWithSnap(
+					atkExtra,
+					snapExtra,
+					combat.NewSingleTargetHit(r.self.Key()),
+					9,
+				)
+			}
+		}
 		r.core.Tasks.Add(r.nextTickLC(r.core.F, a.Info.ActorIndex), 70)
 		r.core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 			n := args[0].(combat.Target)
@@ -297,6 +348,38 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 		}, fmt.Sprintf("lc-%v", r.self.Key()))
 	}
 	return true
+}
+
+// calcLCDamageContrib: contributorごとのダメージ・index・クリティカル判定を返す
+func (r *Reactable) calcLCDamageContrib(lcContributor []int, lcPrecalcDamages []lcDamageRecord, lcPrecalcDamagesCRIT []lcDamageRecord) (damageList []float64, indexList []int, isCrit []bool) {
+	isCrit = make([]bool, len(lcContributor))
+	damageList = make([]float64, len(lcContributor))
+	indexList = make([]int, len(lcContributor))
+	for i, idx := range lcContributor {
+		char := r.core.Player.ByIndex(idx)
+		cr := char.Stat(attributes.CR)
+		randVal := r.core.Rand.Float64()
+		isCrit[i] = randVal < cr
+		var dmg float64
+		if isCrit[i] {
+			for _, rec := range lcPrecalcDamagesCRIT {
+				if rec.Index == idx {
+					dmg = rec.Damage
+					break
+				}
+			}
+		} else {
+			for _, rec := range lcPrecalcDamages {
+				if rec.Index == idx {
+					dmg = rec.Damage
+					break
+				}
+			}
+		}
+		damageList[i] = dmg
+		indexList[i] = idx
+	}
+	return
 }
 
 // calcLCDamage calculates the final LC damage based on contributors, crits, and coefficients.
@@ -439,31 +522,77 @@ func (r *Reactable) nextTickLC(src int, lcActorIndex int) func() {
 			r.core.Tasks.Add(r.nextTickLC(src, lcActorIndex), 122+r.core.Rand.Intn(9))
 			return
 		}
-		// Calculate final LC damage using the latest LC state.
-		damageResult := r.calcLCDamage(r.lcContributor, r.lcPrecalcDamages, r.lcPrecalcDamagesCRIT)
-		atk.FlatDmg = damageResult.FinalDamage
-
-		// Set ActorIndex to the character who triggered LC (the original attacker).
-		atk.ActorIndex = lcActorIndex
-
-		var snap combat.Snapshot
-		snap.Stats[attributes.CR] = damageResult.HighestCR
-		snap.Stats[attributes.CD] = 0 // Prevent additional Crit DMG
-		snap.CharLvl = r.core.Player.ByIndex(damageResult.HighestCRIndex).Base.Level
-		r.core.QueueAttackWithSnap(
-			atk,
-			snap,
-			combat.NewSingleTargetHit(closest.Key()),
-			9,
-		)
-		if r.core.Player.ByIndex(lcActorIndex).StatusIsActive("law-of-new-moon") && r.core.Rand.Float64() < 0.33 {
+		// Calculate individual LC damages and queue attacks per contributor (tick)
+		damageList, indexList, isCrit := r.calcLCDamageContrib(r.lcContributor, r.lcPrecalcDamages, r.lcPrecalcDamagesCRIT)
+		type damageWithIndex struct {
+			Dmg  float64
+			Idx  int
+			Crit bool
+		}
+		dwiList := make([]damageWithIndex, len(damageList))
+		for i := range damageList {
+			dwiList[i] = damageWithIndex{Dmg: damageList[i], Idx: indexList[i], Crit: isCrit[i]}
+		}
+		sort.SliceStable(dwiList, func(i, j int) bool {
+			return dwiList[i].Dmg > dwiList[j].Dmg
+		})
+		coefs := []float64{1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0}
+		// Columbina A4: single-roll for extra attack on LC tick
+		columbinaExtra := false
+		columbinaIdx := -1
+		for idx, p := range r.core.Player.Chars() {
+			if p.Base.Key == keys.Columbina {
+				columbinaIdx = idx
+				break
+			}
+		}
+		if columbinaIdx != -1 {
+			columbinaExtra = r.core.Rand.Float64() < 0.33
+		}
+		for i, dwi := range dwiList {
+			if i >= len(coefs) {
+				break
+			}
+			coef := coefs[i]
+			if coef == 0 {
+				continue
+			}
+			var snap combat.Snapshot
+			char := r.core.Player.ByIndex(dwi.Idx)
+			snap.Stats[attributes.CR] = char.Stat(attributes.CR)
+			snap.Stats[attributes.CD] = 0
+			snap.CharLvl = char.Base.Level
+			atkCopy := atk
+			atkCopy.ActorIndex = dwi.Idx
+			atkCopy.FlatDmg = dwi.Dmg * coef
+			if i == 0 {
+				atkCopy.AttackTag = attacks.AttackTagLCDamage
+			} else {
+				atkCopy.AttackTag = attacks.AttackTagNone
+			}
 			r.core.QueueAttackWithSnap(
-				atk,
+				atkCopy,
 				snap,
 				combat.NewSingleTargetHit(closest.Key()),
 				9,
 			)
-		} // Double LC tick with 33% chance for extra attack if Columbina A4 is active
+			if columbinaExtra && i == 0 && columbinaIdx != -1 {
+				colChar := r.core.Player.ByIndex(columbinaIdx)
+				atkExtra := atkCopy
+				atkExtra.ActorIndex = columbinaIdx
+				atkExtra.AttackTag = attacks.AttackTagNone
+				var snapExtra combat.Snapshot
+				snapExtra.Stats[attributes.CR] = colChar.Stat(attributes.CR)
+				snapExtra.Stats[attributes.CD] = 0
+				snapExtra.CharLvl = colChar.Base.Level
+				r.core.QueueAttackWithSnap(
+					atkExtra,
+					snapExtra,
+					combat.NewSingleTargetHit(closest.Key()),
+					9,
+				)
+			}
+		}
 		// Schedule the next LC tick.
 		r.core.Tasks.Add(r.nextTickLC(src, lcActorIndex), 122+r.core.Rand.Intn(9))
 	}

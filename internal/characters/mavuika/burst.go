@@ -1,4 +1,4 @@
-﻿package mavuika
+package mavuika
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -145,4 +145,3 @@ func (c *char) burstInit() {
 		return false
 	}, "mavuika-fighting-spirit-na")
 }
-

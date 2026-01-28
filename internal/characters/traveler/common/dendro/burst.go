@@ -1,4 +1,4 @@
-﻿package dendro
+package dendro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -60,4 +60,3 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package wriothesley
+package wriothesley
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -203,4 +203,3 @@ func (c *char) addC6Buff(snap *combat.Snapshot) {
 	snap.Stats[attributes.CD] += cd
 	c.Core.Log.NewEvent("adding c6", glog.LogCharacterEvent, c.Index).Write("cr", cr).Write("cd", cd)
 }
-

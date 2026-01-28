@@ -1,4 +1,4 @@
-﻿package alley
+package alley
 
 import (
 	"fmt"
@@ -113,4 +113,3 @@ func (w *Weapon) incStack(c *character.CharWrapper, src int) func() {
 		}
 	}
 }
-

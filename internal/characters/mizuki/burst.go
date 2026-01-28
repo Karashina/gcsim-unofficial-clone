@@ -1,4 +1,4 @@
-﻿package mizuki
+package mizuki
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -138,4 +138,3 @@ func (c *char) calculateSnackSpawnLocation() geometry.Point {
 	}
 	return finalPosition
 }
-

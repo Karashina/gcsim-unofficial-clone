@@ -1,4 +1,4 @@
-﻿package electro
+package electro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -67,4 +67,3 @@ func (c *Traveler) c6Energy() combat.AttackCBFunc {
 		}
 	}
 }
-

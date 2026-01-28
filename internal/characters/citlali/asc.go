@@ -1,4 +1,4 @@
-﻿package citlali
+package citlali
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -79,4 +79,3 @@ func (c *char) a4Dmg(abil string) float64 {
 	}
 	return 0
 }
-

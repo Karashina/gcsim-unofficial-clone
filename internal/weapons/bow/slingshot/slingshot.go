@@ -1,4 +1,4 @@
-﻿package slingshot
+package slingshot
 
 import (
 	"slices"
@@ -62,4 +62,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	return w, nil
 }
-

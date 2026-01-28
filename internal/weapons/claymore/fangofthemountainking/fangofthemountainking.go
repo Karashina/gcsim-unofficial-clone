@@ -1,4 +1,4 @@
-﻿package fangofthemountainking
+package fangofthemountainking
 
 import (
 	"fmt"
@@ -117,4 +117,3 @@ func (w *Weapon) addStacks(num int) {
 		},
 	})
 }
-

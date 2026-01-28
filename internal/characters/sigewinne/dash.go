@@ -1,4 +1,4 @@
-﻿package sigewinne
+package sigewinne
 
 import (
 	"fmt"
@@ -33,4 +33,3 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 
 	return c.Character.Dash(p)
 }
-

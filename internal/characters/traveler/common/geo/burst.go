@@ -1,4 +1,4 @@
-﻿package geo
+package geo
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -168,4 +168,3 @@ func (w *wall) IsLimited() bool                  { return true }
 func (w *wall) Count() int                       { return 1 }
 func (w *wall) Direction() geometry.Point        { return w.dir }
 func (w *wall) Pos() geometry.Point              { return w.pos }
-

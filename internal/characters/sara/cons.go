@@ -1,4 +1,4 @@
-﻿package sara
+package sara
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -35,4 +35,3 @@ func (c *char) c6(char *character.CharWrapper) {
 		},
 	})
 }
-

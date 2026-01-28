@@ -1,4 +1,4 @@
-﻿package yaemiko
+package yaemiko
 
 import (
 	"errors"
@@ -156,4 +156,3 @@ func (c *char) plungeCollision(delay int) {
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.5), delay, delay)
 }
-

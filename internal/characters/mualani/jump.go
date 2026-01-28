@@ -1,4 +1,4 @@
-﻿package mualani
+package mualani
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -34,4 +34,3 @@ func (c *char) Jump(p map[string]int) (action.Info, error) {
 	}
 	return c.Character.Jump(p)
 }
-

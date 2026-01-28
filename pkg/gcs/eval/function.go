@@ -1,4 +1,4 @@
-﻿package eval
+package eval
 
 import (
 	"fmt"
@@ -43,4 +43,3 @@ func (e *Eval) validateArguments(c *ast.CallExpr, env *Env, objTypes ...ObjTyp) 
 	}
 	return objs, nil
 }
-

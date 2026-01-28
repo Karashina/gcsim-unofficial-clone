@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -216,4 +216,3 @@ func (r *Reactable) TrySwirlFrozen(a *combat.AttackEvent) bool {
 	r.checkFreeze()
 	return true
 }
-

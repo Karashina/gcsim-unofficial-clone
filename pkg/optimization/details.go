@@ -1,4 +1,4 @@
-﻿package optimization
+package optimization
 
 import (
 	"context"
@@ -135,4 +135,3 @@ func (stats *SubstatOptimizerDetails) cloneStatsWithFixedAllocations(fixedSubsta
 		}
 	}
 }
-

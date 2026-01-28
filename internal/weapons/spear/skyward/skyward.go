@@ -1,4 +1,4 @@
-﻿package skyward
+package skyward
 
 import (
 	"fmt"
@@ -88,4 +88,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("skyward-spine-%v", char.Base.Key.String()))
 	return w, nil
 }
-

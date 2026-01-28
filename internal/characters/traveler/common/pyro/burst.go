@@ -1,4 +1,4 @@
-﻿package pyro
+package pyro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -76,4 +76,3 @@ func (c *Traveler) nightsoulGainFunc(count int) func() {
 		}
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package amenoma
+package amenoma
 
 import (
 	"fmt"
@@ -80,4 +80,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("amenoma-burst-%v", char.Base.Key.String()))
 	return w, nil
 }
-

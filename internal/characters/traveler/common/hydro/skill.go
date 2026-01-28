@@ -1,4 +1,4 @@
-﻿package hydro
+package hydro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -334,4 +334,3 @@ func (c *Traveler) skillLosingHP(ai *combat.AttackInfo) {
 	}
 	c.AddStatus(skillLosingHPICDKey, 0.9*60, true)
 }
-

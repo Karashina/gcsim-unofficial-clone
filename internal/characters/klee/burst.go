@@ -1,4 +1,4 @@
-﻿package klee
+package klee
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -148,4 +148,3 @@ func (c *char) onExitField() {
 		return false
 	}, "klee-exit")
 }
-

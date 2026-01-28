@@ -1,4 +1,4 @@
-﻿package hydro
+package hydro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -90,4 +90,3 @@ func (c *Traveler) c6() {
 		Bonus:   c.Stat(attributes.Heal),
 	})
 }
-

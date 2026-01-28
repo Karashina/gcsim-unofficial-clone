@@ -1,4 +1,4 @@
-﻿package ayato
+package ayato
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -95,4 +95,3 @@ func (c *char) makeC6CB() combat.AttackCBFunc {
 		}
 	}
 }
-

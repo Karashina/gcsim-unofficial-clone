@@ -1,4 +1,4 @@
-﻿package chiori
+package chiori
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -183,4 +183,3 @@ func (c *char) c6NAIncrease(ai *combat.AttackInfo, snap *combat.Snapshot) {
 	ai.FlatDmg = snap.Stats.TotalDEF()
 	ai.FlatDmg *= 2.35
 }
-

@@ -1,4 +1,4 @@
-﻿package deathmatch
+package deathmatch
 
 import (
 	"fmt"
@@ -84,4 +84,3 @@ func (w *Weapon) enemyCheck(char *character.CharWrapper, c *core.Core, src int) 
 		}
 	}
 }
-

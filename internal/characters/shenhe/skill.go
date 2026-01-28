@@ -1,4 +1,4 @@
-﻿package shenhe
+package shenhe
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -264,4 +264,3 @@ func (c *char) quillDamageMod() {
 		return false
 	}, "shenhe-quill-hook")
 }
-

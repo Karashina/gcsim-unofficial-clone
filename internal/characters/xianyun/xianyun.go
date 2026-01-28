@@ -1,4 +1,4 @@
-﻿package xianyun
+package xianyun
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -83,4 +83,3 @@ func (c *char) Condition(fields []string) (any, error) {
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	return 10
 }
-

@@ -1,4 +1,4 @@
-﻿package tartaglia
+package tartaglia
 
 import (
 	"fmt"
@@ -269,4 +269,3 @@ func (c *char) onDefeatTargets() {
 		return false
 	}, "tartaglia-on-enemy-death")
 }
-

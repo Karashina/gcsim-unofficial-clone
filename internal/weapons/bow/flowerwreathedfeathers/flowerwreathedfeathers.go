@@ -1,4 +1,4 @@
-﻿package flowerwreathedfeathers
+package flowerwreathedfeathers
 
 import (
 	"fmt"
@@ -132,4 +132,3 @@ func (w *Weapon) clearBuff(src int) func() {
 			Write("stacks", w.stacks)
 	}
 }
-

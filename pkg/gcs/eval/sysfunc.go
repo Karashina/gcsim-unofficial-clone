@@ -1,4 +1,4 @@
-﻿package eval
+package eval
 
 import (
 	"errors"
@@ -473,4 +473,3 @@ func (e *Eval) executeAction(c *ast.CallExpr, env *Env) (Obj, error) {
 
 	return &null{}, nil
 }
-

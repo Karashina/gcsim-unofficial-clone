@@ -1,4 +1,4 @@
-﻿package venti
+package venti
 
 import (
 	"errors"
@@ -55,4 +55,3 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 		State:           action.PlungeAttackState,
 	}, nil
 }
-

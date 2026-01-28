@@ -1,4 +1,4 @@
-﻿package optimization
+package optimization
 
 import (
 	"fmt"
@@ -116,4 +116,3 @@ func (stats *SubstatOptimizerDetails) optimizeNonErSubstatsForChar(
 	stats.optimizer.logger.Debug(char.Base.Key, " has relevant substats:", stats.charRelevantSubstats[idxChar])
 	return opDebug
 }
-

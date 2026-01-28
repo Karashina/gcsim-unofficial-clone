@@ -1,4 +1,4 @@
-﻿package arlecchino
+package arlecchino
 
 import (
 	"fmt"
@@ -88,4 +88,3 @@ func (c *char) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
 	}
 	return 0
 }
-

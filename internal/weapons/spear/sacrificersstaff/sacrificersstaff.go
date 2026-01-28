@@ -1,4 +1,4 @@
-﻿package sacrificersstaff
+package sacrificersstaff
 
 import (
 	"fmt"
@@ -85,4 +85,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	return w, nil
 }
-

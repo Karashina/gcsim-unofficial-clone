@@ -1,4 +1,4 @@
-﻿package player
+package player
 
 import (
 	"errors"
@@ -212,4 +212,3 @@ func (h *Handler) useAbility(
 		Write("swap_cd_post", h.SwapCD)
 	return nil
 }
-

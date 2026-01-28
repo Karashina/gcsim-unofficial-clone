@@ -1,4 +1,4 @@
-﻿package core
+package core
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -91,4 +91,3 @@ func (c *Core) SetupOnNormalHitEnergy() {
 		return false
 	}, "random-energy-restore-on-hit-swap")
 }
-

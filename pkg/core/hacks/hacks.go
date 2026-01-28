@@ -1,4 +1,4 @@
-﻿package hacks
+package hacks
 
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 
@@ -11,4 +11,3 @@ func RegisterNOSpecialChar(k keys.Char) {
 func NOCharIsSpecial(k keys.Char) bool {
 	return noblesseSpecialChars[k]
 }
-

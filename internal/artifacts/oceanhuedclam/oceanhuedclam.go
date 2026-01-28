@@ -1,4 +1,4 @@
-﻿package oceanhuedclam
+package oceanhuedclam
 
 import (
 	"fmt"
@@ -145,4 +145,3 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 
 	return &s, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package wanderer
+package wanderer
 
 import (
 	"errors"
@@ -87,4 +87,3 @@ func (c *char) plungeCollision(fullDelay int) {
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.5), fullDelay, fullDelay)
 }
-

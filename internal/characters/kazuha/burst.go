@@ -1,4 +1,4 @@
-﻿package kazuha
+package kazuha
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -132,4 +132,3 @@ func (c *char) absorbCheckQ(src, count, maxcount int) func() {
 		c.Core.Tasks.Add(c.absorbCheckQ(src, count+1, maxcount), 18)
 	}
 }
-

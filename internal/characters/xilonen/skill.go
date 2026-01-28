@@ -1,4 +1,4 @@
-﻿package xilonen
+package xilonen
 
 import (
 	"fmt"
@@ -221,4 +221,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, 0.5*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Geo, c.ParticleDelay)
 }
-

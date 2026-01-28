@@ -1,4 +1,4 @@
-﻿package yaoyao
+package yaoyao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -97,4 +97,3 @@ func (yg *yuegui) c6(target geometry.Point) {
 	yg.Core.Tasks.Add(yg.c.heal(c6MegaRadishAoE, hi), c6TravelDelay)
 	yg.Core.QueueAttackWithSnap(ai, yg.snap, c6MegaRadishAoE, c6TravelDelay)
 }
-

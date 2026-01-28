@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"testing"
@@ -108,4 +108,3 @@ func TestPyroFrozenCryoMelt(t *testing.T) {
 		t.Error("expecting target to not contain any remaining hydro or pyro aura")
 	}
 }
-

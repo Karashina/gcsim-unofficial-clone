@@ -1,4 +1,4 @@
-﻿package moonweaversdawn
+package moonweaversdawn
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"

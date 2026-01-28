@@ -1,4 +1,4 @@
-﻿// package animation provides a simple way of tracking the current
+// package animation provides a simple way of tracking the current
 // animation state at any given frame, as well as if the current frame
 // is in animation lock or not
 package animation
@@ -125,4 +125,3 @@ func (h *AnimationHandler) logEnded() {
 		h.char,
 	)
 }
-

@@ -1,4 +1,4 @@
-﻿package nighttimewhispersintheechoingwoods
+package nighttimewhispersintheechoingwoods
 
 import (
 	"fmt"
@@ -128,4 +128,3 @@ func (s *Set) OnSkill() func(args ...interface{}) bool {
 		return false
 	}
 }
-

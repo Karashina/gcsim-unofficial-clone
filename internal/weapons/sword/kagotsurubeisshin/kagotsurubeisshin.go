@@ -1,4 +1,4 @@
-﻿package kagotsurubeisshin
+package kagotsurubeisshin
 
 import (
 	"fmt"
@@ -82,4 +82,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("kagotsurube-isshin-%v", char.Base.Key.String()))
 	return w, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package anemo
+package anemo
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -80,4 +80,3 @@ func (c *Traveler) a4() {
 		return false
 	}, "traveleranemo-a4")
 }
-

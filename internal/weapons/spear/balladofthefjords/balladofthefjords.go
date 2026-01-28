@@ -1,4 +1,4 @@
-﻿package balladofthefjords
+package balladofthefjords
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -55,4 +55,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}
 	return w, nil
 }
-

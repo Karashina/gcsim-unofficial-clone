@@ -1,4 +1,4 @@
-﻿package favonius
+package favonius
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/weapons/common"
@@ -16,4 +16,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	f := common.NewFavonius(base)
 	return f.NewWeapon(c, char, p)
 }
-

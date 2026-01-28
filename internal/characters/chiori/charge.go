@@ -1,4 +1,4 @@
-﻿package chiori
+package chiori
 
 import (
 	"fmt"
@@ -62,4 +62,3 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
-

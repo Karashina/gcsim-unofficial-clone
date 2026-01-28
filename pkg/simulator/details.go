@@ -1,4 +1,4 @@
-﻿package simulator
+package simulator
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
@@ -22,4 +22,3 @@ func GenerateCharacterDetails(cfg *info.ActionList) ([]*model.Character, error) 
 
 	return sim.CharacterDetails(), nil
 }
-

@@ -1,4 +1,4 @@
-﻿package yaemiko
+package yaemiko
 
 import (
 	"log"
@@ -184,4 +184,3 @@ func (c *char) sakuraLevelCheck() int {
 	}
 	return count
 }
-

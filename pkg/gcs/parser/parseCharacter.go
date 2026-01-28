@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"errors"
@@ -389,4 +389,3 @@ func (p *Parser) acceptLevelReturnBaseMax() (int, int, error) {
 	}
 	return base, maxlvl, nil
 }
-

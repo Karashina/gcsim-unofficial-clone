@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -46,4 +46,3 @@ func (r *Reactable) TryVaporize(a *combat.AttackEvent) bool {
 	r.core.Events.Emit(event.OnVaporize, r.self, a)
 	return true
 }
-

@@ -1,4 +1,4 @@
-﻿package common
+package common
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -23,4 +23,3 @@ func NewNoEffect(data *model.WeaponData) *NoEffect {
 func (n *NoEffect) NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	return n, nil
 }
-

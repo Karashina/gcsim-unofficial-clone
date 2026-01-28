@@ -1,4 +1,4 @@
-﻿package kazuha
+package kazuha
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -177,4 +177,3 @@ func (c *char) skillHold(glide int) action.Info {
 		State:           action.SkillState,
 	}
 }
-

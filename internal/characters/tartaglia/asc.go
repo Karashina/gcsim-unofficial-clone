@@ -1,4 +1,4 @@
-﻿package tartaglia
+package tartaglia
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
@@ -29,4 +29,3 @@ func (c *char) makeA4CB() combat.AttackCBFunc {
 		}
 	}
 }
-

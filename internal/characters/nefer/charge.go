@@ -1,4 +1,4 @@
-﻿package nefer
+package nefer
 
 import (
 	"math"
@@ -295,4 +295,3 @@ func (c *char) absorbSeeds(radius float64) {
 		})
 	}
 }
-

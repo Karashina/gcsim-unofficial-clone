@@ -1,4 +1,4 @@
-﻿package xiao
+package xiao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -95,4 +95,3 @@ func (c *char) makeParticleCB() combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Anemo, c.ParticleDelay)
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package aino
+package aino
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -88,4 +88,3 @@ func (c *char) burstTick(src int, radius float64) func() {
 		)
 	}
 }
-

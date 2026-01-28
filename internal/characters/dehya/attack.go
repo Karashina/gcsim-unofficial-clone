@@ -1,4 +1,4 @@
-﻿package dehya
+package dehya
 
 import (
 	"fmt"
@@ -77,4 +77,3 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 }
 
 // TODO: charged attack
-

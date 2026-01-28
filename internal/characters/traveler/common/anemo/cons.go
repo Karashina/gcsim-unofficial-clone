@@ -1,4 +1,4 @@
-﻿package anemo
+package anemo
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -34,4 +34,3 @@ func c6cb(ele attributes.Element) func(a combat.AttackCB) {
 		})
 	}
 }
-

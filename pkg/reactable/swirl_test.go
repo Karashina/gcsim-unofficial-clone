@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"fmt"
@@ -194,4 +194,3 @@ func TestSwirl50to10(t *testing.T) {
 		t.Errorf("expected durability to be %v, got %v", expected, trg[1].last.Info.Durability)
 	}
 }
-

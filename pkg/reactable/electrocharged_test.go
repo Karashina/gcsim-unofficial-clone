@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"testing"
@@ -37,4 +37,3 @@ func TestEC(t *testing.T) {
 		t.Errorf("expecting 2 ticks, got %v", count)
 	}
 }
-

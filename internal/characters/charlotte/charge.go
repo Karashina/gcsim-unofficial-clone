@@ -1,4 +1,4 @@
-﻿package charlotte
+package charlotte
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -105,4 +105,3 @@ func (c *char) arkhe(pos geometry.Point) func() {
 		)
 	}
 }
-

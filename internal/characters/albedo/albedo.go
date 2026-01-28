@@ -1,4 +1,4 @@
-﻿package albedo
+package albedo
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"

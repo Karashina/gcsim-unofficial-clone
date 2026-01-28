@@ -1,4 +1,4 @@
-﻿package sigewinne
+package sigewinne
 
 import (
 	"fmt"
@@ -164,4 +164,3 @@ func getBurstHitmark(tick int) int {
 		return 25
 	}
 }
-

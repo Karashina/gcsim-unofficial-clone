@@ -1,4 +1,4 @@
-﻿package kachina
+package kachina
 
 import (
 	"math"
@@ -159,4 +159,3 @@ func (c *char) c6() {
 	}, "kachina-shield-broken")
 
 }
-

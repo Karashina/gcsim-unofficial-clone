@@ -1,4 +1,4 @@
-﻿package serenityscall
+package serenityscall
 
 import (
 	"fmt"
@@ -61,4 +61,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	return w, nil
 }
-

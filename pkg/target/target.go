@@ -1,4 +1,4 @@
-﻿package target
+package target
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -18,16 +18,13 @@ type Target struct {
 	Tags            map[string]int
 	CollidableTypes [targets.TargettableTypeCount]bool
 	OnCollision     func(combat.Target)
-
-	Alive bool
-
+	Alive           bool
 	// icd related
 	icdTagOnTimer       [MaxTeamSize][attacks.ICDTagLength]bool
 	icdTagCounter       [MaxTeamSize][attacks.ICDTagLength]int
 	icdDamageTagOnTimer [MaxTeamSize][attacks.ICDTagLength]bool
 	icdDamageTagCounter [MaxTeamSize][attacks.ICDTagLength]int
-
-	direction geometry.Point
+	direction           geometry.Point
 }
 
 func New(core *core.Core, p geometry.Point, r float64) *Target {
@@ -38,10 +35,8 @@ func New(core *core.Core, p geometry.Point, r float64) *Target {
 	t.direction = geometry.DefaultDirection()
 	t.Tags = make(map[string]int)
 	t.Alive = true
-
 	return t
 }
-
 func (t *Target) Collidable() bool                              { return t.OnCollision != nil }
 func (t *Target) CollidableWith(x targets.TargettableType) bool { return t.CollidableTypes[x] }
 func (t *Target) CollidedWith(x combat.Target) {
@@ -49,7 +44,6 @@ func (t *Target) CollidedWith(x combat.Target) {
 		t.OnCollision(x)
 	}
 }
-
 func (t *Target) Key() targets.TargetKey     { return t.key }
 func (t *Target) SetKey(x targets.TargetKey) { t.key = x }
 func (t *Target) Shape() geometry.Shape      { return &t.Hitbox }
@@ -60,15 +54,12 @@ func (t *Target) IsAlive() bool              { return t.Alive }
 func (t *Target) SetTag(key string, val int) {
 	t.Tags[key] = val
 }
-
 func (t *Target) GetTag(key string) int {
 	return t.Tags[key]
 }
-
 func (t *Target) RemoveTag(key string) {
 	delete(t.Tags, key)
 }
-
 func (t *Target) WillCollide(s geometry.Shape) bool {
 	if !t.Alive {
 		return false
@@ -82,7 +73,6 @@ func (t *Target) WillCollide(s geometry.Shape) bool {
 		return false
 	}
 }
-
 func (t *Target) AttackWillLand(a combat.AttackPattern) (bool, string) {
 	// shape shouldn't be nil; panic here
 	if a.Shape == nil {
@@ -101,7 +91,6 @@ func (t *Target) AttackWillLand(a combat.AttackPattern) (bool, string) {
 			return false, "no self harm"
 		}
 	}
-
 	// check if shape matches
 	switch v := a.Shape.(type) {
 	case *geometry.Circle:
@@ -115,11 +104,9 @@ func (t *Target) AttackWillLand(a combat.AttackPattern) (bool, string) {
 		return false, "unknown shape"
 	}
 }
-
 func (t *Target) IsWithinArea(a combat.AttackPattern) bool {
 	return a.Shape.PointInShape(t.Pos())
 }
-
 func (t *Target) Direction() geometry.Point { return t.direction }
 func (t *Target) SetDirection(trg geometry.Point) {
 	src := t.Pos()
@@ -158,4 +145,3 @@ func (t *Target) CalcTempDirection(trg geometry.Point) geometry.Point {
 		Write("temporary direction", direction)
 	return direction
 }
-

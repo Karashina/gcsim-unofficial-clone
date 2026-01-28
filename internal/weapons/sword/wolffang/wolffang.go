@@ -1,4 +1,4 @@
-﻿package wolffang
+package wolffang
 
 import (
 	"fmt"
@@ -111,4 +111,3 @@ func requiredTag(tag attacks.AttackTag, list ...attacks.AttackTag) bool {
 	}
 	return false
 }
-

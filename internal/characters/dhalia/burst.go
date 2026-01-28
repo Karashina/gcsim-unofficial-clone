@@ -1,4 +1,4 @@
-﻿package dhalia
+package dhalia
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -100,4 +100,3 @@ func (c *char) generateFavonianFavor() {
 		}, "dhalia-ff-frozen")
 	}
 }
-

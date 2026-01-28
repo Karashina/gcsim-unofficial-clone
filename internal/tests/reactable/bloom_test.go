@@ -1,4 +1,4 @@
-﻿package reactable_test
+package reactable_test
 
 import (
 	"math"
@@ -216,4 +216,3 @@ func TestBloomOldestDeleted(t *testing.T) {
 		t.Errorf("expecting oldest gadget to be from frame %v, got %v", reactable.DendroCoreDelay+3, og.Src())
 	}
 }
-

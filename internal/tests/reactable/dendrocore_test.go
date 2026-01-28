@@ -1,4 +1,4 @@
-﻿package reactable_test
+package reactable_test
 
 import (
 	"log"
@@ -97,4 +97,3 @@ func (f *fakeCore) SetDirectionToClosestEnemy()                            {}
 func (f *fakeCore) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
-

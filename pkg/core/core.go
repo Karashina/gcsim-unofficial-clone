@@ -1,4 +1,4 @@
-﻿// Package core provides core functionality for a simulation:
+// Package core provides core functionality for a simulation:
 //   - combat
 //   - tasks
 //   - event handling
@@ -230,4 +230,3 @@ func (c *Core) AddChar(p info.CharacterProfile) (int, error) {
 
 	return index, nil
 }
-

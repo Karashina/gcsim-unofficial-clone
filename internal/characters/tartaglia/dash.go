@@ -1,4 +1,4 @@
-﻿package tartaglia
+package tartaglia
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -21,4 +21,3 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 		State:           action.DashState,
 	}, nil
 }
-

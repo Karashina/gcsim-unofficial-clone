@@ -28,7 +28,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	// Initial burst damage (AoE Hydro DMG)
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "Moonlit Melancholy",
+		Abil:       "Moonlit Melancholy (Q)",
 		AttackTag:  attacks.AttackTagElementalBurst,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,

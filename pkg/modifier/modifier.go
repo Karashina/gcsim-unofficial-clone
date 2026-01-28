@@ -1,4 +1,4 @@
-﻿// package modifier provides a universal way of handling a slice
+// package modifier provides a universal way of handling a slice
 // of modifiers
 package modifier
 
@@ -155,4 +155,3 @@ func LogAdd[K Mod](prefix string, index int, mod K, logger glog.Logger, overwrot
 	evt.SetEnded(mod.Expiry())
 	mod.SetEvent(evt)
 }
-

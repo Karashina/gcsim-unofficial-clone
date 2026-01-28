@@ -1,4 +1,4 @@
-﻿package electro
+package electro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -154,4 +154,3 @@ func (c *Traveler) fallingThunderEnergy() combat.AttackCBFunc {
 		active.AddEnergy("travelerelectro-fallingthunder", burstRegen[c.TalentLvlBurst()])
 	}
 }
-

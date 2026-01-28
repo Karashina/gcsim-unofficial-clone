@@ -1,4 +1,4 @@
-﻿package dori
+package dori
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -85,4 +85,3 @@ func (c *char) WeaponReactionHandler() {
 		return false
 	}, "dori-infusion")
 }
-

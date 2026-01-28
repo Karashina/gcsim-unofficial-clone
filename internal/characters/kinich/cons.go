@@ -1,4 +1,4 @@
-﻿package kinich
+package kinich
 
 import (
 	"slices"
@@ -98,4 +98,3 @@ func (c *char) c6(ai combat.AttackInfo, s *combat.Snapshot, radius float64, targ
 	ap := combat.NewCircleHitOnTarget(next, nil, radius)
 	c.Core.QueueAttackWithSnap(ai, *s, ap, travel, c.particleCB, c.a1CB, c.c2ResShredCB)
 }
-

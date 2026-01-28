@@ -1,4 +1,4 @@
-﻿package stats
+package stats
 
 import (
 	"sync"
@@ -34,4 +34,3 @@ func Register(cfg Config) {
 func Collectors() map[string]Config {
 	return collectors
 }
-

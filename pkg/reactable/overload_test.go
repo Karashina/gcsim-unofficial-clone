@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"testing"
@@ -22,4 +22,3 @@ func TestOverload(t *testing.T) {
 		t.Errorf("expecting overload, got %v", trg[0].last.Info.Abil)
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package albedo
+package albedo
 
 import (
 	"errors"
@@ -161,4 +161,3 @@ func (c *char) plungeCollision(delay int) {
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 1), delay, delay)
 }
-

@@ -1,4 +1,4 @@
-﻿package sigewinne
+package sigewinne
 
 import (
 	"fmt"
@@ -317,4 +317,3 @@ func (c *char) generateSkillSnapshot() {
 	}
 	c.skillSnapshot = c.Snapshot(&c.skillAttackInfo)
 }
-

@@ -1,4 +1,4 @@
-﻿package ineffa
+package ineffa
 
 import (
 	"math"
@@ -109,4 +109,3 @@ func (c *char) skillTick(src int) func() {
 		)
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package kachina
+package kachina
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/construct"
@@ -23,4 +23,3 @@ func (s *TurboTwirly) IsLimited() bool                  { return true }
 func (s *TurboTwirly) Count() int                       { return 1 }
 func (s *TurboTwirly) Direction() geometry.Point        { return s.dir }
 func (s *TurboTwirly) Pos() geometry.Point              { return s.pos }
-

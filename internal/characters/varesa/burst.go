@@ -1,4 +1,4 @@
-﻿package varesa
+package varesa
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -136,4 +136,3 @@ func (c *char) volcanicKablam() action.Info {
 		},
 	}
 }
-

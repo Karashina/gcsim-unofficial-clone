@@ -1,4 +1,4 @@
-﻿package energy
+package energy
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -55,4 +55,3 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 		result.Characters[c].EnergyEvents = b.events[c]
 	}
 }
-

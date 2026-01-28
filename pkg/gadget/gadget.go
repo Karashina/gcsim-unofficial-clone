@@ -1,4 +1,4 @@
-﻿// gadget provides a skeleton implementation for gadgets and is
+// gadget provides a skeleton implementation for gadgets and is
 // basically a thin wrapper around target.Target and adds some
 // helper functionalities
 package gadget
@@ -67,4 +67,3 @@ func (g *Gadget) Tick() {
 		}
 	}
 }
-

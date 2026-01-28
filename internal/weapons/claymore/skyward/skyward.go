@@ -1,4 +1,4 @@
-﻿package skyward
+package skyward
 
 import (
 	"fmt"
@@ -89,4 +89,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("skyward-pride-%v", char.Base.Key.String()))
 	return w, nil
 }
-

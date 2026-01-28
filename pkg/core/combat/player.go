@@ -1,4 +1,4 @@
-﻿package combat
+package combat
 
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 
@@ -14,4 +14,3 @@ func (h *Handler) Player() Target {
 func (h *Handler) SetPlayerPos(p geometry.Point) {
 	h.player.SetPos(p)
 }
-

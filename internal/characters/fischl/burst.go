@@ -1,4 +1,4 @@
-﻿package fischl
+package fischl
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -109,4 +109,3 @@ func (c *char) burstOzSpawn(src, ozSpawn, firstTick int, c4HealFunc func()) func
 		}
 	}
 }
-

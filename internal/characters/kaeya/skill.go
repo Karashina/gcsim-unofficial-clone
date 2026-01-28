@@ -1,4 +1,4 @@
-﻿package kaeya
+package kaeya
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -116,4 +116,3 @@ func (c *char) makeA4ParticleCB() combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Cryo, c.ParticleDelay)
 	}
 }
-

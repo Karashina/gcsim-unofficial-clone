@@ -1,4 +1,4 @@
-﻿package wanderer
+package wanderer
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -92,4 +92,3 @@ func (c *char) makeC6Callback() func(cb combat.AttackCB) {
 		)
 	}
 }
-

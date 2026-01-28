@@ -1,4 +1,4 @@
-﻿package navia
+package navia
 
 import (
 	"fmt"
@@ -350,4 +350,3 @@ func (c *char) pullCrystals(firingTimeF, i int) {
 		}
 	}, i)
 }
-

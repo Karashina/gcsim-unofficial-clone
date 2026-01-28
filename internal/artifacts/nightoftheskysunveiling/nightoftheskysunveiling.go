@@ -1,4 +1,4 @@
-﻿package nightoftheskysunveiling
+package nightoftheskysunveiling
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -110,4 +110,3 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 	}
 	return &s, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package raiden
+package raiden
 
 import (
 	"fmt"
@@ -164,4 +164,3 @@ func (c *char) swordAttack() action.Info {
 		State:           action.NormalAttackState,
 	}
 }
-

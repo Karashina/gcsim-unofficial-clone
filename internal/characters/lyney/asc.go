@@ -1,4 +1,4 @@
-﻿package lyney
+package lyney
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -75,4 +75,3 @@ func (c *char) a4() {
 		},
 	})
 }
-

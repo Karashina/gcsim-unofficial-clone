@@ -1,4 +1,4 @@
-﻿package iansan
+package iansan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -96,4 +96,3 @@ func (c *char) chargedSwift() action.Info {
 		State:           action.ChargeAttackState,
 	}
 }
-

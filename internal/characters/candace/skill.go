@@ -1,4 +1,4 @@
-﻿package candace
+package candace
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -137,4 +137,3 @@ func (c *char) makeParticleCB(particleCount float64) combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), particleCount, attributes.Hydro, c.ParticleDelay)
 	}
 }
-

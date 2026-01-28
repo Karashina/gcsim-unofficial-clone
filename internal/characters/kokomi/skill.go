@@ -1,4 +1,4 @@
-﻿package kokomi
+package kokomi
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -152,4 +152,3 @@ func (c *char) skillTickTask(originalSnapshot *combat.AttackEvent, src int) func
 		c.Core.Tasks.Add(c.skillTickTask(originalSnapshot, src), 120)
 	}
 }
-

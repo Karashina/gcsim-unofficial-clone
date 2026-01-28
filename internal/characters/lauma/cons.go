@@ -1,4 +1,4 @@
-﻿package lauma
+package lauma
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"

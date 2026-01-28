@@ -1,4 +1,4 @@
-﻿package conditional
+package conditional
 
 import (
 	"fmt"
@@ -73,4 +73,3 @@ func evalAction(fields []string) (int, error) {
 	}
 	return int(a), nil
 }
-

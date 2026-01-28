@@ -1,4 +1,4 @@
-﻿package combat
+package combat
 
 import (
 	"log"
@@ -243,4 +243,3 @@ func TestKillGadgetOnCollision(t *testing.T) {
 		t.FailNow()
 	}
 }
-

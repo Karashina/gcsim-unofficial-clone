@@ -1,4 +1,4 @@
-﻿package freedom
+package freedom
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/weapons/common"
@@ -112,4 +112,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	return w, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package amber
+package amber
 
 import (
 	"fmt"
@@ -240,4 +240,3 @@ func (c *char) overloadExplode() {
 		return false
 	}, "amber-bunny-explode-overload")
 }
-

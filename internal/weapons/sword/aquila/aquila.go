@@ -1,4 +1,4 @@
-﻿package aquila
+package aquila
 
 import (
 	"fmt"
@@ -88,4 +88,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("aquila-%v", char.Base.Key.String()))
 	return w, nil
 }
-

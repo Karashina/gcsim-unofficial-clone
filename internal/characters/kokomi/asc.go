@@ -1,4 +1,4 @@
-﻿package kokomi
+package kokomi
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -58,4 +58,3 @@ func (c *char) a4() {
 		return false
 	}, "kokomi-a4")
 }
-

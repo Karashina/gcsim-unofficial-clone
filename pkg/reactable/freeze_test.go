@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"testing"
@@ -84,4 +84,3 @@ func TestFreezePlusAddFreeze(t *testing.T) {
 		t.Errorf("expecting 80 frozen attached, got %v", trg.Durability[Frozen])
 	}
 }
-

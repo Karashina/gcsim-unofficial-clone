@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"errors"
@@ -158,4 +158,3 @@ func parseHurtElement(p *Parser) error {
 	p.res.HurtSettings.Element = ast.EleKeys[n.Val]
 	return nil
 }
-

@@ -1,4 +1,4 @@
-﻿package iansan
+package iansan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -118,4 +118,3 @@ func (c *char) setNightsoulExitTimer(duration int) {
 		c.exitNightsoul()
 	}, duration)
 }
-

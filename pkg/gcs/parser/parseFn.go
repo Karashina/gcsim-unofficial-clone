@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"fmt"
@@ -140,4 +140,3 @@ func (p *Parser) parseFnArgs() ([]*ast.Ident, []ast.ExprType, error) {
 	}
 	return args, argsType, nil
 }
-

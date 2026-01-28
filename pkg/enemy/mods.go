@@ -1,4 +1,4 @@
-﻿package enemy
+package enemy
 
 import (
 	"strconv"
@@ -148,4 +148,3 @@ func (e *Enemy) defAdj(evt glog.Event) float64 {
 
 	return r
 }
-

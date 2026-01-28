@@ -1,4 +1,4 @@
-﻿package characters
+package characters
 
 import (
 	"log"
@@ -284,4 +284,3 @@ func TestTravelerDendroBurstElectroTicks(t *testing.T) {
 		t.Errorf("expecting %v ticks, got %v", expectedCount, dmgCount)
 	}
 }
-

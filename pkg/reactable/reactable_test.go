@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"os"
@@ -349,4 +349,3 @@ func durApproxEqual(expect, result, tol reactions.Durability) bool {
 	}
 	return result-expect < tol
 }
-

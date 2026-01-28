@@ -1,4 +1,4 @@
-﻿package nahida
+package nahida
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -238,4 +238,3 @@ func (c *char) triggerTriKarmaDamageIfAvail(t *enemy.Enemy) {
 		)
 	}
 }
-

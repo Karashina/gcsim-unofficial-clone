@@ -1,4 +1,4 @@
-﻿package reactable_test
+package reactable_test
 
 import (
 	"testing"
@@ -155,4 +155,3 @@ func TestECHyperbloom(t *testing.T) {
 		t.Errorf("expected 2 instance of hyperbloom damage, got %v", count)
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"fmt"
@@ -42,4 +42,3 @@ func (p *Parser) parseLet() (ast.Stmt, error) {
 
 	return stmt, err
 }
-

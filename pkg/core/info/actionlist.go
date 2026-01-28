@@ -1,4 +1,4 @@
-﻿package info
+package info
 
 import (
 	"encoding/json"
@@ -88,4 +88,3 @@ func (a *ActionList) PrettyPrint() string {
 	}
 	return string(prettyJSON)
 }
-

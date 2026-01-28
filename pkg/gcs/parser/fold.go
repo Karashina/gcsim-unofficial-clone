@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
@@ -83,4 +83,3 @@ func foldConstants(ex ast.Expr) (ast.Expr, error) {
 		return ex, nil
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package finaleofthedeepgalleries
+package finaleofthedeepgalleries
 
 import (
 	"fmt"
@@ -118,4 +118,3 @@ func (s *Set) pc4() {
 		return false
 	}, fmt.Sprintf("deep-galleries-4pc-%v", s.char.Base.Key.String()))
 }
-

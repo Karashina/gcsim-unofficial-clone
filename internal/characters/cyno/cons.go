@@ -1,4 +1,4 @@
-﻿package cyno
+package cyno
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -184,4 +184,3 @@ func (c *char) makeC6CB() combat.AttackCBFunc {
 		)
 	}
 }
-

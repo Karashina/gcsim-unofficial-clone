@@ -1,4 +1,4 @@
-﻿package nahida
+package nahida
 
 import (
 	"fmt"
@@ -115,4 +115,3 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	}
 	return c.Character.AnimationStartDelay(k)
 }
-

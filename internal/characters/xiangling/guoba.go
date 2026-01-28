@@ -1,4 +1,4 @@
-﻿package xiangling
+package xiangling
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/faruzan"
@@ -118,4 +118,3 @@ func (p *panda) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, bool) 
 
 	return 0, false
 }
-

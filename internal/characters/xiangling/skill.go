@@ -1,4 +1,4 @@
-﻿package xiangling
+package xiangling
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -79,4 +79,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, 1*60, false)
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Pyro, c.ParticleDelay)
 }
-

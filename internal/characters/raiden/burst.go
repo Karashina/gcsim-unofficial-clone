@@ -1,4 +1,4 @@
-﻿package raiden
+package raiden
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -154,4 +154,3 @@ func (c *char) onBurstStackCount() {
 		return false
 	}, "raiden-stacks")
 }
-

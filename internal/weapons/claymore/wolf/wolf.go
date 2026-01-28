@@ -1,4 +1,4 @@
-﻿package wolf
+package wolf
 
 import (
 	"fmt"
@@ -86,4 +86,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("wolf-%v", char.Base.Key.String()))
 	return w, nil
 }
-

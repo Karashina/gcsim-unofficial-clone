@@ -1,4 +1,4 @@
-﻿package mizuki
+package mizuki
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/avatar"
@@ -152,4 +152,3 @@ func (p *snack) SetDirectionToClosestEnemy()     {}
 func (p *snack) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
-

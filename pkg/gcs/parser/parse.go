@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"errors"
@@ -793,4 +793,3 @@ func (p *Parser) parseMap() (ast.Expr, error) {
 		}
 	}
 }
-

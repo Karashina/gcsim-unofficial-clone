@@ -1,4 +1,4 @@
-﻿package songofdayspast
+package songofdayspast
 
 import (
 	"fmt"
@@ -120,4 +120,3 @@ func (s *Set) OnEnemyHit() func(args ...interface{}) bool {
 		return false
 	}
 }
-

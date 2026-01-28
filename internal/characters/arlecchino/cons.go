@@ -1,4 +1,4 @@
-﻿package arlecchino
+package arlecchino
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -110,4 +110,3 @@ func (c *char) c6skill() {
 		},
 	})
 }
-

@@ -1,4 +1,4 @@
-﻿package lyney
+package lyney
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -123,4 +123,3 @@ func (g *GrinMalkinHat) SetDirectionToClosestEnemy()     {}
 func (g *GrinMalkinHat) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
-

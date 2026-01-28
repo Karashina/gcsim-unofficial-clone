@@ -1,4 +1,4 @@
-﻿package optstats
+package optstats
 
 import (
 	"slices"
@@ -81,4 +81,3 @@ func (agg *CustomDamageAggBuffer) Flush() {
 	}
 	slices.Sort(agg.ExpectedDps)
 }
-

@@ -1,4 +1,4 @@
-﻿package cashflow
+package cashflow
 
 import (
 	"fmt"
@@ -154,4 +154,3 @@ func (w *Weapon) onChangeHP() {
 		})
 	}
 }
-

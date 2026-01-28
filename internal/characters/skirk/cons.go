@@ -1,4 +1,4 @@
-﻿package skirk
+package skirk
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -195,4 +195,3 @@ func (c *char) c6Init() {
 
 	// TODO: OnCharacterHurt?
 }
-

@@ -1,4 +1,4 @@
-﻿package neuvillette
+package neuvillette
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -148,4 +148,3 @@ func (c *char) onSwap() {
 		return false
 	}, "neuvillette-swap")
 }
-

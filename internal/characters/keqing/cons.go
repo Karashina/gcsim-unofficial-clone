@@ -1,4 +1,4 @@
-﻿package keqing
+package keqing
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -84,4 +84,3 @@ func (c *char) c6(src string) {
 		},
 	})
 }
-

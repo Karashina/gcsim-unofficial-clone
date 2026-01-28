@@ -1,4 +1,4 @@
-﻿package hutao
+package hutao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -152,4 +152,3 @@ func (c *char) bbtickfunc(src int, trg *enemy.Enemy) func() {
 		trg.QueueEnemyTask(c.bbtickfunc(src, trg), 240)
 	}
 }
-

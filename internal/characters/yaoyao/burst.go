@@ -1,4 +1,4 @@
-﻿package yaoyao
+package yaoyao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -101,4 +101,3 @@ func (c *char) removeBurst() {
 	}
 	c.numYueguiJumping = 0
 }
-

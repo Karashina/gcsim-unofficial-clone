@@ -1,4 +1,4 @@
-﻿package alhaitham
+package alhaitham
 
 import (
 	"errors"
@@ -224,4 +224,3 @@ func (c *char) plungeCollision(delay int) {
 		c.projectionAttack,
 	)
 }
-

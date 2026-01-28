@@ -1,4 +1,4 @@
-﻿package oathsworneye
+package oathsworneye
 
 import (
 	"fmt"
@@ -45,4 +45,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("oathsworn-%v", char.Base.Key.String()))
 	return w, nil
 }
-

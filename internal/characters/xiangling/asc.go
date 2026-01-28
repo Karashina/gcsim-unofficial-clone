@@ -1,4 +1,4 @@
-﻿package xiangling
+package xiangling
 
 import (
 	"fmt"
@@ -42,4 +42,3 @@ func (c *char) a4(a4Delay int) {
 		)
 	}, a4Delay)
 }
-

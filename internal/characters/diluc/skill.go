@@ -1,4 +1,4 @@
-﻿package diluc
+package diluc
 
 import (
 	"fmt"
@@ -180,4 +180,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Pyro, c.ParticleDelay)
 }
-

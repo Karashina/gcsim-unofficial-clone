@@ -1,4 +1,4 @@
-﻿package simulation
+package simulation
 
 import (
 	"errors"
@@ -328,4 +328,3 @@ func (s *Simulation) Run() (res stats.Result, err error) {
 	res, err = s.run()
 	return
 }
-

@@ -1,4 +1,4 @@
-﻿package info
+package info
 
 import (
 	"encoding/json"
@@ -65,4 +65,3 @@ type Weapon interface {
 	Init() error
 	Data() *model.WeaponData
 }
-

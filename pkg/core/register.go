@@ -1,4 +1,4 @@
-﻿package core
+package core
 
 import (
 	"sync"
@@ -45,4 +45,3 @@ func RegisterWeaponFunc(weap keys.Weapon, f NewWeaponFunc) {
 	}
 	weaponMap[weap] = f
 }
-

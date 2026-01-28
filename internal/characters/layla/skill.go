@@ -1,4 +1,4 @@
-﻿package layla
+package layla
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -85,4 +85,3 @@ func (c *char) starsSkill() {
 		return false
 	}, "stars-skill")
 }
-

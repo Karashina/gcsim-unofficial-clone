@@ -1,4 +1,4 @@
-﻿package shield
+package shield
 
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 
@@ -82,4 +82,3 @@ func (t *Tmpl) OnExpire() {
 }
 
 func (t *Tmpl) OnOverwrite() {}
-

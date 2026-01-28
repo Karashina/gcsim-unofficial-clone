@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"errors"
@@ -169,4 +169,3 @@ func (p *Parser) parseFloat64Const() (float64, error) {
 // 	}
 // 	return int(result), err
 // }
-

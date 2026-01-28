@@ -1,4 +1,4 @@
-﻿// Package combat handles all combat related functionalities including
+// Package combat handles all combat related functionalities including
 //   - target tracking
 //   - target selection
 //   - hitbox collision checking
@@ -104,4 +104,3 @@ func (h *Handler) Tick() {
 		h.gccount = 0
 	}
 }
-

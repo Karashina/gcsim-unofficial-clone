@@ -1,4 +1,4 @@
-﻿package varesa
+package varesa
 
 import (
 	"fmt"
@@ -174,4 +174,3 @@ func (c *char) fieryAttack() action.Info {
 		State:           action.NormalAttackState,
 	}
 }
-

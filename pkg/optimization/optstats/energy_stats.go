@@ -1,4 +1,4 @@
-﻿package optstats
+package optstats
 
 import (
 	"slices"
@@ -162,4 +162,3 @@ func (agg *CustomEnergyAggBuffer) Flush() {
 		slices.Sort(agg.AdditionalErNeeded[i])
 	}
 }
-

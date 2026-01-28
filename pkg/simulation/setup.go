@@ -1,4 +1,4 @@
-﻿package simulation
+package simulation
 
 import (
 	"errors"
@@ -467,4 +467,3 @@ func (s *Simulation) handleHurt() {
 			Write("hurt_frame", s.C.F+f)
 	}
 }
-

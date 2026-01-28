@@ -1,4 +1,4 @@
-﻿package sara
+package sara
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -122,4 +122,3 @@ func (c *char) attackBuff(a combat.AttackPattern, delay int) {
 		}
 	}, delay)
 }
-

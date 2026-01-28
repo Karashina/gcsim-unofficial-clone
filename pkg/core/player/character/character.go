@@ -1,4 +1,4 @@
-﻿package character
+package character
 
 import (
 	"fmt"
@@ -280,4 +280,3 @@ type Particle struct {
 	Num    float64
 	Ele    attributes.Element
 }
-

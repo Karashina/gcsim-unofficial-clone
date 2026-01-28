@@ -1,4 +1,4 @@
-﻿package lynette
+package lynette
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -55,4 +55,3 @@ func (c *char) c6() {
 		},
 	})
 }
-

@@ -1,4 +1,4 @@
-﻿package clorinde
+package clorinde
 
 import (
 	"math"
@@ -201,4 +201,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Electro, c.ParticleDelay)
 }
-

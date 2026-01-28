@@ -1,4 +1,4 @@
-﻿package kirara
+package kirara
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -34,4 +34,3 @@ func (c *char) shieldHP() float64 {
 func (c *char) maxShieldHP() float64 {
 	return maxShieldPP[c.TalentLvlSkill()]*c.MaxHP() + maxShieldFlat[c.TalentLvlSkill()]
 }
-

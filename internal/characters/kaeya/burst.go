@@ -1,4 +1,4 @@
-﻿package kaeya
+package kaeya
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -104,4 +104,3 @@ func (c *char) burstTickerFunc(ai combat.AttackInfo, snap combat.Snapshot, src i
 		c.Core.Tasks.Add(c.burstTickerFunc(ai, snap, src), 120)
 	}
 }
-

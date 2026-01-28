@@ -57,7 +57,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	if !ok {
 		aiCollision := combat.AttackInfo{
 			ActorIndex: c.Index,
-			Abil:       "Plunge Collision",
+			Abil:       "Plunge Collision (P)",
 			AttackTag:  attacks.AttackTagPlunge,
 			ICDTag:     attacks.ICDTagNone,
 			ICDGroup:   attacks.ICDGroupDefault,
@@ -77,7 +77,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	// High Plunge
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "High Plunge",
+		Abil:       "High Plunge (HP)",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -110,7 +110,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	if !ok {
 		aiCollision := combat.AttackInfo{
 			ActorIndex: c.Index,
-			Abil:       "Plunge Collision",
+			Abil:       "Plunge Collision (P)",
 			AttackTag:  attacks.AttackTagPlunge,
 			ICDTag:     attacks.ICDTagNone,
 			ICDGroup:   attacks.ICDGroupDefault,
@@ -130,7 +130,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	// Low Plunge
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "Low Plunge",
+		Abil:       "Low Plunge (LP)",
 		AttackTag:  attacks.AttackTagPlunge,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,

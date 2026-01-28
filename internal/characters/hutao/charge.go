@@ -1,4 +1,4 @@
-﻿package hutao
+package hutao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -156,4 +156,3 @@ func (c *char) ppChargeAttack() action.Info {
 		},
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package validation
+package validation
 
 import (
 	"sync"
@@ -22,4 +22,3 @@ func RegisterCharParamValidationFunc(char keys.Char, f CharParamKeysValidationFu
 	}
 	charValidParamKeys[char] = f
 }
-

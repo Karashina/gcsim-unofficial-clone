@@ -1,4 +1,4 @@
-﻿package beidou
+package beidou
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -178,4 +178,3 @@ func (c *char) chain(src, count int) combat.AttackCBFunc {
 		c.Core.QueueAttackEvent(&atk, 1)
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package sigewinne
+package sigewinne
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -96,4 +96,3 @@ func (c *char) a4() {
 		},
 	})
 }
-

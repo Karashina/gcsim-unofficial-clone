@@ -1,4 +1,4 @@
-﻿package combat
+package combat
 
 import (
 	"math"
@@ -108,4 +108,3 @@ func (h *Handler) GadgetCount() int {
 
 	return count
 }
-

@@ -1,4 +1,4 @@
-﻿package flins
+package flins
 
 import (
 	"fmt"
@@ -177,4 +177,3 @@ func (c *char) attackE() (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-

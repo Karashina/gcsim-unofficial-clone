@@ -1,4 +1,4 @@
-﻿package barbara
+package barbara
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -151,4 +151,3 @@ func (c *char) barbaraMelodyTick(ai combat.AttackInfo, skillInitF int) func() {
 		c.Core.Tasks.Add(c.barbaraMelodyTick(ai, skillInitF), 1.5*60)
 	}
 }
-

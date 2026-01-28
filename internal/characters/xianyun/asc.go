@@ -1,4 +1,4 @@
-﻿package xianyun
+package xianyun
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -130,4 +130,3 @@ func (c *char) a4() {
 		return false
 	}, "xianyun-starwicker-hook")
 }
-

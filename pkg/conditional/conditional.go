@@ -1,4 +1,4 @@
-﻿package conditional
+package conditional
 
 import (
 	"fmt"
@@ -60,4 +60,3 @@ func Eval(c *core.Core, fields []string) (any, error) {
 		return 0, fmt.Errorf("invalid character %v in character condition", name)
 	}
 }
-

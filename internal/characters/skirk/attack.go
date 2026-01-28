@@ -1,4 +1,4 @@
-﻿package skirk
+package skirk
 
 import (
 	"fmt"
@@ -204,4 +204,3 @@ func (c *char) AttackSkill(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-

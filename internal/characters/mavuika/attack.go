@@ -1,4 +1,4 @@
-﻿package mavuika
+package mavuika
 
 import (
 	"fmt"
@@ -184,4 +184,3 @@ func (c *char) bikeAttack() action.Info {
 		State:           action.NormalAttackState,
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package kitain
+package kitain
 
 import (
 	"fmt"
@@ -72,4 +72,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("kitain-%v", char.Base.Key.String()))
 	return w, nil
 }
-

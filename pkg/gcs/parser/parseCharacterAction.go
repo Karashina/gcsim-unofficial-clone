@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"fmt"
@@ -158,4 +158,3 @@ func (p *Parser) acceptOptionalRepeaterReturnCount() (int, error) {
 	count, err := itemNumberToInt(n)
 	return count, err
 }
-

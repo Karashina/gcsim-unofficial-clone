@@ -1,4 +1,4 @@
-﻿package info
+package info
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -30,4 +30,3 @@ func (e *EnemyProfile) Clone() EnemyProfile {
 	}
 	return r
 }
-

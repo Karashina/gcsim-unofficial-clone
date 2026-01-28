@@ -1,4 +1,4 @@
-﻿package cyno
+package cyno
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -99,4 +99,3 @@ func (c *char) onBurstExpiry(burstSrc int) {
 	}
 	c.burstSrc = -1 // make sure we don't call other burst fns
 }
-

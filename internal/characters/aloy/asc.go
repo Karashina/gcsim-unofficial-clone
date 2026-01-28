@@ -1,4 +1,4 @@
-﻿package aloy
+package aloy
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -53,4 +53,3 @@ func (c *char) a4() {
 		c.Core.Tasks.Add(func() { stacks++ }, 60*(1+i))
 	}
 }
-

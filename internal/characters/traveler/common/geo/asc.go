@@ -1,4 +1,4 @@
-﻿package geo
+package geo
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -41,4 +41,3 @@ func (c *Traveler) a4() {
 		)
 	}, a4Hitmark[c.gender])
 }
-

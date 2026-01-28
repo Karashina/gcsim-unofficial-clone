@@ -1,4 +1,4 @@
-﻿package xinyan
+package xinyan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -88,4 +88,3 @@ func (c *char) makeC4CB() combat.AttackCBFunc {
 
 // Decreases the Stamina Consumption of Xinyan's Charged Attacks by 30%. Additionally, Xinyan's Charged Attacks gain an ATK Bonus equal to 50% of her DEF.
 // func (c *char) c6() {}
-

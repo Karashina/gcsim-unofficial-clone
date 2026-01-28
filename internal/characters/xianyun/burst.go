@@ -1,4 +1,4 @@
-﻿package xianyun
+package xianyun
 
 import (
 	"strings"
@@ -180,4 +180,3 @@ func (c *char) burstHealDoT() {
 		Bonus:   c.Stat(attributes.Heal),
 	})
 }
-

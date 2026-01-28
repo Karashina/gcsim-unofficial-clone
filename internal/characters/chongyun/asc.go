@@ -1,4 +1,4 @@
-﻿package chongyun
+package chongyun
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -63,4 +63,3 @@ func (c *char) a4CB(a combat.AttackCB) {
 		Value: -0.10,
 	})
 }
-

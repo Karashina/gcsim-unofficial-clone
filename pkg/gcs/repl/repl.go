@@ -1,4 +1,4 @@
-﻿package repl
+package repl
 
 import (
 	"bufio"
@@ -80,4 +80,3 @@ func Start(in io.Reader, out io.Writer, log *log.Logger, showProgram bool) {
 		Eval(scanner.Text(), log)
 	}
 }
-

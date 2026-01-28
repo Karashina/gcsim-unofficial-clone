@@ -1,4 +1,4 @@
-﻿package pyro
+package pyro
 
 import (
 	"slices"
@@ -116,4 +116,3 @@ func (c *Traveler) c6Init() {
 		},
 	})
 }
-

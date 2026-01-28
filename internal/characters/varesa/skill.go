@@ -1,4 +1,4 @@
-﻿package varesa
+package varesa
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -117,4 +117,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 }
 
 // TODO: skill hold
-

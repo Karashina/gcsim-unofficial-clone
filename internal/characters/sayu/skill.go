@@ -1,4 +1,4 @@
-﻿package sayu
+package sayu
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -382,4 +382,3 @@ func (c *char) rollAbsorb() {
 		return false
 	}, "sayu-absorb-check")
 }
-

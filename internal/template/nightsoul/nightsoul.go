@@ -1,4 +1,4 @@
-﻿package nightsoul
+package nightsoul
 
 import (
 	"fmt"
@@ -177,4 +177,3 @@ func (s *State) Condition(fields []string) (any, error) {
 		return nil, fmt.Errorf("invalid nightsoul condition: %v", fields[1])
 	}
 }
-

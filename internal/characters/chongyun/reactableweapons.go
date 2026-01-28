@@ -1,4 +1,4 @@
-﻿package chongyun
+package chongyun
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -113,4 +113,3 @@ func (p *ReactableWeapon) resetgauge() {
 	p.Durability[reactable.Geo] = 0
 	p.Durability[reactable.Dendro] = 0
 }
-

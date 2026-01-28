@@ -1,4 +1,4 @@
-﻿package verdant
+package verdant
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"

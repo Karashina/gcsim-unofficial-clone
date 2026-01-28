@@ -1,4 +1,4 @@
-﻿package combat
+package combat
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -99,4 +99,3 @@ func (h *Handler) PrimaryTarget() Target {
 	}
 	panic("default target does not exist?!")
 }
-

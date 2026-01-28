@@ -1,4 +1,4 @@
-﻿package tulaytullahsremembrance
+package tulaytullahsremembrance
 
 import (
 	"fmt"
@@ -156,4 +156,3 @@ func (w *Weapon) incStack(char *character.CharWrapper, src int) func() {
 		char.QueueCharTask(w.incStack(char, src), 60)
 	}
 }
-

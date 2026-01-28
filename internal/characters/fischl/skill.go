@@ -1,4 +1,4 @@
-﻿package fischl
+package fischl
 
 import (
 	"fmt"
@@ -214,4 +214,3 @@ func (c *char) removeOz(src int) func() {
 		c.ozActive = false
 	}
 }
-

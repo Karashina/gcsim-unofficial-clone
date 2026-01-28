@@ -1,4 +1,4 @@
-﻿package tartaglia
+package tartaglia
 
 import (
 	"errors"
@@ -102,4 +102,3 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		State:           action.AimState,
 	}, nil
 }
-

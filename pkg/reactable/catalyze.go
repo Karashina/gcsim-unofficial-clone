@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -85,4 +85,3 @@ func (r *Reactable) TryQuicken(a *combat.AttackEvent) bool {
 func (r *Reactable) attachQuicken(dur reactions.Durability) {
 	r.attachOverlapRefreshDuration(Quicken, dur, 12*dur+360)
 }
-

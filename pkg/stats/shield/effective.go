@@ -1,4 +1,4 @@
-﻿package shield
+package shield
 
 import (
 	"math"
@@ -156,4 +156,3 @@ func computeEffective(shields map[string][]stats.ShieldInterval) map[string][]st
 	}
 	return out
 }
-

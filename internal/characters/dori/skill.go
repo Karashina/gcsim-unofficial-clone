@@ -1,4 +1,4 @@
-﻿package dori
+package dori
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -126,4 +126,3 @@ func (c *char) afterSales() combat.AttackCBFunc {
 		}
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package beidou
+package beidou
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -96,4 +96,3 @@ func (c *char) makeParticleCB(counter int) combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 2+float64(counter), attributes.Electro, c.ParticleDelay)
 	}
 }
-

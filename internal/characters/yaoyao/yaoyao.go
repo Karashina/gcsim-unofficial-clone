@@ -1,4 +1,4 @@
-﻿package yaoyao
+package yaoyao
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -72,4 +72,3 @@ func (c *char) Init() error {
 	c.a4Srcs = make([]int, 4)
 	return nil
 }
-

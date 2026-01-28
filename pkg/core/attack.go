@@ -1,4 +1,4 @@
-﻿package core
+package core
 
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
 
@@ -93,4 +93,3 @@ func (c *Core) queueDmg(a *combat.AttackEvent, delay int) {
 		c.Combat.ApplyAttack(a)
 	}, delay)
 }
-

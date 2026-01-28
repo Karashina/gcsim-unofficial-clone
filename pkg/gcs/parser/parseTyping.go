@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"fmt"
@@ -115,4 +115,3 @@ func (p *Parser) parseFnType() (ast.ExprType, error) {
 	}
 	return res, nil
 }
-

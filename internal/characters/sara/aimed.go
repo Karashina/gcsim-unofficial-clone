@@ -1,4 +1,4 @@
-﻿package sara
+package sara
 
 import (
 	"fmt"
@@ -141,4 +141,3 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 
 	return a, nil
 }
-

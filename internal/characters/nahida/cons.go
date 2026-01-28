@@ -1,4 +1,4 @@
-﻿package nahida
+package nahida
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -172,4 +172,3 @@ func (c *char) makeC6CB() combat.AttackCBFunc {
 		c.c6Count++
 	}
 }
-

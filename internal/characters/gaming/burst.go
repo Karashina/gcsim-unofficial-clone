@@ -1,4 +1,4 @@
-﻿package gaming
+package gaming
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -115,4 +115,3 @@ func (c *char) onExitField() {
 		return false
 	}, "gaming-exit")
 }
-

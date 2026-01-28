@@ -1,4 +1,4 @@
-﻿package chevreuse
+package chevreuse
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -255,4 +255,3 @@ func (c *char) overchargedBallEventSub() {
 		return false
 	}, "chev-overcharged-ball")
 }
-

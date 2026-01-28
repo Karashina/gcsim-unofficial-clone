@@ -1,4 +1,4 @@
-﻿package flins
+package flins
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -169,4 +169,3 @@ func (c *char) c6() {
 		}
 	}
 }
-

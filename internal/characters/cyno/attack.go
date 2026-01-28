@@ -1,4 +1,4 @@
-﻿package cyno
+package cyno
 
 import (
 	"fmt"
@@ -187,4 +187,3 @@ func (c *char) attackB() (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-

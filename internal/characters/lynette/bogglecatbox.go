@@ -1,4 +1,4 @@
-﻿package lynette
+package lynette
 
 import (
 	"fmt"
@@ -155,4 +155,3 @@ func (b *BogglecatBox) SetDirectionToClosestEnemy()     {}
 func (b *BogglecatBox) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
-

@@ -1,4 +1,4 @@
-﻿package skirk
+package skirk
 
 import (
 	"errors"
@@ -152,4 +152,3 @@ func (c *char) particleInit() {
 		return false
 	}, c.Base.Key.String()+"-particles")
 }
-

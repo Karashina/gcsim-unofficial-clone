@@ -1,4 +1,4 @@
-﻿package reactable_test
+package reactable_test
 
 import (
 	"testing"
@@ -147,4 +147,3 @@ func TestECBurgeon(t *testing.T) {
 		t.Errorf("expected 2 instance of burgeon damage, got %v", count)
 	}
 }
-

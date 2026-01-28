@@ -1,4 +1,4 @@
-﻿package combat
+package combat
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
@@ -92,4 +92,3 @@ func NewBoxHit(src, center, offset positional, w, h float64) AttackPattern {
 func NewBoxHitOnTarget(trg, offset positional, w, h float64) AttackPattern {
 	return NewBoxHit(trg, trg, offset, w, h)
 }
-

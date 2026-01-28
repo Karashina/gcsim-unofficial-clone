@@ -1,4 +1,4 @@
-﻿package optimization
+package optimization
 
 import (
 	"errors"
@@ -111,4 +111,3 @@ func RunSubstatOptim(simopt simulator.Options, verbose bool, additionalOptions s
 		sugarLog.Infof("Saved to the following location: %v", simopt.ResultSaveToPath)
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package qiqi
+package qiqi
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
@@ -48,4 +48,3 @@ func (c *char) a1() {
 // she has a 50% chance to apply a Fortune-Preserving Talisman to them for 6s.
 // This effect can only occur once every 30s.
 const a4ICDKey = "qiqi-a4-icd"
-

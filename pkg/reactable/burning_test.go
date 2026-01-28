@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"testing"
@@ -34,4 +34,3 @@ func TestBurning(t *testing.T) {
 		t.Error("expecting target to not contain any remaining dendro or electro aura")
 	}
 }
-

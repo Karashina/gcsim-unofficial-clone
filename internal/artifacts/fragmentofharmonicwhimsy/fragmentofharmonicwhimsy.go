@@ -1,4 +1,4 @@
-﻿package fragmentofharmonicwhimsy
+package fragmentofharmonicwhimsy
 
 import (
 	"fmt"
@@ -78,4 +78,3 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 
 	return &s, nil
 }
-

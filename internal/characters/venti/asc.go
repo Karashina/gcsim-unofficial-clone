@@ -1,4 +1,4 @@
-﻿package venti
+package venti
 
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 
@@ -20,4 +20,3 @@ func (c *char) a4() {
 		}
 	}
 }
-

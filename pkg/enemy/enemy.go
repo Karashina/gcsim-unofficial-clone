@@ -1,4 +1,4 @@
-﻿// Package enemy implements an enemey target
+// Package enemy implements an enemey target
 package enemy
 
 import (
@@ -82,4 +82,3 @@ func (e *Enemy) SetDirectionToClosestEnemy()     {}
 func (e *Enemy) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
-

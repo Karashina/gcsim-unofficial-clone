@@ -1,4 +1,4 @@
-﻿package xingqiu
+package xingqiu
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -95,4 +95,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, 1*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Hydro, c.ParticleDelay)
 }
-

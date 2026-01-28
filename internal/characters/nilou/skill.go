@@ -1,4 +1,4 @@
-﻿package nilou
+package nilou
 
 import (
 	"fmt"
@@ -336,4 +336,3 @@ func (c *char) onExitField() {
 		return false
 	}, "nilou-exit")
 }
-

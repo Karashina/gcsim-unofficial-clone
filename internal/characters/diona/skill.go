@@ -1,4 +1,4 @@
-﻿package diona
+package diona
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -163,4 +163,3 @@ func (c *char) pawsPewPew(f, travel, pawCount int) {
 		)
 	}
 }
-

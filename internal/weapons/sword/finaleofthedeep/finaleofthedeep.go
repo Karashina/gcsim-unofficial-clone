@@ -1,4 +1,4 @@
-﻿package finaleofthedeep
+package finaleofthedeep
 
 import (
 	"fmt"
@@ -102,4 +102,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("finaleofthedeep-flatatk%v", char.Base.Key.String()))
 	return w, nil
 }
-

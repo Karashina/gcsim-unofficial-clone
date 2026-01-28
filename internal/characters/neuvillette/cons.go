@@ -1,4 +1,4 @@
-﻿package neuvillette
+package neuvillette
 
 import (
 	"strings"
@@ -134,4 +134,3 @@ func (c *char) c6cb(a combat.AttackCB) {
 	c.Core.QueueAttack(ai, ap, 29, 29)
 	c.Core.QueueAttack(ai, ap, 29, 29)
 }
-

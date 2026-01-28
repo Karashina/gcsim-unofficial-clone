@@ -1,4 +1,4 @@
-﻿package candace
+package candace
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -37,4 +37,3 @@ func (c *char) a4(char *character.CharWrapper) {
 		},
 	})
 }
-

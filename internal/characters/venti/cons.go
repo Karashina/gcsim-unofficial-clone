@@ -1,4 +1,4 @@
-﻿package venti
+package venti
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -94,4 +94,3 @@ func (c *char) c6(ele attributes.Element) func(a combat.AttackCB) {
 		})
 	}
 }
-

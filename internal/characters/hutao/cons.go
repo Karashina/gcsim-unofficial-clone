@@ -1,4 +1,4 @@
-﻿package hutao
+package hutao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -95,4 +95,3 @@ func (c *char) c4() {
 		return false
 	}, "hutao-c4")
 }
-

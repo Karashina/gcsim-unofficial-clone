@@ -1,4 +1,4 @@
-﻿package yoimiya
+package yoimiya
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -64,4 +64,3 @@ func (c *char) makeC2CB() combat.AttackCBFunc {
 		})
 	}
 }
-
