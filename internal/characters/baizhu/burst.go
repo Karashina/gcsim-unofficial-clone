@@ -1,4 +1,4 @@
-﻿package baizhu
+package baizhu
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -105,4 +105,3 @@ func (c *char) summonSpiritvein() {
 		burstTickRelease+burstTickTravel,
 	)
 }
-

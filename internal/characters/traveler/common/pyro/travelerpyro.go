@@ -1,4 +1,4 @@
-﻿package pyro
+package pyro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/common"
@@ -69,4 +69,3 @@ func (c *Traveler) Condition(fields []string) (any, error) {
 		return c.Character.Condition(fields)
 	}
 }
-

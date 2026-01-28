@@ -1,4 +1,4 @@
-﻿package klee
+package klee
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"

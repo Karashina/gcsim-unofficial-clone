@@ -1,4 +1,4 @@
-﻿package furina
+package furina
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -120,4 +120,3 @@ func (c *char) c6heal(char *character.CharWrapper, src int) func() {
 		char.QueueCharTask(c.c6heal(char, src), 60)
 	}
 }
-

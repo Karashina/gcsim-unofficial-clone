@@ -1,4 +1,4 @@
-﻿package xiao
+package xiao
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -95,4 +95,3 @@ func (c *char) Snapshot(a *combat.AttackInfo) combat.Snapshot {
 	}
 	return ds
 }
-

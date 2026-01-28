@@ -1,4 +1,4 @@
-﻿package yunjin
+package yunjin
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -99,4 +99,3 @@ func (c *char) burstProc() {
 		return false
 	}, "yunjin-burst")
 }
-

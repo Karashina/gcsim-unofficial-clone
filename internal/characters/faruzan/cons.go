@@ -1,4 +1,4 @@
-﻿package faruzan
+package faruzan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -75,4 +75,3 @@ func (c *char) c6Collapse() {
 		return false
 	}, "faruzan-c6-hook")
 }
-

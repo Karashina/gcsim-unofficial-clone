@@ -1,4 +1,4 @@
-﻿package emilie
+package emilie
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -111,4 +111,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, particleICD, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Dendro, c.ParticleDelay)
 }
-

@@ -1,4 +1,4 @@
-﻿package xiphos
+package xiphos
 
 import (
 	"fmt"
@@ -75,4 +75,3 @@ func (w *Weapon) updateStats() {
 
 	w.char.QueueCharTask(w.updateStats, 10*60)
 }
-

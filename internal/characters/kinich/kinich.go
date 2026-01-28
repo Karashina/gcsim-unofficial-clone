@@ -1,4 +1,4 @@
-﻿package kinich
+package kinich
 
 import (
 	"math"
@@ -164,4 +164,3 @@ func NormalizeAngle360(angle float64) float64 {
 	}
 	return angle
 }
-

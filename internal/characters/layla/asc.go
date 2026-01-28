@@ -1,4 +1,4 @@
-﻿package layla
+package layla
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
@@ -28,4 +28,3 @@ func (c *char) a4() float64 {
 	}
 	return 0.015 * c.MaxHP()
 }
-

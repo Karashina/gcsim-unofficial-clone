@@ -1,4 +1,4 @@
-﻿package emilie
+package emilie
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -126,4 +126,3 @@ func (c *char) getRandomEnemyPosition(area combat.AttackPattern) geometry.Point 
 	}
 	return pos
 }
-

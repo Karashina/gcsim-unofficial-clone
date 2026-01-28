@@ -1,4 +1,4 @@
-﻿package mountainking
+package mountainking
 
 import (
 	"fmt"
@@ -138,4 +138,3 @@ func (w *Weapon) applybuff() {
 		},
 	})
 }
-

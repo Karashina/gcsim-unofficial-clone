@@ -1,4 +1,4 @@
-﻿package combat
+package combat
 
 import (
 	"fmt"
@@ -84,4 +84,3 @@ func (h *Handler) ApplyAttack(a *AttackEvent) float64 {
 	}
 	return total
 }
-

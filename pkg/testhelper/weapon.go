@@ -1,4 +1,4 @@
-﻿package testhelper
+package testhelper
 
 import (
 	_ "embed"
@@ -29,8 +29,6 @@ type Weapon struct {
 func (b *Weapon) SetIndex(idx int)        { b.Index = idx }
 func (b *Weapon) Init() error             { return nil }
 func (b *Weapon) Data() *model.WeaponData { return bweap }
-
 func NewFakeWeapon(_ *core.Core, _ *character.CharWrapper, _ info.WeaponProfile) (info.Weapon, error) {
 	return &Weapon{}, nil
 }
-

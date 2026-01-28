@@ -1,4 +1,4 @@
-﻿package yunjin
+package yunjin
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -145,4 +145,3 @@ func (c *char) makeParticleCB(count float64) combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Geo, c.ParticleDelay)
 	}
 }
-

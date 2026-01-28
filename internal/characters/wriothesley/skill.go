@@ -1,4 +1,4 @@
-﻿package wriothesley
+package wriothesley
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -97,4 +97,3 @@ func (c *char) onExit() {
 		return false
 	}, "wriothesley-exit")
 }
-

@@ -1,4 +1,4 @@
-﻿package rosaria
+package rosaria
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -98,4 +98,3 @@ func (c *char) makeC6CB() combat.AttackCBFunc {
 		})
 	}
 }
-

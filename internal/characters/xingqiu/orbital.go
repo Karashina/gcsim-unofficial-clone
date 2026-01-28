@@ -1,4 +1,4 @@
-﻿package xingqiu
+package xingqiu
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -78,4 +78,3 @@ func (c *char) orbitalTickTask(src int) func() {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.2), -1, 1)
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package xilonen
+package xilonen
 
 import (
 	"fmt"
@@ -227,4 +227,3 @@ func (c *char) c6FlatDmg() {
 		},
 	})
 }
-

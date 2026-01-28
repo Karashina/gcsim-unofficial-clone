@@ -1,4 +1,4 @@
-﻿package halo
+package halo
 
 import (
 	"fmt"
@@ -74,4 +74,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	return w, nil
 }
-

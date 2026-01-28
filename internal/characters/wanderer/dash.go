@@ -1,4 +1,4 @@
-﻿package wanderer
+package wanderer
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -60,4 +60,3 @@ func (c *char) WindfavoredDash(p map[string]int) (action.Info, error) {
 
 	return ai, nil
 }
-

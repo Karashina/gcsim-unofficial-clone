@@ -1,4 +1,4 @@
-﻿package kachina
+package kachina
 
 import (
 	"errors"
@@ -21,4 +21,3 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 		State:           action.DashState,
 	}, nil
 }
-

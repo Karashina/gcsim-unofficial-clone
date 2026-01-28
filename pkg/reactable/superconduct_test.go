@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"testing"
@@ -42,4 +42,3 @@ func TestFrozenSuperconduct(t *testing.T) {
 		t.Errorf("expecting superconduct, got %v", trg[0].last.Info.Abil)
 	}
 }
-

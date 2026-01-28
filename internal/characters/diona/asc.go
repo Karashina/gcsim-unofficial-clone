@@ -1,4 +1,4 @@
-﻿package diona
+package diona
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -20,4 +20,3 @@ func (c *char) a1() {
 
 // A4 is not implemented:
 // TODO: Opponents who enter the AoE of Signature Mix have 10% decreased ATK for 15s.
-

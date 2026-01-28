@@ -1,4 +1,4 @@
-﻿package lisa
+package lisa
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -192,4 +192,3 @@ func (c *char) skillHoldMult() {
 		return false
 	}, "lisa-skill-hold-mul")
 }
-

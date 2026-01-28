@@ -1,4 +1,4 @@
-﻿package varesa
+package varesa
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -141,4 +141,3 @@ func quickAbilFunc(slice []int, skip int) func(action.Action) int {
 		return slice[next]
 	}
 }
-

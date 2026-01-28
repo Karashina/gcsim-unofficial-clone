@@ -1,4 +1,4 @@
-﻿package venti
+package venti
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -91,4 +91,3 @@ func (c *char) makeParticleCB(count float64) combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Anemo, c.ParticleDelay)
 	}
 }
-

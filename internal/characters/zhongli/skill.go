@@ -1,4 +1,4 @@
-﻿package zhongli
+package zhongli
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -91,4 +91,3 @@ func (c *char) skillHold(createStele bool) action.Info {
 		State:           action.SkillState,
 	}
 }
-

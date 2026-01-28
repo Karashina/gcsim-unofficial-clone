@@ -1,4 +1,4 @@
-﻿package nilou
+package nilou
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -68,4 +68,3 @@ func (b *BountifulCore) SetDirectionToClosestEnemy()                            
 func (b *BountifulCore) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
-

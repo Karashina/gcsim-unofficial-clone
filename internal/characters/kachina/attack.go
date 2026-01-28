@@ -1,4 +1,4 @@
-﻿package kachina
+package kachina
 
 import (
 	"fmt"
@@ -95,4 +95,3 @@ func (c *char) AttackRide(hitmark int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package albedo
+package albedo
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/construct"
@@ -31,4 +31,3 @@ func (c *skillConstruct) IsLimited() bool                  { return true }
 func (c *skillConstruct) Count() int                       { return 1 }
 func (c *skillConstruct) Direction() geometry.Point        { return c.dir }
 func (c *skillConstruct) Pos() geometry.Point              { return c.pos }
-

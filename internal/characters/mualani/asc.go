@@ -1,4 +1,4 @@
-﻿package mualani
+package mualani
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
@@ -44,4 +44,3 @@ func (c *char) a4() {
 		return false
 	}, "maulani-a4-nightsoul")
 }
-

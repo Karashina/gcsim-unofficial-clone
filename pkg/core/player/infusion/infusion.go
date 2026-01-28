@@ -1,4 +1,4 @@
-﻿package infusion
+package infusion
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -84,4 +84,3 @@ func (i *Handler) Infused(char int, a attacks.AttackTag) attributes.Element {
 	}
 	return attributes.NoElement
 }
-

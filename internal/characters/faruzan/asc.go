@@ -1,4 +1,4 @@
-﻿package faruzan
+package faruzan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -62,4 +62,3 @@ func (c *char) a4() {
 		return false
 	}, "faruzan-a4-hook")
 }
-

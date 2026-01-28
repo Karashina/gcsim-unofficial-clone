@@ -1,4 +1,4 @@
-﻿package dori
+package dori
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -105,4 +105,3 @@ func (c *char) makeC6CB() combat.AttackCBFunc {
 		})
 	}
 }
-

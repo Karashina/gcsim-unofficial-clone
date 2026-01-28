@@ -1,4 +1,4 @@
-﻿package worker
+package worker
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
@@ -14,7 +14,6 @@ type Pool struct {
 	QueueCh chan Job
 	StopCh  chan bool
 }
-
 type Job struct {
 	Cfg     *info.ActionList
 	Actions ast.Node
@@ -37,7 +36,6 @@ func New(maxWorker int, respCh chan stats.Result, errCh chan error) *Pool {
 	}
 	return p
 }
-
 func (p *Pool) worker() {
 	for {
 		select {
@@ -64,7 +62,6 @@ func (p *Pool) worker() {
 				break
 			}
 			p.respCh <- res
-
 		case _, ok := <-p.StopCh:
 			if !ok {
 				// stopping
@@ -73,4 +70,3 @@ func (p *Pool) worker() {
 		}
 	}
 }
-

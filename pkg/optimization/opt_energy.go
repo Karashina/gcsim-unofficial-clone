@@ -1,4 +1,4 @@
-﻿package optimization
+package optimization
 
 import (
 	"context"
@@ -112,4 +112,3 @@ func (stats *SubstatOptimizerDetails) findOptimalERforChars() {
 	}
 	stats.simcfg.Settings.IgnoreBurstEnergy = false
 }
-

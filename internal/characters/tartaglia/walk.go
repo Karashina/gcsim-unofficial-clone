@@ -1,4 +1,4 @@
-﻿package tartaglia
+package tartaglia
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -33,4 +33,3 @@ func (c *char) Walk(p map[string]int) (action.Info, error) {
 		State:           action.WalkState,
 	}, nil
 }
-

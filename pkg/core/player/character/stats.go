@@ -1,4 +1,4 @@
-﻿package character
+package character
 
 import (
 	"slices"
@@ -170,4 +170,3 @@ func (c *CharWrapper) TotalDef(nonExtra bool) float64 {
 	stats := c.SelectStat(nonExtra, attributes.BaseDEF, attributes.DEFP, attributes.DEF)
 	return stats.TotalDEF()
 }
-

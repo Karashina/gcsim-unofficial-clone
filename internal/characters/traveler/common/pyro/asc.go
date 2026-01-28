@@ -1,4 +1,4 @@
-﻿package pyro
+package pyro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
@@ -43,4 +43,3 @@ func (c *Traveler) a4Init() {
 	c.Core.Events.Subscribe(event.OnCrystallizePyro, fReactionHook, "travelerpyro-a4-oncrystallizepyro")
 	c.Core.Events.Subscribe(event.OnNightsoulBurst, fNSHook, "travelerpyro-a4-onnsburst")
 }
-

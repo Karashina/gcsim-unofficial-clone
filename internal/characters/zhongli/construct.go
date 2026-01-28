@@ -1,4 +1,4 @@
-﻿package zhongli
+package zhongli
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/construct"
@@ -26,4 +26,3 @@ func (s *stoneStele) IsLimited() bool                  { return true }
 func (s *stoneStele) Count() int                       { return 1 }
 func (s *stoneStele) Direction() geometry.Point        { return s.dir }
 func (s *stoneStele) Pos() geometry.Point              { return s.pos }
-

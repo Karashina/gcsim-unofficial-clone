@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -347,4 +347,3 @@ func (s *DendroCore) SetDirectionToClosestEnemy()     {}
 func (s *DendroCore) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
-

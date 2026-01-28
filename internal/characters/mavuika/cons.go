@@ -1,4 +1,4 @@
-﻿package mavuika
+package mavuika
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -206,4 +206,3 @@ func (c *char) c6RingAtk(src int) func() {
 		c.QueueCharTask(c.c6RingAtk(src), 180)
 	}
 }
-

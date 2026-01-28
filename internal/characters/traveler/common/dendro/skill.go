@@ -1,4 +1,4 @@
-﻿package dendro
+package dendro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -86,4 +86,3 @@ func (c *Traveler) particleCB(a combat.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Dendro, c.ParticleDelay)
 }
-

@@ -1,4 +1,4 @@
-﻿package arlecchino
+package arlecchino
 
 import (
 	"fmt"
@@ -199,4 +199,3 @@ func (c *char) bondConsumeCB(a combat.AttackCB) {
 
 	c.ReduceActionCooldown(action.ActionSkill, 0.8*60)
 }
-

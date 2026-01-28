@@ -1,4 +1,4 @@
-﻿package itto
+package itto
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/construct"
@@ -31,4 +31,3 @@ func (u *ushi) IsLimited() bool                  { return true }
 func (u *ushi) Count() int                       { return 1 }
 func (u *ushi) Direction() geometry.Point        { return u.dir }
 func (u *ushi) Pos() geometry.Point              { return u.pos }
-

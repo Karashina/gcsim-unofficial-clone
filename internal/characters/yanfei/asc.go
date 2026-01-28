@@ -1,4 +1,4 @@
-﻿package yanfei
+package yanfei
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -67,4 +67,3 @@ func (c *char) makeA4CB() combat.AttackCBFunc {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(trg, nil, 3.5), 10, 10)
 	}
 }
-

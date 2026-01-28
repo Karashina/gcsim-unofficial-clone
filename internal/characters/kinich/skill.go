@@ -1,4 +1,4 @@
-﻿package kinich
+package kinich
 
 import (
 	"fmt"
@@ -215,4 +215,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Dendro, c.ParticleDelay)
 }
-

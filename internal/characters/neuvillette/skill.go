@@ -1,4 +1,4 @@
-﻿package neuvillette
+package neuvillette
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -151,4 +151,3 @@ func (c *char) makeDropletCB() combat.AttackCBFunc {
 		c.Core.Combat.Log.NewEvent("Skill: Spawned 3 droplets", glog.LogCharacterEvent, c.Index)
 	}
 }
-

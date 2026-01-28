@@ -1,4 +1,4 @@
-﻿package cyno
+package cyno
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -84,4 +84,3 @@ func (c *char) a4Bolt() float64 {
 	}
 	return c.Stat(attributes.EM) * 2.5
 }
-

@@ -1,4 +1,4 @@
-﻿package kaveh
+package kaveh
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -81,4 +81,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, 0.2*60, false)
 	c.Core.QueueParticle(c.Base.Key.String(), 2, attributes.Dendro, c.ParticleDelay)
 }
-

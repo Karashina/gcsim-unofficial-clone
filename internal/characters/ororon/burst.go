@@ -1,4 +1,4 @@
-﻿package ororon
+package ororon
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -104,4 +104,3 @@ func (c *char) burstTick(src int) {
 		c.burstTick(src)
 	}, tick)
 }
-

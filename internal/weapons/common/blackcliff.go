@@ -1,4 +1,4 @@
-﻿package common
+package common
 
 import (
 	"fmt"
@@ -82,4 +82,3 @@ func (b *Blackcliff) NewWeapon(c *core.Core, char *character.CharWrapper, p info
 
 	return b, nil
 }
-

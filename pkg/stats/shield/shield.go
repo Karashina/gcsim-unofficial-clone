@@ -1,4 +1,4 @@
-﻿package shield
+package shield
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -147,4 +147,3 @@ func same(i, j map[string]float64) bool {
 	}
 	return true
 }
-

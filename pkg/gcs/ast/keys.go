@@ -1,4 +1,4 @@
-﻿package ast
+package ast
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -102,4 +102,3 @@ var actionKeys = map[string]action.Action{
 	"walk":        action.ActionWalk,
 	"swap":        action.ActionSwap,
 }
-

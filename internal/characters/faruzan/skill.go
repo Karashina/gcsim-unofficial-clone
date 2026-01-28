@@ -1,4 +1,4 @@
-﻿package faruzan
+package faruzan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -127,4 +127,3 @@ func (c *char) pressurizedCollapse(pos geometry.Point) {
 		)
 	}, vortexHitmark)
 }
-

@@ -1,4 +1,4 @@
-﻿package blacksword
+package blacksword
 
 import (
 	"fmt"
@@ -75,4 +75,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("black-sword-%v", char.Base.Key.String()))
 	return w, nil
 }
-

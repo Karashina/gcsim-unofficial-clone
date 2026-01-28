@@ -1,4 +1,4 @@
-﻿package combat
+package combat
 
 import (
 	"sort"
@@ -285,4 +285,3 @@ func (h *Handler) ClosestGadgetsWithinArea(a AttackPattern, filter func(t Gadget
 	}
 	return result
 }
-

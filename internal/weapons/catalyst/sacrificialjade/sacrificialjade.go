@@ -1,4 +1,4 @@
-﻿package sacrificialjade
+package sacrificialjade
 
 import (
 	"fmt"
@@ -109,4 +109,3 @@ func (w *Weapon) clearBuffs(src int) func() {
 		w.c.Log.NewEvent("sacrificial jade lost buffs", glog.LogWeaponEvent, w.char.Index)
 	}
 }
-

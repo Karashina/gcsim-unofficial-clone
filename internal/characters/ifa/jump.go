@@ -1,4 +1,4 @@
-﻿package ifa
+package ifa
 
 import (
 	"errors"
@@ -13,4 +13,3 @@ func (c *char) Jump(p map[string]int) (action.Info, error) {
 	}
 	return c.Character.Jump(p)
 }
-

@@ -1,4 +1,4 @@
-﻿package anemo
+package anemo
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -296,4 +296,3 @@ func (c *Traveler) absorbCheckE(src, count, maxcount int) func() {
 		}
 	}
 }
-

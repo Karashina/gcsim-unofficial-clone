@@ -1,4 +1,4 @@
-﻿package skirk
+package skirk
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -141,4 +141,3 @@ func (c *char) BurstExtinction(p map[string]int) (action.Info, error) {
 		OnRemoved:       func(next action.AnimationState) { c.DeleteStatus(burstAbsorbRiftAnimKey) },
 	}, nil
 }
-

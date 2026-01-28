@@ -1,4 +1,4 @@
-﻿package simulation
+package simulation
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -16,4 +16,3 @@ func NewCore(seed int64, debug bool, cfg *info.ActionList) (*core.Core, error) {
 		IgnoreBurstEnergy: cfg.Settings.IgnoreBurstEnergy,
 	})
 }
-

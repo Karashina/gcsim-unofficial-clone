@@ -1,4 +1,4 @@
-﻿package xiao
+package xiao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -67,4 +67,3 @@ func (c *char) onExitField() {
 		return false
 	}, "xiao-exit")
 }
-

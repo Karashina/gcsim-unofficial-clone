@@ -1,4 +1,4 @@
-﻿package dhalia
+package dhalia
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -70,4 +70,3 @@ func (c *char) regenShirld() {
 		return false
 	}, "dhalia-shield-regen")
 }
-

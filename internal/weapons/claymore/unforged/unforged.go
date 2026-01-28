@@ -1,4 +1,4 @@
-﻿package unforged
+package unforged
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/weapons/common"
@@ -16,4 +16,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	w := common.NewGoldenMajesty(base)
 	return w.NewWeapon(c, char, p)
 }
-

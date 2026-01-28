@@ -1,4 +1,4 @@
-﻿// Package cooldown provides default implementation for SetCD, SetCDWithDelay, ResetActionCooldown, ReduceActionCooldown, ActionReady,
+// Package cooldown provides default implementation for SetCD, SetCDWithDelay, ResetActionCooldown, ReduceActionCooldown, ActionReady,
 package character
 
 import (
@@ -201,4 +201,3 @@ func (c *Character) startCooldownQueueWorker(a action.Action) {
 	// wait for c.cooldownQueue[a][0], then add a stack
 	c.Core.Tasks.Add(worker, c.cdQueue[a][0])
 }
-

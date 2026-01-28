@@ -1,4 +1,4 @@
-﻿package lauma
+package lauma
 
 import (
 	_ "embed"
@@ -22,4 +22,3 @@ func (c *char) onLunarBloomLaumaSpecial(args ...interface{}) bool {
 func (c *char) InitLCallback() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.onLunarBloomLaumaSpecial, "lc-lauma-special")
 }
-

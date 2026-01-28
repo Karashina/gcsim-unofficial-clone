@@ -1,4 +1,4 @@
-﻿package barbara
+package barbara
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -61,4 +61,3 @@ func (c *char) checkc6() {
 
 	c.c6icd = c.Core.F + 60*60*15
 }
-

@@ -1,4 +1,4 @@
-﻿package dhalia
+package dhalia
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -56,4 +56,3 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 		return c.Character.AnimationStartDelay(k)
 	}
 }
-

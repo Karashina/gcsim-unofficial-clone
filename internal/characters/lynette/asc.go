@@ -1,4 +1,4 @@
-﻿package lynette
+package lynette
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -62,4 +62,3 @@ func (c *char) a4(duration int) {
 		},
 	})
 }
-

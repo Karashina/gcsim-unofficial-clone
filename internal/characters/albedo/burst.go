@@ -1,4 +1,4 @@
-﻿package albedo
+package albedo
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"

@@ -1,4 +1,4 @@
-﻿package optimization
+package optimization
 
 import (
 	"fmt"
@@ -120,4 +120,3 @@ func (stats *SubstatOptimizerDetails) optimizeERAndDMGSubstatsForChar(
 	opDebug = append(opDebug, "Final "+PrettyPrintStatsCounts(stats.charSubstatFinal[idxChar]))
 	return opDebug
 }
-

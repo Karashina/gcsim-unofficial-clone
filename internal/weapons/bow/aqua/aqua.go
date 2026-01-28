@@ -1,4 +1,4 @@
-﻿package aqua
+package aqua
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -58,4 +58,3 @@ func (w *Weapon) enemyCheck(char *character.CharWrapper, c *core.Core) func() {
 		char.QueueCharTask(w.enemyCheck(char, c), 30)
 	}
 }
-

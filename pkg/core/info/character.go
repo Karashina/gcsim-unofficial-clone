@@ -1,4 +1,4 @@
-﻿package info
+package info
 
 import (
 	"errors"
@@ -133,4 +133,3 @@ const (
 	ZoneSnezhnaya
 	ZoneNodkrai
 )
-

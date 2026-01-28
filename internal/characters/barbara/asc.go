@@ -1,4 +1,4 @@
-﻿package barbara
+package barbara
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -39,4 +39,3 @@ func (c *char) a4() {
 		return false
 	}, "barbara-a4")
 }
-

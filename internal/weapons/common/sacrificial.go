@@ -1,4 +1,4 @@
-﻿package common
+package common
 
 import (
 	"fmt"
@@ -71,4 +71,3 @@ func (s *Sacrificial) NewWeapon(c *core.Core, char *character.CharWrapper, p inf
 
 	return s, nil
 }
-

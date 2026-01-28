@@ -1,4 +1,4 @@
-﻿package player
+package player
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
@@ -20,4 +20,3 @@ func (h *Handler) Drain(di info.DrainInfo) float64 {
 	h.chars[di.ActorIndex].Drain(&di)
 	return di.Amount
 }
-

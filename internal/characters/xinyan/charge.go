@@ -1,4 +1,4 @@
-﻿package xinyan
+package xinyan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -141,4 +141,3 @@ func (c *char) ChargePress() action.Info {
 		State:           action.ChargeAttackState,
 	}
 }
-

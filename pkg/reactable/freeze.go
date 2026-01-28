@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -132,4 +132,3 @@ func (r *Reactable) checkFreeze() {
 		r.core.QueueAttack(ai, combat.NewSingleTargetHit(r.self.Key()), -1, 0)
 	}
 }
-

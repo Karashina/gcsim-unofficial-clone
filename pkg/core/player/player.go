@@ -1,4 +1,4 @@
-﻿// Package player contains player related tracking and functionalities:
+// Package player contains player related tracking and functionalities:
 // - tracking characters on the team
 // - handling animations state
 // - handling normal attack state

@@ -1,4 +1,4 @@
-﻿package collei
+package collei
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -131,4 +131,3 @@ func (c *char) a1Ticks(startFrame int, snap combat.Snapshot) {
 		c.a1Ticks(startFrame, snap)
 	}, sproutTickPeriod)
 }
-

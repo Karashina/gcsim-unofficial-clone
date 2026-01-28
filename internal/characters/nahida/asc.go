@@ -1,4 +1,4 @@
-﻿package nahida
+package nahida
 
 import (
 	"strings"
@@ -96,4 +96,3 @@ func (c *char) a4Tick() {
 
 	c.Core.Tasks.Add(c.a4Tick, 30)
 }
-

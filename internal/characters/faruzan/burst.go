@@ -1,4 +1,4 @@
-﻿package faruzan
+package faruzan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -156,4 +156,3 @@ func applyBurstShred(trg combat.Target) {
 		Value: -0.3,
 	})
 }
-

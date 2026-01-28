@@ -1,4 +1,4 @@
-﻿package furina
+package furina
 
 import (
 	"strings"
@@ -100,4 +100,3 @@ func (c *char) a4Tick() {
 
 	c.QueueCharTask(c.a4Tick, 30)
 }
-

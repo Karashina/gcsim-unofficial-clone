@@ -1,4 +1,4 @@
-﻿package nilou
+package nilou
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -85,4 +85,3 @@ func (c *char) LingeringAeon(a combat.AttackCB) {
 		)
 	}, burstAeonHitmark)
 }
-

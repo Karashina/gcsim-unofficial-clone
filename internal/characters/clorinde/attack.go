@@ -1,4 +1,4 @@
-﻿package clorinde
+package clorinde
 
 import (
 	"fmt"
@@ -186,4 +186,3 @@ func (c *char) arkheAttack() {
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 4.5), arkheHitmark, arkheHitmark)
 	c.AddStatus(arkheICDKey, int(arkheCD[c.TalentLvlSkill()]*60), true)
 }
-

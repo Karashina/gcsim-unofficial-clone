@@ -1,4 +1,4 @@
-﻿package character
+package character
 
 import (
 	"fmt"
@@ -146,4 +146,3 @@ func (c *Character) NextQueueItemIsValid(_ keys.Char, a action.Action, p map[str
 	}
 	return nil
 }
-

@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"errors"
@@ -120,4 +120,3 @@ func parseEnergyEvery(p *Parser) (parseFn, error) {
 	}
 	return nil, errors.New("unexpected end of line while parsing energy event")
 }
-

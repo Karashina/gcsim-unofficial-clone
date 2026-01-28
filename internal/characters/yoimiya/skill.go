@@ -1,4 +1,4 @@
-﻿package yoimiya
+package yoimiya
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -63,4 +63,3 @@ func (c *char) onExit() {
 		return false
 	}, "yoimiya-exit")
 }
-

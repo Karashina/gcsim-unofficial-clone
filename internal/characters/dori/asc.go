@@ -1,4 +1,4 @@
-﻿package dori
+package dori
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -81,4 +81,3 @@ func (c *char) makeA4CB() combat.AttackCBFunc {
 		c.AddEnergy("dori-a4", a4Energy)
 	}
 }
-

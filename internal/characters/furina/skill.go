@@ -1,4 +1,4 @@
-﻿package furina
+package furina
 
 import (
 	"fmt"
@@ -355,4 +355,3 @@ func (c *char) consumeAlliesHealth(hpDrainRatio float64) int {
 
 	return alliesWithDrainedHPCounter
 }
-

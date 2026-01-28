@@ -1,4 +1,4 @@
-﻿package player
+package player
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -94,4 +94,3 @@ func (h *Handler) AddStamPercentMod(key string, dur int, f StamPercentModFunc) {
 	mod.Event.SetEnded(mod.Expiry)
 	h.stamPercentMods[ind] = mod
 }
-

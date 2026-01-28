@@ -1,4 +1,4 @@
-﻿package yaoyao
+package yaoyao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -55,4 +55,3 @@ func (c *char) getSkillHealInfo(snap *combat.Snapshot) info.HealInfo {
 		Bonus:   snap.Stats[attributes.Heal],
 	}
 }
-

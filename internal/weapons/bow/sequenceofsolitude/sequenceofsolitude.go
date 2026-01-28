@@ -1,4 +1,4 @@
-﻿package sequenceofsolitude
+package sequenceofsolitude
 
 import (
 	"fmt"
@@ -65,4 +65,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("solitude-%v", char.Base.Key.String()))
 	return w, nil
 }
-

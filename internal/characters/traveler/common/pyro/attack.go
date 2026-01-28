@@ -1,4 +1,4 @@
-﻿package pyro
+package pyro
 
 import (
 	"fmt"
@@ -113,4 +113,3 @@ func (c *Traveler) Attack(p map[string]int) (action.Info, error) {
 		State:           action.NormalAttackState,
 	}, nil
 }
-

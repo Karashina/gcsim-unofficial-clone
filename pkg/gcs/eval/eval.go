@@ -1,4 +1,4 @@
-﻿package eval
+package eval
 
 import (
 	"errors"
@@ -315,4 +315,3 @@ func (e *Eval) evalNode(n ast.Node, env *Env) (Obj, error) {
 		return &null{}, nil
 	}
 }
-

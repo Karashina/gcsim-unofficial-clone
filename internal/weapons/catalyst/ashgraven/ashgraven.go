@@ -1,4 +1,4 @@
-﻿package ashgraven
+package ashgraven
 
 import (
 	"fmt"
@@ -65,4 +65,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("ashgraven-%v", char.Base.Key.String()))
 	return w, nil
 }
-

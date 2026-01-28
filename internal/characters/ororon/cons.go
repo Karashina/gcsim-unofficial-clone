@@ -1,4 +1,4 @@
-﻿package ororon
+package ororon
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -157,4 +157,3 @@ func (c *char) c6onHypersense() {
 		})
 	}
 }
-

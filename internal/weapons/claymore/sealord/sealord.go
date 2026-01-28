@@ -1,4 +1,4 @@
-﻿package sealord
+package sealord
 
 import (
 	"fmt"
@@ -81,4 +81,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("sealord-%v", char.Base.Key.String()))
 	return w, nil
 }
-

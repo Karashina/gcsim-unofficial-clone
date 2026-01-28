@@ -1,4 +1,4 @@
-﻿package aloy
+package aloy
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -209,4 +209,3 @@ func (c *char) onExitField() {
 		return false
 	}, "aloy-exit")
 }
-

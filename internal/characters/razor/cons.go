@@ -1,4 +1,4 @@
-﻿package razor
+package razor
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -110,4 +110,3 @@ func (c *char) c6cb(a combat.AttackCB) {
 		sigilcb,
 	)
 }
-

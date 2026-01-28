@@ -1,4 +1,4 @@
-﻿package conditional
+package conditional
 
 import (
 	"fmt"
@@ -88,4 +88,3 @@ func parseTarget(c *core.Core, trg string) (*enemy.Enemy, error) {
 	}
 	return e, nil
 }
-

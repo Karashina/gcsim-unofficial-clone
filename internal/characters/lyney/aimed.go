@@ -1,4 +1,4 @@
-﻿package lyney
+package lyney
 
 import (
 	"fmt"
@@ -256,4 +256,3 @@ func (c *char) makeGrinMalkinHat(pos geometry.Point, hpDrained bool) func() {
 		}
 	}
 }
-

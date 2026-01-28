@@ -1,4 +1,4 @@
-﻿package heizou
+package heizou
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -128,4 +128,3 @@ func (c *char) irisDmg(t combat.Target) {
 
 	c.Core.QueueAttack(aiAbs, combat.NewCircleHitOnTarget(t, nil, 2.5), 0, 40) // if any of this is wrong blame Koli
 }
-

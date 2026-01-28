@@ -1,4 +1,4 @@
-﻿package starsilver
+package starsilver
 
 import (
 	"fmt"
@@ -75,4 +75,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("starsilver-%v", char.Base.Key.String()))
 	return w, nil
 }
-

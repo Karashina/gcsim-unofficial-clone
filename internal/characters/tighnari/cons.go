@@ -1,4 +1,4 @@
-﻿package tighnari
+package tighnari
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -102,4 +102,3 @@ func (c *char) c4() {
 	c.Core.Events.Subscribe(event.OnQuicken, f, "tighnari-c4-quicken")
 	c.Core.Events.Subscribe(event.OnSpread, f, "tighnari-c4-spread")
 }
-

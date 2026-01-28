@@ -1,4 +1,4 @@
-﻿package sucrose
+package sucrose
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"

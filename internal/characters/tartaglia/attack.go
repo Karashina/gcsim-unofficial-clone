@@ -1,4 +1,4 @@
-﻿package tartaglia
+package tartaglia
 
 import (
 	"fmt"
@@ -185,4 +185,3 @@ func (c *char) meleeAttack() action.Info {
 		State:           action.NormalAttackState,
 	}
 }
-

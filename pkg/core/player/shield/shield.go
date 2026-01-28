@@ -1,4 +1,4 @@
-﻿// Package shield provide a handler to keep track of shields and
+// Package shield provide a handler to keep track of shields and
 // add shields etc...
 package shield
 

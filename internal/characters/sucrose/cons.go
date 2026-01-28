@@ -1,4 +1,4 @@
-﻿package sucrose
+package sucrose
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -57,4 +57,3 @@ func (c *char) c6() {
 		})
 	}
 }
-

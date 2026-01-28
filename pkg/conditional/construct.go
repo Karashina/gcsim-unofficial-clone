@@ -1,4 +1,4 @@
-﻿package conditional
+package conditional
 
 import (
 	"fmt"
@@ -29,4 +29,3 @@ func evalConstruct(c *core.Core, fields []string) (int, error) {
 		return 0, fmt.Errorf("bad construct condition: invalid criteria %v", v)
 	}
 }
-

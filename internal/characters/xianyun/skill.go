@@ -1,4 +1,4 @@
-﻿package xianyun
+package xianyun
 
 import (
 	"slices"
@@ -151,4 +151,3 @@ func (c *char) particleCB() func(combat.AttackCB) {
 		c.Core.QueueParticle(c.Base.Key.String(), particleCount, attributes.Anemo, c.ParticleDelay)
 	}
 }
-

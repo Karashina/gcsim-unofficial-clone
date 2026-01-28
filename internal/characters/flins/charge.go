@@ -1,4 +1,4 @@
-﻿package flins
+package flins
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -88,4 +88,3 @@ func (c *char) chargeE() (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
-

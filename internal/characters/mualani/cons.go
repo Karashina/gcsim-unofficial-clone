@@ -1,4 +1,4 @@
-﻿package mualani
+package mualani
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -80,4 +80,3 @@ func (c *char) c6() {
 	}
 	c.c1Done = false
 }
-

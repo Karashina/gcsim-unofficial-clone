@@ -1,4 +1,4 @@
-﻿package eval
+package eval
 
 import (
 	"fmt"
@@ -232,4 +232,3 @@ func fromConstant(x constant.Value) Obj {
 		return &null{}
 	}
 }
-

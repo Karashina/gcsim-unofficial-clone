@@ -1,4 +1,4 @@
-﻿package combat
+package combat
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -73,4 +73,3 @@ type Snapshot struct {
 	SourceFrame int           // frame snapshot was generated at
 	Logs        []interface{} // logs for the snapshot
 }
-

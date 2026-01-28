@@ -1,4 +1,4 @@
-﻿package raiden
+package raiden
 
 import (
 	"errors"
@@ -295,4 +295,3 @@ func (c *char) plungeCollisionB(delay int) {
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 1), delay, delay)
 }
-

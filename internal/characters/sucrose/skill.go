@@ -1,4 +1,4 @@
-﻿package sucrose
+package sucrose
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -80,4 +80,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, 0.4*60, false)
 	c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Anemo, c.ParticleDelay)
 }
-

@@ -1,4 +1,4 @@
-﻿package eval
+package eval
 
 import (
 	"fmt"
@@ -260,4 +260,3 @@ func (e *Eval) evalSwitchStmt(swt *ast.SwitchStmt, env *Env) (Obj, error) {
 	}
 	return &null{}, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package keys
+package keys
 
 import (
 	"encoding/json"
@@ -121,4 +121,3 @@ var CharKeyToEle = map[Char]attributes.Element{
 	LumineCryo:       attributes.Cryo,
 	TestCharDoNotUse: attributes.Geo,
 }
-

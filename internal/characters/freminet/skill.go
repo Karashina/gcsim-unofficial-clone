@@ -1,4 +1,4 @@
-﻿package freminet
+package freminet
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -246,4 +246,3 @@ func (c *char) particleCBLv4(a combat.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), particles, attributes.Cryo, c.ParticleDelay)
 }
-

@@ -1,4 +1,4 @@
-﻿package dendro
+package dendro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -82,4 +82,3 @@ func (c *Traveler) a4Init() {
 		},
 	})
 }
-

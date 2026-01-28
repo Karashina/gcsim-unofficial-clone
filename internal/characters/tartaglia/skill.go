@@ -1,4 +1,4 @@
-﻿package tartaglia
+package tartaglia
 
 import (
 	"math"
@@ -227,4 +227,3 @@ func (c *char) onExitMeleeStance(delay int) {
 	}
 	c.DeleteStatus(meleeKey)
 }
-

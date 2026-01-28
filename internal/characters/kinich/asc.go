@@ -1,4 +1,4 @@
-﻿package kinich
+package kinich
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/template/nightsoul"
@@ -79,4 +79,3 @@ func (c *char) a4Amount() float64 {
 	c.DeleteStatus(a4StackKey)
 	return 3.2 * float64(stacks) * c.TotalAtk()
 }
-

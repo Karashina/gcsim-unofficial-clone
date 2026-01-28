@@ -1,4 +1,4 @@
-﻿package reactable_test
+package reactable_test
 
 import (
 	"fmt"
@@ -433,4 +433,3 @@ func TestQuickenBurningDecay(t *testing.T) {
 		fmt.Printf("%v: %v\n", i, trg[0].ActiveAuraString())
 	}
 }
-

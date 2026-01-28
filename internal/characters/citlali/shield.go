@@ -1,4 +1,4 @@
-﻿package citlali
+package citlali
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -27,4 +27,3 @@ func (c *char) addShield() {
 	}
 	c.Core.Player.Shields.Add(c.skillShield)
 }
-

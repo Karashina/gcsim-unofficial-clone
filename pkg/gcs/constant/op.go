@@ -1,4 +1,4 @@
-﻿package constant
+package constant
 
 import (
 	"errors"
@@ -189,4 +189,3 @@ func BinaryOp(op ast.Token, left, right Value) (Value, error) {
 
 	return nil, fmt.Errorf("invalid binary operator %v%v%v", left.Inspect(), op, right.Inspect())
 }
-

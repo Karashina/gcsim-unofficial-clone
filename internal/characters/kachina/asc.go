@@ -1,4 +1,4 @@
-﻿package kachina
+package kachina
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -34,4 +34,3 @@ func (c *char) a4() {
 		c.a4flat = c.TotalDef(false) * 0.2
 	}
 }
-

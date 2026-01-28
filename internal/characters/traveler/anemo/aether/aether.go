@@ -1,4 +1,4 @@
-﻿package aether
+package aether
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/common/anemo"
@@ -30,4 +30,3 @@ func init() {
 	core.RegisterCharFunc(keys.AetherAnemo, NewChar)
 	hacks.RegisterNOSpecialChar(keys.AetherAnemo)
 }
-

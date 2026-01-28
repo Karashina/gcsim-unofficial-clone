@@ -1,4 +1,4 @@
-﻿package character
+package character
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
@@ -90,4 +90,3 @@ func (c *Character) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
 
 	return heal
 }
-

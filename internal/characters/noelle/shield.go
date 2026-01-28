@@ -1,4 +1,4 @@
-﻿package noelle
+package noelle
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -43,4 +43,3 @@ func (n *noelleShield) OnDamage(dmg float64, ele attributes.Element, bonus float
 	}
 	return taken, ok
 }
-

@@ -1,4 +1,4 @@
-﻿package tighnari
+package tighnari
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -43,4 +43,3 @@ func (c *char) Init() error {
 
 	return nil
 }
-

@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"testing"
@@ -90,4 +90,3 @@ func TestCrystallizePyro(t *testing.T) {
 		t.Errorf("expecting 37.5 burning left, got %v", trg.Durability[Burning])
 	}
 }
-

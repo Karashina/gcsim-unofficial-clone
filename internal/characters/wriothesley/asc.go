@@ -1,4 +1,4 @@
-﻿package wriothesley
+package wriothesley
 
 import (
 	"math"
@@ -142,4 +142,3 @@ func (c *char) resetA4() {
 	}
 	c.a4Stack = 0
 }
-

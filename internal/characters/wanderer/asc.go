@@ -1,4 +1,4 @@
-﻿package wanderer
+package wanderer
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -194,4 +194,3 @@ func (c *char) deleteFromValidBuffs(ele attributes.Element) {
 	}
 	c.a1ValidBuffs = results
 }
-

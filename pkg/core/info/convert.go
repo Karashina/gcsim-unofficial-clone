@@ -1,4 +1,4 @@
-﻿package info
+package info
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -167,4 +167,3 @@ func ConvertRarity(q model.QualityType) int {
 		return 4
 	}
 }
-

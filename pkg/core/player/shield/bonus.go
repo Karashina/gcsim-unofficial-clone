@@ -1,4 +1,4 @@
-﻿package shield
+package shield
 
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 
@@ -95,4 +95,3 @@ func (h *Handler) AddShieldBonusMod(key string, dur int, f ShieldBonusModFunc) {
 	mod.Event.SetEnded(mod.Expiry)
 	h.shieldBonusMods[ind] = mod
 }
-

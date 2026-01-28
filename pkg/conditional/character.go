@@ -1,4 +1,4 @@
-﻿package conditional
+package conditional
 
 import (
 	"fmt"
@@ -142,4 +142,3 @@ func evalCharacterAbil(c *core.Core, char *character.CharWrapper, act action.Act
 		return 0, fmt.Errorf("bad character ability condition: invalid type %v", typ)
 	}
 }
-

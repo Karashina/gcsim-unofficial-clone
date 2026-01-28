@@ -1,4 +1,4 @@
-﻿package itto
+package itto
 
 import (
 	"fmt"
@@ -184,4 +184,3 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	}
 	return c.Character.AnimationStartDelay(k)
 }
-

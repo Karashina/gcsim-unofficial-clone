@@ -1,4 +1,4 @@
-﻿package navia
+package navia
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -147,4 +147,3 @@ func (c *char) calcCannonPos() geometry.Point {
 		c.Core.Rand,
 	)
 }
-

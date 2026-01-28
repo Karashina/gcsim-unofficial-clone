@@ -1,4 +1,4 @@
-﻿package filletblade
+package filletblade
 
 import (
 	"fmt"
@@ -75,4 +75,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("fillet-blade-%v", char.Base.Key.String()))
 	return w, nil
 }
-

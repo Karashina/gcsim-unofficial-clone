@@ -1,4 +1,4 @@
-﻿package shield
+package shield
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -146,4 +146,3 @@ func (h *Handler) Tick() {
 	}
 	h.shields = h.shields[:n]
 }
-

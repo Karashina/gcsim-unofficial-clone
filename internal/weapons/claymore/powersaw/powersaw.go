@@ -1,4 +1,4 @@
-﻿package powersaw
+package powersaw
 
 import (
 	"fmt"
@@ -116,4 +116,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	return w, nil
 }
-

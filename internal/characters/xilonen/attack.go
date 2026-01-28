@@ -1,4 +1,4 @@
-﻿package xilonen
+package xilonen
 
 import (
 	"fmt"
@@ -159,4 +159,3 @@ func (c *char) nightsoulAttack() action.Info {
 		},
 	}
 }
-

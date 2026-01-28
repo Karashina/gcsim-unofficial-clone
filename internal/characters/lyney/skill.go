@@ -1,4 +1,4 @@
-﻿package lyney
+package lyney
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -119,4 +119,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 
 	c.Core.QueueParticle(c.Base.Key.String(), particleCount, attributes.Pyro, c.ParticleDelay)
 }
-

@@ -1,4 +1,4 @@
-﻿package gaming
+package gaming
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -32,4 +32,3 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		State:           action.SkillState,
 	}, nil
 }
-

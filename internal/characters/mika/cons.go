@@ -1,4 +1,4 @@
-﻿package mika
+package mika
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -43,4 +43,3 @@ func (c *char) c6(char *character.CharWrapper) {
 		},
 	})
 }
-

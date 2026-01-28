@@ -1,4 +1,4 @@
-﻿package testhelper
+package testhelper
 
 import (
 	_ "embed"
@@ -57,11 +57,9 @@ func (c *Character) ModifyHPDebtByRatio(float64)                          {}
 func (c *Character) Heal(*info.HealInfo) (float64, float64)               { return 0, 0 }
 func (c *Character) Drain(*info.DrainInfo) float64                        { return 0 }
 func (c *Character) ReceiveHeal(hi *info.HealInfo, heal float64) float64  { return heal }
-
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := Character{}
 	c.CharWrapper = w
 	w.Character = &c
 	return nil
 }
-

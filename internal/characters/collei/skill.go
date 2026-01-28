@@ -1,4 +1,4 @@
-﻿package collei
+package collei
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -118,4 +118,3 @@ func (c *char) makeParticleCB() combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Dendro, c.ParticleDelay)
 	}
 }
-

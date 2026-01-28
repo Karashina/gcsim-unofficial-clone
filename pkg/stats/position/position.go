@@ -1,4 +1,4 @@
-﻿package position
+package position
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -55,4 +55,3 @@ func overlaps(targets []combat.Target) bool {
 func (b buffer) Flush(core *core.Core, result *stats.Result) {
 	result.TargetOverlap = b.targetOverlap
 }
-

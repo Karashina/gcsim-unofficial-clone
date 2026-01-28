@@ -1,4 +1,4 @@
-﻿package sethos
+package sethos
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -95,4 +95,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(skillParticleICDKey, 0.5*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 2, attributes.Electro, c.ParticleDelay)
 }
-

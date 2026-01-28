@@ -1,4 +1,4 @@
-﻿package neuvillette
+package neuvillette
 
 import (
 	"fmt"
@@ -12,4 +12,3 @@ func (c *char) Walk(p map[string]int) (action.Info, error) {
 	}
 	return c.Character.Walk(p)
 }
-

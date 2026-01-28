@@ -1,4 +1,4 @@
-﻿// package endstats collects a snapshot of relevant information right when a simulation
+// package endstats collects a snapshot of relevant information right when a simulation
 // ends, such as ending energy etc..
 package endstats
 
@@ -39,4 +39,3 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 		result.EndStats[c].EndingEnergy = b.endingEnergy[c]
 	}
 }
-

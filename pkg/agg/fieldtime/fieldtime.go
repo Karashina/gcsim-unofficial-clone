@@ -1,11 +1,11 @@
-﻿package fieldtime
+package fieldtime
 
 import (
-	calc "github.com/aclements/go-moremath/stats"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/agg"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
+	calc "github.com/aclements/go-moremath/stats"
 )
 
 func init() {
@@ -43,4 +43,3 @@ func (b *buffer) Flush(result *model.SimulationStatistics) {
 		result.FieldTime[i] = agg.ToDescriptiveStats(c)
 	}
 }
-

@@ -1,4 +1,4 @@
-﻿package shenhe
+package shenhe
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -58,4 +58,3 @@ func (c *char) c4CB(a combat.AttackCB) {
 	}
 	c.AddStatus(c4BuffKey, 3600, true) // 60 s
 }
-

@@ -1,4 +1,4 @@
-﻿package lynette
+package lynette
 
 import (
 	"fmt"
@@ -58,4 +58,3 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
-

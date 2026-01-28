@@ -1,4 +1,4 @@
-﻿package reactable_test
+package reactable_test
 
 import (
 	"math"
@@ -92,4 +92,3 @@ func TestElectroDoesNotReduceQuicken(t *testing.T) {
 			"expected electro attack to not reduce, got electro=%v", trg.Durability[reactable.Electro])
 	}
 }
-

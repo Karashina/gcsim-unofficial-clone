@@ -1,4 +1,4 @@
-﻿package sourcewaterdroplet
+package sourcewaterdroplet
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -30,4 +30,3 @@ func (s *Gadget) CalcTempDirection(trg geometry.Point) geometry.Point {
 
 func (s *Gadget) Type() targets.TargettableType                          { return targets.TargettableGadget }
 func (s *Gadget) Attack(*combat.AttackEvent, glog.Event) (float64, bool) { return 0, false }
-

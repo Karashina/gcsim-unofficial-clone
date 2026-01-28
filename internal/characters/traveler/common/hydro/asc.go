@@ -1,4 +1,4 @@
-﻿package hydro
+package hydro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/template/sourcewaterdroplet"
@@ -85,4 +85,3 @@ func (c *Traveler) newDroplet() *sourcewaterdroplet.Gadget {
 	droplet := sourcewaterdroplet.New(c.Core, pos, combat.GadgetTypSourcewaterDropletHydroTrav)
 	return droplet
 }
-

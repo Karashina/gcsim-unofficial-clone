@@ -1,4 +1,4 @@
-﻿package mizuki
+package mizuki
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -236,4 +236,3 @@ func (c *char) cloudTask(travel, src, hitmark int) {
 		c.cloudTask(travel, src, cloudHitInterval)
 	}, hitmark)
 }
-

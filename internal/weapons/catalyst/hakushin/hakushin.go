@@ -1,4 +1,4 @@
-﻿package hakushin
+package hakushin
 
 import (
 	"fmt"
@@ -106,4 +106,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	c.Events.Subscribe(event.OnHyperbloom, hrfunc(attributes.Dendro, "hr-hyperbloom", true), fmt.Sprintf("hakushin-ring-%v", char.Base.Key.String()))
 	return w, nil
 }
-

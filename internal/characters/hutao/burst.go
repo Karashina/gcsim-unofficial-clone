@@ -1,4 +1,4 @@
-﻿package hutao
+package hutao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -90,4 +90,3 @@ func (c *char) burstHealCB(atk combat.AttackCB) {
 	c.burstHealCount++
 	c.Core.Player.Heal(c.burstHealAmount)
 }
-

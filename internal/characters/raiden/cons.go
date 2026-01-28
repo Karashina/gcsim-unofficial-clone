@@ -1,4 +1,4 @@
-﻿package raiden
+package raiden
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -51,4 +51,3 @@ func (c *char) c6(ac combat.AttackCB) {
 		char.ReduceActionCooldown(action.ActionBurst, 60)
 	}
 }
-

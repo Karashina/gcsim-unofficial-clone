@@ -1,4 +1,4 @@
-﻿package character
+package character
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
@@ -74,4 +74,3 @@ func (c *Character) CurrentHPDebt() float64 {
 func (c *Character) CurrentHPDebtRatio() float64 {
 	return c.currentHPDebt / c.MaxHP()
 }
-

@@ -1,4 +1,4 @@
-﻿package xingqiu
+package xingqiu
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -160,4 +160,3 @@ func (c *char) summonSwordWave() {
 
 	c.AddStatus(burstICDKey, 60, true)
 }
-

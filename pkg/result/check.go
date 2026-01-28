@@ -1,4 +1,4 @@
-﻿package result
+package result
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
@@ -17,4 +17,3 @@ func IsCharacterComplete(char keys.Char) bool {
 	}
 	return true
 }
-

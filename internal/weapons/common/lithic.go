@@ -1,4 +1,4 @@
-﻿package common
+package common
 
 import (
 	"fmt"
@@ -52,4 +52,3 @@ func (l *Lithic) NewWeapon(c *core.Core, char *character.CharWrapper, p info.Wea
 
 	return l, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package chasca
+package chasca
 
 import (
 	"fmt"
@@ -85,4 +85,3 @@ func (c *char) a4() {
 		return false
 	}, "chasca-a4")
 }
-

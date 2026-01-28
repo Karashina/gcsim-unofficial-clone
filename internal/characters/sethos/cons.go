@@ -1,4 +1,4 @@
-﻿package sethos
+package sethos
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -143,4 +143,3 @@ func (c *char) makeC6cb(energy float64) combat.AttackCBFunc {
 		c.AddEnergy(c6Key, energy)
 	}
 }
-

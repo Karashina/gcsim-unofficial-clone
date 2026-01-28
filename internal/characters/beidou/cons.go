@@ -1,4 +1,4 @@
-﻿package beidou
+package beidou
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -60,4 +60,3 @@ func (c *char) makeC4Callback() combat.AttackCBFunc {
 		c.Core.QueueAttack(ai, combat.NewSingleTargetHit(trg.Key()), 0, 1)
 	}
 }
-

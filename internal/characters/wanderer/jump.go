@@ -1,4 +1,4 @@
-﻿package wanderer
+package wanderer
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -42,4 +42,3 @@ func (c *char) WindfavoredJump(p map[string]int) (action.Info, error) {
 		State:           action.JumpState,
 	}, nil
 }
-

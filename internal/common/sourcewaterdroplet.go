@@ -1,4 +1,4 @@
-﻿package common
+package common
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -30,4 +30,3 @@ func (s *SourcewaterDroplet) CalcTempDirection(trg geometry.Point) geometry.Poin
 
 func (s *SourcewaterDroplet) Type() targets.TargettableType                          { return targets.TargettableGadget }
 func (s *SourcewaterDroplet) Attack(*combat.AttackEvent, glog.Event) (float64, bool) { return 0, false }
-

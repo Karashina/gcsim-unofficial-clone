@@ -1,4 +1,4 @@
-﻿package cyno
+package cyno
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -114,4 +114,3 @@ func (c *char) chargeB() (action.Info, error) {
 		State:           action.ChargeAttackState,
 	}, nil
 }
-

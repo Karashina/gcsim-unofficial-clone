@@ -1,4 +1,4 @@
-﻿package xiao
+package xiao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -79,4 +79,3 @@ func (c *char) c6cb() combat.AttackCBFunc {
 		}
 	}
 }
-

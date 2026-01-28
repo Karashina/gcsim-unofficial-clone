@@ -1,4 +1,4 @@
-﻿package combat
+package combat
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -37,4 +37,3 @@ type TargetWithAura interface {
 	Target
 	AuraContains(e ...attributes.Element) bool
 }
-

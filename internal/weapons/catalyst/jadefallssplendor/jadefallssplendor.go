@@ -1,4 +1,4 @@
-﻿package jadefallssplendor
+package jadefallssplendor
 
 import (
 	"fmt"
@@ -92,4 +92,3 @@ func (w *Weapon) addEnergy(src int, energy float64, char *character.CharWrapper)
 		char.AddEnergy("jadefall-energy", energy)
 	}
 }
-

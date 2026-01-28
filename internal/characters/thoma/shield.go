@@ -1,4 +1,4 @@
-﻿package thoma
+package thoma
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -53,4 +53,3 @@ func (c *char) genShield(src string, shieldamt float64, shouldStack bool) {
 		}
 	}
 }
-

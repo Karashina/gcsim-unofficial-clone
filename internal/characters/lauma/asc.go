@@ -1,4 +1,4 @@
-﻿package lauma
+package lauma
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -161,4 +161,3 @@ func (c *char) applyResReduction() {
 		return false
 	}, "lauma-res-reduction")
 }
-

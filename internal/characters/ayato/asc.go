@@ -1,4 +1,4 @@
-﻿package ayato
+package ayato
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
@@ -41,4 +41,3 @@ func (c *char) a4() {
 	c.AddEnergy("ayato-a4", 2)
 	c.Core.Tasks.Add(c.a4, 60)
 }
-

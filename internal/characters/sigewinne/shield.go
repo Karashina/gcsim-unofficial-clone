@@ -1,4 +1,4 @@
-﻿package sigewinne
+package sigewinne
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -39,4 +39,3 @@ func (c *char) removeC2Shield() {
 	c.c2Shield.Expires = c.Core.F + 1
 	c.c2Shield = nil
 }
-

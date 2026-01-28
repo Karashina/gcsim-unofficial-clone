@@ -1,4 +1,4 @@
-﻿package eula
+package eula
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -281,4 +281,3 @@ func (c *char) holdParticleCB(a combat.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Cryo, c.ParticleDelay)
 }
-

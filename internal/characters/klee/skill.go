@@ -1,4 +1,4 @@
-﻿package klee
+package klee
 
 import (
 	"math"
@@ -164,4 +164,3 @@ func (c *char) makeParticleCB() combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Pyro, c.ParticleDelay)
 	}
 }
-

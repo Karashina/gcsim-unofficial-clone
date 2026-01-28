@@ -1,4 +1,4 @@
-﻿package mualani
+package mualani
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -209,4 +209,3 @@ func (c *char) surfingCB(a combat.AttackCB) {
 	enemy.AddStatus(momentumIcdKey, momentumIcd, false)
 	c.momentumStacks = min(c.momentumStacks+1, 3)
 }
-

@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -144,4 +144,3 @@ func (r *Reactable) burningCheck() {
 		r.DecayRate[BurningFuel] = 0
 	}
 }
-

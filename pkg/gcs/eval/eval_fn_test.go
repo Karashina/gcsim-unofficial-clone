@@ -1,4 +1,4 @@
-﻿package eval
+package eval
 
 import (
 	"fmt"
@@ -299,4 +299,3 @@ func TestIsEven(t *testing.T) {
 		t.Errorf("expecting result to be 0, got %v", val.ival)
 	}
 }
-

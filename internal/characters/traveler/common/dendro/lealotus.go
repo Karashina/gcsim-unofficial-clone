@@ -1,4 +1,4 @@
-﻿package dendro
+package dendro
 
 import (
 	"fmt"
@@ -255,4 +255,3 @@ func (s *LeaLotus) SetDirectionToClosestEnemy()     {}
 func (s *LeaLotus) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
-

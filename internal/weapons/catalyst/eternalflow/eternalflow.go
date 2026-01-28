@@ -1,4 +1,4 @@
-﻿package eternalflow
+package eternalflow
 
 import (
 	"fmt"
@@ -131,4 +131,3 @@ func (w *Weapon) onChangeHP() {
 		w.char.AddStatus(energyIcd, 12*60, true)
 	}
 }
-

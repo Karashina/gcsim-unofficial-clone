@@ -1,4 +1,4 @@
-﻿package ganyu
+package ganyu
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -63,4 +63,3 @@ func (c *char) makeParticleCB() combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), 2, attributes.Cryo, c.ParticleDelay)
 	}
 }
-

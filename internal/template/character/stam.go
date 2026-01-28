@@ -1,4 +1,4 @@
-﻿package character
+package character
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -186,4 +186,3 @@ func (c *Character) Walk(p map[string]int) (action.Info, error) {
 		State:           action.WalkState,
 	}, nil
 }
-

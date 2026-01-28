@@ -1,4 +1,4 @@
-﻿package nefer
+package nefer
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -29,4 +29,3 @@ func (c *char) a1() {
 	}
 	// Now handled via direct seed absorption in Charge/Phantasm attacks
 }
-

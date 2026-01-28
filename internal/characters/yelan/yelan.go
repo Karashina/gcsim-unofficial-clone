@@ -1,4 +1,4 @@
-﻿package yelan
+package yelan
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -96,4 +96,3 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 func (c *char) shouldDelay() bool {
 	return c.Core.Player.ActiveChar().NormalCounter == 1
 }
-

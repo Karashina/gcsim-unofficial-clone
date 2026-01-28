@@ -1,4 +1,4 @@
-﻿package abilities
+package abilities
 
 import (
 	"errors"
@@ -127,4 +127,3 @@ func advanceCoreFrame(c *core.Core) {
 	c.F++
 	c.Tick()
 }
-

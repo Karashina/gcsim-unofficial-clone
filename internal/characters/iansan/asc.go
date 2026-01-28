@@ -1,4 +1,4 @@
-﻿package iansan
+package iansan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -116,4 +116,3 @@ func (c *char) a4Task(src int) {
 		c.a4Task(src)
 	}, 2.8*60)
 }
-

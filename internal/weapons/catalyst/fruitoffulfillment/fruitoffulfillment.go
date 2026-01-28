@@ -1,4 +1,4 @@
-﻿package fruitoffulfillment
+package fruitoffulfillment
 
 import (
 	"fmt"
@@ -113,4 +113,3 @@ func (w *Weapon) checkStackLoss(src int) func() {
 		}
 	}
 }
-

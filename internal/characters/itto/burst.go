@@ -1,4 +1,4 @@
-﻿package itto
+package itto
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -131,4 +131,3 @@ func (c *char) onExitField() {
 		return false
 	}, "itto-exit")
 }
-

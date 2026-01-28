@@ -1,4 +1,4 @@
-﻿package character
+package character
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -96,4 +96,3 @@ func (c *CharWrapper) ReceiveParticle(p Particle, isActive bool, partyCount int)
 		Write("post_recovery", c.Energy).
 		Write("max_energy", c.EnergyMax)
 }
-

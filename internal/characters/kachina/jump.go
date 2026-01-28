@@ -1,4 +1,4 @@
-﻿package kachina
+package kachina
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -31,4 +31,3 @@ func (c *char) Jump(p map[string]int) (action.Info, error) {
 
 	return ai, err
 }
-

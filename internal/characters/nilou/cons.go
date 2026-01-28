@@ -1,4 +1,4 @@
-﻿package nilou
+package nilou
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -142,4 +142,3 @@ func (c *char) c6() {
 
 	c.QueueCharTask(c.c6, 60)
 }
-

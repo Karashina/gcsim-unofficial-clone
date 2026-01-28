@@ -1,4 +1,4 @@
-﻿package jean
+package jean
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -90,4 +90,3 @@ func (c *char) extraParticleCB(a combat.AttackCB) {
 		c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Anemo, c.ParticleDelay)
 	}
 }
-

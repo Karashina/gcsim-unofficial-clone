@@ -1,4 +1,4 @@
-﻿package xinyan
+package xinyan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -35,4 +35,3 @@ func (n *xinyanShield) OnDamage(dmg float64, ele attributes.Element, bonus float
 	}
 	return taken, ok
 }
-

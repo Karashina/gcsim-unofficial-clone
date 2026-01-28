@@ -1,4 +1,4 @@
-﻿package charlotte
+package charlotte
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -65,4 +65,3 @@ func (c *char) a4() {
 		},
 	})
 }
-

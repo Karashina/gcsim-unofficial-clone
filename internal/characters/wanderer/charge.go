@@ -1,4 +1,4 @@
-﻿package wanderer
+package wanderer
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -138,4 +138,3 @@ func (c *char) chargeWindupE() int {
 		return 0
 	}
 }
-

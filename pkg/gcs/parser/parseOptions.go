@@ -1,4 +1,4 @@
-﻿package parser
+package parser
 
 import (
 	"errors"
@@ -119,4 +119,3 @@ func parseOptions(p *Parser) (parseFn, error) {
 
 	return nil, errors.New("unexpected end of line while parsing options")
 }
-

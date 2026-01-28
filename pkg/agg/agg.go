@@ -1,4 +1,4 @@
-﻿package agg
+package agg
 
 import (
 	"sync"
@@ -38,4 +38,3 @@ func Register(cfg Config) {
 func Aggregators() map[string]Config {
 	return aggregators
 }
-

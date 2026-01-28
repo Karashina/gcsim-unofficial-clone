@@ -1,4 +1,4 @@
-﻿package ineffa
+package ineffa
 
 import (
 	"errors"
@@ -161,4 +161,3 @@ func (c *char) plungeCollision(delay int) {
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1), delay, delay)
 }
-

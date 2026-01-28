@@ -1,4 +1,4 @@
-﻿package flute
+package flute
 
 import (
 	"fmt"
@@ -83,4 +83,3 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, fmt.Sprintf("flute-%v", char.Base.Key.String()))
 	return w, nil
 }
-

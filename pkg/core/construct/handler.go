@@ -1,4 +1,4 @@
-﻿package construct
+package construct
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
@@ -247,4 +247,3 @@ func (h *Handler) Destroy(key int) bool {
 	h.consNoLimit = h.consNoLimit[:n]
 	return ok
 }
-

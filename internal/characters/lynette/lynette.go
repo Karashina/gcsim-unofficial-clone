@@ -1,4 +1,4 @@
-﻿package lynette
+package lynette
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -124,4 +124,3 @@ func (c *char) WeaponReactionHandler() {
 		return false
 	}, "lynette-infusion")
 }
-

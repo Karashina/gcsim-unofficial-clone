@@ -1,4 +1,4 @@
-﻿package shortcut
+package shortcut
 
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 
@@ -143,4 +143,3 @@ var SetNameToKey = map[string]keys.Set{
 	"wanderers":                          keys.WanderersTroupe,
 	"wt":                                 keys.WanderersTroupe,
 }
-

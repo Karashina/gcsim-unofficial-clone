@@ -1,4 +1,4 @@
-﻿package noelle
+package noelle
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -82,4 +82,3 @@ func (c *char) makeA4CB() combat.AttackCBFunc {
 		}
 	}
 }
-

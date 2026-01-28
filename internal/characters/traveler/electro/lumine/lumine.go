@@ -1,4 +1,4 @@
-﻿package lumine
+package lumine
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/common/electro"
@@ -28,4 +28,3 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 func init() {
 	core.RegisterCharFunc(keys.LumineElectro, NewChar)
 }
-

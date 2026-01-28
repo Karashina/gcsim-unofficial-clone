@@ -1,4 +1,4 @@
-﻿package yunjin
+package yunjin
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -35,4 +35,3 @@ func (c *char) a4() float64 {
 	}
 	return 0.025 * float64(c.partyElementalTypes)
 }
-

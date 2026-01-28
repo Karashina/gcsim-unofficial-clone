@@ -1,4 +1,4 @@
-﻿package kirara
+package kirara
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -279,4 +279,3 @@ func (c *char) generateSkillShield() {
 	}
 	player.ApplySelfInfusion(attributes.Dendro, 25, 0.1*60)
 }
-

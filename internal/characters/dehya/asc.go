@@ -1,4 +1,4 @@
-﻿package dehya
+package dehya
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -91,4 +91,3 @@ func (c *char) a4DotHeal(count int) func() {
 		c.QueueCharTask(c.a4DotHeal(count+1), a4DoTHealInterval)
 	}
 }
-

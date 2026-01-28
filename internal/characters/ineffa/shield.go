@@ -1,4 +1,4 @@
-﻿package ineffa
+package ineffa
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -26,4 +26,3 @@ func (c *char) genShield(src string, shieldamt float64) {
 func (c *char) shieldHP() float64 {
 	return shieldPct[c.TalentLvlSkill()]*c.TotalAtk() + shieldCst[c.TalentLvlSkill()]
 }
-

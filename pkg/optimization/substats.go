@@ -1,4 +1,4 @@
-﻿package optimization
+package optimization
 
 import (
 	"fmt"
@@ -349,4 +349,3 @@ func PrettyPrintStatsCounts(statsCounts []int) string {
 	}
 	return strings.Trim(sb.String(), " ")
 }
-

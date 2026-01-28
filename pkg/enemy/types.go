@@ -1,4 +1,4 @@
-﻿package enemy
+package enemy
 
 import (
 	"fmt"
@@ -94,4 +94,3 @@ func getMonsterInfo(name string) (info.EnemyProfile, error) {
 		MonsterName:   result.Key,
 	}, nil
 }
-

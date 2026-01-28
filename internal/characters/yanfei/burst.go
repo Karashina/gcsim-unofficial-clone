@@ -1,4 +1,4 @@
-﻿package yanfei
+package yanfei
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -113,4 +113,3 @@ func (c *char) burstAddSealHook() func() {
 		c.Core.Tasks.Add(c.burstAddSealHook(), 60)
 	}
 }
-

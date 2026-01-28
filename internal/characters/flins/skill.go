@@ -1,4 +1,4 @@
-﻿package flins
+package flins
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -98,4 +98,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, 2.1*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Electro, c.ParticleDelay)
 }
-

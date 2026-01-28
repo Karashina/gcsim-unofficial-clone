@@ -1,4 +1,4 @@
-﻿package splendoroftranquilwaters
+package splendoroftranquilwaters
 
 import (
 	"fmt"
@@ -161,4 +161,3 @@ func (w *Weapon) onOtherChangeHP() {
 		},
 	})
 }
-

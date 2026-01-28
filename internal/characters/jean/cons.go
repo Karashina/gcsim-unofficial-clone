@@ -1,4 +1,4 @@
-﻿package jean
+package jean
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -63,4 +63,3 @@ func (c *char) c4() {
 func (c *char) c6() {
 	c.Core.Log.NewEvent("jean-c6 not implemented", glog.LogCharacterEvent, c.Index)
 }
-

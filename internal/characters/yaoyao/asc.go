@@ -1,4 +1,4 @@
-﻿package yaoyao
+package yaoyao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -83,4 +83,3 @@ func (c *char) a4(index, src int) func() {
 		c.QueueCharTask(c.a4(index, src), 60)
 	}
 }
-

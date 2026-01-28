@@ -1,4 +1,4 @@
-﻿package cyno
+package cyno
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -185,4 +185,3 @@ func (c *char) makeParticleCB(burst bool) combat.AttackCBFunc {
 		c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Electro, c.ParticleDelay)
 	}
 }
-

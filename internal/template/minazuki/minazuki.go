@@ -1,4 +1,4 @@
-﻿// package minazuki provides common implementation for abilities that trigger
+// package minazuki provides common implementation for abilities that trigger
 // based on normal animation state, i.e. xingqiu burst
 package minazuki
 
@@ -220,4 +220,3 @@ func (w *Watcher) tickerFunc(src int) func() {
 		w.queueTick(src)
 	}
 }
-

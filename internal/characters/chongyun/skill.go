@@ -1,4 +1,4 @@
-﻿package chongyun
+package chongyun
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -174,4 +174,3 @@ func (c *char) infuse(active *character.CharWrapper) {
 		return
 	}
 }
-

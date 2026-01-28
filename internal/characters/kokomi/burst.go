@@ -1,4 +1,4 @@
-﻿package kokomi
+package kokomi
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -166,4 +166,3 @@ func (c *char) onExitField() {
 		return false
 	}, "kokomi-exit")
 }
-

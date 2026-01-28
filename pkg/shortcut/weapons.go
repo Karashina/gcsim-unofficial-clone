@@ -1,4 +1,4 @@
-﻿package shortcut
+package shortcut
 
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 

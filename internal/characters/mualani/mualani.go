@@ -1,4 +1,4 @@
-﻿package mualani
+package mualani
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -131,4 +131,3 @@ func (c *char) onExitField() {
 		return false
 	}, "mualani-exit")
 }
-

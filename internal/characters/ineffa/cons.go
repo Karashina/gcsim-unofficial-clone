@@ -1,4 +1,4 @@
-﻿package ineffa
+package ineffa
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -92,4 +92,3 @@ func (c *char) c6() {
 		return false
 	}, "ineffa-c6")
 }
-

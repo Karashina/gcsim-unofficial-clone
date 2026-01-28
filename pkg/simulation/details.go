@@ -1,4 +1,4 @@
-﻿package simulation
+package simulation
 
 import (
 	"fmt"
@@ -49,12 +49,12 @@ func (s *Simulation) CharacterDetails() []*model.Character {
 			Abil:      "stats-check",
 			AttackTag: attacks.AttackTagNone,
 		})
-		
+
 		// Store base stats before calculation
 		out[i].BaseHP = snap.Stats[attributes.BaseHP]
 		out[i].BaseATK = snap.Stats[attributes.BaseATK]
 		out[i].BaseDEF = snap.Stats[attributes.BaseDEF]
-		
+
 		// Calculate and store final stats at simulation start
 		out[i].FinalHP = snap.Stats.MaxHP()
 		out[i].FinalATK = snap.Stats.TotalATK()
@@ -63,7 +63,7 @@ func (s *Simulation) CharacterDetails() []*model.Character {
 		out[i].FinalCR = snap.Stats[attributes.CR]
 		out[i].FinalCD = snap.Stats[attributes.CD]
 		out[i].FinalER = snap.Stats[attributes.ER]
-		
+
 		// convert all atk%, def% and hp% into flat amounts by tacking on base
 		snap.Stats[attributes.HP] = snap.Stats.MaxHP()
 		snap.Stats[attributes.DEF] = snap.Stats.TotalDEF()
@@ -88,4 +88,3 @@ func (s *Simulation) CharacterDetails() []*model.Character {
 
 	return out
 }
-

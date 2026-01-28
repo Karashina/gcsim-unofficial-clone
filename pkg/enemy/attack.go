@@ -1,4 +1,4 @@
-﻿package enemy
+package enemy
 
 import (
 	"log"
@@ -255,4 +255,3 @@ func (e *Enemy) applyDamage(atk *combat.AttackEvent, damage float64) float64 {
 	// - duration mode (no concept of killing blow)
 	return damage
 }
-

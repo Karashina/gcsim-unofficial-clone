@@ -1,4 +1,4 @@
-﻿package flins
+package flins
 
 import (
 	_ "embed"
@@ -158,4 +158,3 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 func (c *char) InitLCallback() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.onSpecialLunarChargedFlins, "lc-flins-special")
 }
-

@@ -1,4 +1,4 @@
-﻿package lanyan
+package lanyan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -45,4 +45,3 @@ func (c *char) hasShield() bool {
 func (c *char) shieldHP() float64 {
 	return shieldAmt[c.TalentLvlSkill()]*c.TotalAtk() + shieldFlat[c.TalentLvlSkill()]
 }
-

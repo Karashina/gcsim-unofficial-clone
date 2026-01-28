@@ -29,7 +29,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	// Initial skill damage (AoE Hydro DMG)
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "Eternal Tides",
+		Abil:       "Eternal Tides (E)",
 		AttackTag:  attacks.AttackTagElementalArt,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -103,7 +103,7 @@ func (c *char) gravityRippleTick(src int) func() {
 
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
-			Abil:       "Gravity Ripple",
+			Abil:       "Gravity Ripple (E)",
 			AttackTag:  attacks.AttackTagElementalArt,
 			ICDTag:     attacks.ICDTagNone,
 			ICDGroup:   attacks.ICDGroupDefault,
@@ -274,7 +274,7 @@ func (c *char) triggerGravityInterference() {
 func (c *char) gravityInterferenceLC() {
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
-		Abil:             "Gravity Interference (Lunar-Charged)",
+		Abil:             "Gravity Interference (Lunar-Charged / E)",
 		AttackTag:        attacks.AttackTagLCDamage,
 		ICDTag:           attacks.ICDTagNone,
 		ICDGroup:         attacks.ICDGroupDefault,
@@ -286,7 +286,7 @@ func (c *char) gravityInterferenceLC() {
 
 	// HP scaling with Lunar-Charged formula
 	em := c.Stat(attributes.EM)
-	baseDmg := c.MaxHP() * gravityInterfLC[c.TalentLvlSkill()]
+	baseDmg := c.MaxHP() * gravityInterfLC[c.TalentLvlSkill()] * 3
 	emBonus := (6 * em) / (2000 + em)
 	ai.FlatDmg = baseDmg * (1 + emBonus + c.LCReactBonus(ai))
 
@@ -320,7 +320,7 @@ func (c *char) gravityInterferenceLB() {
 		c.Core.Tasks.Add(func() {
 			ai := combat.AttackInfo{
 				ActorIndex:       c.Index,
-				Abil:             "Gravity Interference (Lunar-Bloom)",
+				Abil:             "Gravity Interference (Lunar-Bloom / E)",
 				AttackTag:        attacks.AttackTagLBDamage,
 				ICDTag:           attacks.ICDTagNone,
 				ICDGroup:         attacks.ICDGroupDefault,
@@ -363,7 +363,7 @@ func (c *char) gravityInterferenceLB() {
 func (c *char) gravityInterferenceLCrs() {
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
-		Abil:             "Gravity Interference (Lunar-Crystallize)",
+		Abil:             "Gravity Interference (Lunar-Crystallize / E)",
 		AttackTag:        attacks.AttackTagLCrsDamage,
 		ICDTag:           attacks.ICDTagNone,
 		ICDGroup:         attacks.ICDGroupDefault,
@@ -375,7 +375,7 @@ func (c *char) gravityInterferenceLCrs() {
 
 	// HP scaling with Lunar-Crystallize formula
 	em := c.Stat(attributes.EM)
-	baseDmg := c.MaxHP() * gravityInterfLCrs[c.TalentLvlSkill()]
+	baseDmg := c.MaxHP() * gravityInterfLCrs[c.TalentLvlSkill()] * 1.6
 	emBonus := (6 * em) / (2000 + em)
 	ai.FlatDmg = baseDmg * (1 + emBonus + c.LCrsReactBonus(ai))
 

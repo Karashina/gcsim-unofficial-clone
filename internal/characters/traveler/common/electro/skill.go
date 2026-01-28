@@ -1,4 +1,4 @@
-﻿package electro
+package electro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -194,4 +194,3 @@ func (c *Traveler) collectAmulets(collector *character.CharWrapper) bool {
 
 	return true
 }
-

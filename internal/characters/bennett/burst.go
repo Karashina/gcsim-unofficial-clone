@@ -1,4 +1,4 @@
-﻿package bennett
+package bennett
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -160,4 +160,3 @@ func (c *char) applyBennettField(stats [attributes.EndStatType]float64, firstTic
 		}
 	}
 }
-

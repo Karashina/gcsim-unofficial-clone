@@ -1,4 +1,4 @@
-﻿package lauma
+package lauma
 
 import (
 	"math"

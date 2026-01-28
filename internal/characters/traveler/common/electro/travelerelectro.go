@@ -1,4 +1,4 @@
-﻿package electro
+package electro
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/common"
@@ -54,4 +54,3 @@ func (c *Traveler) AnimationStartDelay(k model.AnimationDelayKey) int {
 		return c.Character.AnimationStartDelay(k)
 	}
 }
-

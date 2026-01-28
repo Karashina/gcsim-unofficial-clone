@@ -1,4 +1,4 @@
-﻿package construct
+package construct
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
@@ -53,4 +53,3 @@ type Construct interface {
 	Direction() geometry.Point
 	Pos() geometry.Point
 }
-

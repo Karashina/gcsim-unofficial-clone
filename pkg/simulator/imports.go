@@ -1,4 +1,4 @@
-﻿package simulator
+package simulator
 
 import (
 	// Aggregators
@@ -15,4 +15,3 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/pkg/agg/shield"
 	_ "github.com/Karashina/gcsim-unofficial-clone/pkg/agg/warnings"
 )
-

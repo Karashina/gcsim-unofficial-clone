@@ -1,4 +1,4 @@
-﻿package yelan
+package yelan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -133,4 +133,3 @@ func (c *char) summonExquisiteThrow() {
 		)
 	}
 }
-

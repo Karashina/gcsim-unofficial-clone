@@ -1,4 +1,4 @@
-﻿package lynette
+package lynette
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -231,4 +231,3 @@ func (c *char) skillDrain(count int) func() {
 		c.QueueCharTask(c.skillDrain(count), 1*60)
 	}
 }
-

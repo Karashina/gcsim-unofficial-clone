@@ -1,4 +1,4 @@
-﻿package candace
+package candace
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -155,4 +155,3 @@ func (c *char) burstInit(char *character.CharWrapper) {
 		},
 	})
 }
-

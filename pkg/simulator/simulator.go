@@ -1,4 +1,4 @@
-﻿package simulator
+package simulator
 
 import (
 	"context"
@@ -311,4 +311,3 @@ func ReadConfig(fpath string) (string, error) {
 
 	return data.String(), nil
 }
-

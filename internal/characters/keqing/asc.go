@@ -1,4 +1,4 @@
-﻿package keqing
+package keqing
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -44,4 +44,3 @@ func (c *char) a4() {
 		},
 	})
 }
-

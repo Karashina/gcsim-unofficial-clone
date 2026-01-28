@@ -1,4 +1,4 @@
-﻿package lanyan
+package lanyan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -123,4 +123,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.particleGenerated = true
 	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Anemo, c.ParticleDelay)
 }
-

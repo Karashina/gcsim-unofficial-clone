@@ -1,4 +1,4 @@
-﻿package yelan
+package yelan
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -168,4 +168,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, 0.3*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Hydro, c.ParticleDelay) // TODO: this used to be 82?
 }
-

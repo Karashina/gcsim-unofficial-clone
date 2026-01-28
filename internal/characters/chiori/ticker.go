@@ -1,4 +1,4 @@
-﻿package chiori
+package chiori
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -69,4 +69,3 @@ func (g *ticker) tick() {
 		g.queuer(g.tick, g.interval)
 	}
 }
-

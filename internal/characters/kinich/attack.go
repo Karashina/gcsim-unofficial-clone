@@ -1,4 +1,4 @@
-﻿package kinich
+package kinich
 
 import (
 	"fmt"
@@ -200,4 +200,3 @@ func (c *char) NextMoveIsInBlindSpot(direction int) (bool, float64) {
 	}
 	return false, -1
 }
-

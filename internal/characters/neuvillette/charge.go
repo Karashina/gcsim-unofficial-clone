@@ -1,4 +1,4 @@
-﻿package neuvillette
+package neuvillette
 
 import (
 	"fmt"
@@ -310,4 +310,3 @@ func (c *char) consumeDroplet(g *sourcewaterdroplet.Gadget) {
 		})
 	}, 5)
 }
-

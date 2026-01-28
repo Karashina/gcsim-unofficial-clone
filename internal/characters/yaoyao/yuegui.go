@@ -1,4 +1,4 @@
-﻿package yaoyao
+package yaoyao
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -181,4 +181,3 @@ func (yg *yuegui) SetDirectionToClosestEnemy()                            {}
 func (yg *yuegui) CalcTempDirection(trg geometry.Point) geometry.Point {
 	return geometry.DefaultDirection()
 }
-

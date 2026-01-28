@@ -1,4 +1,4 @@
-﻿package fischl
+package fischl
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"

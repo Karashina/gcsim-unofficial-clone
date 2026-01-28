@@ -1,4 +1,4 @@
-﻿package ast
+package ast
 
 import (
 	"fmt"
@@ -429,4 +429,3 @@ func (l *Lexer) atTerminator() bool {
 	}
 	return false
 }
-

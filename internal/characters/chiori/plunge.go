@@ -1,4 +1,4 @@
-﻿package chiori
+package chiori
 
 import (
 	"errors"
@@ -69,4 +69,3 @@ func (c *char) lowPlungeC() action.Info {
 		State:           action.PlungeAttackState,
 	}
 }
-

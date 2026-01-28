@@ -1,4 +1,4 @@
-﻿package combat
+package combat
 
 import (
 	"math/rand"
@@ -141,4 +141,3 @@ func newCombatCtrl() *Handler {
 		EnableHitlag: true,
 	})
 }
-

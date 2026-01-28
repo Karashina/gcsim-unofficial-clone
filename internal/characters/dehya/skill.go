@@ -1,4 +1,4 @@
-﻿package dehya
+package dehya
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -357,4 +357,3 @@ func (c *char) skillSelfDoT() {
 		})
 	}
 }
-

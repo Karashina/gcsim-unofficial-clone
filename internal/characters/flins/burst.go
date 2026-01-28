@@ -1,4 +1,4 @@
-﻿package flins
+package flins
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -136,4 +136,3 @@ func (c *char) lcCloudCheck() bool {
 	}
 	return false
 }
-

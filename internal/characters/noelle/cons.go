@@ -1,4 +1,4 @@
-﻿package noelle
+package noelle
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -30,4 +30,3 @@ func (c *char) c2() {
 		return 0, false
 	})
 }
-

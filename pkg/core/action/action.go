@@ -1,4 +1,4 @@
-﻿// Package action describes the valid actions that any character may take
+// Package action describes the valid actions that any character may take
 package action
 
 import (
@@ -208,4 +208,3 @@ var statestr = []string{
 func (a AnimationState) String() string {
 	return statestr[a]
 }
-

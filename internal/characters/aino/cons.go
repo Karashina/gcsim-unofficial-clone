@@ -1,4 +1,4 @@
-﻿package aino
+package aino
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -213,4 +213,3 @@ func (c *char) c6() {
 		return false
 	}, "aino-c6-bloom")
 }
-

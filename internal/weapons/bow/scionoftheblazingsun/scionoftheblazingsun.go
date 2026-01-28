@@ -1,4 +1,4 @@
-﻿package scionoftheblazingsun
+package scionoftheblazingsun
 
 import (
 	"fmt"
@@ -105,4 +105,3 @@ func (w *Weapon) applyDebuff(a combat.AttackCB) {
 	}
 	e.AddStatus(debuffKey, 10*60, true)
 }
-

@@ -1,4 +1,4 @@
-﻿package itto
+package itto
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -67,4 +67,3 @@ func (c *char) a4(ai *combat.AttackInfo) {
 	ai.FlatDmg = c.TotalDef(false) * 0.35
 	c.Core.Log.NewEvent("itto-a4 applied", glog.LogCharacterEvent, c.Index)
 }
-

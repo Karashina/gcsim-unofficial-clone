@@ -1,4 +1,4 @@
-﻿package qiqi
+package qiqi
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -164,4 +164,3 @@ func (c *char) skillHealTickTask(src int) func() {
 		c.Core.Tasks.Add(c.skillHealTickTask(src), 4.5*60)
 	}
 }
-

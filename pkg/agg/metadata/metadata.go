@@ -1,4 +1,4 @@
-﻿package metadata
+package metadata
 
 import (
 	"math"
@@ -61,4 +61,3 @@ func (b buffer) Flush(result *model.SimulationStatistics) {
 	result.P50Seed = strconv.FormatUint(agg.Median(b.runs).seed, 10)
 	result.P75Seed = strconv.FormatUint(agg.Median(b.runs[c2:]).seed, 10)
 }
-

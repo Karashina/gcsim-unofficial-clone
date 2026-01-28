@@ -1,4 +1,4 @@
-﻿package kaeya
+package kaeya
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -102,4 +102,3 @@ func (c *char) c4() {
 		return false
 	}, "kaeya-c4")
 }
-

@@ -1,4 +1,4 @@
-﻿package varesa
+package varesa
 
 import (
 	"errors"
@@ -354,4 +354,3 @@ func (c *char) getApexDrive() {
 		c.AddEnergy("varesa-c6", 30)
 	}
 }
-

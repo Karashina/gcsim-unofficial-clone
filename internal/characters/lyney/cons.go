@@ -1,4 +1,4 @@
-﻿package lyney
+package lyney
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -161,4 +161,3 @@ func (c *char) c6(c6Travel int) {
 		c.makeC4CB(),
 	)
 }
-

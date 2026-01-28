@@ -1,4 +1,4 @@
-﻿package sucrose
+package sucrose
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -92,4 +92,3 @@ func (c *char) a4() {
 		Write("em snapshot", c.a4Buff[attributes.EM]).
 		Write("expiry", c.Core.F+480)
 }
-

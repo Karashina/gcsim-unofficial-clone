@@ -1,4 +1,4 @@
-﻿package keqing
+package keqing
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -111,4 +111,3 @@ func (c *char) WeaponReactionHandler() {
 		return false
 	}, "keqing-infusion")
 }
-

@@ -1,4 +1,4 @@
-﻿package gorou
+package gorou
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -128,4 +128,3 @@ func (c *char) gorouSkillBuffField(src int) func() {
 		c.Core.Tasks.Add(c.gorouSkillBuffField(src), 18)
 	}
 }
-

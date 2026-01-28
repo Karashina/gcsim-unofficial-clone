@@ -1,4 +1,4 @@
-﻿package kachina
+package kachina
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -50,4 +50,3 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		State:           action.BurstState,
 	}, nil
 }
-

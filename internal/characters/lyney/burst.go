@@ -1,4 +1,4 @@
-﻿package lyney
+package lyney
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -119,4 +119,3 @@ func (c *char) explosiveFirework() {
 
 	c.increasePropSurplusStacks()
 }
-

@@ -1,4 +1,4 @@
-﻿package reactable_test
+package reactable_test
 
 import (
 	"time"
@@ -73,4 +73,3 @@ func advanceCoreFrame(c *core.Core) {
 	c.F++
 	c.Tick()
 }
-

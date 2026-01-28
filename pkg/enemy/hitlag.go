@@ -1,4 +1,4 @@
-﻿package enemy
+package enemy
 
 import (
 	"fmt"
@@ -73,4 +73,3 @@ func (e *Enemy) Tick() {
 	e.queue.Run()
 	e.Reactable.Tick()
 }
-

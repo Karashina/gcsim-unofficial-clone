@@ -1,4 +1,4 @@
-﻿package heartstrings
+package heartstrings
 
 import (
 	"fmt"
@@ -164,4 +164,3 @@ func (w *Weapon) OnUpdateStack() {
 	}
 	w.prevStacks = stacks
 }
-

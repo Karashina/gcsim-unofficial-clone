@@ -1,4 +1,4 @@
-﻿package dehya
+package dehya
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -175,4 +175,3 @@ func (c *char) burstKick(src int) action.Info {
 		State:           action.Idle,                   // TODO: cannot use burst state because burst state implies iframes
 	}
 }
-

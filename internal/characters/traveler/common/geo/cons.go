@@ -1,4 +1,4 @@
-﻿package geo
+package geo
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -51,4 +51,3 @@ func (c *Traveler) c1(ticks int) func() {
 		c.Core.Tasks.Add(c.c1(ticks), 60)
 	}
 }
-

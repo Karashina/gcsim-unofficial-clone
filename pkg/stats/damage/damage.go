@@ -1,4 +1,4 @@
-﻿package damage
+package damage
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -144,4 +144,3 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 		}
 	}
 }
-

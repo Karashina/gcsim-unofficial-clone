@@ -1,4 +1,4 @@
-﻿package xilonen
+package xilonen
 
 import (
 	"slices"
@@ -112,4 +112,3 @@ func (c *char) a4MaxPoints(t combat.Target, ae *combat.AttackEvent) {
 	c.AddStatus(a4IcdKey, 14*60, true)
 	c.Core.Events.Emit(event.OnNightsoulBurst, t, ae)
 }
-

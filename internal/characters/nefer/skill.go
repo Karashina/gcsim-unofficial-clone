@@ -1,4 +1,4 @@
-﻿package nefer
+package nefer
 
 import (
 	"reflect"
@@ -135,4 +135,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	}
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Dendro, c.ParticleDelay)
 }
-

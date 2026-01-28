@@ -1,4 +1,4 @@
-﻿package xianyun
+package xianyun
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -100,4 +100,3 @@ func (c *char) c6mod(snap *combat.Snapshot) {
 		Write("old", old).
 		Write("new", snap.Stats[attributes.CD])
 }
-

@@ -1,4 +1,4 @@
-﻿package characters
+package characters
 
 import (
 	"errors"
@@ -84,4 +84,3 @@ func TestBeidouBounce(t *testing.T) {
 		t.Errorf("expecting target 1 (key %v) to take 2 hits, got %v", trg[1].Key(), dmgCount[trg[1].Key()])
 	}
 }
-

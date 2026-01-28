@@ -1,4 +1,4 @@
-﻿package swap
+package swap
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -52,4 +52,3 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 	result.ActiveCharacters = b.activeIntervals
 	result.ActiveCharacters = append(result.ActiveCharacters, interval)
 }
-

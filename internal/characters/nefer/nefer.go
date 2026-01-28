@@ -1,4 +1,4 @@
-﻿package nefer
+package nefer
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -77,4 +77,3 @@ func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Fail
 func (c *char) Condition(fields []string) (any, error) {
 	return c.Character.Condition(fields)
 }
-

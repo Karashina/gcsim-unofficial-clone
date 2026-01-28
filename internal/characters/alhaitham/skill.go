@@ -1,4 +1,4 @@
-﻿package alhaitham
+package alhaitham
 
 import (
 	"fmt"
@@ -273,4 +273,3 @@ func (c *char) projectionAttack(a combat.AttackCB) {
 	}
 	c.AddStatus(projectionICDKey, 96, true) // 1.6 sec icd
 }
-

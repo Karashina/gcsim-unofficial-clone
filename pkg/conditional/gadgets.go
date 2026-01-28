@@ -1,4 +1,4 @@
-﻿package conditional
+package conditional
 
 import (
 	"fmt"
@@ -93,4 +93,3 @@ func countElementalCrystallizeShards(c *core.Core, ele string) int {
 	}
 	return count
 }
-

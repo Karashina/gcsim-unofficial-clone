@@ -1,4 +1,4 @@
-﻿package yanfei
+package yanfei
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -94,4 +94,3 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, 0.2*60, true)
 	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Pyro, c.ParticleDelay)
 }
-

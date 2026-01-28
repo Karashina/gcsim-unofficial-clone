@@ -1,4 +1,4 @@
-﻿package xilonen
+package xilonen
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -86,4 +86,3 @@ func (c *char) burstHeal(ai combat.AttackInfo) {
 		}, hitmark)
 	}
 }
-

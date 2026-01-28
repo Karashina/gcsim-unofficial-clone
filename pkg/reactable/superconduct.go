@@ -1,4 +1,4 @@
-﻿package reactable
+package reactable
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
@@ -93,4 +93,3 @@ func (r *Reactable) queueSuperconduct(a *combat.AttackEvent) {
 	atk.FlatDmg = 1.5 * flatdmg
 	r.core.QueueAttackWithSnap(atk, snap, combat.NewCircleHitOnTarget(r.self, nil, 3), 1)
 }
-

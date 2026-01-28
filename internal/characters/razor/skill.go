@@ -1,4 +1,4 @@
-﻿package razor
+package razor
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/internal/frames"
@@ -235,4 +235,3 @@ func (c *char) clearSigil() {
 		c.DeleteStatus(skillSigilKey)
 	}
 }
-

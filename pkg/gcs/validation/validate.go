@@ -1,4 +1,4 @@
-﻿package validation
+package validation
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -13,4 +13,3 @@ func ValidateCharParamKeys(c keys.Char, a action.Action, keys []string) error {
 	}
 	return f(a, keys)
 }
-

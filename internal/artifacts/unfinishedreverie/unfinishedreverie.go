@@ -1,4 +1,4 @@
-﻿package unfinishedreverie
+package unfinishedreverie
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -97,4 +97,3 @@ func (s *Set) enemyCheck() {
 	}
 	char.QueueCharTask(s.enemyCheck, checkInterval)
 }
-

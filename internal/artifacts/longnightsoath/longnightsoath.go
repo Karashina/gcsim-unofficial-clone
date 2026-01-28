@@ -1,4 +1,4 @@
-﻿package longnightsoath
+package longnightsoath
 
 import (
 	"fmt"
@@ -124,4 +124,3 @@ func (s *Set) pc4() {
 		},
 	})
 }
-

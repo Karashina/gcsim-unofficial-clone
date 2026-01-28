@@ -1,4 +1,4 @@
-﻿package info
+package info
 
 import (
 	"strconv"
@@ -31,4 +31,3 @@ type Set interface {
 	GetCount() int
 	Init() error
 }
-

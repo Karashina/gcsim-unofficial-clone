@@ -1,4 +1,4 @@
-﻿package alhaitham
+package alhaitham
 
 import (
 	"fmt"
@@ -119,4 +119,3 @@ func (c *char) c6(generated int) {
 		}
 	}
 }
-

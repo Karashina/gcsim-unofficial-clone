@@ -1,4 +1,4 @@
-﻿// Package simulation provide the functionality required to run one simulation
+// Package simulation provide the functionality required to run one simulation
 package simulation
 
 import (
@@ -87,4 +87,3 @@ func New(cfg *info.ActionList, eval action.Evaluator, c *core.Core) (*Simulation
 
 	return s, nil
 }
-

@@ -1,4 +1,4 @@
-﻿package sethos
+package sethos
 
 import (
 	tmpl "github.com/Karashina/gcsim-unofficial-clone/internal/template/character"
@@ -67,4 +67,3 @@ func (c *char) onExitField() {
 		return false
 	}, "sethos-exit")
 }
-

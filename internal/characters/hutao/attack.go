@@ -1,4 +1,4 @@
-﻿package hutao
+package hutao
 
 import (
 	"fmt"
@@ -180,4 +180,3 @@ func (c *char) ppAttack() action.Info {
 
 	return act
 }
-

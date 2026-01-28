@@ -1,4 +1,4 @@
-﻿package huskofopulentdreams
+package huskofopulentdreams
 
 import (
 	"fmt"
@@ -200,4 +200,3 @@ func (s *Set) gainStackOfffield(src int) func() {
 		s.char.QueueCharTask(s.checkStackLoss(s.core.F), s.stackLossTimer)
 	}
 }
-

@@ -29,7 +29,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	// Regular Charged Attack (Hydro DMG)
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
-		Abil:       "Charge Attack",
+		Abil:       "Charge Attack (C)",
 		AttackTag:  attacks.AttackTagExtra,
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
@@ -96,7 +96,7 @@ func (c *char) queueMoondewCleanseHit() {
 	// Use AttackTagLBDamage for "considered as Lunar-Bloom DMG"
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
-		Abil:             "Moondew Cleanse",
+		Abil:             "Moondew Cleanse (C)",
 		AttackTag:        attacks.AttackTagLBDamage,
 		ICDTag:           attacks.ICDTagNone,
 		ICDGroup:         attacks.ICDGroupDefault,

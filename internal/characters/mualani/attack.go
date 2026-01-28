@@ -1,4 +1,4 @@
-﻿package mualani
+package mualani
 
 import (
 	"fmt"
@@ -201,4 +201,3 @@ func (c *char) removeEnemyMarkCB(a combat.AttackCB) {
 	}
 	enemy.DeleteStatus(markedAsPreyKey)
 }
-

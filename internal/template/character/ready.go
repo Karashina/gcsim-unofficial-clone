@@ -1,4 +1,4 @@
-﻿package character
+package character
 
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
@@ -45,4 +45,3 @@ func (c *Character) ActionReady(a action.Action, p map[string]int) (bool, action
 	}
 	return true, action.NoFailure
 }
-

@@ -1,4 +1,4 @@
-﻿package lumidouceelegy
+package lumidouceelegy
 
 import (
 	"fmt"
@@ -110,4 +110,3 @@ func (w *Weapon) bonusCB() {
 		},
 	})
 }
-

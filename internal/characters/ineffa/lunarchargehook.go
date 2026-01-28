@@ -1,4 +1,4 @@
-﻿package ineffa
+package ineffa
 
 import (
 	_ "embed"
@@ -100,4 +100,3 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 func (c *char) InitLCallback() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.onLunarChargedIneffaSpecial, "lc-ineffa-special")
 }
-
