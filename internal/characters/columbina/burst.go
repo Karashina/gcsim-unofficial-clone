@@ -85,20 +85,27 @@ func (c *char) applyLunarDomainBuff() {
 	dur := lunarDomainDur
 
 	for _, char := range c.Core.Player.Chars() {
-		// Add Lunar reaction bonus mods
-		char.AddReactBonusMod(character.ReactBonusMod{
-			Base: modifier.NewBaseWithHitlag(lunarDomainModKey, dur),
+		// Add Lunar-Charged reaction bonus
+		char.AddLCReactBonusMod(character.LCReactBonusMod{
+			Base: modifier.NewBaseWithHitlag(lunarDomainModKey+"-lc", dur),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
-				switch ai.AttackTag {
-				case attacks.AttackTagLCDamage:
-					return bonus, false
-				case attacks.AttackTagLBDamage:
-					return bonus, false
-				case attacks.AttackTagLCrsDamage:
-					return bonus, false
-				default:
-					return 0, false
-				}
+				return bonus, false
+			},
+		})
+
+		// Add Lunar-Bloom reaction bonus
+		char.AddLBReactBonusMod(character.LBReactBonusMod{
+			Base: modifier.NewBaseWithHitlag(lunarDomainModKey+"-lb", dur),
+			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				return bonus, false
+			},
+		})
+
+		// Add Lunar-Crystallize reaction bonus
+		char.AddLCrsReactBonusMod(character.LCrsReactBonusMod{
+			Base: modifier.NewBaseWithHitlag(lunarDomainModKey+"-lcrs", dur),
+			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				return bonus, false
 			},
 		})
 	}

@@ -20,7 +20,7 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		return false
 	}
 
-	// Lunar-Crystallize base coefficient is 0.96 (not 1.8 like Lunar-Charged)
+	// Lunar-Crystallize base coefficient is 0.96
 	lcrsAtk := combat.AttackInfo{
 		DamageSrc:        r.self.Key(),
 		Abil:             string(reactions.LunarCrystallize),
@@ -36,13 +36,14 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 	char := r.core.Player.ByIndex(actorIdx)
 	em := char.Stat(attributes.EM)
 
-	// Reset contributor lists when a new reaction is triggered and LCrs tick is not active
-	if !a.Reacted && r.lcrsTickSrc == -1 {
+	// Reset contributor lists when no active LCrs session
+	if r.lcrsTickSrc == -1 {
 		r.lcrsContributor = make([]int, 0, 4)
 		r.lcrsPrecalcDamages = make([]lcDamageRecord, 0, 4)
 		r.lcrsPrecalcDamagesCRIT = make([]lcDamageRecord, 0, 4)
 		r.lcrsExpiryTaskMap = make(map[int]int)
 		r.lcrsTriggerCount = 0
+		r.lcrsTickSrc = r.core.F
 	}
 
 	// Record the current actor as a contributor
@@ -138,10 +139,10 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 	lcrsAtk.ActorIndex = actorIdx
 	r.core.Events.Emit(event.OnLunarCrystallize, r.self, a)
 
-	// Increment trigger count
+	// Increment trigger count (R-8: accumulate triggers)
 	r.lcrsTriggerCount++
 
-	// Refresh LCrs expiration time
+	// Refresh LCrs session expiration time
 	r.lcrsActiveExpiry = r.core.F + 360
 	r.core.Tasks.Add(func() {
 		if r.lcrsTickSrc != -1 && r.core.F >= r.lcrsActiveExpiry {
@@ -149,115 +150,21 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		}
 	}, 360)
 
-	// Calculate individual LCrs damages and queue attacks per contributor
-	damageList, indexList, isCrit := r.calcLCrsDamageContrib(r.lcrsContributor, r.lcrsPrecalcDamages, r.lcrsPrecalcDamagesCRIT)
-	type damageWithIndex struct {
-		Dmg  float64
-		Idx  int
-		Crit bool
+	// R-8: Fire Moondrifts only after 3 triggers
+	if r.lcrsTriggerCount >= 3 {
+		// R-9: calcLCrsDamage handles combined damage + highest CR contributor tracking
+		damageResult := r.calcLCrsDamage(
+			r.lcrsContributor,
+			r.lcrsPrecalcDamages,
+			r.lcrsPrecalcDamagesCRIT,
+		)
+		// Fire 3 Moondrift projectiles with combined FinalDamage
+		r.fireMoondriftHarmony(lcrsAtk, damageResult, actorIdx)
+		// Reset trigger count for next cycle
+		r.lcrsTriggerCount = 0
 	}
-	dwiList := make([]damageWithIndex, len(damageList))
-	for i := range damageList {
-		dwiList[i] = damageWithIndex{Dmg: damageList[i], Idx: indexList[i], Crit: isCrit[i]}
-	}
-	sort.SliceStable(dwiList, func(i, j int) bool {
-		return dwiList[i].Dmg > dwiList[j].Dmg
-	})
-	coefs := []float64{1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0}
-	if r.lcrsTickSrc == -1 {
-		r.lcrsTickSrc = r.core.F
-		// Columbina A4: single-roll for extra attack on LCrs creation
-		columbinaExtra := false
-		columbinaIdx := -1
-		for idx, p := range r.core.Player.Chars() {
-			if p.Base.Key == keys.Columbina {
-				columbinaIdx = idx
-				break
-			}
-		}
-		if columbinaIdx != -1 {
-			columbinaExtra = r.core.Rand.Float64() < 0.33
-		}
-		for i, dwi := range dwiList {
-			if i >= len(coefs) {
-				break
-			}
-			coef := coefs[i]
-			if coef == 0 {
-				continue
-			}
-			var snap combat.Snapshot
-			char := r.core.Player.ByIndex(dwi.Idx)
-			snap.Stats[attributes.CR] = char.Stat(attributes.CR)
-			snap.Stats[attributes.CD] = 0 // Prevent additional Crit DMG
-			snap.CharLvl = char.Base.Level
-			atkCopy := lcrsAtk
-			atkCopy.ActorIndex = dwi.Idx
-			atkCopy.FlatDmg = dwi.Dmg * coef
-			if i == 0 {
-				atkCopy.AttackTag = attacks.AttackTagLCrsDamage
-			} else {
-				atkCopy.AttackTag = attacks.AttackTagNone
-			}
-			r.core.QueueAttackWithSnap(
-				atkCopy,
-				snap,
-				combat.NewSingleTargetHit(r.self.Key()),
-				9,
-			)
-			if columbinaExtra && i == 0 {
-				if columbinaIdx != -1 {
-					colChar := r.core.Player.ByIndex(columbinaIdx)
-					atkExtra := atkCopy
-					atkExtra.ActorIndex = columbinaIdx
-					atkExtra.AttackTag = attacks.AttackTagNone
-					var snapExtra combat.Snapshot
-					snapExtra.Stats[attributes.CR] = colChar.Stat(attributes.CR)
-					snapExtra.Stats[attributes.CD] = 0
-					snapExtra.CharLvl = colChar.Base.Level
-					r.core.QueueAttackWithSnap(
-						atkExtra,
-						snapExtra,
-						combat.NewSingleTargetHit(r.self.Key()),
-						9,
-					)
-				}
-			}
-		}
-	}
-	return true
-}
 
-// calcLCrsDamageContrib: contributorごとのダメージ・index・クリティカル判定を返す
-func (r *Reactable) calcLCrsDamageContrib(lcrsContributor []int, lcrsPrecalcDamages []lcDamageRecord, lcrsPrecalcDamagesCRIT []lcDamageRecord) (damageList []float64, indexList []int, isCrit []bool) {
-	isCrit = make([]bool, len(lcrsContributor))
-	damageList = make([]float64, len(lcrsContributor))
-	indexList = make([]int, len(lcrsContributor))
-	for i, idx := range lcrsContributor {
-		char := r.core.Player.ByIndex(idx)
-		cr := char.Stat(attributes.CR)
-		randVal := r.core.Rand.Float64()
-		isCrit[i] = randVal < cr
-		var dmg float64
-		if isCrit[i] {
-			for _, rec := range lcrsPrecalcDamagesCRIT {
-				if rec.Index == idx {
-					dmg = rec.Damage
-					break
-				}
-			}
-		} else {
-			for _, rec := range lcrsPrecalcDamages {
-				if rec.Index == idx {
-					dmg = rec.Damage
-					break
-				}
-			}
-		}
-		damageList[i] = dmg
-		indexList[i] = idx
-	}
-	return
+	return true
 }
 
 // calcLunarCrystallizeDmg calculates Lunar-Crystallize damage (base coefficient 0.96)
@@ -270,7 +177,7 @@ func calcLunarCrystallizeDmg(char *character.CharWrapper, atk combat.AttackInfo,
 		lvl = 0
 	}
 	base := 0.96 * reactionLvlBase[lvl] * (1 + char.LCrsBaseReactBonus(atk))
-	bonus := (16 * em) / (2000 + em)
+	bonus := (6 * em) / (2000 + em) // R-7 fix: was 16*em
 	return base * (1 + bonus + char.LCrsReactBonus(atk)) * (1 + char.ElevationBonus(atk))
 }
 
@@ -284,7 +191,7 @@ func calcLunarCrystallizeDmgCRIT(char *character.CharWrapper, atk combat.AttackI
 		lvl = 0
 	}
 	base := 0.96 * reactionLvlBase[lvl] * (1 + char.LCrsBaseReactBonus(atk))
-	bonus := (16 * em) / (2000 + em)
+	bonus := (6 * em) / (2000 + em) // R-7 fix: was 16*em
 	cd := char.Stat(attributes.CD)
 	return base * (1 + bonus + char.LCrsReactBonus(atk)) * (1 + cd) * (1 + char.ElevationBonus(atk))
 }

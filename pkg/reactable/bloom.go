@@ -51,10 +51,20 @@ func (r *Reactable) TryBloom(a *combat.AttackEvent) bool {
 	a.Info.Durability = max(a.Info.Durability, 0)
 	a.Reacted = true
 
-	r.addBloomGadget(a)
-	if r.core.Player.ByIndex(a.Info.ActorIndex).StatusIsActive("LB-Key") {
+	// Check for Lunar-Bloom: if any party member has LB-Key, emit OnLunarBloom
+	// This is independent of Dendro Core generation
+	hasLBKey := false
+	for _, char := range r.core.Player.Chars() {
+		if char.StatusIsActive("LB-Key") {
+			hasLBKey = true
+			break
+		}
+	}
+	if hasLBKey {
 		r.core.Events.Emit(event.OnLunarBloom, r.self, a)
 	}
+
+	r.addBloomGadget(a)
 	r.core.Events.Emit(event.OnBloom, r.self, a)
 	return true
 }
@@ -73,6 +83,18 @@ func (r *Reactable) tryQuickenBloom(a *combat.AttackEvent) {
 	avail := r.Durability[Quicken]
 	consumed := r.reduce(attributes.Hydro, avail, 2)
 	r.Durability[Quicken] -= consumed
+
+	// Check for Lunar-Bloom in Quicken bloom case as well
+	hasLBKey := false
+	for _, char := range r.core.Player.Chars() {
+		if char.StatusIsActive("LB-Key") {
+			hasLBKey = true
+			break
+		}
+	}
+	if hasLBKey {
+		r.core.Events.Emit(event.OnLunarBloom, r.self, a)
+	}
 
 	r.addBloomGadget(a)
 	r.core.Events.Emit(event.OnBloom, r.self, a)

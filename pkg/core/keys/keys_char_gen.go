@@ -51,6 +51,7 @@ const (
 	Hutao
 	Iansan
 	Ifa
+	Illuga
 	Ineffa
 	Itto
 	Jean
@@ -113,6 +114,7 @@ const (
 	Yelan
 	Yoimiya
 	Yunjin
+	Zibai
 	Zhongli
 	EndCharKeys
 )
@@ -293,6 +295,10 @@ func init() {
 	charNames[Ifa] = "ifa"
 	charPrettyName[Ifa] = "Ifa"
 	CharKeyToEle[Ifa] = attributes.Anemo
+
+	charNames[Illuga] = "illuga"
+	charPrettyName[Illuga] = "Illuga"
+	CharKeyToEle[Illuga] = attributes.Geo
 
 	charNames[Ineffa] = "ineffa"
 	charPrettyName[Ineffa] = "Ineffa"
@@ -541,6 +547,10 @@ func init() {
 	charNames[Yunjin] = "yunjin"
 	charPrettyName[Yunjin] = "Yunjin"
 	CharKeyToEle[Yunjin] = attributes.Geo
+
+	charNames[Zibai] = "zibai"
+	charPrettyName[Zibai] = "Zibai"
+	CharKeyToEle[Zibai] = attributes.Geo
 
 	charNames[Zhongli] = "zhongli"
 	charPrettyName[Zhongli] = "Zhongli"

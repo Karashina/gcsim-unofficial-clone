@@ -10,7 +10,7 @@ import (
 
 const (
 	// A0: Moonsign Benediction
-	moonsignKey   = "moonsign"
+	moonsignKey   = "moonsignKey"
 	lbKeyStatus   = "LB-Key"
 	lcKeyStatus   = "LC-Key"
 	lcrsKeyStatus = "LCrs-Key"
