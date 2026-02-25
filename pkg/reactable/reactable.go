@@ -140,7 +140,6 @@ type Reactable struct {
 	lcrsTickSrc            int
 	lcrsActiveExpiry       int
 	lcrsExpiryTaskMap      map[int]int
-	lcrsMoondriftCount     int
 	lcrsTriggerCount       int
 }
 

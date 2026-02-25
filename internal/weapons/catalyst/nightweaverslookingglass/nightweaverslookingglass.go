@@ -49,6 +49,10 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
+		c.Log.NewEvent("[Nightweaver] potfnKey triggered", 3, char.Index).
+			Write("frame", c.F).
+			Write("ability", atk.Info.Abil)
+
 		mEM := make([]float64, attributes.EndStatType)
 		mEM[attributes.EM] = 45 + float64(r)*15
 		char.AddStatMod(character.StatMod{
@@ -63,6 +67,9 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}, "nightweaverslookingglass-elemdmg")
 
 	c.Events.Subscribe(event.OnLunarBloom, func(args ...interface{}) bool {
+		c.Log.NewEvent("[Nightweaver] nmvKey triggered", 3, char.Index).
+			Write("frame", c.F)
+
 		mEM := make([]float64, attributes.EndStatType)
 		mEM[attributes.EM] = 45 + float64(r)*15
 		char.AddStatMod(character.StatMod{
@@ -80,7 +87,9 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		chr.AddReactBonusMod(character.ReactBonusMod{
 			Base: modifier.NewBaseWithHitlag("nightweaverslookingglass-bloom-buff", -1),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
-				if char.StatusIsActive(nmvKey) && char.StatusIsActive(potfnKey) {
+				hasNMV := char.StatusIsActive(nmvKey)
+				hasPOTFN := char.StatusIsActive(potfnKey)
+				if hasNMV && hasPOTFN {
 					if ai.AttackTag == attacks.AttackTagBloom {
 						return 0.9 + 0.3*float64(r), false
 					}
@@ -94,10 +103,19 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		chr.AddLBReactBonusMod(character.LBReactBonusMod{
 			Base: modifier.NewBaseWithHitlag("nightweaverslookingglass-lb-buff", -1),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
-				if char.StatusIsActive(nmvKey) && char.StatusIsActive(potfnKey) {
-					return 0.3 + 0.1*float64(r), false
+				hasNMV := char.StatusIsActive(nmvKey)
+				hasPOTFN := char.StatusIsActive(potfnKey)
+				bonus := 0.0
+				if hasNMV && hasPOTFN {
+					bonus = 0.3 + 0.1*float64(r)
 				}
-				return 0, false
+				c.Log.NewEvent("[Nightweaver] LBReactBonus check", 3, char.Index).
+					Write("chr_index", chr.Index).
+					Write("ability", ai.Abil).
+					Write("has_nmv", hasNMV).
+					Write("has_potfn", hasPOTFN).
+					Write("bonus", bonus)
+				return bonus, false
 			},
 		})
 	}

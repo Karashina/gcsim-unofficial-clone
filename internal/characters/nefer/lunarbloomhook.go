@@ -54,7 +54,14 @@ func (c *char) queueLunarBloomAttack(target combat.Target, mult float64, abilNam
 	}
 	baseDmg := em * (mult + c1mult) * (1 + c.LBBaseReactBonus(atk))
 	emBonus := (6 * em) / (2000 + em)
-	atk.FlatDmg = baseDmg * (1 + emBonus + c.LBReactBonus(atk)) * (1 + c.ElevationBonus(atk))
+	lbReactBonus := c.LBReactBonus(atk)
+	c.Core.Log.NewEvent("[Nefer Debug] LBReactBonus", 3, c.Index).
+		Write("ability", abilName).
+		Write("lb_react_bonus", lbReactBonus).
+		Write("em", em).
+		Write("base_dmg", baseDmg).
+		Write("em_bonus", emBonus)
+	atk.FlatDmg = baseDmg * (1 + emBonus + lbReactBonus) * (1 + c.ElevationBonus(atk))
 	snap := combat.Snapshot{CharLvl: c.Base.Level}
 	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
 	snap.Stats[attributes.CD] = c.Stat(attributes.CD)

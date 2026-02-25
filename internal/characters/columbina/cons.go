@@ -1,6 +1,8 @@
 package columbina
 
 import (
+	"fmt"
+
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
@@ -30,7 +32,7 @@ const (
 	c4HPBonusLCrs = 0.125 // 12.5% Max HP
 
 	// C6
-	c6Key       = "c6-crit-dmg"
+	c6Key       = "columbina-c6-crit-dmg"
 	c6Dur       = 8 * 60 // 8s duration
 	c6CDBonus   = 0.80   // 80% CRIT DMG
 	c6Elevation = 0.07   // 7% Elevation
@@ -68,6 +70,7 @@ func (c *char) c1OnSkill() {
 	if c.StatusIsActive(c1Key) {
 		return
 	}
+
 	c.AddStatus(c1Key, c1ICD, false)
 
 	dominantType := c.getDominantLunarType()
@@ -145,47 +148,63 @@ func (c *char) c2OnGravityInterference(dominantType string) {
 	}
 
 	columbinaMHP := c.Stat(attributes.HP)
-	activeCharIdx := c.Core.Player.Active()
-	activeChar := c.Core.Player.ByIndex(activeCharIdx)
 
-	// Lunar Brilliance buffs based on dominant type
+	// To ensure the buff only affects the character who is currently on-field,
+	// add a StatMod to every party member that returns the buff amount only
+	// when that member is the active character. This way the buff follows
+	// whoever is on the field and will stop applying when swapped out.
 	switch dominantType {
 	case "lc":
 		// ATK increase = 1% of Columbina's Max HP
 		buffValue := 0.01 * columbinaMHP
-		activeChar.AddStatMod(character.StatMod{
-			Base:         modifier.NewBaseWithHitlag(c2Key+"-atk", c2Dur),
-			AffectedStat: attributes.ATK,
-			Amount: func() ([]float64, bool) {
-				m := make([]float64, attributes.EndStatType)
-				m[attributes.ATK] = buffValue
-				return m, true
-			},
-		})
+		for _, ch := range c.Core.Player.Chars() {
+			key := fmt.Sprintf("%s-atk-%d", c2Key, ch.Index)
+			ch.AddStatMod(character.StatMod{
+				Base:         modifier.NewBaseWithHitlag(key, c2Dur),
+				AffectedStat: attributes.ATK,
+				Amount: func() ([]float64, bool) {
+					m := make([]float64, attributes.EndStatType)
+					if c.Core.Player.Active() == ch.Index {
+						m[attributes.ATK] = buffValue
+					}
+					return m, true
+				},
+			})
+		}
 	case "lb":
 		// EM increase = 0.35% of Columbina's Max HP
 		buffValue := 0.0035 * columbinaMHP
-		activeChar.AddStatMod(character.StatMod{
-			Base:         modifier.NewBaseWithHitlag(c2Key+"-em", c2Dur),
-			AffectedStat: attributes.EM,
-			Amount: func() ([]float64, bool) {
-				m := make([]float64, attributes.EndStatType)
-				m[attributes.EM] = buffValue
-				return m, true
-			},
-		})
+		for _, ch := range c.Core.Player.Chars() {
+			key := fmt.Sprintf("%s-em-%d", c2Key, ch.Index)
+			ch.AddStatMod(character.StatMod{
+				Base:         modifier.NewBaseWithHitlag(key, c2Dur),
+				AffectedStat: attributes.EM,
+				Amount: func() ([]float64, bool) {
+					m := make([]float64, attributes.EndStatType)
+					if c.Core.Player.Active() == ch.Index {
+						m[attributes.EM] = buffValue
+					}
+					return m, true
+				},
+			})
+		}
 	case "lcrs":
 		// DEF increase = 1% of Columbina's Max HP
 		buffValue := 0.01 * columbinaMHP
-		activeChar.AddStatMod(character.StatMod{
-			Base:         modifier.NewBaseWithHitlag(c2Key+"-def", c2Dur),
-			AffectedStat: attributes.DEF,
-			Amount: func() ([]float64, bool) {
-				m := make([]float64, attributes.EndStatType)
-				m[attributes.DEF] = buffValue
-				return m, true
-			},
-		})
+		for _, ch := range c.Core.Player.Chars() {
+			key := fmt.Sprintf("%s-def-%d", c2Key, ch.Index)
+			ch.AddStatMod(character.StatMod{
+				Base:         modifier.NewBaseWithHitlag(key, c2Dur),
+				AffectedStat: attributes.DEF,
+				Amount: func() ([]float64, bool) {
+					m := make([]float64, attributes.EndStatType)
+					if c.Core.Player.Active() == ch.Index {
+						m[attributes.DEF] = buffValue
+					}
+					return m, true
+				},
+			})
+		}
 	}
 
 	c.Core.Log.NewEvent("C2 Lunar Brilliance activated", glog.LogCharacterEvent, c.Index).
@@ -264,15 +283,17 @@ func (c *char) c6ApplyBuffToAllChars(element attributes.Element) {
 
 	// Apply CRIT DMG buff to all party members
 	for _, char := range c.Core.Player.Chars() {
-		char.AddStatMod(character.StatMod{
-			Base:         modifier.NewBaseWithHitlag(c6Key+"-"+element.String(), c6Dur),
-			AffectedStat: attributes.CD,
-			Amount: func() ([]float64, bool) {
-				m := make([]float64, attributes.EndStatType)
-				m[attributes.CD] = c6CDBonus
-				return m, true
-			},
-		})
+		if char.Base.Element.String() == element.String() {
+			char.AddStatMod(character.StatMod{
+				Base:         modifier.NewBaseWithHitlag(c6Key, c6Dur),
+				AffectedStat: attributes.CD,
+				Amount: func() ([]float64, bool) {
+					m := make([]float64, attributes.EndStatType)
+					m[attributes.CD] = c6CDBonus
+					return m, true
+				},
+			})
+		}
 	}
 
 	c.Core.Log.NewEvent("C6 CRIT DMG buff applied to all party members", glog.LogCharacterEvent, c.Index).

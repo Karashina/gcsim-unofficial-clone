@@ -46,6 +46,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/hutao"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/iansan"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/ifa"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/illuga"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/ineffa"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/itto"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/jean"
@@ -121,4 +122,5 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/yoimiya"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/yunjin"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/zhongli"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/zibai"
 )

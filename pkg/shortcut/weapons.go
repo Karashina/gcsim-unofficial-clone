@@ -198,6 +198,7 @@ var WeaponNameToKey = map[string]keys.Weapon{
 	"waltz":                           keys.MitternachtsWaltz,
 	"moonpiercer":                     keys.Moonpiercer,
 	"moonweaversdawn":                 keys.MoonweaversDawn,
+	"lightbearingmoonshard":           keys.LightbearingMoonshard,
 	"mountainbracingbolt":             keys.MountainBracingBolt,
 	"mouunsmoon":                      keys.MouunsMoon,
 	"mouun":                           keys.MouunsMoon,

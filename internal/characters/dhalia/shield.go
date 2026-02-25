@@ -35,7 +35,7 @@ func (c *char) shieldHP() float64 {
 
 func (c *char) regenShirld() {
 	c.Core.Events.Subscribe(event.OnShieldBreak, func(args ...interface{}) bool {
-		shd := args[0].(shield.Tmpl)
+		shd := args[0].(*shield.Tmpl)
 		if shd.ShieldType != shield.DhaliaBurst {
 			return false
 		}

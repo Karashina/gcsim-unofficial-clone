@@ -155,6 +155,34 @@ func (c *char) subscribeToLunarReactions() {
 		}, 1)
 		return false
 	}, "columbina-gravity-lcrs")
+
+	// Subscribe to Lunar damage events (when dealing Lunar reaction damage)
+	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
+		if !c.StatusIsActive(gravityRippleKey) {
+			return false
+		}
+		ae, ok := args[1].(*combat.AttackEvent)
+		if !ok {
+			return false
+		}
+
+		var lunarType string
+		switch ae.Info.AttackTag {
+		case attacks.AttackTagLCDamage:
+			lunarType = "lc"
+		case attacks.AttackTagLBDamage:
+			lunarType = "lb"
+		case attacks.AttackTagLCrsDamage:
+			lunarType = "lcrs"
+		default:
+			return false
+		}
+
+		c.Core.Tasks.Add(func() {
+			c.accumulateGravity(lunarType)
+		}, 1)
+		return false
+	}, "columbina-gravity-damage")
 }
 
 // accumulateGravity accumulates Gravity from Lunar reactions
@@ -288,10 +316,10 @@ func (c *char) gravityInterferenceLC() {
 	em := c.Stat(attributes.EM)
 	baseDmg := c.MaxHP() * gravityInterfLC[c.TalentLvlSkill()] * 3
 	emBonus := (6 * em) / (2000 + em)
-	ai.FlatDmg = baseDmg * (1 + emBonus + c.LCReactBonus(ai))
+	ai.FlatDmg = baseDmg * (1 + c.LCBaseReactBonus(ai)) * (1 + emBonus + c.LCReactBonus(ai))
 
 	// C4 bonus
-	if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) && c.c4DominantType == "lc" {
+	if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) {
 		ai.FlatDmg += c.MaxHP() * c4HPBonusLC
 		c.AddStatus(c4IcdKey, 15*60, false)
 	}
@@ -334,10 +362,10 @@ func (c *char) gravityInterferenceLB() {
 			em := c.Stat(attributes.EM)
 			baseDmg := c.MaxHP() * gravityInterfLB[c.TalentLvlSkill()]
 			emBonus := (6 * em) / (2000 + em)
-			ai.FlatDmg = baseDmg * (1 + emBonus + c.LBReactBonus(ai))
+			ai.FlatDmg = baseDmg * (1 + c.LBBaseReactBonus(ai)) * (1 + emBonus + c.LBReactBonus(ai))
 
 			// C4 bonus
-			if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) && c.c4DominantType == "lb" {
+			if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) {
 				ai.FlatDmg += c.MaxHP() * c4HPBonusLB
 				c.AddStatus(c4IcdKey, 15*60, false)
 			}
@@ -377,10 +405,10 @@ func (c *char) gravityInterferenceLCrs() {
 	em := c.Stat(attributes.EM)
 	baseDmg := c.MaxHP() * gravityInterfLCrs[c.TalentLvlSkill()] * 1.6
 	emBonus := (6 * em) / (2000 + em)
-	ai.FlatDmg = baseDmg * (1 + emBonus + c.LCrsReactBonus(ai))
+	ai.FlatDmg = baseDmg * (1 + c.LCrsBaseReactBonus(ai)) * (1 + emBonus + c.LCrsReactBonus(ai))
 
 	// C4 bonus
-	if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) && c.c4DominantType == "lcrs" {
+	if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) {
 		ai.FlatDmg += c.MaxHP() * c4HPBonusLCrs
 		c.AddStatus(c4IcdKey, 15*60, false)
 	}

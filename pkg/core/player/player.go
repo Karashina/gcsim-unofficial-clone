@@ -11,6 +11,8 @@ import (
 	"math"
 
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/action"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
@@ -22,6 +24,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/verdant"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/task"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
 const (
@@ -349,6 +352,10 @@ func (h *Handler) InitializeTeam() error {
 	}
 	h.Log.NewEvent("moonsign party init", glog.LogDebugEvent, -1).
 		Write("count", count)
+
+	// Initialize non-Moonsign character buffs (Ascendant Gleam only)
+	h.initNonMoonsignBuffs()
+
 	return nil
 }
 
@@ -399,6 +406,130 @@ func (h *Handler) SetAirborne(src AirborneSource) error {
 
 func (h *Handler) Airborne() AirborneSource {
 	return h.airborne
+}
+
+// initNonMoonsignBuffs sets up Lunar Reaction damage buff for non-Moonsign characters
+// when Ascendant Gleam is active (満照状態).
+func (h *Handler) initNonMoonsignBuffs() {
+	const (
+		buffDuration = 20 * 60 // 20 seconds
+		buffKey      = "non-moonsign-lunar-buff"
+	)
+
+	for _, char := range h.chars {
+		// Skip Moonsign characters (those with moonsignKey)
+		if char.StatusIsActive("moonsignKey") {
+			continue
+		}
+
+		// Capture loop variables for closure
+		currentChar := char
+		currentCharIndex := char.Index
+		currentCharEle := char.Base.Element
+
+		// Subscribe to OnSkill and OnBurst events
+		subscribeKey := fmt.Sprintf("non-moonsign-buff-%d", currentCharIndex)
+
+		handler := func(args ...interface{}) bool {
+			// Only activate if the triggering character is this specific character
+			if h.active != currentCharIndex {
+				return false
+			}
+
+			// Only activate in Ascendant Gleam state (満照)
+			if !currentChar.MoonsignAscendant {
+				return false
+			}
+
+			// Calculate bonus based on the triggering character's element type and stats
+			bonus := h.calculateNonMoonsignBonus(currentCharEle, currentChar)
+
+			h.Log.NewEvent("non-moonsign lunar buff activated", glog.LogCharacterEvent, currentCharIndex).
+				Write("element", currentCharEle.String()).
+				Write("bonus", bonus).
+				Write("trigger_char", currentChar.Base.Key)
+
+			// Apply the buff to all party members
+			h.applyNonMoonsignBuff(buffKey, buffDuration, bonus)
+
+			return false
+		}
+
+		h.Events.Subscribe(event.OnSkill, handler, subscribeKey+"-skill")
+		h.Events.Subscribe(event.OnBurst, handler, subscribeKey+"-burst")
+	}
+}
+
+// calculateNonMoonsignBonus calculates the Lunar Reaction damage bonus
+// based on the character's element and current stats.
+func (h *Handler) calculateNonMoonsignBonus(ele attributes.Element, char *character.CharWrapper) float64 {
+	maxBonus := 0.36 // 36% maximum bonus
+
+	switch ele {
+	case attributes.Pyro, attributes.Electro, attributes.Cryo:
+		// ATK * 0.009, max at 4000 ATK
+		atk := char.Stat(attributes.ATK)
+		bonus := (atk / 100) * 0.009
+		if bonus > maxBonus {
+			bonus = maxBonus
+		}
+		return bonus
+
+	case attributes.Hydro:
+		// MaxHP * 0.0006, max at 60000 HP
+		maxHP := char.MaxHP()
+		bonus := (maxHP / 1000) * 0.006
+		if bonus > maxBonus {
+			bonus = maxBonus
+		}
+		return bonus
+
+	case attributes.Geo:
+		// DEF * 0.01, max at 3600 DEF
+		def := char.Stat(attributes.DEF)
+		bonus := (def / 100) * 0.01
+		if bonus > maxBonus {
+			bonus = maxBonus
+		}
+		return bonus
+
+	case attributes.Anemo, attributes.Dendro:
+		// EM * 0.0225, max at 1600 EM
+		em := char.Stat(attributes.EM)
+		bonus := (em / 100) * 0.0225
+		if bonus > maxBonus {
+			bonus = maxBonus
+		}
+		return bonus
+
+	default:
+		return 0
+	}
+}
+
+// applyNonMoonsignBuff applies the Lunar Reaction damage buff to all party members.
+func (h *Handler) applyNonMoonsignBuff(buffKey string, duration int, bonus float64) {
+	for _, char := range h.chars {
+		// Remove existing buff if any
+		char.DeleteStatus(buffKey)
+
+		// Add new buff status
+		char.AddStatus(buffKey, duration, true)
+
+		// Add ElevationMod for Lunar Reaction damage bonus
+		char.AddElevationMod(character.ElevationMod{
+			Base: modifier.NewBaseWithHitlag(buffKey, duration),
+			Amount: func(ai combat.AttackInfo) (float64, bool) {
+				// Apply to all Lunar Reaction types
+				if ai.AttackTag == attacks.AttackTagLCDamage ||
+					ai.AttackTag == attacks.AttackTagLBDamage ||
+					ai.AttackTag == attacks.AttackTagLCrsDamage {
+					return bonus, false
+				}
+				return 0, false
+			},
+		})
+	}
 }
 
 const (

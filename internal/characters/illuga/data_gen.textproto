@@ -1,0 +1,150 @@
+id: 90642
+key: "illuga"
+rarity: QUALITY_PURPLE
+body: BODY_BOY
+region: 12
+element: Rock
+weapon_class: WEAPON_POLE
+icon_name: "UI_AvatarIcon_Illuga"
+stats: {
+   base_hp: 1003.0
+   base_atk: 16.0
+   base_def: 68.0
+   hp_curve: GROW_CURVE_HP_S4
+   atk_curve: GROW_CURVE_ATTACK_S4
+   def_cruve: GROW_CURVE_HP_S4
+   promo_data: {
+      max_level: 20
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ELEMENT_MASTERY
+      }
+   }
+   promo_data: {
+      max_level: 40
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 749.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 51.7
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 12.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ELEMENT_MASTERY
+      }
+   }
+   promo_data: {
+      max_level: 50
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 1281.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 88.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 20.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ELEMENT_MASTERY
+         value: 24
+      }
+   }
+   promo_data: {
+      max_level: 60
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 1991.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 137.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 32.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ELEMENT_MASTERY
+         value: 48
+      }
+   }
+   promo_data: {
+      max_level: 70
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 2523.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 172.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 40.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ELEMENT_MASTERY
+         value: 48
+      }
+   }
+   promo_data: {
+      max_level: 80
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 3056.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 209.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 48.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ELEMENT_MASTERY
+         value: 72
+      }
+   }
+   promo_data: {
+      max_level: 90
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 3588.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 245.85
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 57.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_ELEMENT_MASTERY
+         value: 96
+      }
+   }
+}
+skill_details: {
+   skill: 90642002
+   burst: 90642003
+   attack: 90642001
+   burst_energy_cost: 60
+}

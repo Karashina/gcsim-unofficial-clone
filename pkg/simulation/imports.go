@@ -271,6 +271,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/ironsting"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/kagotsurubeisshin"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/keyofkhajnisut"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/lightbearingmoonshard"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/lion"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/mistsplitter"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/sword/moonweaversdawn"

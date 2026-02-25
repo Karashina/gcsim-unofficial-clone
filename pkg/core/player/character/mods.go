@@ -144,7 +144,7 @@ func (c *CharWrapper) AddHealBonusMod(mod HealBonusMod) {
 func (c *CharWrapper) AddElevationMod(mod ElevationMod) {
 	mod.SetExpiry(*c.f)
 	overwrote, oldEvt := modifier.Add[modifier.Mod](&c.mods, &mod, *c.f)
-	modifier.LogAdd("react bonus", c.Index, &mod, c.log, overwrote, oldEvt)
+	modifier.LogAdd("elevation bonus", c.Index, &mod, c.log, overwrote, oldEvt)
 }
 
 func (c *CharWrapper) AddReactBonusMod(mod ReactBonusMod) {

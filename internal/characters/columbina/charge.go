@@ -68,11 +68,10 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 // moondewCleanse performs the special charged attack when Verdant Dew is available
 // Consumes 1 Verdant Dew to deal 3 instances of AoE Dendro DMG (considered as Lunar-Bloom DMG)
 func (c *char) moondewCleanse() (action.Info, error) {
-	// Check Moonridge Dew first, then Verdant Dew
-	if c.moonridgeDew > 0 {
+	// Check Verdant Dew first, then Moonridge Dew
+	consumed := c.Core.Player.Verdant.Consume(1)
+	if consumed == 0 && c.moonridgeDew > 0 {
 		c.moonridgeDew--
-	} else {
-		c.Core.Player.Verdant.Consume(1)
 	}
 
 	// 3 instances of Dendro DMG considered as Lunar-Bloom DMG
