@@ -255,6 +255,7 @@ var weaponNames = []string{
 	"whitetassel",
 	"windblumeode",
 	"wineandsong",
+	"gestofthemightywolf",
 	"wolffang",
 	"wolfsgravestone",
 	"xiphosmoonlight",
@@ -487,6 +488,7 @@ const (
 	WhiteTassel
 	WindblumeOde
 	WineAndSong
+	GestOfTheMightyWolf
 	WolfFang
 	WolfsGravestone
 	XiphosMoonlight

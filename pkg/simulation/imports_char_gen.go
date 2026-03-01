@@ -106,6 +106,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/pyro/aether"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/traveler/pyro/lumine"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/varesa"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/varka"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/venti"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/wanderer"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/wriothesley"

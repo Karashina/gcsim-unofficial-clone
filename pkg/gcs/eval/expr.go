@@ -7,6 +7,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/conditional"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/constant"
+	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
 )
 
 func (e *Eval) evalExpr(ex ast.Expr, env *Env) (Obj, error) {
@@ -150,6 +151,11 @@ func (e *Eval) evalBinaryExpr(b *ast.BinaryExpr, env *Env) (Obj, error) {
 		return nil, err
 	}
 
+	// Normalize shortcut names for string comparisons
+	// This allows e.g. .varka.set == "adcfrw" to match canonical name "adaycarvedfromrisingwinds"
+	left = normalizeStrObj(left)
+	right = normalizeStrObj(right)
+
 	lconst := makeConstant(left)
 	if lconst == nil {
 		return nil, fmt.Errorf("binary expression does not evaluate to a comparable variable, got %v ", left.Inspect())
@@ -165,27 +171,40 @@ func (e *Eval) evalBinaryExpr(b *ast.BinaryExpr, env *Env) (Obj, error) {
 	return fromConstant(result), nil
 }
 
+// normalizeStrObj resolves shortcut names (e.g. "adcfrw", "favbow") to their
+// canonical forms so that string comparisons match regardless of which alias is used.
+func normalizeStrObj(o Obj) Obj {
+	sv, ok := o.(*strval)
+	if !ok {
+		return o
+	}
+	normalized := shortcut.NormalizeName(sv.str)
+	if normalized == sv.str {
+		return o
+	}
+	return &strval{str: normalized}
+}
+
 func (e *Eval) evalField(n *ast.Field) (Obj, error) {
 	r, err := conditional.Eval(e.Core, n.Value)
 	if err != nil {
 		return nil, err
 	}
 
-	num := &number{}
 	switch v := r.(type) {
 	case bool:
-		num = bton(v)
+		return bton(v), nil
 	case int:
-		num.ival = int64(v)
+		return &number{ival: int64(v)}, nil
 	case int64:
-		num.ival = v
+		return &number{ival: v}, nil
 	case float64:
-		num.fval = v
-		num.isFloat = true
+		return &number{fval: v, isFloat: true}, nil
+	case string:
+		return &strval{str: v}, nil
 	default:
-		return nil, fmt.Errorf("field condition '.%v' does not evaluate to a number, got %v", strings.Join(n.Value, "."), v)
+		return nil, fmt.Errorf("field condition '.%v' does not evaluate to a number or string, got %v", strings.Join(n.Value, "."), v)
 	}
-	return num, nil
 }
 
 func (e *Eval) evalMap(m *ast.MapExpr, env *Env) (Obj, error) {

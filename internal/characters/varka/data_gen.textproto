@@ -1,0 +1,151 @@
+id: 90650
+key: "varka"
+rarity: QUALITY_ORANGE
+body: BODY_MALE
+region: ASSOC_TYPE_MONDSTADT
+element: Wind
+weapon_class: WEAPON_CLAYMORE
+icon_name: "UI_AvatarIcon_Varka"
+stats: {
+   base_hp: 982.0
+   base_atk: 27.4
+   base_def: 62.0
+   hp_curve: GROW_CURVE_HP_S5
+   atk_curve: GROW_CURVE_ATTACK_S5
+   def_cruve: GROW_CURVE_HP_S5
+   promo_data: {
+      max_level: 20
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_CRITICAL_HURT
+      }
+   }
+   promo_data: {
+      max_level: 40
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 842.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 53.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 24.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_CRITICAL_HURT
+      }
+   }
+   promo_data: {
+      max_level: 50
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 1440.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 91.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 41.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_CRITICAL_HURT
+         value: 0.096
+      }
+   }
+   promo_data: {
+      max_level: 60
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 2237.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 141.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 63.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_CRITICAL_HURT
+         value: 0.192
+      }
+   }
+   promo_data: {
+      max_level: 70
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 2835.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 179.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 80.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_CRITICAL_HURT
+         value: 0.192
+      }
+   }
+   promo_data: {
+      max_level: 80
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 3434.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 216.5
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 97.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_CRITICAL_HURT
+         value: 0.288
+      }
+   }
+   promo_data: {
+      max_level: 90
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_HP
+         value: 4032.1
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_DEFENSE
+         value: 254.17
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_BASE_ATTACK
+         value: 114.0
+      }
+      add_props: {
+         prop_type: FIGHT_PROP_CRITICAL_HURT
+         value: 0.384
+      }
+   }
+}
+skill_details: {
+   skill: 90650002
+   burst: 90650003
+   attack: 90650001
+   burst_energy_cost: 60
+}
+name_text_hash_map: 90650000
