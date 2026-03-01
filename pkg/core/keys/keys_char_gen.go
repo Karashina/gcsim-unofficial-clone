@@ -98,6 +98,7 @@ const (
 	Tartaglia
 	Thoma
 	Tighnari
+	Varka
 	Varesa
 	Venti
 	Wanderer
@@ -483,6 +484,10 @@ func init() {
 	charNames[Tighnari] = "tighnari"
 	charPrettyName[Tighnari] = "Tighnari"
 	CharKeyToEle[Tighnari] = attributes.Dendro
+
+	charNames[Varka] = "varka"
+	charPrettyName[Varka] = "Varka"
+	CharKeyToEle[Varka] = attributes.Anemo
 
 	charNames[Varesa] = "varesa"
 	charPrettyName[Varesa] = "Varesa"

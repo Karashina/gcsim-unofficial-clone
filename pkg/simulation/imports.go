@@ -177,6 +177,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/claymore/flameforgedinsight"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/claymore/forestregalia"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/claymore/fruitfulhook"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/claymore/gestofthemightywolf"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/claymore/lithic"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/claymore/mailedflower"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/claymore/masterkey"

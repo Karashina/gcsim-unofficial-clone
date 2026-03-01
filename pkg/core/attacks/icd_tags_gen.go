@@ -38,6 +38,10 @@ const (
 	ICDTagOroronElmentalBurst
 	ICDTagSkirkCons
 	ICDTagTartagliaRiptideFlash
+	ICDTagVarkaNAOther
+	ICDTagVarkaNAAnemo
+	ICDTagVarkaCAOther
+	ICDTagVarkaCAAnemo
 	ICDTagVaresaCombatCycle
 	ICDTagWandererC6
 	ICDTagWandererA4
