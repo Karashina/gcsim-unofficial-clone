@@ -23,9 +23,17 @@ type char struct {
 	absorbCheckLocation combat.AttackPattern
 	aiAbsorb            combat.AttackInfo
 	snapAbsorb          combat.Snapshot
-	c4bonus             []float64
 	// Hexerei mode (default true unless nohex=1)
-	isHexerei bool
+	isHexerei   bool
+	hasHexBonus bool // 2+ hexerei characters in party
+
+	// Hexerei burst eye tracking
+	burstEnd       int // absolute frame when burst eye expires
+	normalHexCount int // number of hex normal attack triggers per burst (max 2)
+	lastHexTrigger int // last frame hex normal attack trigger fired
+
+	// C1 hexerei: Stormwind Arrow split tracking (0.25s ICD = 15 frames)
+	lastStormwindSplit int
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) error {
@@ -49,10 +57,20 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// C4:
-	// When Venti picks up an Elemental Orb or Particle, he receives a 25% Anemo DMG Bonus for 10s.
+	// Check Hexerei bonus (2+ hexerei characters in party)
+	c.checkHexereiBonus()
+
+	// A0: Hexerei Secret Rite passive (swirl → DMG buff + burst boost)
+	c.a0HexereiInit()
+
+	// C4 (original): Venti gains Anemo DMG +25% for 10s when picking up particle
 	if c.Base.Cons >= 4 {
-		c.c4()
+		c.c4Old()
+	}
+
+	// C6: persistent AttackMod for CRIT DMG bonus against burst-affected enemies (hexerei only)
+	if c.Base.Cons >= 6 {
+		c.c6AttackModInit()
 	}
 	return nil
 }
@@ -71,4 +89,21 @@ func (c *char) Condition(fields []string) (any, error) {
 	default:
 		return c.Character.Condition(fields)
 	}
+}
+
+// checkHexereiBonus determines if party has 2+ hexerei characters.
+func (c *char) checkHexereiBonus() {
+	if !c.isHexerei {
+		c.hasHexBonus = false
+		return
+	}
+	hexereiCount := 0
+	for _, ch := range c.Core.Player.Chars() {
+		if result, err := ch.Condition([]string{"hexerei"}); err == nil {
+			if isHex, ok := result.(bool); ok && isHex {
+				hexereiCount++
+			}
+		}
+	}
+	c.hasHexBonus = hexereiCount >= 2
 }

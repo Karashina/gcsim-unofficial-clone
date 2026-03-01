@@ -69,11 +69,19 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			CanQueueAfter:   skillHoldFrames[action.ActionHighPlunge], // earliest cancel
 			State:           action.SkillState,
 		}
+	} else if c.Base.Cons >= 2 && c.isHexerei {
+		// C2 hexerei addition: press Skyward Sonnet deals 300% of original damage
+		ai.Mult *= 3.0
 	}
 
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(trg, nil, radius), 0, hitmark, c.c2, c.makeParticleCB(count))
 
 	c.SetCDWithDelay(action.ActionSkill, cd, cdstart)
+
+	// C4 (Hexerei): Venti + team gain Anemo DMG +25% for 10s after using skill
+	if c.Base.Cons >= 4 {
+		c.c4New()
+	}
 
 	return act, nil
 }

@@ -44,6 +44,21 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		Durability: 25,
 	}
 
+	// Hexerei: while burst eye is active, normal attacks become piercing Anemo Stormwind Arrows
+	// This is a standalone attack passive (not constellation-gated), active whenever hexerei bonus is present.
+	var hexCB combat.AttackCBFunc
+	if c.hexAttackEnabled() {
+		ai.Element = attributes.Anemo
+		ai.Abil = fmt.Sprintf("Normal %v (Stormwind)", c.NormalCounter)
+		ai.ICDTag = attacks.ICDTagNormalAttack
+		hexNormalCB := c.makeHexNormalCB()
+		c1SplitCB := c.makeC1StormwindSplitCB()
+		hexCB = func(a combat.AttackCB) {
+			hexNormalCB(a)
+			c1SplitCB(a)
+		}
+	}
+
 	for i, mult := range attack[c.NormalCounter] {
 		ai.Mult = mult[c.TalentLvlAttack()]
 		c.Core.QueueAttack(
@@ -57,6 +72,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			),
 			attackHitmarks[c.NormalCounter][i],
 			attackHitmarks[c.NormalCounter][i]+travel,
+			hexCB,
 		)
 	}
 

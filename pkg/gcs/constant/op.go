@@ -150,6 +150,22 @@ func UnaryOp(op ast.Token, right Value) (Value, error) {
 }
 
 func BinaryOp(op ast.Token, left, right Value) (Value, error) {
+	// String comparison (== and != only)
+	if ls, ok := left.(*strval); ok {
+		rs, ok := right.(*strval)
+		if !ok {
+			return nil, fmt.Errorf("cannot compare string with non-string: %v%v%v", left.Inspect(), op, right.Inspect())
+		}
+		switch op.Typ {
+		case ast.OpEqual:
+			return bton(ls.str == rs.str), nil
+		case ast.OpNotEqual:
+			return bton(ls.str != rs.str), nil
+		default:
+			return nil, fmt.Errorf("unsupported string operator: %v%v%v", left.Inspect(), op, right.Inspect())
+		}
+	}
+
 	if left, ok := left.(*number); ok {
 		right, ok := right.(*number)
 		if !ok {

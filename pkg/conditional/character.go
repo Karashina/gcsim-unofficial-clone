@@ -53,7 +53,17 @@ func evalCharacter(c *core.Core, key keys.Char, fields []string) (any, error) {
 	case "onfield":
 		return c.Player.Active() == char.Index, nil
 	case "weapon":
+		// Return the canonical weapon name as a string for string comparison
+		// e.g. .varka.weapon == "gestofthemightywolf"
+		return char.Weapon.Key.String(), nil
+	case "weaponkey":
+		// Return the numeric weapon key for backward-compatible numeric comparison
+		// e.g. .varka.weaponkey == .keys.weapon.gestofthemightywolf
 		return int(char.Weapon.Key), nil
+	case "set":
+		// Return the canonical set name of the equipped set with 4+ pieces
+		// e.g. .varka.set == "adcfrw"
+		return evalCharacterMainSet(char), nil
 	case "status":
 		if err := fieldsCheck(fields, 3, charCat); err != nil {
 			return 0, err
@@ -111,6 +121,23 @@ func evalCharacterSets(char *character.CharWrapper, set string) (float64, error)
 		return 0, nil
 	}
 	return float64(setInfo.GetCount()), nil
+}
+
+// evalCharacterMainSet returns the canonical name of the equipped set with the
+// highest piece count (must be >= 4). Returns "" if no 4-piece set is equipped.
+func evalCharacterMainSet(char *character.CharWrapper) string {
+	var bestKey keys.Set
+	bestCount := 0
+	for k, v := range char.Equip.Sets {
+		if c := v.GetCount(); c >= 4 && c > bestCount {
+			bestKey = k
+			bestCount = c
+		}
+	}
+	if bestCount == 0 {
+		return ""
+	}
+	return bestKey.String()
 }
 
 func evalCharacterAbil(c *core.Core, char *character.CharWrapper, act action.Action, typ string) (any, error) {

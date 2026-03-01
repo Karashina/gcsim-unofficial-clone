@@ -26,6 +26,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.qPos = geometry.CalcOffsetPoint(player.Pos(), geometry.Point{Y: 5}, player.Direction())
 	c.absorbCheckLocation = combat.NewBoxHitOnTarget(c.qPos, geometry.Point{Y: -1}, 2.5, 2.5)
 
+	// Track burst eye duration for hexerei passive:
+	// Last tick fires at frame (106 + 24*19) = 562 from activation. Add buffer for eye persistence.
+	c.burstEnd = c.Core.F + 570
+	// Reset hex normal attack trigger counter for this burst
+	c.normalHexCount = 0
+
 	// 8 second duration, tick every .4 second
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -72,6 +78,11 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c.SetCDWithDelay(action.ActionBurst, 15*60, 81)
 	c.ConsumeEnergy(84)
+
+	// C4 (Hexerei): Venti + team gain Anemo DMG +25% for 10s after using burst
+	if c.Base.Cons >= 4 {
+		c.c4New()
+	}
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
