@@ -205,6 +205,7 @@ func (c *char) spiritSteedStride(p map[string]int) (action.Info, error) {
 	}
 
 	ai2.FlatDmg *= (1 + c.ElevationBonus(ai2))
+	ai2.FlatDmg += c.LCrsFlatBonus(ai2)
 
 	snap := combat.Snapshot{CharLvl: c.Base.Level}
 	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
