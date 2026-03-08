@@ -63,6 +63,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	emBonus := (6 * em) / (2000 + em)
 	ai2.FlatDmg = baseDmg * (1 + c.LCrsBaseReactBonus(ai2)) * (1 + emBonus + c.LCrsReactBonus(ai2))
 	ai2.FlatDmg *= (1 + c.ElevationBonus(ai2))
+	ai2.FlatDmg += c.LCrsFlatBonus(ai2)
 
 	snap := combat.Snapshot{CharLvl: c.Base.Level}
 	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
