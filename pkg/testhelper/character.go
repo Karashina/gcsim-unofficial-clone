@@ -44,6 +44,9 @@ func (c *Character) SetCDWithDelay(a action.Action, dur, delay int)       {}
 func (c *Character) Charges(a action.Action) int                          { return 1 }
 func (c *Character) SetCD(a action.Action, dur int)                       {}
 func (c *Character) Init() error                                          { return nil }
+func (c *Character) ResetNormalCounter()                                  {}
+func (c *Character) NextNormalCounter() int                               { return 0 }
+func (c *Character) Condition(fields []string) (any, error)               { return 0, nil }
 func (c *Character) Data() *model.AvatarData                              { return base }
 func (c *Character) CurrentHPRatio() float64                              { return 0 }
 func (c *Character) CurrentHP() float64                                   { return 0 }
