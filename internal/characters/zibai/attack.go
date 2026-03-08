@@ -181,6 +181,7 @@ func (c *char) queueN4AdditionalHit() {
 	ai.FlatDmg = baseDmg * mult * (1 + c.LCrsBaseReactBonus(ai)) * (1 + emBonus + c.LCrsReactBonus(ai))
 
 	ai.FlatDmg *= (1 + c.ElevationBonus(ai))
+	ai.FlatDmg += c.LCrsFlatBonus(ai)
 
 	snap := combat.Snapshot{CharLvl: c.Base.Level}
 	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
