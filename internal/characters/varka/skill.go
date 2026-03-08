@@ -30,7 +30,7 @@ func init() {
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	if c.sturmActive {
-		// C6: FWA後、スキルタップで追加Azure Devourを発動（FWAではない）
+		// C6: After FWA, tap Skill triggers additional Azure Devour (not FWA)
 		if c.Base.Cons >= 6 && c.StatusIsActive(c6FWAWindowKey) {
 			info, err := c.azureDevour(p)
 			if err == nil {
@@ -43,9 +43,9 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return c.windBoundExecution(p)
 }
 
-// windBoundExecution はSturm und Drangに入る初期スキル発動
+// windBoundExecution is the initial skill cast that enters Sturm und Drang
 func (c *char) windBoundExecution(p map[string]int) (action.Info, error) {
-	// 風元素ダメージを与える（スキルダメージ）
+	// Deal Anemo DMG (Skill DMG)
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Windbound Execution",
@@ -69,10 +69,10 @@ func (c *char) windBoundExecution(p map[string]int) (action.Info, error) {
 		c.skillParticleCB,
 	)
 
-	// Sturm und Drangモードに入る
+	// Enter Sturm und Drang mode
 	c.enterSturmUndDrang()
 
-	// holdパラメータに基づいてCDを設定
+	// Set CD based on hold parameter
 	hold, ok := p["hold"]
 	if ok && hold > 0 {
 		c.SetCD(action.ActionSkill, 8*60) // Hold CD = 8s
@@ -88,26 +88,26 @@ func (c *char) windBoundExecution(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// enterSturmUndDrang はS&Dモードを有効化する
+// enterSturmUndDrang activates S&D mode
 func (c *char) enterSturmUndDrang() {
 	c.sturmActive = true
 	c.sturmSrc = c.Core.F
 	c.cdReductionCount = 0
 
-	// FWAチャージ: CD中から開始ﾈ0チャージﾉ、CD = チャージあたり11秒
+	// FWA charges: starts on cooldown (0 charges), CD = 11s per charge
 	c.fwaCharges = 0
 	c.fwaCDEndFrame = c.Core.F + 11*60
 
-	// C1: S&D突入時にFWAチャージを1つ即座に付与
+	// C1: immediately grant 1 FWA charge upon entering S&D
 	if c.Base.Cons >= 1 {
 		c.fwaCharges = 1
 	}
 
-	// S&D持続時間: 12秒
+	// S&D Duration: 12s
 	dur := 12 * 60
 	c.AddStatus(sturmUndDrangKey, dur, true)
 
-	// C1: Lyrical Libation - 最初のFWA/Azure Devourが200%ダメージ
+	// C1: Lyrical Libation - first FWA/Azure Devour deals 200% DMG
 	if c.Base.Cons >= 1 {
 		c.AddStatus(c1LyricalKey, dur, true)
 	}
@@ -116,7 +116,7 @@ func (c *char) enterSturmUndDrang() {
 	// Core.Tasks.Add uses c.Core.F (absolute frame count); using QueueCharTask
 	// here would cause S&D to last far too long because hitlag pauses TimePassed.
 	src := c.sturmSrc
-	c.Core.Tasks.Add(func() {
+	c.QueueCharTask(func() {
 		if c.sturmSrc != src {
 			return
 		}
@@ -124,7 +124,7 @@ func (c *char) enterSturmUndDrang() {
 	}, dur)
 }
 
-// exitSturmUndDrang はS&Dモードを無効化する
+// exitSturmUndDrang deactivates S&D mode
 func (c *char) exitSturmUndDrang() {
 	c.sturmActive = false
 	c.fwaCharges = 0
@@ -132,40 +132,40 @@ func (c *char) exitSturmUndDrang() {
 	c.DeleteStatus(c1LyricalKey)
 }
 
-// fourWindsAscension はS&Dモード中の特殊スキルを処理する
+// fourWindsAscension handles the special skill during S&D mode
 func (c *char) fourWindsAscension(p map[string]int) (action.Info, error) {
 	lvl := c.TalentLvlSkill()
 
-	// C6: FWAウィンドウからの発動か確認（チャージ消費なし）
+	// C6: check if this is from the FWA window (no charge consumption)
 	consumeCharge := true
 	if c.Base.Cons >= 6 {
 		if c.StatusIsActive(c6AzureWindowKey) {
-			// Azure Devour後、スキルタップでチャージ消費なしの追加FWAを発動
+			// After Azure Devour, tap skill triggers additional FWA without consuming charges
 			consumeCharge = false
 			c.DeleteStatus(c6AzureWindowKey)
 		}
-		// c6FWAWindowKeyのケースはSkill()がazureDevourにルーティングすることで処理
+		// c6FWAWindowKey case is now handled by Skill() routing to azureDevour
 	}
 
 	if consumeCharge {
 		c.fwaCharges--
 	}
 
-	// C1: Lyrical Libation効果
+	// C1: Lyrical Libation effect
 	c1Mult := 1.0
 	if c.Base.Cons >= 1 && c.StatusIsActive(c1LyricalKey) {
 		c1Mult = 2.0
 		c.DeleteStatus(c1LyricalKey)
 	}
 
-	// FWA: 2ヒット
-	// 1打目: 他元素（ICDなし）, 2打目: 風（ICDなし）
+	// FWA: 2 hits
+	// 1st: Other element (No ICD), 2nd: Anemo (No ICD)
 	otherEle := c.otherElement
 	if !c.hasOtherEle {
 		otherEle = attributes.Anemo
 	}
 
-	// ヒット1: 他元素
+	// Hit 1: Other element
 	mult1 := fwaOther[lvl]
 	if c.Base.Ascension >= 1 && c.a1MultFactor != 1.0 {
 		mult1 *= c.a1MultFactor
@@ -193,7 +193,7 @@ func (c *char) fourWindsAscension(p map[string]int) (action.Info, error) {
 		fwaHitmarks[0], fwaHitmarks[0],
 	)
 
-	// ヒット2: 風元素
+	// Hit 2: Anemo
 	mult2 := fwaAnemo[lvl]
 	if c.Base.Ascension >= 1 && c.a1MultFactor != 1.0 {
 		mult2 *= c.a1MultFactor
@@ -221,7 +221,7 @@ func (c *char) fourWindsAscension(p map[string]int) (action.Info, error) {
 		fwaHitmarks[1], fwaHitmarks[1],
 	)
 
-	// C2: ATKの800%に等しい追加風元素攻撃
+	// C2: Additional Anemo strike equal to 800% ATK
 	if c.Base.Cons >= 2 {
 		c.c2Strike(fwaHitmarks[1] + 4)
 	}
@@ -240,7 +240,7 @@ func (c *char) fourWindsAscension(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// skillParticleCB はスキルが敵に命中した時に粒子を生成する
+// skillParticleCB generates particles when skill hits enemy
 func (c *char) skillParticleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -250,11 +250,11 @@ func (c *char) skillParticleCB(a combat.AttackCB) {
 	}
 	c.AddStatus(particleICDKey, 0.5*60, true)
 
-	// 6個の元素粒子を生成
+	// Generates 6 elemental particles
 	c.Core.QueueParticle(c.Base.Key.String(), 6, attributes.Anemo, c.ParticleDelay)
 }
 
-// c2Strike はC2の追加風元素攻撃を実行する
+// c2Strike performs the C2 additional Anemo strike
 func (c *char) c2Strike(delay int) {
 	atk := c.TotalAtk()
 	ai := combat.AttackInfo{
@@ -277,5 +277,5 @@ func (c *char) c2Strike(delay int) {
 }
 
 func (c *char) c2Init() {
-	// C2はFWAとAzure Devour関数内で直接処理
+	// C2 is handled directly in FWA and Azure Devour functions
 }
