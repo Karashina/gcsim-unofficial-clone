@@ -24,8 +24,8 @@ func init() {
 	skillHoldFrames = frames.InitAbilSlice(42)
 }
 
-// Skill performs Dawnbearing Songbird
-// Throws lamp towards enemies, dealing Geo DMG based on EM and DEF
+// Skill は曙光の歌鳥を実行する
+// 敵に向けてランプを投げ、元素熟知と防御力に基づく岩元素ダメージを与える
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	hold, ok := p["hold"]
 	if !ok {
@@ -50,7 +50,7 @@ func (c *char) skillTap(p map[string]int) (action.Info, error) {
 		Durability: 25,
 	}
 
-	// Calculate FlatDmg from EM + DEF scaling
+	// 元素熟知 + 防御力スケーリングからFlatDmgを計算
 	em := c.Stat(attributes.EM)
 	def := c.TotalDef(false)
 	emMult := skillTapEM[c.TalentLvlSkill()]
@@ -64,10 +64,10 @@ func (c *char) skillTap(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(ai, ap, 0, 0, c.particleCB)
 	}, skillTapHitmark)
 
-	// Apply A1 Lightkeeper's Oath buff
+	// 固有天賦1の灯守の誓いバフを適用
 	c.applyLightkeeperOath()
 
-	// Set cooldown (15s)
+	// クールダウンを設定（15秒）
 	c.SetCDWithDelay(action.ActionSkill, 15*60, skillTapHitmark)
 
 	c.Core.Log.NewEvent("Illuga uses Dawnbearing Songbird (Tap)", glog.LogCharacterEvent, c.Index).
@@ -95,7 +95,7 @@ func (c *char) skillHold(p map[string]int, hold int) (action.Info, error) {
 		Durability: 25,
 	}
 
-	// Calculate FlatDmg from EM + DEF scaling (Hold has higher multipliers)
+	// 元素熟知 + 防御力スケーリングからFlatDmgを計算（長押しは乗数が高い）
 	em := c.Stat(attributes.EM)
 	def := c.TotalDef(false)
 	emMult := skillHoldEM[c.TalentLvlSkill()]
@@ -109,10 +109,10 @@ func (c *char) skillHold(p map[string]int, hold int) (action.Info, error) {
 		c.Core.QueueAttack(ai, ap, 0, 0, c.particleCB)
 	}, skillHoldHitmark+hold)
 
-	// Apply A1 Lightkeeper's Oath buff
+	// 固有天賦1の灯守の誓いバフを適用
 	c.applyLightkeeperOath()
 
-	// Set cooldown (15s)
+	// クールダウンを設定（15秒）
 	c.SetCDWithDelay(action.ActionSkill, 15*60, skillHoldHitmark)
 
 	c.Core.Log.NewEvent("Illuga uses Dawnbearing Songbird (Hold)", glog.LogCharacterEvent, c.Index).
@@ -128,7 +128,7 @@ func (c *char) skillHold(p map[string]int, hold int) (action.Info, error) {
 	}, nil
 }
 
-// particleCB handles particle generation
+// particleCBは粒子生成を処理する
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return

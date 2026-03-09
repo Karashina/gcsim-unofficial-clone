@@ -1,5 +1,5 @@
-// package minazuki provides common implementation for abilities that trigger
-// based on normal animation state, i.e. xingqiu burst
+// package minazukiは通常攻撃アニメーション状態に基づいてトリガーされるアビリティの
+// 共通実装を提供する（例: 行秋の元素爆発）
 package minazuki
 
 import (
@@ -15,10 +15,10 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/model"
 )
 
-// Watcher watches state change and triggers accordingly
+// Watcher は状態変化を監視し、それに応じてトリガーする
 type Watcher struct {
-	// mandatory data
-	key         keys.Char // name of the watcher; used for keying subscribers
+	// 必須データ
+	key         keys.Char // ウォッチャーの名前。購読者のキーとして使用
 	caster      *character.CharWrapper
 	abil        string
 	statusKey   string
@@ -27,10 +27,10 @@ type Watcher struct {
 	core        *core.Core
 	tickerFreq  int
 
-	// other fields including optional overrides
-	state        action.AnimationState   // the state change we are watching for
-	delayKey     model.AnimationDelayKey // delay key used to check delay func
-	shouldDelay  func() bool             // function to be called to see if delayed should be applied
+	// その他のフィールド（オプショナルのオーバーライド含む）
+	state        action.AnimationState   // 監視対象の状態変化
+	delayKey     model.AnimationDelayKey // ディレイ関数確認用のディレイキー
+	shouldDelay  func() bool             // ディレイを適用すべきか判定する関数
 	tickOnActive bool
 
 	tickSrc int
@@ -40,7 +40,7 @@ type Config func(w *Watcher) error
 
 func New(cfg ...Config) (*Watcher, error) {
 	w := &Watcher{
-		// defaults
+		// デフォルト
 		delayKey: model.InvalidAnimationDelayKey,
 		state:    action.NormalAttackState,
 	}
@@ -112,17 +112,16 @@ func (w *Watcher) Kill() {
 func (w *Watcher) stateChangeHook() {
 	w.core.Events.Subscribe(event.OnStateChange, func(args ...interface{}) bool {
 		next := args[1].(action.AnimationState)
-		// ignore if it's not the state we are looking for
+		// 監視対象の状態でなければ無視
 		if next != w.state {
 			return false
 		}
 
-		// if we need to check for delay, and there is a delay, then we delay the execution
-		// of this state check
-		// note that this is less performant because we don't actually need to do this check
-		// if say the status is not active at all
-		// however this just simpler to read so... performance hit shouldn't be that big
-		if w.shouldDelay != nil { //TODO: to maintain old implementation equivalent; should be removed
+		// 遅延チェックが必要で、かつ遅延がある場合、この状態チェックの実行を遅延させる
+		// ステータスがアクティブでない場合はこのチェックが不要なので
+		// パフォーマンス的には効率が悪いが、可読性を優先する
+		// パフォーマンスへの影響はそこまで大きくないはず
+		if w.shouldDelay != nil { // TODO: 旧実装との互換性維持のため。削除すべき
 			// if w.shouldDelay() {
 			if delay := w.core.Player.ActiveChar().AnimationStartDelay(w.delayKey); delay > 0 {
 				c := w.caster
@@ -170,14 +169,14 @@ func (w *Watcher) queueTick(src int) {
 	if w.tickOnActive {
 		c = w.core.Player.ActiveChar()
 	}
-	// use the hitlag affected queue for this
+	// ヒットラグ影響付きキューを使用
 	c.QueueCharTask(w.tickerFunc(src), w.tickerFreq)
 }
 
 func (w *Watcher) tickerFunc(src int) func() {
 	return func() {
 		c := w.caster
-		// check if buff is up
+		// バフが有効か確認
 		if !c.StatusIsActive(w.statusKey) {
 			w.core.Log.NewEventBuildMsg(glog.LogCharacterEvent, c.Index, w.abil, " not triggered on tick; on icd").
 				Write("icd", c.StatusExpiry(w.icdKey)).
@@ -190,7 +189,7 @@ func (w *Watcher) tickerFunc(src int) func() {
 				Write("new src", w.tickSrc)
 			return
 		}
-		// stop if we are no longer in the right animation state
+		// 正しいアニメーション状態でなくなったら停止
 		state := w.core.Player.CurrentState()
 		if state != w.state {
 			w.core.Log.NewEventBuildMsg(glog.LogCharacterEvent, c.Index, w.abil, " tick check stopped, wrong state").
@@ -199,7 +198,7 @@ func (w *Watcher) tickerFunc(src int) func() {
 			return
 		}
 		if w.shouldDelay != nil && w.shouldDelay() {
-			// only nesting the if so it's easier to read...
+			// 可読性のためifをネストしている...
 			s := w.core.Player.CurrentStateStart()
 			if w.core.F-s < w.core.Player.ActiveChar().AnimationStartDelay(w.delayKey) {
 				w.core.Log.NewEventBuildMsg(glog.LogCharacterEvent, c.Index, w.abil, " not triggered; not enough time since normal state start").
@@ -208,15 +207,15 @@ func (w *Watcher) tickerFunc(src int) func() {
 				return
 			}
 		}
-		// if there is a delay check then make sure current frame count is passed the delay
+		// 遅延チェックがある場合、現在のフレームカウントが遅延を超えていることを確認
 		w.core.Log.NewEventBuildMsg(glog.LogCharacterEvent, c.Index, w.abil, " triggered from ticker").
 			Write("src", src).
 			Write("state", state).
 			Write("icd", c.StatusExpiry(w.statusKey))
-		// we can trigger a wave here b/c we're in normal state still and src is still the same
+		// 通常状態かつsrcが同じなので、ここでウェーブをトリガーできる
 		w.triggerFunc()
-		// in theory this should not hit an icd?
-		// use the hitlag affected queue for this
+		// 理論上はICDに引っかからないはず？
+		// ヒットラグ影響付きキューを使用
 		w.queueTick(src)
 	}
 }

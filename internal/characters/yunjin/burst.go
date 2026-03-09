@@ -24,9 +24,9 @@ func init() {
 	burstFrames[action.ActionSwap] = 55    // Q -> Swap
 }
 
-// Burst - The main buff effects are handled in a separate function
+// 元素爆発 - メインのバフ効果は別の関数で処理
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// AoE Geo damage
+	// 範囲岩元素ダメージ
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Cliffbreaker's Banner",
@@ -40,15 +40,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Mult:       burstDmg[c.TalentLvlBurst()],
 	}
 
-	// delete burst, c2 and c6 at start
+	// 開始時に元素爆発、2凸、6凸を削除
 	c.DeleteStatus(burstBuffKey)
 	c.deleteC2()
 	c.deleteC6()
 
-	// queue dmg and burst, c2 and c6 start
+	// ダメージと元素爆発、2凸、6凸の開始をキューに追加
 	c.QueueCharTask(func() {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6), 0, 0)
-		// Reset number of burst triggers to 30
+		// 元素爆発のトリガー回数を30にリセット
 		for _, char := range c.Core.Player.Chars() {
 			char.SetTag(burstBuffKey, 30)
 			char.AddStatus(burstBuffKey, 720, true)
@@ -63,13 +63,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionJump], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
 
 func (c *char) burstProc() {
-	// Add Flying Cloud Flag Formation as a pre-damage hook
+	// 飛雲旗陣をダメージ前フックとして追加
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
 
@@ -77,7 +77,7 @@ func (c *char) burstProc() {
 			return false
 		}
 		char := c.Core.Player.ByIndex(ae.Info.ActorIndex)
-		// do nothing if buff gone or burst count gone
+		// バフまたは元素爆発カウントが無い場合は何もしない
 		if char.Tags[burstBuffKey] == 0 {
 			return false
 		}

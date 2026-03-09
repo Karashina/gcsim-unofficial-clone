@@ -1,8 +1,8 @@
-// Package combat handles all combat related functionalities including
-//   - target tracking
-//   - target selection
-//   - hitbox collision checking
-//   - attack queueing
+// パッケージ combat は戦闘関連の全機能を処理する:
+//   - ターゲット追跡
+//   - ターゲット選択
+//   - ヒットボックスの衝突判定
+//   - 攻撃キューイング
 package combat
 
 import (
@@ -63,16 +63,16 @@ func (h *Handler) nextkey() targets.TargetKey {
 }
 
 func (h *Handler) Tick() {
-	// collision check happens before each object ticks (as collision may remove the object)
-	// enemy and player does not check for collision
-	// gadgets check against player and enemy
+	// 衝突判定は各オブジェクトのTick前に行う（衝突によりオブジェクトが削除される可能性があるため）
+	// 敵とプレイヤーは衝突判定を行わない
+	// ガジェットはプレイヤーと敵に対して衝突判定を行う
 	for i := 0; i < len(h.gadgets); i++ {
 		if h.gadgets[i] != nil && h.gadgets[i].CollidableWith(targets.TargettablePlayer) {
 			if h.gadgets[i].WillCollide(h.player.Shape()) {
 				h.gadgets[i].CollidedWith(h.player)
 			}
 		}
-		// sanity check in case gadget is gone
+		// ガジェットが消えていないか確認
 		if h.gadgets[i] != nil && h.gadgets[i].CollidableWith(targets.TargettableEnemy) {
 			for j := 0; j < len(h.enemies) && h.gadgets[i] != nil; j++ {
 				if h.gadgets[i].WillCollide(h.enemies[j].Shape()) {
@@ -90,7 +90,7 @@ func (h *Handler) Tick() {
 			v.Tick()
 		}
 	}
-	//TODO: clean up every 100 tick reasonable?
+	//TODO: 100 Tickごとのクリーンアップは妥当か？
 	h.gccount++
 	if h.gccount > 100 {
 		n := 0

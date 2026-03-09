@@ -65,8 +65,8 @@ func (c *char) Attack(_ map[string]int) (action.Info, error) {
 				attackHitboxes[c.NormalCounter][1],
 			)
 		}
-		// no char queue is fine here because multhit doesn't have hitlag on her
-		// N3 should snap on gadget creation which is assumed to be earliest cancel here so that infusion is snapped properly
+		// マルチヒットにヒットラグがないためcharキュー不要
+		// N3はガジェット生成時にスナップショットすべき（最早キャンセル=付与が正しくスナップされるよう）
 		c.Core.QueueAttack(ai, ap, attackEarliestCancel[c.NormalCounter], attackHitmarks[c.NormalCounter][i])
 	}
 

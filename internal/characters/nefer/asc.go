@@ -8,7 +8,7 @@ import (
 )
 
 // A0
-// Every point of Elemental Mastery that Nefer has increases Lunar-Bloom's Base DMG by 0.0175%, up to a maximum of 14%.
+// Neferの元素熟知1ポイントにつき、Lunar-Bloomの基礎ダメージが0.0175%増加する（最大14%）。
 func (c *char) a0() {
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatus("LB-Key", -1, false)
@@ -22,10 +22,10 @@ func (c *char) a0() {
 	}
 }
 
-// A1: Seeds/Veil mechanic (simplified): absorbing seeds grants Veil of Falsehood stacks; at thresholds grants EM bonus and increases PP DMG by 8% per stack.
+// A1：種/ヴェールメカニクス（簡略化）：種を吸収すると偽りのヴェールスタックを獲得し、閾値で元素熟知ボーナスとPPダメージがスタックあたり8%増加する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	// Now handled via direct seed absorption in Charge/Phantasm attacks
+	// 現在は重撃/幻影攻撃での直接種吸収で処理
 }

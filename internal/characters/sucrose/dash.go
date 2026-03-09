@@ -13,14 +13,14 @@ func init() {
 	dashFrames[action.ActionBurst] = 1
 }
 
-// sucrose's dash can be cancelled by her E and Q, so we override it here. wtf sucrose
+// スクロースのダッシュはEとQでキャンセル可能なので、ここでオーバーライドする
 func (c *char) Dash(p map[string]int) (action.Info, error) {
-	// call default implementation to handle stamina
+	// スタミナ処理のデフォルト実装を呼び出す
 	c.Character.Dash(p)
 	return action.Info{
 		Frames:          frames.NewAbilFunc(dashFrames),
 		AnimationLength: dashFrames[action.InvalidAction],
-		CanQueueAfter:   dashFrames[action.ActionSkill], // earliest cancel
+		CanQueueAfter:   dashFrames[action.ActionSkill], // 最速キャンセル
 		State:           action.DashState,
 	}, nil
 }

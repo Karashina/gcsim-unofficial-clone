@@ -24,7 +24,7 @@ func init() {
 	burstFrames[action.ActionSwap] = 56
 }
 
-// Burst attack damage queue generator
+// 元素爆発のダメージキュー生成
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -38,7 +38,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Mult:       burst[c.TalentLvlBurst()],
 	}
 
-	// damage component not final
+	// ダメージコンポーネントは未確定
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 4),
@@ -53,7 +53,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c.AddStatus(burstKey, d*60, true)
 
-	// C4: restore 15 energy
+	// 4凸: エネルギーを15回復
 	if c.Base.Cons >= 4 {
 		c.Core.Tasks.Add(func() {
 			c.AddEnergy("thoma-c4", 15)
@@ -62,7 +62,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	cd := 20
 	if c.Base.Cons >= 1 {
-		cd = 17 // the CD reduction activates when a character protected by Thoma's shield is hit. Since it is almost impossible for this not to activate, we set the duration to 17 for sim purposes.
+		cd = 17 // CD短縮はトーマのシールドで保護されたキャラが被弾時に発動。シミュレーション上ほぼ確実に発動するため17に設定
 	}
 	c.SetCD(action.ActionBurst, cd*60)
 	c.ConsumeEnergy(7)

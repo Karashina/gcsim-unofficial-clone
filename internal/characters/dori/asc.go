@@ -10,9 +10,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
 )
 
-// After a character connected to the Jinni triggers an Electro-Charged, Superconduct, Overloaded, Quicken, Aggravate, Hyperbloom,
-// or an Electro Swirl or Crystallize reaction, the CD of Spirit-Warding Lamp: Troubleshooter Cannon is decreased by 1s.
-// This effect can be triggered once every 3s.
+// ジニーに接続されたキャラクターが感電・超伝導・過負荷・激化・激化（超）・超開花・
+// 雷元素の拡散・結晶反応をトリガーすると、魔除の灯のCDが1秒短縮される。
+// この効果は3秒に1回発動可能。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -24,7 +24,7 @@ func (c *char) a1() {
 	reduce := func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 
-		if c.Core.Player.Active() != atk.Info.ActorIndex { // only for on field character
+		if c.Core.Player.Active() != atk.Info.ActorIndex { // フィールド上のキャラクターのみ
 			return false
 		}
 		if c.StatusIsActive(icdKey) {
@@ -55,10 +55,10 @@ func (c *char) a1() {
 	c.Core.Events.Subscribe(event.OnSwirlElectro, reduceNoGadget, "dori-a1")
 }
 
-// When the Troubleshooter Shots or After-Sales Service Rounds from Spirit-Warding Lamp: Troubleshooter Cannon hit opponents,
-// Dori will restore 5 Elemental Energy for every 100% Energy Recharge possessed.
-// Per Spirit-Warding Lamp: Troubleshooter Cannon, only one instance of Energy restoration can be triggered
-// and a maximum of 15 Energy can be restored this way.
+// トラブルシューターショットまたはアフターサービス弾が敵に命中すると、
+// ドリーは元素チャージ効率100%ごとに元素エネルギーを5回復する。
+// 魔除の灯1回につきエネルギー回復は1回のみ発動可能で、
+// 最大15まで回復可能。
 func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil

@@ -42,7 +42,7 @@ func (p *Player) HandleAttack(atk *combat.AttackEvent) float64 {
 	var crit bool
 	evt := p.Core.Combat.Log.NewEvent(atk.Info.Abil, glog.LogDamageEvent, atk.Info.ActorIndex)
 
-	// TODO: Implement reactions on player
+	// TODO: プレイヤーへの元素反応を実装する
 
 	dmg, crit = p.calc(atk)
 
@@ -76,8 +76,8 @@ func (p *Player) HandleAttack(atk *combat.AttackEvent) float64 {
 		evt.Write("pre_damage_mods", preDmgModDebug)
 	}
 
-	// returns 0 so that the damage done to player doesn't count
-	// towards the sim's TotalDamage and DPS statistic
+	// 0を返すことで、プレイヤーへのダメージが
+	// シムの TotalDamage や DPS 統計にカウントされないようにする
 	return 0
 }
 func (p *Player) calc(atk *combat.AttackEvent) (float64, bool) {
@@ -90,7 +90,7 @@ func (p *Player) calc(atk *combat.AttackEvent) (float64, bool) {
 	elePer := 0.0
 	if st > -1 {
 		elePer = atk.Snapshot.Stats[st]
-		// Generally not needed except for sim issues
+		// 通常はシミュレーション問題の場合を除き不要
 		// p.Core.Log.NewEvent("ele lookup ok",
 		// 	glog.LogCalc, atk.Info.ActorIndex,
 		// 	"attack_tag", atk.Info.AttackTag,
@@ -104,7 +104,7 @@ func (p *Player) calc(atk *combat.AttackEvent) (float64, bool) {
 	}
 	dmgBonus := elePer + atk.Snapshot.Stats[attributes.DmgP]
 
-	// calculate using attack or def
+	// 攻撃力または防御力で計算
 	var a float64
 	switch {
 	case atk.Info.UseHP:
@@ -118,7 +118,7 @@ func (p *Player) calc(atk *combat.AttackEvent) (float64, bool) {
 	base := atk.Info.Mult*a + atk.Info.FlatDmg
 	damage := base * (1 + dmgBonus)
 
-	// make sure 0 <= cr <= 1
+	// 0 <= 会心率 <= 1 に制限
 	if atk.Snapshot.Stats[attributes.CR] < 0 {
 		atk.Snapshot.Stats[attributes.CR] = 0
 	}
@@ -127,16 +127,16 @@ func (p *Player) calc(atk *combat.AttackEvent) (float64, bool) {
 	}
 
 	char := p.Core.Player.ActiveChar()
-	// TODO: Players don't have resistances right now
+	// TODO: プレイヤーには現在耐性がない
 	res := 0.0
 
 	def := char.TotalDef(false)
 	def *= (1 - atk.Info.IgnoreDefPercent)
 	defmod := 1 - def/(def+float64(5*atk.Snapshot.CharLvl)+500)
 
-	// apply def mod
+	// 防御修飾子を適用
 	damage *= defmod
-	// apply resist mod
+	// 耐性修飾子を適用
 
 	resmod := 1 - res/2
 	if res >= 0 && res < 0.75 {
@@ -148,7 +148,7 @@ func (p *Player) calc(atk *combat.AttackEvent) (float64, bool) {
 
 	precritdmg := damage
 
-	// check if crit
+	// 会心判定をチェック
 	if atk.Info.HitWeakPoint || p.Core.Rand.Float64() <= atk.Snapshot.Stats[attributes.CR] {
 		damage *= (1 + atk.Snapshot.Stats[attributes.CD])
 		isCrit = true
@@ -156,19 +156,19 @@ func (p *Player) calc(atk *combat.AttackEvent) (float64, bool) {
 
 	preampdmg := damage
 
-	// calculate em bonus
+	// 元素熟知ボーナスを計算
 	em := atk.Snapshot.Stats[attributes.EM]
 	emBonus := (2.78 * em) / (1400 + em)
 	var reactBonus float64
-	// check melt/vape
+	// 蒸発/融解をチェック
 	if atk.Info.Amped {
 		reactBonus = p.Core.Player.ByIndex(atk.Info.ActorIndex).ReactBonus(atk.Info)
 		// t.Core.Log.Debugw("debug", "frame", t.Core.F, core.LogPreDamageMod, "char", t.Index, "char_react", char.CharIndex(), "reactbonus", char.ReactBonus(atk.Info), "damage_pre", damage)
 		damage *= (atk.Info.AmpMult * (1 + emBonus + reactBonus))
 	}
 
-	// apply elevation bonus
-	// Skip for Lunar Reaction damage (LC/LB/LCrs) as elevation is already applied in precalc
+	// 標高ボーナスを適用
+	// Lunar Reaction ダメージ（LC/LB/LCrs）は事前計算で標高が適用済みなのでスキップ
 	elevationBonus := 0.0
 	if atk.Info.AttackTag != attacks.AttackTagLCDamage &&
 		atk.Info.AttackTag != attacks.AttackTagLBDamage &&
@@ -177,7 +177,7 @@ func (p *Player) calc(atk *combat.AttackEvent) (float64, bool) {
 	}
 	damage *= (1 + elevationBonus)
 
-	// reduce damage by damage group
+	// ダメージグループによるダメージ減少
 	x := 1.0
 	if !atk.Info.SourceIsSim {
 		x = p.GroupTagDamageMult(atk.Info.ICDTag, atk.Info.ICDGroup, atk.Info.ActorIndex)
@@ -213,7 +213,7 @@ func (p *Player) calc(atk *combat.AttackEvent) (float64, bool) {
 			Write("ele_per", elePer).
 			Write("bonus_dmg", dmgBonus).
 			Write("ignore_def", atk.Info.IgnoreDefPercent).
-			Write("def_adj", 0). // Players don't have DefMods applied
+			Write("def_adj", 0). // プレイヤーにはDefModが適用されない
 			Write("target_lvl", char.Base.Level).
 			Write("char_lvl", atk.Snapshot.CharLvl).
 			Write("def_mod", defmod).
@@ -246,8 +246,8 @@ func (p *Player) ApplySelfInfusion(ele attributes.Element, dur reactions.Durabil
 	p.Core.Log.NewEventBuildMsg(glog.LogPlayerEvent, -1, "self infusion applied: "+ele.String()).
 		Write("durability", dur).
 		Write("duration", f)
-	// we're assuming self infusion isn't subject to 0.8x multiplier
-	// also no real sanity check
+	// 自己付与は0.8倍乗数の対象外と想定
+	// また特にサニティチェックはない
 	if ele == attributes.Frozen {
 		return
 	}
@@ -265,25 +265,25 @@ func (p *Player) ApplySelfInfusion(ele attributes.Element, dur reactions.Durabil
 		mod = reactable.Dendro
 	}
 
-	// we're assuming refill maintains the same decay rate?
+	// リフィルが既存の減衰率を維持すると想定
 	if p.Durability[mod] > reactable.ZeroDur {
-		// make sure we're not adding more than incoming
+		// 受信量以上にならないように確認
 		if p.Durability[mod] < dur {
 			p.Durability[mod] = dur
 		}
 		return
 	}
-	// otherwise calculate decay based on specified f (in frames)
+	// それ以外の場合、指定された f（フレーム）に基づいて減衰を計算
 	p.Durability[mod] = dur
 	p.DecayRate[mod] = dur / reactions.Durability(f)
 }
 
 func (p *Player) ReactWithSelf(atk *combat.AttackEvent) {
-	// check if have an element
+	// 元素が付与されているかチェック
 	if p.AuraCount() == 0 {
 		return
 	}
-	// otherwise react
+	// 元素反応を実行
 	existing := p.Reactable.ActiveAuraString()
 	applied := atk.Info.Durability
 	p.React(atk)

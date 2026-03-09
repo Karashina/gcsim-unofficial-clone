@@ -48,7 +48,7 @@ func (c *char) Init() error {
 	c.a1Absorb = attributes.NoElement
 	c.a4()
 
-	// make sure to use the same key everywhere so that these passives don't stack
+	// 同じキーを全箇所で使用してこれらのパッシブが重複しないようにする
 	c.Core.Player.AddStamPercentMod("utility-dash", -1, func(a action.Action) (float64, bool) {
 		if a == action.ActionDash && c.CurrentHPRatio() > 0 {
 			return -0.2, false

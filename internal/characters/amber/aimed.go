@@ -14,17 +14,17 @@ import (
 var aimedFrames [][]int
 
 var aimedHitmarks = []int{15, 86}
-var c1Delay = 9 // C1 arrow comes out 9f after the normal one, still comes out even if you cancel at aimedHitmark
+var c1Delay = 9 // 1凸の矢は通常の矢の9f後に発射される。aimedHitmarkでキャンセルしても発射される
 
 func init() {
 	aimedFrames = make([][]int, 2)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(25)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(96)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
@@ -49,14 +49,14 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 
 	b := p["bunny"]
 
-	// only works for fully-charged aimed shot
+	// フルチャージ狙い撃ちでのみ動作
 	if c.Base.Cons >= 2 && b != 0 && hold == attacks.AimParamLv1 {
-		// explode the first bunny
+		// 最初のバニーを爆発させる
 		c.Core.Tasks.Add(func() {
 			c.manualExplode()
 		}, aimedHitmarks[hold]+travel)
 
-		// also don't do any dmg since we're shooting at bunny
+		// バニーを撃っているためダメージは発生しない
 		return action.Info{
 			Frames:          frames.NewAbilFunc(aimedFrames[hold]),
 			AnimationLength: aimedFrames[hold][action.InvalidAction],

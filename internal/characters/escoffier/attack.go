@@ -35,11 +35,11 @@ func init() {
 
 	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][1], 62)
 	attackFrames[2][action.ActionWalk] = 61
-	attackFrames[2][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
+	attackFrames[2][action.ActionCharge] = 500 // TODO: このアクションは不正。より良い処理方法が必要
 }
 
-// Normal attack damage queue generator
-// relatively standard with no major differences versus other characters
+// 通常攻撃のダメージキュー生成
+// 他のキャラクターと大きな違いはなく比較的標準的
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{

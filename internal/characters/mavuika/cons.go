@@ -124,7 +124,7 @@ func (c *char) c4DecayRate() int {
 	return 0
 }
 
-// this is just used for c2
+// これは2凸のみに使用
 func (c *char) isRingFollowing() bool {
 	if c.Base.Cons < 6 {
 		return c.armamentState == ring

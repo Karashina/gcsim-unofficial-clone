@@ -24,11 +24,12 @@ func init() {
 	skillFrames[action.ActionSwap] = 50
 }
 
-// Skill attack damage queue generator
-// Includes optional argument "nobehind" for whether Rosaria appears behind her opponent or not (for her A1).
-// Default behavior is to appear behind enemy - set "nobehind=1" to diasble A1 proc
+// 元素スキルのダメージキュー生成
+// 元素スキルのダメージキュー生成
+// ロサリアが敵の背後に現れるかどうかのオプション引数 "nobehind" を含む（固有天賦A1用）。
+// デフォルトは敵の背後に現れる。"nobehind=1" でA1発動を無効化
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// No ICD to the 2 hits
+	// 2ヒットにICDなし
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Ravaging Confession (Hit 1)",
@@ -44,7 +45,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		CanBeDefenseHalted: false,
 	}
 
-	// We always assume that A1 procs on hit 1 to simplify
+	// 簡略化のため、A1は常に1撃目で発動すると仮定
 	var a1CB combat.AttackCBFunc
 	if p["nobehind"] != 1 {
 		a1CB = c.makeA1CB()
@@ -62,8 +63,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c4CB,
 	)
 
-	// Rosaria E is dynamic, so requires a second snapshot
-	//TODO: check snapshot timing here
+	// ロサリアEは動的なので、2回目のスナップショットが必要
+	//TODO: スナップショットタイミングを確認
 	ai = combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Ravaging Confession (Hit 2)",
@@ -79,13 +80,13 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		CanBeDefenseHalted: true,
 	}
 	c.QueueCharTask(func() {
-		// second hit is 14 frames after the first (if we exclude hitlag)
+		// 2撃目は1撃目の14フレーム後（ヒットラグ除外時）
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0.5}, 2.8),
 			0,
 			0,
-			c.particleCB, // Particles are emitted after the second hit lands
+			c.particleCB, // 2撃目のヒット後に粒子が生成される
 			c1CB,
 			c4CB,
 		)
@@ -96,7 +97,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

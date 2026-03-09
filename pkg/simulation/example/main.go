@@ -57,7 +57,7 @@ noelle attack:3, dash, attack:3, dash, attack;
 `
 
 func main() {
-	// parse cfg
+	// 設定をパース
 	p := parser.New(cfg)
 	cfg, gcsl, err := p.Parse()
 	if err != nil {
@@ -66,7 +66,7 @@ func main() {
 
 	fmt.Println(gcsl.String())
 
-	// create core
+	// コアを作成
 	c, err := core.New(core.Opt{
 		Seed:       0,
 		Debug:      true,
@@ -77,18 +77,18 @@ func main() {
 		panic(err)
 	}
 
-	// create new eval
+	// 新しいevalを作成
 	eval, err := eval.NewEvaluator(gcsl, c)
 	if err != nil {
 		panic(err)
 	}
 
-	// create simulation
+	// シミュレーションを作成
 	sim, err := simulation.New(cfg, eval, c)
 	if err != nil {
 		panic(err)
 	}
-	// run simulatin
+	// シミュレーションを実行
 	_, err = sim.Run()
 
 	if err != nil {
@@ -106,5 +106,5 @@ func main() {
 	os.Remove("logs.json")
 	os.WriteFile("logs.json", logs, 0o600)
 
-	// do stuff
+	// 結果を処理
 }

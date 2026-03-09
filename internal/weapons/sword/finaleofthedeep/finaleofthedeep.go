@@ -27,10 +27,10 @@ func (w *Weapon) Init() error {
 	return nil
 }
 
-// When using an Elemental Skill, ATK will be increased by 12/15/18/21/24% for 15s,
-// and a Bond of Life worth 25% of Max HP will be granted. This effect can be triggered once every 10s.
-// When the Bond of Life is cleared, a maximum of 150/187.5/225/262.5/300 ATK will be gained
-// based on 2.4/3/3.6/4.2/4.8% of the total amount of the Life Bond cleared, lasting for 15s.
+// 元素スキル使用時、攻撃力が15秒間12/15/18/21/24%増加し、
+// 最大HPの25%に相当する命の契約が付与される。この効果は10秒毎に1回発動可能。
+// 命の契約がクリアされた時、クリアされた総量の2.4/3/3.6/4.2/4.8%に基づき、
+// 最大150/187.5/225/262.5/300の攻撃力が15秒間得られる。
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}

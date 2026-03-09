@@ -1,6 +1,5 @@
-// gadget provides a skeleton implementation for gadgets and is
-// basically a thin wrapper around target.Target and adds some
-// helper functionalities
+// gadgetパッケージはガジェットのスケルトン実装を提供し、
+// target.Targetの薄いラッパーでヘルパー機能を追加する
 package gadget
 
 import (
@@ -21,7 +20,7 @@ type Gadget struct {
 	ThinkInterval   int    // should be > 0
 	OnThinkInterval func()
 	Duration        int // how long gadget should live for; use -1 for infinite
-	// internal helper
+	// 内部ヘルパー
 	sinceLastThink int
 }
 

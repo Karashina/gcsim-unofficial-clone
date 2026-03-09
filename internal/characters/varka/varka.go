@@ -14,7 +14,7 @@ func init() {
 	core.RegisterCharFunc(keys.Varka, NewChar)
 }
 
-// Status/buff key constants
+// ステータス/バフキー定数
 const (
 	sturmUndDrangKey  = "varka-sturm-und-drang"
 	fwaCDKey          = "varka-fwa-cd"
@@ -34,32 +34,32 @@ const (
 type char struct {
 	*tmpl.Character
 
-	// Sturm und Drang state
-	sturmActive        bool               // whether in S&D mode
-	sturmSrc           int                // source ID to track S&D instance
-	otherElement       attributes.Element // determined "Other" element from party
-	hasOtherEle        bool               // whether party has Pyro/Hydro/Electro/Cryo
+	// Sturm und Drang 状態
+	sturmActive        bool               // S&Dモードかどうか
+	sturmSrc           int                // S&Dインスタンス追跡用ソースID
+	otherElement       attributes.Element // パーティから決定された「他」元素
+	hasOtherEle        bool               // パーティに炎/水/雷/氷がいるか
 	savedNormalCounter int
 
-	// Four Winds' Ascension
-	fwaCharges       int // current FWA charges (max 2, or 3 with C1)
-	fwaMaxCharges    int // max charges (always 2)
-	fwaCDEndFrame    int // frame when next FWA charge becomes available
-	cdReductionCount int // NA CD reduction counter per S&D activation (max 15)
-	cdReductionMax   int // max CD reductions (15 base)
+	// 四風昇天
+	fwaCharges       int // 現在のFWAチャージ数（最大2、C1で3）
+	fwaMaxCharges    int // 最大チャージ数（常に2）
+	fwaCDEndFrame    int // 次のFWAチャージが利用可能になるフレーム
+	cdReductionCount int // S&D発動ごとの通常攻撃CD削減カウンター（最大15）
+	cdReductionMax   int // CD削減最大数（基本15）
 
-	// A1 party composition
-	anemoCount   int     // number of Anemo characters in party
-	sameEleCount int     // max count of same element from Pyro/Hydro/Electro/Cryo
+	// A1 パーティ構成
+	anemoCount   int     // パーティ内の風元素キャラ数
+	sameEleCount int     // 炎/水/雷/氷の同一元素最大数
 	a1MultFactor float64 // 1.0, 1.4, or 2.2
 
-	// A4 stacks
+	// A4 スタック
 	a4Stacks int
 	a4Expiry int
 
-	// Hexerei system
+	// ヘクセライシステム
 	isHexerei   bool
-	hasHexBonus bool // whether 2+ Hexerei characters in party
+	hasHexBonus bool // パーティに2人以上のヘクセライキャラがいるか
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) error {
@@ -75,7 +75,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 	c.SkillCon = 3
 	c.BurstCon = 5
 
-	// Disable hexerei if nohex=1 parameter
+	// nohex=1パラメータでヘクセライを無効化
 	if nohex, ok := p.Params["nohex"]; ok && nohex == 1 {
 		c.isHexerei = false
 	}
@@ -85,25 +85,25 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// Determine party element composition
+	// パーティの元素構成を決定
 	c.determineOtherElement()
 
-	// Determine A1 multiplier
+	// A1倍率を決定
 	c.determineA1Mult()
 
-	// Check Hexerei bonus
+	// ヘクセライボーナスを確認
 	c.checkHexereiBonus()
 
-	// Initialize A1 passive (ATK-based DMG bonus)
+	// A1パッシブを初期化（攻撃力基準ダメージボーナス）
 	c.a1Init()
 
-	// Initialize A4 passive (Swirl subscription)
+	// A4パッシブを初期化（拡散イベント購読）
 	if c.Base.Ascension >= 4 {
 		c.a4Init()
 	}
 
-	// Initialize constellations
-	// C1: immediate charge grant is handled in enterSturmUndDrang
+	// 命ノ星座を初期化
+	// C1: 即時チャージ付与は enterSturmUndDrang で処理
 	if c.Base.Cons >= 2 {
 		c.c2Init()
 	}
@@ -114,15 +114,15 @@ func (c *char) Init() error {
 	return nil
 }
 
-// ActionReady handles skill availability including FWA in S&D mode
+// ActionReady は S&DモードでのFWAを含むスキルの利用可能性を処理する
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
 	if a == action.ActionSkill && c.sturmActive {
-		// In S&D mode, skill becomes Four Winds' Ascension
+		// S&DモードではスキルがFour Winds' Ascensionになる
 		c.updateFWACharges()
 		if c.fwaCharges > 0 {
 			return true, action.NoFailure
 		}
-		// C6: windows allow skill without FWA charges
+		// C6: ウィンドウによりFWAチャージなしでスキル使用可能
 		if c.Base.Cons >= 6 && (c.StatusIsActive(c6AzureWindowKey) || c.StatusIsActive(c6FWAWindowKey)) {
 			return true, action.NoFailure
 		}
@@ -131,8 +131,8 @@ func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Fail
 	return c.Character.ActionReady(a, p)
 }
 
-// updateFWACharges checks if any charges have come off CD.
-// Uses c.Core.F (absolute frame) to match the Core.Tasks-based NA callback timing.
+// updateFWACharges はCDが完了したチャージがあるか確認する。
+// Core.Tasksベースの通常攻撃コールバックタイミングと合わせるためc.Core.F（絶対フレーム）を使用。
 func (c *char) updateFWACharges() {
 	for c.fwaCharges < c.fwaMaxCharges && c.Core.F >= c.fwaCDEndFrame {
 		c.fwaCharges++
@@ -142,7 +142,7 @@ func (c *char) updateFWACharges() {
 	}
 }
 
-// Condition responds to character state queries
+// Condition はキャラクター状態のクエリに応答する
 func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
 	case "hexerei":
@@ -162,8 +162,8 @@ func (c *char) Condition(fields []string) (any, error) {
 	return c.Character.Condition(fields)
 }
 
-// determineOtherElement finds the highest priority element from party
-// Priority: Pyro > Hydro > Electro > Cryo
+// determineOtherElement はパーティから最優先元素を探す
+// 優先度: Pyro > Hydro > Electro > Cryo
 func (c *char) determineOtherElement() {
 	c.hasOtherEle = false
 	priorityElements := []attributes.Element{
@@ -181,11 +181,11 @@ func (c *char) determineOtherElement() {
 			}
 		}
 	}
-	// Default to Anemo if no eligible element found
+	// 該当元素がない場合は風元素をデフォルトにする
 	c.otherElement = attributes.Anemo
 }
 
-// determineA1Mult computes the A1 passive multiplier based on party composition
+// determineA1Mult はパーティ構成に基づいてA1パッシブ倍率を計算する
 func (c *char) determineA1Mult() {
 	if c.Base.Ascension < 1 {
 		c.a1MultFactor = 1.0
@@ -203,7 +203,7 @@ func (c *char) determineA1Mult() {
 		}
 	}
 
-	// Find max same-element count among Pyro/Hydro/Electro/Cryo
+	// 炎/水/雷/氷の同一元素最大数を検索
 	c.sameEleCount = 0
 	for _, cnt := range eleCounts {
 		if cnt > c.sameEleCount {
@@ -211,10 +211,10 @@ func (c *char) determineA1Mult() {
 		}
 	}
 
-	// Determine multiplier:
-	// 2+ Anemo AND 2+ same other element: 2.2x
-	// 2+ Anemo OR 2+ same other element: 1.4x
-	// Otherwise: 1.0x
+	// 倍率を決定:
+	// 風2人以上かつ同一他元素2人以上: 2.2倍
+	// 風2人以上または同一他元素2人以上: 1.4倍
+	// その他: 1.0倍
 	hasAnemoBonus := c.anemoCount >= 2
 	hasOtherBonus := c.sameEleCount >= 2
 
@@ -227,7 +227,7 @@ func (c *char) determineA1Mult() {
 	}
 }
 
-// checkHexereiBonus checks if party has 2+ Hexerei characters
+// checkHexereiBonus はパーティに2人以上のヘクセライキャラがいるか確認する
 func (c *char) checkHexereiBonus() {
 	if !c.isHexerei {
 		c.hasHexBonus = false
@@ -244,7 +244,7 @@ func (c *char) checkHexereiBonus() {
 	c.hasHexBonus = hexereiCount >= 2
 }
 
-// getCDReductionAmount returns the CD reduction per NA hit based on Hexerei bonus
+// getCDReductionAmount はヘクセライボーナスに基づく通常攻撃ヒットごとのCD削減量を返す
 func (c *char) getCDReductionAmount() int {
 	if c.hasHexBonus {
 		return 60 // 1.0s with Hexerei Secret Rite

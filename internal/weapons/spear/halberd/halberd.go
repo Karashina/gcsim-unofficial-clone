@@ -24,8 +24,8 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Normal Attacks deal an additional 160/200/240/280/320% DMG.
-// Can only occur once every 10s.
+// 通常攻撃が追加で160/200/240/280/320%のダメージを与える。
+// 10秒毎に1回のみ発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -36,22 +36,22 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		trg := args[0].(combat.Target)
-		// don't proc if dmg not from weapon holder
+		// 武器装備者からのダメージでなければ発動しない
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		// don't proc if not Normal Attack
+		// 通常攻撃でなければ発動しない
 		if atk.Info.AttackTag != attacks.AttackTagNormal {
 			return false
 		}
-		// don't proc if on icd
+		// ICD中は発動しない
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		// set icd
+		// ICDをセット
 		char.AddStatus(icdKey, 600, true) // 10s
 
-		// queue single target proc
+		// 単体ターゲット発動をキューに追加
 		ai := combat.AttackInfo{
 			ActorIndex: char.Index,
 			Abil:       "Halberd Proc",

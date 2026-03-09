@@ -35,12 +35,12 @@ func (w *Weapon) chain(count int, c *core.Core, char *character.CharWrapper) fun
 	}
 	done := false
 	return func(a combat.AttackCB) {
-		// check target is an enemey
+		// ターゲットが敵かチェック
 		t, ok := a.Target.(*enemy.Enemy)
 		if !ok {
 			return
 		}
-		// shouldn't proc more than one chain if multiple enemies are hit
+		// 複数の敵に命中しても連鎖は1回のみ
 		if done {
 			return
 		}

@@ -27,10 +27,10 @@ func init() {
 
 func (c *char) skillRefundHook() {
 	refundCB := func(args ...interface{}) bool {
-		// TODO: Check if Sethos E filters by enemy
+		// TODO: SethosのEスキルが敵でフィルタリングするか確認
 		// a := args[0].(combat.Target)
 		// if a.Type() != targets.TargettableEnemy {
-		// 	return false
+		// 	falseを返す
 		// }
 		ae := args[1].(*combat.AttackEvent)
 		if ae.Info.ActorIndex != c.Index {
@@ -39,7 +39,7 @@ func (c *char) skillRefundHook() {
 		if ae.Info.AttackTag != attacks.AttackTagElementalArt {
 			return false
 		}
-		// to avoid procing twice in aoe
+		// 範囲攻撃で二重発動を防止
 		if c.lastSkillFrame == ae.SourceFrame {
 			return false
 		}
@@ -80,7 +80,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

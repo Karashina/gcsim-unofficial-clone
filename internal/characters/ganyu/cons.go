@@ -16,8 +16,8 @@ const (
 	c6Key = "ganyu-c6"
 )
 
-// Ganyu C1: Taking DMG from a Charge Level 2 Frostflake Arrow or Frostflake Arrow Bloom decreases opponents' Cryo RES by 15% for 6s.
-// A hit regenerates 2 Energy for Ganyu. This effect can only occur once per Charge Level 2 Frostflake Arrow, regardless if Frostflake Arrow itself or its Bloom hit the target.
+// 甘雨C1: チャージレベル2の霄花矢または霄花矢・霄花のダメージを受けた敵の氷元素耐性-15%、6秒間。
+// 命中時、甘雨の元素エネルギーを2回復。この効果はチャージレベル2の霄花矢ごとに1回のみ発動。
 func (c *char) c1() combat.AttackCBFunc {
 	if c.Base.Cons < 1 {
 		return nil
@@ -52,7 +52,7 @@ func (c *char) c4() {
 				if !ok {
 					return nil, false
 				}
-				// reset stacks on expiry
+				// 期限切れ時にスタックをリセット
 				if !x.StatusIsActive(c4Key) {
 					x.RemoveTag(c4Key)
 					return nil, false

@@ -30,23 +30,23 @@ func init() {
 	skillFrames = frames.InitAbilSlice(41) // E -> D/J
 }
 
-// Ceil helper for tick timing
+// Tickタイミング用の切り上げヘルパー
 func ceil(x float64) int {
 	return int(math.Ceil(x))
 }
 
-// Skill
-// summoning a Frostgrove Sanctuary with different effects depending on whether you Tap or Hold.
+// 元素スキル
+// タップまたは長押しに応じて異なる効果の霜林の聖域を召喚する。
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	skillPos := c.Core.Combat.Player()
 	if p["hold"] == 1 && c.verdantDew > 0 {
-		// Hold
-		// Can be unleashed when you have at least 1 Verdant Dew.
+		// 長押し
+		// 翠露を1つ以上持っている時に発動可能。
 
-		// Lauma consumes all Verdant Dew and intones a Hymn of Eternal Rest,
-		// dealing one regular instance of AoE Dendro DMG and another instance of AoE Dendro DMG that is considered Lunar-Bloom DMG.
-		// Each Verdant Dew consumed will give Lauma one stack of Moon Song.
-		// Each time you Hold to cast an Elemental Skill, a maximum of 3 Verdant Dew can be consumed in this way.
+		// Laumaは全ての翠露を消費し、永眠の讃歌を唱え、
+		// 通常の範囲草元素ダメージ1回と、Lunar-Bloomダメージとみなされる範囲草元素ダメージ1回を与える。
+		// 消費した翠露1つにつき、Laumaは月の歌を1スタック獲得する。
+		// 長押しで元素スキルを発動するたびに、最大3つの翠露を消費できる。
 		dewConsumed := min(c.verdantDew, 3)
 		c.verdantDew = 0
 		c.moonSong += dewConsumed
@@ -69,7 +69,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			combat.NewCircleHitOnTarget(skillPos, geometry.Point{Y: -1.5}, 5),
 			skillInitHitmarkHold, skillInitHitmarkHold, c.particleCB, c.shredCB,
 		)
-		// "considered Lunar-Bloom DMG area"
+		// 「Lunar-Bloomダメージとみなされる」範囲
 		ai2 := combat.AttackInfo{
 			ActorIndex:       c.Index,
 			Abil:             "Runo: Dawnless Rest of Karsikko (E/Hold/Hit 2)",
@@ -91,10 +91,10 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			skillInitHitmarkHold,
 			c.shredCB,
 		)
-		// "considered Lunar-Bloom DMG area end"
+		// 「Lunar-Bloomダメージとみなされる」範囲の終了
 	} else {
-		// Press E
-		// dealing AoE Dendro DMG.
+		// 単押し
+		// 範囲草元素ダメージを与える。
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       "Runo: Dawnless Rest of Karsikko (E/Press)",
@@ -114,7 +114,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		)
 	}
 
-	// E duration and ticks are not affected by hitlag
+	// スキルの持続時間とTickはヒットラグの影響を受けない
 	c.skillSrc = c.Core.F
 
 	for i := 0.0; i < skillTicks; i++ {
@@ -123,17 +123,17 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	c.AddStatus(skillKey, skillFirstTickDelay+ceil((skillTicks-1)*skillInterval), false)
 
 	c.SetCD(action.ActionSkill, 12*60)
-	c.a1() // Apply A1 moonsign buffs for 20s
+	c.a1() // A1ムーンサインバフを20秒間適用
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
 
-// Particle generation callback for skill
+// スキルの粒子生成コールバック
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -149,7 +149,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.AddStatus(particleICDKey, 3.3*60, true)
 }
 
-// Skill tick logic for DoT
+// DoTのスキルTickロジック
 func (c *char) skillTick(src int) func() {
 	return func() {
 		if src != c.skillSrc {
@@ -176,7 +176,7 @@ func (c *char) skillTick(src int) func() {
 		c.c4()
 
 		if c.Base.Cons >= 6 {
-			// Deal additional AoE Dendro DMG equal to 185% of EM
+			// 元素熟知の185%に等しい追加範囲草元素ダメージを与える
 			em := c.Stat(attributes.EM)
 			c6ai := combat.AttackInfo{
 				ActorIndex:       c.Index,
@@ -190,7 +190,7 @@ func (c *char) skillTick(src int) func() {
 			snapc6 := combat.Snapshot{
 				CharLvl: c.Base.Level,
 			}
-			c6ai.FlatDmg = (1.85*em*(1+c.LBBaseReactBonus(c6ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(c6ai)) + c.burstLBBuff // 185% of EM
+			c6ai.FlatDmg = (1.85*em*(1+c.LBBaseReactBonus(c6ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(c6ai)) + c.burstLBBuff // 元素熟知の185%
 			snapc6.Stats[attributes.CR] = c.Stat(attributes.CR)
 			snapc6.Stats[attributes.CD] = c.Stat(attributes.CD)
 
@@ -202,7 +202,7 @@ func (c *char) skillTick(src int) func() {
 				c.shredCB,
 			)
 
-			c.paleHymn += 3 // Gain 2+1 Pale Hymn stacks
+			c.paleHymn += 3 // 淡き讃歌を2+1スタック獲得
 			c.AddStatus("pale-hymn-window", 15*60, true)
 		}
 	}

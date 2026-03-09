@@ -16,20 +16,20 @@ var aimedFrames [][]int
 var aimedHitmarks = []int{14, 86, 103}
 
 func init() {
-	// outside of E status
+	// スキルステータス外
 	aimedFrames = make([][]int, 3)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(23)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(94)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
 
-	// Fully-Charged Aimed Shot with Mini-Bubble
+	// ミニバブル付きフルチャージ狙い撃ち
 	aimedFrames[2] = frames.InitAbilSlice(112)
 	aimedFrames[2][action.ActionDash] = aimedHitmarks[2]
 	aimedFrames[2][action.ActionJump] = aimedHitmarks[2]

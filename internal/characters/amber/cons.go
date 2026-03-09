@@ -8,8 +8,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// C2
-// Explosion via manual detonation deals 200% additional DMG.
+// 2凸
+// 手動起爆による爆発は追加で200%のダメージを与える。
 func (c *char) c2() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DmgP] = 2

@@ -24,14 +24,14 @@ const (
 	skillMitigationAbil    = "Fiery Sanctum Mitigation"
 	skillSelfDoTAbil       = "Redmane's Blood"
 	skillSelfDoTStatus     = "dehya-redmanes-blood"
-	skillSelfDoTStart      = 0.1 * 60 // looks like initial dot tick happens 0.1s after mitigating
-	skillSelfDoTDuration   = 10 * 60  // total of 10 ticks at 0.1s, 1.1s, ..., 9.1s
+	skillSelfDoTStart      = 0.1 * 60 // 最初のDoTティックは軽減から0.1秒後に発生する模様
+	skillSelfDoTDuration   = 10 * 60  // 合訐10回のティック（0.1秒、1.1秒、…、9.1秒）
 	skillSelfDoTRatio      = 0.1
 	skillSelfDoTInterval   = 1 * 60
 	skillICDKey            = "dehya-skill-icd"
 	dehyaFieldKey          = "dehya-field-status"
 	dehyaFieldDuration     = 12 * 60
-	sanctumPickupExtension = 24 // On recast from Burst/Skill-2 the field duration is extended by 0.4s
+	sanctumPickupExtension = 24 // 元素爆発/元素スキル再発動時に領域持続時間が0.4秒延長される
 )
 
 func init() {
@@ -57,7 +57,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 	needPickup := false
 	if c.StatusIsActive(dehyaFieldKey) {
-		// If recast has been used, sanctum needs to picked up right before placing again
+		// 再発動が使用済みの場合、再設置前に浄焔の領域を回収する必要がある
 		if c.hasRecastSkill {
 			needPickup = true
 		} else {
@@ -82,17 +82,17 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Mult:       skill[c.TalentLvlSkill()],
 		FlatDmg:    c.c1FlatDmgRatioE * c.MaxHP(),
 	}
-	// TODO: damage frame
+	// TODO: ダメージフレーム
 	c.skillSnapshot = c.Snapshot(&ai)
 
-	// do initial attack
+	// 初撃を実行
 	player := c.Core.Combat.Player()
 	skillPos := geometry.CalcOffsetPoint(c.Core.Combat.Player().Pos(), geometry.Point{Y: 0.8}, player.Direction())
 	c.skillArea = combat.NewCircleHitOnTarget(skillPos, nil, 10)
 	c.Core.QueueAttackWithSnap(ai, c.skillSnapshot, combat.NewCircleHitOnTarget(skillPos, nil, 5), skillHitmark)
 
-	// handle field
-	c.AddStatus(skillICDKey, skillHitmark+1, false) // add skill icd so field cannot proc from initial attack
+	// 領域を処理
+	c.AddStatus(skillICDKey, skillHitmark+1, false) // 元素スキルICDを追加し、初撃で領域が発動しないようにする
 	if needPickup {
 		c.Core.Tasks.Add(func() { c.pickUpField() }, skillHitmark-1)
 	}
@@ -122,12 +122,12 @@ func (c *char) skillDmgHook() {
 		if dmg == 0 {
 			return false
 		}
-		// don't proc if target hit is outside of the skill area
+		// 命中したターゲットがスキル範囲外なら発動しない
 		if !trg.IsWithinArea(c.skillArea) {
 			return false
 		}
 
-		// this ICD is most likely tied to the construct, so it's not hitlag extendable
+		// このICDはおそらく設置物に紐づいているため、ヒットラグで延長されない
 		c.AddStatus(skillICDKey, 2.5*60, false)
 
 		c.Core.QueueAttackWithSnap(
@@ -137,7 +137,7 @@ func (c *char) skillDmgHook() {
 			2,
 		)
 
-		// set buff flag to false with 3f delay to happen right after the DoT hits
+		// DoTヒット直後に遅延3フレームでバフフラグをfalseに設定
 		if c.hasC2DamageBuff {
 			c.Core.Tasks.Add(func() { c.hasC2DamageBuff = false }, 3)
 		}
@@ -165,24 +165,24 @@ func (c *char) skillRecast() (action.Info, error) {
 		HitlagFactor:     0.01,
 	}
 
-	// pick up field at start
+	// 開始時に領域を回収
 	c.pickUpField()
 
-	// Add icd extension
+	// ICD延長を追加
 	c.AddStatus(skillICDKey, skillRecastHitmark+c.sanctumICD, false)
 
-	// reposition
+	// 再配置
 
-	// TODO: damage frame
+	// TODO: ダメージフレーム
 
 	player := c.Core.Combat.Player()
-	// assuming tap e for hitbox offset
+	// 元素スキル単押しのヒットボックスオフセットを想定
 	skillPos := geometry.CalcOffsetPoint(c.Core.Combat.Player().Pos(), geometry.Point{Y: 0.5}, player.Direction())
 	c.skillArea = combat.NewCircleHitOnTarget(skillPos, nil, 10)
 	c.Core.QueueAttackWithSnap(ai, c.skillSnapshot, combat.NewCircleHitOnTarget(skillPos, nil, 6), skillRecastHitmark)
 
-	// place field back down
-	c.Core.Tasks.Add(func() { // place field
+	// 領域を再設置
+	c.Core.Tasks.Add(func() { // 領域を設置
 		c.c2IncreaseDur()
 		c.addField(c.sanctumSavedDur)
 	}, skillRecastHitmark+1)
@@ -190,16 +190,16 @@ func (c *char) skillRecast() (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillRecastFrames),
 		AnimationLength: skillRecastFrames[action.InvalidAction],
-		CanQueueAfter:   skillRecastFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillRecastFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
 
-// pick up field and save current ICD and duration with implicit extension
+// 領域を回収し、現在のICDと持続時間を暗黙的な延長付きで保存
 func (c *char) pickUpField() {
 	c.a1Reduction()
 	c.sanctumICD = c.StatusDuration(skillICDKey)
-	c.sanctumSavedDur = c.StatusDuration(dehyaFieldKey) + sanctumPickupExtension // dur gets extended on field recast by a low margin, apparently
+	c.sanctumSavedDur = c.StatusDuration(dehyaFieldKey) + sanctumPickupExtension // 領域再設置時にわずかに持続時間が延長される模様
 	c.Core.Log.NewEvent("sanctum picked up", glog.LogCharacterEvent, c.Index).
 		Write("Duration Remaining", c.sanctumSavedDur).
 		Write("DoT tick CD", c.sanctumICD)
@@ -209,14 +209,14 @@ func (c *char) pickUpField() {
 }
 
 func (c *char) addField(dur int) {
-	// places field
+	// 領域を設置する
 	c.AddStatus(dehyaFieldKey, dur, false)
 	c.Core.Log.NewEvent("sanctum added", glog.LogCharacterEvent, c.Index).
 		Write("Duration Remaining", dur).
 		Write("New Expiry Frame", c.StatusExpiry(dehyaFieldKey)).
 		Write("DoT tick CD", c.StatusDuration(skillICDKey))
 
-	// snapshot for ticks
+	// Tick用のスナップショット
 	c.skillAttackInfo = combat.AttackInfo{
 		ActorIndex:       c.Index,
 		Abil:             skillDoTAbil,
@@ -235,56 +235,56 @@ func (c *char) addField(dur int) {
 	c.skillSnapshot = c.Snapshot(&c.skillAttackInfo)
 }
 
-// Active characters within this field have their resistance to interruption increased, (not implemented)
-// and when such characters take DMG, a portion of that damage will be mitigated and flow into Redmane's Blood.
-// Dehya will then take this DMG over 10s. When the mitigated DMG stored by Redmane's Blood reaches
-// or goes over a certain percentage of Dehya's Max HP, she will stop mitigating DMG in this way.
+// この領域内のアクティブキャラクターは中断耐性が上昇する（未実装）、
+// そのようなキャラクターがダメージを受けると、そのダメージの一部が軽減され赤鬣の血に流れ込む。
+// ディヘヤはこのダメージを10秒かけて受ける。赤鬣の血に蓄積された軽減ダメージが
+// ディヘヤのHP上限の一定割合に達するか超えると、この方法によるダメージ軽減を停止する。
 func (c *char) skillHurtHook() {
-	// mitigates true dmg
-	// should not mitigate corrosion (probably will never be added to sim...)
+	// 真のダメージを軽減する
+	// 侵食を軽減すべきではない（おそらくシムには追加されない…）
 	c.Core.Events.Subscribe(event.OnPlayerPreHPDrain, func(args ...interface{}) bool {
 		di := args[0].(*info.DrainInfo)
-		// only mitigate external damage
+		// 外部ダメージのみ軽減
 		if !di.External {
 			return false
 		}
-		// no need to mitigate if 0 dmg
+		// 0ダメージなら躽減不要
 		if di.Amount <= 0 {
 			return false
 		}
-		// field needs to be active for mitigation
+		// 躽減には領域がアクティブである必要がある
 		if !c.StatusIsActive(dehyaFieldKey) {
 			return false
 		}
-		// player needs to be in field for mitigation
+		// 躽減にはプレイヤーが領域内にいる必要がある
 		if !c.Core.Combat.Player().IsWithinArea(c.skillArea) {
 			return false
 		}
-		// ignore self dot
+		// 自己DoTを無視
 		if di.Abil == skillSelfDoTAbil {
 			return false
 		}
-		// stop mitigating dmg if reached threshold
+		// 閾値に達したらダメージ躽減を停止
 		if c.skillRedmanesBlood >= 2*c.MaxHP() {
 			return false
 		}
 		beforeAmount := di.Amount
-		// calc mitigation based on skill level
+		// 天賦レベルに基づいて躽減量を計算
 		mitigation := di.Amount * skillMitigation[c.TalentLvlSkill()]
-		// adjust redmane's blood
+		// 赤鬣の血を調整
 		c.skillRedmanesBlood += mitigation
-		// modify hp drain
+		// HPドレインを変更
 		di.Amount = max(di.Amount-mitigation, 0)
-		// log mitigation
+		// 躽減をログ出力
 		c.Core.Log.NewEvent("dehya mitigating dmg", glog.LogCharacterEvent, c.Index).
 			Write("hurt_before", beforeAmount).
 			Write("mitigation", mitigation).
 			Write("hurt", di.Amount)
-		// add self dot status
+		// 自己DoTステータスを追加
 		c.AddStatus(skillSelfDoTStatus, skillSelfDoTDuration, true)
-		// queue up DoT if not already queued
-		// -> retrigger should not reset interval (unsure)
-		// -> has to be like this otherwise if you keep mitigating between DoT ticks then Dehya will never get damaged
+		// まだキューに入っていなければDoTをキューに追加
+		// -> 再トリガーは間隔をリセットしないはず（未確認）
+		// -> そうでないと、DoTティック間に躽減し続けた場合ディヘヤにダメージが入らなくなる
 		if c.skillSelfDoTQueued {
 			return false
 		}
@@ -300,21 +300,21 @@ func (c *char) skillSelfDoT() {
 		return
 	}
 
-	// queue next tick
+	// 次のティックをキューに追加
 	c.QueueCharTask(c.skillSelfDoT, skillSelfDoTInterval)
 
-	// do not do self DoT if in burst iframes
+	// 元素爆発の無敵フレーム中は自己DoTを実行しない
 	if c.Core.Player.Active() == c.Index && c.Core.Player.CurrentState() == action.BurstState {
 		return
 	}
 
-	// recalculate the dmg on every tick
+	// 毎ティックでダメージを再計算
 	dmg := c.skillRedmanesBlood * skillSelfDoTRatio
 
-	// reduce redmane's blood (before considering shield mitigation/a1!)
+	// 赤鬣の血を減少（シールド躽減/A1を考慮する前に！）
 	c.skillRedmanesBlood = max(c.skillRedmanesBlood-dmg, 0)
 
-	// modify the dmg if a1 is active (redmane's blood is reduced by full amount before this is checked)
+	// A1がアクティブならダメージを変更（赤鬣の血はこのチェック前に全額減少済み）
 	if c.StatusIsActive(a1ReductionKey) {
 		dmgBefore := dmg
 		dmg *= 1 - a1ReductionMult
@@ -323,9 +323,9 @@ func (c *char) skillSelfDoT() {
 			Write("dmg", dmg)
 	}
 
-	// do self DoT
-	// TODO: hack because system is not designed to hit a character directly which is off-field
-	// this is true physical dmg so dmg formula/element resist does not matter
+	// 自己DoTを実行
+	// TODO: システムはオフフィールドのキャラクターに直接ヒットするよう設計されていないためのハック
+	// これは真の物理ダメージなのでダメージ式/元素耐性は関係ない
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       skillSelfDoTAbil,

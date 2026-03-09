@@ -11,8 +11,8 @@ import (
 
 const c1ICDKey = "sara-c1-icd"
 
-// Implements C1 CD reduction. Waits until delay (when it hits the enemy), then procs the effect
-// Triggers on her E and Q
+// 1凸CD短縮の実装。遅延（敵に命中した時）後に効果を発動する
+// 元素スキルと元素爆発で発動する
 func (c *char) c1() {
 	if c.StatusIsActive(c1ICDKey) {
 		return
@@ -23,7 +23,7 @@ func (c *char) c1() {
 		Write("new_cooldown", c.Cooldown(action.ActionSkill))
 }
 
-// The Electro DMG of characters who have had their ATK increased by Tengu Juurai has its Crit DMG increased by 60%.
+// 天狗呉雷により攻撃力が上昇したキャラクターの雷元素ダメージの会心ダメージが60%上昇する。
 func (c *char) c6(char *character.CharWrapper) {
 	char.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBaseWithHitlag("sara-c6", 360),

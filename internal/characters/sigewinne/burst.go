@@ -32,7 +32,7 @@ func init() {
 func (c *char) burstFindDroplets() {
 	droplets := c.getSourcewaterDroplets()
 
-	// TODO: If droplets time out before the "droplet check" it doesn't count.
+	// TODO: 「水滴チェック」前に水滴がタイムアウトした場合はカウントされない
 	indices := c.Core.Combat.Rand.Perm(len(droplets))
 	orbs := 0
 	for _, ind := range indices {
@@ -59,7 +59,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.tickAnimLength = getBurstHitmark(1)
 
 	c.Core.Tasks.Add(func() {
-		// TODO: correct timing?
+		// TODO: 正確なタイミング？
 		c.burstFindDroplets()
 
 		c.burstStartF = c.Core.F
@@ -79,7 +79,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		CanQueueAfter:   earliestCancel,
 		State:           action.BurstState,
 		OnRemoved: func(next action.AnimationState) {
-			// need to calculate correct swap cd in case of early cancel
+			// 早期キャンセル時の正しい交代CDを計算する必要がある
 			switch next {
 			case action.DashState, action.JumpState:
 				c.Core.Player.SwapCD = max(player.SwapCDFrames-(c.Core.F-c.lastSwap), 0)
@@ -94,7 +94,7 @@ func (c *char) burstTick(src, tick, maxTick int, last bool) func() {
 		if c.burstStartF != src {
 			return
 		}
-		// no longer in burst anim -> no tick
+		// 元素爆発アニメーション外 → ティックなし
 		if c.Core.F > c.burstStartF+c.burstMaxDuration {
 			return
 		}
@@ -104,7 +104,7 @@ func (c *char) burstTick(src, tick, maxTick int, last bool) func() {
 			return
 		}
 
-		// tick param supplied and hit the limit -> proc wave, enable early cancel flag for next action check and stop queuing ticks
+		// tickパラメータ指定済みで上限到達 → ウェーブ発動、早期キャンセルフラグを有効化、ティックキュー停止
 		if tick == maxTick {
 			c.burstWave()
 			c.burstEarlyCancelled = true
@@ -114,22 +114,22 @@ func (c *char) burstTick(src, tick, maxTick int, last bool) func() {
 
 		c.burstWave()
 
-		// next tick handling
+		// 次のTick処理
 		if maxTick == -1 || tick < maxTick {
 			tickDelay := getBurstHitmark(tick + 1)
-			// calc new animation length to be up until next tick happens
+			// 次のティックまでの新しいアニメーション長を計算
 			nextTickAnimLength := c.Core.F - c.burstStartF + tickDelay
 
 			c.Core.Tasks.Add(c.burstTick(src, tick+1, maxTick, false), tickDelay)
 
-			// queue up last tick if next tick would happen after burst duration ends
+			// 次のティックが元素爆発持続時間終了後になる場合、最終ティックをキューに追加
 			if nextTickAnimLength > c.burstMaxDuration {
-				// queue up final tick to happen at end of burst duration
+				// 元素爆発持続時間終了時に最終ティックをキューに追加
 				c.Core.Tasks.Add(c.burstTick(src, tick+1, maxTick, true), c.burstMaxDuration-c.tickAnimLength)
-				// update tickAnimLength to be equal to entire burst duration at the end
+				// 最終的にtickAnimLengthを元素爆発全体の持続時間と等しく更新
 				c.tickAnimLength = c.burstMaxDuration
 			} else {
-				// next tick happens within burst duration -> update tickAnimLength as usual
+				// 次のティックが持続時間内 → 通常通りtickAnimLengthを更新
 				c.tickAnimLength = nextTickAnimLength
 			}
 		}
@@ -137,10 +137,10 @@ func (c *char) burstTick(src, tick, maxTick int, last bool) func() {
 }
 
 func (c *char) burstWave() {
-	// TODO: the ACTUAL hitbox???
+	// TODO: 実際のヒットボックス？
 	ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 4, 10)
 
-	// TODO: is deployable?
+	// TODO: 設置型？
 	ai := combat.AttackInfo{
 		ActorIndex:   c.Index,
 		Abil:         "Super Saturated Syringing",

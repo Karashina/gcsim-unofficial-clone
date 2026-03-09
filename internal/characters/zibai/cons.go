@@ -8,24 +8,24 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// c1Init initializes Constellation 1: Burst Forth With Vigor, But Enter in Silence
-// After using the Elemental Skill, Zibai will immediately gain 100 Phase Shift Radiance,
-// and the max number of Spirit Steed's Stride usages per Lunar Phase Shift mode is increased to 5 times.
-// Additionally, each time you switch to the Lunar Phase Shift mode, the first Spirit Steed's Stride's
-// 2nd-hit Lunar-Crystallize Reaction DMG is increased by 220%.
+// c1Init は1凸を初期化する: Burst Forth With Vigor, But Enter in Silence
+// 元素スキル使用後、ジバイは即座に月相転移輝度を100獲得し、
+// 月相転移モードごとの神馬駆けの最大使用回数が5回に増加する。
+// さらに、月相転移モードに切り替わるたびに、初回の神馬駆けの
+// 2段目のLunar-Crystallize反応ダメージが220%増加する。
 func (c *char) c1Init() {
 	c.maxSpiritSteedUsages = 5
 
 	c.Core.Log.NewEvent("Zibai C1 active: Max Spirit Steed usages increased to 5", glog.LogCharacterEvent, c.Index)
 }
 
-// c2Init initializes Constellation 2: At Birth Are Souls Born, and in Death Leave But Husks
-// When in the Lunar Phase Shift mode, all nearby party members' Lunar-Crystallize Reaction DMG is increased by 30%.
-// When the moonsign is Ascendant Gleam, Ascension Passive A1 is enhanced;
-// the DMG dealt by the 2nd hit of Spirit Steed's Stride is further increased by 550% of Zibai's DEF.
-// You must first unlock Ascension 1.
+// c2Init は2凸を初期化する: At Birth Are Souls Born, and in Death Leave But Husks
+// 月相転移モード中、近くの全パーティメンバーのLunar-Crystallize反応ダメージが30%増加する。
+// 月相がAscendant Gleamの時、固有天賦1が強化され、
+// 神馬駆けの2段目のダメージがジバイの防御力の550%分さらに増加する。
+// 固有天賦1のアンロックが必要。
 func (c *char) c2Init() {
-	// Add LCrs reaction bonus for all party members when in Lunar Phase Shift
+	// 月相転移中、全パーティメンバーにLCrs反応ボーナスを追加
 	for _, char := range c.Core.Player.Chars() {
 		char.AddLCrsReactBonusMod(character.LCrsReactBonusMod{
 			Base: modifier.NewBase("zibai-c2-lcrs-bonus", -1),
@@ -41,42 +41,42 @@ func (c *char) c2Init() {
 	c.Core.Log.NewEvent("Zibai C2 active: Party LCrs bonus +30% during Lunar Phase Shift", glog.LogCharacterEvent, c.Index)
 }
 
-// c4Init initializes Constellation 4: The Spirit Passes, Then Form Follows
-// While in the Lunar Phase Shift mode, Zibai's Normal Attack sequence will not reset,
-// and when Spirit Steed's Stride hits opponents, Zibai will gain the "Scattermoon Splendor" effect:
-// The next time she uses Normal Attacks, the additional attack from her 4th hit will deal 250% of
-// the original damage as Lunar-Crystallize Reaction DMG.
+// c4Init は4凸を初期化する: The Spirit Passes, Then Form Follows
+// 月相転移モード中、ジバイの通常攻撃シーケンスがリセットされなくなり、
+// 神馬駆けが敵に命中すると、ジバイは「Scattermoon Splendor」効果を獲得する:
+// 次に通常攻撃を使用する際、4段目の追加攻撃が元のダメージの
+// 250%のLunar-Crystallize反応ダメージを与える。
 func (c *char) c4Init() {
-	// Scattermoon Splendor is handled in spiritSteedOnHitCB and queueN4AdditionalHit
-	// Normal Attack sequence not resetting is handled in attack.go via savedNormalCounter
+	// Scattermoon SplendorはspiritSteedOnHitCBとqueueN4AdditionalHitで処理
+	// 通常攻撃シーケンスのリセット無効化はattack.goのsavedNormalCounterで処理
 
 	c.Core.Log.NewEvent("Zibai C4 active: Scattermoon Splendor and Normal Attack persistence enabled", glog.LogCharacterEvent, c.Index)
 }
 
-// c6Init initializes Constellation 6: The World, A Journey in Passing
-// While Zibai is in the Lunar Phase Shift mode, her Phase Shift Radiance gain rate is increased by 50%.
-// Additionally, Spirit Steed's Stride will change such that it will consume all Phase Shift Radiance.
-// This will elevate the DMG dealt by this instance of Spirit Steed's Stride and the Lunar-Crystallize
-// Reaction DMG dealt by Zibai within the next 3s by 1.6% for every point consumed above 70.
-// This effect cannot stack.
+// c6Init は6凸を初期化する: The World, A Journey in Passing
+// ジバイが月相転移モード中、月相転移輝度の獲得率が50%増加する。
+// さらに、神馬駆けは全ての月相転移輝度を消費するように変更される。
+// これにより、この神馬駆けのダメージと次の3秒間のジバイのLunar-Crystallize
+// 反応ダメージが70を超えた1ポイントごとに1.6%上昇する。
+// この効果は重複しない。
 func (c *char) c6Init() {
-	// 50% radiance gain increase is handled in addPhaseShiftRadiance
-	// Consume all radiance and elevation buff is handled in spiritSteedStride
+	// 50%輝度獲得増加はaddPhaseShiftRadianceで処理
+	// 全輝度消費とelevationバフはspiritSteedStrideで処理
 
 	c.Core.Log.NewEvent("Zibai C6 active: Enhanced radiance gain and elevation buff", glog.LogCharacterEvent, c.Index)
 }
 
-// applyC6ElevationBuff applies the C6 elevation damage buff
+// applyC6ElevationBuff は6凸のelevダメージバフを適用する
 func (c *char) applyC6ElevationBuff(bonusPct float64) {
 	const c6Duration = 3 * 60 // 3 seconds
 
 	c.AddStatus(c6ElevationBuffKey, c6Duration, true)
 
-	// Add elevation mod for Spirit Steed and LCrs damage
+	// 神馬駆けとLCrsダメージ用のelev modを追加
 	c.AddElevationMod(character.ElevationMod{
 		Base: modifier.NewBaseWithHitlag(c6ElevationBuffKey, c6Duration),
 		Amount: func(ai combat.AttackInfo) (float64, bool) {
-			// Only apply to Spirit Steed and LCrs attacks from Zibai
+			// ジバイからの神馬駆けとLCrs攻撃にのみ適用
 			if ai.ActorIndex != c.Index {
 				return 0, false
 			}

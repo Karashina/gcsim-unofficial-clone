@@ -38,7 +38,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		CanBeDefenseHalted: false,
 	}
 
-	// TODO: check snapshot delay
+	// TODO: スナップショット遅延を確認
 	c.Core.QueueAttack(
 		ai,
 		combat.NewBoxHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: -1.2}, 2.8, 3.6),

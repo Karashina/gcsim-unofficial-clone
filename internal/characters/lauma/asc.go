@@ -11,7 +11,7 @@ import (
 )
 
 // A0
-// Every point of Elemental Mastery that Lauma has increasing Lunar-Bloom's Base DMG by 0.0175%, up to a maximum of 14%.
+// Laumaの元素熟知1ポイントにつき、Lunar-Bloomの基礎ダメージが0.0175%増加する（最大14%）。
 func (c *char) a0() {
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatus("LB-Key", -1, false)
@@ -25,25 +25,25 @@ func (c *char) a0() {
 	}
 }
 
-// A1
-// For the next 20s after Lauma uses her Elemental Skill,
-// corresponding differing buff effects will be granted depending on the party's Moonsign.
-// The buffs provided by different Moonsign levels cannot stack.
-// Moonsign: Nascent Gleam
-// Bloom, Hyperbloom, and Burgeon DMG dealt by all nearby party members can score CRIT Hits,
-// with CRIT Rate fixed at 15%, and CRIT DMG fixed at 100%.
-// CRIT Rate from this effect stacks with CRIT Rate from similar effects that allow these Elemental Reactions to CRIT.
-// Moonsign: Ascendant Gleam
-// All nearby party members' Lunar-Bloom DMG CRIT Rate +10%, CRIT DMG +20%.
+// 固有天賦1
+// Laumaが元素スキルを使用した後20秒間、
+// パーティのムーンサインに応じて異なるバフ効果が付与される。
+// 異なるムーンサインレベルのバフは重複しない。
+// ムーンサイン：Nascent Gleam
+// 周囲のパーティメンバー全員の開花・超開花・烈開花ダメージが会心可能になる。
+// 会心率は15%固定、会心ダメージは100%固定。
+// この効果の会心率は、元素反応を会心可能にする同様の効果の会心率と加算される。
+// ムーンサイン：Ascendant Gleam
+// 周囲のパーティメンバー全員のLunar-BloomダメージのCR+10%、CD+20%。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
 
-	// Apply appropriate Moonsign buffs for 20s
+	// 適切なムーンサインバフを20秒間適用
 	if c.MoonsignNascent {
-		// Moonsign: Nascent Gleam - Bloom, Hyperbloom, and Burgeon DMG can score CRIT Hits
-		// CRIT Rate fixed at 15%, CRIT DMG fixed at 100%
+		// ムーンサイン：Nascent Gleam - 開花・超開花・烈開花ダメージが会心可能
+		// 会心率15%固定、会心ダメージ100%固定
 		c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 			ae := args[1].(*combat.AttackEvent)
 
@@ -56,7 +56,7 @@ func (c *char) a1() {
 				return false
 			}
 
-			// Add special crit handling for these reactions
+			// これらの反応に特殊会心処理を追加
 			ae.Snapshot.Stats[attributes.CR] += 0.15
 			ae.Snapshot.Stats[attributes.CD] += 1.0
 
@@ -84,37 +84,37 @@ func (c *char) a1() {
 	}
 }
 
-// A4
-// Each point of Elemental Mastery Lauma has will give her the following bonuses:
-// DMG dealt by her Elemental Skill is increased by 0.04%. The maximum increase obtainable this way is 32%.
+// 固有天賦2
+// Laumaの元素熟知1ポイントにつき以下のボーナスを得る：
+// 元素スキルのダメージが0.04%増加する。この方法で得られる最大増加量は32%。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
 
-	// add Damage Bonus for Elemental Skill
+	// 元素スキルのダメージボーナスを追加
 	m := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("lauma-a4-skill-dmg-bonus", -1), // Permanent
 		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-			// skip if not skill
+			// 元素スキル以外はスキップ
 			if atk.Info.AttackTag != attacks.AttackTagElementalArt {
 				return nil, false
 			}
-			// calculate EM bonus
+			// 元素熟知ボーナスを計算
 			em := c.Stat(attributes.EM)
-			bonus := min(0.32, em*0.0004) // 0.04% per EM, max 32%
+			bonus := min(0.32, em*0.0004) // 元素熟知あたり0.04%、最大32%
 			m[attributes.DmgP] = bonus
 			return m, true
 		},
 	})
 }
 
-// RES reduction from skill hits
-// Additionally, when Lauma's Elemental Skill or attacks from Frostgrove Sanctuary hit an opponent,
-// that opponent's Dendro RES and Hydro RES will be decreased for 10s.
+// スキルヒット時の耐性低下
+// また、Laumaの元素スキルまたは霜林の聖域の攻撃が敵に命中した時、
+// その敵の草元素耐性と水元素耐性が10秒間低下する。
 func (c *char) applyResReduction() {
-	// Apply RES reduction through damage event callback
+	// ダメージイベントコールバック経由で耐性低下を適用
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		if len(args) < 3 {
 			return false
@@ -135,7 +135,7 @@ func (c *char) applyResReduction() {
 			return false
 		}
 
-		// Check if this is from Lauma's skill or sanctuary
+		// Laumaのスキルまたは聖域からの攻撃か確認
 		if atk.Info.ActorIndex != c.Index {
 			return false
 		}
@@ -144,7 +144,7 @@ func (c *char) applyResReduction() {
 			return false
 		}
 
-		// Apply Dendro and Hydro RES reduction
+		// 草元素と水元素の耐性低下を適用
 		if e, ok := enemy.(interface{ AddResistMod(combat.ResistMod) }); ok {
 			e.AddResistMod(combat.ResistMod{
 				Base:  modifier.NewBaseWithHitlag("lauma-dendro-res-reduction", 10*60),

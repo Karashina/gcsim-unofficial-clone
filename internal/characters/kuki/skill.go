@@ -14,7 +14,7 @@ import (
 var skillFrames []int
 
 const (
-	skillHitmark     = 11 // Initial Hit
+	skillHitmark     = 11 // 初撃
 	hpDrainThreshold = 0.2
 	ringKey          = "kuki-e"
 	particleICDKey   = "kuki-particle-icd"
@@ -29,12 +29,12 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// only drain HP when above 20% HP
+	// HPが20%以上の場合のみHPを消費
 	if c.CurrentHPRatio() > hpDrainThreshold {
 		currentHP := c.CurrentHP()
 		maxHP := c.MaxHP()
 		hpdrain := 0.3 * currentHP
-		// The HP consumption from using this skill can only bring her to 20% HP.
+		// スキルのHP消費はHPを20%以下にすることはできない。
 		if (currentHP-hpdrain)/maxHP <= hpDrainThreshold {
 			hpdrain = currentHP - hpDrainThreshold*maxHP
 		}
@@ -60,19 +60,19 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 4), skillHitmark, skillHitmark)
 
-	// C2: Grass Ring of Sanctification's duration is increased by 3s.
+	// 2凸: 草の輪の持続時間が3秒延長。
 	skilldur := 720
 	if c.Base.Cons >= 2 {
 		skilldur = 900 // 12+3s
 	}
 
-	// this gets executed before kuki can experience hitlag so no need for char queue
-	// ring duration starts after hitmark
+	// ヒットラグ前に実行されるためキャラキュー不要
+	// リング持続時間はヒットマーク後に開始
 	c.Core.Tasks.Add(func() {
-		// E duration and ticks are not affected by hitlag
+		// スキルの持続時間とTickはヒットラグの影響を受けない
 		c.Core.Status.Add(ringKey, skilldur)
 		c.ringSrc = c.Core.F
-		c.Core.Tasks.Add(c.bellTick(c.Core.F), 90) // Assuming this executes every 90 frames = 1.5s
+		c.Core.Tasks.Add(c.bellTick(c.Core.F), 90) // 90フレーム（1.5秒）ごとに実行
 		c.Core.Log.NewEvent("Bell activated", glog.LogCharacterEvent, c.Index).
 			Write("next expected tick", c.Core.F+90).
 			Write("expected end", c.Core.F+skilldur)
@@ -83,7 +83,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -120,11 +120,11 @@ func (c *char) bellTick(src int) func() {
 			Mult:       skilldot[c.TalentLvlSkill()],
 			FlatDmg:    c.a4Damage(),
 		}
-		// trigger damage
-		//TODO: Check for snapshots
+		// ダメージを発動
+		//TODO: スナップショット要確認
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 4), 2, 2, c.particleCB)
 
-		// A4 is considered here
+		// 固有天賦4はここで考慮される
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,
 			Target:  c.Core.Player.Active(),

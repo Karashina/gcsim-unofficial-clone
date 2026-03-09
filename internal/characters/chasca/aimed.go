@@ -12,7 +12,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 )
 
-// Aim keeps charging
+// 狙い撃ち充電継続
 const skillAimChargeDelay = 10
 const skillAimFallDelay = 29
 
@@ -23,22 +23,22 @@ var aimedHitmarks = []int{14, 86}
 
 var skillAimHitmarks = []int{4, 7, 10, 13, 16, 19}
 
-// per bullet E CA Load Time
+// 弾丸ごとのスキル重撃チャージ時間
 var cumuSkillAimLoadFrames = []int{21, 38, 56, 70, 91, 108}
 
-// TODO: Get C6 load frames. Using 11f windup and 0.23s per bullet
+// TODO: 6凸のロードフレームを取得。11fの準備動作と弾丸あたり0.23秒を使用
 var cumuSkillAimLoadFramesC6 = []int{14, 28, 42, 55, 69, 83}
 var cumuSkillAimLoadFramesC6Instant = []int{1, 2, 2, 3, 3, 4}
 
 func init() {
 	aimedFrames = make([][]int, 2)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(26)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(96)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
@@ -133,14 +133,14 @@ func (c *char) aimSkillHold(p map[string]int) (action.Info, error) {
 	c.aimSrc = aimSrc
 
 	c.c6AddBuff()
-	// activate c6 for next shot when a1 conversion happens (happens on bullet 1 due to c1)
+	// A1変換発生時に次の射撃用にC6を有効化（C1により弾丸1で発生）
 	if count >= 1 && c.bulletsToFire[1] != attributes.Anemo {
 		c.c6()
 	}
 
 	windup := 11
 	switch c.Core.Player.CurrentState() {
-	// these actions have the windup included in the X -> Aim frames
+	// これらのアクションはX → 狙い撃ちフレームに準備動作が含まれている
 	case action.NormalAttackState, action.AimState, action.SkillState, action.BurstState:
 		windup = 0
 	}
@@ -148,8 +148,8 @@ func (c *char) aimSkillHold(p map[string]int) (action.Info, error) {
 	for i := 1; i <= count; i++ {
 		delay := c.c6ChargeTime(i) + windup
 		c.QueueCharTask(func() {
-			// the bullets can still charge up to 10f from the end of nightsoul blessing,
-			// so we can't simply check for nightsoul blessing here
+			// 弾丸はナイトソウルの祝福終了後も最大10フレームまで充填可能、
+			// そのため単純にナイトソウルの祝福をチェックできない
 			if c.aimSrc != aimSrc {
 				return
 			}
@@ -158,7 +158,7 @@ func (c *char) aimSkillHold(p map[string]int) (action.Info, error) {
 	}
 
 	chargeDelay := c.c6ChargeTime(count) + windup
-	// fire bullets at the end of the charge
+	// チャージ終了時に弾丸を発射
 	c.QueueCharTask(func() {
 		if c.aimSrc == aimSrc {
 			c.fireBullets()
@@ -169,10 +169,10 @@ func (c *char) aimSkillHold(p map[string]int) (action.Info, error) {
 		Frames: c.skillNextFrames(func(next action.Action) int {
 			return chargeDelay + skillAimFrames[next]
 		}, skillAimFallDelay),
-		// This needs to be as long as the maximum possible duration of the actions. Which is aim[bullets=6],
-		// then nightsoul exipres and chasca falls down
+		// これはアクションの最大可能持続時間と同じ長さである必要がある。aim[bullets=6]の場合、
+		// ナイトソウルが期限切れしチャスカが落下する
 		AnimationLength: chargeDelay + skillAimFrames[action.InvalidAction] + skillCancelFrames[action.InvalidAction],
-		CanQueueAfter:   1, // Early CanQueueAfter in case nightsoul runs out
+		CanQueueAfter:   1, // ナイトソウルが切れた場合に備えた早期 CanQueueAfter
 		State:           action.AimState,
 	}, nil
 }
@@ -201,10 +201,10 @@ func (c *char) fireBullets() {
 
 	bulletFireFrame := c.Core.F
 
-	// TODO: get the actual target aquire range
+	// TODO: 実際のターゲット取得範囲を取得
 	enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10), nil)
 	for i := 0; i < c.bulletsCharged; i++ {
-		bulletElem := c.bulletsToFire[c.bulletsCharged-1-i] // get bullets starting from the back
+		bulletElem := c.bulletsToFire[c.bulletsCharged-1-i] // 後ろから弾丸を取得
 		hitDelay := skillAimHitmarks[i]
 		target := enemies[i%len(enemies)]
 		c.QueueCharTask(func() {
@@ -235,16 +235,16 @@ func (c *char) fireBullets() {
 }
 
 func (c *char) loadSkillHoldBullets() {
-	// set c.bulletsToFire = c.bulletsNext
-	// to save allocs we also give c.bulletsNext the old memory
-	// basically a ring buffer with a size of 2
+	// c.bulletsToFire = c.bulletsNext を設定
+	// アロケーション節約のためc.bulletsNextに古いメモリを渡す
+	// 実質的にサイズ2のリングバッファ
 	c.bulletsToFire, c.bulletsNext = c.bulletsNext, c.bulletsToFire
 
 	c.resetBulletPool()
 	c.bulletsNext[0] = attributes.Anemo
 	c.bulletsNext[1] = attributes.Anemo
 	c.bulletsNext[2] = c.a1Conversion()
-	c.c1Conversion() // check if we need to additionally convert bullet[1] due to C1
+	c.c1Conversion() // C1により弾丸[1]の追加変換が必要か確認
 
 	if len(c.partyPHECTypes) < 3 {
 		c.bulletsNext[3] = attributes.Anemo

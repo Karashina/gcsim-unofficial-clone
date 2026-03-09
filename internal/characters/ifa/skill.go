@@ -20,7 +20,7 @@ const (
 func init() {
 	skillFrames = frames.InitAbilSlice(19) // E -> E
 	skillFrames[action.ActionDash] = 19
-	skillFrames[action.ActionSwap] = 589 + 45 // wait for nightsoul to run out and fall onto the ground
+	skillFrames[action.ActionSwap] = 589 + 45 // ナイトソウルが尽きて地面に落下するのを待つ
 
 	skillCancelFrames = frames.InitAbilSlice(45) // E -> Dash/Jump
 	skillCancelFrames[action.ActionSwap] = 45
@@ -73,7 +73,7 @@ func (c *char) nightsoulPointReduceFunc(src int) func() {
 			return
 		}
 		c.reduceNightsoulPoints(0.8)
-		// reduce 0.8 point per 6, which is 8 per second
+		// 6フレームごとに0.8ポイント減少、つまり1秒あたり8
 		c.Core.Tasks.Add(c.nightsoulPointReduceFunc(src), 6)
 	}
 }
@@ -84,7 +84,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		return action.Info{
 			Frames:          frames.NewAbilFunc(skillCancelFrames),
 			AnimationLength: skillCancelFrames[action.InvalidAction],
-			CanQueueAfter:   skillCancelFrames[action.ActionLowPlunge], // earliest cancel
+			CanQueueAfter:   skillCancelFrames[action.ActionLowPlunge], // 最速キャンセル
 			State:           action.SkillState,
 		}, nil
 	}
@@ -92,7 +92,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

@@ -12,9 +12,9 @@ func (c *char) c1(delay int) {
 	if c.Base.Cons < 1 {
 		return
 	}
-	// 0.1 base change, + 0.08 every failure
+	// 基本確率0.1、失敗ごとに+0.08
 	if c.Core.Rand.Float64() > c.c1Chance {
-		// failed
+		// 失敗
 		c.c1Chance += 0.08
 		return
 	}
@@ -33,7 +33,7 @@ func (c *char) c1(delay int) {
 		CanBeDefenseHalted: true,
 		IsDeployable:       true,
 	}
-	// TODO: should center on target hit by attack that triggered c1
+	// TODO: 1凸をトリガーした攻撃が命中したターゲットを中心にすべき
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5), 0, delay)
 }
 

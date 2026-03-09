@@ -14,7 +14,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/reactable"
 )
 
-// test modifying dendro core to something else
+// 草元素コアを別のものに変更するテスト
 func TestModifyDendroCore(t *testing.T) {
 	c, _ := makeCore(1)
 	err := c.Init()
@@ -37,7 +37,7 @@ func TestModifyDendroCore(t *testing.T) {
 			c.Combat.ReplaceGadget(g.Key(), &fakeCore{
 				Gadget: gadget.New(c, geometry.Point{X: 0, Y: 0}, 0.2, combat.GadgetTypDendroCore),
 			})
-			// prevent blowing up
+			// 爆発を防止
 			g.OnKill = nil
 			g.OnExpiry = nil
 			g.OnCollision = nil
@@ -62,7 +62,7 @@ func TestModifyDendroCore(t *testing.T) {
 		Pattern: combat.NewCircleHitOnTarget(geometry.Point{}, nil, 100),
 	}, 0)
 
-	// should create a seed, explodes after 5s
+	// 種を生成し、5秒後に爆発するはず
 	for i := 0; i < reactable.DendroCoreDelay+1; i++ {
 		advanceCoreFrame(c)
 	}
@@ -75,7 +75,7 @@ func TestModifyDendroCore(t *testing.T) {
 		t.Errorf("gadget not a fake core??")
 	}
 
-	// make sure no blow up
+	// 爆発しないことを確認
 	for i := 0; i < 600; i++ {
 		advanceCoreFrame(c)
 	}

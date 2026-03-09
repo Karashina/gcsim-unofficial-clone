@@ -36,7 +36,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 	ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 8, 16)
 
-	// TODO: snapshot timing
+	// TODO: スナップショットのタイミング
 	snap := c.Snapshot(&ai)
 	c.c2(&snap)
 	for _, hitmark := range burstHitmarks {
@@ -76,7 +76,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

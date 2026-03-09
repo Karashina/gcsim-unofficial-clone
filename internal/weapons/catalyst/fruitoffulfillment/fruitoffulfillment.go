@@ -23,7 +23,7 @@ type Weapon struct {
 	core   *core.Core
 	char   *character.CharWrapper
 	stacks int
-	// Required to check for stack loss
+	// 装備者が必要チェックのスタック減少を確認
 	stackLossTimer int
 	lastStackGain  int
 }
@@ -31,10 +31,10 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Obtain the "Wax and Wane" effect after an Elemental Reaction is triggered, gaining 24/27/30/33/36 Elemental Mastery while losing 5% ATK.
-// For every 0.3s, 1 stack of Wax and Wane can be gained. Max 5 stacks.
-// For every 6s that go by without an Elemental Reaction being triggered, 1 stack will be lost.
-// This effect can be triggered even when the character is off-field.
+// 元素反応が発動した後、「盈欠」効果を獲得し、元素熟知が24/27/30/33/36増加するが攻撃力が5%減少する。
+// 0.3秒毎にスタックを1獲得可能。最大5スタック。
+// 元素反応が6秒間発動しなかった場合、スタックが1減少する。
+// キャラクターがフィールドにいなくても発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		core: c,
@@ -92,8 +92,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	return w, nil
 }
 
-// Helper function to check for stack loss
-// called after every stack gain
+// スタック減少チェックのヘルパー関数
+// スタック獲得毎に呼び出される
 func (w *Weapon) checkStackLoss(src int) func() {
 	return func() {
 		if w.lastStackGain != src {
@@ -107,7 +107,7 @@ func (w *Weapon) checkStackLoss(src int) func() {
 			Write("stacks", w.stacks).
 			Write("last_stack_change", w.lastStackGain)
 
-		// queue up again if we still have stacks
+		// まだスタックがあれば再度キューに追加
 		if w.stacks > 0 {
 			w.char.QueueCharTask(w.checkStackLoss(src), w.stackLossTimer)
 		}

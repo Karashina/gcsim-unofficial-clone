@@ -34,10 +34,10 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	mCharge := 72 + float64(r-1)*18 // r1=72, r2=90, ... increments 18
 	mSkill := 48 + float64(r-1)*12  // r1=48, r2=60, ... increments 12
 
-	// Charged Attack hit -> EM for 10s
+	// 重撃命中時 -> 10秒間元素熟知増加
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		if _, ok := args[0].(*combat.Target); ok {
-			// target might be of different type; just continue
+			// ターゲットが異なる型の可能性があるのでそのままcontinue
 		}
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != char.Index {
@@ -54,7 +54,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 				},
 			})
 		}
-		// Elemental Skill hit -> EM for 10s
+		// 元素スキル命中時 -> 10秒間元素熟知増加
 		if atk.Info.AttackTag == attacks.AttackTagElementalArt {
 			mEM := make([]float64, attributes.EndStatType)
 			mEM[attributes.EM] = mSkill

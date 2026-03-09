@@ -14,7 +14,7 @@ import (
 
 type char struct {
 	*tmpl.Character
-	// tracking skill information
+	// スキル情報を追跡
 	hasRecastSkill     bool
 	hasC2DamageBuff    bool
 	skillArea          combat.AttackPattern
@@ -25,7 +25,7 @@ type char struct {
 	sanctumSavedDur    int
 	sanctumICD         int
 	burstCounter       int
-	burstHitSrc        int // I am using this value as a counter because if I use frame I can get duplicates
+	burstHitSrc        int // フレーム値を使うと重複が起こる可能性があるため、カウンターとして使用
 	c1FlatDmgRatioE    float64
 	c1FlatDmgRatioQ    float64
 	c6Count            int
@@ -67,7 +67,7 @@ func (c *char) Init() error {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if it is possible to use next skill
+	// 次のスキルが使用可能かチェック
 	if a == action.ActionSkill && c.StatusIsActive(dehyaFieldKey) && !c.hasRecastSkill {
 		return true, action.NoFailure
 	}
@@ -86,7 +86,7 @@ func (c *char) onExitField() {
 			return false
 		}
 		c.DeleteStatus(burstKey)
-		if dur := c.sanctumSavedDur; dur > 0 { // place field
+		if dur := c.sanctumSavedDur; dur > 0 { // フィールドを配置
 			c.sanctumSavedDur = 0
 			c.QueueCharTask(func() { c.addField(dur) }, burstKickHitmark)
 		}

@@ -66,22 +66,24 @@ func (c *char) Init() error {
 	}
 
 	/**
-	Provides up to 3 buffs to active characters within the skill's AoE based on the number of Geo characters in the party at the time of casting:
-	• 1 Geo character: Adds "Standing Firm" - DEF Bonus.
-	• 2 Geo characters: Adds "Impregnable" - Increased resistance to interruption.
-	• 3 Geo characters: Adds "Crunch" - Geo DMG Bonus.
+	パーティ内の岩元素キャラクターの数に応じて、スキルのAoE内のアクティブキャラクターに最大3つのバフを付与（発動時の人数で決定）:
+	• 岩元素キャラ1人: 「積石」追加 - 防御力ボーナス。
+	• 岩元素キャラ2人: 「集岩」追加 - 中断耐性向上。
+	• 岩元素キャラ3人: 「碎岩」追加 - 岩元素ダメージボーナス。
 	**/
 	c.gorouBuff[attributes.DEF] = skillDefBonus[c.TalentLvlSkill()]
 	if c.geoCharCount > 2 {
-		c.gorouBuff[attributes.GeoP] = 0.15 // 15% geo damage
+		c.gorouBuff[attributes.GeoP] = 0.15 // 岩元素ダメージ15%
 	}
 
 	/**
-	For 12s after using Inuzaka All-Round Defense or Juuga: Forward Unto Victory, increases the CRIT DMG of all nearby party members' Geo DMG based on the buff level of the skill's field at the time of use:
-	• "Standing Firm": +10%
-	• "Impregnable": +20%
-	• "Crunch": +40%
-	This effect cannot stack and will take reference from the last instance of the effect that is triggered.
+	犬坂鐌繰の昭もしくは戦陣の誉を使用してから12秒間、
+	使用時のスキルフィールドのバフレベルに応じて、
+	付近の全パーティメンバーの岩元素ダメージの会心ダメージが増加:
+	• 「積石」: +10%
+	• 「集岩」: +20%
+	• 「碎岩」: +40%
+	この効果は重複せず、最後に発動したインスタンスを参照する。
 	**/
 	switch c.geoCharCount {
 	case 1:
@@ -89,7 +91,7 @@ func (c *char) Init() error {
 	case 2:
 		c.c6Buff[attributes.CD] = 0.2
 	default:
-		// can't be less than 1 so this is 3 or 4
+		// 1未満にはならないので3人以上
 		c.c6Buff[attributes.CD] = 0.4
 	}
 

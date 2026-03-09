@@ -32,10 +32,10 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// add field effect timer
-	// deployable thus not hitlag
+	// フィールド効果タイマーを追加
+	// 設置物のためヒットラグなし
 	c.Core.Status.Add(burstKey, 720+burstStartFrame)
-	// hook for buffs; active right away after cast
+	// バフ用フック。発動直後に有効
 
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -52,18 +52,18 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0.5}, radius)
 	c.Core.QueueAttack(ai, burstArea, 37, 37)
 
-	// add 13 ticks starting from t=0s to t=12s
-	// buff appears to start ticking right before hit (t=0s)
+	// t=0sからt=12sまで13回のティックを追加
+	// バフはヒット直前（t=0s）からティック開始
 	// https://discord.com/channels/845087716541595668/869210750596554772/936507730779308032
 	stats, _ := c.Stats()
 
-	// first tick should only buff atk and not heal
+	// 最初のティックは攻撃力バフのみで回復しない
 	c.Core.Tasks.Add(func() {
 		if c.Core.Combat.Player().IsWithinArea(burstArea) {
 			c.applyBennettField(stats, true)()
 		}
 	}, burstStartFrame)
-	// other ticks should heal
+	// その他のティックは回復する
 	for i := 60; i <= 12*60; i += 60 {
 		c.Core.Tasks.Add(func() {
 			if c.Core.Combat.Player().IsWithinArea(burstArea) {
@@ -78,7 +78,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -100,7 +100,7 @@ func (c *char) applyBennettField(stats [attributes.EndStatType]float64, firstTic
 	return func() {
 		c.Core.Log.NewEvent("bennett field ticking", glog.LogCharacterEvent, -1)
 
-		// self infuse
+		// 自己元素付与
 		p, ok := c.Core.Combat.Player().(*avatar.Player)
 		if !ok {
 			panic("target 0 should be Player but is not!!")
@@ -108,7 +108,7 @@ func (c *char) applyBennettField(stats [attributes.EndStatType]float64, firstTic
 		p.ApplySelfInfusion(attributes.Pyro, 25, burstBuffDuration)
 
 		active := c.Core.Player.ActiveChar()
-		// heal if not first tick and under 70%
+		// 最初のティックでなくHP70%未満なら回復
 		if !firstTick && active.CurrentHPRatio() < 0.7 {
 			c.Core.Player.Heal(info.HealInfo{
 				Caller:  c.Index,
@@ -119,14 +119,14 @@ func (c *char) applyBennettField(stats [attributes.EndStatType]float64, firstTic
 			})
 		}
 
-		// add attack if over 70%
+		// HP70%超の場合、攻撃力を追加
 		threshold := .7
 		if c.Base.Cons >= 1 {
 			threshold = 0
 		}
-		// Activate attack buff
+		// 攻撃力バフを有効化
 		if active.CurrentHPRatio() > threshold {
-			// add weapon infusion
+			// 武器元素付与を追加
 			if c.Base.Cons >= 6 {
 				switch active.Weapon.Class {
 				case info.WeaponClassClaymore:

@@ -9,26 +9,26 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// C1:
-// Increases the pulling speed of Gale Blade after holding for more than 1s, and increases the DMG dealt by 40%.
+// 1凸:
+// 風圧剣を1秒以上長押し後の引き寄せ速度を増加し、与えるダメージを40%増加させる。
 func (c *char) c1(snap *combat.Snapshot) {
-	// add 40% dmg
+	// 40%ダメージを追加
 	snap.Stats[attributes.DmgP] += .4
 	c.Core.Log.NewEvent("jean c1 adding 40% dmg", glog.LogCharacterEvent, c.Index).
 		Write("final dmg%", snap.Stats[attributes.DmgP])
 }
 
-// C2:
-// When Jean picks up an Elemental Orb/Particle, all party members have their Movement SPD and ATK SPD increased by 15% for 15s.
+// 2凸:
+// ジンが元素オーブ/粒子を拾うと、チーム全員の移動速度と攻撃速度が15秒間15%増加する。
 func (c *char) c2() {
 	c.c2buff = make([]float64, attributes.EndStatType)
 	c.c2buff[attributes.AtkSpd] = 0.15
 	c.Core.Events.Subscribe(event.OnParticleReceived, func(args ...interface{}) bool {
-		// only trigger if Jean catches the particle
+		// ジンが粒子を拾った場合のみトリガー
 		if c.Core.Player.Active() != c.Index {
 			return false
 		}
-		// apply C2 to all characters
+		// 全キャラクターに2凸を適用
 		for _, this := range c.Core.Player.Chars() {
 			this.AddStatMod(character.StatMod{
 				Base:         modifier.NewBaseWithHitlag("jean-c2", 900),
@@ -42,11 +42,11 @@ func (c *char) c2() {
 	}, "jean-c2")
 }
 
-// C4:
-// Within the Field created by Dandelion Breeze, all opponents have their Anemo RES decreased by 40%.
+// 4凸:
+// 蒲公英の風が生成したフィールド内の全ての敵の風元素耐性あ40%減少する。
 func (c *char) c4() {
-	// gets called once right before burst start and then at the same time as heal ticks (every 1s)
-	// add debuff to all targets for 1.2 s
+	// 元素爆発開始直前に1回、その後回復ティックと同時（1秒ごと）に呼び出される
+	// 全ターゲットに1.2秒のデバフを追加
 	enemies := c.Core.Combat.EnemiesWithinArea(c.burstArea, nil)
 	for _, e := range enemies {
 		e.AddResistMod(combat.ResistMod{
@@ -57,9 +57,9 @@ func (c *char) c4() {
 	}
 }
 
-// C6:
-// Incoming DMG is decreased by 35% within the Field created by Dandelion Breeze.
-// Upon leaving the Dandelion Field, this effect lasts for 3 attacks or 10s.
+// 6凸:
+// 蒲公英の風が生成したフィールド内で受けるダメージが35%減少する。
+// 蒲公英フィールドを離れた後、この効果は3回の攻撃または10秒間持続する。
 func (c *char) c6() {
 	c.Core.Log.NewEvent("jean-c6 not implemented", glog.LogCharacterEvent, c.Index)
 }

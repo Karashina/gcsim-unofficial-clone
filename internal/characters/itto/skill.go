@@ -18,25 +18,25 @@ const (
 
 func init() {
 	skillFrames = frames.InitAbilSlice(42) // E -> N1/Q
-	skillFrames[action.ActionCharge] = 28  // since we assume that Ushi always hits for a stack, we can just use E -> CA1/CAF
+	skillFrames[action.ActionCharge] = 28  // 丑二郎は常に命中してスタック獲得と仮定、E -> CA1/CAF を使用
 	skillFrames[action.ActionSkill] = 28   // E -> E
 	skillFrames[action.ActionDash] = 28    // E -> D
 	skillFrames[action.ActionJump] = 28    // E -> J
 	skillFrames[action.ActionSwap] = 41    // E -> Swap
 }
 
-// Skill:
-// Hurls Ushi, the young akaushi bull and auxiliary member of the Arataki Gang, dealing Geo DMG to opponents on hit.
-// When Ushi hits opponents, Arataki Itto gains 1 stack of Superlative Superstrength.
-// Ushi will remain on the field and provide support in the following ways:
-// - Taunts surrounding opponents and draws their attacks.
-// - Inherits HP based on a percentage of Arataki Itto's Max HP.
-// - When Ushi takes DMG, Arataki Itto gains 1 stack of Superlative Superstrength. Only 1 stack can be gained in this way every 2s.
-// - Ushi will flee when its HP reaches 0 or its duration ends. It will grant Arataki Itto 1 stack of Superlative Superstrength when it leaves.
-// Ushi is considered a Geo Construct. Arataki Itto can only deploy 1 Ushi on the field at any one time.
+// 元素スキル:
+// 荒瀧派の若き赤牛・丑二郎を投げつけ、命中した敵に岩元素ダメージを与える。
+// 丑二郎が敵に命中すると、荒瀧一斗は怒髪衝天スタックを1つ獲得する。
+// 丑二郎はフィールドに留まり、以下の方法でサポートする:
+// - 周囲の敵を挑発し、敵の攻撃を引きつける。
+// - 荒瀧一斗のHP上限の一定割合に基づくHPを継承する。
+// - 丑二郎がダメージを受けると、荒瀧一斗が怒髪衝天スタックを1つ獲得する。2秒ごとに1スタックのみ獲得可能。
+// - 丑二郎はHPが0になるか持続時間が終了するとフィールドを離れる。離脱時に荒瀧一斗に怒髪衝天スタックを1つ付与する。
+// 丑二郎は岩元素構造物とみなされる。荒瀧一斗はフィールド上に丑二郎を1体のみ配置可能。
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// anything but NA/E -> E should reset savedNormalCounter
-	// can't use CurrentState here since AnimationLength of Dash is the same as Dash -> Skill, so it switches to Idle instead of staying DashState
+	// 通常攻撃/スキル以外 -> スキルはsavedNormalCounterをリセットすべき
+	// ダッシュのAnimationLengthがDash -> Skillと同じためIdleに切り替わるので、ここでCurrentStateは使用不可
 	switch c.Core.Player.LastAction.Type {
 	case action.ActionAttack:
 	case action.ActionSkill:
@@ -44,13 +44,13 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.savedNormalCounter = 0
 	}
 
-	// Added "travel" parameter for future, since Ushi is thrown and takes 12 frames to hit the ground from a press E
+	// 丑二郎は投げられて着地まで12フレームかかるため、将来のために"travel"パラメータを追加
 	travel, ok := p["travel"]
 	if !ok {
 		travel = 4
 	}
 
-	// TODO: refactor this if enemy doing attacks is ever implemented
+	// TODO: 敵の攻撃が実装されたらリファクタリング
 	ushihit, ok := p["ushihit"]
 	if !ok {
 		ushihit = 0
@@ -62,7 +62,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		ushihit = 3
 	}
 
-	// deal damage when created
+	// 生成時にダメージを与える
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
 		Abil:             "Masatsu Zetsugi: Akaushi Burst!",
@@ -82,8 +82,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ushiDir := c.Core.Combat.Player().Direction()
 	ushiPos := c.Core.Combat.PrimaryTarget().Pos()
 
-	// Attack
-	// Ushi callback to create construct
+	// 攻撃
+	// 丑二郎の構造物生成用コールバック
 	done := false
 	cb := func(a combat.AttackCB) {
 		if done {
@@ -91,11 +91,11 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		}
 		done = true
 
-		// spawn ushi. on-field for 6s
+		// 丑二郎を生成。フィールド上に6秒間存在
 		c.Core.Constructs.New(c.newUshi(6*60, ushiDir, ushiPos), true)
 
-		// add stacks via param
-		// random stack gain with 2s stack gain icd
+		// パラメータでスタックを追加
+		// 2秒ICDでランダムにスタックを獲得
 		if ushihit > 0 {
 			startLimit := 6 - 2*(ushihit-1)
 			nextPossibleGain := 0
@@ -107,7 +107,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		}
 	}
 
-	// Assume that Ushi always hits for a stack
+	// 丑二郎は常に命中してスタックを獲得すると仮定
 	c.Core.Tasks.Add(func() { c.addStrStack("ushi-dmg", 1) }, skillRelease+travel)
 	c.Core.QueueAttack(
 		ai,
@@ -118,13 +118,13 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.particleCB,
 	)
 
-	// Cooldown
-	c.SetCDWithDelay(action.ActionSkill, 600, skillRelease) // cd starts on release
+	// クールダウン
+	c.SetCDWithDelay(action.ActionSkill, 600, skillRelease) // CDはリリース時に開始
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

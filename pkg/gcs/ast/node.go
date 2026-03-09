@@ -7,12 +7,12 @@ import (
 
 type Node interface {
 	String() string
-	// Copy does a deep copy of the Node and all its components.
-	// To avoid type assertions, some XxxNodes also have specialized
-	// CopyXxx methods that return *XxxNode.
+	// Copy は Node とそのすべてのコンポーネントのディープコピーを行う。
+	// 型アサーションを避けるため、一部の XxxNode は
+	// *XxxNode を返す特化した CopyXxx メソッドも持つ。
 	Copy() Node
-	Position() Pos // byte position of start of node in full original input string
-	// writeTo writes the String output to the builder.
+	Position() Pos // 元の入力文字列全体におけるノード開始位置のバイトオフセット
+	// writeTo は String の出力を builder に書き込む。
 	writeTo(*strings.Builder)
 }
 
@@ -32,20 +32,20 @@ type Stmt interface {
 
 type (
 
-	// BlockStmt represents a brace statement list
+	// BlockStmt はブレース文のリストを表す
 	BlockStmt struct {
 		List []Node
 		Pos
 	}
 
-	// AssignStmt represents assigning of a value to a previously declared variable
+	// AssignStmt は既に宣言された変数への値の代入を表す
 	AssignStmt struct {
 		Pos
 		Ident Token
 		Val   Expr
 	}
 
-	// LetStmt represents a variable assignment. Number only
+	// LetStmt は変数の代入を表す。数値のみ
 	LetStmt struct {
 		Pos
 		Ident Token
@@ -53,62 +53,62 @@ type (
 		Val   Expr
 	}
 
-	// ReturnStmt represents return <expr>.
+	// ReturnStmt は return <expr> を表す。
 	ReturnStmt struct {
 		Pos
 		Val Expr
 	}
 
-	// CtrlStmt represents continue, break, and fallthrough
+	// CtrlStmt は continue、break、fallthrough を表す
 	CtrlStmt struct {
 		Pos
 		Typ CtrlTyp
 	}
 
-	// IfStmt represents an if block
+	// IfStmt は if ブロックを表す
 	IfStmt struct {
 		Pos
-		Condition Expr       //TODO: this should be an expr?
-		IfBlock   *BlockStmt // What to execute if true
-		ElseBlock Stmt       // What to execute if false
+		Condition Expr       //TODO: これは expr であるべき?
+		IfBlock   *BlockStmt // 真の場合に実行する内容
+		ElseBlock Stmt       // 偽の場合に実行する内容
 	}
 
-	// SwitchStmt represent a switch block
+	// SwitchStmt は switch ブロックを表す
 	SwitchStmt struct {
 		Pos
-		Condition Expr // the condition to switch on
+		Condition Expr // switch の対象となる条件
 		Cases     []*CaseStmt
-		Default   *BlockStmt // default case
+		Default   *BlockStmt // デフォルトケース
 	}
 
-	// CaseStmt represents a case in a switch block
+	// CaseStmt は switch ブロック内の case を表す
 	CaseStmt struct {
 		Pos
 		Condition Expr
 		Body      *BlockStmt
 	}
 
-	// A FnStmt node represents a function declared with syntax fn ident(..args) { block }.
-	// Functionally the same as a LetStmt
+	// FnStmt ノードは fn ident(..args) { block } 構文で宣言された関数を表す。
+	// 機能的には LetStmt と同じ
 	FnStmt struct {
 		Pos
 		Ident Token
 		Func  *FuncLit
 	}
 
-	// WhileStmt represents a while block
+	// WhileStmt は while ブロックを表す
 	WhileStmt struct {
 		Pos
-		Condition  Expr       //TODO: this should be an expr?
-		WhileBlock *BlockStmt // What to execute if true
+		Condition  Expr       //TODO: これは expr であるべき?
+		WhileBlock *BlockStmt // 真の場合に実行する内容
 	}
 
-	// ForStmt represents a for block
+	// ForStmt は for ブロックを表す
 	ForStmt struct {
 		Pos
-		Init Stmt // initialization statement; or nil
-		Cond Expr // condition; or nil
-		Post Stmt // post iteration statement; or nil
+		Init Stmt // 初期化文; nil の場合あり
+		Cond Expr // 条件式; nil の場合あり
+		Post Stmt // 反復後の文; nil の場合あり
 		Body *BlockStmt
 	}
 )
@@ -581,8 +581,7 @@ type Expr interface {
 	CopyExpr() Expr
 }
 
-// An expression is represented by a tree consisting of one or
-// more of the following concrete expression nodes
+// 式は以下の具象式ノードの1つ以上で構成されるツリーで表現される
 type (
 	NumberLit struct {
 		Pos
@@ -596,17 +595,17 @@ type (
 		Value string
 	}
 
-	// FuncExpr is just a wrapper around FuncLit representing an anonymous function declaration
-	// This node should only exists following a let statement
-	// The FuncExpr itself should have null type. The actual FuncLit will have it's own return type
+	// FuncExpr は無名関数宣言を表す FuncLit のラッパーに過ぎない
+	// このノードは let 文の後にのみ存在すべき
+	// FuncExpr 自体は null 型を持つべき。実際の FuncLit は独自の戻り値型を持つ
 	FuncExpr struct {
-		Pos  // position of the fn keyword
+		Pos  // fn キーワードの位置
 		Func *FuncLit
 	}
 
-	// A FuncLit node represents a function literal.
+	// FuncLit ノードは関数リテラルを表す。
 	FuncLit struct {
-		Pos       // position of the starting (
+		Pos       // 開き括弧 ( の位置
 		Signature *FuncType
 		Args      []*Ident
 		Body      *BlockStmt
@@ -622,26 +621,26 @@ type (
 		Value []string
 	}
 
-	// A CallExpr node represents an expression followed by an argument list.
+	// CallExpr ノードは式の後に引数リストが続くものを表す。
 	CallExpr struct {
 		Pos
-		Fun  Expr   // function expression
-		Args []Expr // function arguments; or nil
+		Fun  Expr   // 関数式
+		Args []Expr // 関数引数; nil の場合もある
 	}
 
-	// A UnaryExpr node represents a unary expression.
+	// UnaryExpr ノードは単項式を表す。
 	UnaryExpr struct {
 		Pos
 		Op    Token
-		Right Expr // operand
+		Right Expr // オペランド
 	}
 
-	// A BinaryExpr node represents a binary expression i.e. a > b, 1 + 1, etc..
+	// BinaryExpr ノードは二項式（例: a > b, 1 + 1 など）を表す。
 	BinaryExpr struct {
 		Pos
 		Left  Expr
-		Right Expr  // need to evalute to same type as lhs
-		Op    Token // should be > itemCompareOP and < itemDot
+		Right Expr  // 左辺と同じ型に評価される必要がある
+		Op    Token // itemCompareOP より大きく itemDot より小さい必要がある
 	}
 
 	MapExpr struct {
@@ -1022,17 +1021,17 @@ type ExprType interface {
 
 type (
 	NumberType struct {
-		Pos // position of :, or of the ident if defaulting to NumberType
+		Pos // : の位置、または NumberType がデフォルトの場合は識別子の位置
 	}
 	StringType struct {
-		Pos // position of :
+		Pos // : の位置
 	}
 
 	MapType struct {
-		Pos // position of keyword map
+		Pos // map キーワードの位置
 	}
 	FuncType struct {
-		Pos        // position of opening (
+		Pos        // 開き括弧 ( の位置
 		ArgsType   []ExprType
 		ResultType ExprType
 	}

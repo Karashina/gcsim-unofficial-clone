@@ -6,11 +6,11 @@ import (
 )
 
 func (t *Target) WillApplyEle(tag attacks.ICDTag, grp attacks.ICDGroup, char int) float64 {
-	// no icd if no tag
+	// タグなしの場合はICDなし
 	if tag == attacks.ICDTagNone {
 		return 1
 	}
-	// check if we need to start timer
+	// タイマーの開始が必要か確認
 	x := t.icdTagOnTimer[char][tag]
 	if !t.icdTagOnTimer[char][tag] {
 		t.icdTagOnTimer[char][tag] = true
@@ -18,7 +18,7 @@ func (t *Target) WillApplyEle(tag attacks.ICDTag, grp attacks.ICDGroup, char int
 	}
 	val := t.icdTagCounter[char][tag]
 	t.icdTagCounter[char][tag]++
-	// if counter > length, then use 0 for group seq
+	// カウンターが長さを超える場合はグループ序列に0を使用
 	groupSeq := attacks.ICDGroupEleApplicationSequence[grp][len(attacks.ICDGroupEleApplicationSequence[grp])-1]
 	if val < len(attacks.ICDGroupEleApplicationSequence[grp]) {
 		groupSeq = attacks.ICDGroupEleApplicationSequence[grp][val]
@@ -33,14 +33,14 @@ func (t *Target) WillApplyEle(tag attacks.ICDTag, grp attacks.ICDGroup, char int
 	return groupSeq
 }
 func (t *Target) GroupTagDamageMult(tag attacks.ICDTag, grp attacks.ICDGroup, char int) float64 {
-	// check if we need to start timer
+	// タイマーの開始が必要か確認
 	if !t.icdDamageTagOnTimer[char][tag] {
 		t.icdDamageTagOnTimer[char][tag] = true
 		t.ResetDamageCounterAfterDelay(tag, grp, char)
 	}
 	val := t.icdDamageTagCounter[char][tag]
 	t.icdDamageTagCounter[char][tag]++
-	// if counter > length, then use 0 for group seq
+	// カウンターが長さを超える場合はグループ序列に0を使用
 	groupSeq := attacks.ICDGroupDamageSequence[grp][len(attacks.ICDGroupDamageSequence[grp])-1]
 	if val < len(attacks.ICDGroupDamageSequence[grp]) {
 		groupSeq = attacks.ICDGroupDamageSequence[grp][val]
@@ -49,7 +49,7 @@ func (t *Target) GroupTagDamageMult(tag attacks.ICDTag, grp attacks.ICDGroup, ch
 }
 func (t *Target) ResetDamageCounterAfterDelay(tag attacks.ICDTag, grp attacks.ICDGroup, char int) {
 	t.Core.Tasks.Add(func() {
-		// set the counter back to 0
+		// カウンターを0にリセット
 		t.icdDamageTagCounter[char][tag] = 0
 		t.icdDamageTagOnTimer[char][tag] = false
 		t.Core.Log.NewEvent("damage counter reset", glog.LogICDEvent, char).
@@ -63,7 +63,7 @@ func (t *Target) ResetDamageCounterAfterDelay(tag attacks.ICDTag, grp attacks.IC
 }
 func (t *Target) ResetTagCounterAfterDelay(tag attacks.ICDTag, grp attacks.ICDGroup, char int) {
 	t.Core.Tasks.Add(func() {
-		// set the counter back to 0
+		// カウンターを0にリセット
 		t.icdTagCounter[char][tag] = 0
 		t.icdTagOnTimer[char][tag] = false
 		t.Core.Log.NewEvent("ele app counter reset", glog.LogICDEvent, char).

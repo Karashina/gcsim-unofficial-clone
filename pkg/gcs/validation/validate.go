@@ -8,7 +8,7 @@ import (
 func ValidateCharParamKeys(c keys.Char, a action.Action, keys []string) error {
 	f, ok := charValidParamKeys[c]
 	if !ok {
-		// all is ok if no validation function registered
+		// バリデーション関数が登録されていなければすべてOK
 		return nil
 	}
 	return f(a, keys)

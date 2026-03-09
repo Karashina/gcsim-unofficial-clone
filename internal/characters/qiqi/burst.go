@@ -24,7 +24,7 @@ func init() {
 	burstFrames[action.ActionSwap] = 112    // Q -> Swap
 }
 
-// Only applies burst damage. Main Talisman functions are handled in qiqi.go
+// 元素爆発ダメージのみを適用。主な箓機能はqiqi.goで処理
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -40,7 +40,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7)
 	c.Core.QueueAttack(ai, ap, burstHitmark, burstHitmark)
 
-	// Talisman is applied via a 0 dmg attack way before the damage is dealt
+	// 箓はダメージが与えられる前に0ダメージ攻撃で適用される
 	talismanAi := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Fortune-Preserving Talisman (Talisman application)",
@@ -65,7 +65,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -78,11 +78,11 @@ func (c *char) talismanHealHook() {
 			return false
 		}
 
-		// do nothing if talisman expired
+		// 箓が期限切れなら何もしない
 		if !e.StatusIsActive(talismanKey) {
 			return false
 		}
-		// do nothing if talisman still on icd
+		// 箓がまだICD中なら何もしない
 		if e.GetTag(talismanICDKey) >= c.Core.F {
 			return false
 		}
@@ -101,8 +101,8 @@ func (c *char) talismanHealHook() {
 	}, "talisman-heal-hook")
 }
 
-// Handles C2, A4, and skill NA/CA on hit hooks
-// Additionally handles burst Talisman hook - can't be done another way since Talisman is applied before the burst damage is dealt
+// 2命ノ星座、固有天賦4、および元素スキルの通常/重撃命中時フックを処理
+// また元素爆発の箓フックも処理 - 箓は元素爆発ダメージより前に適用されるため、他の方法では実現できない
 func (c *char) onNACAHitHook() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		e, ok := args[0].(*enemy.Enemy)
@@ -114,7 +114,7 @@ func (c *char) onNACAHitHook() {
 			return false
 		}
 
-		// All of the below only occur on Qiqi NA/CA hits
+		// 以下はすべて七七の通常攻撃/重撃命中時のみ発動
 		switch atk.Info.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagExtra:
@@ -122,17 +122,17 @@ func (c *char) onNACAHitHook() {
 			return false
 		}
 
-		// A4:
-		// When Qiqi hits opponents with her Normal and Charged Attacks,
-		// she has a 50% chance to apply a Fortune-Preserving Talisman to them for 6s.
-		// This effect can only occur once every 30s.
+		// 固有天賤2:
+		// 七七が通常攻撃と重撃で敵に命中したとき、
+		// 50%の確率で敵に寿命の箓を付与する（6秒間）。
+		// この効果は30秒に1回のみ発動。
 		if c.Base.Ascension >= 4 && !c.StatusIsActive(a4ICDKey) && (c.Core.Rand.Float64() < 0.5) {
-			// Don't want to overwrite a longer burst duration talisman with a shorter duration one
-			// TODO: Unclear how the interaction works if there is already a talisman on enemy
-			// TODO: Being generous for now and not putting it on CD if there is a conflict
+			// より長い元素爆発箓の持続時間を短いもので上書きしたくない
+			// TODO: 既に敵に箓がある場合の相互作用は不明
+			// TODO: 現状は競合がある場合CDに置かない寛大な処理
 			if e.StatusExpiry(talismanKey) < c.Core.F+360 {
 				e.AddStatus(talismanKey, 360, true)
-				c.AddStatus(a4ICDKey, 1800, true) // 30s icd
+				c.AddStatus(a4ICDKey, 1800, true) // 30秒ICD
 				c.Core.Log.NewEvent(
 					"Qiqi A4 Adding Talisman",
 					glog.LogCharacterEvent,
@@ -143,7 +143,7 @@ func (c *char) onNACAHitHook() {
 			}
 		}
 
-		// Qiqi NA/CA healing proc in skill duration
+		// 七七の元素スキル持続中の通常/重撃回復処理
 		if c.StatusIsActive(skillBuffKey) {
 			c.Core.Player.Heal(info.HealInfo{
 				Caller:  c.Index,

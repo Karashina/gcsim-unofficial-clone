@@ -29,24 +29,24 @@ func getCenterAndDirection(src, center, offset positional) (geometry.Point, geom
 	srcTrg, srcIsATarget := src.(Target)
 	centerTrg, centerIsATarget := center.(Target)
 
-	// determine direction to use for adding offset
+	// オフセット追加に使用する方向を決定
 	if srcIsATarget {
 		dir = srcTrg.Direction()
-		// recalc direction
-		// - if the provided center is just a position (useful for bow CA targeting)
-		// - if provided targets have different keys
+		// 方向を再計算
+		// - 提供された中心が単なる位置の場合（弓の重撃ターゲットに有用）
+		// - 提供されたターゲットのキーが異なる場合
 		if !centerIsATarget || srcTrg.Key() != centerTrg.Key() {
 			dir = srcTrg.CalcTempDirection(c)
 		}
 	}
 
-	// allow nil as shortcut for no offset
+	// オフセットなしのショートカットとしてnilを許可
 	if offset == nil {
 		return c, dir
 	}
 
 	off := offset.Pos()
-	// add offset
+	// オフセットを追加
 	if off.X == 0 && off.Y == 0 {
 		return c, dir
 	}

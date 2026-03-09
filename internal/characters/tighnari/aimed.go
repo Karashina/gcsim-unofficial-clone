@@ -20,12 +20,12 @@ const aimedWreathHitmark = 175
 func init() {
 	aimedFrames = make([][]int, 2)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(23)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(94)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
@@ -170,7 +170,7 @@ func (c *char) WreathAimed(p map[string]int) (action.Info, error) {
 		Element:      attributes.Dendro,
 		Durability:   25,
 		Mult:         clusterbloom[c.TalentLvlAttack()],
-		HitWeakPoint: false, // TODO: tighnari can hit the weak spot on some enemies (like hilichurls)
+		HitWeakPoint: false, // TODO: Tighnariは一部の敵（ヒルチャール等）の弱点を攻撃できる
 	}
 	c.Core.Tasks.Add(func() {
 		snap := c.Snapshot(&ai)

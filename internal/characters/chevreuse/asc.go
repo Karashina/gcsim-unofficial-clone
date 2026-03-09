@@ -10,19 +10,19 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When all party members are Pyro and Electro characters and there is at least
-// one Pyro and one Electro character each in the party:
-// Chevreuse grants "Coordinated Tactics" to nearby party members:
-// After a character triggers the Overloaded reaction, the Pyro and Electro RES
-// of the opponent(s) affected by this Overloaded reaction will be decreased by 40% for 6s.
-// The "Coordinated Tactics" effect will be removed when the Elemental Types
-// of the characters in the party do not meet the basic requirements for the Passive Talent.
+// パーティ全員が炎元素と雷元素のキャラクターで、かつ炎元素と雷元素が
+// それぞれ少なくとも1人ずついる場合:
+// シュヴルーズは付近のパーティメンバーに「共同戦術」を付与する:
+// キャラクターが過負荷反応を起こした後、この過負荷反応の影響を受けた
+// 敵の炎耐性と雷耐性が40%減少する（6秒間）。
+// パーティ内のキャラクターの元素タイプが固有天賦の基本条件を
+// 満たさなくなると「共同戦術」効果は解除される。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
 
-	// check if only pyro + electro
+	// 炎と雷のみかチェック
 	chars := c.Core.Player.Chars()
 	count := make(map[attributes.Element]int)
 	for _, this := range chars {
@@ -36,7 +36,7 @@ func (c *char) a1() {
 
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
-		// don't trigger if no overload dmg
+		// 過負荷ダメージでなければトリガーしない
 		if atk.Info.AttackTag != attacks.AttackTagOverloadDamage {
 			return false
 		}
@@ -60,9 +60,10 @@ func (c *char) a1() {
 	}, "cheuv-a1")
 }
 
-// After Chevreuse fires an Overcharged Ball using Short-Range Rapid Interdiction Fire,
-// nearby Pyro and Electro characters in the party gain 1% increased ATK for every 1,000 Max HP Chevreuse has for 30s.
-// ATK can be increased by up to 40% in this way.
+// シュヴルーズが近距離キャノン急射で過充填弾を発射した後、
+// 付近のパーティ内の炎元素・雷元素キャラクターは30秒間、
+// シュヴルーズのHP上限1,000ごとに攻撃力+1%を獲得する。
+// この方法で攻撃力は最大40%まで増加可能。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

@@ -15,7 +15,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
 )
 
-// Test to make sure in 2 target scenario, Beidou burst bounces between the 2 targets
+// 2ターゲットシナリオでBeidouの元素爆発が2つのターゲット間でバウンスすることをテスト
 func TestBeidouBounce(t *testing.T) {
 	c, trg := makeCore(2)
 	prof := defProfile(keys.Beidou)
@@ -31,12 +31,12 @@ func TestBeidouBounce(t *testing.T) {
 		t.Errorf("error initializing core: %v", err)
 		t.FailNow()
 	}
-	// initialize some settings
+	// いくつかの設定を初期化
 	c.Combat.DefaultTarget = trg[0].Key()
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// start tests
+	// テスト開始
 	dmgCount := make(map[targets.TargetKey]int)
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		t, ok := args[0].(*enemy.Enemy)

@@ -48,13 +48,13 @@ func (h *Handler) NewConstruct(c Construct, refresh bool, constructs *[]Construc
 			Write("key", (*constructs)[ind].Key()).
 			Write("prev type", (*constructs)[ind].Type()).
 			Write("next type", c.Type())
-		// remove construct from list, reset order by removing nils and add construct to end
+		// リストから構造物を削除し、nilを除去して順序をリセットし、末尾に構造物を追加
 		(*constructs)[ind].OnDestruct()
 		(*constructs)[ind] = nil
 		h.cleanOutNils(constructs)
 		(*constructs) = append((*constructs), c)
 	} else {
-		// add this one to the end
+		// 末尾に追加
 		(*constructs) = append((*constructs), c)
 		h.log.NewEventBuildMsg(glog.LogConstructEvent, -1, "construct created: ", c.Type().String()).
 			Write("key", c.Key()).
@@ -78,7 +78,7 @@ func (h *Handler) NewConstruct(c Construct, refresh bool, constructs *[]Construc
 }
 
 func (h *Handler) cleanOutNils(constructs *[]Construct) {
-	// clean out any nils
+	// nilをすべて除去
 	n := 0
 	for _, x := range *constructs {
 		if x != nil {
@@ -90,7 +90,7 @@ func (h *Handler) cleanOutNils(constructs *[]Construct) {
 }
 
 func (h *Handler) Tick() {
-	// clean out expired
+	// 期限切れを除去
 	n := 0
 	for _, v := range h.constructs {
 		if v.Expiry() == *h.f {
@@ -139,7 +139,7 @@ func (h *Handler) ConstructsByType(t GeoConstructType) ([]Construct, []Construct
 	return match, notMatch
 }
 
-// how many of the given
+// 指定されたものの数
 func (h *Handler) Count() int {
 	count := 0
 	for _, v := range h.constructs {
@@ -210,10 +210,10 @@ func (h *Handler) Expiry(t GeoConstructType) int {
 	return expiry
 }
 
-// destroy key if exist, return true if destroyed
+// キーが存在すれば破壊し、破壊したらtrueを返す
 func (h *Handler) Destroy(key int) bool {
 	ok := false
-	// clean out expired
+	// 期限切れを除去
 	n := 0
 	for _, v := range h.constructs {
 		if v.Key() == key {

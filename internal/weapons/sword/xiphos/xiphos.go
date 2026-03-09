@@ -29,10 +29,11 @@ func (w *Weapon) Init() error {
 	return nil
 }
 
-// The following effect will trigger every 10s: The equipping character will gain 0.036%/0.045%/0.054%/0.063%/0.072% of
-// their Elemental Mastery as bonus Energy Recharge for 12s, with nearby party members gaining 30% of this buff for
-// the same duration. Multiple instances of this weapon can allow this buff to stack. This effect will
-// still trigger even if the character is not on the field.
+// 10秒毎に以下の効果が発動する: 装備キャラは元素熟知の
+// 0.036%/0.045%/0.054%/0.063%/0.072%の元素チャージ効率ボーナスを12秒間得る。
+// 近くのパーティメンバーはこのバフの30%を同じ時間得る。
+// この武器の複数装備でバフを重複可能。
+// キャラクターがフィールドにいなくても発動する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		core: c,

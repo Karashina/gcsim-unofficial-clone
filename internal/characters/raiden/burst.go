@@ -23,24 +23,24 @@ const (
 func init() {
 	burstFrames = frames.InitAbilSlice(112) // Q -> J
 	burstFrames[action.ActionAttack] = 111  // Q -> N1
-	burstFrames[action.ActionCharge] = 500  // TODO: this action is illegal
+	burstFrames[action.ActionCharge] = 500  // TODO: このアクションは無効
 	burstFrames[action.ActionSkill] = 111   // Q -> E
 	burstFrames[action.ActionDash] = 111    // Q -> D
 	burstFrames[action.ActionSwap] = 110    // Q -> Swap
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// activate burst, reset stacks
+	// 元素爆発を発動、愿力スタックをリセット
 	c.burstCastF = c.Core.F
 	c.restoreCount = 0
 	c.restoreICD = 0
 	c.c6Count = 0
 	c.c6ICD = 0
 
-	// use a special modifier to track burst
+	// 特殊の修飾子で元素爆発状態を追跡
 	c.AddStatus(BurstKey, 420+burstHitmark, true)
 
-	// apply when burst ends
+	// 元素爆発終了時に適用
 	if c.Base.Cons >= 4 {
 		c.applyC4 = true
 		src := c.burstCastF
@@ -88,7 +88,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -112,7 +112,7 @@ func (c *char) onSwapClearBurst() {
 		if !c.StatusIsActive(BurstKey) {
 			return false
 		}
-		// i prob don't need to check for who prev is here
+		// 前のキャラが誰かのチェックは不要と思われる
 		prev := args[0].(int)
 		if prev == c.Index {
 			c.DeleteStatus(BurstKey)
@@ -126,14 +126,14 @@ func (c *char) onSwapClearBurst() {
 }
 
 func (c *char) onBurstStackCount() {
-	// TODO: this used to be on PostBurst; need to check if it works correctly still
+	// TODO: 以前はPostBurstで処理していた。現在も正しく動作するか要確認
 	c.Core.Events.Subscribe(event.OnEnergyBurst, func(args ...interface{}) bool {
 		if c.Core.Player.Active() == c.Index {
 			return false
 		}
 		char := args[0].(*character.CharWrapper)
 		amount := args[2].(float64)
-		// add stacks based on char max energy
+		// キャラクターの最大エネルギーに基づきスタックを加算
 		stacks := resolveStackGain[c.TalentLvlBurst()] * amount
 		if c.Base.Cons > 0 {
 			if char.Base.Element == attributes.Electro {

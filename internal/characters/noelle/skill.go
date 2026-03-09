@@ -19,7 +19,7 @@ func init() {
 	skillFrames = frames.InitAbilSlice(78)
 	skillFrames[action.ActionAttack] = 12
 	skillFrames[action.ActionCharge] = 13
-	skillFrames[action.ActionSkill] = 14 // uses burst frames
+	skillFrames[action.ActionSkill] = 14 // 元素爆発フレームを使用
 	skillFrames[action.ActionBurst] = 14
 	skillFrames[action.ActionDash] = 11
 	skillFrames[action.ActionJump] = 11
@@ -43,21 +43,21 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 	snap := c.Snapshot(&ai)
 
-	// add shield first
+	// まずシールドを追加
 	defFactor := snap.Stats.TotalDEF()
 	shieldhp := shieldFlat[c.TalentLvlSkill()] + shieldDef[c.TalentLvlSkill()]*defFactor
 	c.Core.Player.Shields.Add(c.newShield(shieldhp, shield.NoelleSkill, 720))
 
-	// activate shield timer, on expiry explode
-	c.shieldTimer = c.Core.F + 720 // 12 seconds
+	// シールドタイマーを有効化、終了時に爆発
+	c.shieldTimer = c.Core.F + 720 // 12秒
 
 	c.a4Counter = 0
 
-	// initial E hit can proc her heal
+	// 元素スキルの初撃も回復を発動可能
 	cb := c.skillHealCB()
 
-	// center on player
-	// use char queue for this just to be safe in case of C4
+	// プレイヤー中心
+	// 4凸に備えてchar queueを使用
 	c.QueueCharTask(func() {
 		c.Core.QueueAttack(
 			ai,
@@ -68,11 +68,11 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		)
 	}, skillHitmark)
 
-	// handle C4
+	// 4凸を処理
 	if c.Base.Cons >= 4 {
 		c.Core.Tasks.Add(func() {
 			if c.shieldTimer == c.Core.F {
-				// deal damage
+				// ダメージを与える
 				c.explodeShield()
 			}
 		}, 720)
@@ -83,7 +83,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -97,7 +97,7 @@ func (c *char) skillHealCB() combat.AttackCBFunc {
 		if done {
 			return
 		}
-		// check for healing
+		// 回復をチェック
 		if c.Core.Player.Shields.Get(shield.NoelleSkill) != nil {
 			var prob float64
 			if c.Base.Cons >= 1 && c.StatModIsActive(burstBuffKey) {
@@ -106,7 +106,7 @@ func (c *char) skillHealCB() combat.AttackCBFunc {
 				prob = healChance[c.TalentLvlSkill()]
 			}
 			if c.Core.Rand.Float64() < prob {
-				// heal target
+				// ターゲットを回復
 				def := atk.AttackEvent.Snapshot.Stats.TotalDEF()
 				heal := shieldHeal[c.TalentLvlSkill()]*def + shieldHealFlat[c.TalentLvlSkill()]
 				c.Core.Player.Heal(info.HealInfo{
@@ -122,8 +122,9 @@ func (c *char) skillHealCB() combat.AttackCBFunc {
 	}
 }
 
-// C4:
-// When Breastplate's duration expires or it is destroyed by DMG, it will deal 400% ATK of Geo DMG to surrounding opponents.
+// 4凸:
+// 護心の持続時間が終了した時、またはダメージにより破壊された時、
+// 周囲の敵に攻撃力400%の岩元素ダメージを与える。
 func (c *char) explodeShield() {
 	c.shieldTimer = 0
 	ai := combat.AttackInfo{
@@ -142,6 +143,6 @@ func (c *char) explodeShield() {
 		CanBeDefenseHalted: true,
 	}
 
-	// center on player
+	// プレイヤー中心
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 4), 0, 0)
 }

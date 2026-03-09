@@ -52,22 +52,22 @@ func (b *Blackcliff) NewWeapon(c *core.Core, char *character.CharWrapper, p info
 
 	c.Events.Subscribe(event.OnTargetDied, func(args ...interface{}) bool {
 		_, ok := args[0].(*enemy.Enemy)
-		// ignore if not an enemy
+		// 敵でなければ無視
 		if !ok {
 			return false
 		}
 		atk := args[1].(*combat.AttackEvent)
-		// don't proc if someone else defeated the enemy
+		// 別のキャラクターが敵を倒した場合は発動しない
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		// don't proc if off-field
+		// フィールド外では発動しない
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// add status to char given index
+		// 指定インデックスのキャラにステータスを追加
 		char.AddStatus(stackKey[index], 1800, true)
-		// update buff
+		// バフを更新
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("blackcliff", 1800),
 			AffectedStat: attributes.ATKP,

@@ -26,14 +26,14 @@ func init() {
 	chargeFrames[action.ActionSwap] = 59             // CA -> Swap
 }
 
-// Charge attack function - handles seal use
+// 重撃関数 - 朱印消費を処理
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	// check for seal stacks
+	// 朱印スタックを確認
 	if !c.StatusIsActive(sealBuffKey) {
 		c.sealCount = 0
 	}
 
-	// apply a1
+	// 固有天賦1を適用
 	c.a1(c.sealCount)
 
 	ai := combat.AttackInfo{
@@ -49,13 +49,13 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charge[c.sealCount][c.TalentLvlAttack()],
 	}
 
-	// add windup if we're in idle or swap only
+	// 待機または交代時のみ溜め時間を追加
 	windup := 16
 	if c.Core.Player.CurrentState() == action.Idle || c.Core.Player.CurrentState() == action.SwapState {
 		windup = 0
 	}
 	radius := chargeRadius[c.sealCount]
-	// TODO: Not sure of snapshot timing
+	// TODO: スナップショットのタイミングが不明
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, radius),
@@ -67,7 +67,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	c.Core.Log.NewEvent("yanfei charge attack consumed seals", glog.LogCharacterEvent, c.Index).
 		Write("current_seals", c.sealCount)
 
-	// Clear the seals next frame just in case for some reason we call stam check late
+	// スタミナチェックが遅延した場合に備え、次フレームで朱印をクリア
 	c.Core.Tasks.Add(func() {
 		c.sealCount = 0
 		c.DeleteStatus(sealBuffKey)
@@ -76,7 +76,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          func(next action.Action) int { return chargeFrames[next] - windup },
 		AnimationLength: chargeFrames[action.InvalidAction] - windup,
-		CanQueueAfter:   chargeFrames[action.ActionJump] - windup, // earliest cancel is before hitmark
+		CanQueueAfter:   chargeFrames[action.ActionJump] - windup, // 最速キャンセルはヒットマークより前
 		State:           action.ChargeAttackState,
 	}, nil
 }

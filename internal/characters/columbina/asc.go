@@ -9,26 +9,26 @@ import (
 )
 
 const (
-	// A0: Moonsign Benediction
+	// 天賦0: Moonsign Benediction
 	moonsignKey   = "moonsignKey"
 	lbKeyStatus   = "LB-Key"
 	lcKeyStatus   = "LC-Key"
 	lcrsKeyStatus = "LCrs-Key"
 
-	// A1: Lunacy
+	// 固有天賦1: Lunacy
 	lunacyKey      = "lunacy"
 	lunacyMaxStack = 3
-	lunacyDur      = 10 * 60 // 10 seconds
+	lunacyDur      = 10 * 60 // 10秒
 	lunacyCRBonus  = 0.05    // 5% per stack
 
-	// A4: Law of the New Moon
+	// 固有天賦2: Law of the New Moon
 	a4Key = "law-of-new-moon"
 )
 
-// A0: Moonsign Benediction
-// - Sets "moonsign" and "lcrs-Key" status when Columbina is in party
-// - Converts Electro-Charged → Lunar-Charged, Bloom → Lunar-Bloom, Hydro Crystallize → Lunar-Crystallize
-// - Base DMG Bonus = 0.2% per 1000 Max HP, max 7%
+// 固有天賦0: 月印の恭福
+// - Columbinaがパーティにいる時、"moonsign"と"lcrs-Key"ステータスを設定
+// - 感電 → Lunar-Charged、開花 → Lunar-Bloom、水元素結晶 → Lunar-Crystallizeに変換
+// - 基礎ダメージボーナス = HP上限1000ごとに0.2%、最大7%
 func (c *char) a0Init() {
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatus(moonsignKey, -1, false)
@@ -63,7 +63,7 @@ func (c *char) a0Init() {
 	}
 }
 
-// A1: Lunacy - CRIT Rate bonus based on stacks
+// 固有天賦1: Lunacy - スタック数に基づく会心率ボーナス
 func (c *char) a1Init() {
 	if c.Base.Ascension < 1 {
 		return
@@ -83,31 +83,31 @@ func (c *char) a1Init() {
 	})
 }
 
-// a1OnGravityInterference adds Lunacy stack on Gravity Interference trigger
+// a1OnGravityInterferenceはGravity Interferenceトリガー時にLunacyスタックを追加
 func (c *char) a1OnGravityInterference() {
 	if c.Base.Ascension < 1 {
 		return
 	}
 
-	// Add stack (max 3)
+	// スタックを追加（最大3）
 	c.lunacyStacks++
 	if c.lunacyStacks > lunacyMaxStack {
 		c.lunacyStacks = lunacyMaxStack
 	}
 
-	// Refresh duration
+	// 持続時間を更新
 	c.AddStatus(lunacyKey, lunacyDur, true)
 
 	c.Core.Log.NewEvent("Lunacy stack gained", glog.LogCharacterEvent, c.Index).
 		Write("stacks", c.lunacyStacks).
 		Write("crit_bonus", float64(c.lunacyStacks)*lunacyCRBonus)
 
-	// Schedule stack decay
+	// スタック減衰をスケジュール
 	c.lunacySrc = c.Core.F
 	c.Core.Tasks.Add(c.lunacyDecay(c.Core.F), lunacyDur)
 }
 
-// lunacyDecay removes Lunacy stacks after duration
+// lunacyDecayは持続時間終了後にLunacyスタックを削除
 func (c *char) lunacyDecay(src int) func() {
 	return func() {
 		if c.lunacySrc != src {

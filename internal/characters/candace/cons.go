@@ -11,8 +11,8 @@ import (
 
 const c6ICDKey = "candace-c6-icd"
 
-// When Sacred Rite: Heron's Sanctum hits opponents,
-// Candace's Max HP will be increased by 20% for 15s.
+// 聖儀・蒼鷺の庇護が敵に命中した時、
+// キャンディスのHP上限が15秒間20%増加する。
 func (c *char) c2() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.HPP] = 0.2
@@ -25,11 +25,10 @@ func (c *char) c2() {
 	})
 }
 
-// When characters (excluding Candace herself) affected by the Prayer of the
-// Crimson Crown caused by Sacred Rite: Wagtail's Tide deal Elemental DMG to
-// opponents using Normal Attacks, an attack wave will be unleashed that deals
-// AoE Hydro DMG equal to 15% of Candace's Max HP. This effect can trigger once
-// every 2.3s and is considered Elemental Burst DMG.
+// 聖儀・灰鶺鴒の潮によって赤冠の祈りの影響を受けたキャラクター（キャンディス自身を除く）が
+// 通常攻撃で敵に元素ダメージを与えた時、キャンディスのHP上限15%に相当する
+// 水元素範囲ダメージを与える攻撃波が発生する。この効果は2.3秒ごとに1回発動可能で、
+// 元素爆発ダメージとみなされる。
 func (c *char) c6() {
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)

@@ -101,7 +101,7 @@ func (c *char) c4c6() {
 			return false
 		}
 
-		// C6
+		// 6凸
 
 		if !c.StatModIsActive(c6Key) {
 			c.c6Stacks = 0

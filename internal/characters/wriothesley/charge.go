@@ -39,7 +39,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		HitlagHaltFrames: 0.09 * 60,
 	}
 
-	// TODO: snapshot timing
+	// TODO: スナップショットのタイミング
 	snap := c.Snapshot(&ai)
 	var ap combat.AttackPattern
 	var rebukeCB combat.AttackCBFunc
@@ -61,9 +61,9 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}
 
 	c.Core.QueueAttackWithSnap(ai, snap, ap, chargeHitmark, rebukeCB, particleCB)
-	// When released, it will also unleash an icicle that deals 100% of Rebuke: Vaulting Fist's Base
-	// DMG. DMG dealt this way is regarded as Charged Attack DMG.
-	// You must first unlock the Passive Talent "There Shall Be a Plea for Justice."
+	// 発動時、「重裁の嘃き：飛蹴」の基礎ダメージの100%のダメージを与える氷柱も発射する。
+	// このダメージは重撃ダメージとみなされる。
+	// 固有天賦「司罪の傅執」を先に解放する必要がある。
 	if c6Attack {
 		ai.Abil += " (C6)"
 		ai.StrikeType = attacks.StrikeTypeDefault

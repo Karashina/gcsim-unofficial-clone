@@ -7,7 +7,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// A0: Adds base reaction bonus mod for all characters
+// A0: 全キャラクターに基礎反応ボーナス修正を追加
 func (c *char) a0() {
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatus("LC-Key", -1, false)
@@ -21,7 +21,7 @@ func (c *char) a0() {
 	}
 }
 
-// A1: Triggers dummy attack if ascension 1 and skill is active
+// A1: 第1段階以上かつスキルがアクティブならダミー攻撃を発動
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -37,7 +37,7 @@ func (c *char) a1() {
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99), 0, 0)
 }
 
-// A4: Adds EM stat mod for all characters based on total ATK
+// A4: 総攻撃力に基づき全キャラクターに元素熔冶ステータス修正を追加
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

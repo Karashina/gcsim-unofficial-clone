@@ -26,7 +26,7 @@ func init() {
 	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][0], 61) // N4 -> N1
 }
 
-// Standard attack - infusion mechanics are handled as part of the skill
+// 標準通常攻撃 - 元素付与メカニクスはスキルの一部として処理
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	travel, ok := p["travel"]
 	if !ok {
@@ -65,7 +65,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 
 	defer c.AdvanceNormalIndex()
 
-	// return animation cd
+	// アニメーションCDを返す
 	return action.Info{
 		Frames:          frames.NewAttackFunc(c.Character, attackFrames),
 		AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],

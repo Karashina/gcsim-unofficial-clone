@@ -67,7 +67,7 @@ var (
 )
 
 func init() {
-	// charge (burst) -> x
+	// 重撃（元素爆発中） -> x
 	chargeBFrames = frames.InitAbilSlice(65)
 	chargeBFrames[action.ActionSkill] = 63
 	chargeBFrames[action.ActionDash] = 27

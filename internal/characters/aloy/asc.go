@@ -6,8 +6,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When Aloy receives the Coil effect from Frozen Wilds, her ATK is increased by 16%, while nearby party members' ATK is increased by 8%.
-// This effect lasts 10s.
+// アーロイが凍られた野性でコイル効果を受けると、攻撃力が16%増加し、近くのパーティメンバーの攻撃力が8%増加する。
+// この効果は10秒間持続する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -28,8 +28,8 @@ func (c *char) a1() {
 	}
 }
 
-// When Aloy is in the Rushing Ice state conferred by Frozen Wilds, her Cryo DMG Bonus increases by 3.5% every 1s.
-// A maximum Cryo DMG Bonus increase of 35% can be gained in this way.
+// アーロイが凍られた野性によるラッシュアイス状態の時、1秒ごとに氷元素ダメージバフが3.5%増加する。
+// この方法で最大35%の氷元素ダメージバフ増加を獲得できる。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -49,7 +49,7 @@ func (c *char) a4() {
 	})
 
 	for i := 0; i < 10; i++ {
-		// every 1s, aloy can't experience hitlag so this way is fine
+		// 1秒ごと、アーロイはヒットラグの影響を受けないのでこの方法で問題ない
 		c.Core.Tasks.Add(func() { stacks++ }, 60*(1+i))
 	}
 }

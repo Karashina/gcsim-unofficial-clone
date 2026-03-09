@@ -6,7 +6,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Hits by Charged Attacks apply Violet Arc's Conductive status to opponents.
+// 重撃が命中すると、蓒花の雷光の導電状態を敵に付与する。
 func (c *char) makeA1CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 1 {
 		return nil
@@ -23,7 +23,7 @@ func (c *char) makeA1CB() combat.AttackCBFunc {
 	}
 }
 
-// Opponents hit by Lightning Rose have their DEF decreased by 15% for 10s.
+// 薔薇の雷光に命中された敵の防御力が10秒間15%低下する。
 func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil

@@ -27,9 +27,9 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// On hit, increases ATK by 3.2% for 6s. Max 7 stacks. This effect can only
-	// occur once every 0.3s. While in possession of the maximum possible stacks,
-	// DMG dealt is increased by 12%.
+	// 命中時、攻撃力が6秒間3.2%増加。最大7スタック。
+	// この効果は0.3秒毎に1回発動可能。
+	// 最大スタック所持時、与えるダメージが12%増加する。
 	w := &Weapon{}
 	r := p.Refine
 	const icdKey = "primordial-jade-spear-icd"
@@ -40,35 +40,35 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
-		// check if char is correct?
+		// キャラクターが正しいかチェック
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// check if spear is on icd
+		// 槍のICD中かチェック
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		// check if buff expired; if so reset the stacks
+		// バフが期限切れならスタックをリセット
 		if !char.StatModIsActive(buffKey) {
 			w.stacks = 0
 			w.buff[attributes.DmgP] = 0
 		}
-		// every 0.3s
+		// 0.3秒ごと
 		char.AddStatus(icdKey, 18, true)
 
 		if w.stacks < 7 {
 			w.stacks++
-			// check if it's max or amt
+			// 最大スタックか増加量をチェック
 			if w.stacks == 7 {
 				w.buff[attributes.DmgP] = dmgBuffAtMax
 			}
 			w.buff[attributes.ATKP] = float64(w.stacks) * perStackBuff
 		}
 
-		// refresh mod
+		// 修飾子を更新
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(buffKey, 6*60),
 			AffectedStat: attributes.NoStat,

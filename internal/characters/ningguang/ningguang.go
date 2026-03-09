@@ -55,7 +55,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.BurstCon = 3
 	c.SkillCon = 5
 
-	// Initialize at some very low value so these happen correctly at start of sim
+	// シミュレーション開始時に正しく動作するよう非常に低い値で初期化
 	c.c2reset = -9999
 	c.prevAttack = attackTypeLeft
 
@@ -70,7 +70,7 @@ func (c *char) Init() error {
 	return nil
 }
 
-// remove star jades on swap
+// 交代時に星璃を除去
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		prev := args[0].(int)
@@ -84,8 +84,8 @@ func (c *char) onExitField() {
 
 func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 	if a == action.ActionCharge {
-		// A1:
-		// When Ningguang is in possession of Star Jades, her Charged Attack does not consume Stamina.
+		// 固有天賦1:
+		// 凝光が星璃を所持している場合、重撃はスタミナを消費しない。
 		if c.Base.Ascension >= 1 && c.jadeCount > 0 {
 			return 0
 		}

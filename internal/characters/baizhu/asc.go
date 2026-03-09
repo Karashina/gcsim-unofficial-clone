@@ -9,15 +9,15 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Baizhu gains different effects according to the current HP of your current active character:
-// ·When their HP is less than 50%, Baizhu gains 20% Healing Bonus.
-// ·When their HP is equal to or more than 50%, Baizhu gains 25% Dendro DMG Bonus.
+// 白朮はアクティブキャラクターの現在HPに応じて異なる効果を得る：
+// ・HPが50%未満の場合、白朮は与える治療効果+20%を獲得する。
+// ・HPが50%以上の場合、白朮は草元素ダメージ+25%を獲得する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
 
-	// Healing part
+	// 治療部分
 	mHeal := make([]float64, attributes.EndStatType)
 	mHeal[attributes.Heal] = 0.2
 	c.AddStatMod(character.StatMod{
@@ -32,7 +32,7 @@ func (c *char) a1() {
 		},
 	})
 
-	// Dendro DMG part
+	// 草元素ダメージ部分
 	mDendroP := make([]float64, attributes.EndStatType)
 	mDendroP[attributes.DendroP] = 0.25
 	c.AddStatMod(character.StatMod{
@@ -48,11 +48,11 @@ func (c *char) a1() {
 	})
 }
 
-// Characters who are healed by Seamless Shields will gain the Year of Verdant Favor effect:
-// Each 1,000 Max HP that Baizhu possesses that does not exceed 50,000 will increase the Burning, Bloom, Hyperbloom, and Burgeon reaction
-// DMG dealt by these characters by 2%, while the Aggravate and Spread reaction DMG dealt by these characters will be increased by 0.8%.
+// 継ぎ目なきシールドで回復したキャラクターは「草木の恩恵」効果を獲得する：
+// 白朮のHP上限1,000ごと（50,000を超えない範囲）につき、燃焼・開花・超開花・烈開花の
+// 反応ダメージが2%増加し、激化・拡散の反応ダメージが0.8%増加する。
 //
-//	This effect lasts 6s.
+//	この効果は6秒間持続する。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

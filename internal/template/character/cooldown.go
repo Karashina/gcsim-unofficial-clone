@@ -1,4 +1,4 @@
-// Package cooldown provides default implementation for SetCD, SetCDWithDelay, ResetActionCooldown, ReduceActionCooldown, ActionReady,
+// Package cooldown は SetCD, SetCDWithDelay, ResetActionCooldown, ReduceActionCooldown, ActionReady のデフォルト実装を提供する
 package character
 
 import (
@@ -10,38 +10,37 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
-// SetCD takes two parameters:
-//   - a action.Action: this is the action type we are triggering the cooldown for
-//   - dur: duration in frames that the cooldown should last for
+// SetCD は2つのパラメータを受け取る:
+//   - a action.Action: クールダウンをトリガーするアクションタイプ
+//   - dur: クールダウンが持続するフレーム数
 //
-// It is assumed that AvailableCDCharges[a] > 0 (otherwise action should not have been allowed)
+// AvailableCDCharges[a] > 0 であることが前提（そうでなければアクションは許可されないはず）
 //
-// SetCD works by adding the cooldown duration to a queue. This is because when there are
-// multiple charges, the game will first finish recharging the first charge before starting
-// the full cooldown for the second charge.
+// SetCD はクールダウン時間をキューに追加する。これは複数チャージがある場合、
+// ゲームが最初のチャージの回復を完了してから次のチャージの完全なクールダウンを
+// 開始するためである。
 //
-// When a cooldown is added to queue for the first time, a queue worker is started. This queue
-// worker will check back at the cooldown specified for the first queued item, and if the queued
-// cooldown did not change, it will increment the number of charges by 1, and reschedule itself
-// to check back for the next item in queue
+// クールダウンが初めてキューに追加されると、キューワーカーが開始される。このワーカーは
+// キューの最初のアイテムに指定されたクールダウン時間後にチェックし、キューのクールダウンが
+// 変更されていなければチャージ数を1増やし、次のアイテムのためにリスケジュールする。
 //
-// Sometimes, the queued cooldown gets adjusted via ReduceActionCooldown or ResetActionCooldown.
-// When this happens, the initial queued worker will check back at the wrong time. To prevent this,
-// we use cdQueueWorkerStartedAt[a] which tracks the frame the worker started at. So when
-// ReduceActionCooldown or ResetActionCooldown gets called, we start a new worker, updating
-// cdQueueWorkerStartedAt[a] to represent the new worker start frame. This way the old worker can
-// check this value first and then gracefully exit if it no longer matches its starting frame
+// ReduceActionCooldown や ResetActionCooldown によりキューのクールダウンが調整される
+// ことがある。この場合、最初のワーカーは間違ったタイミングでチェックバックしてしまう。
+// これを防ぐため、cdQueueWorkerStartedAt[a] でワーカーの開始フレームを追跡する。
+// ReduceActionCooldown や ResetActionCooldown が呼ばれると新しいワーカーを開始し、
+// cdQueueWorkerStartedAt[a] を更新する。これにより古いワーカーはこの値を確認して
+// 自身の開始フレームと一致しなければ正常に終了できる。
 func (c *Character) SetCD(a action.Action, dur int) {
-	// setting cd is just adding a cd to the recovery queue
-	// we need to check for cooldown reduction first to make sure the correct duration gets added
+	// CDの設定は回復キューにCDを追加するだけ
+	// 正しい時間が追加されるようにまずクールダウン短縮をチェックする
 	modified := c.CDReduction(a, dur)
-	// add current action and duration to the queue
+	// 現在のアクションと時間をキューに追加
 	c.cdQueue[a] = append(c.cdQueue[a], modified)
-	// if queue is zero before we added to it, then we'll start a cooldown queue worker
+	// 追加前にキューが空だった場合、クールダウンキューワーカーを開始する
 	if len(c.cdQueue[a]) == 1 {
 		c.startCooldownQueueWorker(a)
 	}
-	// make sure to remove one from stack count
+	// スタックカウントから1を減らす
 	c.AvailableCDCharge[a]--
 	if c.AvailableCDCharge[a] < 0 {
 		panic("unexpected charges less than 0")
@@ -84,11 +83,11 @@ func (c *Character) SetCDWithDelay(a action.Action, dur, delay int) {
 }
 
 func (c *Character) Cooldown(a action.Action) int {
-	// remaining cooldown is src + first item in queue - current frame
+	// 残りクールダウン = src + キューの最初のアイテム - 現在のフレーム
 	if c.AvailableCDCharge[a] > 0 {
 		return 0
 	}
-	// otherwise check our queue; if zero then it's ready
+	// そうでなければキューを確認; ゼロなら準備完了
 	if len(c.cdQueue) == 0 {
 		// panic("queue length is somehow 0??")
 		return 0
@@ -97,41 +96,41 @@ func (c *Character) Cooldown(a action.Action) int {
 }
 
 func (c *Character) ResetActionCooldown(a action.Action) {
-	// if stacks already maxed then do nothing
+	// スタックが既に最大なら何もしない
 	if c.AvailableCDCharge[a] == 1+c.additionalCDCharge[a] {
 		return
 	}
 	// log.Printf("resetting; frame %v, queue %v\n", c.F, c.cdQueue[a])
-	// otherwise add a stack && pop queue
+	// スタックを追加してキューをポップ
 	c.AvailableCDCharge[a]++
 	c.Tags["skill_charge"]++
 	c.cdQueue[a] = c.cdQueue[a][1:]
-	// reset worker time
+	// ワーカー時間をリセット
 	c.cdQueueWorkerStartedAt[a] = c.Core.F
 	c.cdCurrentQueueWorker[a] = nil
 	c.Core.Log.NewEventBuildMsg(glog.LogCooldownEvent, c.Index, a.String(), " cooldown forcefully reset").
 		Write("type", a.String()).
 		Write("charges_remain", c.AvailableCDCharge[a]).
 		Write("cooldown_queue", c.cdQueueString(a))
-	// check if anymore cd in queue
+	// キューに残りのCDがあるか確認
 	if len(c.cdQueue) > 0 {
 		c.startCooldownQueueWorker(a)
 	}
 }
 
 func (c *Character) ReduceActionCooldown(a action.Action, v int) {
-	// do nothing if stacks already maxed
+	// スタックが既に最大なら何もしない
 	if c.AvailableCDCharge[a] == 1+c.additionalCDCharge[a] {
 		return
 	}
-	// check if reduction > time remaing? if so then call reset cd
+	// 短縮量が残り時間を超えるか確認。超える場合はCDリセットを呼ぶ
 	remain := c.cdQueueWorkerStartedAt[a] + c.cdQueue[a][0] - c.Core.F
 	// log.Printf("hello reducing; reduction %v, remaining %v, frame %v, old queue %v\n", v, remain, c.F, c.cdQueue[a])
 	if v >= remain {
 		c.ResetActionCooldown(a)
 		return
 	}
-	// otherwise reduce remain and restart queue
+	// 残り時間を短縮してキューを再開
 	c.cdQueue[a][0] = remain - v
 	c.Core.Log.NewEventBuildMsg(glog.LogCooldownEvent, c.Index, a.String(), " cooldown forcefully reduced").
 		Write("type", a.String()).
@@ -143,26 +142,25 @@ func (c *Character) ReduceActionCooldown(a action.Action, v int) {
 }
 
 func (c *Character) startCooldownQueueWorker(a action.Action) {
-	// check the length of the queue for action a, if there's nothing then there's
-	// nothing to start
+	// アクション a のキューの長さを確認し、空なら開始するものがない
 	if len(c.cdQueue[a]) == 0 {
 		return
 	}
 
-	// set the time we starter this worker at
+	// このワーカーの開始時間を設定
 	c.cdQueueWorkerStartedAt[a] = c.Core.F
 	var src *func()
 
 	worker := func() {
-		// check if src changed; if so do nothing
+		// srcが変更されていたら何もしない
 		if src != c.cdCurrentQueueWorker[a] {
 			// c.Log.Debugw("src changed",  "src", src, "new", c.cdQueueWorkerStartedAt[a])
 			return
 		}
 		// log.Printf("cd worker triggered, started; %v, queue: %v\n", c.cdQueueWorkerStartedAt[a], c.cdQueue[a])
-		// check to make sure queue is not 0
+		// キューが空でないことを確認
 		if len(c.cdQueue[a]) == 0 {
-			// this should never happen
+			// これは発生しないはず
 			panic(fmt.Sprintf(
 				"queue is empty? index :%v, frame : %v, worker src: %v, started: %v",
 				c.Index,
@@ -172,7 +170,7 @@ func (c *Character) startCooldownQueueWorker(a action.Action) {
 			))
 			// return
 		}
-		// otherwise add a stack and pop first item in queue
+		// スタックを追加してキューの最初のアイテムをポップ
 		c.AvailableCDCharge[a]++
 		c.Tags["skill_charge"]++
 		c.cdQueue[a] = c.cdQueue[a][1:]
@@ -180,7 +178,7 @@ func (c *Character) startCooldownQueueWorker(a action.Action) {
 		// c.Log.Debugw("stack restored",  "avail", c.availableCDCharge[a], "queue", c.cdQueue)
 
 		if c.AvailableCDCharge[a] > 1+c.additionalCDCharge[a] {
-			// sanity check, this should never happen
+			// 安全性チェック、これは発生しないはず
 			panic(fmt.Sprintf("charges > max? index :%v, frame : %v", c.Index, c.Core.F))
 		}
 
@@ -189,7 +187,7 @@ func (c *Character) startCooldownQueueWorker(a action.Action) {
 			Write("charges_remain", c.AvailableCDCharge[a]).
 			Write("cooldown_queue", c.cdQueueString(a))
 
-		// if queue still has len > 0 then call start queue again
+		// キューにまだアイテムがあれば再度キューワーカーを開始
 		if len(c.cdQueue) > 0 {
 			c.startCooldownQueueWorker(a)
 		}
@@ -198,6 +196,6 @@ func (c *Character) startCooldownQueueWorker(a action.Action) {
 	c.cdCurrentQueueWorker[a] = &worker
 	src = &worker
 
-	// wait for c.cooldownQueue[a][0], then add a stack
+	// c.cooldownQueue[a][0] フレーム待ってからスタックを追加
 	c.Core.Tasks.Add(worker, c.cdQueue[a][0])
 }

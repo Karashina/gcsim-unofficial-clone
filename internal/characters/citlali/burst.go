@@ -56,17 +56,17 @@ func (c *char) Burst(_ map[string]int) (action.Info, error) {
 		Mult:           spiritVessel[c.TalentLvlBurst()],
 	}
 
-	// with delay
+	// ディレイ付き
 	c.ConsumeEnergy(8)
 	c.SetCD(action.ActionBurst, 15*60)
 	c.QueueCharTask(func() {
 		c.generateNightsoulPoints(24)
 	}, 115)
 
-	// initial hit
+	// 初撃
 	c.Core.QueueAttack(aiIceStorm, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 6.5), iceStormHitmark, iceStormHitmark)
 
-	// skull hits
+	// 頭蓋骨の攻撃
 	c.QueueCharTask(func() {
 		enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), nil)
 		points := 0.0

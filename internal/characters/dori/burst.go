@@ -45,7 +45,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 5}, 10)
 	burstPos := burstArea.Shape.Pos()
 	icdSrc := []int{math.MinInt32, math.MinInt32, math.MinInt32, math.MinInt32}
-	// 32 damage ticks
+	// 32回のダメージティック
 	for i := 0; i < 32; i++ {
 		c.Core.Tasks.Add(func() {
 			p, ok := c.Core.Combat.Player().(*avatar.Player)
@@ -56,7 +56,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				return
 			}
 
-			// queue attack
+			// 攻撃をキューに追加
 			distance := p.Pos().Distance(burstPos)
 			c.Core.QueueAttackWithSnap(
 				ai,
@@ -65,8 +65,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				0,
 			)
 
-			// dori self application
-			// TODO: change this to a ST attack later when self reactions need to be implemented
+			// ドリーの自己元素付与
+			// TODO: 自己反応の実装が必要になったらST攻撃に変更する
 			idx := c.Core.Player.ActiveChar().Index
 			c.Core.Player.Drain(info.DrainInfo{
 				ActorIndex: idx,
@@ -79,11 +79,11 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				if p.AuraCount() == 0 {
 					dur = 20
 				}
-				p.ApplySelfInfusion(attributes.Electro, dur, 9.5*60) // TODO: find actual duration
+				p.ApplySelfInfusion(attributes.Electro, dur, 9.5*60) // TODO: 実際の持続時間を調べる
 				icdSrc[idx] = c.Core.F
 			}
 
-			// C4
+			// 4凸
 			if c.Base.Cons >= 4 {
 				c.c4()
 			}
@@ -103,7 +103,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			if c.Base.Cons >= 2 {
 				c.c2(c2Travel)
 			}
-			// Heals
+			// 回復
 			c.Core.Player.Heal(info.HealInfo{
 				Caller:  c.Index,
 				Target:  c.Core.Player.Active(),
@@ -111,7 +111,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				Src:     bursthealpp[c.TalentLvlBurst()]*c.MaxHP() + bursthealflat[c.TalentLvlBurst()],
 				Bonus:   snap.Stats[attributes.Heal],
 			})
-			// Energy regen to active char
+			// アクティブキャラへのエネルギー回復
 			active := c.Core.Player.ActiveChar()
 			active.AddEnergy("Alcazarzaray's Exactitude: Energy Regen", burstenergy[c.TalentLvlBurst()])
 		}, 120*i+11)
@@ -123,7 +123,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

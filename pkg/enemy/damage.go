@@ -17,7 +17,7 @@ func (e *Enemy) calc(atk *combat.AttackEvent, evt glog.Event) (float64, bool) {
 	elePer := 0.0
 	if st > -1 {
 		elePer = atk.Snapshot.Stats[st]
-		// Generally not needed except for sim issues
+		// 通常はシミュレーション問題の場合を除き不要
 		// e.Core.Log.NewEvent("ele lookup ok",
 		// 	glog.LogCalc, atk.Info.ActorIndex,
 		// 	"attack_tag", atk.Info.AttackTag,
@@ -31,7 +31,7 @@ func (e *Enemy) calc(atk *combat.AttackEvent, evt glog.Event) (float64, bool) {
 	}
 	dmgBonus := elePer + atk.Snapshot.Stats[attributes.DmgP]
 
-	// calculate using attack or def
+	// 攻撃力または防御力で計算
 	var a float64
 	switch {
 	case atk.Info.UseHP:
@@ -45,7 +45,7 @@ func (e *Enemy) calc(atk *combat.AttackEvent, evt glog.Event) (float64, bool) {
 	base := atk.Info.Mult*a + atk.Info.FlatDmg
 	damage := base * (1 + dmgBonus)
 
-	// make sure 0 <= cr <= 1
+	// 0 <= 会心率 <= 1 に制限
 	if atk.Snapshot.Stats[attributes.CR] < 0 {
 		atk.Snapshot.Stats[attributes.CR] = 0
 	}
@@ -63,9 +63,9 @@ func (e *Enemy) calc(atk *combat.AttackEvent, evt glog.Event) (float64, bool) {
 		(float64(atk.Snapshot.CharLvl+100) +
 			float64(e.Level+100)*(1+defadj)*(1-atk.Info.IgnoreDefPercent))
 
-	// apply def mod
+	// 防御修飾子を適用
 	damage *= defmod
-	// apply resist mod
+	// 耐性修飾子を適用
 
 	resmod := 1 - res/2
 	if res >= 0 && res < 0.75 {
@@ -77,7 +77,7 @@ func (e *Enemy) calc(atk *combat.AttackEvent, evt glog.Event) (float64, bool) {
 
 	precritdmg := damage
 
-	// check if crit
+	// 会心判定をチェック
 	if atk.Info.HitWeakPoint || e.Core.Rand.Float64() <= atk.Snapshot.Stats[attributes.CR] {
 		damage *= (1 + atk.Snapshot.Stats[attributes.CD])
 		isCrit = true
@@ -85,19 +85,19 @@ func (e *Enemy) calc(atk *combat.AttackEvent, evt glog.Event) (float64, bool) {
 
 	preampdmg := damage
 
-	// calculate em bonus
+	// 元素熟知ボーナスを計算
 	em := atk.Snapshot.Stats[attributes.EM]
 	emBonus := (2.78 * em) / (1400 + em)
 	var reactBonus float64
-	// check melt/vape
+	// 蒸発/融解をチェック
 	if atk.Info.Amped {
 		reactBonus = e.Core.Player.ByIndex(atk.Info.ActorIndex).ReactBonus(atk.Info)
 		// e.Core.Log.Debugw("debug", "frame", e.Core.F, core.LogPreDamageMod, "char", e.Index, "char_react", char.CharIndex(), "reactbonus", char.ReactBonus(atk.Info), "damage_pre", damage)
 		damage *= (atk.Info.AmpMult * (1 + emBonus + reactBonus))
 	}
 
-	// apply elevation bonus
-	// Skip for Lunar Reaction damage (LC/LB/LCrs) as elevation is already applied in precalc
+	// 標高ボーナスを適用
+	// Lunar Reaction ダメージ（LC/LB/LCrs）は事前計算で標高が適用済みなのでスキップ
 	elevationBonus := 0.0
 	if atk.Info.AttackTag != attacks.AttackTagLCDamage &&
 		atk.Info.AttackTag != attacks.AttackTagLBDamage &&
@@ -106,7 +106,7 @@ func (e *Enemy) calc(atk *combat.AttackEvent, evt glog.Event) (float64, bool) {
 	}
 	damage *= (1 + elevationBonus)
 
-	// reduce damage by damage group
+	// ダメージグループによるダメージ減少
 	x := 1.0
 	if !atk.Info.SourceIsSim {
 		x = e.GroupTagDamageMult(atk.Info.ICDTag, atk.Info.ICDGroup, atk.Info.ActorIndex)

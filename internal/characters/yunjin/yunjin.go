@@ -37,7 +37,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	return nil
 }
 
-// Occurs after all characters are loaded, so getPartyElementalTypeCounts works properly
+// 全キャラクターのロード後に実行されるため、getPartyElementalTypeCountsが正しく動作する
 func (c *char) Init() error {
 	c.a4Init()
 	c.burstProc()

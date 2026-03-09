@@ -21,15 +21,15 @@ var (
 	attackOffsets         = []float64{0.5, -0.5, -0.5, 0.5, -0.5}
 	attackFanAngles       = []float64{300, 360, 360, 300, 360}
 
-	// S&D attack frames
+	// S&D 攻撃フレーム
 	sturmFrames          [][]int
 	sturmHitmarks        = []int{19, 16, 28, 14, 40}
 	sturmPoiseDMG        = []float64{108.1, 80.0, 100.0, 100.0, 130.0}
 	sturmHitlagHaltFrame = []float64{0.03, 0.06, 0.12, 0.1, 0.12}
-	sturmSecondHitDelays = []int{8, 8, 8, 8, 10} // delay between 1st and 2nd sub-hit (S&D)
+	sturmSecondHitDelays = []int{8, 8, 8, 8, 10} // 1番目と2番目のサブヒット間の遅延（S&D）
 
-	// Delay (frames) from 1st to 2nd sub-hit for each normal segment.
-	// Index 0 is unused (N1 is single-hit); N2-N5 are indices 1-4.
+	// 各通常攻撃セグメントの1打目から2打目までの遅延（フレーム）。
+	// インデックス0は未使用（N1は単発）; N2-N5はインデックス1-4。
 	attackSecondHitDelays = []int{0, 11, 17, 6, 1}
 )
 
@@ -76,9 +76,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	return c.normalAttack(p)
 }
 
-// normalAttack handles the Physical normal attack sequence
+// normalAttack は物理通常攻撃シーケンスを処理する
 func (c *char) normalAttack(p map[string]int) (action.Info, error) {
-	// N1 is a single hit
+	// N1は単発
 	if c.NormalCounter == 0 {
 		ai := combat.AttackInfo{
 			ActorIndex:         c.Index,
@@ -103,7 +103,7 @@ func (c *char) normalAttack(p map[string]int) (action.Info, error) {
 		)
 		c.Core.QueueAttack(ai, ap, attackHitmarks[0], attackHitmarks[0])
 	} else {
-		// N2-N5 are multi-hit (2 sub-hits each)
+		// N2-N5は複数ヒット（各段で2サブヒット）
 		idx := c.NormalCounter
 		multiIdx := idx - 1 // maps N2→0, N3→1, N4→2, N5→3
 		subHits := attackMulti[multiIdx+1]
@@ -159,16 +159,16 @@ func (c *char) normalAttack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// sturmAttack handles the Sturm und Drang enhanced normal attacks
+// sturmAttack はSturm und Drang強化通常攻撃を処理する
 func (c *char) sturmAttack(p map[string]int) (action.Info, error) {
 	idx := c.NormalCounter
 
-	// S&D elemental assignment per hit (from spec):
-	// N1: Other only
-	// N2: Anemo + Other
-	// N3: Anemo + Other
-	// N4: Other + Anemo
-	// N5: Other + Anemo
+	// S&Dヒットごとの元素割り当て（仕様より）:
+	// N1: 他のみ
+	// N2: 風 + 他
+	// N3: 風 + 他
+	// N4: 他 + 風
+	// N5: 他 + 風
 	type hitInfo struct {
 		mult    []float64
 		element attributes.Element
@@ -179,33 +179,33 @@ func (c *char) sturmAttack(p map[string]int) (action.Info, error) {
 	lvl := c.TalentLvlSkill()
 
 	switch idx {
-	case 0: // N1: Other only (single hit)
+	case 0: // N1: 他のみ（単発）
 		hits = []hitInfo{
 			{sturmN1, c.otherElement, attacks.ICDTagVarkaNAOther},
 		}
-	case 1: // N2: 1st=Anemo, 2nd=Other
+	case 1: // N2: 1打目=風, 2打目=他
 		hits = []hitInfo{
 			{sturmN2a, attributes.Anemo, attacks.ICDTagVarkaNAAnemo},
 			{sturmN2b, c.otherElement, attacks.ICDTagVarkaNAOther},
 		}
-	case 2: // N3: 1st=Anemo, 2nd=Other
+	case 2: // N3: 1打目=風, 2打目=他
 		hits = []hitInfo{
 			{sturmN3a, attributes.Anemo, attacks.ICDTagVarkaNAAnemo},
 			{sturmN3b, c.otherElement, attacks.ICDTagVarkaNAOther},
 		}
-	case 3: // N4: 1st=Other, 2nd=Anemo
+	case 3: // N4: 1打目=他, 2打目=風
 		hits = []hitInfo{
 			{sturmN4a, c.otherElement, attacks.ICDTagVarkaNAOther},
 			{sturmN4b, attributes.Anemo, attacks.ICDTagVarkaNAAnemo},
 		}
-	case 4: // N5: 1st=Other, 2nd=Anemo
+	case 4: // N5: 1打目=他, 2打目=風
 		hits = []hitInfo{
 			{sturmN5a, c.otherElement, attacks.ICDTagVarkaNAOther},
 			{sturmN5b, attributes.Anemo, attacks.ICDTagVarkaNAAnemo},
 		}
 	}
 
-	// If no other element, all become Anemo
+	// 他元素がない場合、全て風元素になる
 	if !c.hasOtherEle {
 		for i := range hits {
 			hits[i].element = attributes.Anemo
@@ -214,7 +214,7 @@ func (c *char) sturmAttack(p map[string]int) (action.Info, error) {
 
 	for i, h := range hits {
 		mult := h.mult[lvl]
-		// Apply A1 multiplier to S&D attacks
+		// A1倍率をS&D攻撃に適用
 		if c.Base.Ascension >= 1 && c.a1MultFactor != 1.0 {
 			mult *= c.a1MultFactor
 		}
@@ -255,9 +255,9 @@ func (c *char) sturmAttack(p map[string]int) (action.Info, error) {
 			)
 		}
 
-		// Add CD reduction callback for every sub-hit.
-		// In-game, each individual hit of S&D normals reduces FWA CD,
-		// not just the first sub-hit per NA segment.
+		// 全サブヒットにCD削減コールバックを追加。
+		// ゲーム内ではS&D通常攻撃の各個別ヒットがFWAのCDを削減する。
+		// NAセグメントごとの最初のサブヒットだけではない。
 		c.Core.QueueAttack(ai, ap, delay, delay, c.sturmNAHitCB)
 	}
 
@@ -274,8 +274,8 @@ func (c *char) sturmAttack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// sturmNAHitCB is the callback when S&D normal attacks hit an enemy
-// Reduces Four Winds' Ascension CD by 0.5s (or 1s with Hexerei)
+// sturmNAHitCB はS&D通常攻撃が敵に命中した時のコールバック
+// Four Winds' AscensionのCDを0.5秒（ヘクセライでは1秒）削減する
 func (c *char) sturmNAHitCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -290,9 +290,9 @@ func (c *char) sturmNAHitCB(a combat.AttackCB) {
 	c.cdReductionCount++
 	reduction := c.getCDReductionAmount()
 
-	// Reduce FWA charge cooldown timer
+	// FWAチャージクールダウンタイマーを削減
 	c.fwaCDEndFrame -= reduction
 
-	// Immediately check if charges became ready
+	// チャージが準備完了になったか即座に確認
 	c.updateFWACharges()
 }

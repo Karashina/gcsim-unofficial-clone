@@ -30,16 +30,16 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	refund := 4.5 + 1.5*float64(r)
 	const icdKey = "amenoma-icd"
 
-	// TODO: this used to be on postskill. make sure nothing broke here
+	// TODO: 以前はpostskillだった。問題がないか確認が必要
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// add 1 seed
+		// 種を1つ追加
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		// find oldest seed to overwrite
+		// 最も古い種を見つけて上書き
 		index := 0
 		for i, s := range seeds {
 			if char.StatusExpiry(s) < char.StatusExpiry(seeds[index]) {
@@ -51,12 +51,12 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		c.Log.NewEvent("amenoma proc'd", glog.LogWeaponEvent, char.Index).
 			Write("index", index)
 
-		char.AddStatus(icdKey, 300, true) // 5 sec icd
+		char.AddStatus(icdKey, 300, true) // 5秒のICD
 
 		return false
 	}, fmt.Sprintf("amenoma-skill-%v", char.Base.Key.String()))
 
-	// TODO: this used to be on postburst. make sure nothing broke here
+	// TODO: 以前はpostburstだった。問題がないか確認が必要
 	c.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false
@@ -71,10 +71,10 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if count == 0 {
 			return false
 		}
-		// regen energy after 2 seconds
+		// 2秒後にエネルギーを回復
 		char.QueueCharTask(func() {
 			char.AddEnergy("amenoma", refund*float64(count))
-		}, 120+60) // added 1 extra sec for burst animation but who knows if this is true
+		}, 120+60) // 爆発アニメーション用に1秒追加したが、正確かは不明
 
 		return false
 	}, fmt.Sprintf("amenoma-burst-%v", char.Base.Key.String()))

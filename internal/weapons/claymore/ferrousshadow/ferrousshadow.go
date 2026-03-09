@@ -22,8 +22,8 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// When HP falls below 70/75/80/85/90%, increases Charged Attack DMG by 30/35/40/45/50%,
-// and Charged Attacks become much harder to interrupt.
+// HPが70/75/80/85/90%以下になると、重撃ダメージが30/35/40/45/50%増加し、
+// 重撃が中断されにくくなる。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -35,11 +35,11 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	char.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("ferrousshadow", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			// don't apply buff if not Charged Attack
+			// 重撃でなければバフを適用しない
 			if atk.Info.AttackTag != attacks.AttackTagExtra {
 				return nil, false
 			}
-			// don't apply buff if above hp threshold
+			// HP閾値を超えている場合はバフを適用しない
 			if char.CurrentHPRatio() > hpCheck {
 				return nil, false
 			}

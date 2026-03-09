@@ -12,7 +12,7 @@ import (
 
 const c4Key = "beidou-c4"
 
-// Upon being attacked, Beidou's Normal Attacks gain an additional instance of 20% Electro DMG for 10s.
+// 攻撃を受けた時、北斗の通常攻撃に20%の雷元素ダメージが追加される（10秒間）。
 func (c *char) c4Init() {
 	c.Core.Events.Subscribe(event.OnPlayerHPDrain, func(args ...interface{}) bool {
 		di := args[0].(*info.DrainInfo)
@@ -29,8 +29,8 @@ func (c *char) c4Init() {
 	}, c4Key)
 }
 
-// TODO: this should also be added to her CA
-// Beidou's Normal Attacks gain an additional instance of 20% Electro DMG for 10s.
+// TODO: 重撃にも追加すべき
+// 北斗の通常攻撃に20%の雷元素ダメージが追加される（10秒間）。
 func (c *char) makeC4Callback() combat.AttackCBFunc {
 	if c.Base.Cons < 4 {
 		return nil

@@ -35,21 +35,21 @@ func init() {
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	// Check if we should use Phantasm Performance
+	// 幻影公演を使用すべきか確認
 	if c.StatusIsActive(skillKey) && c.Core.Player.Verdant.Count() >= 1 {
 		return c.phantasmPerformance(p)
 	}
 
-	// Normal Charged attack (Slither): forward movement with stamina drain; exit deals Dendro DMG. Shadow Dance lowers max consumption.
+	// 通常重撃（Slither）：前方移動とスタミナ消費、離脱時に草元素ダメージ。Shadow Danceは最大消費量を低下させる。
 
 	if p["hold"] > 0 {
-		// Slither hold - set up stamina drain mechanics
+		// Slither長押し - スタミナドレインメカニクスを設定
 		dur := p["hold"]
-		chargeFrames[action.ActionSkill] = 1 // using the Elemental Skill while Nefer is in the Slither state will not cause her to exit the state.
+		chargeFrames[action.ActionSkill] = 1 // Neferがスリザー状態中に元素スキルを使用しても、その状態が解除されることはない。
 		prevbonus := c.Core.Player.Verdant.GetGainBonus()
 		frameremaining := c.Core.Player.Verdant.RemainingFrames()
 
-		// A4 interaction: strengthen Verdant Dew gain in Shadow Dance
+		// A4相互作用：Shadow Dance中の翠露獲得を強化
 		if c.StatusIsActive(skillKey) {
 			emBonus := 1 + min(0.001*float64(max(0, c.Stat(attributes.EM)-500)), 0.5)
 			c.Core.Player.Verdant.SetGainBonus(prevbonus + emBonus)
@@ -62,7 +62,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		}
 	}
 
-	// Deal Charged Attack DMG
+	// 重撃ダメージを与える
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Charge Attack",
@@ -82,7 +82,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		chargeHitmark,
 	)
 
-	// Attempt to absorb Seeds of Deceit within range when using Charged Attack
+	// 重撃使用時に範囲内の欺きの種を吸収を試みる
 	c.absorbSeeds(5)
 
 	return action.Info{
@@ -95,14 +95,14 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 
 func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 	/*
-		When nefer is on the Shadow Dance state and party have at least 1 Verdant Dew, Nefer's Charged Attacks will be replaced with the special Charged Attack "Phantasm Performance", which will not consume Stamina.
-		Nefer will deal "Phantasm Performance n-Hit DMG (Nefer)" 2 times and "Phantasm Performance n-Hit DMG (Shades)" 3 times. DMG dealt by the shades is considered Lunar-Bloom DMG.
-		after Phantasm Performance 1-Hit DMG (Shades) is used, 1 Verdant Dew will be consumed.
+		NeferがShadow Dance状態でパーティが翠露を1以上持っている時、Neferの重撃は特殊重撃「幻影公演」に置き換わり、スタミナを消費しない。
+		Neferは「幻影公演 n-Hitダメージ（Nefer）」を2回、「幻影公演 n-Hitダメージ（影）」を3回与える。影のダメージはLunar-Bloomダメージとみなされる。
+		幻影公演 1-Hitダメージ（影）使用後、翠露が1消費される。
 	*/
 
-	// Phantasm Performance: 2 Nefer hits (ATK-scaled) and 3 Shade hits (Lunar-Bloom). Consumes 1 Verdant Dew after first Shade hit.
+	// 幻影公演：Neferの2ヒット（ATKスケーリング）と3影ヒット（Lunar-Bloom）。最初の影ヒット後に翠露1消費。
 
-	// Absorb Seeds of Deceit when unleashing Phantasm Performance
+	// 幻影公演発動時に欺きの種を吸収
 	c.absorbSeeds(6)
 	c.QueueCharTask(func() {
 		aiATK := combat.AttackInfo{
@@ -125,10 +125,10 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 
 	}, phantasmHitmarks[0])
 
-	// 2nd Nefer hit (ATK) or C6 conversion to Lunar-Bloom
+	// Neferの第2ヒット（ATK）または6凸のLunar-Bloom変換
 	c.QueueCharTask(func() {
 		if c.Base.Cons >= 6 {
-			// C6: Convert 2nd hit to Lunar-Bloom DMG based on EM
+			// 6凸：第2ヒットを元素熟知スケーリングのLunar-Bloomダメージに変換
 			ai := combat.AttackInfo{
 				ActorIndex: c.Index,
 				Abil:       "Nefer C6 2nd Dummy (C)",
@@ -140,7 +140,7 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 				0, 0,
 			)
 		} else {
-			// Normal 2nd hit
+			// 通常の第2ヒット
 			aiATK := combat.AttackInfo{
 				ActorIndex: c.Index,
 				Abil:       "Phantasm Performance 2-Hit (Nefer / C)",
@@ -161,7 +161,7 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 		}
 	}, phantasmHitmarks[1])
 
-	// Shade hits (dummies) -> resolved to Lunar-Bloom via hook; consume Verdant Dew after first Shade hit
+	// 影ヒット（ダミー） -> フック経由でLunar-Bloomに解決、最初の影ヒット後に翠露を消費
 	c.QueueCharTask(func() {
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -173,11 +173,11 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99),
 			0, 0,
 		)
-		// Consume 1 Verdant Dew
+		// 翠露1消費
 		c.Core.Player.Verdant.Consume(1)
 	}, phantasmHitmarks[2])
 
-	// Shade 2 (dummy)
+	// 影 2（ダミー）
 	c.QueueCharTask(func() {
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -191,7 +191,7 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 		)
 	}, phantasmHitmarks[3])
 
-	// Shade 3 (dummy)
+	// 影 3（ダミー）
 	c.QueueCharTask(func() {
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -205,7 +205,7 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 		)
 	}, phantasmHitmarks[4])
 
-	// C6: Extra dummy hit after PP
+	// 6凸：PP後の追加ダミーヒット
 	if c.Base.Cons >= 6 {
 		c.QueueCharTask(func() {
 			ai := combat.AttackInfo{
@@ -229,19 +229,19 @@ func (c *char) phantasmPerformance(_ map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// Apply Veil of Falsehood bonus to Phantasm Performance
+// 幻影公演に偽りのヴェールボーナスを適用
 func (c *char) makePhantasmBonus() combat.AttackCBFunc {
-	bonus := c.a1count * 0.08 // Each stack increases DMG by 8%
+	bonus := c.a1count * 0.08 // 各スタックがダメージを8%増加
 	if bonus == 0 {
 		return nil
 	}
 	return func(a combat.AttackCB) {
-		// Apply bonus as percentage increase to total damage
+		// ボーナスを総ダメージの割合増加として適用
 		a.AttackEvent.Info.FlatDmg *= (1 + bonus)
 	}
 }
 
-// absorbSeeds looks for Seeds of Deceit (DendroCore with IsSeed=true) within radius of player's position and absorbs them
+// absorbSeedsはプレイヤー位置から半径内の欺きの種（IsSeed=trueのDendroCore）を探して吸収する
 func (c *char) absorbSeeds(radius float64) {
 	absorbed := 0
 	player := c.Core.Combat.Player()
@@ -256,10 +256,10 @@ func (c *char) absorbSeeds(radius float64) {
 			if !dc.IsSeed {
 				continue
 			}
-			// distance check
+			// 距離チェック
 			if dc.Pos().Distance(player.Pos()) <= radius {
 				absorbed++
-				// remove gadget
+				// ガジェットを削除
 				dc.Gadget.Kill()
 			}
 		}
@@ -275,10 +275,10 @@ func (c *char) absorbSeeds(radius float64) {
 	}
 	c.a1count = math.Min(maxStacks, c.a1count+float64(absorbed))
 
-	// add per-stack duration (9s) and refresh durations
+	// スタックごとの持続時間（9秒）を追加し、持続時間を更新
 	c.AddStatus("veil-of-falsehood", 9*60, true)
 
-	// If reaching 3 stacks or refreshing 3rd stack's duration, grant EM bonus
+	// 3スタック以上または3スタック目の持続時間更新時に元素熟知ボーナスを付与
 	if c.a1count >= 3 || (prev >= 3 && absorbed > 0) {
 		emBonus := 100.0
 		if c.Base.Cons >= 2 && c.a1count >= 5 {

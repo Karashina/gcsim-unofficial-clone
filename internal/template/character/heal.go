@@ -21,18 +21,18 @@ func (c *Character) CalcHealAmount(hi *info.HealInfo) (float64, float64) {
 func (c *Character) Heal(hi *info.HealInfo) (float64, float64) {
 	hp, bonus := c.CalcHealAmount(hi)
 
-	// save previous hp related values for logging
+	// ログ用に前回のHP関連値を保存
 	prevHPRatio := c.CurrentHPRatio()
 	prevHP := c.CurrentHP()
 	prevHPDebt := c.CurrentHPDebt()
 
-	// calc original heal amount
+	// 元の回復量を計算
 	healAmt := hp * bonus
 
-	// change hp and hp debt
+	// HPとHP負債を変更
 	heal := c.CharWrapper.ReceiveHeal(hi, healAmt)
 
-	// calc overheal
+	// 超過回復量を計算
 	overheal := prevHP + heal - c.MaxHP()
 	if overheal < 0 {
 		overheal = 0
@@ -74,18 +74,18 @@ func (c *Character) Drain(di *info.DrainInfo) float64 {
 }
 
 func (c *Character) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
-	// calc actual heal amount considering hp debt
-	// TODO: assumes that healing can occur in the same heal as debt being cleared, could also be that it can only occur starting from next heal
-	// example: hp debt is 10, heal is 11, so char will get healed by 11 - 10 = 1 instead of receiving no healing at all
+	// HP負債を考慮した実際の回復量を計算
+	// TODO: 負債の清算と同じ回復で治癒が発生すると仮定している。次の回復からのみ発生する可能性もある
+	// 例: HP負債が10、回復量が11の場合、回復なしではなく 11 - 10 = 1 だけ回復する
 	heal := healAmt - c.CurrentHPDebt()
 	if heal < 0 {
 		heal = 0
 	}
 
-	// update hp debt based on original heal amount
+	// 元の回復量に基づきHP負債を更新
 	c.ModifyHPDebtByAmount(-healAmt)
 
-	// perform heal based on actual heal amount
+	// 実際の回復量に基づき回復を実行
 	c.ModifyHPByAmount(heal)
 
 	return heal

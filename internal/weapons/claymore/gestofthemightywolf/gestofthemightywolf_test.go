@@ -44,21 +44,21 @@ func TestGestStacksOnNormalHit(t *testing.T) {
 
 	char := c.Player.Chars()[idx]
 
-	// Before hit: DmgP should be 0 (no stacks)
+	// ヒット前: DmgPは0であるべき（スタックなし）
 	atk := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 	char.ApplyAttackMods(atk, nil)
 	if atk.Snapshot.Stats[attributes.DmgP] != 0 {
 		t.Fatalf("expected DmgP=0 before first hit, got %v", atk.Snapshot.Stats[attributes.DmgP])
 	}
 
-	// Advance past ICD
+	// ICDを超えて進める
 	c.F = stackICD + 2
 
-	// Normal Attack hit → 1 stack
+	// 通常攻撃ヒット → 1スタック
 	hit := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 	c.Events.Emit(event.OnEnemyHit, nil, hit)
 
-	// Check DmgP is applied
+	// DmgPが適用されているか確認
 	atk2 := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 	char.ApplyAttackMods(atk2, nil)
 	if atk2.Snapshot.Stats[attributes.DmgP] <= 0 {
@@ -93,17 +93,17 @@ func TestGestStacksOnSkillHit(t *testing.T) {
 
 	char := c.Player.Chars()[idx]
 
-	// Advance past ICD
+	// ICDを超えて進める
 	c.F = stackICD + 2
 
-	// Skill hit → 2 stacks
+	// スキルヒット → 2スタック
 	hit := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagElementalArt}}
 	c.Events.Emit(event.OnEnemyHit, nil, hit)
 
-	// Check DmgP (should be 2 × 7.5% = 15% at R1)
+	// DmgPを確認（R1で 2 × 7.5% = 15%のはず）
 	atk := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 	char.ApplyAttackMods(atk, nil)
-	expectedDmg := 0.075 * 2 // 2 stacks × 7.5% per stack at R1
+	expectedDmg := 0.075 * 2 // R1で2スタック × 7.5%/スタック
 	if atk.Snapshot.Stats[attributes.DmgP] < expectedDmg-0.001 || atk.Snapshot.Stats[attributes.DmgP] > expectedDmg+0.001 {
 		t.Fatalf("expected DmgP ≈ %v after skill hit (2 stacks), got %v", expectedDmg, atk.Snapshot.Stats[attributes.DmgP])
 	}
@@ -136,17 +136,17 @@ func TestGestMaxStacks(t *testing.T) {
 
 	char := c.Player.Chars()[idx]
 
-	// Apply 6 stacks worth of hits (should cap at 4)
+	// 6スタック分のヒットを適用（4でキャップされるべき）
 	for i := 0; i < 6; i++ {
-		c.F += stackICD + 2 // advance past ICD each time
+		c.F += stackICD + 2 // 毎回ICDを超えて進める
 		hit := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 		c.Events.Emit(event.OnEnemyHit, nil, hit)
 	}
 
-	// Check DmgP capped at 4 × 7.5% = 30%
+	// DmgPが 4 × 7.5% = 30%でキャップされているか確認
 	atk := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 	char.ApplyAttackMods(atk, nil)
-	maxDmg := 0.075 * 4 // 4 stacks max × 7.5%
+	maxDmg := 0.075 * 4 // 最大4スタック × 7.5%
 	if atk.Snapshot.Stats[attributes.DmgP] > maxDmg+0.001 {
 		t.Fatalf("DmgP should be capped at %v (4 stacks), got %v", maxDmg, atk.Snapshot.Stats[attributes.DmgP])
 	}
@@ -179,14 +179,14 @@ func TestGestChargedAttackGives2Stacks(t *testing.T) {
 
 	char := c.Player.Chars()[idx]
 
-	// Advance past ICD
+	// ICDを超えて進める
 	c.F = stackICD + 2
 
-	// Charged Attack hit → 2 stacks
+	// 重撃ヒット → 2スタック
 	hit := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagExtra}}
 	c.Events.Emit(event.OnEnemyHit, nil, hit)
 
-	// Check DmgP (should be 2 × 7.5% = 15%)
+	// DmgPを確認（2 × 7.5% = 15%のはず）
 	atk := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 	char.ApplyAttackMods(atk, nil)
 	expectedDmg := 0.075 * 2
@@ -222,20 +222,20 @@ func TestGestBuffExpiresAfter4Seconds(t *testing.T) {
 
 	char := c.Player.Chars()[idx]
 
-	// Add a stack
+	// スタックを追加
 	c.F = stackICD + 2
 	hit := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 	c.Events.Emit(event.OnEnemyHit, nil, hit)
 
-	// Verify buff is active
+	// バフがアクティブであることを確認
 	if !char.StatusIsActive(buffKey) {
 		t.Fatal("buff should be active after hit")
 	}
 
-	// Advance 5 seconds (300 frames) — past 4s buff duration
+	// 5秒進める（300フレーム）— 4秒のバフ持続時間を超過
 	c.F += 300
 
-	// Buff should have expired
+	// バフが失効しているべき
 	if char.StatusIsActive(buffKey) {
 		t.Fatal("buff should expire after 4 seconds")
 	}
@@ -268,12 +268,12 @@ func TestGestNoCritDMGWithoutHexerei(t *testing.T) {
 
 	char := c.Player.Chars()[idx]
 
-	// Add stacks
+	// スタックを追加
 	c.F = stackICD + 2
 	hit := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 	c.Events.Emit(event.OnEnemyHit, nil, hit)
 
-	// Without Hexerei party: CD bonus should not be applied
+	// Hexereiパーティなし: CDボーナスは適用されないべき
 	atk := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 	char.ApplyAttackMods(atk, nil)
 	if atk.Snapshot.Stats[attributes.CD] != 0 {
@@ -308,7 +308,7 @@ func TestGestAtkSpdPassive(t *testing.T) {
 
 	char := c.Player.Chars()[idx]
 
-	// ATK SPD should be permanently +10%
+	// 攻撃速度が永続的に+10%であるべき
 	atkSpd := char.Stat(attributes.AtkSpd)
 	if atkSpd < 0.09 || atkSpd > 0.11 {
 		t.Fatalf("expected ATK SPD ≈ 0.10, got %v", atkSpd)

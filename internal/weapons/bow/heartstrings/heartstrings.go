@@ -38,16 +38,16 @@ const (
 )
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// The equipping character can gain the Remedy effect.
-	// When they possess 1/2/3 Remedy stacks, Max HP will increase by 12%/24%/40%.
-	// 1 stack may be gained when the following conditions are met:
-	// 1 stack for 25s when using an Elemental Skill;
-	// 1 stack for 25s when the value of a Bond of Life value increases;
-	// 1 stack for 20s for performing healing.
-	// Stacks can still be triggered when the equipping character is not on the field.
-	// Each stack's duration is counted independently.
-	// In addition, when 3 stacks are active, Elemental Burst CRIT Rate will be increased by 28%.
-	// This effect will be canceled 4s after falling under 3 stacks.
+	// 装備キャラクターはRemedy効果を獲得できる。
+	// Remedyスタックを1/2/3所持時、HP上限が12%/24%/40%増加する。
+	// 以下の条件を満たすとスタックを1つ獲得できる:
+	// 元素スキル使用時に25秒間スタック1つ;
+	// 命の契約の値が増加した時に25秒間スタック1つ;
+	// 回復を行った時に20秒間スタック1つ。
+	// 装備キャラクターがフィールドにいなくてもスタック獲得可能。
+	// 各スタックの持続時間は独立してカウントされる。
+	// さらに、3スタック時、元素爆発の会心率が28%増加する。
+	// この効果はスタックが3未満になってから4秒後に解除される。
 	w := &Weapon{
 		char: char,
 		core: c,
@@ -57,7 +57,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	hpStack := 0.09 + float64(r)*0.03
 	hpMaxStack := 0.03 + float64(r)*0.01
 
-	// Max HP increase
+	// Max HP増加
 	mHP := make([]float64, attributes.EndStatType)
 	char.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("heartstrings", -1),
@@ -72,7 +72,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// Using skill
+	// スキル使用時
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false
@@ -82,7 +82,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("heartstrings-%v", char.Base.Key.String()))
 
-	// Gaining Bond
+	// 命の契約獲得時
 	c.Events.Subscribe(event.OnHPDebt, func(args ...interface{}) bool {
 		index := args[0].(int)
 		amount := args[1].(float64)
@@ -95,7 +95,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("heartstrings-%v", char.Base.Key.String()))
 
-	// Healing
+	// 回復時
 	c.Events.Subscribe(event.OnHeal, func(args ...interface{}) bool {
 		src := args[0].(*info.HealInfo)
 
@@ -107,7 +107,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("heartstrings-%v", char.Base.Key.String()))
 
-	// Burst CR buff if 3 stacks
+	// 3スタック時の元素爆発会心率バフ
 	mCR := make([]float64, attributes.EndStatType)
 	mCR[attributes.CR] = 0.21 + float64(r)*0.07
 	char.AddAttackMod(character.AttackMod{
@@ -159,7 +159,7 @@ func (w *Weapon) OnUpdateStack() {
 		Write("heal-stack", w.char.StatusIsActive(healingKey))
 
 	if w.prevStacks == 3 && stacks < 3 {
-		// Elemental Burst CRIT Rate effect will be canceled 4s after falling under 3 stacks.
+		// 元素爆発会心率効果はスタックが3未満になってから4秒後に解除される。
 		w.char.AddStatus(burstCRKeyCancel, 4*60, true)
 	}
 	w.prevStacks = stacks

@@ -28,7 +28,7 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// On hit, Normal or Charged Attacks increase ATK by 6% for 6s. Max 4 stacks. Can occur once every 0.5s.
+	// 命中時、通常攻撃または重撃で攻撃力が6秒間6%増加。最大4スタック。0.5秒に1回発動可能。
 	w := &Weapon{}
 	r := p.Refine
 
@@ -50,22 +50,22 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		// if hit lands after all stack should have fallen off, reset to 0
+		// 全スタックの持続時間が切れた後に命中した場合、0にリセット
 		if !char.StatModIsActive("skyrider") {
 			w.stacks = 0
 		}
 
 		if w.stacks < 4 {
 			w.stacks++
-			// update buff
+			// バフを更新
 			w.buff[attributes.ATKP] = float64(w.stacks) * atkbuff
 		}
 
-		// extend buff timer
+		// バフタイマーを延長
 		char.AddStatus(icdKey, 30, true)
 
-		// every whack adds a stack while under 4 and refreshes buff
-		// lasts 6 seconds
+		// 4スタック未満の間、命中毎にスタックを追加しバフを更新
+		// 6秒間持続
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("skyrider", 360),
 			AffectedStat: attributes.NoStat,

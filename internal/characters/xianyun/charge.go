@@ -42,16 +42,16 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charged[c.TalentLvlAttack()],
 	}
 
-	// skip CA windup if we're in NA
+	// 通常攻撃中なら重撃のモーション開始をスキップ
 	windup := 0
 	if c.Core.Player.CurrentState() == action.NormalAttackState {
 		windup = 14
 	}
 
-	// TODO: Not sure of snapshot timing
+	// TODO: スナップショットのタイミングが不明
 	c.Core.QueueAttack(
 		ai,
-		// TODO: Find actual radius of CA projectile
+		// TODO: 重撃射出物の実際の半径を調査
 		combat.NewCircleHit(
 			c.Core.Combat.Player(),
 			c.Core.Combat.PrimaryTarget(),

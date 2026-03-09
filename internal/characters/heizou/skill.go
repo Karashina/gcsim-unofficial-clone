@@ -23,15 +23,15 @@ func init() {
 const (
 	skillHitmark                 = 20
 	skillCDStart                 = 18
-	holdAtFullStacksPenalty      = 17 // if you hold while at 4 stacks it takes 17 extra frames to release
+	holdAtFullStacksPenalty      = 17 // 4スタック時に長押すると解放まで追加17フレームかかる
 	skillHitlagHaltFrame         = 0.09
 	skillHitlagMaxStackHaltFrame = 0.12
 	particleICDKey               = "heizou-particle-icd"
 )
 
 func (c *char) skillHoldDuration(stacks int) int {
-	// animation duration only
-	// diff is the number of stacks we must charge up to reach the desired state
+	// アニメーションの持続時間のみ
+	// diffは目標状態に到達するために充填するスタック数
 	diff := stacks - c.decStack
 	if diff < 0 {
 		diff = 0
@@ -39,7 +39,7 @@ func (c *char) skillHoldDuration(stacks int) int {
 	if diff > 4 {
 		diff = 4
 	}
-	// it's .75s per stack
+	// 1スタックあたり0.75秒
 	return 45 * diff
 }
 
@@ -116,7 +116,7 @@ func (c *char) skillRelease(delay int) action.Info {
 	return action.Info{
 		Frames:          func(next action.Action) int { return delay + skillEndFrames[next] + skillHitmark },
 		AnimationLength: delay + skillEndFrames[action.InvalidAction] + skillHitmark,
-		CanQueueAfter:   delay + skillEndFrames[action.ActionSwap] + skillHitmark, // earliest cancel
+		CanQueueAfter:   delay + skillEndFrames[action.ActionSwap] + skillHitmark, // 最速キャンセル
 		State:           action.SkillState,
 	}
 }

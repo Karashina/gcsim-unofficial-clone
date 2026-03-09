@@ -11,7 +11,7 @@ import (
 
 var burstFrames []int
 
-const burstStart = 58 // Initial Hit
+const burstStart = 58 // 初撃
 
 func init() {
 	burstFrames = frames.InitAbilSlice(64) // Q -> N1/E
@@ -21,7 +21,7 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// Initial Hit
+	// 初撃
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Signature Mix (Initial)",
@@ -35,7 +35,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 3), 0, burstStart)
 
-	// Ticks
+	// Tick処理
 	ai.Abil = "Signature Mix (Tick)"
 	ai.Mult = burstDot[c.TalentLvlBurst()]
 	ap := combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 6.5)
@@ -46,17 +46,17 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	heal := burstHealPer[c.TalentLvlBurst()]*maxhp + burstHealFlat[c.TalentLvlBurst()]
 
 	c.burstBuffArea = combat.NewCircleHitOnTarget(ap.Shape.Pos(), nil, 7)
-	// apparently lasts for 12.5
-	// TODO: assumes that field starts when it lands (which is dynamic ingame)
+	// 12.5秒持続する模様
+	// TODO: フィールドが着地時に開始する前提（ゲーム内では動的）
 	c.Core.Tasks.Add(func() {
-		// add burst status for C4 check
+		// 4凸チェック用の元素爆発ステータスを追加
 		c.Core.Status.Add("diona-q", 750)
-		// ticks every 2s, first tick at t=2s (relative to field start), then t=4,6,8,10,12; lasts for 12.5s from field start
+		// 2秒ごとにtick、最初のtickはt=2s（フィールド開始基準）、以降t=4,6,8,10,12; フィールド開始から12.5秒持続
 		for i := 0; i < 6; i++ {
 			c.Core.Tasks.Add(func() {
-				// attack
+				// 攻撃
 				c.Core.QueueAttackWithSnap(ai, snap, ap, 0)
-				// heal
+				// 回復
 				if !c.Core.Combat.Player().IsWithinArea(c.burstBuffArea) {
 					return
 				}
@@ -69,15 +69,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				})
 			}, 120+i*120)
 		}
-		// C6
+		// 6凸
 		if c.Base.Cons >= 6 {
 			c.c6()
 		}
 	}, burstStart)
 
-	// C1
+	// 1凸
 	if c.Base.Cons >= 1 {
-		// 15 energy after ends, flat not affected by ER
+		// 終了後にエネルギー15回復、固定値でERの影響を受けない
 		c.Core.Tasks.Add(func() {
 			c.AddEnergy("diona-c1", 15)
 		}, burstStart+750)

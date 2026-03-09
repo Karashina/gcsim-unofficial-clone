@@ -19,7 +19,7 @@ func TestBurningTicks(t *testing.T) {
 		t.Errorf("error initializing core: %v", err)
 		t.FailNow()
 	}
-	// expecting 8 ticks: https://www.youtube.com/watch?v=PdZ6Qxo7pSY
+	// 8回ティックを期待: https://www.youtube.com/watch?v=PdZ6Qxo7pSY
 	count := 0
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
@@ -29,7 +29,7 @@ func TestBurningTicks(t *testing.T) {
 		return false
 	}, "burning-ticks")
 
-	// yanfei auto at 80
+	// 烎妖の通常攻撃（フレーム80）
 	c.QueueAttackEvent(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Pyro,
@@ -37,7 +37,7 @@ func TestBurningTicks(t *testing.T) {
 		},
 		Pattern: combat.NewSingleTargetHit(trg[0].Key()),
 	}, 70)
-	// tighnari skill at 200
+	// ティナリのスキル（フレーム200）
 	c.QueueAttackEvent(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Dendro,
@@ -45,7 +45,7 @@ func TestBurningTicks(t *testing.T) {
 		},
 		Pattern: combat.NewSingleTargetHit(trg[0].Key()),
 	}, 200)
-	// lisa 250
+	// リサ（フレーム250）
 	c.QueueAttackEvent(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Electro,
@@ -54,15 +54,14 @@ func TestBurningTicks(t *testing.T) {
 		Pattern: combat.NewSingleTargetHit(trg[0].Key()),
 	}, 250)
 
-	// burning starts ticking at 200 and ticks every 15 frames
+	// 燃焼はフレーム200でティック開始、15フレームごとにティックする
 	for c.F = 0; c.F < 200; c.F++ {
 		c.Tick()
 	}
-	// burning got queued at f = 200 but first tick actually happens at beginning of
-	// 216; so we advanced 1 extra here??
-	//TODO: does this need to be adjusted somehow? i think this has to do with the fact
-	// that the task got added AFTER the run at f 200 so that's why it doesn't get
-	// executed until 201, then delay 15 so we end up at 216 first tick instead of 215
+	// 燃焼はf=200でキューに入れられたが、最初のティックは実際には216の開始時に発生する
+	// そのため、ここで1フレーム余分に進めている??
+	//TODO: これは調整が必要か？タスクがf200の実行後に追加されたため、
+	// 201まで実行されず、その後15フレーム遅延で215ではなく216が最初のティックになる
 	advanceCoreFrame(c)
 
 	// log.Printf("count should be 0 right now, got %v", count)
@@ -73,7 +72,7 @@ func TestBurningTicks(t *testing.T) {
 		// log.Printf("count should be %v right now, got %v", i+1, count)
 	}
 
-	// extra 200 frames to make sure it doesn't go past 8
+	// 8回を超えないことを確認するために追加200フレーム
 	for i := 0; i < 200; i++ {
 		advanceCoreFrame(c)
 	}
@@ -109,7 +108,7 @@ func TestBurningQuickenFuel(t *testing.T) {
 		},
 		Pattern: combat.NewSingleTargetHit(trg[0].Key()),
 	}, 290)
-	// beidou e should apply hitlag here
+	// 北斗のEはここでヒットラグを適用するはず
 	c.QueueAttackEvent(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Electro,
@@ -152,25 +151,25 @@ func TestBurningQuickenFuel(t *testing.T) {
 		c.Events.Subscribe(i, cb(i), fmt.Sprintf("event-%v", i))
 	}
 	i := 0
-	// quicken reaction at 327
+	// quicken反応が327で発生
 	for ; i < 327; i++ {
 		advanceCoreFrame(c)
 	}
 	log.Printf("quicken at %v\n", f[event.OnQuicken])
 
-	// burning reaction at 396
+	// burning反応が396で発生
 	for ; i < 396; i++ {
 		advanceCoreFrame(c)
 	}
 	log.Printf("burning at %v\n", f[event.OnBurning])
 
-	// spread at 462
+	// spreadが462で発生
 	for ; i < 462; i++ {
 		advanceCoreFrame(c)
 	}
 	log.Printf("spread at %v\n", f[event.OnSpread])
 
-	// overload, quicken, aggrvate at 536
+	// overload, quicken, aggravateが536で発生
 	for ; i < 535; i++ {
 		advanceCoreFrame(c)
 	}
@@ -179,11 +178,11 @@ func TestBurningQuickenFuel(t *testing.T) {
 	log.Printf("quicken at %v\n", f[event.OnQuicken])
 	log.Printf("aggravate at %v\n", f[event.OnAggravate])
 
-	// 4 burning ticks at yanfei's em, 4 ticks at tighnari em (applied at 462), last tick roughly 523
+	// 烎妖の熊力で燃焼4ティック、ティナリの熊力で燃焼4ティック（フレーム462で適用）、最後のティックは約523
 	log.Printf("number of burning ticks - actor 0: %v", countByActor[0])
 	log.Printf("number of burning ticks - actor 1: %v", countByActor[1])
 
-	// dendro or quicken last frame 796
+	// 草元素または激化の最終フレーム 796
 	for ; i < 2000; i++ {
 		advanceCoreFrame(c)
 		if trg[0].Durability[reactable.Quicken] == 0 {
@@ -250,7 +249,7 @@ func TestPyroDendroCoexist(t *testing.T) {
 		},
 		Pattern: combat.NewSingleTargetHit(trg[0].Key()),
 	}, 344)
-	// pyro ended 546, dendro ended 689
+	// 火+草元素の共存 （火終了546、草終了689）
 
 	f := make(map[event.Event]int)
 	cb := func(evt event.Event) func(args ...interface{}) bool {

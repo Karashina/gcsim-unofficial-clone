@@ -12,9 +12,9 @@ import (
 var chargeFrames []int
 
 const (
-	// hitmark frame, includes CA windup
+	// ヒットマークフレーム（重撃の溜め時間を含む）
 	chargeHitmark = 70
-	// TODO: stacks technically only last 15s and each stack has its own timer
+	// TODO: スタックは技術的には15秒しか持たず、各スタックに独自のタイマーがある
 	conductiveTag = "lisa-conductive-stacks"
 )
 
@@ -40,7 +40,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charge[c.TalentLvlAttack()],
 	}
 
-	// skip CA windup if we're in NA or Skill (Hold) animation
+	// 通常攻撃またはスキル（長押し）中なら重撃のモーション開始をスキップ
 	windup := 0
 	switch c.Core.Player.CurrentState() {
 	case action.NormalAttackState:

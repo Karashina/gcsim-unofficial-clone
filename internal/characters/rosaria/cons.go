@@ -11,7 +11,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When Rosaria deals a CRIT Hit, her ATK Speed increase by 10% and her Normal Attack DMG increases by 10% for 4s (can trigger vs shielded enemies)
+// ロサリアが会心ヒット時、攻撃速度10%と通常攻撃ダメージ10%が4秒間アップ（シールド敵にも発動可能）
 func (c *char) makeC1CB() combat.AttackCBFunc {
 	if c.Base.Cons < 1 {
 		return nil
@@ -57,7 +57,7 @@ func (c *char) makeC1CB() combat.AttackCBFunc {
 	}
 }
 
-// Ravaging Confession's CRIT Hits regenerate 5 Energy for Rosaria. Can only be triggered once each time Ravaging Confession is cast.
+// 告解の兄姉の会心ヒット時、ロサリアのHPを5回復する。告解の兄姉発動ごとに1回のみ発動。
 func (c *char) makeC4CB() combat.AttackCBFunc {
 	if c.Base.Cons < 4 {
 		return nil
@@ -81,7 +81,7 @@ func (c *char) makeC4CB() combat.AttackCBFunc {
 	}
 }
 
-// Rites of Termination's attack decreases opponent's Physical RES by 20% for 10s.
+// 教典のレクイエムの攻撃が敵の物理耐性を20%低下させる（10秒間）。
 func (c *char) makeC6CB() combat.AttackCBFunc {
 	if c.Base.Cons < 6 {
 		return nil

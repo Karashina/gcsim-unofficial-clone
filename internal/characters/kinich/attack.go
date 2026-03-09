@@ -34,12 +34,12 @@ const (
 	normalHitNum = 3
 	skillHitNum  = 2
 
-	angularVelocity   = 70. / 40 // degrees per frame
+	angularVelocity   = 70. / 40 // フレームあたりの角度
 	blindSpotBoundary = 35.      // +- degrees from the "center" of the blind spot
 )
 
 func init() {
-	// Normal attack
+	// 通常攻撃
 	attackFrames = make([][]int, normalHitNum)
 
 	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 47) // N1 -> Walk
@@ -51,7 +51,7 @@ func init() {
 	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 79) // N3 -> Walk
 	attackFrames[2][action.ActionAttack] = 75
 
-	// Skill attack
+	// スキル攻撃
 	skillAttackFrames = make([][]int, skillHitNum)
 
 	skillAttackFrames[0] = frames.InitNormalCancelSlice(skillAttackHitmarks[0][1], 53) // N1(E) -> Swap
@@ -156,7 +156,7 @@ func (c *char) skillAttack(p map[string]int) (action.Info, error) {
 	}
 	c.QueueCharTask(func() {
 		c.characterAngularPosition = NormalizeAngle360(c.characterAngularPosition + float64(direction)*skillAttackAngularTravel[c.normalSCounter])
-	}, skillAttackFrames[c.normalSCounter][action.ActionDash]) // Update on earliest possible cancel
+	}, skillAttackFrames[c.normalSCounter][action.ActionDash]) // 最速キャンセル可能時に更新
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillAttackFrames[c.normalSCounter]),
@@ -171,7 +171,7 @@ func (c *char) NextMoveIsInBlindSpot(direction int) (bool, float64) {
 		return false, -1
 	}
 
-	// Calculate the sector boundaries and normalize them
+	// セクター境界を計算して正規化
 	lowerBoundary := NormalizeAngle360(c.characterAngularPosition)
 	upperBoundary := NormalizeAngle360(c.characterAngularPosition + float64(direction)*skillAttackAngularTravel[c.normalSCounter])
 
@@ -183,12 +183,12 @@ func (c *char) NextMoveIsInBlindSpot(direction int) (bool, float64) {
 		lowerBlindBoundary, upperBlindBoundary = upperBlindBoundary, lowerBlindBoundary
 	}
 
-	// Helper function to check if an angle is within the circular sector
+	// 角度が円形セクター内にあるかチェックするヘルパー関数
 	isInSector := func(angle float64) bool {
 		if lowerBoundary < upperBoundary {
 			return angle >= lowerBoundary && angle <= upperBoundary
 		}
-		// Handles wrap-around sector cases (e.g., sector from 350 to 10 degrees)
+		// 折り返しセクターのケースを処理（例: 350度から10度のセクター）
 		return angle >= lowerBoundary || angle <= upperBoundary
 	}
 

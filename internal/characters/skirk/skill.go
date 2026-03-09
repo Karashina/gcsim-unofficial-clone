@@ -92,7 +92,7 @@ func (c *char) serpentsReduceTask(src int) {
 		if c.skillSrc != src {
 			return
 		}
-		// reduce 1.4 point every 12f, which is 7 per second
+		// 12fごとに1.4ポイント減少（毎秒7ポイント）
 		c.ReduceSerpentsSubtlety(c.Base.Key.String()+"skill", 1.4)
 		if c.serpentsSubtlety == 0 && c.StatusIsActive(skillKey) {
 			c.exitSkillState(src)
@@ -103,7 +103,7 @@ func (c *char) serpentsReduceTask(src int) {
 
 func (c *char) skillHold(p map[string]int) (action.Info, error) {
 	duration := p["hold"]
-	// TODO: max duration of hold E?
+	// TODO: 長押しEの最大持続時間は？
 	extraDuration := min(duration, 184) - 1 // subtract 1 because frames are listed as the minimum already
 	c.QueueCharTask(func() {
 		c.AddSerpentsSubtlety(c.Base.Key.String()+"-skill-hold", 45.0)
@@ -111,7 +111,7 @@ func (c *char) skillHold(p map[string]int) (action.Info, error) {
 		c.absorbVoidRifts()
 	}, skillHoldGainSS)
 
-	// status used to absorb void rifts constantly during the hold E animation
+	// 長押しEアニメーション中にVoid Riftを常時吸収するためのステータス
 	c.AddStatus(skillAbsorbRiftAnimKey, extraDuration, true)
 
 	c.SetCDWithDelay(action.ActionSkill, 8*60, extraDuration+skillHoldGainSS)

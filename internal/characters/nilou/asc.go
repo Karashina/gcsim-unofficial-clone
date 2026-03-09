@@ -16,15 +16,15 @@ const (
 	a4Mod    = "nilou-a4"
 )
 
-// When all characters in the party are all Dendro or Hydro, and there are at least one Dendro character and one Hydro character:
-// The completion of the third dance step of Nilou’s Dance of Haftkarsvar will grant all nearby characters the Golden Chalice’s Bounty
-// for 30s upon its completion.
-// Characters under the effect of Golden Chalice’s Bounty will increase the Elemental Mastery of all nearby characters by 100 for 10s
-// whenever they are hit by Dendro attacks. Also, triggering the Bloom reaction will create Bountiful Cores instead of Dendro Cores.
-// Such Cores will burst very quickly after being created, and they have larger AoEs.
-// Bountiful Cores cannot trigger Hyperbloom or Burgeon, and they share an upper numerical limit with Dendro Cores. Bountiful Core DMG
-// is considered DMG dealt by Dendro Cores produced by Bloom.
-// Should the party not meet the conditions for this Passive Talent, any existing Golden Chalice’s Bounty effects will be canceled.
+// パーティー全員が草元素または水元素で、かつ草元素キャラと水元素キャラがそれぞれ1人以上いる場合:
+// ニィロウの七域の舞の3回目のステップ完了時、近くの全キャラクターに
+// 金杯の恭福を30秒間付与する。
+// 金杯の恭福の影響下のキャラクターが草元素攻撃を受けた時、近くの全キャラの元素熔合が10秒間100アップする。
+// また、開花反応時に草元素コアではなく豊穣のコアを生成する。
+// 豊穣のコアは生成後すぐに爆発し、より広い範囲を持つ。
+// 豊穣のコアは超開花や烈開花をトリガーできず、草元素コアと上限を共有する。豊穣のコアのダメージは
+// 開花反応による草元素コアのダメージとみなされる。
+// パーティーがこの固有天賦の条件を満たさない場合、既存の金杯の恭福効果は取り消される。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 || !c.onlyBloomTeam {
 		return
@@ -35,7 +35,7 @@ func (c *char) a1() {
 	}
 	c.a4()
 
-	// Bountiful Cores
+	// 豊穣のコア
 	c.Core.Events.Subscribe(event.OnDendroCore, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		char := c.Core.Player.ByIndex(atk.Info.ActorIndex)
@@ -50,7 +50,7 @@ func (c *char) a1() {
 		b := newBountifulCore(c.Core, g.Gadget.Pos(), atk)
 		b.Gadget.SetKey(g.Gadget.Key())
 		c.Core.Combat.ReplaceGadget(g.Key(), b)
-		// prevent blowing up
+		// 爆発を防止
 		g.Gadget.OnExpiry = nil
 		g.Gadget.OnKill = nil
 
@@ -84,15 +84,15 @@ func (c *char) a1() {
 	}, "nilou-a1")
 }
 
-// Every 1,000 points of Nilou’s Max HP above 30,000 will cause the DMG dealt by Bountiful Cores created by characters affected
-// by Golden Chalice’s Bounty to increase by 9%.
-// The maximum increase in Bountiful Core DMG that can be achieved this way is 400%.
+// ニィロウの最大HPが30,000を超えた分、1,000ポイントごとに
+// 金杯の恭福の影響下のキャラが生成した豊穣のコアのダメージが9%増加する。
+// 最大増加は400%。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
 	for _, this := range c.Core.Player.Chars() {
-		// TODO: a4 should be an extra buff
+		// TODO: a4は追加バフであるべき
 		this.AddReactBonusMod(character.ReactBonusMod{
 			Base: modifier.NewBaseWithHitlag(a4Mod, 30*60),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {

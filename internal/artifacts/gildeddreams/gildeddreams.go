@@ -57,12 +57,11 @@ func (s *Set) Init() error {
 	return nil
 }
 
-// 2-Piece Bonus: Elemental Mastery +80.
-// 4-Piece Bonus: Within 8s of triggering an Elemental Reaction, the character equipping this will obtain buffs based on the Elemental
-// Type of the other party members. ATK is increased by 14% for each party member whose Elemental Type is the same as the equipping
-// character, and Elemental Mastery is increased by 50 for every party member with a different Elemental Type. Each of the aforementioned
-// buffs will count up to 3 characters. This effect can be triggered once every 8s. The character who equips this can still trigger its
-// effects when not on the field.
+// 2セット効果: 元素熟知 +80
+// 4セット効果: 元素反応発動後8秒間、装備キャラはパーティメンバーの元素タイプに基づくバフを獲得。
+// 装備キャラと同じ元素タイプのパーティメンバー1人ごとに攻撃力14%増加、異なる元素タイプの
+// パーティメンバー1人ごとに元素熟知50増加。上記バフはそれぞれ最大3人までカウント。
+// この効果は8秒に1回発動可能。装備キャラがフィールド上にいなくても効果を発動可能。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{
 		c:     c,

@@ -53,7 +53,7 @@ func (c *char) Init() error {
 func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
 	ds := c.Character.Snapshot(ai)
 
-	// apply skill multiplier
+	// 元素スキル倍率を適用
 	if c.skillBuffActive() && ai.AttackTag == attacks.AttackTagNormal {
 		ai.Mult *= skill[c.TalentLvlSkill()]
 	}
@@ -88,7 +88,7 @@ func (c *char) Condition(fields []string) (any, error) {
 }
 
 func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]int) error {
-	// cannot use charge without attack beforehand unlike most of the other catalyst users
+	// 他の法器キャラと異なり、通常攻撃前に重撃を使用できない
 	if a == action.ActionCharge && c.Core.Player.LastAction.Type != action.ActionAttack {
 		return player.ErrInvalidChargeAction
 	}

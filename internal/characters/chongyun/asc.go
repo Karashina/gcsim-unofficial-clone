@@ -8,8 +8,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When the field created by Spirit Blade: Chonghua's Layered Frost disappears,
-// another spirit blade will be summoned to strike nearby opponents, dealing 100% of Chonghua's Layered Frost's Skill DMG as AoE Cryo DMG.
+// 重華の氷螢之陽のフィールドが消えると、
+// もう一本の霊刃が召喚され、付近の敵に重華の氷螢之陽のスキルダメージの100%の氷元素範囲ダメージを与える。
 func (c *char) a4(delay, src int, useOldSnapshot bool) {
 	if c.Base.Ascension < 4 {
 		return
@@ -26,7 +26,7 @@ func (c *char) a4(delay, src int, useOldSnapshot bool) {
 		Durability: 25,
 		Mult:       skill[c.TalentLvlSkill()],
 	}
-	// need to snap both snapshot and skill area into the task closure
+	// スナップショットとスキル範囲の両方をタスククロージャにキャプチャする必要がある
 	var snap combat.Snapshot
 	if useOldSnapshot {
 		snap = c.a4Snap
@@ -36,7 +36,7 @@ func (c *char) a4(delay, src int, useOldSnapshot bool) {
 	}
 	skillPattern := c.skillArea
 	c.Core.Tasks.Add(func() {
-		// if src changed then that means the field changed already
+		// srcが変更された場合、フィールドは既に変更済み
 		if src != c.fieldSrc {
 			return
 		}
@@ -51,7 +51,7 @@ func (c *char) a4(delay, src int, useOldSnapshot bool) {
 	}, delay)
 }
 
-// Opponents hit by this blade will have their Cryo RES decreased by 10% for 8s.
+// この刃に命中した敵は氷元素耐性が10%低下する（8秒間）。
 func (c *char) a4CB(a combat.AttackCB) {
 	e, ok := a.Target.(*enemy.Enemy)
 	if !ok {

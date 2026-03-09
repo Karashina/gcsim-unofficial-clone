@@ -21,13 +21,13 @@ const (
 func init() {
 	skillFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	skillFrames[0] = frames.InitAbilSlice(37) // E -> N1
 	skillFrames[0][action.ActionDash] = 29    // E -> D
 	skillFrames[0][action.ActionJump] = 29    // E -> J
 	skillFrames[0][action.ActionSwap] = 36    // E -> Swap
 
-	// Female
+	// 女性
 	skillFrames[1] = frames.InitAbilSlice(37) // E -> N1/Q
 	skillFrames[1][action.ActionDash] = 28    // E -> D
 	skillFrames[1][action.ActionJump] = 28    // E -> J
@@ -66,7 +66,7 @@ func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames[c.gender]),
 		AnimationLength: skillFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   skillFrames[c.gender][action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[c.gender][action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

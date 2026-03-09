@@ -21,8 +21,8 @@ func init() {
 	chargeFrames[action.ActionSwap] = 51
 }
 
-// Charge attack damage queue generator
-// Very standard - consistent with other characters like Xiangling
+// 重撃のダメージキュー生成
+// 非常に標準的 - 香菱などの他キャラクターと同様
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
@@ -53,7 +53,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(chargeFrames),
 		AnimationLength: chargeFrames[action.InvalidAction],
-		CanQueueAfter:   chargeFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   chargeFrames[action.ActionJump], // 最速キャンセル
 		State:           action.ChargeAttackState,
 	}, nil
 }

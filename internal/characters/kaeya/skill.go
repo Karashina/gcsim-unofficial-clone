@@ -45,8 +45,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			return
 		}
 
-		// A1:
-		// Every hit with Frostgnaw regenerates HP for Kaeya equal to 15% of his ATK.
+		// 固有天賦1:
+		// 霎裂歩のヒットごとにカイアの攻撃力15%分のHPを回復する。
 		if c.Base.Ascension >= 1 {
 			c.Core.Player.Heal(info.HealInfo{
 				Caller:  c.Index,
@@ -72,7 +72,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel is before skillHitmark
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセルはスキルヒットマークより前
 		State:           action.SkillState,
 	}, nil
 }
@@ -93,8 +93,8 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Cryo, c.ParticleDelay)
 }
 
-// Opponents Frozen by Frostgnaw will drop additional Elemental Particles.
-// Frostgnaw may only produce a maximum of 2 additional Elemental Particles per use.
+// 霎裂歩で凍結した敵から追加の元素粒子がドロップする。
+// 霎裂歩で1回につき最大2個まで。
 func (c *char) makeA4ParticleCB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil

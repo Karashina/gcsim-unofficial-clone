@@ -24,10 +24,10 @@ func init() {
 	burstFrames = frames.InitAbilSlice(122)
 }
 
-// Elemental Burst: two AoE Dendro hits; consumes Veil stacks to buff damage.
+// 元素爆発：範囲草元素ダメージ2回、ヴェールスタックを消費してダメージをバフする。
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 
-	// 1st Hit
+	// 第1ヒット
 	c.QueueCharTask(func() {
 		ai1atk := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -48,7 +48,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		)
 	}, burstHitmark1)
 
-	// 2nd Hit - ATK portion
+	// 第2ヒット - ATK部分
 	c.QueueCharTask(func() {
 		ai2atk := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -67,7 +67,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			0,
 			0,
 		)
-		// Consume Veil of Falsehood stacks
+		// 偽りのヴェールスタックを消費
 		c.a1count = 0
 	}, burstHitmark2)
 
@@ -82,17 +82,17 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// makeBurstBonus consumes Veil stacks to increase current Burst DMG.
+// makeBurstBonusはヴェールスタックを消費して現在の元素爆発ダメージを増加させる。
 func (c *char) makeBurstBonus() {
 	m := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBaseWithHitlag("nefer-q-dmgbuff", -1),
 		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-			// skip if not burst
+			// 元素爆発以外はスキップ
 			if atk.Info.AttackTag != attacks.AttackTagElementalBurst {
 				return nil, false
 			}
-			// apply buff
+			// バフを適用
 			m[attributes.DmgP] = burstbonus[c.TalentLvlBurst()] * c.a1count
 			return m, true
 		},

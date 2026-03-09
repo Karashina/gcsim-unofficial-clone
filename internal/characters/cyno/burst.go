@@ -25,14 +25,14 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	c.burstExtension = 0 // resets the number of possible extensions to the burst each time
-	c.c4Counter = 0      // reset c4 stacks
-	c.c6Stacks = 0       // same as above
+	c.burstExtension = 0 // 元素爆発ごとに延長可能回数をリセット
+	c.c4Counter = 0      // 第4命ノ星座スタックをリセット
+	c.c6Stacks = 0       // 同上
 
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.EM] = 100
 	c.AddStatMod(character.StatMod{
-		Base:         modifier.NewBaseWithHitlag(burstKey, 712), // 112f extra duration
+		Base:         modifier.NewBaseWithHitlag(burstKey, 712), // 112f追加持続
 		AffectedStat: attributes.EM,
 		Amount: func() ([]float64, bool) {
 			return m, true
@@ -40,7 +40,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	})
 	c.burstSrc = c.Core.F
 	src := c.Core.F
-	// if cyno extends his burst, we need to set skill CD properly
+	// セノが元素爆発を延長した場合、元素スキルCDを正しく設定する必要がある
 	c.QueueCharTask(func() { c.onBurstExpiry(src) }, 713+240)
 	c.QueueCharTask(func() { c.onBurstExpiry(src) }, 713+480)
 
@@ -58,7 +58,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -72,7 +72,7 @@ func (c *char) tryBurstPPSlide(hitmark int) {
 		src := c.burstSrc
 		c.QueueCharTask(func() {
 			c.onBurstExpiry(src)
-		}, hitmark-duration+3) // 3f because burst expires on 2f
+		}, hitmark-duration+3) // 3f（元素爆発は2fで終了するため）
 	}
 }
 
@@ -97,5 +97,5 @@ func (c *char) onBurstExpiry(burstSrc int) {
 	if c.StatusIsActive(burstKey) {
 		return
 	}
-	c.burstSrc = -1 // make sure we don't call other burst fns
+	c.burstSrc = -1 // 他の元素爆発関数を呼ばないようにする
 }

@@ -26,9 +26,9 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// Implements Instructor artifact set:
-// 2-Piece Bonus: Increases Elemental Mastery by 80.
-// 4-Piece Bonus: Upon triggering an Elemental Reaction, increases all party members' Elemental Mastery by 120 for 8s.
+// Instructor聖遺物セットの実装:
+// 2セット効果: 元素熟知+80
+// 4セット効果: 元素反応発動時、全パーティメンバーの元素熟知が8秒間120増加。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
@@ -47,19 +47,19 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.EM] = 120
 
-		// TODO: does multiple instructor holders extend the duration?
+		// TODO: 複数の教官所持者で効果時間は延長されるか？
 		add := func(args ...interface{}) bool {
 			atk := args[1].(*combat.AttackEvent)
-			// Character must be on field to proc bonus
+			// ボーナス発動にはキャラがフィールド上にいる必要がある
 			if c.Player.Active() != char.Index {
 				return false
 			}
-			// Source of elemental reaction must be the character with instructor
+			// 元素反応の発生源は教官を装備したキャラクターでなければならない
 			if atk.Info.ActorIndex != char.Index {
 				return false
 			}
 
-			// Add 120 EM to all characters
+			// 全キャラクターに元素熟知120を追加
 			for _, this := range c.Player.Chars() {
 				this.AddStatMod(character.StatMod{
 					Base:         modifier.NewBaseWithHitlag("instructor-4pc", 480),

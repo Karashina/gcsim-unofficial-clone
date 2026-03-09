@@ -38,7 +38,7 @@ func init() {
 const (
 	skillPressBoxX = 4
 	skillPressBoxY = 8
-	// hold hitbox is an approximation
+	// 長押しヒットボックスは近似値
 	skillHoldOffsetX        = 1.3
 	skillHoldBoxX           = 4.5
 	skillHoldBoxY           = 30
@@ -100,9 +100,9 @@ func (c *char) skillPress() (action.Info, error) {
 
 func (c *char) skillHold(p map[string]int) (action.Info, error) {
 	hold := p["hold"]
-	// earliest hold hitmark is ~111f
-	// latest hold hitmark is ~919f
-	// hold=1 gives 111f and hold=809 gives a 919f delay until hitmark.
+	// 長押し最速ヒットマークは約111f
+	// 長押し最遅ヒットマークは約919f
+	// hold=1で111f、hold=809で919fのヒットマーク遅延
 	if hold < 1 {
 		hold = 1
 	}

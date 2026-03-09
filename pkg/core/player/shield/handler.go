@@ -6,10 +6,10 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
-// Handler keeps track of all the active shields
-// However we do care which is active since:
-// - global shields: only active is shielded
-// - 1 character shields: active only shieled if is target of shield
+// Handler はアクティブなシールドを管理する。
+// シールドの種類によって有効範囲が異なる:
+// - グローバルシールド: アクティブキャラのみが保護される
+// - 1キャラ対象シールド: シールドの対象がアクティブキャラの場合のみ保護される
 type Handler struct {
 	shields []Shield
 	log     glog.Logger
@@ -51,9 +51,9 @@ func (h *Handler) Get(t Type) Shield {
 	return nil
 }
 
-// TODO: do shields get affected by hitlag? if so.. which timer? active char?
+// TODO: シールドはヒットラグの影響を受けるか？受ける場合、どのタイマー？アクティブキャラ？
 func (h *Handler) Add(shd Shield) {
-	// we always assume over write of the same type and target
+	// 同じタイプとターゲットのシールドは常に上書きされると想定
 	ind := -1
 	for i, v := range h.shields {
 		if v.Type() == shd.Type() && v.ShieldTarget() == shd.ShieldTarget() {
@@ -86,7 +86,7 @@ func (h *Handler) List() []Shield {
 }
 
 func (h *Handler) OnDamage(char, active int, dmg float64, ele attributes.Element) float64 {
-	// find shield bonuses
+	// シールドボーナスを検索
 	bonus := h.ShieldBonus()
 	mintaken := dmg // min of damage taken
 	n := 0
@@ -115,7 +115,7 @@ func (h *Handler) OnDamage(char, active int, dmg float64, ele attributes.Element
 			h.shields[n] = v
 			n++
 		} else {
-			// shield broken
+			// シールド破壊
 			h.log.NewEvent(
 				"shield broken",
 				glog.LogShieldEvent,

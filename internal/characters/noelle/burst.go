@@ -13,7 +13,7 @@ import (
 
 var burstFrames []int
 
-// TODO: not sure about this
+// TODO: これが正しいか不明
 const (
 	burstStart   = 80
 	burstBuffKey = "noelle-burst"
@@ -30,8 +30,8 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// TODO: Assume snapshot happens immediately upon cast since the conversion buffs the two burst hits
-	// Generate a "fake" snapshot in order to show a listing of the applied mods in the debug
+	// TODO: 変換が元素爆発の2ヒットにもバフを与えるため、発動時に即座にスナップショットされると仮定
+	// デバッグで適用中のモッド一覧を表示するための「仮」スナップショットを生成
 	aiSnapshot := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Sweeping Time (Stat Snapshot)",
@@ -42,17 +42,17 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	if c.Base.Cons >= 6 {
 		mult += 0.5
 	}
-	// Add mod for def to attack burst conversion
+	// 防御力→攻撃力変換のモッドを追加
 	c.burstBuff[attributes.ATK] = mult * burstDefSnapshot
 
-	dur := 900 + burstStart // default duration
+	dur := 900 + burstStart // デフォルト持続時間
 	if c.Base.Cons >= 6 {
 		// https://library.keqingmains.com/evidence/characters/geo/noelle#noelle-c6-burst-extension
-		// check extension
+		// 延長を確認
 		getExt := func() int {
 			ext, ok := p["extend"]
 			if !ok {
-				return 10 // to maintain prev default behaviour of full extension
+				return 10 // 以前のデフォルト動作（フル延長）を維持するため
 			}
 			if ext < 0 {
 				ext = 0
@@ -69,7 +69,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			Write("total_dur", dur).
 			Write("ext", ext)
 	}
-	// TODO: Confirm exact timing of buff - for now matched to status duration previously set, which is 900 + animation frames
+	// TODO: バフの正確なタイミングを確認。現在は以前設定されたステータス持続時間（900+アニメーションフレーム）に合わせている
 	c.AddStatMod(character.StatMod{
 		Base:         modifier.NewBaseWithHitlag("noelle-burst", dur),
 		AffectedStat: attributes.ATK,
@@ -99,7 +99,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		CanBeDefenseHalted: true,
 	}
 
-	// Burst part
+	// 元素爆発部分
 	c.QueueCharTask(func() {
 		c.Core.QueueAttack(
 			ai,
@@ -110,8 +110,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		)
 	}, 24)
 
-	// Skill part
-	// Burst and Skill part of Q have the same hitlag values and both can heal
+	// 元素スキル部分
+	// 元素爆発とスキル部分は同じヒットラグ値で、両方とも回復可能
 	c.QueueCharTask(func() {
 		ai.Abil = "Sweeping Time (Skill)"
 		ai.Mult = burstskill[c.TalentLvlBurst()]
@@ -130,7 +130,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

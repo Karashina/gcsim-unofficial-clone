@@ -17,8 +17,8 @@ type CustomEnergyStatsBuffer struct {
 
 func OptimizerERStat(core *core.Core) (CollectorCustomStats[CustomEnergyStatsBuffer], error) {
 	if !core.Flags.IgnoreBurstEnergy {
-		// This data doesn't mean much without the IgnoreBurstEnergy flag set
-		// So the stat collector disables itself when this flag isn't set
+		// IgnoreBurstEnergyフラグが設定されていないとこのデータはあまり意味がない
+		// そのため、フラグが未設定の場合、スタットコレクターは自身を無効化する
 		return &CustomEnergyStatsBuffer{}, nil
 	}
 
@@ -140,7 +140,7 @@ func (agg *CustomEnergyAggBuffer) Add(b CustomEnergyStatsBuffer) {
 		erNeeded := 1.0
 		additionalNeeded := erNeeded - weightedEr
 
-		// j starts at 1 to ignore the first burst
+		// 最初の元素爆発を無視するためjは1から開始
 		for j := 1; j < burstCount; j++ {
 			weightedEr = min(weightedEr, b.WeightedER[i][j])
 			erNeeded = max(erNeeded, b.ErNeeded[i][j])

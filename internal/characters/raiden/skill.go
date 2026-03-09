@@ -13,8 +13,8 @@ import (
 )
 
 /**
-The Raiden Shogun unveils a shard of her Euthymia, dealing Electro DMG to nearby opponents, and granting nearby party members the Eye of Stormy Judgment.
-Eye of Stormy Judgment
+雷電将軍が涄善の一片を展開し、周囲の敵に雷元素ダメージを与え、近くのパーティメンバーに雷牠の眼を付与する。
+雷牠の眼
 **/
 
 var skillFrames []int
@@ -51,12 +51,12 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		skillHitmark,
 	)
 
-	// Add pre-damage mod
+	// ダメージ前修飾子を追加
 	mult := skillBurstBonus[c.TalentLvlSkill()]
 	m := make([]float64, attributes.EndStatType)
 	for _, char := range c.Core.Player.Chars() {
 		this := char
-		// starts 1s after cd delay
+		// CDディレイの1秒後に開始
 		c.Core.Tasks.Add(func() {
 			this.AddAttackMod(character.AttackMod{
 				Base: modifier.NewBaseWithHitlag(skillKey, 1500),
@@ -77,7 +77,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -97,8 +97,8 @@ func (c *char) particleCB(a combat.AttackCB) {
 
 /*
 *
-When characters with this buff attack and hit opponents, the Eye will unleash a coordinated attack, dealing AoE Electro DMG at the opponent's position.
-The Eye can initiate one coordinated attack every 0.9s per party.
+このバフを持つキャラクターが攻撃して敵に命中すると、雷牠の眼が連携攻撃を発動し、敵の位置に雷元素範囲ダメージを与える。
+雷牠の眼はパーティごとに0.9秒に1回連携攻撃を行える。
 *
 */
 func (c *char) eyeOnDamage() {
@@ -106,33 +106,33 @@ func (c *char) eyeOnDamage() {
 		trg := args[0].(combat.Target)
 		ae := args[1].(*combat.AttackEvent)
 		dmg := args[2].(float64)
-		// ignore if eye on icd
+		// 眼のICD中なら無視
 		if c.eyeICD > c.Core.F {
 			return false
 		}
-		// ignore if eye status not active on char that's doing dmg
+		// ダメージを与えたキャラに眼のステータスがない場合は無視
 		if !c.Core.Player.ByIndex(ae.Info.ActorIndex).StatusIsActive(skillKey) {
 			return false
 		}
-		// ignore EC, hydro swirl, and burning damage
-		// this clause is here since these damage types are sourced to the target rather than character
+		// 感電・水拡散・燃焧ダメージを無視
+		// これらのダメージタイプはキャラではなくターゲットがソースのため
 		if ae.Info.AttackTag == attacks.AttackTagECDamage || ae.Info.AttackTag == attacks.AttackTagBurningDamage ||
 			ae.Info.AttackTag == attacks.AttackTagSwirlHydro {
 			return false
 		}
-		// ignore self dmg
+		// 自身のダメージを無視
 		if ae.Info.ActorIndex == c.Index &&
 			ae.Info.AttackTag == attacks.AttackTagElementalArt &&
 			ae.Info.StrikeType == attacks.StrikeTypeSlash {
 			return false
 		}
-		// ignore 0 damage
+		// 0ダメージを無視
 		if dmg == 0 {
 			return false
 		}
 
-		// hit mark 857, eye land 862
-		// electro appears to be applied right away
+		// ヒットマーク857、眼着弾862
+		// 雷元素は即座に付与される模様
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       "Eye of Stormy Judgement (Strike)",

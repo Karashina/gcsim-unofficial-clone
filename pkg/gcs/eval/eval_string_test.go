@@ -29,7 +29,7 @@ func TestNormalizeStrObjUnknownNamePassthrough(t *testing.T) {
 }
 
 func TestNormalizeStrObjCanonicalNameUnchanged(t *testing.T) {
-	// A canonical name with no shortcut mapping should come back as-is
+	// ショートカットマッピングのない正規名はそのまま返される
 	obj := &strval{str: "somefullcanonicalname"}
 	result := normalizeStrObj(obj)
 	sv, ok := result.(*strval)
@@ -41,7 +41,7 @@ func TestNormalizeStrObjCanonicalNameUnchanged(t *testing.T) {
 	}
 }
 
-// runGCSLExpr executes a GCSL expression and returns the result Obj.
+// runGCSLExprはGCSL式を実行し結果のObjを返す。
 func runGCSLExpr(t *testing.T, prog string) Obj {
 	t.Helper()
 	p := parser.New(prog)

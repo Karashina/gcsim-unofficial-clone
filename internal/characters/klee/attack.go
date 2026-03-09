@@ -64,7 +64,7 @@ func init() {
 	add9FrameLag(attackFramesWithLag[0])
 }
 
-// klee has 9f lag on normals when using after skill/dash/burst
+// クレーは元素スキル/ダッシュ/元素爆発後に通常攻撃を使用すると9fのラグが発生する
 func add9FrameLag(frames []int) {
 	for i := range frames {
 		switch action.Action(i) {

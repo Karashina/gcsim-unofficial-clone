@@ -35,12 +35,12 @@ func init() {
 	attackFrames[2][action.ActionCharge] = 26
 
 	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][0], 58) // N4 -> N1
-	attackFrames[3][action.ActionCharge] = 500                               // impossible action
+	attackFrames[3][action.ActionCharge] = 500                               // 不正なアクション
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(burstKey) {
-		return c.attackB() // go to burst mode attacks
+		return c.attackB() // 元素爆発モードの攻撃へ
 	}
 	c2CB := c.makeC2CB()
 	c6CB := c.makeC6CB()
@@ -108,7 +108,7 @@ var (
 )
 
 func init() {
-	// NA cancels (burst)
+	// 通常攻撃キャンセル（元素爆発中）
 	attackBFrames = make([][]int, burstHitNum)
 	attackBFrames[0] = frames.InitNormalCancelSlice(attackBHitmarks[0][0], 28) // N1 -> CA
 	attackBFrames[0][action.ActionAttack] = 16
@@ -123,7 +123,7 @@ func init() {
 	attackBFrames[3][action.ActionAttack] = 27
 
 	attackBFrames[4] = frames.InitNormalCancelSlice(attackBHitmarks[4][0], 62) // N5 -> N1
-	attackBFrames[4][action.ActionCharge] = 500                                // illegal action
+	attackBFrames[4][action.ActionCharge] = 500 // 不正なアクション
 }
 
 func (c *char) attackB() (action.Info, error) {

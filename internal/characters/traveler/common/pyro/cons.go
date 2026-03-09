@@ -28,7 +28,7 @@ func (c *Traveler) c1Init() {
 		this.AddAttackMod(character.AttackMod{
 			Base: modifier.NewBase(c1AttackModKey, -1),
 			Amount: func(ae *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-				// char must be active
+				// キャラクターがフィールド上にいる必要がある
 				if c.Core.Player.Active() != this.Index {
 					return nil, false
 				}

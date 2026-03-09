@@ -34,8 +34,8 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       ca[c.TalentLvlAttack()],
 	}
 
-	// spawn up to 5 attacks
-	// priority: enemy > gadget
+	// 最大5回の攻撃を生成
+	// 優先度: 敵 > ガジェット
 	chargeCount := 5
 	checkDelay := chargeHitmarks[0] - 1 // TODO: exact delay unknown
 	singleCharge := func(pos geometry.Point, hitmark int) {
@@ -55,7 +55,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 
 	charge := func(target combat.Target) {
 		for j := 0; j < 3; j++ {
-			// queue up ca hits because target could move
+			// ターゲットが移動する可能性があるため重撃ヒットをキューに追加
 			c.Core.Tasks.Add(func() {
 				singleCharge(target.Pos(), 0)
 			}, chargeHitmarks[j]-checkDelay)
@@ -63,23 +63,23 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}
 
 	c.Core.Tasks.Add(func() {
-		// look for enemies around the player
+		// プレイヤー周囲の敵を探す
 		enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5), nil)
 
-		// don't do anything if there are no enemies in range
+		// 範囲内に敵がいない場合は何もしない
 		if enemies == nil {
 			return
 		}
 
-		// check for enemies around the enemy found
+		// 見つかった敵の周囲の敵を確認
 		anchorEnemy := enemies[0]
 		chargeArea := combat.NewCircleHitOnTarget(anchorEnemy, nil, 4)
 		enemies = c.Core.Combat.EnemiesWithinArea(chargeArea, func(t combat.Enemy) bool {
-			return t.Key() != anchorEnemy.Key() // don't want to target the same enemy twice
+			return t.Key() != anchorEnemy.Key() // 同じ敵を2回ターゲットしない
 		})
 		enemyCount := len(enemies)
 
-		// spawn attacks on enemies
+		// 敵に攻撃を生成
 		charge(anchorEnemy)
 		chargeCount -= 1
 		for i := 0; i < chargeCount; i++ {
@@ -89,9 +89,9 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		}
 		chargeCount -= enemyCount
 
-		// queue up following ca hits
+		// 後続の重撃ヒットをキューに追加
 
-		// if less than 5 enemies were targeted, then check for gadgets
+		// ターゲットした敵が5体未満の場合、ガジェットを確認
 		if chargeCount > 0 {
 			gadgets := c.Core.Combat.GadgetsWithinArea(chargeArea, nil)
 			gadgetCount := len(gadgets)

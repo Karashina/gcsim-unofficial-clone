@@ -33,7 +33,7 @@ func (b buffer) addFailure(core *core.Core, char int, active activeFailure) {
 		Reason: active.reason.String(),
 	}
 
-	// TODO: limit intervals to be at least length x (5?)
+	// TODO: 間隔を最低x（5？）に制限
 	b.failures[char] = append(b.failures[char], interval)
 }
 
@@ -57,7 +57,7 @@ func NewStat(core *core.Core) (stats.Collector, error) {
 			out.energySpent[char] += core.Player.Chars()[char].EnergyMax
 		}
 
-		// TODO: ActionId population
+		// TODO: ActionIdの設定
 		event := stats.ActionEvent{
 			Frame:  core.F,
 			Action: e.String(),
@@ -76,9 +76,9 @@ func NewStat(core *core.Core) (stats.Collector, error) {
 		e := args[1].(action.Action)
 		reason := args[3].(action.Failure)
 
-		// Assumes we will continue trying an action until it succeeds.
-		// If we ever give up trying actions, this will no longer be accurate
-		// TODO: track by action id to handle this edge case?
+		// アクションが成功するまで試行を続ける前提。
+		// アクションの試行を中断した場合、これは正確ではなくなる
+		// TODO: このエッジケースに対応するためアクションIDで追跡する？
 		if _, ok := out.activeFailures[char][e]; !ok {
 			out.activeFailures[char][e] = activeFailure{
 				start:  core.F,

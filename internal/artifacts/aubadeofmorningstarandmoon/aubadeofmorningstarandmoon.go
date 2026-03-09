@@ -25,19 +25,19 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// Aubade of Morningstar and Moon
-// 2-set: Increases Elemental Mastery by 80.
-// 4-set: When the equipping character is off-field, Lunar-Charged, Lunar-Bloom,
-// and Lunar-Crystallize Bonus is increased by 20%.
-// When the party's Moonsign Level is at least Ascendant Gleam, Lunar Reaction DMG
-// will be further increased by 40%.
-// This effect will disappear after the equipping character is active for 3s.
+// 曙星と月のオバード
+// 2セット: 元素熟知+80
+// 4セット: 装備キャラがフィールド外の場合、Lunar-Charged、Lunar-Bloom、
+// およびLunar-Crystallizeボーナスが20%増加。
+// パーティのMoonsignレベルがAscendant Gleam以上の場合、Lunar反応ダメージが
+// さらに40%増加。
+// この効果は装備キャラがフィールド上で3秒後に消失。
 
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
 	if count >= 2 {
-		// 2pc: EM +80
+		// 2セット: 元素熟知+80
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.EM] = 80
 		char.AddStatMod(character.StatMod{
@@ -53,39 +53,39 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		const activeKey = "aubade-4pc-active-timer"
 		activeTimeout := 180 // 3s
 
-		// Track when character becomes active
+		// キャラクターがアクティブになったタイミングを追跡
 		c.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 			if c.Player.Active() != char.Index {
 				return false
 			}
-			// Start timer when character becomes active
+			// キャラクターがアクティブになったらタイマーを開始
 			char.AddStatus(activeKey, activeTimeout, true)
 			return false
 		}, "aubade-4pc-swap")
 
-		// Add attack mod for Lunar Reaction DMG bonus
+		// ルナリアクションダメージボーナス用の攻撃モディファイアを追加
 		char.AddAttackMod(character.AttackMod{
 			Base: modifier.NewBase("aubade-4pc", -1),
 			Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-				// Check if this is Lunar Reaction DMG
+				// Lunar反応ダメージかどうか確認
 				if atk.Info.AttackTag != attacks.AttackTagLCDamage &&
 					atk.Info.AttackTag != attacks.AttackTagLBDamage &&
 					atk.Info.AttackTag != attacks.AttackTagLCrsDamage {
 					return nil, false
 				}
 
-				// Check if character is off-field (active timer not active)
+				// キャラがフィールド外かどうか確認（アクティブタイマーが無効）
 				if char.StatusIsActive(activeKey) {
 					return nil, false
 				}
 
 				val := make([]float64, attributes.EndStatType)
 
-				// Base bonus: 20% when off-field
+				// 基本ボーナス: フィールド外で20%
 				bonus := 0.20
 
-				// Additional bonus: 40% if Moonsign Level is at least Ascendant Gleam
-				// Check if character has Moonsign Ascendant status
+				// 追加ボーナス: MoonsignレベルがAscendant Gleam以上で40%
+				// キャラにMoonsign Ascendantステータスがあるか確認
 				if char.MoonsignAscendant {
 					bonus += 0.40
 				}

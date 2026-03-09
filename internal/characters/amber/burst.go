@@ -13,7 +13,7 @@ import (
 
 var burstFrames []int
 
-const burstStart = 72 // hitmark of the first tick
+const burstStart = 72 // 最初のティックのヒットマーク
 
 func init() {
 	burstFrames = frames.InitAbilSlice(111) // Q -> N1/E
@@ -38,7 +38,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	snap := c.Snapshot(&ai)
 
 	burstCenter := c.Core.Combat.PrimaryTarget().Pos()
-	// 2sec duration, spawn arrow every .4s at a random position, burstRadius from burst center
+	// 2秒間持続、0.4秒ごとに元素爆発中心からburstRadius内のランダムな位置に矢を生成
 	for i := 24; i <= 120; i += 24 {
 		arrowPos := geometry.CalcRandomPointFromCenter(burstCenter, c.burstRadius, c.burstRadius, c.Core.Rand)
 		c.Core.QueueAttackWithSnap(
@@ -48,7 +48,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			burstStart+i)
 	}
 
-	// 2sec duration, spawn arrow every .6s at a random position burstRadius from burst center
+	// 2秒間持続、0.6秒ごとにburstRadius内のランダムな位置に矢を生成
 	for i := 36; i <= 120; i += 36 {
 		arrowPos := geometry.CalcRandomPointFromCenter(burstCenter, c.burstRadius, c.burstRadius, c.Core.Rand)
 		c.Core.QueueAttackWithSnap(
@@ -58,7 +58,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			burstStart+i)
 	}
 
-	// 2sec duration, spawn arrow every .2s between 0.1m and burstRadius from burst center
+	// 2秒間持続、0.2秒ごとに中心から0.1m～burstRadiusの範囲に矢を生成
 	for i := 12; i <= 120; i += 12 {
 		arrowPos := geometry.CalcRandomPointFromCenter(burstCenter, 0.1, c.burstRadius, c.Core.Rand)
 		c.Core.QueueAttackWithSnap(
@@ -88,7 +88,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

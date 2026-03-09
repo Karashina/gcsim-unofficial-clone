@@ -12,9 +12,9 @@ type AttackEvent struct {
 	Pattern AttackPattern
 	// Timing        AttackTiming
 	Snapshot    Snapshot
-	SourceFrame int            // source frame
+	SourceFrame int            // ソースフレーム
 	Callbacks   []AttackCBFunc `json:"-"`
-	Reacted     bool           // true if a reaction already took place - for purpose of attach/refill
+	Reacted     bool           // trueの場合、元素反応が既に発生済み — 付着/補充用
 }
 
 type AttackCB struct {
@@ -27,49 +27,49 @@ type AttackCB struct {
 type AttackCBFunc func(AttackCB)
 
 type AttackInfo struct {
-	ActorIndex       int               // character this attack belongs to
-	DamageSrc        targets.TargetKey // source of this attack; should be a unique key identifying the target
-	Abil             string            // name of ability triggering the damage
+	ActorIndex       int               // この攻撃が属するキャラクター
+	DamageSrc        targets.TargetKey // この攻撃のソース。ターゲットを識別するユニークキー
+	Abil             string            // ダメージをトリガーするアビリティ名
 	AttackTag        attacks.AttackTag
 	AdditionalTags   []attacks.AdditionalTag
-	PoiseDMG         float64 // only needed on blunt attacks for frozen consumption before shatter for now
+	PoiseDMG         float64 // 現時点では氷結消費前の粉砕用、銀撃攻撃のみ必要
 	ICDTag           attacks.ICDTag
 	ICDGroup         attacks.ICDGroup
-	Element          attributes.Element   // element of ability
-	Durability       reactions.Durability // durability of aura, 0 if nothing applied
+	Element          attributes.Element   // アビリティの元素
+	Durability       reactions.Durability // 元素付着量。付着無しの場合は0
 	NoImpulse        bool
 	HitWeakPoint     bool
-	Mult             float64 // ability multiplier. could set to 0 from initial Mona dmg
+	Mult             float64 // アビリティ倍率。初期モナダメージでは0に設定可能
 	StrikeType       attacks.StrikeType
-	UseDef           bool    // we use this instead of flatdmg to make sure stat snapshotting works properly
-	UseHP            bool    // we use this instead of flatdmg to make sure stat snapshotting works properly
-	FlatDmg          float64 // flat dmg;
-	IgnoreDefPercent float64 // by default this value is 0; if = 1 then the attack will ignore defense; raiden c2 should be set to 0.6 (i.e. ignore 60%)
+	UseDef           bool    // ステータススナップショットが正しく動作するようflatdmgの代わりに使用
+	UseHP            bool    // ステータススナップショットが正しく動作するようflatdmgの代わりに使用
+	FlatDmg          float64 // 固定ダメージ
+	IgnoreDefPercent float64 // デフォルトは0。 1の場合は防御力無視。雷電将軍2凸は0.6（60%無視）に設定
 	IgnoreInfusion   bool
-	// amp info
-	Amped   bool                   // new flag used by new reaction system
-	AmpMult float64                // amplier
-	AmpType reactions.ReactionType // melt or vape i guess
-	// catalyze info
+	// 増幅情報
+	Amped   bool                   // 新反応システム用フラグ
+	AmpMult float64                // 増幅倍率
+	AmpType reactions.ReactionType // 融解または蒸発
+	// 激化情報
 	Catalyzed     bool
 	CatalyzedType reactions.ReactionType
-	// special flag for sim generated attack
+	// シミュレーションが生成した攻撃用の特殊フラグ
 	SourceIsSim bool
 	DoNotLog    bool
-	// hitlag stuff
-	HitlagHaltFrames     float64 // this is the number of frames to pause by
-	HitlagFactor         float64 // this is factor to slow clock by
-	CanBeDefenseHalted   bool    // for whacking ruin gaurds
-	IsDeployable         bool    // if this is true, then hitlag does not affect owner
-	HitlagOnHeadshotOnly bool    // if this is true, will only apply if HitWeakpoint is also true
+	// ヒットラグ関連
+	HitlagHaltFrames     float64 // 一時停止するフレーム数
+	HitlagFactor         float64 // クロックを遅くする係数
+	CanBeDefenseHalted   bool    // 遍機守衛などに対する攻撃用
+	IsDeployable         bool    // trueの場合、ヒットラグは所有者に影響しない
+	HitlagOnHeadshotOnly bool    // trueの場合、HitWeakpointがtrueの時のみ適用
 
-	AuraExpiry int // for lc contributor tracking
+	AuraExpiry int // LC貢献者追跡用
 }
 
 type Snapshot struct {
-	Stats   attributes.Stats // total character stats including from artifact, bonuses, etc...
+	Stats   attributes.Stats // 聖遺物・ボーナス等を含むキャラクターの合計ステータス
 	CharLvl int
 
-	SourceFrame int           // frame snapshot was generated at
-	Logs        []interface{} // logs for the snapshot
+	SourceFrame int           // スナップショットが生成されたフレーム
+	Logs        []interface{} // スナップショットのログ
 }

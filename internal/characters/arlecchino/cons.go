@@ -26,7 +26,7 @@ func (c *char) c2() {
 }
 
 func (c *char) c2OnAbsorbDue() {
-	// Check is redundant? Can't reach blood debt due without A1
+	// チェックは冗長？A1なしでは血の負債期限に到達できない
 	if c.Base.Cons < 2 || c.Base.Ascension < 1 {
 		return
 	}

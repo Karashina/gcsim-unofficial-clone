@@ -27,20 +27,20 @@ func init() {
 const burstBuffKey = "diluc-q"
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// A4:
-	// The Pyro Infusion provided by Dawn lasts for 4s longer.
+	// 固有天賦2:
+	// 黎明の炎元素付与の持続時間が4秒延長される
 	duration := 480
 	hasA4 := c.Base.Ascension >= 4
 	if hasA4 {
 		duration += 240
 	}
 
-	// infusion starts when burst starts and ends when burst comes off CD - check any diluc video
+	// 元素付与は元素爆発開始時に始まりCD終了時に終了する（ディルックの動画で確認可能）
 	c.AddStatus(burstBuffKey, duration, true)
 	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Pyro, duration)
 
-	// A4:
-	// Additionally, Diluc gains 20% Pyro DMG Bonus during the duration of this effect.
+	// 固有天賦2:
+	// さらに、効果持続中ディルックの炎元素ダメージ+20%
 	if hasA4 {
 		c.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(burstBuffKey, duration),
@@ -51,8 +51,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		})
 	}
 
-	// Snapshot occurs late in the animation when it is released from the claymore
-	// For our purposes, snapshot upon damage proc
+	// スナップショットはアニメーション後半、大剣から放たれる時点で行われる
+	// ここではダメージ発生時にスナップショットする
 	c.Core.Tasks.Add(func() {
 		ai := combat.AttackInfo{
 			ActorIndex:         c.Index,
@@ -78,18 +78,18 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		)
 
 		ai.StrikeType = attacks.StrikeTypeDefault
-		// both initial hit, DoT and explosion all have 50 durability
+		// 初撃、持続ダメージ、爆発すべて元素量50
 		ai.Abil = "Dawn (Tick)"
 		ai.Mult = burstDOT[c.TalentLvlBurst()]
 
-		// only initial hit has hitlag
+		// ヒットラグは初撃のみ
 		ai.HitlagHaltFrames = 0
 		ai.CanBeDefenseHalted = false
 
-		// DoT and explosion dmg
-		// - gadget spawns at Y: 1m and lives for ~1.7s until it explodes
-		// - moves at 14 m/s with dmg happening every 0.2s, so it moves at 2.8m per attack
-		// - 1.7s / (0.2 s/attack) ~= 8 attacks total before explosion
+		// 持続ダメージと爆発ダメージ
+		// - ガジェットはY: 1mに生成され、爆発まで約1.7秒存在
+		// - 14 m/sで移動し0.2秒ごとにダメージ、1攻撃あたり2.8m移動
+		// - 1.7s / (0.2 s/攻撃) ≒ 爆発前に計8回攻撃
 		initialPos := c.Core.Combat.Player().Pos()
 		initialDirection := c.Core.Combat.Player().Direction()
 		for i := 0; i < 8; i++ {
@@ -120,7 +120,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

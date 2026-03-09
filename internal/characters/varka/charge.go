@@ -33,25 +33,25 @@ func init() {
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	if c.sturmActive {
-		// Update FWA charges from CD timer
+		// CDタイマーからFWAチャージを更新
 		c.updateFWACharges()
-		// In S&D mode: if FWA charges available, perform Azure Devour
+		// S&Dモード: FWAチャージがあればAzure Devourを実行
 		if c.fwaCharges > 0 {
 			return c.azureDevour(p)
 		}
-		// C6: if window is active from FWA, perform Azure Devour without charges
+		// C6: FWAからのウィンドウが有効なら、チャージなしでAzure Devourを実行
 		if c.Base.Cons >= 6 && c.StatusIsActive(c6FWAWindowKey) {
 			return c.azureDevour(p)
 		}
-		// Otherwise, perform S&D charged attack
+		// それ以外はS&D重撃を実行
 		return c.sturmCharge(p)
 	}
 	return c.normalCharge(p)
 }
 
-// normalCharge handles the basic charged attack (outside S&D)
+// normalCharge は基本重撃を処理する（S&D外）
 func (c *char) normalCharge(p map[string]int) (action.Info, error) {
-	// 2 sub-hits, both Physical
+	// 2サブヒット、両方物理
 	subHits := [][]float64{charge_a, charge_b}
 	for i, mult := range subHits {
 		ai := combat.AttackInfo{
@@ -84,11 +84,11 @@ func (c *char) normalCharge(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// sturmCharge handles the S&D charged attack (no FWA charges available)
+// sturmCharge はS&D重撃を処理する（FWAチャージなし）
 func (c *char) sturmCharge(p map[string]int) (action.Info, error) {
 	lvl := c.TalentLvlSkill()
 
-	// S&D Charged: 1st=Other, 2nd=Anemo
+	// S&D重撃: 1打目=他, 2打目=風
 	type hitInfo struct {
 		mult    float64
 		element attributes.Element
@@ -106,7 +106,7 @@ func (c *char) sturmCharge(p map[string]int) (action.Info, error) {
 
 	for i, h := range hits {
 		mult := h.mult
-		// Apply A1 multiplier
+		// A1倍率を適用
 		if c.Base.Ascension >= 1 && c.a1MultFactor != 1.0 {
 			mult *= c.a1MultFactor
 		}
@@ -141,15 +141,15 @@ func (c *char) sturmCharge(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// azureDevour handles the special charged attack that consumes FWA charges
+// azureDevour はFWAチャージを消費する特殊重撃を処理する
 func (c *char) azureDevour(p map[string]int) (action.Info, error) {
 	lvl := c.TalentLvlSkill()
 
-	// C6: check if we should not consume charges
+	// C6: チャージを消費しないか確認
 	consumeCharge := true
 	if c.Base.Cons >= 6 {
 		if c.StatusIsActive(c6FWAWindowKey) {
-			// After FWA, tap charged triggers additional Azure Devour without consuming charges
+			// FWA後、重撃タップでチャージ消費なしの追加Azure Devourを発動
 			consumeCharge = false
 			c.DeleteStatus(c6FWAWindowKey)
 		} else if c.StatusIsActive(c6AzureWindowKey) {
@@ -162,16 +162,16 @@ func (c *char) azureDevour(p map[string]int) (action.Info, error) {
 		c.fwaCharges--
 	}
 
-	// C1: Lyrical Libation effect - first Azure Devour after entering S&D deals 200% DMG
+	// C1: Lyrical Libation効果 - S&D突入後の最初のAzure Devourは200%ダメージ
 	c1Mult := 1.0
 	if c.Base.Cons >= 1 && c.StatusIsActive(c1LyricalKey) {
 		c1Mult = 2.0
 		c.DeleteStatus(c1LyricalKey)
 	}
 
-	// Azure Devour: 4 hits
-	// 1st: Other, 2nd: Anemo, 3rd: Other, 4th: Anemo
-	// All use ICDTagVarkaCAOther
+	// Azure Devour: 4ヒット
+	// 1打目: 他, 2打目: 風, 3打目: 他, 4打目: 風
+	// 全てICDTagVarkaCAOtherを使用
 	type hitInfo struct {
 		mult    float64
 		element attributes.Element
@@ -191,18 +191,18 @@ func (c *char) azureDevour(p map[string]int) (action.Info, error) {
 
 	for i, h := range hits {
 		mult := h.mult
-		// Apply A1 multiplier to Azure Devour
+		// A1倍率をAzure Devourに適用
 		if c.Base.Ascension >= 1 && c.a1MultFactor != 1.0 {
 			mult *= c.a1MultFactor
 		}
-		// Apply C1 Lyrical Libation multiplier
+		// C1 Lyrical Libation倍率を適用
 		mult *= c1Mult
 
 		ai := combat.AttackInfo{
 			ActorIndex:         c.Index,
 			Abil:               fmt.Sprintf("Azure Devour (Hit %v)", i+1),
 			AttackTag:          attacks.AttackTagExtra,
-			ICDTag:             attacks.ICDTagVarkaCAOther, // All 4 hits share this tag
+			ICDTag:             attacks.ICDTagVarkaCAOther, // 4ヒット全てがこのタグを共有
 			ICDGroup:           attacks.ICDGroupDefault,
 			StrikeType:         attacks.StrikeTypeBlunt,
 			PoiseDMG:           120.0,
@@ -220,15 +220,15 @@ func (c *char) azureDevour(p map[string]int) (action.Info, error) {
 		)
 	}
 
-	// C2: Additional Anemo strike equal to 800% ATK
+	// C2: ATKの800%に等しい追加風元素攻撃
 	if c.Base.Cons >= 2 {
 		c.c2Strike(azureDevourHitmarks[3] + 4)
 	}
 
-	// C6: after Azure Devour, open window for additional FWA
-	// Only set window when this was a normal Azure Devour (not a C6 chain trigger)
+	// C6: Azure Devour後、追加FWA用のウィンドウを開く
+	// 通常のAzure Devourの場合のみウィンドウを設定（C6チェーントリガーではない）
 	if c.Base.Cons >= 6 && consumeCharge {
-		c.AddStatus(c6AzureWindowKey, 60, true) // ~1s window
+		c.AddStatus(c6AzureWindowKey, 60, true) // 約1秒のウィンドウ
 	}
 
 	return action.Info{

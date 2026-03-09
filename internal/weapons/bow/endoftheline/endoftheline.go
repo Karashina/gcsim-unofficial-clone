@@ -26,10 +26,10 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Triggers the Flowrider effect after using an Elemental Skill, dealing 80% ATK as AoE DMG upon hitting an opponent with an attack.
-// Flowrider will be removed after 15s or after causing 3 instances of AoE DMG.
-// Only 1 instance of AoE DMG can be caused every 2s in this way.
-// Flowrider can be triggered once every 12s.
+// 元素スキル使用後、Flowrider効果を発動し、攻撃が敵に命中した時に攻撃力80%分の範囲ダメージを与える。
+// Flowriderは15秒後または範囲ダメージを3回与えた後に解除される。
+// 範囲ダメージは2秒毎に1回のみ発動可能。
+// Flowriderは12秒毎に1回発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -40,45 +40,45 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	const dmgIcdKey = "endoftheline-dmg-icd"
 
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
-		// do nothing if holder is off-field
+		// 装備者がフィールド外なら何もしない
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// do nothing if flowrider is on icd
+		// FlowriderがICD中なら何もしない
 		if char.StatusIsActive(effectIcdKey) {
 			return false
 		}
-		// add flowrider status and proc flowrider icd
+		// Flowriderステータスを追加し、FlowriderのICDを発動
 		char.AddStatus(effectKey, 15*60, true)
 		char.AddStatus(effectIcdKey, 12*60, true)
-		// reset icd
+		// ICDをリセット
 		if char.StatusIsActive(dmgIcdKey) {
 			char.DeleteStatus(dmgIcdKey)
 		}
-		// reset proc count
+		// 発動回数をリセット
 		w.procCount = 0
 		return false
 	}, fmt.Sprintf("endoftheline-effect-%v", char.Base.Key.String()))
 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
-		// do nothing if holder is off-field
+		// 装備者がフィールド外なら何もしない
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// do nothing if attack not from holder
+		// 装備者からの攻撃でなければ何もしない
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		// do nothing if flowrider is not active
+		// Flowriderがアクティブでなければ何もしない
 		if !char.StatusIsActive(effectKey) {
 			return false
 		}
-		// do nothing if flowrider dmg is on icd
+		// FlowriderダメージがICD中なら何もしない
 		if char.StatusIsActive(dmgIcdKey) {
 			return false
 		}
-		// queue up flowrider proc
+		// Flowrider発動をキューに追加
 		ai := combat.AttackInfo{
 			ActorIndex: char.Index,
 			Abil:       "End of the Line Proc",

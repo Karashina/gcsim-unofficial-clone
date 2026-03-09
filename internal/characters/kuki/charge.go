@@ -38,7 +38,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 			HitlagHaltFrames:   chargeHitlagHaltFrame[i] * 60,
 			CanBeDefenseHalted: chargeDefHalt[i],
 		}
-		// only the last multihit has hitlag so no need for char queue here
+		// 最後のマルチヒットのみヒットラグがあるためキャラキュー不要
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 2.8),

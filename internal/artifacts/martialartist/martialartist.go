@@ -30,7 +30,7 @@ func (s *Set) Init() error      { return nil }
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
-	// 2 Piece: Increases Normal Attack and Charged Attack DMG by 15%.
+	// 2セット: 通常攻撃と重撃のダメージが15%増加。
 	if count >= 2 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.DmgP] = 0.15
@@ -44,16 +44,16 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			},
 		})
 	}
-	// 4 Piece: After using Elemental Skill, increases Normal Attack and Charged Attack DMG by 25% for 8s.
+	// 4セット: 元素スキル使用後、通常攻撃と重撃のダメージが8秒間25%増加。
 	if count >= 4 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.DmgP] = 0.25
 		c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
-			// don't proc if someone else used a skill
+			// 他のキャラクターのスキルでは発動しない
 			if c.Player.Active() != char.Index {
 				return false
 			}
-			// add buff
+			// バフを追加
 			char.AddAttackMod(character.AttackMod{
 				Base: modifier.NewBaseWithHitlag("martialartist-4pc", 480), // 8s
 				Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {

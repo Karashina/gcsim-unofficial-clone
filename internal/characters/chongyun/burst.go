@@ -38,7 +38,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c4CB := c.makeC4Callback()
 
-	// Spirit Blade 1-3
+	// 霊刃 1-3
 	for _, hitmark := range burstHitmarks {
 		c.Core.QueueAttack(
 			ai,
@@ -49,7 +49,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		)
 	}
 
-	// extra Spirit Blade at C6
+	// 6凸時の追加霊刃
 	if c.Base.Cons >= 6 {
 		c.Core.QueueAttack(
 			ai,
@@ -66,7 +66,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

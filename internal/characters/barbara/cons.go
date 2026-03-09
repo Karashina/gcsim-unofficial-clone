@@ -30,15 +30,15 @@ func (c *char) c2() {
 	}
 }
 
-// inspired from hutao c6
-// TODO: does this even work?
+// 胡桃C6を参考
+// TODO: これは正しく動作するか？
 func (c *char) c6() {
 	c.Core.Events.Subscribe(event.OnPlayerHPDrain, func(args ...interface{}) bool {
 		di := args[0].(*info.DrainInfo)
 		if di.Amount <= 0 {
 			return false
 		}
-		if c.Core.Player.Active() != c.Index { // trigger only when not barbara
+		if c.Core.Player.Active() != c.Index { // バーバラ以外の場合のみ発動
 			c.checkc6()
 		}
 		return false
@@ -52,9 +52,9 @@ func (c *char) checkc6() {
 	if c.Core.F < c.c6icd && c.c6icd != 0 {
 		return
 	}
-	// grab the active char
+	// アクティブキャラクターを取得
 	char := c.Core.Player.ActiveChar()
-	// if dead, revive back to 1 hp
+	// 死亡している場合はHP1で復活
 	if char.CurrentHPRatio() <= 0 {
 		char.SetHPByAmount(1)
 	}

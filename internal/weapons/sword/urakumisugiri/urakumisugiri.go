@@ -29,9 +29,9 @@ const (
 	buffKey = "urakumisugiri-increase-buff"
 )
 
-// Normal Attack DMG is increased by 16/20/24/28/32% and Elemental Skill DMG is increased by 24/30/36/42/48%.
-// After a nearby active character deals Geo DMG, the aforementioned effects increase by 100% for 15s.
-// Additionally, the wielder's DEF is increased by 20/25/30/35/40%.
+// 通常攻撃ダメージが16/20/24/28/32%増加し、元素スキルダメージが24/30/36/42/48%増加する。
+// 近くのアクティブキャラが岩元素ダメージを与えた後、上記の効果が15秒間100%増加する。
+// また、装備者の防御力が20/25/30/35/40%増加する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

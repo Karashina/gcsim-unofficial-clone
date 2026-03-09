@@ -4,7 +4,7 @@ import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 
 func (c *char) radishHeal(hi info.HealInfo) {
 	c.Core.Player.Heal(hi)
-	// c1 and a4 should not proc on c6 radish
+	// 1凸と固有天賦2は6凸の大根では発動しない
 	if hi.Message == c6HealMsg {
 		return
 	}

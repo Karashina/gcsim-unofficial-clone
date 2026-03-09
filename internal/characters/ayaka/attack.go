@@ -40,7 +40,7 @@ func init() {
 	attackFrames[3][action.ActionAttack] = 22
 
 	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 66)
-	attackFrames[4][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
+	attackFrames[4][action.ActionCharge] = 500 //TODO: このアクションは不正; より良い処理方法が必要
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
@@ -48,8 +48,8 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		icdGroup := attacks.ICDGroupDefault
 		centerTarget := c.Core.Combat.Player()
 		if c.NormalCounter == 4 {
-			icdGroup = attacks.ICDGroupPoleExtraAttack   // N5 has a different ICDGroup
-			centerTarget = c.Core.Combat.PrimaryTarget() // N5 is a bullet
+			icdGroup = attacks.ICDGroupPoleExtraAttack   // N5は異なるICDGroupを持つ
+			centerTarget = c.Core.Combat.PrimaryTarget() // N5は弾丸
 		}
 		ai := combat.AttackInfo{
 			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),

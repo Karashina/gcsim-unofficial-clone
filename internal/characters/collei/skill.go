@@ -31,9 +31,9 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// The game has ICD as AttackTagElementalArt, ICDTagElementalArt,
-	// ICDGroupColleiBoomerangForward, and ICDGroupColleiBoomerangBack. However,
-	// we believe this is unnecessary, so just use ICDTagNone.
+	// ゲーム内のICDはAttackTagElementalArt, ICDTagElementalArt,
+	// ICDGroupColleiBoomerangForward, ICDGroupColleiBoomerangBackだが、
+	// 不要と判断し、ICDTagNoneを使用。
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Floral Brush",
@@ -59,7 +59,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		}
 	}
 	particleCB := c.makeParticleCB()
-	//TODO: this should have its own position
+	//TODO: 独自の位置を持つべき
 	for _, hitmark := range skillHitmarks {
 		c.Core.QueueAttack(
 			ai,
@@ -100,7 +100,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

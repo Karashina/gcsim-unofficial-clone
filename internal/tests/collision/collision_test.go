@@ -122,19 +122,19 @@ func TestSingleTarget(t *testing.T) {
 // 	c, trgs := makeCore(rand.Intn(10))
 // 	count := 0
 // 	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-// 		count++
-// 		return false
+// 		カウント++
+// 		falseを返す
 // 	}, "dmg-count")
 // 	c.Events.Subscribe(event.OnPlayerHit, func(args ...interface{}) bool {
-// 		count++
-// 		return false
+// 		カウント++
+// 		falseを返す
 // 	}, "dmg-count")
 // 	c.Events.Subscribe(event.OnGadgetHit, func(args ...interface{}) bool {
-// 		count++
-// 		return false
+// 		カウント++
+// 		falseを返す
 // 	}, "dmg-count")
 
-// 	//last one should be moved aside
+// 	//最後の1つを脇に移動
 // 	trgs[len(trgs)-1].SetPos(geometry.Point{X: 2, Y: 0})
 
 // 	for i := 0; i < len(trgs)-1; i++ {
@@ -250,11 +250,11 @@ func TestSkipTargets(t *testing.T) {
 	}
 }
 
-// common:
-// - attack centers on player
-// - player at 0,0 + t0 at 2,2 + t1 at 4,7
-// - player direction is towards t1
-// - everyone has radius 1
+// 共通:
+// - 攻撃はプレイヤーを中心に展開
+// - プレイヤーが0,0 + t0が2,2 + t1が4,7
+// - プレイヤーの方向はt1へ向いている
+// - 全員の半径は1
 func TestCircleAttackCollision(t *testing.T) {
 	tests := map[string]struct {
 		attackRadius float64
@@ -262,20 +262,20 @@ func TestCircleAttackCollision(t *testing.T) {
 		fanAngle     float64
 		want         int
 	}{
-		// no offset
+		// オフセットなし
 		"no offset, hit nothing": {attackRadius: 1, attackOffset: geometry.Point{}, fanAngle: 360, want: 0},
 		"no offset, hit t0":      {attackRadius: 7.06, attackOffset: geometry.Point{}, fanAngle: 360, want: 1},
 		"no offset, hit t0 & t1": {attackRadius: 7.07, attackOffset: geometry.Point{}, fanAngle: 360, want: 2},
-		// offset
+		// オフセットあり
 		"offset, hit nothing": {attackRadius: 1.7, attackOffset: geometry.Point{X: -1, Y: 5.5}, fanAngle: 360, want: 0},
 		"offset, hit t0":      {attackRadius: 1, attackOffset: geometry.Point{Y: 3}, fanAngle: 360, want: 1},
 		"offset, hit t1":      {attackRadius: 1.78, attackOffset: geometry.Point{X: -1, Y: 5.5}, fanAngle: 360, want: 1},
 		"offset, hit t0 & t1": {attackRadius: 1.79, attackOffset: geometry.Point{X: -1, Y: 5.5}, fanAngle: 360, want: 2},
-		// no offset, fanAngle
+		// オフセットなし、扇形角度指定
 		"no offset, fanAngle, hit nothing": {attackRadius: 1, attackOffset: geometry.Point{}, fanAngle: 30, want: 0},
 		"no offset, fanAngle, hit t0":      {attackRadius: 7.06, attackOffset: geometry.Point{}, fanAngle: 30, want: 1},
 		"no offset, fanAngle, hit t0 & t1": {attackRadius: 7.07, attackOffset: geometry.Point{}, fanAngle: 30, want: 2},
-		// offset, fanAngle
+		// オフセットあり、扇形角度指定
 		"offset, fanAngle, hit nothing": {attackRadius: 1, attackOffset: geometry.Point{X: -2, Y: 2}, fanAngle: 30, want: 0},
 		"offset, fanAngle, hit t0":      {attackRadius: 1, attackOffset: geometry.Point{X: -2, Y: 2}, fanAngle: 35, want: 1},
 		"offset, fanAngle, hit t1":      {attackRadius: 1.79, attackOffset: geometry.Point{X: -1, Y: 5.5}, fanAngle: 30, want: 1},
@@ -311,11 +311,11 @@ func circleAttackCollision(attackRadius float64, attackOffset geometry.Point, fa
 	return count
 }
 
-// common:
-// - attack centers on player
-// - player at 0,0 + t0 at 2,2 + t1 at 4,7
-// - player direction is towards t1
-// - everyone has radius 1
+// 共通:
+// - 攻撃はプレイヤーを中心に展開
+// - プレイヤーが0,0 + t0が2,2 + t1が4,7
+// - プレイヤーの方向はt1へ向いている
+// - 全員の半径は1
 func TestRectangleAttackCollision(t *testing.T) {
 	tests := map[string]struct {
 		attackWidth  float64
@@ -323,11 +323,11 @@ func TestRectangleAttackCollision(t *testing.T) {
 		attackOffset geometry.Point
 		want         int
 	}{
-		// no offset
+		// オフセットなし
 		"no offset, hit nothing": {attackWidth: 3, attackHeight: 1.5, attackOffset: geometry.Point{}, want: 0},
 		"no offset, hit t0":      {attackWidth: 3, attackHeight: 4, attackOffset: geometry.Point{}, want: 1},
 		"no offset, hit t0 & t1": {attackWidth: 3, attackHeight: 15, attackOffset: geometry.Point{}, want: 2},
-		// offset
+		// オフセットあり
 		"offset, hit nothing": {attackWidth: 2.5, attackHeight: 1, attackOffset: geometry.Point{X: -3, Y: 2}, want: 0},
 		"offset, hit t0":      {attackWidth: 2.6, attackHeight: 1, attackOffset: geometry.Point{X: -3, Y: 2}, want: 1},
 		"offset, hit t1":      {attackWidth: 1, attackHeight: 1, attackOffset: geometry.Point{Y: 9}, want: 1},

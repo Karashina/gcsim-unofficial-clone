@@ -9,13 +9,13 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When Arataki Itto uses consecutive Arataki Kesagiri, he obtains the following effects:
+// 荒瀧一斗が連続で荒瀧キサギリを使用すると、以下の効果を得る:
 //
-// - Each slash increases the ATK SPD of the next slash by 10%. Max ATK SPD increase is 30%.
+// - 各斬撃で次の斬撃の攻撃速度が10%増加する。最大攻撃速度増加は30%。
 //
-// TODO: - Increases his resistance to interruption.
+// TODO: - 中断耐性が増加する。
 //
-// These effects will be cleared once he stops performing consecutive slashes.
+// これらの効果は連続斬撃を停止すると解除される。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -40,14 +40,14 @@ func (c *char) a1Update(curSlash SlashType) {
 	}
 	switch curSlash {
 	case SaichiSlash:
-		// reset a1 stacks if we are doing a CA0
+		// CA0の場合はA1スタックをリセット
 		c.a1Stacks = 0
 		c.Core.Log.NewEvent("itto-a1 reset atkspd stacks", glog.LogCharacterEvent, c.Index).
 			Write("a1Stacks", c.a1Stacks).
 			Write("slash", curSlash.String(false))
 	case LeftSlash, RightSlash:
-		// increment a1 stacks if we are doing CA1/CA2
-		// increment stacks for A1, max is 3 stacks
+		// CA1/CA2の場合はA1スタックを増加
+		// A1スタックを増加、最大3スタック
 		c.a1Stacks++
 		if c.a1Stacks > 3 {
 			c.a1Stacks = 3
@@ -56,10 +56,10 @@ func (c *char) a1Update(curSlash SlashType) {
 			Write("a1Stacks", c.a1Stacks).
 			Write("slash", curSlash.String(false))
 	}
-	// do nothing if we are doing a CAF
+	// CAFの場合は何もしない
 }
 
-// Arataki Kesagiri DMG is increased by 35% of Arataki Itto's DEF.
+// 荒瀧キサギリのダメージが荒瀧一斗の防御力の35%分増加する。
 func (c *char) a4(ai *combat.AttackInfo) {
 	if c.Base.Ascension < 4 {
 		return

@@ -13,16 +13,16 @@ const (
 	kinuDuration       = int(3 * 60)
 	kinuStartDelay     = int(0.6 * 60)
 	kinuAttackInterval = int(0.5 * 60)
-	kinuAttackDelay    = 5 // should be 0.08s
+	kinuAttackDelay    = 5 // 0.08秒であるべき
 )
 
-// Kinu will attack nearby opponents, dealing AoE Geo DMG equivalent to 170% of
-// Tamoto's DMG. DMG dealt this way is considered Elemental Skill DMG.
+// 「絹」は付近の敵を攻撃し、Tamotoの170%に相当する
+// 岩元素範囲ダメージを与える。このダメージは元素スキルダメージ扱い。
 //
-// Kinu will leave the field after 1 attack or after lasting 3s.
+// 「絹」は1回攻撃後または3秒経過後に退場する。
 func (c *char) createKinu(src int, centerOffset, minRandom, maxRandom float64) func() {
 	return func() {
-		// determine kinu pos
+		// 「絹」の位置を決定
 		player := c.Core.Combat.Player()
 		center := geometry.CalcOffsetPoint(
 			player.Pos(),
@@ -33,7 +33,7 @@ func (c *char) createKinu(src int, centerOffset, minRandom, maxRandom float64) f
 
 		c.Core.Log.NewEvent("kinu spawned", glog.LogCharacterEvent, c.Index).Write("src", src)
 
-		// spawn kinu
+		// 「絹」を生成
 		kinu := newTicker(c.Core, kinuDuration, nil)
 		kinu.cb = c.kinuAttack(src, kinu, kinuPos)
 		kinu.interval = kinuAttackInterval
@@ -62,8 +62,8 @@ func (c *char) kinuAttack(src int, kinu *ticker, pos geometry.Point) func() {
 			ai.FlatDmg = snap.Stats.TotalDEF()
 			ai.FlatDmg *= turretDefScaling[c.TalentLvlSkill()] * kinuDmgRatio
 
-			// if the player has an attack target it will always choose this enemy
-			// so just need to make sure that it is within the search AoE
+			// プレイヤーに攻撃ターゲットがある場合は常にこの敵を選択する
+			// 検索AoE内にあることを確認するだけでよい
 			t := c.Core.Combat.PrimaryTarget()
 			if !t.IsWithinArea(combat.NewCircleHitOnTarget(pos, nil, c.skillSearchAoE)) {
 				return

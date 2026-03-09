@@ -15,7 +15,7 @@ func init() {
 	core.RegisterWeaponFunc(keys.WhiteTassel, NewWeapon)
 }
 
-// Increases Normal Attack DMG by 24/30/36/42/48%.
+// 通常攻撃ダメージが24/30/36/42/48%増加する。
 type Weapon struct {
 	Index int
 }

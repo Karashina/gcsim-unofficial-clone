@@ -24,20 +24,20 @@ func init() {
 	burstFrames = frames.InitAbilSlice(66)
 }
 
-// Burst performs Shadowless Reflection - Oriole-Song
-// Enters Oriole-Song state; Nightingale's Song adds FlatDmg to party Geo hits
+// Burst は影なき映し・Oriole-Songを実行する
+// Oriole-Song状態に入る。ナイチンゲールの歌はパーティの岩元素ヒットにFlatDmgを追加
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// Calculate initial Nightingale stacks
-	// Base 21 + 5 per Geo Construct (max 3 constructs)
+	// 初期ナイチンゲールスタックを計算
+	// 基本21 + 岩元素構築物1体につき5（構築物最大3体）
 	geoConstructs := c.countGeoConstructs()
 	initialConstructStacks := geoConstructs * stacksPerGeoConstruct
 	if initialConstructStacks > 15 {
 		initialConstructStacks = 15
 	}
-	c.geoConstructBonusStacks = initialConstructStacks // Track initial construct stacks toward 15-cap
+	c.geoConstructBonusStacks = initialConstructStacks // 初期構築物スタックを15上限に向けて追跡
 	c.nightingaleSongStacks = baseNightingaleStacks + initialConstructStacks
 
-	// Initial burst hit
+	// 元素爆発初撃
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Shadowless Reflection",
@@ -49,7 +49,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Durability: 50,
 	}
 
-	// EM + DEF scaling from burst_gen data
+	// burst_genデータからの元素熟知 + 防御力スケーリング
 	em := c.Stat(attributes.EM)
 	def := c.TotalDef(false)
 	emMult := burstEM[c.TalentLvlBurst()]
@@ -63,15 +63,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(ai, ap, 0, 0)
 	}, burstHitmark)
 
-	// Enter Oriole-Song state
+	// Oriole-Song状態に入る
 	c.QueueCharTask(func() {
 		c.enterOrioleSong()
 	}, burstHitmark)
 
-	// Apply A1 enhanced buffs (Ascendant Gleam check)
+	// 固有天賦1の強化バフを適用（Ascendant Gleamチェック）
 	c.applyLightkeeperOath()
 
-	// I-4 fix: CD 18s → 15s
+	// I-4修正: CD 18秒 → 15秒
 	c.SetCDWithDelay(action.ActionBurst, 15*60, burstHitmark)
 	c.ConsumeEnergy(4)
 
@@ -88,20 +88,20 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// enterOrioleSong activates Oriole-Song state
+// enterOrioleSong はOriole-Song状態を発動する
 func (c *char) enterOrioleSong() {
 	c.orioleSongActive = true
 	c.orioleSongSrc = c.Core.F
 	c.AddStatus(orioleSongKey, orioleSongDur, true)
 
-	// I-1/I-2 refactor: Nightingale's Song uses FlatDmg per hit via OnEnemyHit
-	// instead of GeoP% StatMod. burstGeoBonusEM and burstLCrsBonusEM are now used.
+	// I-1/I-2リファクタ: ナイチンゲールの歌はOnEnemyHit経由でヒット毎にFlatDmgを使用
+	// GeoP% StatModの代わりにburstGeoBonusEMとburstLCrsBonusEMを使用。
 	c.subscribeNightingaleStackConsumption()
 
-	// I-GC1: Subscribe to Geo Construct spawns for dynamic stack gain
+	// I-GC1: 岩元素構築物生成を購読し、動的にスタックを獲得
 	c.subscribeGeoConstructStacks()
 
-	// Schedule mode exit
+	// モード終了をスケジュール
 	src := c.orioleSongSrc
 	c.QueueCharTask(func() {
 		if c.orioleSongSrc != src {
@@ -115,10 +115,10 @@ func (c *char) enterOrioleSong() {
 		Write("duration", orioleSongDur)
 }
 
-// subscribeNightingaleStackConsumption subscribes to party member Geo damage hits
-// I-1: Nightingale's Song adds FlatDmg to each qualifying Geo hit, consuming 1 stack per hit
-// I-13: Applies to all party members' Geo attacks
-// I-14: Only Normal/Charged/Plunge/Skill/Burst attack tags qualify
+// subscribeNightingaleStackConsumption はパーティメンバーの岩元素ダメージヒットを購読する
+// I-1: ナイチンゲールの歌は対象の岩元素ヒット毎にFlatDmgを追加し、1ヒットにつき1スタック消費
+// I-13: 全パーティメンバーの岩元素攻撃に適用
+// I-14: 通常攻撃/重撃/落下攻撃/元素スキル/元素爆発の攻撃タグのみ対象
 func (c *char) subscribeNightingaleStackConsumption() {
 	cb := func(args ...interface{}) bool {
 		if !c.orioleSongActive {
@@ -131,17 +131,17 @@ func (c *char) subscribeNightingaleStackConsumption() {
 		atk := args[1].(*combat.AttackEvent)
 		t := args[0].(combat.Target)
 
-		// Only apply to hits against enemies
+		// 敵へのヒットのみ適用
 		if t.Type() != targets.TargettableEnemy {
 			return false
 		}
 
-		// Only qualify Geo element hits
+		// 岩元素ヒットのみ対象
 		if atk.Info.Element != attributes.Geo {
 			return false
 		}
 
-		// I-14: Only Normal/Charged/Plunge/Skill/Burst attack tags qualify
+		// I-14: 通常攻撃/重撃/落下攻撃/元素スキル/元素爆発の攻撃タグのみ対象
 		switch atk.Info.AttackTag {
 		case attacks.AttackTagNormal,
 			attacks.AttackTagExtra,
@@ -150,29 +150,29 @@ func (c *char) subscribeNightingaleStackConsumption() {
 			attacks.AttackTagElementalArtHold,
 			attacks.AttackTagElementalBurst,
 			attacks.AttackTagLCrsDamage:
-			// valid
+			// 有効
 		default:
 			return false
 		}
 
-		// I-1/I-2: Add FlatDmg based on Illuga's EM and talent level
+		// I-1/I-2: イルーガの元素熟知と天賦レベルに基づきFlatDmgを追加
 		illugaEM := c.Stat(attributes.EM)
 		var flatDmg float64
 		if atk.Info.AttackTag == attacks.AttackTagLCrsDamage {
-			// LCrs hits use burstLCrsBonusEM multiplier
+			// LCrsヒットはburstLCrsBonusEM乗数を使用
 			flatDmg = burstLCrsBonusEM[c.TalentLvlBurst()] * illugaEM
-			flatDmg += c.getA4LCrsBonus() // A4 LCrs enhancement
+			flatDmg += c.getA4LCrsBonus() // 固有天賦4 LCrs強化
 		} else {
-			// Geo hits use burstGeoBonusEM multiplier
+			// 岩元素ヒットはburstGeoBonusEM乗数を使用
 			flatDmg = burstGeoBonusEM[c.TalentLvlBurst()] * illugaEM
-			flatDmg += c.getA4GeoBonus() // A4 Geo enhancement
+			flatDmg += c.getA4GeoBonus() // 固有天賦4 岩元素強化
 		}
 		atk.Info.FlatDmg += flatDmg
 
-		// Consume 1 stack per enemy hit
+		// 敵ヒット毎に1スタック消費
 		c.nightingaleSongStacks--
 
-		// C2: Check if enough stacks consumed for lamp attack
+		// 2命: ランプ攻撃に十分なスタックが消費されたかチェック
 		if c.Base.Cons >= 2 {
 			c.c2StackCounter++
 			for c.c2StackCounter >= 7 {
@@ -193,11 +193,11 @@ func (c *char) subscribeNightingaleStackConsumption() {
 		return false
 	}
 
-	// I-10: Use key-based subscribe to avoid duplicate registration on burst reuse
+	// I-10: 元素爆発再使用時の重複登録を避けるためキーベースの購読を使用
 	c.Core.Events.Subscribe(event.OnEnemyHit, cb, "illuga-nightingale-consume")
 }
 
-// exitOrioleSong ends Oriole-Song state
+// exitOrioleSong はOriole-Song状態を終了する
 func (c *char) exitOrioleSong() {
 	c.orioleSongActive = false
 	c.orioleSongSrc = -1
@@ -209,9 +209,9 @@ func (c *char) exitOrioleSong() {
 	c.Core.Log.NewEvent("Illuga exits Oriole-Song", glog.LogCharacterEvent, c.Index)
 }
 
-// subscribeGeoConstructStacks subscribes to Geo Construct creation events
-// When a Geo Construct is created during Oriole-Song, Illuga gains 5 stacks per
-// construct currently on the battlefield, up to 15 additional stacks total.
+// subscribeGeoConstructStacks は岩元素構築物生成イベントを購読する
+// Oriole-Song中に岩元素構築物が生成されると、現在のフィールド上の
+// 構築物1体につき5スタック獲得する（追加スタック上限15）。
 func (c *char) subscribeGeoConstructStacks() {
 	c.Core.Events.Subscribe(event.OnConstructSpawned, func(args ...interface{}) bool {
 		if !c.orioleSongActive {
@@ -240,7 +240,7 @@ func (c *char) subscribeGeoConstructStacks() {
 	}, "illuga-geo-construct-stacks")
 }
 
-// countGeoConstructs returns the number of active Geo constructs
+// countGeoConstructs はアクティブな岩元素構築物の数を返す
 func (c *char) countGeoConstructs() int {
 	return c.Core.Constructs.Count()
 }

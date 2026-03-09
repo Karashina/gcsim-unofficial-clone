@@ -20,7 +20,7 @@ var key = map[string]TokenType{
 	"fallthrough": KeywordFallthrough,
 	"return":      KeywordReturn,
 	"for":         KeywordFor,
-	// genshin specific keywords
+	// 原神固有のキーワード
 	"options":             KeywordOptions,
 	"add":                 KeywordAdd,
 	"char":                KeywordChar,
@@ -43,12 +43,12 @@ var key = map[string]TokenType{
 	"resist":              KeywordResist,
 	"energy":              KeywordEnergy,
 	"hurt":                KeywordHurt,
-	// commands
-	// team keywords
-	// flags
-	// ??
-	// energy/hurt event related
-	// target related
+	// コマンド
+	// チームキーワード
+	// フラグ
+	// ???
+	// エネルギー/被ダメージイベント関連
+	// ターゲット関連
 }
 
 var StatKeys = map[string]attributes.Stat{

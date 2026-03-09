@@ -35,14 +35,13 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Max HP increased by 40%.
-// Once every 15s, for the 14s after using an Elemental Skill:
-// Gain 4 Scorching Summer stacks.
-// Each stack increases Normal Attack DMG by 24%.
-// For the duration of the effect,
-// once every 1.5s, lose 1 stack after a Normal Attack hits an opponent;
-// once every 1.5s, gain 1 stack after triggering a Vaporize reaction on an opponent.
-// Max 4 Scorching Summer stacks.
+// HP上限が40%増加する。
+// 15秒毎に、1回元素スキル使用後14秒間:
+// Scorching Summerスタックを4獲得する。
+// 各スタックは通常攻撃ダメージを24%増加させる。
+// 効果持続中、1.5秒毎に通常攻撃が敵に命中するとスタックが1減少;
+// 1.5秒毎に蒸発反応を起こすとスタックが1増加。
+// 最大 4 Scorching Summerスタック。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -85,7 +84,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("surfs-up-skill-%v", char.Base.Key.String()))
 
-	// Gain stack on vape
+	// 蒸発反応でスタック獲得
 	c.Events.Subscribe(event.OnVaporize, func(args ...interface{}) bool {
 		if _, ok := args[0].(*enemy.Enemy); !ok {
 			return false
@@ -106,7 +105,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		if w.stacks < 5 { // limit to 5 so it can carry over when NA hits
+		if w.stacks < 5 { // NAヒット時に引き継ぐため上限5に制限
 			w.stacks++
 		}
 		if w.stacks == 5 {
@@ -121,7 +120,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("surfs-up-vape-%v", char.Base.Key.String()))
 
-	// Lose stack on NA
+	// 通常攻撃でスタック減少
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		if _, ok := args[0].(*enemy.Enemy); !ok {
 			return false

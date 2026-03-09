@@ -18,11 +18,11 @@ const (
 	c6ICDKey = "cyno-c6-icd"
 )
 
-// After using Sacred Rite: Wolf's Swiftness, Cyno's Normal Attack SPD will be increased by 20% for 10s.
-// If the Judication effect of his Passive Talent Featherfall Judgment is triggered during Secret Rite: Chasmic Soulfarer,
-// the duration of this increase will be refreshed.
+// 「圣儀・狼駆」使用後、セノの通常攻撃速度が10秒間20%増加する。
+// 「秘儀・裂置の将」中に固有天賦「羽落ちの裁定」の「裁定」効果が発動した場合、
+// この増加の持続時間がリフレッシュされる。
 //
-// You need to unlock the Passive Talent "Featherfall Judgment."
+// 固有天賦「羽落ちの裁定」を先に解放する必要がある。
 func (c *char) c1() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.AtkSpd] = 0.2
@@ -41,9 +41,8 @@ func (c *char) c1() {
 const c2Key = "cyno-c2"
 const c2ICD = "cyno-c2-icd"
 
-// When Cyno's Normal Attacks hit opponents, his Electro DMG Bonus will
-// increase by 10% for 4s. This effect can be triggered once every 0.1s. Max 5
-// stacks.
+// セノの通常攻撃が敵に命中すると、雷元素ダメージボーナスが
+// 4秒間10%増加する。0.1秒に1回発動可能。最大5スタック。
 func (c *char) makeC2CB() combat.AttackCBFunc {
 	if c.Base.Cons < 2 {
 		return nil
@@ -77,25 +76,23 @@ func (c *char) makeC2CB() combat.AttackCBFunc {
 	}
 }
 
-// When Cyno is in the Pactsworn Pathclearer state triggered by Sacred Rite:
-// Wolf's Swiftness, after he triggers Electro-Charged, Superconduct,
-// Overloaded, Quicken, Aggravate, Hyperbloom, or an Electro Swirl reaction, he
-// will restore 3 Elemental Energy for all nearby party members (except
-// himself.)
-// This effect can occur 5 times within one use of Sacred Rite: Wolf’s Swiftness.
+// 「圣儀・狼駆」で発動した「契約の导砂者」状態のセノが、
+// 感電・超伝導・過負荷・激化・超激化・超開花・雷拡散反応を
+// 発動した際、周囲のパーティメンバー（自身を除く）の元素エネルギーを3回復。
+// 「圣儀・狼駆」1回につき5回まで発動可能。
 func (c *char) c4() {
-	//nolint:unparam // ignoring for now, event refactor should get rid of bool return of event sub
+	//nolint:unparam // 今は無視、イベントリファクタで bool 戻り値が解決されるはず
 	restore := func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != c.Index {
 			return false
 		}
-		if c.c4Counter > 4 { // counting from 0 to 4, 5 instances max
+		if c.c4Counter > 4 { // 0〜4のカウント、最大5回
 			return false
 		}
 		c.c4Counter++
 		for _, this := range c.Core.Player.Chars() {
-			// not for cyno
+			// サイノ以外
 			if this.Index != c.Index {
 				this.AddEnergy("cyno-c4", 3)
 			}
@@ -119,8 +116,8 @@ func (c *char) c4() {
 	c.Core.Events.Subscribe(event.OnSwirlElectro, restoreNoGadget, "cyno-c4")
 }
 
-// After using Sacred Rite: Wolf's Swiftness or triggering the Judication effect of the Passive Talent "Featherfall Judgment,"
-// Cyno will gain 4 stacks of the "Day of the Jackal" effect.
+// 「圣儀・狼駆」または固有天賦「羽落ちの裁定」の「裁定」効果発動後、
+// 「ジャッカルの日」効果を4スタック獲得する。
 func (c *char) c6Init() {
 	if c.Base.Cons < 6 {
 		return
@@ -132,10 +129,10 @@ func (c *char) c6Init() {
 	}
 }
 
-// When he hits opponents with Normal Attacks, he will consume 1 stack of "Day of the Jackal" to fire off one Duststalker Bolt.
-// "Day of the Jackal" lasts for 8s. Max 8 stacks. It will be canceled once Pactsworn Pathclearer ends.
-// A maximum of 1 Duststalker Bolt can be unleashed this way every 0.4s.
-// You must first unlock the Passive Talent "Featherfall Judgment."
+// 通常攻撃が敵に命中すると「ジャッカルの日」スタックを1消費し、「砂の矢」を1本発射する。
+// 「ジャッカルの日」は8秒持続。最大8スタック。「契約の导砂者」終了時に解除される。
+// 0.4秒に1本の「砂の矢」が発射可能。
+// 固有天賦「羽落ちの裁定」を先に解放する必要がある。
 func (c *char) makeC6CB() combat.AttackCBFunc {
 	if c.Base.Cons < 6 || c.c6Stacks == 0 || !c.StatusIsActive(c6Key) {
 		return nil
@@ -156,7 +153,7 @@ func (c *char) makeC6CB() combat.AttackCBFunc {
 		c.AddStatus(c6ICDKey, 0.4*60, true)
 		c.c6Stacks--
 
-		// technically should use ICDGroupCynoC6, but it's just reskinned standard ICD
+		// 技術的には ICDGroupCynoC6 を使うべきだが、実質的には標準ICDと同じ
 		ai := combat.AttackInfo{
 			ActorIndex:   c.Index,
 			Abil:         "Raiment: Just Scales (C6)",

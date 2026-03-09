@@ -28,34 +28,34 @@ const (
 func init() {
 	skillFrames = make([][]int, 5)
 
-	// skill (press) -> x
+	// スキル（単押し） -> x
 	skillFrames[0] = frames.InitAbilSlice(42)
 	skillFrames[0][action.ActionDash] = 22
 	skillFrames[0][action.ActionJump] = 23
 	skillFrames[0][action.ActionSwap] = 41
 
-	// skill (hold=1) -> x
+	// スキル（長押し=1） -> x
 	skillFrames[1] = frames.InitAbilSlice(98)
 	skillFrames[1][action.ActionBurst] = 97
 	skillFrames[1][action.ActionDash] = 65
 	skillFrames[1][action.ActionJump] = 66
 	skillFrames[1][action.ActionSwap] = 96
 
-	// skill (hold=1,c4) -> x
+	// スキル（長押し=1,4凸） -> x
 	skillFrames[2] = frames.InitAbilSlice(107)
 	skillFrames[2][action.ActionDash] = 95
 	skillFrames[2][action.ActionJump] = 95
 	skillFrames[2][action.ActionSwap] = 106
 
-	// skill (hold=2) -> x
+	// スキル（長押し=2） -> x
 	skillFrames[3] = frames.InitAbilSlice(343)
-	skillFrames[3][action.ActionSkill] = 339 // uses burst frames
+	skillFrames[3][action.ActionSkill] = 339 // 元素爆発フレームを使用
 	skillFrames[3][action.ActionBurst] = 339
 	skillFrames[3][action.ActionDash] = 231
 	skillFrames[3][action.ActionJump] = 340
 	skillFrames[3][action.ActionSwap] = 337
 
-	// skill (hold=2,a4) -> x
+	// スキル（長押し=2,固有天賦4） -> x
 	skillFrames[4] = frames.InitAbilSlice(175)
 	skillFrames[4][action.ActionDash] = 171
 	skillFrames[4][action.ActionJump] = 174
@@ -114,7 +114,7 @@ func (c *char) skillPress() (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames[0]),
 		AnimationLength: skillFrames[0][action.InvalidAction],
-		CanQueueAfter:   skillFrames[0][action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[0][action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -183,7 +183,7 @@ func (c *char) skillHold(level int, c4Active bool) (action.Info, error) {
 		)
 	}
 
-	// user-specified c4 variant adds an additional attack that deals 135% of the second hit
+	// ユーザー指定の4凸バリアントは2段目の135%の追加攻撃を行う
 	if level == 1 && c4Active {
 		ai.Mult = skillHold[level-1][1][c.TalentLvlSkill()] * 1.35
 		ai.Abil = "Passion Overload (C4)"
@@ -197,12 +197,12 @@ func (c *char) skillHold(level int, c4Active bool) (action.Info, error) {
 		)
 	}
 
-	// figure out which frames to return
-	// 0: skill (press) -> x
-	// 1: skill (hold=1) -> x
-	// 2: skill (hold=1,c4) -> x
-	// 3: skill (hold=2) -> x
-	// 4: skill (hold=2,a4) -> x
+	// 返すフレームを決定
+	// 0: スキル（単押し） -> x
+	// 1: スキル（長押し=1） -> x
+	// 2: スキル（長押し=1,4凸） -> x
+	// 3: スキル（長押し=2） -> x
+	// 4: スキル（長押し=2,固有天賦4） -> x
 	var idx, cd, cdDelay int
 	switch level {
 	case 1:
@@ -227,7 +227,7 @@ func (c *char) skillHold(level int, c4Active bool) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames[idx]),
 		AnimationLength: skillFrames[idx][action.InvalidAction],
-		CanQueueAfter:   skillFrames[idx][action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[idx][action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

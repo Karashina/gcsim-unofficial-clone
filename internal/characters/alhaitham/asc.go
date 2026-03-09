@@ -11,8 +11,8 @@ import (
 
 const a1IcdKey = "alhaitham-a1-icd"
 
-// When Alhaitham's Charged or Plunging Attacks hit opponents, they will generate 1 Chisel-Light Mirror.
-// This effect can be triggered once every 12s.
+// アルハイゼムの重撃または落下攻撃が敵に命中した場合、琢光鏡を1枚生成する。
+// この効果は12秒ごとに1回のみ発動可能。
 func (c *char) makeA1CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 1 {
 		return nil
@@ -21,7 +21,7 @@ func (c *char) makeA1CB() combat.AttackCBFunc {
 		if a.Target.Type() != targets.TargettableEnemy {
 			return
 		}
-		// ignore if projection on icd
+		// 投影がICD中の場合は無視
 		if c.Core.Status.Duration(a1IcdKey) > 0 {
 			return
 		}
@@ -31,9 +31,9 @@ func (c *char) makeA1CB() combat.AttackCBFunc {
 	}
 }
 
-// Each point of Alhaitham's Elemental Mastery will increase the DMG dealt by
-// Projection Attacks and Particular Field: Fetters of Phenomena by 0.1%.
-// The maximum DMG increase for both these abilities is 100%.
+// アルハイゼムの元素熟知1ポイントごとに、投影攻撃と
+// 殊境・顕象結縛のダメージが0.1%増加する。
+// 両能力の最大ダメージ増加は100%。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -42,7 +42,7 @@ func (c *char) a4() {
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("alhaitham-a4", -1),
 		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-			// only trigger on projection attack and burst damage
+			// 投影攻撃と元素爆発ダメージでのみ発動
 			if atk.Info.AttackTag != attacks.AttackTagElementalBurst &&
 				atk.Info.ICDGroup != attacks.ICDGroupAlhaithamProjectionAttack {
 				return nil, false

@@ -54,7 +54,7 @@ func (c *char) a1CB(a combat.AttackCB) {
 	if !ok {
 		return
 	}
-	// TODO: add the modifier for a gadget
+	// TODO: ガジェット用のモディファイアを追加
 	e.AddStatus(desolationKey, 12*60, true)
 }
 

@@ -23,8 +23,8 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Within 8s after the character's Elemental Skill hits an opponent or the character triggers an Elemental Reaction,
-// their ATK and Elemental Mastery will be increased by 12%/15%/18%/21%/24% and 48/60/72/84/96 respectively.
+// キャラクターの元素スキルが敵に命中するか、元素反応を起こしてから8秒間、
+// 攻撃力と元素熟知がそれぞれ12%/15%/18%/21%/24%え48/60/72/84/96増加する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -69,7 +69,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}
 
 	c.Events.Subscribe(event.OnEnemyDamage, fDamage, "mailedflower-skill-"+char.Base.Key.String())
-	// considers shatter as an elemental reaction
+	// 砕氷を元素反応として扱う
 	for i := event.ReactionEventStartDelim + 1; i < event.ReactionEventEndDelim; i++ {
 		c.Events.Subscribe(i, fReact, "mailedflower-"+char.Base.Key.String())
 	}

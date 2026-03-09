@@ -15,7 +15,7 @@ const (
 )
 
 func (c *char) c1() {
-	// C1: Needs to be manually deleted when Windfavored state ends
+	// 第1命ノ星座: 「風の恵み」状態終了時に手動で削除が必要
 	if c.Base.Cons < 1 {
 		return
 	}
@@ -31,7 +31,7 @@ func (c *char) c1() {
 }
 
 func (c *char) c2() {
-	// C2: Buff stays active during entire burst animation
+	// 第2命ノ星座: バフは元素爆発アニメーション全体で有効
 	if c.Base.Cons < 2 {
 		return
 	}
@@ -70,7 +70,7 @@ func (c *char) makeC6Callback() func(cb combat.AttackCB) {
 			)
 		}
 
-		// a gets passed into the callback as param by core
+		// a はコアによりコールバックのパラメータとして渡される
 		trg := a.Target
 
 		ai := combat.AttackInfo{
@@ -85,7 +85,7 @@ func (c *char) makeC6Callback() func(cb combat.AttackCB) {
 			Mult:       a.AttackEvent.Info.Mult * 0.4,
 		}
 
-		// TODO: Snapshot delay?
+		// TODO: スナップショット遅延?
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(trg, nil, 2), 8, 8,

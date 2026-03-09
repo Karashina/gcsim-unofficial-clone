@@ -18,7 +18,7 @@ func (s *Server) handleGetData(t AssetType) http.HandlerFunc {
 		key := chi.URLParam(r, "key")
 		s.logger.Info("request for data", "t", t.String(), "key", key)
 
-		// special assets are handled separately
+		// 特殊アセットは別途処理する
 		if _, ok := specialAssets[key]; ok {
 			s.logger.Info("key is special", "key", key)
 			data, err := staticAssets.ReadFile(fmt.Sprintf("static/special/%v.png", key))
@@ -32,7 +32,7 @@ func (s *Server) handleGetData(t AssetType) http.HandlerFunc {
 			return
 		}
 
-		// check if it's a recognized item; if not then we can skip the rest
+		// 認識できるアイテムか確認。認識できなければ残りの処理をスキップ
 		assetName, ok := s.assetNameMapping[t][key]
 		if !ok {
 			s.logger.Info("unrecognized key, serving default", "t", t.String(), "key", key)
@@ -40,11 +40,11 @@ func (s *Server) handleGetData(t AssetType) http.HandlerFunc {
 			return
 		}
 
-		// try cache first
+		// まずキャッシュを試す
 		data, err := s.loadFromCache(t, key)
 		switch {
 		case data != nil && err == nil:
-			// load successful
+			// 読み込み成功
 			s.logger.Info("loaded from cache ok", "t", t.String(), "key", key)
 			w.WriteHeader(http.StatusOK)
 			w.Write(data)
@@ -55,7 +55,7 @@ func (s *Server) handleGetData(t AssetType) http.HandlerFunc {
 			s.logger.Info("cache data not found", "t", t.String(), "key", key)
 		}
 
-		// else try external 1 at a time
+		// 外部ソースを1つずつ試す
 		for i, v := range s.hosts[t] {
 			joinedURL := v.JoinPath(fmt.Sprintf("/%v.png", assetName))
 			s.logger.Info("trying external image source", "host", v.String(), "try", i, "key", key, "full_path", joinedURL.String())
@@ -66,19 +66,19 @@ func (s *Server) handleGetData(t AssetType) http.HandlerFunc {
 			}
 			s.logger.Info("received image from source ok", "host", v.String())
 			s.saveToCache(t, key, data)
-			// found ok, save to cache and end request
+			// 見つかったのでキャッシュに保存してリクエストを終了
 			w.WriteHeader(http.StatusOK)
 			w.Write(data)
 			return
 		}
 		s.logger.Info("no external source found, serving default", "t", t.String(), "key", key)
-		// if we reached here then all external failed so we should serve default question mark image
+		// ここに到達した場合、全ての外部ソースが失敗したのでデフォルトのクエスチョンマーク画像を配信
 		s.handleNotFound(w)
 	}
 }
 
 func (s *Server) handleNotFound(w http.ResponseWriter) {
-	// should return /static/misc/default.png
+	// /static/misc/default.png を返すべき
 	data, err := staticAssets.ReadFile("static/misc/default.png")
 	if err != nil {
 		s.logger.Warn("error reading default.png", "err", err)

@@ -11,7 +11,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-var a1DMGBuff = []float64{0.0, 0.15, 0.35, 0.65, 0.65} // has an extra 0.65 for c2 stack
+var a1DMGBuff = []float64{0.0, 0.15, 0.35, 0.65, 0.65} // C2スタック用に追加の0.65あり
 var a1ConversionChance = []float64{0.0, 0.333, 0.667, 1.0}
 
 func (c *char) a1DMGBuff() {
@@ -19,8 +19,8 @@ func (c *char) a1DMGBuff() {
 		return
 	}
 	m := make([]float64, attributes.EndStatType)
-	// assuming we don't need to add and remove this buff constantly
-	// since it would be active for all E-CAs anyways
+	// 常にこのバフを追加・削除する必要はないと想定
+	// どのみち全てのスキル重撃に対してアクティブなため
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("chasca-a1", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {

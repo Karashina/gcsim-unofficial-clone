@@ -27,10 +27,10 @@ func init() {
 	burstFrames[action.ActionSwap] = 46    // Q -> Swap
 }
 
-// Burst - Deals burst damage and adds status for charge attack bonus
+// 元素爆発 - 元素爆発ダメージを与え、重撃ボーナス用ステータスを付与
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// +1 is to make sure the scarlet seal grant works correctly on the last frame
-	// TODO: Not 100% sure whether this adds a seal at the exact moment the burst ends or not
+	// +1は最終フレームでの朱印付与が正しく動作するため
+	// TODO: 元素爆発終了の正確な瞬間に朱印が付与されるかは100%確実ではない
 	c.AddStatus(burstBuffKey, 15*60+1, true)
 
 	c.AddAttackMod(character.AttackMod{
@@ -48,7 +48,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		if done {
 			return
 		}
-		// Create max seals on hit
+		// ヒット時に朱印を最大数付与
 		if c.sealCount < c.maxTags {
 			c.sealCount = c.maxTags
 		}
@@ -91,12 +91,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionJump], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
 
-// Recurring task to add seals every second while burst is up
+// 元素爆発中に毎秒朱印を追加する定期タスク
 func (c *char) burstAddSealHook() func() {
 	return func() {
 		if !c.StatusIsActive(burstBuffKey) {

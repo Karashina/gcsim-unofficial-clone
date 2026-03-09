@@ -17,8 +17,8 @@ func init() {
 	core.RegisterWeaponFunc(keys.FilletBlade, NewWeapon)
 }
 
-// On hit, has 50% chance to deal 240/280/320/360/400% ATK DMG to a single enemy.
-// Can only occur once every 15/14/13/12/11s.
+// 命中時、50%の確率で単体の敵に攻撃力の240/280/320/360/400%のダメージを与える。
+// 15/14/13/12/11秒毎に1回のみ発動可能。
 type Weapon struct {
 	Index int
 }
@@ -52,8 +52,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if dmg == 0 {
 			return false
 		}
-		// add a new action that deals % dmg immediately
-		// superconduct attack
+		// 即座に%ダメージを与える新しいアクションを追加
+		// 超電導攻撃
 		ai := combat.AttackInfo{
 			ActorIndex: char.Index,
 			Abil:       "Fillet Blade Proc",
@@ -68,7 +68,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		trg := args[0].(combat.Target)
 		c.QueueAttack(ai, combat.NewSingleTargetHit(trg.Key()), 0, 1)
 
-		// trigger cd
+		// クールダウンを発動
 		char.AddStatus(icdKey, cd, true)
 
 		return false

@@ -29,7 +29,7 @@ const (
 )
 
 func (c *char) spawnLumidouceCase(level int, pos geometry.Point, afterBurst bool) {
-	if c.StatusIsActive(lumidouceStatus) && c.Tag(lumidouceLevel) == 3 { // only update the reset timer during burst
+	if c.StatusIsActive(lumidouceStatus) && c.Tag(lumidouceLevel) == 3 { // 元素爆発中のみリセットタイマーを更新
 		c.AddStatus(lumidouceScentResetKey, lumidouceScentResetInterval, true)
 		return
 	}
@@ -75,7 +75,7 @@ func (c *char) lumidouceAttack(src int) func() {
 			c.Core.QueueAttack(ai, ap, lumidouceHitmarkLevel2+c.caseTravel, lumidouceHitmarkLevel2+c.caseTravel, c.particleCB)
 		}
 
-		c.lumidouceScentCollect(src)() // TODO: i'm not sure about it, but some tests show that a1/reset is triggered at the moment of attack.
+		c.lumidouceScentCollect(src)() // TODO: 確証はないが、一部テストではa1/リセットが攻撃の瞬間にトリガーされることを示している
 		c.QueueCharTask(c.lumidouceAttack(src), lumidouceTickInterval)
 	}
 }

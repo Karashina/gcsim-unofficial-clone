@@ -44,7 +44,7 @@ func (e *Eval) evalNumberLit(n *ast.NumberLit) Obj {
 }
 
 func (e *Eval) evalStringLit(n *ast.StringLit) Obj {
-	// strip the ""
+	// "" を除去
 	return &strval{
 		str: strings.Trim(n.Value, "\""),
 	}
@@ -60,7 +60,7 @@ func (e *Eval) evalFuncExpr(n *ast.FuncExpr, env *Env) Obj {
 }
 
 func (e *Eval) evalIdent(n *ast.Ident, env *Env) (Obj, error) {
-	//TODO: this should be a variable
+	//TODO: これは変数として扱うべき
 	res, err := env.v(n.Value)
 	if err != nil {
 		return nil, err
@@ -80,17 +80,17 @@ func (e *Eval) evalCallExpr(c *ast.CallExpr, env *Env) (Obj, error) {
 		return nil, fmt.Errorf("invalid function call %v", c.Fun.String())
 	}
 
-	if bfn, ok := v.(*bfuncval); ok { // is built-in
+	if bfn, ok := v.(*bfuncval); ok { // ビルトイン関数
 		return bfn.Body(c, env)
 	}
 
 	fn := v.(*funcval)
-	// check number of param matches
+	// パラメータ数が一致するかチェック
 	if len(c.Args) != len(fn.Args) {
 		return nil, fmt.Errorf("unmatched number of params for fn %v", c.Fun.String())
 	}
-	// params are just variables assigned to a local env
-	// created from the function's env
+	// パラメータは関数の env から作成された
+	// ローカル env に代入される変数
 	local := NewEnv(fn.Env)
 	for i, v := range fn.Args {
 		param, err := e.evalExpr(c.Args[i], env)
@@ -108,13 +108,13 @@ func (e *Eval) evalCallExpr(c *ast.CallExpr, env *Env) (Obj, error) {
 		return v.res, nil
 	case *null:
 		if _, ok := fn.Signature.ResultType.(*ast.NumberType); ok {
-			// force return to 0
+			// 戻り値を0に強制
 			return &number{}, nil
 		}
 		return &null{}, nil
 	case *number:
 		if _, ok := fn.Signature.ResultType.(*ast.NumberType); ok {
-			// force return to 0
+			// 戻り値を0に強制
 			return v, nil
 		}
 		return nil, fmt.Errorf("fn %v returned an invalid type; got %v", c.Fun.String(), res.Inspect())
@@ -141,7 +141,7 @@ func (e *Eval) evalUnaryExpr(b *ast.UnaryExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) evalBinaryExpr(b *ast.BinaryExpr, env *Env) (Obj, error) {
-	// eval left, right, operator
+	// 左辺、右辺、演算子を評価
 	left, err := e.evalExpr(b.Left, env)
 	if err != nil {
 		return nil, err
@@ -151,8 +151,8 @@ func (e *Eval) evalBinaryExpr(b *ast.BinaryExpr, env *Env) (Obj, error) {
 		return nil, err
 	}
 
-	// Normalize shortcut names for string comparisons
-	// This allows e.g. .varka.set == "adcfrw" to match canonical name "adaycarvedfromrisingwinds"
+	// 文字列比較用にショートカット名を正規化する
+	// 例: .varka.set == "adcfrw" が正規名 "adaycarvedfromrisingwinds" と一致するようにする
 	left = normalizeStrObj(left)
 	right = normalizeStrObj(right)
 
@@ -171,8 +171,8 @@ func (e *Eval) evalBinaryExpr(b *ast.BinaryExpr, env *Env) (Obj, error) {
 	return fromConstant(result), nil
 }
 
-// normalizeStrObj resolves shortcut names (e.g. "adcfrw", "favbow") to their
-// canonical forms so that string comparisons match regardless of which alias is used.
+// normalizeStrObj はショートカット名（例: "adcfrw", "favbow"）を正規形式に解決する。
+// どのエイリアスが使われても文字列比較が一致するようにする。
 func normalizeStrObj(o Obj) Obj {
 	sv, ok := o.(*strval)
 	if !ok {
@@ -208,7 +208,7 @@ func (e *Eval) evalField(n *ast.Field) (Obj, error) {
 }
 
 func (e *Eval) evalMap(m *ast.MapExpr, env *Env) (Obj, error) {
-	if len(m.Fields) == 0 { // empty map
+	if len(m.Fields) == 0 { // 空のマップ
 		return &mapval{}, nil
 	}
 

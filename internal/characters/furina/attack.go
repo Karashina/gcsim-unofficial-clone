@@ -28,7 +28,7 @@ var (
 const normalHitNum = 4
 
 func init() {
-	// NA cancels
+	// 通常攻撃キャンセル
 	attackFrames = make([][]int, normalHitNum)
 
 	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 34) // N1 -> CA/Walk
@@ -51,7 +51,7 @@ func (c *char) arkheCB(a combat.AttackCB) {
 	}
 	c.AddStatus(arkheIcdKeys[c.arkhe], 6*60, true)
 
-	// calc attack pos
+	// 攻撃位置を計算
 	player := c.Core.Combat.Player()
 	arkhePos := geometry.CalcOffsetPoint(player.Pos(), geometry.Point{Y: -0.3}, player.Direction())
 	c.QueueCharTask(func() {
@@ -68,7 +68,7 @@ func (c *char) arkheCB(a combat.AttackCB) {
 			IgnoreInfusion: true,
 		}
 		// https://www.youtube.com/watch?v=sbKIEzelynE
-		// Furina's 18% Max HP boost applies to her Arkhe attacks
+		// フリーナの最大HP18%ブーストはArkhe攻撃にも適用
 		if c.Base.Cons >= 6 && c.StatusIsActive(c6Key) {
 			ai.FlatDmg = c.c6BonusDMGNoExtra()
 		}
@@ -103,7 +103,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			var c6cb combat.AttackCBFunc
 			var ap combat.AttackPattern
 			c6Index := 0
-			// TODO: Check if DMG bonus still applies if c6 runs out between start of NA and the hit
+			// TODO: NA開始からヒットまでの間に6凸が切れた場合、ダメージボーナスが維持されるか確認
 
 			if c.Base.Cons >= 6 && c.StatusIsActive(c6Key) {
 				c6Index = 1

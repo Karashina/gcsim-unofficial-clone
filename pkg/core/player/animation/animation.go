@@ -1,6 +1,5 @@
-// package animation provides a simple way of tracking the current
-// animation state at any given frame, as well as if the current frame
-// is in animation lock or not
+// animation パッケージは、任意のフレームにおける現在のアニメーション状態と、
+// 現在のフレームがアニメーションロック中かどうかを追跡するシンプルな方法を提供する
 package animation
 
 import (
@@ -41,25 +40,22 @@ func New(f *int, debug bool, log glog.Logger, events event.Eventter, tasks task.
 	return h
 }
 
-// IsAnimationLocked returns true if the next action can be executed on the
-// current frame; false otherwise
+// IsAnimationLocked は現在のフレームで次のアクションを実行できない場合にtrueを返す
 func (h *AnimationHandler) IsAnimationLocked(next action.Action) bool {
 	if h.aniEvt == nil {
 		return false
 	}
-	// actions are always executed after ticks and right before we advance to
-	// the next frame i.e. at the end of a frame
+	// アクションはtick処理後、次のフレームに進む直前（フレーム末尾）で実行される
 	//
-	// if an action should take 20 frames of animation then this action would be ready if
-	// f >= s + 20
+	// あるアクションのアニメーションが20フレーム必要な場合、
+	// f >= s + 20 のとき準備完了となる
 	//
-	// i.e the action lasted 20 frames counting the current frame
+	// つまり現在のフレームを含めて20フレーム継続したことになる
 	// fmt.Printf("animation check; current frame %v, animation duration %v\n", *h.f, h.info.Frames(next))
 	return !h.aniEvt.CanUse(next)
 }
 
-// CanQueue returns true if we can start looking for the next action to queue
-// on the current frame, false otherwise
+// CanQueueNextAction は現在のフレームで次のアクションのキューイングを開始できる場合にtrueを返す
 func (h *AnimationHandler) CanQueueNextAction() bool {
 	if h.aniEvt == nil {
 		return true
@@ -68,14 +64,14 @@ func (h *AnimationHandler) CanQueueNextAction() bool {
 }
 
 func (h *AnimationHandler) SetActionUsed(char int, act action.Action, evt *action.Info) {
-	// remove previous if still active
+	// まだアクティブな場合は前のアニメーションを削除
 	if h.aniEvt != nil {
 		if h.aniEvt.OnRemoved != nil {
 			h.aniEvt.OnRemoved(evt.State)
 		}
 		h.logEnded()
 	}
-	// setup next
+	// 次のアニメーションを設定
 	h.char = char
 	h.started = *h.f
 	h.aniEvt = evt

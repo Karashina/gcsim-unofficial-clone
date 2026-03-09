@@ -9,7 +9,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// After using Kamisato Art: Hyouka, Kamisato Ayaka's Normal and Charged Attacks deal 30% increased DMG for 6s.
+// 神里流・氷華を使用後、神里綾華の通常攻撃と重撃のダメージが6秒間30%増加する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -24,11 +24,11 @@ func (c *char) a1() {
 	})
 }
 
-// When the Cryo application at the end of Kamisato Art: Senho hits an opponent, Kamisato Ayaka gains the following effects:
+// 神里流・霰歩の終了時の氷元素付与が敵にヒットすると、神里綾華は以下の効果を得る：
 //
-// - Restores 10 Stamina
+// - スタミナ10回復
 //
-// - Gains 18% Cryo DMG Bonus for 10s.
+// - 10秒間、氷元素ダメージバフ18%を獲得。
 func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil

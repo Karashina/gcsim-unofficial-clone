@@ -1,5 +1,5 @@
 // package modifier provides a universal way of handling a slice
-// of modifiers
+// モディファイアの管理
 package modifier
 
 import (
@@ -65,7 +65,7 @@ func NewBaseWithHitlag(key string, dur int) Base {
 	}
 }
 
-// Delete removes a modifier. Returns true if deleted ok
+// Deleteはモディファイアを削除する。削除成功時trueを返す
 func Delete[K Mod](slice *[]K, key string) Mod {
 	n := 0
 	var m Mod
@@ -81,20 +81,20 @@ func Delete[K Mod](slice *[]K, key string) Mod {
 	return m
 }
 
-// Add adds a modifier. Returns true if overwritten and the original evt (if overwritten)
-// TODO: consider adding a map here to track the index to assist with faster lookups
+// Add はModifierを追加する。上書きされた場合はtrueとオリジナルのイベント（上書き前）を返す
+// TODO: 高速な検索のためにインデックスを追跡するマップの追加を検討
 func Add[K Mod](slice *[]K, mod K, f int) (bool, glog.Event) {
 	ind := Find(slice, mod.Key())
 	overwrote := false
 	var evt glog.Event
 
-	// if does not exist, make new and add
+	// 存在しなければ新規作成して追加
 	if ind == -1 {
 		*slice = append(*slice, mod)
 		return overwrote, evt
 	}
 
-	// otherwise check not expired
+	// そうでなければ有効期限切れでないかチェック
 	if (*slice)[ind].Expiry() > f || (*slice)[ind].Expiry() == -1 {
 		overwrote = true
 		evt = (*slice)[ind].Event()
@@ -125,7 +125,7 @@ func FindCheckExpiry[K Mod](slice *[]K, key string, f int) (int, bool) {
 	return ind, true
 }
 
-// LogAdd is a helper that logs mod add events
+// LogAdd はMod追加イベントをログに記録するヘルパー
 func LogAdd[K Mod](prefix string, index int, mod K, logger glog.Logger, overwrote bool, oldEvt glog.Event) {
 	var evt glog.Event
 	if overwrote {

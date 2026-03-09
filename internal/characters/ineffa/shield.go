@@ -5,7 +5,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
-// Generate shield for the character
+// キャラクターのシールドを生成
 func (c *char) genShield(src string, shieldamt float64) {
 	c.c1()
 	c.Core.Tasks.Add(func() {
@@ -22,7 +22,7 @@ func (c *char) genShield(src string, shieldamt float64) {
 	}, 1)
 }
 
-// Calculate shield HP based on skill level and stats
+// スキルレベルとステータスに基づきシールドHPを計算
 func (c *char) shieldHP() float64 {
 	return shieldPct[c.TalentLvlSkill()]*c.TotalAtk() + shieldCst[c.TalentLvlSkill()]
 }

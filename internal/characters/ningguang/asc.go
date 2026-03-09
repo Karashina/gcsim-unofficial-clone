@@ -8,21 +8,21 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// A1 is implemented in ningguang.go:
-// When Ningguang is in possession of Star Jades, her Charged Attack does not consume Stamina.
+// 固有天賦1はningguang.goで実装済み:
+// 凝光が星璃を所持している場合、重撃はスタミナを消費しない。
 
-// A character that passes through the Jade Screen will gain a 12% Geo DMG Bonus for 10s.
+// 璇璣屏を通過したキャラクターは10秒間、岩元素ダメージ+12%を獲得する。
 //
-// - activate if screen is on-field and character uses dash
+// - 璇璣屏がフィールド上にあり、キャラクターがダッシュした場合に発動
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.GeoP] = 0.12
-	//TODO: this used to be on PostDash; need to check if working correctly still
+	//TODO: 以前はPostDashで発動していた。正常に動作するか要確認
 	c.Core.Events.Subscribe(event.OnDash, func(_ ...interface{}) bool {
-		// check for jade screen
+		// 璇璣屏の存在を確認
 		if c.Core.Constructs.CountByType(construct.GeoConstructNingSkill) <= 0 {
 			return false
 		}

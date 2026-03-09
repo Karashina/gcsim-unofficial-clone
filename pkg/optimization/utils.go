@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Thin wrapper around sort Slice to retrieve the sorted indices as well
+// ソートされたインデックスも取得できるsort.Sliceの薄いラッパー
 type Slice struct {
 	slice sort.Float64Slice
 	idx   []int
@@ -94,7 +94,7 @@ func fmtHist(sortedArr []float64, start, binSize float64) []string {
 	for i := range binCount {
 		binCount[i] /= float64(len(sortedArr))
 	}
-	// strip bins from start and end that don't have enough iterations
+	// イテレーション数が不足しているビンを先頭と末尾から除去
 	for i := range binCount {
 		if int(binCount[i]/valPerBlock) == 0 && int(math.Round(math.Mod(binCount[i], valPerBlock)*8)) == 0 {
 			continue
@@ -120,16 +120,15 @@ func fmtHist(sortedArr []float64, start, binSize float64) []string {
 	}
 
 	for i := range output {
-		// The ASCII block elements come in chunks of 8, so we work out how
-		// many fractions of 8 we need.
+		// ASCIIブロック要素は8単位のチャンクなので、8分の何が必要かを計算する
 		// https://en.wikipedia.org/wiki/Block_Elements
 		barChunks := int(math.Round(binCount[i] / valPerBlock))
 		bar := strings.Repeat("█", barChunks)
 
-		// Currently the default PowerShell font doesn't support the partial blocks
-		// Cascadia Mono, the default font for Windows Terminal, supports it
-		// TODO: Add this back in and remove the math.Round in the barChunks once we target Windows 11,
-		// since W11 default console is Terminal
+		// 現在のPowerShellデフォルトフォントは部分ブロック要素をサポートしていない
+		// Windows Terminalのデフォルトフォント Cascadia Mono はサポートしている
+		// TODO: Windows 11をターゲットにしたらこれを復活させ、barChunksのmath.Roundを削除する
+		// （W11のデフォルトコンソールはTerminalのため）
 		// rem := int(math.Round(math.Mod(binCount[i], valPerBlock) / valPerBlock * 8))
 		// if rem > 0 {
 		// 	bar += fmt.Sprint(string(rune('█' + 8 - rem)))

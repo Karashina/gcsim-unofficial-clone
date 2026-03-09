@@ -42,8 +42,8 @@ func init() {
 	attackFrames[4][action.ActionCharge] = 500                               // N5 -> CA, TODO: this action is illegal; need better way to handle it
 }
 
-// Normal attack damage queue generator
-// Very standard
+// 通常攻撃のダメージキュー生成
+// 標準的な実装
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{

@@ -70,7 +70,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -104,7 +104,7 @@ func (c *char) bloodDebtDirective(a combat.AttackCB) {
 
 func (c *char) directiveTickFunc(src, count int, trg *enemy.Enemy) func() {
 	return func() {
-		// do nothing if source changed
+		// ソースが変更された場合は何もしない
 		if trg.Tags[directiveSrcKey] != src {
 			return
 		}
@@ -114,7 +114,7 @@ func (c *char) directiveTickFunc(src, count int, trg *enemy.Enemy) func() {
 		c.Core.Log.NewEvent("Blood Debt Directive checking for tick", glog.LogCharacterEvent, c.Index).
 			Write("src", src)
 
-		// queue up one damage instance
+		// 1回分のダメージをキューに追加
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       "Blood Debt Directive",
@@ -129,7 +129,7 @@ func (c *char) directiveTickFunc(src, count int, trg *enemy.Enemy) func() {
 		c.Core.QueueAttack(ai, combat.NewSingleTargetHit(trg.Key()), 0, 0)
 
 		if count-1 > 0 {
-			// queue up next instance
+			// 次のインスタンスをキューに追加
 			trg.QueueEnemyTask(c.directiveTickFunc(src, count-1, trg), 5*60)
 		}
 	}

@@ -47,7 +47,7 @@ func init() {
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	// Apart from this, Normal Attack combo count will not reset for a short time after using Icefang Rush or sprinting.
+	// また、「氷牙の突進」やダッシュ使用後の短い時間内は通常攻撃コンボカウントがリセットされない。
 	switch c.Core.Player.CurrentState() {
 	case action.DashState, action.SkillState:
 		c.NormalCounter = c.savedNormalCounter
@@ -68,9 +68,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			HitlagHaltFrames:   attackHitlagHaltFrame[c.NormalCounter][i] * 60,
 			CanBeDefenseHalted: true,
 		}
-		c1N5CB := c.makeC1N5CB() // here so that the normalcounter check is correct
+		c1N5CB := c.makeC1N5CB() // normalcounterチェックが正しくなるようここで取得
 		c.QueueCharTask(func() {
-			// TODO: when should this check happen?
+			// TODO: このチェックはいつ行われるべきか?
 			skillIndex := 0
 			var particleCB combat.AttackCBFunc
 			var chillingPenalty combat.AttackCBFunc

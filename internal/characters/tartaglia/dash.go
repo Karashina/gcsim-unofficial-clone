@@ -17,7 +17,7 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          func(next action.Action) int { return dashFrames[next] },
 		AnimationLength: dashFrames[action.InvalidAction],
-		CanQueueAfter:   dashFrames[action.ActionSkill], // fastest cancel
+		CanQueueAfter:   dashFrames[action.ActionSkill], // 最速キャンセル
 		State:           action.DashState,
 	}, nil
 }

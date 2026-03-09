@@ -14,7 +14,7 @@ import (
 var burstFrames []int
 
 const (
-	burstDuration  = 660 + 90 + 45 // barely cover basic combo
+	burstDuration  = 660 + 90 + 45 // 基本コンボをカバーする程度
 	burstBuffKey   = "itto-q"
 	burstAtkSpdKey = "itto-q-atkspd"
 )
@@ -26,23 +26,23 @@ func init() {
 	burstFrames[action.ActionSwap] = 90    // Q -> Swap
 }
 
-// Adapted from Noelle
-// Burst:
-// Time to show 'em the might of the Arataki Gang! For a time, Itto lets out his inner Raging Oni King, wielding his Oni King's Kanabou in battle.
-// This state has the following special properties:
-// - Converts Itto's Normal, Charged, and Plunging Attacks to Geo DMG. This cannot be overridden.
-// - Increases Itto's Normal Attack SPD. Also increases his ATK based on his DEF.
-// - On hit, the 1st and 3rd strikes of his attack combo will each grant Arataki Itto 1 stack of Superlative Superstrength.
-// - Decreases Itto's Elemental and Physical RES by 20%.
-// The Raging Oni King state will be cleared when Itto leaves the field.
+// Noelleを参考に実装
+// 元素爆発:
+// 荒瀧一斗が鬼王の覇気を解き放ち、鬼王の金砕棒を振るって戦う。
+// この状態には以下の特殊効果がある:
+// - 一斗の通常攻撃、重撃、落下攻撃を岩元素ダメージに変換する。この変換は上書きされない。
+// - 一斗の通常攻撃速度が増加する。また、防御力に基づいて攻撃力が増加する。
+// - 命中時、攻撃コンボの1段目と3段目で荒瀧一斗が怒髪衝天スタックを1つ獲得する。
+// - 一斗の元素耐性と物理耐性が20%減少する。
+// 鬼王状態は一斗がフィールドを離れると解除される。
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// N1 pre-stack tech. If Itto did N1 -> Q, then add a stack before Q def to atk conversion
+	// N1プレスタック技法。一斗がN1 -> Qを行った場合、Q防御→攻撃変換前にスタックを追加
 	// https://library.keqingmains.com/evidence/characters/geo/itto#itto-n1-burst-cancel-ss-stack
 	if p["prestack"] != 0 && c.Core.Player.CurrentState() == action.NormalAttackState && c.NormalCounter == 1 {
 		c.addStrStack("n1-burst-cancel", 1)
 	}
 
-	// Generate a "fake" snapshot in order to show a listing of the applied mods in the debug
+	// デバッグで適用されたModの一覧を表示するための「仮の」スナップショットを生成
 	aiSnapshot := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Royal Descent: Behold, Itto the Evil! (Stat Snapshot)",
@@ -51,8 +51,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	burstDefSnapshot := c.TotalDef(true)
 	mult := defconv[c.TalentLvlBurst()]
 
-	// TODO: Confirm exact timing of buff
-	// Q def to atk conversion
+	// TODO: バフの正確なタイミングを確認
+	// Q 防御力→攻撃力変換
 	mATK := make([]float64, attributes.EndStatType)
 	mATK[attributes.ATK] = mult * burstDefSnapshot
 	c.AddStatMod(character.StatMod{
@@ -64,7 +64,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		},
 	})
 
-	// Q atk speed buff
+	// Q 攻撃速度バフ
 	mAtkSpd := make([]float64, attributes.EndStatType)
 	mAtkSpd[attributes.AtkSpd] = 0.10
 	c.AddStatMod(character.StatMod{
@@ -84,20 +84,20 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Write("mult", mult)
 
 	if c.Base.Cons >= 1 {
-		// TODO: add link to itto-c1-mechanics tcl entry later
-		// this is before Q animation is done, so no need for char queue
-		// 75 is a rough count for when Itto gains the 2 stacks from C1
+		// TODO: itto-c1-mechanics TCLエントリへのリンクを後で追加
+		// Qのアニメーション完了前のため、キャラキューは不要
+		// 75は一斗がC1から2スタックを得るタイミングの概算
 		c.Core.Tasks.Add(c.c1, 75)
 	}
 
 	if c.Base.Cons >= 2 {
-		// TODO: check C2 delay, but it doesn't really matter
-		// should apply after cd/energy delay
-		// this is before Q animation is done, so no need for char queue
+		// TODO: C2の遅延を確認、ただし影響は小さい
+		// CD/エネルギー遅延後に適用すべき
+		// Qのアニメーション完了前のため、キャラキューは不要
 		c.Core.Tasks.Add(c.c2, 9)
 	}
 
-	// apply when burst ends
+	// 元素爆発終了時に適用
 	c.burstCastF = c.Core.F
 	if c.Base.Cons >= 4 {
 		c.applyC4 = true
@@ -115,7 +115,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

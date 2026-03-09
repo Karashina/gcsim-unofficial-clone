@@ -45,8 +45,8 @@ func init() {
 	highPlungeFrames[action.ActionSwap] = 47
 }
 
-// Low Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
+// 低空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
@@ -95,8 +95,8 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// High Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
+// 高空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
@@ -145,7 +145,7 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// Collision attack for plunge
+// 落下攻撃の衝突ダメージ
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

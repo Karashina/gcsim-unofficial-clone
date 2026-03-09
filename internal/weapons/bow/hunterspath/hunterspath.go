@@ -32,11 +32,10 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Gain 12% All Elemental DMG Bonus. Obtain the Tireless Hunt effect after
-	// hitting an opponent with a Charged Attack. This effect increases Charged
-	// Attack DMG by 160% of Elemental Mastery. This effect will be removed after
-	// 12 Charged Attacks or 10s. Only 1 instance of Tireless Hunt can be gained
-	// every 12s.
+	// 全元素ダメージボーナス12%増加。重撃が敵に命中した後、
+	// Tireless Hunt効果を獲得し、重撃ダメージが元素熟知の160%分増加する。
+	// この効果は重撃を 12回当てた後または10秒後に解除される。
+	// Tireless Huntは12秒毎に1回のみ獲得可能。
 	w := &Weapon{}
 	r := p.Refine
 
@@ -63,8 +62,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if atk.Info.AttackTag != attacks.AttackTagExtra {
 			return false
 		}
-		// The buff is a ping dependent action, we're assuming the first hit won't
-		// have extra damage.
+		// バフはping依存のアクションであり、最初の命中には
+		// 追加ダメージあり。
 		if !char.StatusIsActive(icdKey) {
 			char.AddStatus(buffKey, 600, true)
 			char.AddStatus(icdKey, 720, true)

@@ -30,9 +30,9 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Sprint or Alternate Sprint Stamina Consumption decreased by 15%.
-// Additionally, after using Sprint or Alternate Sprint, Normal Attack DMG is increased by 32% of ATK.
-// This effect expires after triggering 18 times or 7s.
+// ダッシュまたは代替ダッシュのスタミナ消費が15%減少する。
+// また、ダッシュまたは代替ダッシュ使用後、通常攻撃ダメージが攻撃力の32%分増加する。
+// この効果は18回発動または7秒後に消滅する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

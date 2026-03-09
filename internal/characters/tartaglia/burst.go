@@ -34,9 +34,9 @@ func init() {
 	burstRangedFrames[action.ActionSwap] = 53    // Q -> Swap
 }
 
-// Performs a different attack depending on the stance in which it is cast.
-// Ranged Stance: dealing AoE Hydro DMG. Apply Riptide status to enemies hit. Returns 20 Energy after use
-// Melee Stance: dealing AoE Hydro DMG. Triggers Riptide Blast (clear riptide after triggering riptide blast)
+// スタンスに応じて異なる攻撃を行う。
+// 遠距離スタンス: 範囲水元素ダメージ。命中した敵に断流を付与。使用後エネルギーを20回復
+// 近接スタンス: 範囲水元素ダメージ。断流爆発をトリガー（断流爆発後に断流を解除）
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -93,7 +93,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(cancels),
 		AnimationLength: cancels[action.InvalidAction],
-		CanQueueAfter:   cancels[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   cancels[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

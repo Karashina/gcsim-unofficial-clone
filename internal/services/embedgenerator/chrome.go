@@ -22,7 +22,7 @@ type resp struct {
 }
 
 func (s *Server) listen() {
-	// only one unit of work at a time
+	// 一度に1つの作業のみ処理
 	var queue []string
 	done := make(chan resp)
 	busy := false
@@ -48,7 +48,7 @@ func (s *Server) listen() {
 				s.logger.Info("work done", "id", res.id, "err", res.err, "set_err", status.Err(), "publish_err", pubstatus.Err())
 			}
 		}
-		//TODO: more than 1 worker?
+		//TODO: ワーカーを1つ以上にすべき？
 		if !busy && len(queue) > 0 {
 			busy = true
 			next := queue[0]
@@ -110,7 +110,7 @@ func (s *Server) generateSnapshot(url string) ([]byte, error) {
 		return &rod.Element{}, nil
 	}).Element("#has-error").Handle(func(e *rod.Element) error {
 		str, err := e.Attribute("value")
-		// can't do much aobut this err here other than log it
+		// このエラーに対してはログ出力以外にできることはない
 		if err != nil {
 			s.logger.Info("error encountered looking for value attribute", "err", err)
 			return fmt.Errorf("unexpected server error: %w", err)

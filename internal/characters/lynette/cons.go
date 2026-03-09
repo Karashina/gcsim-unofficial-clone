@@ -9,9 +9,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// TODO: C1 is not implemented, because vortex/pulling mechanics are not implemented
+// TODO: 第1命ノ星座は未実装。渦巻/引き寄せメカニクスが実装されていないため
 
-// Whenever the Bogglecat Box summoned by Magic Trick: Astonishing Shift fires a Vivid Shot, it will fire an extra Vivid Shot.
+// 「魔術・アストニッシングシフト」で召喚された「ビックリボンボックス」が「ヴィヴィッドショット」を発射する際、追加でもう1発発射する。
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
@@ -19,7 +19,7 @@ func (c *char) c2() {
 	c.vividCount = 2
 }
 
-// Increases Enigmatic Feint's charges by 1.
+// 「エニグマティックフェイント」の使用回数を1増やす。
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
@@ -27,14 +27,14 @@ func (c *char) c4() {
 	c.SetNumCharges(action.ActionSkill, 2)
 }
 
-// When Lynette uses Enigmatic Feint's Enigma Thrust, she will gain an Anemo Infusion and 20% Anemo DMG Bonus for 6s.
+// リネットが「エニグマティックフェイント」の「エニグマスラスト」を使用すると、風元素付与と風元素ダメージボーナス+20%を6秒間獲得する。
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
 	}
 	duration := int((6 + 0.4) * 60)
 
-	// add anemo infusion
+	// 風元素付与を追加
 	c.Core.Player.AddWeaponInfuse(
 		c.Index,
 		"lynette-c6-infusion",
@@ -45,7 +45,7 @@ func (c *char) c6() {
 	)
 	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Anemo, duration)
 
-	// add anemo% buff
+	// 風元素ダメージボーナスバフを追加
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.AnemoP] = 0.2
 	c.AddStatMod(character.StatMod{

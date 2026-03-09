@@ -10,7 +10,7 @@ type (
 	Stats [EndStatType]float64
 )
 
-// stat types
+// ステータスの種類
 const (
 	NoStat Stat = iota
 	DEFP
@@ -38,7 +38,7 @@ const (
 	BaseHP
 	BaseATK
 	BaseDEF
-	// delim
+	// 区切り文字
 	EndStatType
 )
 

@@ -72,7 +72,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 				deltaPos := c.Core.Combat.Player().Pos().Sub(c.Core.Combat.PrimaryTarget().Pos())
 				dist := deltaPos.Magnitude()
 
-				// simulate piercing. Extends 15 units from player
+				// 貫通をシミュレート。プレイヤーから15ユニット延長
 				ap = combat.NewBoxHit(
 					c.Core.Combat.Player(),
 					c.Core.Combat.PrimaryTarget(),

@@ -5,7 +5,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
-// need to rewrite Expires
+// Expiresを書き直す必要がある
 type shd struct {
 	*shield.Tmpl
 }
@@ -35,7 +35,7 @@ func (c *char) removeC2Shield() {
 	if c.Base.Cons < 2 || c.c2Shield == nil {
 		return
 	}
-	// +1f to be sure
+	// 確実にするために+1フレーム
 	c.c2Shield.Expires = c.Core.F + 1
 	c.c2Shield = nil
 }

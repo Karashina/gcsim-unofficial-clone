@@ -22,25 +22,25 @@ func (c *char) makeKitsune() {
 	k.src = c.Core.F
 	k.deleted = false
 
-	// spawn kitsune detection area on player pos
+	// プレイヤー位置に狐検知エリアを生成
 	k.kitsuneArea = combat.NewCircleHitOnTarget(c.Core.Combat.Player().Pos(), nil, c.kitsuneDetectionRadius)
 
-	// start ticking
+	// ティック開始
 	c.Core.Tasks.Add(c.kitsuneTick(k), 120-skillStart)
-	// add task to delete this one if times out (and not deleted by anything else)
+	// タイムアウト時（他で削除されていない場合）にこれを削除するタスクを追加
 	c.Core.Tasks.Add(func() {
-		// i think we can just check for .deleted here
+		// ここでは.deletedをチェックするだけで良いと思う
 		if k.deleted {
 			return
 		}
-		// ok now we can delete this
+		// これで削除可能
 		c.popOldestKitsune()
 	}, 900-skillStart) // e ani + duration
 
 	if len(c.kitsunes) == 0 {
 		c.Core.Status.Add(yaeTotemStatus, 900-skillStart)
 	}
-	// pop oldest first
+	// 最も古いものを先にポップ
 	if len(c.kitsunes) == 3 {
 		c.popOldestKitsune()
 	}
@@ -59,14 +59,14 @@ func (c *char) popAllKitsune() {
 
 func (c *char) popOldestKitsune() {
 	if len(c.kitsunes) == 0 {
-		// nothing to pop??
+		// ポップするものがない？
 		return
 	}
 
 	c.kitsunes[0].deleted = true
 	c.kitsunes = c.kitsunes[1:]
 
-	// here check for status
+	// ここでステータスを確認
 	if len(c.kitsunes) > 0 {
 		dur := c.Core.F - c.kitsunes[0].src + (900 - skillStart)
 		if dur < 0 {
@@ -98,12 +98,12 @@ func (c *char) kitsuneBurst(ai combat.AttackInfo, pattern combat.AttackPattern) 
 
 func (c *char) kitsuneTick(totem *kitsune) func() {
 	return func() {
-		// if deleted do nothing
+		// 削除済みの場合は何もしない
 		if totem.deleted {
 			return
 		}
-		// c6
-		// Sesshou Sakura start at Level 2 when created. Max level increased to 4, and their attacks will ignore 45% of the opponents' DEF.
+		// 6凸
+		// 殺生櫻はレベル2で開始。最大レベルは4に増加し、攻撃は敵の防御力の45%を無視する。
 
 		lvl := c.sakuraLevelCheck() - 1
 		if c.Base.Cons >= 2 {
@@ -143,8 +143,8 @@ func (c *char) kitsuneTick(totem *kitsune) func() {
 			ai.IgnoreDefPercent = 0.60
 		}
 
-		// spawn 1 attack
-		// priority: enemy > gadget
+		// 攻撃を1回生成
+		// 優先度: 敵 > ガジェット
 		tick := func(pos geometry.Point) {
 			c.Core.QueueAttack(
 				ai,
@@ -156,19 +156,19 @@ func (c *char) kitsuneTick(totem *kitsune) func() {
 			)
 		}
 
-		// try to target an enemy first
+		// まず敵をターゲットする
 		enemy := c.Core.Combat.RandomEnemyWithinArea(totem.kitsuneArea, nil)
 		if enemy != nil {
 			tick(enemy.Pos())
 		} else {
-			// target gadget if no enemy was targeted
+			// 敵がターゲットされなかった場合はガジェットをターゲット
 			gadget := c.Core.Combat.RandomGadgetWithinArea(totem.kitsuneArea, nil)
 			if gadget != nil {
 				tick(gadget.Pos())
 			}
 		}
 
-		// tick per ~2.9s seconds
+		// 約2.9秒ごとにティック
 		c.Core.Tasks.Add(c.kitsuneTick(totem), 176)
 	}
 }
@@ -176,7 +176,7 @@ func (c *char) kitsuneTick(totem *kitsune) func() {
 func (c *char) sakuraLevelCheck() int {
 	count := len(c.kitsunes)
 	if count < 0 {
-		// this is for the base case when there are no totems (other wise we'll end up with 1 if C6)
+		// これはトーテムがない場合のベースケース（そうでなければ6凸の場合1になる）
 		return 0
 	}
 	if count > 3 {

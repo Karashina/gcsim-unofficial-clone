@@ -52,7 +52,7 @@ func (c *char) Init() error {
 	}
 
 	chars := c.Core.Player.Chars()
-	// count number of ele first
+	// 元素数をカウント
 	count := make(map[attributes.Element]int)
 	for _, this := range chars {
 		count[this.Base.Element]++
@@ -63,7 +63,7 @@ func (c *char) Init() error {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if it is possible to use next skill
+	// 次のスキルが使用可能かチェック
 	if a == action.ActionSkill && c.StatusIsActive(pirouetteStatus) {
 		return true, action.NoFailure
 	}

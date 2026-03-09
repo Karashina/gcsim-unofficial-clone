@@ -13,7 +13,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
-// TestADCFRW4pcNormalAttackTrigger verifies Normal Attack triggers 4pc buff
+// TestADCFRW4pcNormalAttackTrigger は通常攻撃が4セットバフを発動することを検証する
 func TestADCFRW4pcNormalAttackTrigger(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Cyno)
@@ -64,8 +64,8 @@ func TestADCFRW4pcNormalAttackTrigger(t *testing.T) {
 	}
 }
 
-// TestADCFRW4pcHoldSkillTrigger verifies Hold Elemental Skill (AttackTagElementalArtHold) triggers 4pc buff
-// Kirara's skillHold uses AttackTagElementalArtHold for roll ticks
+// TestADCFRW4pcHoldSkillTrigger は長押し元素スキル（AttackTagElementalArtHold）が4セットバフを発動することを検証する
+// KiraraのskillHoldはroll tickにAttackTagElementalArtHoldを使用
 func TestADCFRW4pcHoldSkillTrigger(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Kirara)
@@ -117,7 +117,7 @@ func TestADCFRW4pcHoldSkillTrigger(t *testing.T) {
 	}
 }
 
-// TestADCFRW4pcBuffDuration verifies buff expires after 6s (360 frames)
+// TestADCFRW4pcBuffDuration はバフが6秒（360フレーム）後に失効することを検証する
 func TestADCFRW4pcBuffDuration(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Cyno)

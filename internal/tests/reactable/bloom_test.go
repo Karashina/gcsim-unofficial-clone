@@ -35,7 +35,7 @@ func TestHydroBloom(t *testing.T) {
 		Pattern: combat.NewCircleHitOnTarget(geometry.Point{}, nil, 100),
 	}, 0)
 
-	// should create a seed, explodes after 5s
+	// 種を生成し、5秒後に爆発するはず
 	for i := 0; i < reactable.DendroCoreDelay+1; i++ {
 		advanceCoreFrame(c)
 	}
@@ -72,7 +72,7 @@ func TestDendroBloom(t *testing.T) {
 		Pattern: combat.NewCircleHitOnTarget(geometry.Point{}, nil, 100),
 	}, 0)
 
-	// should create a seed, explodes after 5s
+	// 種を生成し、5秒後に爆発するはず
 	for i := 0; i < reactable.DendroCoreDelay+1; i++ {
 		advanceCoreFrame(c)
 	}
@@ -92,7 +92,7 @@ func TestECBloom(t *testing.T) {
 		t.FailNow()
 	}
 
-	// create 2 seeds with ec
+	// 感電で種を2つ生成
 	c.QueueAttackEvent(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Hydro,
@@ -171,7 +171,7 @@ func TestBloomOldestDeleted(t *testing.T) {
 		t.FailNow()
 	}
 
-	// oldest should be the 2nd one, which is frame 3 ?
+	// 最も古いものは2番目で、フレーム3のはず？
 	for i := 0; i < 6; i++ {
 		c.QueueAttackEvent(&combat.AttackEvent{
 			Info: combat.AttackInfo{
@@ -199,7 +199,7 @@ func TestBloomOldestDeleted(t *testing.T) {
 		t.Errorf("expected only 5 seeds remaining, got %v", c.Combat.GadgetCount())
 	}
 
-	// find oldest
+	// 最も古いものを見つける
 	f := math.MaxInt
 	oldest := -1
 	for i, v := range c.Combat.Gadgets() {

@@ -10,31 +10,31 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
-// ErrActionNotReady is returned if the requested action is not ready; this could be
-// due to any of the following:
-//   - Insufficient energy (burst only)
-//   - Ability on cooldown
-//   - Player currently in animation
+// ErrActionNotReady は要求されたアクションがまだ準備できていない場合に返される。
+// 以下の理由が考えられる:
+//   - エネルギー不足（元素爆発のみ）
+//   - スキルがクールダウン中
+//   - プレイヤーがアニメーション中
 var (
-	// exec-specfic errors
+	// exec固有のエラー
 	ErrActionNotReady        = errors.New("action is not ready yet; cannot be executed")
 	ErrPlayerNotReady        = errors.New("player still in animation; cannot execute action")
 	ErrInvalidAirborneAction = errors.New("player must use low_plunge or high_plunge while airborne")
 	ErrActionNoOp            = errors.New("action is a noop")
-	// shared character-specific errors
+	// キャラクター間で共有されるエラー
 	ErrInvalidChargeAction = errors.New("need to use attack right before charge")
 )
 
-// ReadyCheck returns nil action is ready, else returns error representing why action is not ready
+// ReadyCheck はアクションが実行可能ならnilを返し、そうでなければ理由を表すエラーを返す
 func (h *Handler) ReadyCheck(t action.Action, k keys.Char, param map[string]int) error {
-	// check animation state
+	// アニメーション状態をチェック
 	if h.IsAnimationLocked(t) {
 		return ErrPlayerNotReady
 	}
 	char := h.chars[h.active]
-	// check for energy, cd, etc..
-	//TODO: make sure there is a default check for charge attack/dash stams in char implementation
-	// this should deal with Ayaka/Mona's drain vs straight up consumption
+	// エネルギー、クールダウン等をチェック
+	//TODO: キャラクター実装で重撃/ダッシュのスタミナデフォルトチェックがあることを確認する
+	// 綾華/モナのドレインと通常消費の違いに対応する必要がある
 	if ok, reason := char.ActionReady(t, param); !ok {
 		h.Events.Emit(event.OnActionFailed, h.active, t, param, reason)
 		return ErrActionNotReady
@@ -55,8 +55,8 @@ func (h *Handler) ReadyCheck(t action.Action, k keys.Char, param map[string]int)
 			h.Events.Emit(event.OnActionFailed, h.active, t, param, action.InsufficientStamina)
 			return ErrActionNotReady
 		}
-	case action.ActionDash: // require special calc for stam
-		// dash handles it in the action itself
+	case action.ActionDash: // スタミナの特殊計算が必要
+		// ダッシュはアクション自体で処理される
 		amt, ok := stamCheck(t, param)
 		if !ok {
 			h.Log.NewEvent("insufficient stam: dash", glog.LogWarnings, -1).
@@ -66,7 +66,7 @@ func (h *Handler) ReadyCheck(t action.Action, k keys.Char, param map[string]int)
 			return ErrActionNotReady
 		}
 
-		// dash is still on cooldown and is locked out, cannot dash again until CD expires
+		// ダッシュがまだクールダウン中でロックされている場合、CDが切れるまで再ダッシュ不可
 		if h.DashLockout && h.DashCDExpirationFrame > *h.F {
 			h.Log.NewEvent("dash on cooldown", glog.LogWarnings, -1).
 				Write("dash_cd_expiration", h.DashCDExpirationFrame-*h.F)
@@ -75,7 +75,7 @@ func (h *Handler) ReadyCheck(t action.Action, k keys.Char, param map[string]int)
 		}
 	case action.ActionSwap:
 		if h.active == h.charPos[k] {
-			// even though noop this action is still ready
+			// noopではあるがアクション自体は実行可能
 			return nil
 		}
 		if h.SwapCD > 0 {
@@ -87,28 +87,27 @@ func (h *Handler) ReadyCheck(t action.Action, k keys.Char, param map[string]int)
 	return nil
 }
 
-// Exec will forcefully execute an action t regardless if t is ready or not. The assumption is
-// that whatever caller of Exec would have first checked ReadyCheck where ever relevant
-// before calling Exec.
+// Exec はアクション t の準備状態に関わらず強制的に実行する。
+// Exec の呼び出し元は、関連する場合は事前に ReadyCheck を実行済みであることが前提。
 //
-// The separation allows for forcefully execution of certain actions such as swap bypassing
-// swapCD if any
+// この分離により、スワップCDをバイパスするスワップなど、
+// 特定のアクションの強制実行が可能になる。
 func (h *Handler) Exec(t action.Action, k keys.Char, param map[string]int) error {
 	char := h.chars[h.active]
 
-	// special airborne handler; if airborne the next action MUST be attack otherwise error
+	// 空中専用ハンドラ: 空中の場合、次のアクションは必ず落下攻撃でなければエラー
 	if h.airborne != Grounded && t != action.ActionLowPlunge && t != action.ActionHighPlunge {
 		return ErrInvalidAirborneAction
 	}
 
 	var err error
 	switch t {
-	case action.ActionCharge: // require special calc for stam
+	case action.ActionCharge: // スタミナの特殊計算が必要
 		req := h.AbilStamCost(char.Index, t, param)
 		h.UseStam(req, t)
-		err = h.useAbility(t, param, char.ChargeAttack) //TODO: make sure characters are consuming stam in charge attack function
+		err = h.useAbility(t, param, char.ChargeAttack) //TODO: キャラクターが重撃関数内でスタミナを消費しているか確認
 	case action.ActionDash:
-		err = h.useAbility(t, param, char.Dash) //TODO: make sure characters are consuming stam in dashes
+		err = h.useAbility(t, param, char.Dash) //TODO: キャラクターがダッシュ内でスタミナを消費しているか確認
 	case action.ActionJump:
 		err = h.useAbility(t, param, char.Jump)
 	case action.ActionWalk:
@@ -132,7 +131,7 @@ func (h *Handler) Exec(t action.Action, k keys.Char, param map[string]int) error
 			return ErrActionNoOp
 		}
 		if h.SwapCD > 0 {
-			// since we allow force swap, this is ok but will emit an extra log anyways just in case
+			// 強制スワップを許可しているので問題ないが、念のため追加ログを出力する
 			h.Log.NewEventBuildMsg(glog.LogActionEvent, h.active, "swapping ", h.chars[h.active].Base.Key.String(), " to ", h.chars[h.charPos[k]].Base.Key.String(), " (bypassed cd)").
 				Write("swap_cd", h.SwapCD)
 			h.SwapCD = 0

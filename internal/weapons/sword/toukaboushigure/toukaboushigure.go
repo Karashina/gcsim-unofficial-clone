@@ -30,9 +30,9 @@ const (
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// After an attack hits opponents, it will inflict an instance of Cursed Parasol upon one of them for 10s.
-// This effect can be triggered once every 15s. If this opponent is taken out during Cursed Parasol's duration, Cursed Parasol's CD will be refreshed immediately.
-// The character wielding this weapon will deal 16/20/24/28/32% more DMG to the opponent affected by Cursed Parasol.
+// 攻撃が敵に命中した時、敵のう1体に10秒間「呪いの傘」を付与する。
+// この効果は15秒毎に1回発動可能。「呪いの傘」持続中にその敵が倒された場合、CDが即リセットされる。
+// この武器を装備したキャラは「呪いの傘」の影響を受けた敵に対してダメージが16/20/24/28/32%増加する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

@@ -24,10 +24,10 @@ type ServerCfg func(s *Server) error
 type Server struct {
 	*chi.Mux
 
-	// server context for graceful shutdown
+	// グレースフルシャットダウン用のサーバーコンテキスト
 	serverClosed chan bool
 
-	// status for if service is ready
+	// サービス準備完了状態
 	redisReady bool
 	rodReady   bool
 
@@ -39,29 +39,29 @@ type Server struct {
 	previewURL  string
 	authKey     string
 
-	// static asset; mandatory to serve from
+	// 静的アセット。配信元として必須
 	staticDir string
 
-	// proxy for assets
+	// アセット用プロキシ
 	useAssetsProxy    bool
 	assetsProxyPrefix string // cannot be blank
 	assetsProxyTarget *url.URL
 	assetsProxy       *httputil.ReverseProxy
 
-	// proxy requests
+	// プロキシリクエスト
 	useProxy     bool
 	proxyPrefix  string
 	skipInsecure bool
 
-	// for proxying api requests
+	// APIリクエストのプロキシ用
 	proxy       *httputil.ReverseProxy
 	proxyTarget *url.URL
 
-	// timeouts
+	// タイムアウト
 	generateTimeout time.Duration
 	cacheTTL        time.Duration
 
-	// browser for navigating to pages
+	// ページナビゲーション用のブラウザ
 	browser *rod.Browser
 }
 
@@ -235,13 +235,13 @@ func (s *Server) handleRedis() {
 }
 
 func (s *Server) handleLauncher() {
-	// initial connection
+	// 初回接続
 	err := s.tryConnectLauncher()
 	if err != nil {
 		s.logger.Warn("launcher connect failed", "err", err)
 	}
 	ticker := time.NewTicker(30 * time.Second)
-	// keep trying to connect to launcher and establish a browser if not available
+	// ランチャーへの接続とブラウザの確立を継続的に試みる
 	for {
 		select {
 		case _, ok := <-s.serverClosed:
@@ -249,7 +249,7 @@ func (s *Server) handleLauncher() {
 				return
 			}
 		case <-ticker.C:
-			// try connecting if not already connected
+			// 未接続の場合、接続を試みる
 			err := s.tryConnectLauncher()
 			if err != nil {
 				s.logger.Warn("launcher connect failed", "err", err)
@@ -266,14 +266,14 @@ func (s *Server) tryConnectLauncher() error {
 			return fmt.Errorf("error instancing launcher: %w", err)
 		}
 		s.l = l
-		// try connecting browser
+		// ブラウザへの接続を試行
 		rc, err := l.Client()
 		if err != nil {
 			return fmt.Errorf("error creating client for remote browser: %w", err)
 		}
 		s.browser = rod.New().Client(rc)
 	}
-	// try checking browser version
+	// ブラウザのバージョン確認を試行
 	version, err := s.browser.Version()
 	if err != nil {
 		return fmt.Errorf("browser version check failed: %w", err)

@@ -18,7 +18,7 @@ const particleICDKey = "mona-particle-icd"
 
 func init() {
 	skillFrames = make([][]int, 2)
-	// Tap E
+	// 元素スキル（単押し）
 	skillFrames[0] = frames.InitAbilSlice(50) // Tap E -> N1
 	skillFrames[0][action.ActionCharge] = 46  // Tap E -> CA
 	skillFrames[0][action.ActionBurst] = 28   // Tap E -> Q
@@ -26,7 +26,7 @@ func init() {
 	skillFrames[0][action.ActionJump] = 28    // Tap E -> J
 	skillFrames[0][action.ActionSwap] = 43    // Tap E -> Swap
 
-	// Hold E
+	// 元素スキル（長押し）
 	skillFrames[1] = frames.InitAbilSlice(80) // Hold E -> N1
 	skillFrames[1][action.ActionCharge] = 76  // Hold E -> CA
 	skillFrames[1][action.ActionBurst] = 58   // Hold E -> Q
@@ -41,8 +41,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		hold = 1
 	}
 
-	// DoT
-	// ticks 4 times
+	// 継続ダメージ
+	// 4回Tick
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Mirror Reflection of Doom (Tick)",
@@ -57,12 +57,12 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	snap := c.Snapshot(&ai)
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5)
 
-	// tick every 1s
+	// 1秒ごとにTick
 	for i := skillHitmarks[hold]; i < 300; i += 60 {
 		c.Core.QueueAttackWithSnap(ai, snap, ap, i)
 	}
 
-	// Explosion
+	// 爆発
 	aiExplode := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Mirror Reflection of Doom (Explode)",
@@ -81,7 +81,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames[hold]),
 		AnimationLength: skillFrames[hold][action.InvalidAction],
-		CanQueueAfter:   skillFrames[hold][action.ActionBurst], // earliest cancel
+		CanQueueAfter:   skillFrames[hold][action.ActionBurst], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

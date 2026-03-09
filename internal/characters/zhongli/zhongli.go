@@ -21,7 +21,7 @@ type char struct {
 	steleCount    int
 }
 
-// TODO: need to clean up zhongli code still
+// TODO: 鍾離のコードの整理がまだ必要
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := char{}
 	c.Character = tmpl.NewWithWrapper(s, w)

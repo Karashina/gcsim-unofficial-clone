@@ -20,11 +20,11 @@ const (
 )
 
 func init() {
-	burstFrames = frames.InitAbilSlice(128) // Q - N1/E/Jump/Walk
+	burstFrames = frames.InitAbilSlice(128) // Q -> N1/E/ジャンプ/歩行
 	burstFrames[action.ActionDash] = 127
 	burstFrames[action.ActionSwap] = 127
 
-	burstSkillStateFrames = frames.InitAbilSlice(128) // Q - Jump/Walk
+	burstSkillStateFrames = frames.InitAbilSlice(128) // Q -> ジャンプ/歩行
 	burstSkillStateFrames[action.ActionAttack] = 127
 	burstSkillStateFrames[action.ActionSkill] = 127
 	burstSkillStateFrames[action.ActionDash] = 127
@@ -45,7 +45,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		HitlagHaltFrames: 0.1,
 	}
 	for _, v := range burstHitmarks {
-		// TODO: what's the size of this??
+		// TODO: このサイズは？
 		ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: -1}, 11.2, 9)
 		c.Core.QueueAttack(ai, ap, v, v)
 	}
@@ -60,14 +60,14 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		return action.Info{
 			Frames:          frames.NewAbilFunc(burstSkillStateFrames),
 			AnimationLength: burstSkillStateFrames[action.InvalidAction],
-			CanQueueAfter:   burstSkillStateFrames[action.ActionSwap], // earliest cancel
+			CanQueueAfter:   burstSkillStateFrames[action.ActionSwap], // 最速キャンセル
 			State:           action.BurstState,
 		}, nil
 	}
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

@@ -53,7 +53,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		CanBeDefenseHalted: true,
 	}
 
-	// check burst status for hitbox
+	// 元素爆発ステータスでヒットボックスを確認
 	attackIndex := 0
 	if c.StatModIsActive(burstKey) {
 		attackIndex = 1

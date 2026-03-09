@@ -11,7 +11,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
-// TestVentiSkillDealsDamage verifies Venti Skill (Skyward Sonnet) deals Anemo DMG
+// TestVentiSkillDealsDamage はVentiのスキル（Skyward Sonnet）が風元素ダメージを与えることを検証する
 func TestVentiSkillDealsDamage(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Venti)
@@ -59,7 +59,7 @@ func TestVentiSkillDealsDamage(t *testing.T) {
 	}
 }
 
-// TestVentiBurstCreatesBurstEye verifies Burst spawns the Wind's Grand Ode eye
+// TestVentiBurstCreatesBurstEye は元素爆発がWind's Grand Odeの目を生成することを検証する
 func TestVentiBurstCreatesBurstEye(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Venti)
@@ -99,22 +99,22 @@ func TestVentiBurstCreatesBurstEye(t *testing.T) {
 		advanceCoreFrame(c)
 	}
 
-	// Advance several seconds for burst ticks
+	// 元素爆発のtickのため数秒分進める
 	for i := 0; i < 600; i++ {
 		advanceCoreFrame(c)
 	}
 
-	// Burst should deal multiple tick hits over its duration
+	// 元素爆発は持続時間中に複数のtickヒットを与えるべき
 	if hitCount < 5 {
 		t.Fatalf("Venti Burst should deal multiple tick hits, got %v", hitCount)
 	}
 }
 
-// TestVentiHexereiCondition verifies hexerei condition query
+// TestVentiHexereiCondition はhexereiのConditionクエリを検証する
 func TestVentiHexereiCondition(t *testing.T) {
 	c, _ := makeCore(1)
 
-	// Venti with Hexerei enabled (default)
+	// Hexerei有効のVenti（デフォルト）
 	prof := defProfile(keys.Venti)
 	prof.Base.Cons = 0
 	prof.Base.Ascension = 6
@@ -132,7 +132,7 @@ func TestVentiHexereiCondition(t *testing.T) {
 		t.Fatalf("error initializing core: %v", err)
 	}
 
-	// Hexerei should be true by default
+	// デフォルトでHexereiはtrueであるべき
 	result, err := c.Player.Chars()[idx].Condition([]string{"hexerei"})
 	if err != nil {
 		t.Fatalf("hexerei condition error: %v", err)
@@ -142,7 +142,7 @@ func TestVentiHexereiCondition(t *testing.T) {
 	}
 }
 
-// TestVentiNoHexDisablesHexerei verifies nohex=1 disables Hexerei
+// TestVentiNoHexDisablesHexerei はnohex=1がHexereiを無効化することを検証する
 func TestVentiNoHexDisablesHexerei(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Venti)
@@ -167,7 +167,7 @@ func TestVentiNoHexDisablesHexerei(t *testing.T) {
 	}
 }
 
-// TestVentiC6Setup verifies C6 initializes without error
+// TestVentiC6Setup はC6がエラーなく初期化されることを検証する
 func TestVentiC6Setup(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Venti)
@@ -188,7 +188,7 @@ func TestVentiC6Setup(t *testing.T) {
 	}
 }
 
-// TestVentiAllActionsDoNotPanic verifies all actions don't panic
+// TestVentiAllActionsDoNotPanic は全アクションがパニックしないことを検証する
 func TestVentiAllActionsDoNotPanic(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Venti)

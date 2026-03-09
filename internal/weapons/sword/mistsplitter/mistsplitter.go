@@ -30,31 +30,31 @@ const (
 	burstBuffKey  = "mistsplitter-burst"
 )
 
-// Gain a 12% Elemental DMG Bonus for all elements and receive the might of the
-// Mistsplitter's Emblem. At stack levels 1/2/3, the Mistsplitter's Emblem
-// provides a 8/16/28% Elemental DMG Bonus for the character's Elemental Type.
-// The character will obtain 1 stack of Mistsplitter's Emblem in each of the
-// following scenarios: Normal Attack deals Elemental DMG (stack lasts 5s),
-// casting Elemental Burst (stack lasts 10s); Energy is less than 100% (stack
-// disappears when Energy is full). Each stack's duration is calculated
-// independently.
+// 全元素ダメージボーナスが12%増加し、「霧切」の紋章の力を得る。
+// スタック数が1/2/3の時、キャラクターの元素タイプの
+// 元素ダメージボーナスが8/16/28%増加する。
+// 以下の条件でそれぞれ1スタック獲得:
+// 通常攻撃が元素ダメージを与えた時（5秒持続）、
+// 元素爆発使用時（10秒持続）、
+// エネルギーが100%未満の時（エネルギーが満タンになると消滅）。
+// 各スタックの持続時間は独立して計算される。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	// perm buff
+	// 永続バフ
 	m := make([]float64, attributes.EndStatType)
 	base := 0.09 + float64(r)*0.03
 	for i := attributes.PyroP; i <= attributes.DendroP; i++ {
 		m[i] = base
 	}
 
-	// stacking buff
+	// スタッキングバフ
 	stack := 0.06 + float64(r)*0.02
 	maxBonus := 0.03 + float64(r)*0.01
 	bonus := attributes.EleToDmgP(char.Base.Element)
 
-	// normal dealing dmg
+	// 通常攻撃がダメージを与えた時
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != char.Index {
@@ -70,7 +70,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("mistsplitter-%v", char.Base.Key.String()))
 
-	// using burst
+	// 元素爆発使用時
 	c.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false

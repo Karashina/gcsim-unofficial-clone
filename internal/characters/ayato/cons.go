@@ -50,9 +50,9 @@ func (c *char) c2() {
 	})
 }
 
-// After using Kamisato Art: Kyouka, Ayato's next Shunsuiken attack will create
-// 2 extra Shunsuiken strikes when they hit opponents, each one dealing 450% of Ayato's ATK as DMG.
-// Both these Shunsuiken attacks will not be affected by Namisen.
+// 神里流・鏡花使用後、綾人の次の瞬水剣攻撃が敵に命中すると、
+// 追加の瞬水剣の一撃を2回発生させ、それぞれ綾人の攻撃力の450%のダメージを与える。
+// この2回の瞬水剣攻撃は波闃の影響を受けない。
 func (c *char) makeC6CB() combat.AttackCBFunc {
 	if c.Base.Cons < 6 || !c.c6Ready {
 		return nil

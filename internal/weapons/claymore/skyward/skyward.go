@@ -26,13 +26,13 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Increases all DMG by 8%. After using an Elemental Burst, Normal or Charged
-	// Attack, on hit, creates a vacuum blade that does 80% of ATK as DMG to
-	// opponents along its path. Lasts for 20s or 8 vacuum blades.
+	// 全ダメージが8%増加。元素爆発使用後、通常攻撃または重撃が
+	// 命中すると、攻撃力の80%分のダメージを与える真空の刃を生成する。
+	// 20秒間または真空の刃8回まで持続。
 	w := &Weapon{}
 	r := p.Refine
 
-	// perm buff
+	// 永続バフ
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DmgP] = 0.06 + float64(r)*0.02
 	char.AddStatMod(character.StatMod{

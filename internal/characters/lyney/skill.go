@@ -76,14 +76,14 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	player := c.Core.Combat.Player()
 	skillPos := combat.NewCircleHitOnTarget(geometry.CalcOffsetPoint(player.Pos(), geometry.Point{Y: 5.5}, player.Direction()), nil, 5.5)
 	c.QueueCharTask(func() {
-		// trigger skill dmg
+		// 元素スキルのダメージを発動
 		c.Core.QueueAttack(ai, skillPos, 0, 0, c.particleCB)
-		// explode hats
+		// ハットを爆発させる
 		hatCount := len(c.hats)
 		for i := 0; i < hatCount; i++ {
 			c.hats[0].skillExplode()
 		}
-		// heal self
+		// 自身を回復
 		c.Core.Player.Heal(skillHeal)
 	}, skillHitmark)
 
@@ -104,7 +104,7 @@ func (c *char) skillBurst() action.Info {
 		Frames:          frames.NewAbilFunc(skillBurstFrames),
 		AnimationLength: skillBurstFrames[action.InvalidAction],
 		CanQueueAfter:   skillBurstFrames[action.ActionJump],
-		State:           action.SkillState, // TODO: does this matter?
+		State:           action.SkillState, // TODO: これは影響あるか?
 	}
 }
 

@@ -33,12 +33,12 @@ const (
 	energyIcd    = int(0.7 * 60)
 )
 
-// After the equipping character hits an opponent with a Plunging Attack,
-// all nearby party members' Plunging Attacks will deal 28/41/54/67/80% increased DMG for 20s.
-// When nearby party members hit opponents with Plunging Attacks,
-// they will restore 2.5/2.75/3/3.25/3.5 Energy to the equipping character.
-// Energy can be restored this way every 0.7s.
-// This energy regain effect can be triggered even if the equipping character is not on the field.
+// 装備キャラクターが落下攻撃で敵に命中した後、
+// 近くのパーティメンバー全員の落下攻撃ダメージが20秒間28/41/54/67/80%増加する。
+// 近くのパーティメンバーが落下攻撃で敵に命中した時、
+// 装備キャラクターに2.5/2.75/3/3.25/3.5エネルギーを回復する。
+// エネルギーは0.7秒に1回回復可能。
+// 装備キャラクターがフィールドにいなくてもエネルギー回復効果は発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -51,12 +51,12 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 
-		// can only trigger on plunge dmg
+		// 落下ダメージでのみ発動可能
 		if atk.Info.AttackTag != attacks.AttackTagPlunge {
 			return false
 		}
 
-		// if dmg came from equipping char, then buff team plunge dmg
+		// 装備キャラからのダメージの場合、チームの落下ダメージをバフ
 		if atk.Info.ActorIndex == char.Index {
 			for _, char := range c.Player.Chars() {
 				char.AddAttackMod(character.AttackMod{
@@ -71,7 +71,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			}
 		}
 
-		// restore energy regardless of who did plunge dmg
+		// 落下ダメージを行ったキャラに関係なくエネルギーを回復
 		if char.StatusIsActive(energyIcdKey) {
 			return false
 		}

@@ -16,21 +16,21 @@ func (c *CharWrapper) QueueCharTask(f func(), delay int) {
 }
 
 func (c *CharWrapper) Tick() {
-	// decrement frozen time first
+	// まず凍結時間を減少
 	c.frozenFrames -= 1
 	left := 0
 	if c.frozenFrames < 0 {
 		left = -c.frozenFrames
 		c.frozenFrames = 0
 	}
-	// if any left then increase time passed
+	// 残りがあれば経過時間を増加
 	if left <= 0 {
-		// do nothing this tick
+		// このTickでは何もしない
 		return
 	}
 	c.TimePassed += left
 
-	// check char queue for any executable actions
+	// キャラキューに実行可能なアクションがあるか確認
 	c.queue.Run()
 }
 
@@ -38,9 +38,9 @@ func (c *CharWrapper) FramePausedOnHitlag() bool {
 	return c.frozenFrames > 0
 }
 
-// ApplyHitlag adds hitlag to the character for specified duration
+// ApplyHitlag はキャラクターに指定された期間のヒットラグを追加する
 func (c *CharWrapper) ApplyHitlag(factor, dur float64) {
-	// number of frames frozen is total duration * (1 - factor)
+	// 凍結フレーム数 = 合計期間 * (1 - 係数)
 	ext := int(math.Ceil(dur * (1 - factor)))
 	c.frozenFrames += ext
 	var logs []string

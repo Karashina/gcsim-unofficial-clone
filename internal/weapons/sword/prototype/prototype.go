@@ -32,8 +32,8 @@ const (
 	buffKey = "prototype-rancour"
 )
 
-// On hit, Normal or Charged Attacks increase ATK and DEF by 4% for 6s. Max 4
-// stacks. This effect can only occur once every 0.3s.
+// 命中時、通常攻撃または重撃が攻撃力と防御力を6秒間4%増加させる。最大4スタック。
+// この効果は0.3秒毎に1回のみ発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

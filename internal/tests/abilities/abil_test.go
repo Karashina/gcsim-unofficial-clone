@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	// we import simulation like this so that import.go is pulled in
+	// import.goを読み込むためにこのようにsimulationをインポートする
 
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/avatar"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
@@ -19,7 +19,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/pkg/simulation"
 )
 
-// purpose of this test is to check that characters abilities do not randomly panic
+// このテストの目的は、キャラクターのアビリティがランダムにパニックしないことを確認すること
 func TestAbilities(t *testing.T) {
 	for k := range core.NewCharFuncMap {
 		testChar(t, k)
@@ -36,16 +36,16 @@ func testChar(t *testing.T, k keys.Char) {
 		t.FailNow()
 	}
 	c.Player.SetActive(idx)
-	// ensure there is a default combat target before initializing the core
-	// some character init code (e.g. const handlers) assumes a default target
-	// exists, so set it here to avoid panics during Init()
+	// コア初期化前にデフォルトの戦闘ターゲットが存在することを確認する
+	// 一部のキャラクター初期化コード（例: 命ノ星座ハンドラー）はデフォルトターゲットの
+	// 存在を前提としているため、Init()中のパニックを防ぐためにここで設定する
 	c.Combat.DefaultTarget = trg[0].Key()
 	err = c.Init()
 	if err != nil {
 		t.Errorf("error initializing core: %v", err)
 		t.FailNow()
 	}
-	// initialize some settings
+	// いくつかの設定を初期化
 	c.Combat.DefaultTarget = trg[0].Key()
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)

@@ -13,20 +13,21 @@ import (
 
 const c2ICDKey = "baizhu-c2-icd"
 
-// Universal Diagnosis gains 1 additional charge.
+// 木鑰の薬診に追加チャージ1回を付与する。
 func (c *char) c1() {
 	c.SetNumCharges(action.ActionSkill, 2)
 }
 
-// When your own active character hits a nearby opponent with their attacks, Baizhu will unleash a Gossamer Sprite: Splice.
-// Gossamer Sprite: Splice will initiate 1 attack before returning, dealing 250% of Baizhu's ATK as Dendro DMG and healing for 20% of Universal Diagnosis's Gossamer Sprite's normal healing.
-// DMG dealt this way is considered Elemental Skill DMG.
-// This effect can be triggered once every 5s.
+// アクティブキャラクターの攻撃が近くの敵に命中すると、白朮は遊糸徴霊・結を放つ。
+// 遊糸徴霊・結は1回攻撃してから帰還し、白朮の攻撃力250%の草元素ダメージを与え、
+// 木鑰の薬診の遊糸徴霊の通常回復量の20%を回復する。
+// この方法で与えたダメージは元素スキルダメージとみなされる。
+// この効果は5秒に1回発動可能。
 func (c *char) c2() {
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
 		t := args[0].(combat.Target)
-		// only trigger with the active character
+		// アクティブキャラクターでのみ発動
 		if ae.Info.ActorIndex != c.Core.Player.Active() {
 			return false
 		}
@@ -49,16 +50,16 @@ func (c *char) c2() {
 		if c.Base.Cons >= 6 {
 			c6cb = c.makeC6CB()
 		}
-		// TODO: accurate C2 hitmark and return travel values
+		// TODO: 正確な2凸のヒットマークと帰還移動値
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(t, nil, 0.6),
 			0,
-			skillFirstHitmark, // reuse skill for now
+			skillFirstHitmark, // 今のところスキルを再利用
 			c6cb,
 		)
 
-		// C2 healing
+		// 2凸の回復
 		c.Core.Tasks.Add(func() {
 			c.Core.Player.Heal(info.HealInfo{
 				Caller:  c.Index,
@@ -67,14 +68,14 @@ func (c *char) c2() {
 				Src:     (skillHealPP[c.TalentLvlSkill()]*c.MaxHP() + skillHealFlat[c.TalentLvlSkill()]) * 0.2,
 				Bonus:   c.Stat(attributes.Heal),
 			})
-		}, skillReturnTravel) // reuse skill for now
+		}, skillReturnTravel) // 今のところスキルを再利用
 
 		c.AddStatus(c2ICDKey, 60*5, false) // 5s
 		return false
 	}, "baizhu-c2")
 }
 
-// For 15s after Healing Holism is used, Baizhu will increase all nearby party members' Elemental Mastery by 80.
+// 癒しの秘法を使用後15秒間、白朮は近くのチーム全員の元素熟知を80上昇させる。
 func (c *char) c4() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.EM] = 80
@@ -89,9 +90,9 @@ func (c *char) c4() {
 	}
 }
 
-// Increases the DMG dealt by Holistic Revivification's Spiritveins by 8% of Baizhu's Max HP.
-// Additionally, when Gossamer Sprite or Gossamer Sprite: Splice hit opponents, there is a 100% chance of generating one of Healing Holism's
-// Seamless Shields. This effect can only be triggered once by a Gossamer Sprite or Gossamer Sprite: Splice.
+// 癒しの霊脈のダメージを白朮のHP上限の8%分増加させる。
+// また、遊糸徴霊または遊糸徴霊・結が敵に命中すると、100%の確率で
+// 癒しの秘法の継ぎ目なきシールドを1つ生成する。この効果は1回の遊糸徴霊につき1回のみ発動。
 func (c *char) makeC6CB() combat.AttackCBFunc {
 	done := false
 	return func(a combat.AttackCB) {

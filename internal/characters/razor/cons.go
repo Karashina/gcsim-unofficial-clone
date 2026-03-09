@@ -12,13 +12,13 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Picking up an Elemental Orb or Particle increases Razor's DMG by 10% for 8s.
+// 元素オーブまたは元素粒子を拾うと、Razorのダメージが8秒間10%上昇する。
 func (c *char) c1() {
 	c.c1bonus = make([]float64, attributes.EndStatType)
 	c.c1bonus[attributes.DmgP] = 0.1
 
 	c.Core.Events.Subscribe(event.OnParticleReceived, func(_ ...interface{}) bool {
-		// ignore if character not on field
+		// キャラクターがフィールドにいなければ無視
 		if c.Core.Player.Active() != c.Index {
 			return false
 		}
@@ -33,7 +33,7 @@ func (c *char) c1() {
 	}, "razor-c1")
 }
 
-// Increases CRIT Rate against opponents with less than 30% HP by 10%.
+// HPが30%未満の敵に対して会心率が10%上昇する。
 func (c *char) c2() {
 	if c.Core.Combat.DamageMode {
 		c.c2bonus = make([]float64, attributes.EndStatType)
@@ -55,7 +55,7 @@ func (c *char) c2() {
 	}
 }
 
-// When casting Claw and Thunder (Press), opponents hit will have their DEF decreased by 15% for 7s.
+// 爪雷（単押し）で命中した敵の防御力が7秒間15%減少する。
 func (c *char) c4cb(a combat.AttackCB) {
 	e, ok := a.Target.(*enemy.Enemy)
 	if !ok {
@@ -69,13 +69,13 @@ func (c *char) c4cb(a combat.AttackCB) {
 
 const c6ICDKey = "razor-c6-icd"
 
-// Every 10s, Razor's sword charges up, causing the next Normal Attack to release lightning that deals 100% of Razor's ATK as Electro DMG.
-// When Razor is not using Lightning Fang, a lightning strike on an opponent will grant Razor an Electro Sigil for Claw and Thunder.
+// 10秒ごとにRazorの剣が充電され、次の通常攻撃がRazorの攻撃力100%分の雷元素ダメージを与える電撃を放つ。
+// 雷牙未使用時、敵への電撃は爪雷用の雷印を付与する。
 func (c *char) c6cb(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
-	// effect can only happen every 10s
+	// 効果は10秒ごとにのみ発動
 	if c.StatusIsActive(c6ICDKey) {
 		return
 	}
@@ -85,7 +85,7 @@ func (c *char) c6cb(a combat.AttackCB) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Lupus Fulguris",
-		AttackTag:  attacks.AttackTagNone, // TODO: it has another tag?
+		AttackTag:  attacks.AttackTagNone, // TODO: 別のタグがある？
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
 		StrikeType: attacks.StrikeTypeDefault,
@@ -95,7 +95,7 @@ func (c *char) c6cb(a combat.AttackCB) {
 	}
 
 	sigilcb := func(a combat.AttackCB) {
-		// add sigil only outside burst
+		// 爆発外でのみ雷印を追加
 		if c.StatusIsActive(burstBuffKey) {
 			return
 		}

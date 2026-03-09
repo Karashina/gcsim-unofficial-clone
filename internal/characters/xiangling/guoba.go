@@ -43,30 +43,30 @@ func (c *char) newGuoba(ai combat.AttackInfo) *panda {
 }
 
 func (p *panda) Tick() {
-	// this is needed since both reactable and gadget tick
+	// reactableとgadgetの両方がtickを必要とするため
 	p.Reactable.Tick()
 	p.Gadget.Tick()
 	p.timer++
-	// guoba pew pew every 100 frames
-	// first pew pew is at 126, but guoba spawns 13 in; so it's really 113
-	// then every 100 after that
-	// TODO: kids.. don't do this
+	// グゥオパァーは100フレームごとに火を噴く
+	// 最初の火噴きは126フレーム目だが、グゥオパァーは13フレーム後にスポーンするため実質113
+	// その後は100フレームごと
+	// TODO: この実装は改善が必要
 	switch p.timer {
-	case 103, 203, 303, 403: // swirl window
+	case 103, 203, 303, 403: // 拡散ウィンドウ
 		p.Core.Log.NewEvent("guoba self infusion applied", glog.LogElementEvent, p.c.Index).
 			SetEnded(p.c.Core.F + infuseWindow + 1)
 		p.Durability[reactable.Pyro] = infuseDurability
 		p.Core.Tasks.Add(func() {
 			p.Durability[reactable.Pyro] = 0
-		}, infuseWindow+1) // +1 since infuse window is inclusive
+		}, infuseWindow+1) // +1（元素付与ウィンドウが包含的なため）
 		p.SetDirectionToClosestEnemy()
-		// queue this in advance because that's how it is on live
+		// ライブでの挙動に合わせて事前にキューに追加
 		p.breath()
 	}
 }
 
 func (p *panda) breath() {
-	// assume A1
+	// 固有天賦1を前提とする
 	p.Core.QueueAttackWithSnap(
 		p.ai,
 		p.snap,
@@ -89,12 +89,12 @@ func (p *panda) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, bool) 
 	if atk.Info.AttackTag != attacks.AttackTagElementalArt {
 		return 0, false
 	}
-	// check pyro window
+	// 炎元素ウィンドウをチェック
 	if p.Durability[reactable.Pyro] <= reactable.ZeroDur {
 		return 0, false
 	}
 
-	// don't take damage, trigger swirl reaction only on sucrose E or faruzan E
+	// ダメージは受けず、スクロースEまたはファルザンEによる拡散反応のみトリガー
 	switch p.Core.Player.Chars()[atk.Info.ActorIndex].Base.Key {
 	case keys.Sucrose:
 		p.Core.Log.NewEvent("guoba hit by sucrose E", glog.LogCharacterEvent, p.c.Index)
@@ -106,14 +106,14 @@ func (p *panda) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, bool) 
 	default:
 		return 0, false
 	}
-	// both sucrose E and faruzan E are 50 durability against gadgets
+	// スクロースEとファルザンEはガジェットに対して50元素量
 	atk.Info.Durability = 50
 
-	// cheat a bit, set the durability just enough to match incoming sucrose/faruzan E gauge
+	// スクロース/ファルザンEのゲージに合わせて元素量を調整
 	oldDur := p.Durability[reactable.Pyro]
 	p.Durability[reactable.Pyro] = infuseDurability
 	p.React(atk)
-	// restore the durability after
+	// 元素量を事後に復元
 	p.Durability[reactable.Pyro] = oldDur
 
 	return 0, false

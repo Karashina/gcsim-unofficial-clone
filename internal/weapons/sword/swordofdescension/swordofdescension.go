@@ -18,12 +18,12 @@ func init() {
 	core.RegisterWeaponFunc(keys.SwordOfDescension, NewWeapon)
 }
 
-// Descension
-// This weapon's effect is only applied on the following platform(s):
+// ディセンション
+// この武器の効果は以下のプラットフォームでのみ適用される:
 // "PlayStation Network"
-// Hitting enemies with Normal or Charged Attacks grants a 50% chance to deal 200% ATK as DMG in a small AoE. This effect can only occur once every 10s.
-// Additionally, if the Traveler equips the Sword of Descension, their ATK is increased by 66.
-//   - Weapon refines do not affect this weapon
+// 通常攻撃または重撃が敵に命中した時、50%の確率で攻撃力の200%のダメージを小範囲に与える。この効果は10秒毎に1回のみ発動可能。
+// また、旅人が Sword of Descension を装備すると、攻撃力が66増加する。
+//   - 精錬はこの武器に影響しない
 type Weapon struct {
 	Index int
 }
@@ -65,19 +65,19 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		// ignore if character not on field
+		// キャラクターがフィールドにいなければ無視
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// Ignore if neither a charged nor normal attack
+		// 重撃でも通常攻撃でもない場合は無視
 		if atk.Info.AttackTag != attacks.AttackTagNormal && atk.Info.AttackTag != attacks.AttackTagExtra {
 			return false
 		}
-		// Ignore if icd is still up
+		// ICDがまだ有効な場合は無視
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		// Ignore 50% of the time, 1:1 ratio
+		// 50%の確率で無視、1:1の比率
 		if c.Rand.Float64() < 0.5 {
 			return false
 		}

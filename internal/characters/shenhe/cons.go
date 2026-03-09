@@ -22,11 +22,12 @@ func (c *char) c2(active *character.CharWrapper, dur int) {
 	})
 }
 
-// When characters under the effect of Icy Quill applied by Shenhe trigger its DMG Bonus effects, Shenhe will gain a Skyfrost Mantra stack:
+// 氷羽の効果を受けたキャラクターがダメージボーナスを発動した時、申鶴は霜霊詣スタックを獲得する:
 //
-// - When Shenhe uses Spring Spirit Summoning, she will consume all stacks of Skyfrost Mantra, increasing the DMG of that Spring Spirit Summoning by 5% for each stack consumed.
+//   - 申鶴が仕組みの春神を使用時、全ての霜霊詣スタックを消費し、
+//     消費したスタック1つにつきその仕組みの春神のダメージが5%増加する。
 //
-// - Max 50 stacks. Stacks last for 60s.
+// 最奇50スタック。スタックは60秒間持続。
 func (c *char) c4() float64 {
 	if c.Base.Cons < 4 {
 		return 0
@@ -44,10 +45,10 @@ func (c *char) c4() float64 {
 	return dmgBonus
 }
 
-// C4 stacks are gained after the damage has been dealt and not before
+// C4スタックはダメージが与えられた後に獲得される（前ではなく）
 // https://library.keqingmains.com/evidence/characters/cryo/shenhe?q=shenhe#c4-insight
 func (c *char) c4CB(a combat.AttackCB) {
-	// reset stacks to zero if all expired
+	// 全て期限切れの場合スタックをゼロにリセット
 	if !c.StatusIsActive(c4BuffKey) {
 		c.c4count = 0
 	}

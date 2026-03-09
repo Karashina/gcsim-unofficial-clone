@@ -46,11 +46,11 @@ type SimulatorSettings struct {
 	EnableHitlag      bool    `json:"enable_hitlag"`
 	DefHalt           bool    `json:"def_halt"` // for hitlag
 	IgnoreBurstEnergy bool    `json:"ignore_burst_energy"`
-	// other stuff
+	// その他
 	NumberOfWorkers int    `json:"-"`          // how many workers to run the simulation
 	Iterations      int    `json:"iterations"` // how many iterations to run
 	Delays          Delays `json:"delays"`
-	// Specify which stats to collect. An empty/nil slice enables all
+	// 収集するステータスを指定。空/nilのスライスは全て有効
 	CollectStats []string `json:"-"`
 }
 

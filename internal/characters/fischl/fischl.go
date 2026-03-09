@@ -19,16 +19,16 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	// field use for calculating oz damage
+	// オズのダメージ計算用のフィールド
 	ozPos           geometry.Point
 	ozSnapshot      combat.AttackEvent
-	ozSource        int  // keep tracks of source of oz aka resets
-	ozActive        bool // purely used for gscl conditional purposes
-	ozTickSrc       int  // used for oz recast attacks
+	ozSource        int  // オズのソースを追跡（リセット用）
+	ozActive        bool // GCSL条件判定専用
+	ozTickSrc       int  // オズの再召喚攻撃用
 	ozTravel        int
-	burstOzSpawnSrc int // prevent double oz spawn from burst
+	burstOzSpawnSrc int // 元素爆発からのオズ二重召喚を防止
 	c6Watcher       *minazuki.Watcher
-	// Hexerei mode (default true unless nohex=1)
+	// Hexereiモード（nohex=1が指定されない限りデフォルトtrue）
 	isHexerei bool
 }
 
@@ -51,7 +51,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 		c.ozTravel = travel
 	}
 
-	// Default is Hexerei character unless nohex=1 is specified
+	// nohex=1が指定されない限りデフォルトはHexereiキャラクター
 	c.isHexerei = true
 	if nohex, ok := p.Params["nohex"]; ok && nohex == 1 {
 		c.isHexerei = false
@@ -99,11 +99,11 @@ func (c *char) Condition(fields []string) (any, error) {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if it is possible to recast oz
+	// オズの再召喚が可能かチェック
 	if a == action.ActionSkill && p["recast"] != 0 && c.ozActive {
 		return !c.StatusIsActive(skillRecastCDKey), action.SkillCD
 	}
-	// check if cast skill with oz on-field
+	// スキルでオズがフィールド上にいる時に発動判定
 	if a == action.ActionSkill && c.ozActive {
 		return false, action.NoFailure
 	}

@@ -23,8 +23,8 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// After the wielder is healed, they will deal 16/20/24/28/32% more DMG for 8s.
-// This can be triggered even when the character is not on the field.
+// 武器装備者が回復を受けた後、8秒間与えるダメージが16/20/24/28/32%増加する。
+// キャラクターがフィールドにいなくても発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

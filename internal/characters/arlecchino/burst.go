@@ -44,13 +44,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.QueueCharTask(func() { c.ResetActionCooldown(action.ActionSkill) }, 107)
 
 	c.QueueCharTask(func() {
-		// the BoL can change during the burst
+		// 元素爆発中にBoLが変化する可能性がある
 		ai.FlatDmg += c.c6Amount()
 		c.Core.QueueAttack(ai, skillArea, 0, 0)
 	}, burstHitmarks)
 
-	// video seems to have delay due to ping
-	// Should be 6f delay looking at sources
+	// 動画はpingによる遅延がある模様
+	// ソースを見ると6fの遅延
 	c.QueueCharTask(c.balemoonRisingHeal, 123)
 
 	c.SetCDWithDelay(action.ActionBurst, 15*60, 0)
@@ -59,7 +59,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

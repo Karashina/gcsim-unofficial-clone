@@ -58,21 +58,21 @@ func (c *Circle) String() string {
 }
 
 func calcSegments(center Point, r float64, dir Point, fanAngle float64) []Point {
-	// assume circle center is origin at first to do the rotation stuff
+	// 最初は回転処理のために円の中心を原点と仮定する
 	segmentStart := Point{X: 0, Y: r}.Rotate(dir)
 	segmentLeft := segmentStart.Rotate(DegreesToDirection(-fanAngle / 2))
 	segmentRight := segmentStart.Rotate(DegreesToDirection(fanAngle / 2))
-	// save segment points (the circle center and segment point make up a line segment)
-	// need to move segment to where the actual circle center is
+	// セグメントの点を保存（円の中心とセグメント点で線分を構成）
+	// セグメントを実際の円の中心位置に移動する必要がある
 	return []Point{segmentLeft.Add(center), segmentRight.Add(center)}
 }
 
-// AABB is always for full circle
+// AABB は常に完全な円に対して計算する
 func calcCircleAABB(center Point, r float64) []Point {
 	return []Point{{X: center.X - r, Y: center.Y - r}, {X: center.X + r, Y: center.Y + r}}
 }
 
-// collision related
+// 衝突関連
 
 func (c *Circle) PointInShape(p Point) bool {
 	rangeCheck := c.center.Sub(p).MagnitudeSquared() <= c.r*c.r
@@ -83,29 +83,29 @@ func (c *Circle) PointInShape(p Point) bool {
 }
 
 func (c *Circle) IntersectCircle(c2 Circle) bool {
-	// TODO: circle with fanAngle hurtbox-circle collision
+	// TODO: fanAngle 付き円形ハートボックスの円-円衝突は未実装
 	if c.segments != nil {
 		panic("target with fanAngle hurtbox isn't supported in circle-circle collision")
 	}
 	// https://stackoverflow.com/a/4226473
-	// A: full circles have to be intersecting
+	// A: 完全な円が交差している必要がある
 	// (R0 - R1)^2 <= (x0 - x1)^2 + (y0 - y1)^2 <= (R0 + R1)^2
 	radiusSum := c.r + c2.r
 	if c.center.Sub(c2.center).MagnitudeSquared() > radiusSum*radiusSum {
 		return false
 	}
 
-	// c2 has no fanAngle -> there's an intersection if A
+	// c2 に fanAngle がない -> A を満たせば交差
 	if c2.segments == nil {
 		return true
 	}
 
-	// c2 has a fanAngle -> there's an intersection if A && (B || C)
+	// c2 に fanAngle がある -> A && (B || C) を満たせば交差
 	// https://www.baeldung.com/cs/circle-line-segment-collision-detection
-	// (note: no need for maxDist since we also count segment completely inside of circle as an intersection)
-	// B: check if c1 intersects any of c2's segments, if yes we can exit early
-	// (it's necessary to check for this because c1 can collide with c2's fanAngle area
-	// even if c1's circle center isn't in c2's fanAngle range)
+	// (注: maxDist チェックは不要。セグメント全体が円内に含まれる場合も交差として扱うため)
+	// B: c1 が c2 のセグメントのいずれかと交差するか確認。交差すれば早期リターン。
+	// (c1 の円中心が c2 の fanAngle 範囲外でも、c2 の fanAngle 領域と
+	// 衝突する可能性があるため、このチェックが必要)
 	o := c.center
 	p := c2.center
 
@@ -129,7 +129,7 @@ func (c *Circle) IntersectCircle(c2 Circle) bool {
 		}
 	}
 
-	// C: check if the angle between the vector pointing from c2 to c1 and the y axis lies within the fanAngle of c2
+	// C: c2 から c1 への方向ベクトルと y 軸のなす角が c2 の fanAngle 内にあるか確認
 	return fanAngleAreaCheck(c2.center, c.center, c2.dir, c2.fanAngle)
 }
 

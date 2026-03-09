@@ -18,9 +18,9 @@ func init() {
 	core.RegisterWeaponFunc(keys.KagotsurubeIsshin, NewWeapon)
 }
 
-// When a Normal, Charged, or Plunging Attack hits an opponent, it will whip up a
-// Hewing Gale, dealing AoE DMG equal to 180% of ATK and increasing ATK by 15% for
-// 8s. This effect can be triggered once every 8s.
+// 通常攻撃、重撃、または落下攻撃が敵に命中した時、「斬風」を発生させ、
+// 攻撃力の180%の範囲ダメージを与え、攻撃力が8秒間15%増加する。
+// この効果は8秒毎に1回のみ発動可能。
 type Weapon struct {
 	Index int
 }
@@ -59,8 +59,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 				return val, true
 			},
 		})
-		// add a new action that deals % dmg immediately
-		// superconduct attack
+		// 即座に%ダメージを与える新しいアクションを追加
+		// 超電導攻撃
 		ai := combat.AttackInfo{
 			ActorIndex: char.Index,
 			Abil:       "Kagotsurube Isshin Proc",
@@ -75,7 +75,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		trg := args[0].(combat.Target)
 		c.QueueAttack(ai, combat.NewCircleHitOnTarget(trg, nil, 3), 0, 1)
 
-		// trigger cd
+		// クールダウンを発動
 		char.AddStatus(icdKey, cd, true)
 
 		return false

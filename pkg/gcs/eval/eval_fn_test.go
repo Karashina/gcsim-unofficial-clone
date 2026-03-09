@@ -52,7 +52,7 @@ func TestFib(t *testing.T) {
 	if eval.Err() != nil {
 		t.Error(eval.Err())
 	}
-	// should get 34
+	// 34を取得するはず
 	res := result.(*retval)
 	val, ok := res.res.(*number)
 	if !ok {
@@ -107,7 +107,7 @@ func TestFunctional(t *testing.T) {
 	if eval.Err() != nil {
 		t.Error(eval.Err())
 	}
-	// should get 2
+	// 2を取得するはず
 	res := result.(*retval)
 	val, ok := res.res.(*number)
 	if !ok {
@@ -155,7 +155,7 @@ func TestAnonFunc(t *testing.T) {
 	if eval.Err() != nil {
 		t.Error(eval.Err())
 	}
-	// should get 5
+	// 5を取得するはず
 	res := result.(*retval)
 	val, ok := res.res.(*number)
 	if !ok {
@@ -203,7 +203,7 @@ func TestStringFunc(t *testing.T) {
 	if eval.Err() != nil {
 		t.Error(eval.Err())
 	}
-	// should get 5
+	// 5を取得するはず
 	res := result.(*retval)
 	val, ok := res.res.(*strval)
 	if !ok {
@@ -251,7 +251,7 @@ func TestNestedActions(t *testing.T) {
 		}
 	}
 	result := <-resultChan
-	// by default, functions return num
+	// デフォルトでは関数はnumを返す
 	if result.Typ() != typNum {
 		t.Errorf("expecting type to return num, got %v", result.Typ())
 	}

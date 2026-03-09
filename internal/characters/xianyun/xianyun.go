@@ -60,8 +60,8 @@ func (c *char) Init() error {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if it is possible to use next skill
-	// can't use skill when at 3 skills executed without a plunge
+	// 次のスキルが使用可能かチェック
+	// 落下攻撃を行わずにスキルを3回実行した場合は使用不可
 	if a == action.ActionSkill && (c.StatusIsActive(skillStateKey) || c.StatusIsActive(c6Key)) && c.skillCounter < 3 {
 		return true, action.NoFailure
 	}

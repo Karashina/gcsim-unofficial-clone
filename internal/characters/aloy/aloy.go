@@ -18,7 +18,7 @@ type char struct {
 	*tmpl.Character
 	coilICDExpiry int
 	lastFieldExit int
-	// coil related
+	// コイル関連
 	coils int
 }
 

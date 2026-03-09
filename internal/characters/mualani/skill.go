@@ -74,7 +74,7 @@ func (c *char) nightsoulPointReduceFunc(src int) func() {
 
 		c.reduceNightsoulPoints(1)
 
-		// reduce 1 point per 6f
+		// 6fごとに1ポイント消費
 		c.QueueCharTask(c.nightsoulPointReduceFunc(src), 6)
 	}
 }
@@ -85,7 +85,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		return action.Info{
 			Frames:          frames.NewAbilFunc(skillCancelFrames),
 			AnimationLength: skillCancelFrames[action.InvalidAction],
-			CanQueueAfter:   skillCancelFrames[action.ActionAttack], // earliest cancel
+			CanQueueAfter:   skillCancelFrames[action.ActionAttack], // 最速キャンセル
 			State:           action.SkillState,
 		}, nil
 	}
@@ -103,8 +103,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		}, 6)
 	}, skillDelay)
 
-	canQueueAfter := skillFrames[action.ActionAttack] // earliest cancel
-	// press skill "while" walking
+	canQueueAfter := skillFrames[action.ActionAttack] // 最速キャンセル
+	// 歩行「中」にスキルを発動
 	isWalking := c.Core.Player.AnimationHandler.CurrentState() == action.WalkState
 	if isWalking {
 		canQueueAfter = skillDelay
@@ -113,7 +113,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames: func(next action.Action) int {
 			if next == action.ActionWalk && isWalking {
-				// TODO: or 0f?
+				// TODO: 0fの可能性あり？
 				return skillDelay
 			}
 			return skillFrames[next]
@@ -141,7 +141,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 }
 
 func (c *char) surfingTick() {
-	// TODO: create a gadget?
+	// TODO: ガジェットを作成すべき？
 	c.Core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
 		if c.Core.Player.Active() != c.Index {
 			return false
@@ -159,7 +159,7 @@ func (c *char) surfingTick() {
 			return false
 		}
 
-		// to avoid spamming Surfing Hit logs
+		// Surfing Hitログのスパムを防止
 		useAttack := false
 		ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0.9}, 0, 1)
 		for _, e := range c.Core.Combat.Enemies() {

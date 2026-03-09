@@ -55,8 +55,8 @@ func (c *CharWrapper) ReceiveParticle(p Particle, isActive bool, partyCount int)
 	if !isActive {
 		r = 1.0 - 0.1*float64(partyCount)
 	}
-	// recharge amount - particles: same = 3, non-ele = 2, diff = 1
-	// recharge amount - orbs: same = 9, non-ele = 6, diff = 3 (3x particles)
+	// 元素チャージ量 - 粒子: 同元素 = 3, 無元素 = 2, 異元素 = 1
+	// 元素チャージ量 - オーブ: 同元素 = 9, 無元素 = 6, 異元素 = 3（粒子の3倍）
 	switch {
 	case p.Ele == c.Base.Element:
 		amt = 3
@@ -65,8 +65,8 @@ func (c *CharWrapper) ReceiveParticle(p Particle, isActive bool, partyCount int)
 	default:
 		amt = 1
 	}
-	amt *= r // apply off field reduction
-	// apply energy regen stat
+	amt *= r // オフフィールド減衰を適用
+	// 元素チャージ効率ステータスを適用
 
 	er = c.Stat(attributes.ER)
 

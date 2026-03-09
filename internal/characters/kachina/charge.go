@@ -51,7 +51,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(chargeFrames),
 		AnimationLength: chargeFrames[action.InvalidAction],
-		CanQueueAfter:   chargeFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   chargeFrames[action.ActionDash], // 最速キャンセル
 		State:           action.ChargeAttackState,
 	}, nil
 }

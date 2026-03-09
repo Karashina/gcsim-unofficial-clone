@@ -23,7 +23,7 @@ type char struct {
 	a4Buff              []float64
 	c4Count             int
 	c6buff              []float64
-	// Hexerei mode (default true unless nohex=1)
+	// Hexereiモード（nohex=1が指定されない限りデフォルトtrue）
 	isHexerei bool
 }
 
@@ -40,7 +40,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 		c.SetNumCharges(action.ActionSkill, 2)
 	}
 
-	// Default is Hexerei character unless nohex=1 is specified
+	// nohex=1が指定されない限りデフォルトはHexereiキャラクター
 	c.isHexerei = true
 	if nohex, ok := p.Params["nohex"]; ok && nohex == 1 {
 		c.isHexerei = false

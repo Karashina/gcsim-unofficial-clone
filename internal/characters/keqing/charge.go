@@ -55,10 +55,10 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}
 
 	if c.Core.Status.Duration(stilettoKey) > 0 {
-		// despawn stiletto
+		// 仕込み刀を消滅
 		c.Core.Status.Delete(stilettoKey)
 
-		// 2 hits
+		// 2ヒット
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       "Thunderclap Slash",

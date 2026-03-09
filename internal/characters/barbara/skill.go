@@ -11,7 +11,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 )
 
-// barbara skill - copied from bennett burst
+// バーバラのスキル - ベネットの元素爆発からコピー
 const skillDuration = 15*60 + 1
 const barbSkillKey = "barbara-e"
 const skillCDStart = 3
@@ -33,7 +33,7 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// restart a4 counter
+	// a4カウンターをリセット
 	c.a4extendCount = 0
 
 	ai := combat.AttackInfo{
@@ -48,24 +48,24 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Mult:       skill[c.TalentLvlSkill()],
 	}
 
-	// 2 Droplets
+	// 2つの水滴
 	for _, hitmark := range skillHitmarks {
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3),
 			5,
 			hitmark,
-		) // need to confirm snapshot timing
+		) // スナップショットタイミングの確認が必要
 	}
 
-	c.skillInitF = c.Core.F // needed for ticks
+	c.skillInitF = c.Core.F // Tick処理に必要
 
-	// setup heal and wet ticks (first tick at skillCDStart, once every 5s)
+	// 回復と湿潤Tickの設定（最初のTickはskillCDStart時、以降5秒ごと）
 	stats, _ := c.Stats()
 	hpplus := stats[attributes.Heal]
 	heal := skillhp[c.TalentLvlSkill()] + skillhpp[c.TalentLvlSkill()]*c.MaxHP()
 
-	// setup Melody Loop ticks (first tick at skillCDStart, once every 1.5s)
+	// メロディーループTickの設定（最初のTickはskillCDStart時、1.5秒ごと）
 	ai.Abil = "Let the Show Begin♪ (Melody Loop)"
 	ai.AttackTag = attacks.AttackTagNone
 	ai.Mult = 0
@@ -74,7 +74,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ai.CanBeDefenseHalted = true
 	ai.IsDeployable = true
 
-	// add skill status and queue up ticks
+	// スキルステータスを追加しTickをキューに入れる
 	c.Core.Tasks.Add(func() {
 		c.Core.Status.Add(barbSkillKey, skillDuration)
 		c.a1()
@@ -83,7 +83,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}, skillCDStart)
 
 	if c.Base.Cons >= 2 {
-		c.c2() // c2 hydro buff
+		c.c2() // 2凸水元素バフ
 		c.SetCDWithDelay(action.ActionSkill, 32*60*0.85, skillCDStart)
 	} else {
 		c.SetCDWithDelay(action.ActionSkill, 32*60, skillCDStart)
@@ -99,18 +99,18 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 func (c *char) barbaraSelfTick(healAmt, hpplus float64, skillInitF int) func() {
 	return func() {
-		// make sure it's not overwritten
+		// 上書きされていないことを確認
 		if c.skillInitF != skillInitF {
 			return
 		}
-		// do nothing if buff expired
+		// バフが期限切れなら何もしない
 		if c.Core.Status.Duration(barbSkillKey) == 0 {
 			return
 		}
 
 		c.Core.Log.NewEvent("barbara heal and wet ticking", glog.LogCharacterEvent, c.Index)
 
-		// heal
+		// 回復
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,
 			Target:  c.Core.Player.Active(),
@@ -119,35 +119,35 @@ func (c *char) barbaraSelfTick(healAmt, hpplus float64, skillInitF int) func() {
 			Bonus:   hpplus,
 		})
 
-		// wet: apply self infusion for 0.3s
+		// 湿潤: 0.3秒間自己付与を適用
 		p, ok := c.Core.Combat.Player().(*avatar.Player)
 		if !ok {
 			panic("target 0 should be Player but is not!!")
 		}
 		p.ApplySelfInfusion(attributes.Hydro, 25, 0.3*60)
 
-		// tick every 5s
+		// 5秒ごとにTick
 		c.Core.Tasks.Add(c.barbaraSelfTick(healAmt, hpplus, skillInitF), 5*60)
 	}
 }
 
 func (c *char) barbaraMelodyTick(ai combat.AttackInfo, skillInitF int) func() {
 	return func() {
-		// make sure it's not overwritten
+		// 上書きされていないことを確認
 		if c.skillInitF != skillInitF {
 			return
 		}
-		// do nothing if buff expired
+		// バフが期限切れなら何もしない
 		if c.Core.Status.Duration(barbSkillKey) == 0 {
 			return
 		}
 
 		c.Core.Log.NewEvent("barbara melody loop ticking", glog.LogCharacterEvent, c.Index)
 
-		// 0 DMG attack that causes hitlag on enemy only
+		// 0ダメージ攻撃で敵にのみヒットラグを発生させる
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1), -1, 0)
 
-		// tick every 1.5s
+		// 1.5秒ごとにTick
 		c.Core.Tasks.Add(c.barbaraMelodyTick(ai, skillInitF), 1.5*60)
 	}
 }

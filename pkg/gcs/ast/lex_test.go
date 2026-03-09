@@ -26,7 +26,7 @@ func TestBasicToken(t *testing.T) {
 		if x > 10 {
 			break A;
 		}
-		//comment
+		//コメント
 		switch x {
 		case 1:
 			fallthrough;
@@ -48,7 +48,7 @@ func TestBasicToken(t *testing.T) {
 	`
 
 	expected := []Token{
-		// function
+		// 関数
 		{Typ: KeywordLet, Val: "let"},
 		{Typ: ItemIdentifier, Val: "y"},
 		{Typ: ItemAssign, Val: "="},
@@ -65,22 +65,22 @@ func TestBasicToken(t *testing.T) {
 		{Typ: ItemNumber, Val: "1"},
 		{Typ: ItemTerminateLine, Val: ";"},
 		{Typ: ItemRightBrace, Val: "}"},
-		// variable
+		// 変数
 		{Typ: KeywordLet, Val: "let"},
 		{Typ: ItemIdentifier, Val: "x"},
 		{Typ: ItemAssign, Val: "="},
 		{Typ: ItemNumber, Val: "5"},
 		{Typ: ItemTerminateLine, Val: ";"},
-		// label
+		// ラベル
 		{Typ: KeywordLabel, Val: "label"},
 		{Typ: ItemIdentifier, Val: "A"},
 		{Typ: ItemColon, Val: ":"},
-		// while loop
+		// while ループ
 		{Typ: KeywordWhile, Val: "while"},
 		{Typ: ItemLeftBrace, Val: "{"},
-		// comment
+		// コメント
 		// {typ: itemComment, Val: "comment"},
-		// function call
+		// 関数呼び出し
 		{Typ: ItemIdentifier, Val: "x"},
 		{Typ: ItemAssign, Val: "="},
 		{Typ: ItemIdentifier, Val: "y"},
@@ -88,48 +88,48 @@ func TestBasicToken(t *testing.T) {
 		{Typ: ItemIdentifier, Val: "x"},
 		{Typ: ItemRightParen, Val: ")"},
 		{Typ: ItemTerminateLine, Val: ";"},
-		// if statement
+		// if 文
 		{Typ: KeywordIf, Val: "if"},
 		{Typ: ItemIdentifier, Val: "x"},
 		{Typ: OpGreaterThan, Val: ">"},
 		{Typ: ItemNumber, Val: "10"},
 		{Typ: ItemLeftBrace, Val: "{"},
-		// break
+		// break 文
 		{Typ: KeywordBreak, Val: "break"},
 		{Typ: ItemIdentifier, Val: "A"},
 		{Typ: ItemTerminateLine, Val: ";"},
-		// end if
+		// if 終了
 		{Typ: ItemRightBrace, Val: "}"},
-		// comment
+		// コメント
 		// {typ: itemComment, Val: "comment"},
-		// switch
+		// switch 文
 		{Typ: KeywordSwitch, Val: "switch"},
 		{Typ: ItemIdentifier, Val: "x"},
 		{Typ: ItemLeftBrace, Val: "{"},
-		// case
+		// ケース
 		{Typ: KeywordCase, Val: "case"},
 		{Typ: ItemNumber, Val: "1"},
 		{Typ: ItemColon, Val: ":"},
 		{Typ: KeywordFallthrough, Val: "fallthrough"},
 		{Typ: ItemTerminateLine, Val: ";"},
-		// case
+		// ケース
 		{Typ: KeywordCase, Val: "case"},
 		{Typ: ItemNumber, Val: "2"},
 		{Typ: ItemColon, Val: ":"},
 		{Typ: KeywordFallthrough, Val: "fallthrough"},
 		{Typ: ItemTerminateLine, Val: ";"},
-		// case
+		// ケース
 		{Typ: KeywordCase, Val: "case"},
 		{Typ: ItemNumber, Val: "3"},
 		{Typ: ItemColon, Val: ":"},
 		{Typ: KeywordBreak, Val: "break"},
 		{Typ: ItemIdentifier, Val: "A"},
 		{Typ: ItemTerminateLine, Val: ";"},
-		// end switch
+		// switch 終了
 		{Typ: ItemRightBrace, Val: "}"},
-		// end while
+		// while 終了
 		{Typ: ItemRightBrace, Val: "}"},
-		// for loop
+		// for ループ
 		{Typ: KeywordFor, Val: "for"},
 		{Typ: ItemIdentifier, Val: "x"},
 		{Typ: ItemAssign, Val: "="},
@@ -145,7 +145,7 @@ func TestBasicToken(t *testing.T) {
 		{Typ: ItemPlus, Val: "+"},
 		{Typ: ItemNumber, Val: "1"},
 		{Typ: ItemLeftBrace, Val: "{"},
-		// body
+		// 本体
 		{Typ: KeywordLet, Val: "let"},
 		{Typ: ItemIdentifier, Val: "i"},
 		{Typ: ItemAssign, Val: "="},
@@ -154,9 +154,9 @@ func TestBasicToken(t *testing.T) {
 		{Typ: ItemIdentifier, Val: "x"},
 		{Typ: ItemRightParen, Val: ")"},
 		{Typ: ItemTerminateLine, Val: ";"},
-		// end for
+		// for 終了
 		{Typ: ItemRightBrace, Val: "}"},
-		// misc tests
+		// その他のテスト
 		{Typ: ItemMinus, Val: "-"},
 		{Typ: ItemNumber, Val: "1"},
 		{Typ: ItemNumber, Val: "1"},
@@ -183,7 +183,7 @@ func TestElseSpace(t *testing.T) {
 	`
 
 	expected := []Token{
-		// function
+		// 関数
 		{Typ: KeywordIf, Val: "if"},
 		{Typ: ItemIdentifier, Val: "x"},
 		{Typ: OpGreaterThan, Val: ">"},

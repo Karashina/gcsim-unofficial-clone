@@ -58,7 +58,7 @@ func (p Point) Cross(p2 Point) float64 {
 	return p.X*p2.Y - p.Y*p2.X
 }
 
-// dir needs to be magnitude of 1 if passing custom dir;
+// カスタム方向を渡す場合、dir の大きさは1である必要がある;
 // https://gamedev.stackexchange.com/a/97586
 // https://en.wikipedia.org/wiki/Rotation_matrix
 func (p Point) Rotate(dir Point) Point {

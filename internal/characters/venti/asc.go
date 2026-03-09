@@ -16,18 +16,16 @@ const (
 	a0BurstDmgKey = "venti-a0-burst-dmg"
 )
 
-// a0HexereiInit registers:
-//  1. A permanent AttackMod on Venti giving +35% DmgP to burst attacks while
-//     the a0 swirl buff is active.
-//  2. Swirl event subscriptions: when burst eye is active and any character
-//     triggers Swirl, that character gains +50% DmgP for 4s and Venti gains
-//     the a0 swirl buff for 4s.
+// a0HexereiInitは以下を登録する：
+//  1. Ventiに永続AttackModを付与し、a0拡散バフがアクティブ中に元素爆発攻撃に+35% DmgPを与える。
+//  2. 拡散イベントサブスクリプション：元素爆発の眼がアクティブ中に任意のキャラが
+//     拡散を発動すると、そのキャラは4秒間+50% DmgPを得て、Ventiはa0拡散バフを4秒間得る。
 func (c *char) a0HexereiInit() {
-	// A0 requires hexerei mode and 2+ hexerei characters in party
+	// A0はHexereiモードとパーティに2人以上のHexereiキャラが必要
 	if !c.isHexerei || !c.hasHexBonus {
 		return
 	}
-	// Permanent burst-attack bonus (+35%) while swirl buff is active
+	// 拡散バフがアクティブ中の永続元素爆発攻撃ボーナス（+35%）
 	m := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase(a0BurstDmgKey, -1),
@@ -49,7 +47,7 @@ func (c *char) a0HexereiInit() {
 		},
 	})
 
-	// Subscribe to all four swirl events
+	// 4つの拡散イベントをサブスクライブ
 	swirlEvents := []event.Event{
 		event.OnSwirlHydro,
 		event.OnSwirlPyro,
@@ -59,7 +57,7 @@ func (c *char) a0HexereiInit() {
 	for _, ev := range swirlEvents {
 		ev := ev // capture
 		c.Core.Events.Subscribe(ev, func(args ...interface{}) bool {
-			// Only trigger when Venti's burst eye is active
+			// Ventiの元素爆発の眼がアクティブな時のみ発動
 			if c.Core.F >= c.burstEnd {
 				return false
 			}
@@ -67,7 +65,7 @@ func (c *char) a0HexereiInit() {
 			if !ok {
 				return false
 			}
-			// Apply +50% DmgP AttackMod to the triggering character for 4s (240f)
+			// トリガーしたキャラに4秒間（240f）+50% DmgP AttackModを適用
 			chars := c.Core.Player.Chars()
 			actorIdx := atk.Info.ActorIndex
 			if actorIdx >= 0 && actorIdx < len(chars) {
@@ -82,20 +80,20 @@ func (c *char) a0HexereiInit() {
 					},
 				})
 			}
-			// Activate Venti's a0 swirl status for 4s
+			// Ventiのa0拡散ステータスを4秒間有効化
 			c.AddStatus(a0SwirlKey, 240, false)
 			return false
 		}, fmt.Sprintf("venti-a0-%v", ev))
 	}
 }
 
-// A1 is not implemented and will likely never be implemented:
-// Holding Skyward Sonnet creates an upcurrent that lasts for 20s.
+// A1は実装されておらず、今後も実装される可能性は低い：
+// 長押し「高天の歌」は20秒間持続する上昇気流を生成する。
 
-// Regenerates 15 Energy for Venti after the effects of Wind's Grand Ode end.
-// If an Elemental Absorption occurred, this also restores 15 Energy to all characters of that corresponding element in the party.
+// 「風神の詩」の効果終了後、Ventiの元素エネルギーを15回復する。
+// 元素変化が発生した場合、その元素に対応するパーティ全員の元素エネルギーもそれぞれ15回復する。
 //
-// - checks for ascension level in burst.go to avoid queuing this up only to fail the ascension level check
+// - 突破レベルチェックはburst.goで行い、失敗時にキューに入れるのを避ける
 func (c *char) a4() {
 	c.AddEnergy("venti-a4", 15)
 	if c.qAbsorb == attributes.NoElement {

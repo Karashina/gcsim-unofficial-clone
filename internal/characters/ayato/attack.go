@@ -25,7 +25,7 @@ const normalHitNum = 5
 const shunsuikenHitmark = 5
 
 func init() {
-	// NA cancels
+	// 通常攻撃キャンセル
 	attackFrames = make([][]int, normalHitNum)
 
 	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 21) // N1 -> CA
@@ -40,7 +40,7 @@ func init() {
 	attackFrames[3][action.ActionAttack] = 27                                // N4 -> N5
 
 	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 63) // N5 -> N1
-	attackFrames[4][action.ActionCharge] = 500                               // N5 -> CA, TODO: this action is illegal; need better way to handle it
+	attackFrames[4][action.ActionCharge] = 500                               // N5 -> CA, TODO: このアクションは不正; より良い処理方法が必要
 
 	// NA (in skill) -> x
 	shunsuikenFrames = frames.InitNormalCancelSlice(shunsuikenHitmark, 23)
@@ -86,7 +86,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 
 	defer c.AdvanceNormalIndex()
 
-	// normal state
+	// 通常状態
 	return action.Info{
 		Frames:          frames.NewAttackFunc(c.Character, attackFrames),
 		AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],

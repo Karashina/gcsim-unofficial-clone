@@ -58,7 +58,7 @@ func (c *char) Init() error {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if stiletto is on-field
+	// 仕込み刀がフィールド上にあるか確認
 	if a == action.ActionSkill && c.Core.Status.Duration(stilettoKey) > 0 {
 		return true, action.NoFailure
 	}

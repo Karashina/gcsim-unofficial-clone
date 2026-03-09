@@ -41,7 +41,7 @@ const (
 )
 
 func init() {
-	// Tap E
+	// 元素スキル（単押し）
 	skillPressFrames = frames.InitAbilSlice(58) // E -> Walk
 	skillPressFrames[action.ActionAttack] = 43
 	skillPressFrames[action.ActionSkill] = 44
@@ -50,7 +50,7 @@ func init() {
 	skillPressFrames[action.ActionJump] = 43
 	skillPressFrames[action.ActionSwap] = 42
 
-	// Hold E
+	// 元素スキル（長押し）
 	skillHoldEndFrames = frames.InitAbilSlice(41) // Hold E -> Walk
 	skillHoldEndFrames[action.ActionAttack] = 29
 	skillHoldEndFrames[action.ActionSkill] = 29
@@ -66,16 +66,16 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		if hold > 150 {
 			hold = 150
 		}
-		// min duration in e state: ~35f
-		// max duration in e state: ~184f
-		// -> offset of 34f to 1 <= hold <= 150
+		// スキル状態の最小持続時間: 紵35f
+		// スキル状態の最大持続時間: 紵184f
+		// -> 34fのオフセットで 1 <= hold <= 150
 		return c.skillHold(hold + 34), nil
 	}
 	return c.skillPress(), nil
 }
 
 func (c *char) skillPress() action.Info {
-	// press attack and aligned attack
+	// 単押し攻撃と整合攻撃
 	c.QueueCharTask(func() {
 		c.Core.QueueAttack(
 			c.skillAI,
@@ -85,7 +85,7 @@ func (c *char) skillPress() action.Info {
 			c.particleCB,
 			c.makeSkillHealAndDrainCB(),
 		)
-		c.skillAligned(skillPressAlignedHitmark - skillPressHitmark) // TODO: unsure about when the check for aligned cd happens
+		c.skillAligned(skillPressAlignedHitmark - skillPressHitmark) // TODO: 整列CDのチェックがいつ発生するか不明
 	}, skillPressHitmark)
 
 	c.QueueCharTask(c.c6, skillPressC6Start)
@@ -102,16 +102,16 @@ func (c *char) skillPress() action.Info {
 }
 
 func (c *char) skillHold(duration int) action.Info {
-	// shadowsign activation
+	// 影標の発動
 	c.QueueCharTask(func() {
 		c.shadowsignSrc = c.Core.F
 		c.applyShadowsign(c.Core.F)
 	}, skillHoldShadowsignStart)
 
-	// shadowsign termination, hold attack and aligned attack
+	// 影標の終了、長押し攻撃と整合攻撃
 	c.QueueCharTask(func() {
 		c.clearShadowSign()
-		c.shadowsignSrc = -1 // cancel ticks because skill is over
+		c.shadowsignSrc = -1 // スキル終了のためティックをキャンセル
 
 		c.Core.QueueAttack(
 			c.skillAI,
@@ -121,7 +121,7 @@ func (c *char) skillHold(duration int) action.Info {
 			c.particleCB,
 			c.makeSkillHealAndDrainCB(),
 		)
-		c.skillAligned(skillHoldEndAlignedHitmark - skillHoldEndHitmark) // TODO: unsure about when the check for aligned cd happens
+		c.skillAligned(skillHoldEndAlignedHitmark - skillHoldEndHitmark) // TODO: 整列CDのチェックがいつ発生するか不明
 	}, duration+skillHoldEndHitmark)
 
 	c.QueueCharTask(c.c6, duration+skillHoldEndC6Start)
@@ -144,17 +144,17 @@ func (c *char) applyShadowsign(src int) func() {
 
 		c.clearShadowSign()
 
-		// apply shadowsign to nearest enemy
-		// TODO: should actually select highest score and not closest
+		// 最も近い敵に影標を適用
+		// TODO: 本来は最も近いではなく最高スコアの敵を選択すべき
 		enemy := c.Core.Combat.ClosestEnemyWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 8), nil)
 		enemy.SetTag(skillTag, 1)
 
-		// queue up next shadowsign application
+		// 次の影標適用をキューに追加
 		c.QueueCharTask(c.applyShadowsign(src), skillHoldShadowsignInterval)
 	}
 }
 
-// clear shadowsign from all enemies
+// 全ての敵から影標を解除
 func (c *char) clearShadowSign() {
 	for _, t := range c.Core.Combat.Enemies() {
 		if e, ok := t.(*enemy.Enemy); ok {
@@ -188,8 +188,8 @@ func (c *char) skillAligned(hitmark int) {
 	)
 }
 
-// When the Enigma Thrust hits an opponent, it will restore Lynette's HP based on her Max HP,
-// and in the 4s afterward, she will lose a certain amount of HP per second.
+// 「エニグマスラスト」が敵に命中すると、リネットのHPが最大HPに基づき回復し、
+// その後4秒間、毎秒一定量のHPが消耗される。
 func (c *char) makeSkillHealAndDrainCB() combat.AttackCBFunc {
 	done := false
 	return func(a combat.AttackCB) {
@@ -201,7 +201,7 @@ func (c *char) makeSkillHealAndDrainCB() combat.AttackCBFunc {
 		}
 		done = true
 
-		// heal
+		// 回復
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,
 			Target:  c.Index,
@@ -210,9 +210,9 @@ func (c *char) makeSkillHealAndDrainCB() combat.AttackCBFunc {
 			Bonus:   c.Stat(attributes.Heal),
 		})
 
-		// drain
-		// TODO: does this really stack?
-		// TODO: proper frames for interval
+		// HP消耗
+		// TODO: これは本当に重複する？
+		// TODO: 間隔の正確なフレーム
 		c.QueueCharTask(c.skillDrain(0), 1*60)
 	}
 }

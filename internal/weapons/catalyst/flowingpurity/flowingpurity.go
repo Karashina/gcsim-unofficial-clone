@@ -23,10 +23,10 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// When using an Elemental Skill, All Elemental DMG Bonus will be increased by 8/10/12/14/16% for 15s,
-// and a Bond of Life worth 24% of Max HP will be granted. This effect can be triggered once every 10s.
-// When the Bond of Life is cleared, every 1,000 HP cleared in the process will provide 2/2.5/3/3.5/4% All Elemental DMG Bonus,
-// up to a maximum of 12/15/18/21/24%. This effect lasts 15s.
+// 元素スキル使用時、全元素ダメージボーナスが15秒間8/10/12/14/16%増加し、
+// 最大HPの24%相当の命の契約が付与される。この効果は10秒に1回発動可能。
+// 命の契約が解除された時、1,000HPごとに全元素ダメージボーナスが2/2.5/3/3.5/4%増加、
+// 最奇12/15/18/21/24%まで。この効果は15秒間持続する。
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
@@ -72,7 +72,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 		char.ModifyHPDebtByRatio(hp)
 		debt += char.CurrentHPDebt()
-		bondDMGP := (debt / 1000) * bondPercentage // use hp debt since you only get the buff after clearing bond anyway
+		bondDMGP := (debt / 1000) * bondPercentage // 契約解除後にバフを得るのでHP負債を使用
 		if bondDMGP > bondDMGPCap {
 			bondDMGP = bondDMGPCap
 		}

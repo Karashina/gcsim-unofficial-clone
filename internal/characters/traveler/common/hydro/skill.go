@@ -39,10 +39,10 @@ const (
 )
 
 func init() {
-	// Tap E
+	// 元素スキル（単押し）
 	skillPressFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	skillPressFrames[0] = frames.InitAbilSlice(45) // Tap E -> E
 	skillPressFrames[0][action.ActionAttack] = 44  // Tap E -> N1
 	skillPressFrames[0][action.ActionBurst] = 44   // Tap E -> Q
@@ -51,17 +51,17 @@ func init() {
 	skillPressFrames[0][action.ActionWalk] = 44    // Tap E -> Walk
 	skillPressFrames[0][action.ActionSwap] = 43    // Tap E -> Swap
 
-	// Female
+	// 女性
 	skillPressFrames[1] = frames.InitAbilSlice(44) // Tap E -> E/Q/Walk
 	skillPressFrames[1][action.ActionAttack] = 43  // Tap E -> N1
 	skillPressFrames[1][action.ActionDash] = 41    // Tap E -> D
 	skillPressFrames[1][action.ActionJump] = 40    // Tap E -> J
 	skillPressFrames[1][action.ActionSwap] = 43    // Tap E -> Swap
 
-	// Short Hold E (0 ticks)
+	// 短押しE（0ティック）
 	skillShortHold0TicksFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	skillShortHold0TicksFrames[0] = frames.InitAbilSlice(29) // Short Hold E (0 ticks) -> D/J
 	skillShortHold0TicksFrames[0][action.ActionAttack] = 36  // Short Hold E (0 ticks) -> N1
 	skillShortHold0TicksFrames[0][action.ActionSkill] = 36   // Short Hold E (0 ticks) -> E
@@ -69,7 +69,7 @@ func init() {
 	skillShortHold0TicksFrames[0][action.ActionWalk] = 35    // Short Hold E (0 ticks) -> Walk
 	skillShortHold0TicksFrames[0][action.ActionSwap] = 44    // Short Hold E (0 ticks) -> Swap
 
-	// Female
+	// 女性
 	skillShortHold0TicksFrames[1] = frames.InitAbilSlice(29) // Short Hold E (0 ticks) -> D
 	skillShortHold0TicksFrames[1][action.ActionAttack] = 36  // Short Hold E (0 ticks) -> N1
 	skillShortHold0TicksFrames[1][action.ActionSkill] = 37   // Short Hold E (0 ticks) -> E
@@ -78,10 +78,10 @@ func init() {
 	skillShortHold0TicksFrames[1][action.ActionWalk] = 36    // Short Hold E (0 ticks) -> Walk
 	skillShortHold0TicksFrames[1][action.ActionSwap] = 43    // Short Hold E (0 ticks) -> Swap
 
-	// Short Hold E
+	// 元素スキル（短押し）
 	skillShortHoldFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	skillShortHoldFrames[0] = frames.InitAbilSlice(90) // Short Hold E -> Swap
 	skillShortHoldFrames[0][action.ActionAttack] = 81  // Short Hold E -> N1
 	skillShortHoldFrames[0][action.ActionSkill] = 81   // Short Hold E -> E
@@ -90,7 +90,7 @@ func init() {
 	skillShortHoldFrames[0][action.ActionJump] = 74    // Short Hold E -> J
 	skillShortHoldFrames[0][action.ActionWalk] = 81    // Short Hold E -> Walk
 
-	// Female
+	// 女性
 	skillShortHoldFrames[1] = frames.InitAbilSlice(89) // Short Hold E -> Swap
 	skillShortHoldFrames[1][action.ActionAttack] = 81  // Short Hold E -> N1
 	skillShortHoldFrames[1][action.ActionSkill] = 81   // Short Hold E -> E
@@ -111,7 +111,7 @@ func (c *Traveler) skillPress(hitmark, spiritHitmark, cdStart int, skillFrames [
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames[c.gender]),
 		AnimationLength: skillFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   skillFrames[c.gender][action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[c.gender][action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 		OnRemoved:       func(next action.AnimationState) { c.c4Remove() },
 	}, nil
@@ -152,7 +152,7 @@ func (c *Traveler) skillShortHold(travel int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillShortHoldFrames[c.gender]),
 		AnimationLength: skillShortHoldFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   skillShortHoldFrames[c.gender][action.ActionJump], // earliest cancel
+		CanQueueAfter:   skillShortHoldFrames[c.gender][action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 		OnRemoved:       func(next action.AnimationState) { c.c4Remove() },
 	}, nil
@@ -199,7 +199,7 @@ func (c *Traveler) skillHold(travel, holdTicks int) (action.Info, error) {
 	return action.Info{
 		Frames:          func(next action.Action) int { return skillShortHoldFrames[c.gender][next] + extend },
 		AnimationLength: skillShortHoldFrames[c.gender][action.InvalidAction] + extend,
-		CanQueueAfter:   skillShortHoldFrames[c.gender][action.ActionJump] + extend, // earliest cancel
+		CanQueueAfter:   skillShortHoldFrames[c.gender][action.ActionJump] + extend, // 最速キャンセル
 		State:           action.SkillState,
 		OnRemoved:       func(next action.AnimationState) { c.c4Remove() },
 	}, nil
@@ -217,14 +217,14 @@ func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
 		holdTicks = 22
 	}
 
-	// for skill hold
+	// 元素スキル長押し用
 	travel, ok := p["travel"]
 	if !ok {
 		travel = 6
 	}
 	switch {
 	case !hold:
-		// hold=0
+		// 長押しなし
 		return c.skillPress(
 			skillPressHitmarks[c.gender],
 			skillPressSpiritThornHitmark,
@@ -232,7 +232,7 @@ func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
 			skillPressFrames,
 		)
 	case holdTicks == 0:
-		// hold=1, hold_ticks=0
+		// 長押し、ティック0
 		return c.skillPress(
 			skillShortHold0TicksTorrentSurgeHitmark,
 			skillShortHold0TicksSpiritbreathThornHitmark,
@@ -240,10 +240,10 @@ func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
 			skillShortHold0TicksFrames,
 		)
 	case holdTicks == 1:
-		// hold=1, hold_ticks=1
+		// 長押し、ティック1
 		return c.skillShortHold(travel)
 	default:
-		// hold=1, hold_ticks>1
+		// 長押し、ティック2以上
 		return c.skillHold(travel, holdTicks)
 	}
 }
@@ -320,9 +320,9 @@ func (c *Traveler) skillLosingHP(ai *combat.AttackInfo) {
 		Amount:     drainHP,
 	})
 
-	// If HP has been consumed via Suffusion while using the Hold Mode Aquacrest Saber, the Torrent Surge at the skill's end
-	// will deal Bonus DMG equal to 45% of the total HP the Traveler has consumed in this skill use via Suffusion.
-	// The maximum DMG Bonus that can be gained this way is 5,000.
+	// 長押し「水光の破刃」使用中に浸潤によりHPが消費された場合、スキル終了時の激流が
+	// この使用中に浸潤で消費された合計HPの45%に相当するダメージボーナスを与える。
+	// この方法で得られるダメージボーナスの上限は5,000。
 	if c.Base.Ascension >= 4 {
 		c.a4Bonus += drainHP * 0.45
 		if c.a4Bonus > 5000 {

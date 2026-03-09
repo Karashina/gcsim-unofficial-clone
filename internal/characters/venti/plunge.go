@@ -16,14 +16,14 @@ var highPlungeFrames []int
 const highPlungeHitmark = 58
 
 func init() {
-	// TODO: missing counts for plunge cancels?
-	// using hitmark as placeholder for now
+	// TODO: 落下攻撃キャンセルのカウントが不足？
+	// 現時点ではヒットマークをプレースホルダーとして使用
 	highPlungeFrames = frames.InitAbilSlice(highPlungeHitmark)
 }
 
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
-	// check if hold skill was used
+	// 長押しスキルが使用されたか確認
 	lastAct := c.Core.Player.LastAction
 	if lastAct.Char != c.Index || lastAct.Type != action.ActionSkill || lastAct.Param["hold"] != 0 {
 		return action.Info{}, errors.New("high_plunge should be preceded by hold skill")

@@ -25,7 +25,7 @@ const normalHitNum = 5
 func init() {
 	attackFrames = make([][][]int, 2)
 
-	// Male
+	// 男性
 	attackFrames[0] = make([][]int, normalHitNum)
 
 	attackFrames[0][0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 28) // N1 -> CA
@@ -41,9 +41,9 @@ func init() {
 	attackFrames[0][3][action.ActionAttack] = 39                                // N4 -> N5
 
 	attackFrames[0][4] = frames.InitNormalCancelSlice(attackHitmarks[0][4], 69) // N5 -> N1
-	attackFrames[0][4][action.ActionCharge] = 500                               // N5 -> CA, TODO: this action is illegal; need better way to handle it
+	attackFrames[0][4][action.ActionCharge] = 500                               // N5 -> CA, TODO: このアクションは不正。より良い処理方法が必要
 
-	// Female
+	// 女性
 	attackFrames[1] = make([][]int, normalHitNum)
 
 	attackFrames[1][0] = frames.InitNormalCancelSlice(attackHitmarks[1][0], 32) // N1 -> CA
@@ -59,7 +59,7 @@ func init() {
 	attackFrames[1][3][action.ActionAttack] = 38                                // N4 -> N5
 
 	attackFrames[1][4] = frames.InitNormalCancelSlice(attackHitmarks[1][4], 64) // N5 -> N1
-	attackFrames[1][4][action.ActionCharge] = 500                               // N5 -> CA, TODO: this action is illegal; need better way to handle it
+	attackFrames[1][4][action.ActionCharge] = 500                               // N5 -> CA, TODO: このアクションは不正。より良い処理方法が必要
 }
 
 func (c *Traveler) Attack(p map[string]int) (action.Info, error) {

@@ -35,13 +35,13 @@ func init() {
 	skillFrames = make([][]int, 2)
 	skillHoldFrames = make([][]int, 2)
 
-	// Male
-	// Tap
+	// 男性
+	// 単押し
 	skillFrames[0] = frames.InitAbilSlice(49) // E -> N1
 	skillFrames[0][action.ActionDash] = 31
 	skillFrames[0][action.ActionJump] = 31
 	skillFrames[0][action.ActionSwap] = 48
-	// Hold
+	// 長押し
 	skillHoldFrames[0] = frames.InitAbilSlice(77) // E -> E
 	skillHoldFrames[0][action.ActionAttack] = 61
 	skillHoldFrames[0][action.ActionBurst] = 59
@@ -50,13 +50,13 @@ func init() {
 	skillHoldFrames[0][action.ActionWalk] = 81
 	skillHoldFrames[0][action.ActionSwap] = 59
 
-	// Female
-	// Tap
+	// 女性
+	// 単押し
 	skillFrames[1] = frames.InitAbilSlice(49) // E -> N1
 	skillFrames[1][action.ActionDash] = 31
 	skillFrames[1][action.ActionJump] = 31
 	skillFrames[1][action.ActionSwap] = 48
-	// Hold
+	// 長押し
 	skillHoldFrames[1] = frames.InitAbilSlice(77) // E -> E
 	skillHoldFrames[1][action.ActionAttack] = 61
 	skillHoldFrames[1][action.ActionBurst] = 59
@@ -87,7 +87,7 @@ func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
 }
 
 func (c *Traveler) SkillTap(p map[string]int) (action.Info, error) {
-	// Enter Nightsoul and start reducing Points
+	// 夜魂に入りポイント消費を開始
 	skillSrc := c.Core.F + enterNightsoulDelay
 	c.QueueCharTask(func() {
 		c.enterNightsoul(skillSrc)
@@ -98,7 +98,7 @@ func (c *Traveler) SkillTap(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames[c.gender]),
 		AnimationLength: skillFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   skillFrames[c.gender][action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[c.gender][action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -133,7 +133,7 @@ func (c *Traveler) SkillHold(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames[c.gender]),
 		AnimationLength: skillHoldFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[c.gender][action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillHoldFrames[c.gender][action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -202,12 +202,12 @@ func (c *Traveler) scorchingThresholdOnDamage() {
 		if !c.StatusIsActive(scoringThresholdKey) {
 			return false
 		}
-		// ignore burning damage
+		// 燃焼ダメージを無視
 		if ae.Info.AttackTag == attacks.AttackTagBurningDamage ||
 			ae.Info.AttackTag == attacks.AttackTagSwirlHydro {
 			return false
 		}
-		// ignore 0 damage
+		// 0ダメージを無視
 		if dmg == 0 {
 			return false
 		}

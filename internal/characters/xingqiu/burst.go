@@ -28,30 +28,30 @@ func init() {
 }
 
 /**
-The number of Hydro Swords summoned per wave follows a specific pattern, usually alternating between 2 and 3 swords.
-At C6, this is upgraded and follows a pattern of 2 → 3 → 5… which then repeats.
+波ごとに召喚される水の剣の数は特定のパターンに従い、通常2本と3本が交互に発動する。
+C6ではこれが強化され、2 → 3 → 5… のパターンで繰り返す。
 
-There is an approximately 1 second interval between summoned Hydro Sword waves, so that means a theoretical maximum of 15 or 18 waves.
+召喚された水の剣の波の間には約1秒の間隔があり、理論上の最大波数は15または18波。
 
-Each wave of Hydro Swords is capable of applying one (1) source of Hydro status, and each individual sword is capable of getting a crit.
+各波の水の剣は1回の水元素付着が可能で、各剣は個別に会心判定が行われる。
 **/
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// apply hydro every 3rd hit
-	// triggered on normal attack
-	// also applies hydro on cast if p=1
-	// how we doing that?? trigger 0 dmg?
+	// 3ヒットごとに水元素を付与
+	// 通常攻撃でトリガー
+	// p=1の場合は発動時にも水元素を付与
+	// どうやって？？ 0ダメージをトリガー？
 
-	/** c2
-	Extends the duration of Guhua Sword: Raincutter by 3s.
-	Decreases the Hydro RES of opponents hit by sword rain attacks by 15% for 4s.
+	/** C2
+	古華剣・裂雨の持続時間を3秒延長する。
+	剣雨攻撃に命中した敵の水元素耐性を4秒間15%減少させる。
 	**/
 	dur := 15
 	if c.Base.Cons >= 2 {
 		dur += 3
 	}
 	dur *= 60
-	c.AddStatus(burstKey, dur+33, true) // add 33f for anim
+	c.AddStatus(burstKey, dur+33, true) // アニメーション用に33f追加
 	c.applyOrbital(dur, burstHitmark)
 
 	c.burstCounter = 0
@@ -83,7 +83,7 @@ func (c *char) summonSwordWave() {
 		Mult:       burst[c.TalentLvlBurst()],
 	}
 
-	// only if c.nextRegen is true and first sword
+	// c.nextRegenがtrueかつ最初の剣の場合のみ
 	var c2cb, c6cb func(a combat.AttackCB)
 	if c.nextRegen {
 		done := false
@@ -140,7 +140,7 @@ func (c *char) summonSwordWave() {
 		c.burstCounter++
 	}
 
-	// figure out next wave # of swords
+	// 次の波の剣の数を決定
 	switch c.numSwords {
 	case 2:
 		c.numSwords = 3

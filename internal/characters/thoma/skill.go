@@ -25,7 +25,7 @@ func init() {
 	skillFrames[action.ActionSwap] = 44
 }
 
-// Skill attack damage queue generator
+// 元素スキルのダメージキュー生成
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
@@ -41,7 +41,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		HitlagFactor:       0.01,
 		CanBeDefenseHalted: true,
 	}
-	// snapshot unknown
+	// スナップショットのタイミング不明
 	// snap := c.Snapshot(&ai)
 
 	c.Core.Tasks.Add(func() {
@@ -49,7 +49,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.genShield("Thoma Skill", shieldamt, false)
 	}, 9)
 
-	// damage component not final
+	// ダメージ部分は未確定
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTargetFanAngle(c.Core.Combat.Player(), geometry.Point{Y: 1}, 3, 270),
@@ -68,7 +68,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}, 9)
 
 	cd := 15
-	// TODO: this should only active if a char protected by Thoma's shield is hit, should also proc on stuff like Dori Q self attack
+	// TODO: トーマのシールドで保護されたキャラが被弾時のみ発動すべき、DoriのQ自己攻撃などでも発動すべき
 	if c.Base.Cons >= 1 {
 		cd = 12
 	}

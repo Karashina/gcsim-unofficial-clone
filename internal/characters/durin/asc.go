@@ -12,42 +12,42 @@ import (
 )
 
 const (
-	// A1 state keys
+	// A1 ステートキー
 	a1ResShredKey  = "durin-a1-res-shred"
 	a1DarkDecayKey = "durin-a1-dark-decay"
 
-	// A1 durations and values
-	a1ResShredDuration = 6 * 60 // 6 seconds
+	// A1 持続時間および値
+	a1ResShredDuration = 6 * 60 // 6秒
 
-	// A4 state keys
+	// A4 ステートキー
 	a4PrimordialKey = "durin-a4-primordial"
 
-	// A4 durations and values
-	a4Duration         = 20 * 60 // 20 seconds
+	// A4 持続時間および値
+	a4Duration         = 20 * 60 // 20秒
 	a4MaxStacks        = 10
-	a4DmgPercentPerAtk = 0.03 // 3% per 100 ATK
-	a4MaxDmgPercent    = 0.75 // Maximum 75% additional DMG
+	a4DmgPercentPerAtk = 0.03 // 攻撃力100あたり3%
+	a4MaxDmgPercent    = 0.75 // 追加ダメージ上限75%
 )
 
-// A1: Light Manifest of the Divine Calculus
-// Dragon of White Flame: After Burning, Overloaded, Pyro Swirl, or Pyro Crystallize reactions,
-// or dealing Pyro/Dendro DMG to burning enemies, decrease Pyro RES and corresponding elemental RES by 20%
-// Dragon of Dark Decay: Durin's Vaporize and Melt DMG increased by 40%
+// A1: 神算の光顕 (Light Manifest of the Divine Calculus)
+// 白焔の龍: 燃焼、過負荷、炎元素拡散、炎元素結晶化反応後、
+// または燃焼中の敵に炎/草元素ダメージを与えた後、炎元素耐性と対応する元素耐性を20%減少
+// 暗蝕の龍: デュリンの蒸発と溶解ダメージが40%増加
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
 
-	// Subscribe to reaction events for Dragon of White Flame RES shred
+	// 白焔の龍の耐性デバフ用に元素反応イベントを購読
 	c.Core.Events.Subscribe(event.OnBurning, c.a1WhiteFlameReactionCB(attributes.Pyro, attributes.Dendro), "durin-a1-burning")
 	c.Core.Events.Subscribe(event.OnOverload, c.a1WhiteFlameReactionCB(attributes.Pyro, attributes.Electro), "durin-a1-overload")
 	c.Core.Events.Subscribe(event.OnSwirlPyro, c.a1WhiteFlameReactionCB(attributes.Pyro, attributes.Anemo), "durin-a1-pyro-swirl")
 	c.Core.Events.Subscribe(event.OnCrystallizePyro, c.a1WhiteFlameReactionCB(attributes.Pyro, attributes.Geo), "durin-a1-pyro-crystallize")
 
-	// Subscribe for Pyro/Dendro DMG to burning enemies
+	// 燃焼中の敵への炎/草元素ダメージを購読
 	c.Core.Events.Subscribe(event.OnEnemyDamage, c.a1WhiteFlameOnDamageCB, "durin-a1-burning-dmg")
 
-	// Dragon of Dark Decay: reactmod for Vaporize and Melt
+	// 暗蝕の龍: 蒸発と溶解の反応補正
 	c.a1DarkDecayReactMod()
 }
 
@@ -63,13 +63,13 @@ func (c *char) a1WhiteFlameReactionCB(ele1, ele2 attributes.Element) func(args .
 			return false
 		}
 
-		// Calculate RES shred amount (20% or 35% with Hexerei bonus)
+		// 耐性デバフ量を計算（20%、Hexereiボーナス時35%）
 		resShred := 0.20
 		if c.hasHexereiBonus() {
 			resShred = 0.35 // 20% * 1.75
 		}
 
-		// Apply RES shred for both elements
+		// 両元素に耐性デバフを適用
 		e.AddResistMod(combat.ResistMod{
 			Base:  modifier.NewBaseWithHitlag(a1ResShredKey+"-"+ele1.String(), a1ResShredDuration),
 			Ele:   ele1,
@@ -104,23 +104,23 @@ func (c *char) a1WhiteFlameOnDamageCB(args ...interface{}) bool {
 		return false
 	}
 
-	// Check if target is burning
+	// 対象が燃焼中か確認
 	if !e.AuraContains(attributes.Pyro, attributes.Dendro) {
 		return false
 	}
 
-	// Check if dealing Pyro or Dendro DMG
+	// 炎または草元素ダメージを与えているか確認
 	if atk.Info.Element != attributes.Pyro && atk.Info.Element != attributes.Dendro {
 		return false
 	}
 
-	// Calculate RES shred amount
+	// 耐性デバフ量を計算
 	resShred := 0.20
 	if c.hasHexereiBonus() {
 		resShred = 0.35
 	}
 
-	// Apply Pyro RES shred and corresponding element RES shred
+	// 炎元素耐性デバフと対応する元素の耐性デバフを適用
 	e.AddResistMod(combat.ResistMod{
 		Base:  modifier.NewBaseWithHitlag(a1ResShredKey+"-pyro", a1ResShredDuration),
 		Ele:   attributes.Pyro,
@@ -136,7 +136,7 @@ func (c *char) a1WhiteFlameOnDamageCB(args ...interface{}) bool {
 }
 
 func (c *char) a1DarkDecayReactMod() {
-	// Apply reactmod for Vaporize and Melt when Dragon of Dark Decay is active
+	// 暗蝕の龍がアクティブ時に蒸発と溶解の反応補正を適用
 	reactMod := 0.40
 	if c.hasHexereiBonus() {
 		reactMod = 0.70 // 40% * 1.75
@@ -164,7 +164,7 @@ func (c *char) a4OnBurst() {
 		return
 	}
 
-	// Reset stacks when burst is used
+	// 元素爆発使用時にスタックをリセット
 	c.primordialFusionStacks = a4MaxStacks
 	c.primordialFusionExpiry = c.Core.F + a4Duration
 	c.AddStatus(a4PrimordialKey, a4Duration, true)
@@ -178,17 +178,17 @@ func (c *char) a4DragonAttackCB(a combat.AttackCB) {
 		return
 	}
 
-	// Check if we have stacks
+	// スタックがあるか確認
 	if c.primordialFusionStacks <= 0 || c.Core.F >= c.primordialFusionExpiry {
 		return
 	}
 
-	// Consume 1 stack (only once per attack, even if hitting multiple enemies)
+	// 1スタック消費（複数の敵にヒットしても1回の攻撃につき1回のみ）
 	c.primordialFusionStacks--
 
-	// Calculate DMG bonus: 3% per 100 ATK, max 75%
-	// The spec says to multiply ai.Mult, but since we're in a callback,
-	// we need to apply this as flat damage or similar mechanism
+	// ダメージボーナスを計算: 攻撃力100あたり3%、最大75%
+	// 仕様ではai.Multに乗算する必要があるが、コールバック内のため、
+	// 固定ダメージまたは同様の仕組みで適用する必要がある
 	totalAtk := c.TotalAtk()
 	dmgBonus := (totalAtk / 100.0) * a4DmgPercentPerAtk
 	if dmgBonus > a4MaxDmgPercent {
@@ -200,11 +200,11 @@ func (c *char) a4DragonAttackCB(a combat.AttackCB) {
 		Write("atk", totalAtk).
 		Write("dmg_bonus", dmgBonus)
 
-	// Note: The actual damage modification is handled in the attack info setup
-	// since we can't modify damage in a callback. This callback is for stack consumption.
+	// 注: 実際のダメージ変更は攻撃情報のセットアップで処理される
+	// コールバック内ではダメージを変更できないため。このコールバックはスタック消費用。
 }
 
-// Vaporize and Melt reaction types for A1 Dark Decay check
+// A1暗蝕の龍チェック用の蒸発と溶解の反応タイプ
 func init() {
 	_ = reactions.Vaporize
 	_ = reactions.Melt

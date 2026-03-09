@@ -44,7 +44,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c1CB,
 	)
 
-	// 7 hits
+	// 7ヒット
 	ai = combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Riff Revolution (DoT)",
@@ -57,7 +57,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Mult:               burstDot[c.TalentLvlBurst()],
 		CanBeDefenseHalted: true,
 	}
-	// 1st DoT
+	// 1回目のDoT
 	c.QueueCharTask(func() {
 		c.Core.QueueAttack(
 			ai,
@@ -66,8 +66,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			0,
 			c1CB,
 		)
-		ai.CanBeDefenseHalted = false // only the first DoT has hitlag
-		// 2nd DoT onwards
+		ai.CanBeDefenseHalted = false // 最初のDoTのみヒットラグあり
+		// 2回目以降のDoT
 		c.QueueCharTask(func() {
 			for i := 0; i < 6; i++ {
 				c.Core.QueueAttack(
@@ -82,15 +82,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}, burstDoT1Hitmark)
 
 	if c.Base.Cons >= 2 {
-		// TODO: snapshot timing?
+		// TODO: スナップショットのタイミング？
 		defFactor := c.TotalDef(false)
 		c.QueueCharTask(func() {
 			c.updateShield(3, defFactor)
 		}, burstShieldStart)
 
-		// C2 causes extra pulses of level 3 shield DoT
-		// Can vary with fps, frame video has 2 pulses
-		// See https://library.keqingmains.com/evidence/characters/pyro/xinyan#xinyan-c2-shield-formation-pulses-extra-times
+		// 2凸でレベル3シールドDoTの追加パルスが発生
+		// fpsにより変動、フレーム動画では2パルス
+		// 参照: https://library.keqingmains.com/evidence/characters/pyro/xinyan#xinyan-c2-shield-formation-pulses-extra-times
 		ai := c.getAttackInfoShieldDoT()
 		for i := 0; i < 2; i++ {
 			c.Core.QueueAttack(
@@ -109,7 +109,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionAttack], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionAttack], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

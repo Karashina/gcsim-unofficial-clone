@@ -34,7 +34,7 @@ func init() {
 	skillFrames[action.ActionJump] = 32
 	skillFrames[action.ActionWalk] = 41
 	skillFrames[action.ActionSwap] = 29
-	// skill -> skill is unknown
+	// スキル -> スキルは不明
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
@@ -51,19 +51,19 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Durability: 25,
 		FlatDmg:    skill[c.TalentLvlSkill()] * c.MaxHP(),
 	}
-	// TODO: if target is out of range then pos should be player pos + Y: 8 offset
+	// TODO: ターゲットが射程外の場合、位置はプレイヤー位置 + Y: 8 オフセットにすべき
 	skillPos := c.Core.Combat.PrimaryTarget().Pos()
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(skillPos, nil, 6),
-		skillHitmarks[0], //TODO: snapshot delay?
+		skillHitmarks[0], // TODO: スナップショット遅延？
 		skillHitmarks[0],
 		c.makeDropletCB(),
 		c.particleCB,
 	)
 
 	aiThorn := combat.AttackInfo{
-		// TODO: Apply Pneuma
+		// TODO: Pneuma を適用
 		ActorIndex:         c.Index,
 		Abil:               "Spiritbreath Thorn (" + c.Base.Key.Pretty() + ")",
 		AttackTag:          attacks.AttackTagElementalArt,
@@ -85,7 +85,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(
 			aiThorn,
 			combat.NewCircleHitOnTarget(skillPos, nil, 4.5),
-			skillHitmarks[1]-skillHitmarks[0], // TODO: snapshot delay?
+			skillHitmarks[1]-skillHitmarks[0], // TODO: スナップショット遅延？
 			skillHitmarks[1]-skillHitmarks[0],
 		)
 	}, skillHitmarks[0])
@@ -95,7 +95,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionCharge], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionCharge], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -123,7 +123,7 @@ func (c *char) makeDropletCB() combat.AttackCBFunc {
 		}
 		done = true
 
-		// determine which droplet offset and random ranges to use based on distance to first target hit
+		// 最初のターゲットヒットまでの距離に基づいて水の雫のオフセットとランダム範囲を決定
 		player := c.Core.Combat.Player()
 		i := 2
 		if a.Target.IsWithinArea(combat.NewCircleHitOnTarget(player.Pos(), nil, 5)) {

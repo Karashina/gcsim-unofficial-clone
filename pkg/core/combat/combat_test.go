@@ -30,16 +30,16 @@ type (
 	}
 )
 
-// char
+// char（キャラクター）
 func (t *testchar) ApplyAttackMods(a *AttackEvent, x Target) []interface{} {
 	return nil
 }
 
-// team
+// team（チーム）
 func (t *testteam) CombatByIndex(i int) Character             { return &testchar{} }
 func (t *testteam) ApplyHitlag(char int, factor, dur float64) {}
 
-// target
+// target（ターゲット）
 func (t *testtarg) Index() int                                      { return t.idx }
 func (t *testtarg) SetIndex(i int)                                  { t.idx = i }
 func (t *testtarg) Key() targets.TargetKey                          { return t.key }
@@ -80,32 +80,32 @@ func (t *testtarg) WillCollide(s geometry.Shape) bool {
 func (t *testtarg) HandleAttack(*AttackEvent) float64 { return 0 }
 
 func (t *testtarg) AttackWillLand(a AttackPattern) (bool, string) {
-	// geometry.Shape shouldn't be nil; panic here
+	// geometry.Shape は nil であってはならない; ここで panic する
 	if a.Shape == nil {
 		panic("unexpected nil geometry.Shape")
 	}
 	if !t.alive {
 		return false, "target dead"
 	}
-	// geometry.Shape can't be nil now, check if type matches
+	// geometry.Shape は nil でないことが確認済み、型が一致するかチェック
 	// if !a.Targets[t.typ] {
 	// 	return false, "wrong type"
 	// }
-	// swirl aoe shouldn't hit the src of the aoe
+	// 拡散AoEはAoEの発生源を攻撃すべきでない
 	for _, v := range a.IgnoredKeys {
 		if t.Key() == v {
 			return false, "no self harm"
 		}
 	}
 
-	// check if geometry.Shape matches
+	// geometry.Shape が一致するかチェック
 	switch v := a.Shape.(type) {
 	case *geometry.Circle:
 		return t.Shape().IntersectCircle(*v), "intersect circle"
 	case *geometry.Rectangle:
 		return t.Shape().IntersectRectangle(*v), "intersect rectangle"
 	case *geometry.SingleTarget:
-		// only true if
+		// trueになる条件:
 		return v.Target == t.key, "target"
 	default:
 		return false, "unknown geometry.Shape"

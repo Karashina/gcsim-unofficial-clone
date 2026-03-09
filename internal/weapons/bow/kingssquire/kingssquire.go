@@ -26,10 +26,10 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Obtain the Teachings of the Forest effect when unleashing Elemental Skills and Bursts, increasing Elemental Mastery by 60/80/100/120/140 for 12s.
-// This effect will be removed when switching characters.
-// When the Teachings of the Forest effect ends or is removed, it will deal 100/120/140/160/180% of ATK as DMG to 1 nearby opponent.
-// The Teachings of the Forest effect can be triggered once every 20s.
+// 元素スキルと元素爆発を発動すると、森の教え効果を獲得し、元素熟知が60/80/100/120/140増加する（12秒間）。
+// この効果はキャラクター切り替え時に解除される。
+// 森の教え効果が終了または解除された時、近くの敵 1体に攻撃力100/120/140/160/180%分のダメージを与える。
+// 森の教え効果は20秒毎に1回発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -46,7 +46,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 		char.DeleteStatMod(buffKey)
 
-		// determine attack pos
+		// 攻撃位置を決定
 		player := c.Combat.Player()
 		enemy := c.Combat.ClosestEnemyWithinArea(combat.NewCircleHitOnTarget(player, nil, 15), nil)
 		var pos geometry.Point

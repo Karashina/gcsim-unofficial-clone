@@ -29,20 +29,20 @@ var (
 	}
 	attackHitboxes = [][][][]float64{
 		{
-			{{1.9, 3}},     // box
-			{{2.6}},        // fan
-			{{1.9, 4}},     // box
-			{{2.8}, {2.8}}, // circle, circle
-			{{2.5}},        // circle
-			{{3}},          // circle
+			{{1.9, 3}},     // 矩形
+			{{2.6}},        // 扇形
+			{{1.9, 4}},     // 矩形
+			{{2.8}, {2.8}}, // 円形, 円形
+			{{2.5}},        // 円形
+			{{3}},          // 円形
 		},
 		{
-			{{1.9, 4.2}},   // box
-			{{3.1}},        // fan
-			{{3.4, 5.6}},   // box
-			{{3.3}, {3.3}}, // circle, circle
-			{{2.8}},        // circle
-			{{3.7}},        // circle
+			{{1.9, 4.2}},   // 矩形
+			{{3.1}},        // 扇形
+			{{3.4, 5.6}},   // 矩形
+			{{3.3}, {3.3}}, // 円形, 円形
+			{{2.8}},        // 円形
+			{{3.7}},        // 円形
 		},
 	}
 	attackOffsets = [][][]float64{
@@ -95,12 +95,12 @@ func (c *char) naBuff() {
 		if target != c.Index {
 			return false
 		}
-		// TODO: Remove when BoL changes get logged for all characters
+		// TODO: 全キャラクターのBoL変更がログされるようになったら削除
 		c.Core.Log.NewEvent("Bond of Life changed", glog.LogCharacterEvent, c.Index).
 			Write("arle_hp_debt", c.CurrentHPDebt()).
 			Write("arle_hp_debt%", c.CurrentHPDebt()/c.MaxHP())
 		if c.CurrentHPDebt() >= c.MaxHP()*0.3 {
-			// Due to negative duration, configs need do to `.arle.bolratio >= 0.3` instead of `.arle.status.masque-of-the-red-death`
+			// 負の持続時間のため、設定では `.arle.status.masque-of-the-red-death` の代わりに `.arle.bolratio >= 0.3` を使用する必要がある
 			c.AddStatus(naBuffKey, -1, false)
 		} else {
 			c.DeleteStatus(naBuffKey)
@@ -139,14 +139,14 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			}
 
 			var ap combat.AttackPattern
-			if len(attackHitboxes[naIndex][counter][i]) == 1 { // circle or fan
+			if len(attackHitboxes[naIndex][counter][i]) == 1 { // 円形または扇形
 				ap = combat.NewCircleHitOnTargetFanAngle(
 					c.Core.Combat.Player(),
 					geometry.Point{X: attackOffsets[counter][i][0], Y: attackOffsets[counter][i][1]},
 					attackHitboxes[naIndex][counter][i][0],
 					attackFanAngles[counter][i],
 				)
-			} else { // box
+			} else { // 矩形
 				ap = combat.NewBoxHitOnTarget(
 					c.Core.Combat.Player(),
 					geometry.Point{X: attackOffsets[counter][i][0], Y: attackOffsets[counter][i][1]},
@@ -190,7 +190,7 @@ func (c *char) bondConsumeCB(a combat.AttackCB) {
 		return
 	}
 
-	// 0.03*60 = 1.8 rounded to 2 frames
+	// 0.03*60 = 1.8 → 2フレームに丸め
 	c.AddStatus(bondConsumeICDKey, 2, true)
 
 	amt := -0.075 * c.CurrentHPDebt()

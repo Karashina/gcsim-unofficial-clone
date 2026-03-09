@@ -25,8 +25,8 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Normal Attack hits on opponents increase Charged Attack DMG by 16% for 6s. Charged Attack hits on opponents
-// increase ATK by 8% for 6s.
+// 通常攻撃が敵に命中すると、重撃ダメージが16%増加する（6秒間）。
+// 重撃が敵に命中すると、攻撃力が8%増加する（6秒間）。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

@@ -103,7 +103,7 @@ func (c *char) c2activate() {
 	for _, other := range c.Core.Player.Chars() {
 		switch other.Base.Element {
 		case attributes.Geo:
-			// skip, because it's already applied
+			// 既に適用済みのためスキップ
 		case attributes.Pyro, attributes.Hydro, attributes.Cryo:
 			c.QueueCharTask(c.applyC2Buff(c.c2Src, other), c2Interval)
 		case attributes.Electro:
@@ -120,7 +120,7 @@ func (c *char) c4() {
 		return
 	}
 	for _, char := range c.Core.Player.Chars() {
-		char.AddStatus(c4key, 15*60, true) // 15 sec duration
+		char.AddStatus(c4key, 15*60, true) // 15秒間の持続時間
 		char.SetTag(c4key, 6)              // 6 c4 stacks
 	}
 }
@@ -183,7 +183,7 @@ func (c *char) applyC6() {
 	c.AddStatus(c6IcdKey, 15*60, true)
 	c.c6FlatDmg() // sets c6 key
 
-	// "pause" Nightsoul's Blessing time limit countdown
+	// ナイトソウルの祝福の時間制限カウントダウンを「一時停止」
 	duration := c.nightsoulState.Duration() + c6Duration
 	c.nightsoulState.SetNightsoulExitTimer(duration, c.exitNightsoul)
 

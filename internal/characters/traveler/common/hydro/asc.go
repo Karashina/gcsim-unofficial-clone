@@ -11,9 +11,9 @@ import (
 
 const a1ICDKey = "sourcewater-droplet-icd"
 
-// After the Dewdrop fired by the Hold Mode of the Aquacrest Saber hits an opponent, a Sourcewater Droplet will be
-// generated near to the Traveler. If the Traveler picks it up, they will restore 7% HP.
-// 1 Droplet can be created this way every second, and each use of Aquacrest Saber can create 4 Droplets at most.
+// 水紋の剣の長押しモードで発射された水珠が敵に命中すると、旅人の近くに源水の雫が生成される。
+// 旅人が拾うとHPを7%回復する。
+// この方法では毎秒1個まで生成可能で、水紋の剣の使用ごとに最大4個まで生成できる。
 func (c *Traveler) makeA1CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 1 {
 		return nil
@@ -58,8 +58,8 @@ func (c *Traveler) a1PickUp(count int) {
 			Bonus:   c.Stat(attributes.Heal),
 		})
 
-		// Picking up a Sourcewater Droplet will restore 2 Energy to the Traveler.
-		// Requires the Passive Talent "Spotless Waters."
+		// 源水の雫を拾うと旅人のエネルギーが2回復する。
+		// 固有天賦「Spotless Waters」が必要。
 		if c.Base.Cons >= 1 {
 			c.AddEnergy("travelerhydro-c1", 2)
 		}

@@ -35,8 +35,8 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charge[c.TalentLvlAttack()],
 	}
 
-	// add windup if we're in idle or swap only
-	// TODO: this ignores N4 -> CA (which should be illegal anyways)
+	// 待機または交代時のみ溜め時間を追加
+	// TODO: N4 -> CA を無視している（そもそも不正なアクション）
 	windup := 14
 	if c.Core.Player.CurrentState() == action.Idle || c.Core.Player.CurrentState() == action.SwapState {
 		windup = 0
@@ -58,7 +58,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          func(next action.Action) int { return chargeFrames[next] - windup },
 		AnimationLength: chargeFrames[action.InvalidAction] - windup,
-		CanQueueAfter:   chargeFrames[action.ActionSwap] - windup, // earliest cancel is before hitmark
+		CanQueueAfter:   chargeFrames[action.ActionSwap] - windup, // 最速キャンセルはヒットマークより前
 		State:           action.ChargeAttackState,
 	}, nil
 }

@@ -15,14 +15,14 @@ func (c *char) checkCurrentNightsoulPoint() {
 		index := args[0].(int)
 		amt := args[1].(float64)
 		c.charnightsoulpoints[index] += amt
-		c.a1() //recalc a1
+		c.a1() // 固有天賦1を再計算
 		return false
 	}, "ifa-a1-nscheck-generate")
 	c.Core.Events.Subscribe(event.OnNightsoulConsume, func(args ...interface{}) bool {
 		index := args[0].(int)
 		amt := args[1].(float64)
 		c.charnightsoulpoints[index] -= amt
-		c.a1() //recalc a1
+		c.a1() // 固有天賦1を再計算
 		return false
 	}, "ifa-a1-nscheck-consume")
 

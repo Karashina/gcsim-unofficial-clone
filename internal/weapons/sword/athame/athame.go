@@ -40,7 +40,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}
 	r := p.Refine
 
-	// CRIT DMG bonus for Elemental Burst
+	// 元素爆発の会心ダメージボーナス
 	burstCritDmg := 0.14 + float64(r)*0.04 // 16/20/24/28/32%
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CD] = burstCritDmg
@@ -54,7 +54,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// Blade of the Daylight Hours effect on Burst hit
+	// 日照の刃の効果（元素爆発命中時）
 	atkBonus := 0.18 + float64(r)*0.05      // 20/25/30/35/40%
 	partyAtkBonus := 0.14 + float64(r)*0.04 // 16/20/24/28/32%
 
@@ -67,14 +67,14 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		// Check for Hexerei: Secret Rite (2+ Hexerei characters)
+		// Hexerei: Secret Rite のチェック（Hexereiキャラ2人以上）
 		hasHexerei := w.countHexereiCharacters() >= 2
 		multiplier := 1.0
 		if hasHexerei {
-			multiplier = 1.75 // 75% increase
+			multiplier = 1.75 // 75%増加
 		}
 
-		// Apply ATK bonus to wielder
+		// 装備者に攻撃力ボーナスを付与
 		wielderBonus := atkBonus * multiplier
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(bladeKey, bladeDuration),
@@ -84,7 +84,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			},
 		})
 
-		// Apply ATK bonus to nearby active party members
+		// パーティメンバーに攻撃力ボーナスを付与
 		partyBonus := partyAtkBonus * multiplier
 		for _, other := range c.Player.Chars() {
 			if other.Index == char.Index {
@@ -113,9 +113,9 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 func (w *Weapon) countHexereiCharacters() int {
 	count := 0
 	for _, char := range w.c.Player.Chars() {
-		// Check if character has Hexerei trait
-		// This assumes characters have a method or field to identify Hexerei status
-		// For now, we'll check if they have any "hexerei" status
+		// キャラクターがHexerei特性を持つかチェック
+		// キャラクターにHexereiステータスを識別するメソッドまたはフィールドがあることを前提とする
+		// 現時点では "hexerei" ステータスの有無で判定する
 		if char.StatusIsActive("hexerei-character") {
 			count++
 		}

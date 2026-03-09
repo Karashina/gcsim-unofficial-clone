@@ -22,9 +22,9 @@ func init() {
 	burstFrames[action.ActionJump] = 100    // Q -> J
 }
 
-// Burst - doesn't do much other than damage, so fairly straightforward
+// 元素爆発 - ダメージ以外の要素は少なく、比較的単純
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// snapshots before or during Burst Animation
+	// 元素爆発アニメーション前または中にスナップショット
 	// https://library.keqingmains.com/evidence/characters/cryo/aloy#burst-mechanics
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -51,7 +51,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionJump], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

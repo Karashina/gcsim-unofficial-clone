@@ -20,19 +20,19 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// reset location
+	// 位置をリセット
 	c.qAbsorb = attributes.NoElement
 	player := c.Core.Combat.Player()
 	c.qPos = geometry.CalcOffsetPoint(player.Pos(), geometry.Point{Y: 5}, player.Direction())
 	c.absorbCheckLocation = combat.NewBoxHitOnTarget(c.qPos, geometry.Point{Y: -1}, 2.5, 2.5)
 
-	// Track burst eye duration for hexerei passive:
-	// Last tick fires at frame (106 + 24*19) = 562 from activation. Add buffer for eye persistence.
+	// Hexereiパッシブ用に元素爆発の眼の持続時間を追跡：
+	// 最後Tickは発動からフレーム (106 + 24*19) = 562で発射。眼の持続用にバッファを追加。
 	c.burstEnd = c.Core.F + 570
-	// Reset hex normal attack trigger counter for this burst
+	// この元素爆発のHex通常攻撃トリガーカウンターをリセット
 	c.normalHexCount = 0
 
-	// 8 second duration, tick every .4 second
+	// 8秒間の持続、0.4秒ごとにTick
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Wind's Grand Ode",
@@ -51,7 +51,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.aiAbsorb.Mult = burstAbsorbDot[c.TalentLvlBurst()]
 	c.aiAbsorb.Element = attributes.NoElement
 
-	// snapshot is around cd frame and 1st tick?
+	// スナップショットはCDフレームと第1Tick前後？
 	var snap combat.Snapshot
 	c.Core.Tasks.Add(func() {
 		snap = c.Snapshot(&ai)
@@ -63,13 +63,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		cb = c.c6(attributes.Anemo)
 	}
 
-	// starts at 106 with 24f interval between ticks. 20 total
+	// 106フレーム目から開始、24f間隔でTick。合計20回
 	for i := 0; i < 20; i++ {
 		c.Core.Tasks.Add(func() {
 			c.Core.QueueAttackWithSnap(ai, snap, ap, 0, cb)
 		}, 106+24*i)
 	}
-	// Infusion usually occurs after 4 ticks of anemo according to KQM library
+	// KQMライブラリによると、通常風4Tick後に元素変化が発生
 	c.Core.Tasks.Add(c.absorbCheckQ(c.Core.F, 0, int((480-24*4)/18)), 106+24*3)
 
 	if c.Base.Ascension >= 4 {
@@ -79,7 +79,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.SetCDWithDelay(action.ActionBurst, 15*60, 81)
 	c.ConsumeEnergy(84)
 
-	// C4 (Hexerei): Venti + team gain Anemo DMG +25% for 10s after using burst
+	// 4凸（Hexerei）：Venti + チームが元素爆発使用後10秒間風元素ダメージ+25%
 	if c.Base.Cons >= 4 {
 		c.c4New()
 	}
@@ -87,7 +87,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -99,7 +99,7 @@ func (c *char) burstAbsorbedTicks() {
 	}
 
 	ap := combat.NewCircleHitOnTarget(c.qPos, nil, 6)
-	// ticks at 24f. 15 total
+	// 24f間隔でTick。合計15回
 	for i := 0; i < 15; i++ {
 		c.Core.QueueAttackWithSnap(c.aiAbsorb, c.snapAbsorb, ap, i*24, cb)
 	}
@@ -123,11 +123,11 @@ func (c *char) absorbCheckQ(src, count, maxcount int) func() {
 			case attributes.Cryo:
 				c.aiAbsorb.ICDTag = attacks.ICDTagElementalBurstCryo
 			}
-			// trigger dmg ticks here
+			// ここでダメージTickを発動
 			c.burstAbsorbedTicks()
 			return
 		}
-		// otherwise queue up
+		// それ以外はキューに追加
 		c.Core.Tasks.Add(c.absorbCheckQ(src, count+1, maxcount), 18)
 	}
 }

@@ -1,5 +1,5 @@
 // package endstats collects a snapshot of relevant information right when a simulation
-// ends, such as ending energy etc..
+// 終了時のステータス（終了時エネルギー等）を収集
 package endstats
 
 import (

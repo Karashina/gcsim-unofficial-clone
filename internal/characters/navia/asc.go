@@ -13,36 +13,35 @@ const (
 	a1Key = "navia-a1-dmg"
 )
 
-// For 4s after using Ceremonial Crystalshot, the DMG dealt by Navia's Normal Attacks,
-// Charged Attacks, and Plunging Attacks will be converted into Geo DMG which cannot
-// be overridden by other Elemental infusions, and the DMG dealt by Navia's Normal Attacks,
-// Charged Attacks, and Plunging Attacks will be increased by 40%.
+// セレモニアルクリスタルショット使用後4秒間、ナヴィアの通常攻撃、
+// 重撃、落下攻撃ダメージが岩元素ダメージに変換され（他の元素付与で上書き不可）、
+// ナヴィアの通常攻撃、重撃、落下攻撃ダメージが40%増加する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
 	c.Core.Log.NewEvent("a1 infusion added", glog.LogCharacterEvent, c.Index)
 
-	// add Damage Bonus
+	// ダメージボーナスを追加
 	m := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBaseWithHitlag(a1Key, 60*4), // 4s
 		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-			// skip if not normal/charged/plunge
+			// 通常攻撃/重撃/落下攻撃以外はスキップ
 			if atk.Info.AttackTag != attacks.AttackTagNormal &&
 				atk.Info.AttackTag != attacks.AttackTagExtra &&
 				atk.Info.AttackTag != attacks.AttackTagPlunge {
 				return nil, false
 			}
-			// apply buff
+			// バフを適用
 			m[attributes.DmgP] = 0.4
 			return m, true
 		},
 	})
 }
 
-// For each Pyro/Electro/Cryo/Hydro party member, Navia gains 20% increased ATK.
-// This effect can stack up to 2 times.
+// 烤/雷/氷/水元素のパーティメンバーごとに、ナヴィアの攻撃力が20%増加。
+// この効果は最大2回まで重複可能。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

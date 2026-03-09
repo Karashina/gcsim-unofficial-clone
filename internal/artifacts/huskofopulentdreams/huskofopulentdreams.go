@@ -20,13 +20,13 @@ func init() {
 
 type Set struct {
 	stacks int
-	// Required to check for stack gain icd
+	// スタック獲得ICDの確認に必要
 	stackGainICDKey string
 	stackGainICD    int
-	// Required to check for stack loss
+	// スタック喪失の確認に必要
 	stackLossTimer int
 	lastStackGain  int
-	// Source initializes at -1
+	// ソースは-1で初期化
 	lastSwap int
 	core     *core.Core
 	char     *character.CharWrapper
@@ -37,7 +37,7 @@ type Set struct {
 func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 
-// Initiate off-field stacking if off-field at start of the sim
+// シム開始時にフィールド外であればフィールド外スタックを開始
 func (s *Set) Init() error {
 	if s.core.Player.Active() != s.char.Index {
 		s.core.Tasks.Add(s.gainStackOfffield(s.lastSwap), 180)
@@ -101,7 +101,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
-		// Only triggers when onfield
+		// フィールド上の時のみ発動
 		if c.Player.Active() != char.Index {
 			return false
 		}
@@ -146,8 +146,8 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 	return &s, nil
 }
 
-// Helper function to check for stack loss
-// called after every stack gain
+// スタック喪失を確認するヘルパー関数
+// スタック獲得後に毎回呼び出される
 func (s *Set) checkStackLoss(src int) func() {
 	return func() {
 		if s.lastStackGain != src {
@@ -162,7 +162,7 @@ func (s *Set) checkStackLoss(src int) func() {
 			Write("last_swap", s.lastSwap).
 			Write("last_stack_change", s.lastStackGain)
 
-		// queue up again if we still have stacks
+		// まだスタックがあれば再度キューに追加
 		if s.stacks > 0 {
 			s.char.QueueCharTask(s.checkStackLoss(src), s.stackLossTimer)
 		}
@@ -180,7 +180,7 @@ func (s *Set) gainStackOfffield(src int) func() {
 		if s.core.Player.Active() == s.char.Index {
 			return
 		}
-		// Ignore if the last source was not not the most recent swap
+		// 最後のソースが最新のスワップでなければ無視
 		if s.lastSwap != src {
 			return
 		}

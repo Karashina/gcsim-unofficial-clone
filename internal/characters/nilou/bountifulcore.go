@@ -31,14 +31,14 @@ func newBountifulCore(c *core.Core, p geometry.Point, a *combat.AttackEvent) *Bo
 		c.Tasks.Add(func() {
 			ai, snap := reactable.NewBloomAttack(char, b, func(atk *combat.AttackInfo) {
 				// atk.Abil += " (bountiful core)"
-				// FIXME: some external code only match against AttackTagBloom. fix A4 if you uncomment this
+				// FIXME: 一部の外部コードはAttackTagBloomのみにマッチする。これをアンコメントする場合はA4を修正すること
 				// atk.AttackTag = attacks.AttackTagBountifulCore
 				atk.ICDTag = attacks.ICDTagBountifulCoreDamage
 			})
 			ap := combat.NewCircleHitOnTarget(b.Gadget, nil, 6.5)
 			c.QueueAttackWithSnap(ai, snap, ap, 0)
 
-			// self damage
+			// 自傷ダメージ
 			ai.Abil += reactions.SelfDamageSuffix
 			ai.FlatDmg = 0.05 * ai.FlatDmg
 			ap.SkipTargets[targets.TargettablePlayer] = false
@@ -54,7 +54,7 @@ func newBountifulCore(c *core.Core, p geometry.Point, a *combat.AttackEvent) *Bo
 }
 
 func (b *BountifulCore) Tick() {
-	// this is needed since gadget tick
+	// ガジェットのTickに必要
 	b.Gadget.Tick()
 }
 

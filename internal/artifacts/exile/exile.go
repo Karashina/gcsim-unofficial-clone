@@ -25,8 +25,8 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// 2-Piece Bonus: Energy Recharge +20%.
-// 4-Piece Bonus: Using an Elemental Burst regenerates 2 Energy for all party members (excluding the wearer) every 2s for 6s. This effect cannot stack.
+// 2セット効果: 元素チャージ効率 +20%
+// 4セット効果: 元素爆発使用時、装備者以外の全パーティメンバーに2秒ごとにエネルギーを2回復（6秒間）。この効果は重複しない。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
@@ -51,7 +51,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 				return false
 			}
 
-			// TODO: does multiple exile holders extend the duration?
+			// TODO: 複数の旧貴族所持者で効果時間は延長されるか？
 			// for now: if exile is still ticking on at least one char then reject new exile buff
 			for _, x := range c.Player.Chars() {
 				this := x
@@ -65,11 +65,11 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 				if char.Index == this.Index {
 					continue
 				}
-				// add exile status to all party members except holder
+				// 装備者以外の全パーティメンバーに亡命ステータスを追加
 				this.AddStatus(buffKey, buffDuration, true)
-				// 3 ticks
+				// 3ティック
 				for i := 120; i <= 360; i += 120 {
-					// exile ticks are affected by hitlag
+					// 亡命のティックはヒットラグの影響を受ける
 					this.QueueCharTask(func() {
 						this.AddEnergy("exile-4pc", 2)
 					}, i)

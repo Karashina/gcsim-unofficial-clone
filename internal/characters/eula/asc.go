@@ -9,15 +9,15 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
-// If 2 stacks of Grimheart are consumed upon unleashing the Holding Mode of Icetide Vortex,
-// a Shattered Lightfall Sword will be created that will explode immediately,
-// dealing 50% of the basic Physical DMG dealt by a Lightfall Sword created by Glacial Illumination.
+// 氷潮の渦の長押しで冷酷な心スタックを2消費した場合、
+// 砕けた光落の剣が即座に爆発し、
+// 光界プロテクションで生成された光落の剣の基礎物理ダメージの50%を与える。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	// make sure this gets executed after hold e hitlag starts but before hold e is over
-	// this makes it so it doesn't get affected by hitlag after Hold E is over
+	// 長押しスキルのヒットラグ開始後かつ終了前に実行されるようにする
+	// これにより長押しスキル終了後のヒットラグの影響を受けない
 	aiA1 := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Icetide (Lightfall)",
@@ -41,7 +41,7 @@ func (c *char) a1() {
 	}, skillHoldHitmark+1)
 }
 
-// When Glacial Illumination is cast, the CD of Icetide Vortex is reset and Eula gains 1 stack of Grimheart.
+// 光界プロテクション発動時、氷潮の渦のCDがリセットされ、ユーラは冷酷な心を1スタック獲得する。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

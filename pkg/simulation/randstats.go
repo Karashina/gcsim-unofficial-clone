@@ -12,7 +12,7 @@ import (
 var subDist [attributes.DelimBaseStat]float64
 var subUpgrade [attributes.DelimBaseStat][4]float64
 
-// mainstat at lvl 20
+// レベル20でのメインステータス
 var mainStat = map[attributes.Stat]float64{
 	attributes.HP:       4780,
 	attributes.ATK:      311,
@@ -63,7 +63,7 @@ func generateRandSubs(r *info.RandomSubstats, rng *rand.Rand) ([]float64, error)
 		return nil, errors.New("sorry only 5 star artifacts supported currently")
 	}
 	stats := make([]float64, attributes.EndStatType)
-	// main stats first
+	// メインステータスを先に処理
 	stats[attributes.ATK] = mainStat[attributes.ATK]
 	stats[attributes.HP] = mainStat[attributes.HP]
 	stats[r.Sand] += mainStat[r.Sand]
@@ -73,19 +73,19 @@ func generateRandSubs(r *info.RandomSubstats, rng *rand.Rand) ([]float64, error)
 	mains := [5]attributes.Stat{attributes.ATK, attributes.HP, r.Sand, r.Goblet, r.Circlet}
 
 	for _, m := range mains {
-		// weights
+		// 重み
 		var weight [attributes.DelimBaseStat]float64
 		var picked [4]attributes.Stat
 		copy(weight[:], subDist[:])
 		weight[m] = 0
 
-		//TODO: option to use boss
+		//TODO: ボスを使用するオプション
 		upgrades := 4
 		if rng.Float64() <= 0.2 {
 			upgrades = 5
 		}
 		for i := 0; i < 4; i++ {
-			// pick stat from weight
+			// 重みからステータスを選択
 			s := randSub(weight, rng)
 			if s == attributes.NoStat {
 				log.Println("weights no good?")
@@ -98,7 +98,7 @@ func generateRandSubs(r *info.RandomSubstats, rng *rand.Rand) ([]float64, error)
 			picked[i] = s
 		}
 		for i := 0; i < upgrades; i++ {
-			// pick one out of 4 stats
+			// 4つのステータスから1つを選択
 			s := picked[rng.Intn(4)]
 			stats[s] += subUpgrade[s][rng.Intn(4)]
 		}

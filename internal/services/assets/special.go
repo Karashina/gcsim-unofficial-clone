@@ -1,7 +1,7 @@
 package assets
 
 var specialAssets = map[string]string{
-	// traveler have special images
+	// 旅人は特殊な画像を持つ
 	"aetheranemo":   "UI_AvatarIcon_PlayerBoy",
 	"lumineanemo":   "UI_AvatarIcon_PlayerGirl",
 	"aetherdendro":  "UI_AvatarIcon_PlayerBoy",

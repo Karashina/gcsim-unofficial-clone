@@ -41,7 +41,7 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// OnRemoved is sometimes called after the next action is executed. so we need to exit nightsoul here too
+	// OnRemovedは次のアクション実行後に呼ばれることがある。そのためここでもナイトソウルを終了する必要がある
 	c.clearNightsoulCB(action.SkillState)
 
 	ai := combat.AttackInfo{
@@ -79,7 +79,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	c.Core.QueueAttack(
 		ai,
-		combat.NewBoxHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 0.1, 2), // TODO: approximated
+		combat.NewBoxHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 0.1, 2), // TODO: 近似値
 		hitmark,
 		hitmark,
 		particleCB,
@@ -95,7 +95,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(sFrames),
 		AnimationLength: sFrames[action.InvalidAction],
-		CanQueueAfter:   sFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   sFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -116,4 +116,4 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Electro, c.ParticleDelay)
 }
 
-// TODO: skill hold
+// TODO: スキル長押し

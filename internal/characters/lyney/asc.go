@@ -9,9 +9,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// If Lyney consumes HP when firing off a Prop Arrow,
-// the Grin-Malkin hat summoned by the arrow will, upon hitting an opponent,
-// restore 3 Energy to Lyney and increase DMG dealt by 80% of his ATK.
+// リネがマジック弾を発射する際にHPを消費した場合、
+// その矢が召喚するグリンマルキンハットが敵に命中すると、
+// リネのエネルギーを3回復し、攻撃力の80%分ダメージが追加される。
 func (c *char) makeA1CB(hpDrained bool) combat.AttackCBFunc {
 	if c.Base.Ascension < 1 || !hpDrained {
 		return nil
@@ -36,16 +36,16 @@ func (c *char) addA1(ai *combat.AttackInfo, hpDrained bool) {
 	ai.Mult += 0.8
 }
 
-// The DMG Lyney deals to opponents affected by Pyro will receive the following buffs:
-// - Increases the DMG dealt by 60%.
-// - Each Pyro party member other than Lyney will cause the DMG dealt to increase by an additional 20%.
-// Lyney can deal up to 100% increased DMG to opponents affected by Pyro in this way.
+// 炎元素の影響を受けた敵に対してリネが与えるダメージに以下のバフが適用される:
+// - 与えるダメージが60%増加。
+// - リネ以外の炎元素パーティメンバー1人につき、さらに20%増加。
+// この方法で炎元素の影響を受けた敵に対して最大100%のダメージ増加が可能。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
 
-	// count up all pyro chars in team
+	// チーム内の炎元素キャラクターを数える
 	pyroCount := 0
 	for _, char := range c.Core.Player.Chars() {
 		if char.Base.Element == attributes.Pyro {
@@ -53,7 +53,7 @@ func (c *char) a4() {
 		}
 	}
 
-	// calc a4 dmg% value
+	// 固有天賦4のダメージ%値を計算
 	a4Dmg := 0.6 + float64(pyroCount-1)*0.2
 	if a4Dmg > 1 {
 		a4Dmg = 1

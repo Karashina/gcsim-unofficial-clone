@@ -28,15 +28,15 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Nocturne's Curtain Call
-// Max HP increases by 10/12/14/16/18%.
-// When triggering Lunar reactions or inflicting Lunar Reaction DMG on opponents,
-// the equipping character will recover 14/15/16/17/18 Energy, and receive the
-// Bountiful Sea's Sacred Wine effect for 12s:
-// Max HP increases by an additional 14/16/18/20/22%,
-// CRIT DMG from Lunar Reaction DMG increases by 60/80/100/120/140%.
-// The Energy recovery effect can be triggered at most once every 18s,
-// and can be triggered even when the equipping character is off-field.
+// Nocturne's Curtain Call（夜幕のカーテンコール）
+// HP上限が10/12/14/16/18%増加する。
+// Lunar反応を発動した時、または敵にLunar Reactionダメージを与えた時、
+// 装備キャラクターは14/15/16/17/18の元素エネルギーを回復し、
+// 12秒間Bountiful Sea's Sacred Wine効果を獲得する:
+// HP上限がさらに14/16/18/20/22%増加し、
+// Lunar Reactionダメージの会心ダメージが60/80/100/120/140%増加する。
+// エネルギー回復効果は18秒毎に1回発動可能で、
+// 装備キャラクターがフィールド外でも発動できる。
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
@@ -45,7 +45,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}
 	r := p.Refine
 
-	// Base HP increase (10/12/14/16/18%)
+	// 基本HP増加 (10/12/14/16/18%)
 	baseHPBonus := 0.08 + 0.02*float64(r)
 	val := make([]float64, attributes.EndStatType)
 	val[attributes.HPP] = baseHPBonus
@@ -58,7 +58,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// Energy recovery and buff on Lunar reaction
+	// Lunar反応時のエネルギー回復とバフ
 	energyAmt := []float64{14, 15, 16, 17, 18}
 	buffHPBonus := []float64{0.14, 0.16, 0.18, 0.20, 0.22}
 	buffCDBonus := []float64{0.60, 0.80, 1.00, 1.20, 1.40}
@@ -68,10 +68,10 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	buffDuration := 720 // 12s
 	icdDuration := 1080 // 18s
 
-	// Subscribe to Lunar reaction events
+	// Lunar反応イベントを購読
 	lunarReactionTrigger := func(args ...interface{}) bool {
-		// args[0] should be the reactable target
-		// Check if the attack actor is this character
+		// args[0]はreactableターゲット
+		// 攻撃者がこのキャラクターかチェック
 		atk, ok := args[1].(*combat.AttackEvent)
 		if !ok {
 			return false
@@ -80,17 +80,17 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		// Check ICD
+		// ICDをチェック
 		if !char.StatusIsActive(icdKey) {
-			// Recover energy
+			// エネルギーを回復
 			char.AddEnergy("nocturnes-curtain-call", energyAmt[r-1])
 			c.Log.NewEvent("nocturnes curtain call energy recovery", glog.LogWeaponEvent, char.Index).
 				Write("energy", energyAmt[r-1])
-				// Add ICD
+				// ICDを追加
 			char.AddStatus(icdKey, icdDuration, true)
 		}
 
-		// Apply buff (HP + CRIT DMG for Lunar reactions)
+		// バフを適用 (HP + Lunar反応ダメージの会心ダメージ)
 		char.AddStatus(buffKey, buffDuration, true)
 
 		return false
@@ -113,23 +113,23 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		// Check ICD
+		// ICDをチェック
 		if !char.StatusIsActive(icdKey) {
-			// Recover energy
+			// エネルギーを回復
 			char.AddEnergy("nocturnes-curtain-call", energyAmt[r-1])
 			c.Log.NewEvent("nocturnes curtain call energy recovery", glog.LogWeaponEvent, char.Index).
 				Write("energy", energyAmt[r-1])
-				// Add ICD
+				// ICDを追加
 			char.AddStatus(icdKey, icdDuration, true)
 		}
 
-		// Apply buff (HP + CRIT DMG for Lunar reactions)
+		// バフを適用 (HP + Lunar反応ダメージの会心ダメージ)
 		char.AddStatus(buffKey, buffDuration, true)
 
 		return false
 	}, "nocturnes-curtain-call-enemy-dmg-"+char.Base.Key.String())
 
-	// HP bonus from buff
+	// バフからのHPボーナス
 	buffVal := make([]float64, attributes.EndStatType)
 	char.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase(fmt.Sprintf("%s-hp", buffKey), -1),
@@ -143,7 +143,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// CRIT DMG bonus for Lunar Reaction DMG
+	// Lunar Reactionダメージの会心ダメージボーナス
 	cdVal := make([]float64, attributes.EndStatType)
 	char.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase(fmt.Sprintf("%s-cd", buffKey), -1),
@@ -151,7 +151,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			if !char.StatusIsActive(buffKey) {
 				return nil, false
 			}
-			// Check if this is Lunar Reaction DMG
+			// Lunar Reactionダメージかチェック
 			if atk.Info.AttackTag != attacks.AttackTagLCDamage &&
 				atk.Info.AttackTag != attacks.AttackTagLBDamage &&
 				atk.Info.AttackTag != attacks.AttackTagLCrsDamage {

@@ -16,7 +16,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
 )
 
-// TestVarkaSkillEntersSturmUndDrang verifies that using Skill activates S&D mode
+// TestVarkaSkillEntersSturmUndDrang はスキル使用でS&Dモードが有効になることを検証する
 func TestVarkaSkillEntersSturmUndDrang(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Varka)
@@ -27,7 +27,7 @@ func TestVarkaSkillEntersSturmUndDrang(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error adding char: %v", err)
 	}
-	// Fill remaining slots with test chars
+	// 残りのスロットをテストキャラで埋める
 	for i := 0; i < 3; i++ {
 		_, err := c.AddChar(defProfile(keys.TestCharDoNotUse))
 		if err != nil {
@@ -42,7 +42,7 @@ func TestVarkaSkillEntersSturmUndDrang(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Before skill: S&D should be inactive
+	// スキル前: S&Dは非アクティブであるべき
 	result, err := c.Player.Chars()[idx].Condition([]string{"sturm-und-drang"})
 	if err != nil {
 		t.Fatalf("error querying condition: %v", err)
@@ -51,7 +51,7 @@ func TestVarkaSkillEntersSturmUndDrang(t *testing.T) {
 		t.Fatal("S&D should not be active before skill use")
 	}
 
-	// Execute skill
+	// 元素スキルを実行
 	p := make(map[string]int)
 	if err := c.Player.Exec(action.ActionSkill, keys.Varka, p); err != nil {
 		t.Fatalf("unexpected error executing skill: %v", err)
@@ -60,7 +60,7 @@ func TestVarkaSkillEntersSturmUndDrang(t *testing.T) {
 		advanceCoreFrame(c)
 	}
 
-	// After skill: S&D should be active
+	// スキル後: S&Dはアクティブであるべき
 	result, err = c.Player.Chars()[idx].Condition([]string{"sturm-und-drang"})
 	if err != nil {
 		t.Fatalf("error querying condition: %v", err)
@@ -70,11 +70,11 @@ func TestVarkaSkillEntersSturmUndDrang(t *testing.T) {
 	}
 }
 
-// TestVarkaFWAChargeConsumption verifies FWA consumes charges in S&D mode
+// TestVarkaFWAChargeConsumption はS&DモードでFWAがチャージを消費することを検証する
 func TestVarkaFWAChargeConsumption(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Varka)
-	prof.Base.Cons = 1 // C1 grants 1 FWA charge on S&D entry
+	prof.Base.Cons = 1 // C1はS&D突入時にFWAチャージ1を付与
 	prof.Base.Ascension = 6
 	prof.Params["nohex"] = 1
 	idx, err := c.AddChar(prof)
@@ -95,14 +95,14 @@ func TestVarkaFWAChargeConsumption(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Enter S&D with skill
+	// スキルでS&Dに入る
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionSkill, keys.Varka, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// C1: should have 1 FWA charge
+	// C1: FWAチャージが1あるべき
 	result, _ := c.Player.Chars()[idx].Condition([]string{"fwa-charges"})
 	charges, ok := result.(int)
 	if !ok {
@@ -112,7 +112,7 @@ func TestVarkaFWAChargeConsumption(t *testing.T) {
 		t.Fatalf("C1 should grant at least 1 FWA charge on S&D entry, got %v", charges)
 	}
 
-	// Use FWA (skill in S&D mode)
+	// FWAを使用（S&Dモードでのスキル）
 	err = c.Player.Exec(action.ActionSkill, keys.Varka, p)
 	if err != nil {
 		t.Fatalf("error executing FWA: %v", err)
@@ -121,7 +121,7 @@ func TestVarkaFWAChargeConsumption(t *testing.T) {
 		advanceCoreFrame(c)
 	}
 
-	// After FWA: charges should be consumed
+	// FWA後: チャージが消費されているべき
 	result, _ = c.Player.Chars()[idx].Condition([]string{"fwa-charges"})
 	chargesAfter, _ := result.(int)
 	if chargesAfter >= charges {
@@ -129,7 +129,7 @@ func TestVarkaFWAChargeConsumption(t *testing.T) {
 	}
 }
 
-// TestVarkaFWADealsTwoHits verifies FWA deals 2 hits (Other + Anemo)
+// TestVarkaFWADealsTwoHits はFWAが2ヒット（Other + 風元素）することを検証する
 func TestVarkaFWADealsTwoHits(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Varka)
@@ -154,14 +154,14 @@ func TestVarkaFWADealsTwoHits(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Enter S&D
+	// S&Dに入る
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionSkill, keys.Varka, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// Count hits from FWA
+	// FWAからのヒット数をカウント
 	hitCount := 0
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
@@ -171,12 +171,12 @@ func TestVarkaFWADealsTwoHits(t *testing.T) {
 		return false
 	}, "fwa-hit-count")
 
-	// Execute FWA
+	// FWAを実行
 	c.Player.Exec(action.ActionSkill, keys.Varka, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
-	// Advance extra frames for damage processing
+	// ダメージ処理のため追加フレームを進める
 	for i := 0; i < 60; i++ {
 		advanceCoreFrame(c)
 	}
@@ -186,7 +186,7 @@ func TestVarkaFWADealsTwoHits(t *testing.T) {
 	}
 }
 
-// TestVarkaAzureDevourDeals4Hits verifies Azure Devour hits 4 times
+// TestVarkaAzureDevourDeals4Hits はAzure Devourが4回ヒットすることを検証する
 func TestVarkaAzureDevourDeals4Hits(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Varka)
@@ -211,14 +211,14 @@ func TestVarkaAzureDevourDeals4Hits(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Enter S&D
+	// S&Dに入る
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionSkill, keys.Varka, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// Count Azure Devour hits (charge attack in S&D with FWA charges)
+	// Azure Devourのヒット数をカウント（FWAチャージありのS&Dでの重撃）
 	hitCount := 0
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
@@ -228,10 +228,10 @@ func TestVarkaAzureDevourDeals4Hits(t *testing.T) {
 		return false
 	}, "azure-hit-count")
 
-	// Execute Azure Devour (charge attack in S&D mode)
+	// Azure Devourを実行（S&Dモードでの重撃）
 	err = c.Player.Exec(action.ActionCharge, keys.Varka, p)
 	if err != nil {
-		// If charge is not ready, advance and retry
+		// 重撃が準備できていない場合、フレームを進めてリトライ
 		for i := 0; i < 60; i++ {
 			advanceCoreFrame(c)
 		}
@@ -252,7 +252,7 @@ func TestVarkaAzureDevourDeals4Hits(t *testing.T) {
 	}
 }
 
-// TestVarkaSturmUndDrangExpires verifies S&D mode expires after 12 seconds
+// TestVarkaSturmUndDrangExpires はS&Dモードが12秒後に終了することを検証する
 func TestVarkaSturmUndDrangExpires(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Varka)
@@ -277,32 +277,32 @@ func TestVarkaSturmUndDrangExpires(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Enter S&D
+	// S&Dに入る
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionSkill, keys.Varka, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// Verify S&D is active
+	// S&Dがアクティブであることを確認
 	result, _ := c.Player.Chars()[idx].Condition([]string{"sturm-und-drang"})
 	if active, ok := result.(bool); !ok || !active {
 		t.Fatal("S&D should be active after skill use")
 	}
 
-	// Advance 12 seconds + buffer (720 frames + 60 buffer)
+	// 12秒 + バッファ（720フレーム + 60バッファ）を進める
 	for i := 0; i < 780; i++ {
 		advanceCoreFrame(c)
 	}
 
-	// S&D should have expired
+	// S&Dは終了しているべき
 	result, _ = c.Player.Chars()[idx].Condition([]string{"sturm-und-drang"})
 	if active, ok := result.(bool); ok && active {
 		t.Fatal("S&D should expire after 12 seconds")
 	}
 }
 
-// TestVarkaBurstDealsDamage verifies Burst deals damage
+// TestVarkaBurstDealsDamage は元素爆発がダメージを与えることを検証する
 func TestVarkaBurstDealsDamage(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Varka)
@@ -345,7 +345,7 @@ func TestVarkaBurstDealsDamage(t *testing.T) {
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
-	// Extra frames for processing
+	// 処理のため追加フレームを進める
 	for i := 0; i < 200; i++ {
 		advanceCoreFrame(c)
 	}
@@ -355,7 +355,7 @@ func TestVarkaBurstDealsDamage(t *testing.T) {
 	}
 }
 
-// TestVarkaC6ChainFWAToAzure verifies C6 FWA→Azure chaining via Skill routing
+// TestVarkaC6ChainFWAToAzure はC6のスキルルーティングによるFWA→Azureチェーンを検証する
 func TestVarkaC6ChainFWAToAzure(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Varka)
@@ -380,26 +380,26 @@ func TestVarkaC6ChainFWAToAzure(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Enter S&D (C1 grants 1 charge)
+	// S&Dに入る（C1がチャージ1を付与）
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionSkill, keys.Varka, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// Use FWA (sets c6FWAWindowKey)
+	// FWAを使用（c6FWAWindowKeyを設定）
 	c.Player.Exec(action.ActionSkill, keys.Varka, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// After FWA with C6: c6FWAWindowKey should route next Skill to Azure Devour
+	// C6でのFWA後: c6FWAWindowKeyが次のスキルをAzure Devourにルーティングするべき
 	ready, _ := c.Player.Chars()[idx].ActionReady(action.ActionSkill, p)
 	if !ready {
 		t.Fatal("C6: Skill should be ready after FWA (window routes to Azure Devour)")
 	}
 
-	// Execute Azure Devour via Skill (C6 routes Skill→Azure when c6FWAWindowKey active)
+	// スキル経由でAzure Devourを実行（C6はc6FWAWindowKeyアクティブ時にスキル→Azureにルーティング）
 	err = c.Player.Exec(action.ActionSkill, keys.Varka, p)
 	if err != nil {
 		t.Fatalf("C6: Skill→Azure Devour should execute after FWA, got error: %v", err)
@@ -408,12 +408,12 @@ func TestVarkaC6ChainFWAToAzure(t *testing.T) {
 		advanceCoreFrame(c)
 	}
 
-	// C6 chain is one-direction only (FWA→Azure); chained Azure does NOT
-	// re-open the reverse window (consumeCharge=false ⇒ c6AzureWindowKey not set).
-	// So no further chain is available. This prevents infinite chains by design.
+	// C6チェーンは一方向のみ（FWA→Azure）; チェーンされたAzureは
+	// 逆方向のウィンドウを再オープンしない（consumeCharge=false ⇒ c6AzureWindowKeyが設定されない）。
+	// これにより追加チェーンは不可。設計上の無限チェーン防止。
 }
 
-// TestVarkaConditionQueries verifies all Condition() fields return correct types
+// TestVarkaConditionQueries は全Condition()フィールドが正しい型を返すことを検証する
 func TestVarkaConditionQueries(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Varka)
@@ -437,7 +437,7 @@ func TestVarkaConditionQueries(t *testing.T) {
 
 	ch := c.Player.Chars()[idx]
 
-	// Test hexerei query (disabled via nohex=1)
+	// hexereiクエリをテスト（nohex=1で無効化）
 	result, err := ch.Condition([]string{"hexerei"})
 	if err != nil {
 		t.Fatalf("hexerei condition error: %v", err)
@@ -446,7 +446,7 @@ func TestVarkaConditionQueries(t *testing.T) {
 		t.Fatal("hexerei should be false with nohex=1")
 	}
 
-	// Test sturm-und-drang query
+	// sturm-und-drangクエリをテスト
 	result, err = ch.Condition([]string{"sturm-und-drang"})
 	if err != nil {
 		t.Fatalf("sturm-und-drang condition error: %v", err)
@@ -455,7 +455,7 @@ func TestVarkaConditionQueries(t *testing.T) {
 		t.Fatalf("sturm-und-drang should return bool, got %T", result)
 	}
 
-	// Test fwa-charges query
+	// fwa-chargesクエリをテスト
 	result, err = ch.Condition([]string{"fwa-charges"})
 	if err != nil {
 		t.Fatalf("fwa-charges condition error: %v", err)
@@ -464,7 +464,7 @@ func TestVarkaConditionQueries(t *testing.T) {
 		t.Fatalf("fwa-charges should return int, got %T", result)
 	}
 
-	// Test a4-stacks query
+	// a4-stacksクエリをテスト
 	result, err = ch.Condition([]string{"a4-stacks"})
 	if err != nil {
 		t.Fatalf("a4-stacks condition error: %v", err)
@@ -474,11 +474,11 @@ func TestVarkaConditionQueries(t *testing.T) {
 	}
 }
 
-// TestVarkaHexereiBonusDetection verifies Hexerei party detection
+// TestVarkaHexereiBonusDetection はHexereiパーティ検出を検証する
 func TestVarkaHexereiBonusDetection(t *testing.T) {
 	c, _ := makeCore(1)
 
-	// Varka with Hexerei enabled (default)
+	// Hexerei有効のVarka（デフォルト）
 	prof := defProfile(keys.Varka)
 	prof.Base.Cons = 0
 	prof.Base.Ascension = 6
@@ -487,7 +487,7 @@ func TestVarkaHexereiBonusDetection(t *testing.T) {
 		t.Fatalf("error adding Varka: %v", err)
 	}
 
-	// Add Venti (also Hexerei by default) — should trigger 2+ Hexerei
+	// Ventiを追加（デフォルトでHexerei） — 2人以上のHexereiをトリガーするべき
 	profVenti := defProfile(keys.Venti)
 	profVenti.Base.Cons = 0
 	profVenti.Base.Ascension = 6
@@ -507,7 +507,7 @@ func TestVarkaHexereiBonusDetection(t *testing.T) {
 		t.Fatalf("error initializing core: %v", err)
 	}
 
-	// Both Varka and Venti are Hexerei → party has 2+ Hexerei → hasHexBonus should be true
+	// VarkaとVenti両方がHexerei → パーティに2人以上のHexerei → hasHexBonusはtrueであるべき
 	result, err := c.Player.Chars()[0].Condition([]string{"hexerei"})
 	if err != nil {
 		t.Fatalf("hexerei condition error: %v", err)
@@ -517,7 +517,7 @@ func TestVarkaHexereiBonusDetection(t *testing.T) {
 	}
 }
 
-// TestVarkaNoHexDisablesHexerei verifies nohex=1 parameter disables Hexerei
+// TestVarkaNoHexDisablesHexerei はnohex=1パラメータがHexereiを無効化することを検証する
 func TestVarkaNoHexDisablesHexerei(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Varka)
@@ -543,7 +543,7 @@ func TestVarkaNoHexDisablesHexerei(t *testing.T) {
 	}
 }
 
-// TestVarkaSkillAllActionsDoNotPanic verifies all actions don't panic for Varka
+// TestVarkaSkillAllActionsDoNotPanic はVarkaの全アクションがパニックしないことを検証する
 func TestVarkaSkillAllActionsDoNotPanic(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Varka)
@@ -567,7 +567,7 @@ func TestVarkaSkillAllActionsDoNotPanic(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Execute all actions without panicking
+	// パニックせずに全アクションを実行
 	actions := []action.Action{
 		action.ActionAttack,
 		action.ActionSkill,
@@ -587,13 +587,13 @@ func TestVarkaSkillAllActionsDoNotPanic(t *testing.T) {
 			case errors.Is(err, player.ErrActionNotReady),
 				errors.Is(err, player.ErrPlayerNotReady),
 				errors.Is(err, player.ErrActionNoOp):
-				// Expected when not ready
+				// 準備できていない場合の想定エラー
 			case err == nil:
 				for !c.Player.CanQueueNextAction() {
 					advanceCoreFrame(c)
 				}
 			}
-			// Advance some frames between actions
+			// アクション間でフレームを進める
 			for i := 0; i < 120; i++ {
 				advanceCoreFrame(c)
 			}

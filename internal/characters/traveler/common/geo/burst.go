@@ -13,19 +13,19 @@ import (
 
 var burstFrames [][]int
 
-const burstStart = 35   // lines up with cooldown start
+const burstStart = 35   // クールダウン開始と一致
 const burstHitmark = 51 // Initial Shockwave 1
 
 func init() {
 	burstFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	burstFrames[0] = frames.InitAbilSlice(67) // Q -> N1/E
 	burstFrames[0][action.ActionDash] = 42    // Q -> D
 	burstFrames[0][action.ActionJump] = 42    // Q -> J
 	burstFrames[0][action.ActionSwap] = 51    // Q -> Swap
 
-	// Female
+	// 女性
 	burstFrames[1] = frames.InitAbilSlice(64) // Q -> E
 	burstFrames[1][action.ActionAttack] = 62  // Q -> N1
 	burstFrames[1][action.ActionDash] = 42    // Q -> D
@@ -36,12 +36,12 @@ func init() {
 func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	hits, ok := p["hits"]
 	if !ok {
-		hits = 4 // assume all 4 instances of shockwave dmg hit the enemy
+		hits = 4 // 衝撃波ダメージの全4回が敵に命中すると仮定
 	}
 	maxConstructCount, ok := p["construct_limit"]
 	if !ok {
-		// assume all 4 walls actually spawn
-		// going lower than 4 starts not spawning walls from top left, going counterclockwise
+		// 全4枚の壁が実際に出現すると仮定
+		// 4未満にすると左上から反時計回りに壁が出現しなくなる
 		maxConstructCount = 4
 	}
 
@@ -59,9 +59,9 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	}
 	snap := c.Snapshot(&ai)
 
-	// C4
-	// The shockwave triggered by Wake of Earth regenerates 5 Energy for every opponent hit.
-	// A maximum of 25 Energy can be regenerated in this manner at any one time.
+	// 4凸
+	// 岩潮の衝撃波は敵に命中するごとに5エネルギーを回復する。
+	// 1回で最大25エネルギーまで回復可能。
 	src := c.Core.F
 	var c4cb combat.AttackCBFunc
 	if c.Base.Cons >= 4 {
@@ -71,7 +71,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 			if !ok {
 				return
 			}
-			// TODO: A bit of a cludge to deal with frame 0 casts. Will have to think about this behavior a bit more
+			// TODO: フレーム0キャストに対処するための応急処置。この動作についてもう少し考える必要あり
 			if t.GetTag("traveler-c4-src") == src && src > 0 {
 				return
 			}
@@ -85,7 +85,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	}
 	player := c.Core.Combat.Player()
 	c.burstArea = combat.NewCircleHitOnTarget(player, nil, 7)
-	// 1.1 sec duration, tick every .25
+	// 1.1秒間持続、0.25秒ごとにティック
 	for i := 0; i < hits; i++ {
 		c.Core.QueueAttackWithSnap(
 			ai,
@@ -96,29 +96,29 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 		)
 	}
 
-	// 4 walls spawn at +-2.75, +-6.67 assuming default viewing direction
-	// spawning starts top right, and goes clockwise
-	// if you rotate (2.75, 6.67) counterclockwise until ending up with (0, x), then the angle is around 22.5
-	// this angle gets used for determining the wall's viewing direction
+	// 4枚の壁は+-2.75, +-6.67の位置に出現（デフォルトの視点方向を想定）
+	// 出現は右上から開始し、時計回りに進む
+	// (2.75, 6.67)を反時計回りに(0, x)になるまで回転すると、角度は約22.5度
+	// この角度は壁の視点方向の決定に使用される
 	angles := []float64{22.5, 112.5, 202.5, 292.5}
 	offsets := []geometry.Point{{X: 2.75, Y: 6.67}, {X: 2.75, Y: -6.67}, {X: -2.75, Y: -6.67}, {X: -2.75, Y: 6.67}}
 	c.Core.Tasks.Add(func() {
-		// C1
-		// Party members within the radius of Wake of Earth have their CRIT Rate increased by 10% and have increased resistance against interruption.
+		// 1凸
+		// 岩潮の範囲内のパーティメンバーは会心率10%増加、中断耐性が向上。
 		if c.Base.Cons >= 1 {
 			c.Tags["wall"] = 1
 		}
 		if c.Base.Cons >= 1 {
-			c.Core.Tasks.Add(c.c1(1), 60) // start checking in 1s
+			c.Core.Tasks.Add(c.c1(1), 60) // 1秒後にチェック開始
 		}
-		// C6
-		// The barrier created by Wake of Earth lasts 5s longer.
-		// The meteorite created by Starfell Sword lasts 10s longer.
+		// 6凸
+		// 岩潮のバリアの持続時間が5秒延長される。
+		// 星落としの剣の隕石の持続時間が10秒延長される。
 		dur := 15 * 60
 		if c.Base.Cons >= 6 {
 			dur += 300
 		}
-		// spawn walls up until the specified limit is reached
+		// 指定された上限まで壁を出現させる
 		for i := 0; i < maxConstructCount; i++ {
 			dir := geometry.DegreesToDirection(angles[i]).Rotate(player.Direction())
 			pos := geometry.CalcOffsetPoint(player.Pos(), offsets[i], player.Direction())
@@ -132,7 +132,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames[c.gender]),
 		AnimationLength: burstFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   burstFrames[c.gender][action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[c.gender][action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

@@ -20,14 +20,14 @@ func init() {
 	dashFrames[action.ActionSwap] = 34
 }
 
-// TODO: move this into PostDash event instead
+// TODO: 代わりにPostDashイベントに移動する
 func (c *char) Dash(p map[string]int) (action.Info, error) {
 	f, ok := p["f"]
 	if !ok {
 		f = 0
 	}
 
-	// no dmg attack at end of dash
+	// ダッシュ終了時にダメージなし攻撃
 	ai := combat.AttackInfo{
 		Abil:       "Dash",
 		ActorIndex: c.Index,
@@ -47,8 +47,8 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 		c.makeA4CB(),
 	)
 
-	// add cryo infuse
-	//TODO: check weapon infuse timing; this SHOULD be ok?
+	// 氷元素付与を追加
+	//TODO: 武器付与のタイミングを確認; これで問題ないはず？
 	c.Core.Tasks.Add(func() {
 		c.Core.Player.AddWeaponInfuse(
 			c.Index,
@@ -61,13 +61,13 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 	}, dashHitmark+f)
 	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Cryo, 300)
 
-	// handle stamina usage, avoid default dash implementation since dont want CD
+	// スタミナ消費を処理。CDが不要なためデフォルトのダッシュ実装を使わない
 	c.QueueDashStaminaConsumption(p)
 
 	return action.Info{
 		Frames:          func(next action.Action) int { return dashFrames[next] + f },
 		AnimationLength: dashFrames[action.InvalidAction] + f,
-		CanQueueAfter:   dashFrames[action.ActionDash] + f, // earliest cancel
+		CanQueueAfter:   dashFrames[action.ActionDash] + f, // 最速キャンセル
 		State:           action.DashState,
 	}, nil
 }

@@ -1,6 +1,6 @@
 package bennett
 
-// Decreases Passion Overload's CD by 20%.
+// 溢れる情熱のCDを20%短縮する。
 func (c *char) a1(cd int) int {
 	if c.Base.Ascension < 1 {
 		return cd
@@ -8,9 +8,9 @@ func (c *char) a1(cd int) int {
 	return int(float64(cd) * 0.8)
 }
 
-// Within the area created by Fantastic Voyage, Passion Overload takes on the following effects:
+// 素晴らしい旅の範囲内で、溢れる情熱は以下の効果を得る：
 //
-// - CD is reduced by 50%.
+// - CDが50%短縮される。
 func (c *char) a4CD(cd int) int {
 	if c.Base.Ascension < 4 || !c.StatModIsActive(burstFieldKey) {
 		return cd
@@ -18,9 +18,9 @@ func (c *char) a4CD(cd int) int {
 	return int(float64(cd) * 0.5)
 }
 
-// Within the area created by Fantastic Voyage, Passion Overload takes on the following effects:
+// 素晴らしい旅の範囲内で、溢れる情熱は以下の効果を得る：
 //
-// - Bennett will not be launched by the effects of Charge Level 2.
+// - ベネットはチャージレベル2の効果で打ち上げられなくなる。
 func (c *char) a4NoLaunch() bool {
 	return c.Base.Ascension >= 4 && c.StatModIsActive(burstFieldKey)
 }

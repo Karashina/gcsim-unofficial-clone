@@ -27,7 +27,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CR] = .105 + .035*float64(r)
 
-	// set stat to crit to avoid infinite loop when calling MaxHP
+	// MaxHP呼び出し時の無限ループを避けるため、ステータスを会心に設定
 	char.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("harbinger", -1),
 		AffectedStat: attributes.CR,

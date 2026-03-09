@@ -26,13 +26,13 @@ func (c *char) addDetectorStack() {
 	c.SetTag(a1Stacks, stacks)
 }
 
-// Per the following circumstances, the Soulwind state caused by Starfrost Swirl will grant characters the Detector effect,
-// increasing their Physical DMG by 10% when they are on the field.
-// - If the Flowfrost Arrow hits more than one opponent, each additional opponent hit will generate 1 Detector stack.
-// - When a Rimestar Shard hits an opponent, it will generate 1 Detector stack. Each Rimestar Shard can trigger the effect 1 time.
+// 以下の条件で、星霜の旋による極寒の風状態はキャラクターにディテクターを付与し、
+// フィールド上にいる時、物理ダメージが10%増加する。
+// - 霜流れの矢が複数の敵に命中した場合、追加の敵1体につきディテクタースタックが1つ生成される。
+// - 霜星の破片が敵に命中すると、ディテクタースタックが1つ生成される。各破片は1回のみ効果を発動できる。
 //
-// The Soulwind state can have a maximum of 3 Detector stacks, and if Starfrost Swirl is cast again during this duration, the pre-existing
-// Soulwind state and all its Detector stacks will be cleared.
+// 極寒の風状態は最大3つのディテクタースタックを持つことができ、この持続中に星霜の旋を再使用すると、
+// 既存の極寒の風状態とすべてのディテクタースタックがクリアされる。
 func (c *char) a1(char *character.CharWrapper) {
 	m := make([]float64, attributes.EndStatType)
 	char.AddStatMod(character.StatMod{
@@ -45,11 +45,10 @@ func (c *char) a1(char *character.CharWrapper) {
 	})
 }
 
-// When an active character affected by both Skyfeather Song's Eagleplume and Starfrost Swirl's Soulwind at once scores a CRIT Hit with their
-// attacks, Soulwind will grant them 1 stack of Detector from Suppressive Barrage. During a single instance of Soulwind, 1 Detector stack
-// can be gained in this manner.
-// Additionally, the maximum number of stacks that can be gained through Soulwind alone is increased by 1.
-// Requires Suppressive Barrage to be unlocked first.
+// 星翼の歌の鷲羽と星霜の旋の極寒の風の両方の効果を受けたアクティブキャラクターが攻撃で会心した場合、
+// 極寒の風は索敵弾幕のディテクタースタックを1つ付与する。1回の極寒の風につき、この方法で1スタックのみ獲得可能。
+// さらに、極寒の風のみで獲得できるスタックの最大数が1つ増加する。
+// 索敵弾幕のアンロックが必要。
 func (c *char) a4() {
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		if c.a4Stack {

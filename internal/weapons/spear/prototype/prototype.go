@@ -27,16 +27,16 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// After using an Elemental Skill, increases Normal and Charged Attack DMG by 8% for 12s. Max 2 stacks.
+// 元素スキル使用後、通常攻撃と重撃のダメージが8%増加する（12秒間）。最大2スタック。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 	const buffKey = "prototype"
 
-	// no icd on this one
+	// この武器にICDはない
 	w.buff = make([]float64, attributes.EndStatType)
 	atkbonus := 0.06 + 0.02*float64(r)
-	// add on crit effect
+	// 会心時効果を追加
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false

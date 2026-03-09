@@ -52,7 +52,7 @@ func NewAgg(cfg *info.ActionList) (agg.Aggregator, error) {
 
 func (b *buffer) Add(result stats.Result) {
 	for _, shield := range result.ShieldResults.Shields {
-		// create empty state if new shield
+		// 新シールドの場合は空の状態を作成
 		if _, ok := b.shieldHP[shield.Name]; !ok {
 			b.shieldHP[shield.Name] = make(map[string]*stats.WeightedStreamStats)
 			for _, t := range types {

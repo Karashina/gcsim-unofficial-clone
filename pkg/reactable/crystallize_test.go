@@ -33,7 +33,7 @@ func TestCrystallizeCryo(t *testing.T) {
 		},
 	})
 
-	// check shield
+	// シールドを確認
 	if !ok {
 		t.Errorf("expecting crystallize to have occured")
 		t.FailNow()
@@ -65,7 +65,7 @@ func TestCrystallizePyro(t *testing.T) {
 			Durability: 25,
 		},
 	})
-	// force on burning
+	// 燃焼を強制付与
 	trg.Durability[Burning] = 50
 
 	trg.React(&combat.AttackEvent{
@@ -75,7 +75,7 @@ func TestCrystallizePyro(t *testing.T) {
 		},
 	})
 
-	// check shield
+	// シールドを確認
 	if !ok {
 		t.Errorf("expecting crystallize to have occured")
 		t.FailNow()

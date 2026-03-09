@@ -12,7 +12,7 @@ import (
 	calc "github.com/aclements/go-moremath/stats"
 )
 
-// 30 = .5s
+// 30 = 0.5秒
 const bucketSize uint32 = 30
 
 func init() {
@@ -22,7 +22,7 @@ func init() {
 	})
 }
 
-// copied and adjusted from metadata agg pkg
+// メタデータ集計パッケージからコピーして調整
 type run struct {
 	overallDPS float64
 	targetDPS  float64
@@ -31,7 +31,7 @@ type run struct {
 
 type runs []run
 
-// assumes already sorted
+// ソート済みと仮定
 func (r runs) getPercentiles() *model.TargetBucket {
 	c1, c2 := agg.GetPercentileIndexes(r)
 	return &model.TargetBucket{
@@ -43,11 +43,10 @@ func (r runs) getPercentiles() *model.TargetBucket {
 	}
 }
 
-// TODO: We need to populate targetDPS with 0s if damage wasn't done that iteration
-// for an accurate measure. The problem is that we need target keys to be decided at the cfg level
-// not the core level.
-// We also have no guarantee that targets will have the same key across iterations. This will solve
-// the problem.
+// TODO: 正確な計測のため、イテレーションでダメージが発生しなかった場合にtargetDPSに0を追加する必要がある。
+// 問題は、ターゲットキーがコアレベルではなく設定レベルで決定される必要があること。
+// また、イテレーション間でターゲットが同じキーを持つ保証がない。
+// これを解決する必要がある。
 type buffer struct {
 	elementDPS            map[string]*calc.StreamStats
 	targetDPS             map[int]*calc.StreamStats
@@ -59,7 +58,7 @@ type buffer struct {
 
 	damageBuckets     []*calc.StreamStats
 	cumulativeContrib [][]*calc.StreamStats
-	// first index is for target, 2nd for iteration
+	// 最初のインデックスはターゲット用、2番目はイテレーション用
 	cumulativeDamage []runs
 	iters            uint
 }
@@ -78,7 +77,7 @@ func NewAgg(cfg *info.ActionList) (agg.Aggregator, error) {
 		cumulativeDamage:      make([]runs, len(cfg.Targets)),
 	}
 
-	// start with single entry
+	// 1エントリで開始
 	out.damageBuckets = append(out.damageBuckets, &calc.StreamStats{})
 
 	for i := 0; i < len(cfg.Characters); i++ {
@@ -213,7 +212,7 @@ func (b *buffer) Add(result stats.Result) {
 			b.cumulativeDamage[i],
 			run{
 				overallDPS: result.DPS,
-				// TODO: subject to break if target key gen changes
+				// TODO: ターゲットキー生成が変更されると壊れる可能性あり
 				targetDPS: targetDPS[i+1] * time,
 				buckets:   result.Enemies[i].CumulativeDamage,
 			},
@@ -343,7 +342,7 @@ func (b *buffer) Flush(result *model.SimulationStatistics) {
 			return 1
 		})
 		target := e.getPercentiles()
-		// TODO: mapping target index back to target key here, subject to break...
+		// TODO: ターゲットキー生成の変更で壊れる可能性あり
 		targetBuckets[int32(i+1)] = &model.TargetBuckets{
 			Overall: overall,
 			Target:  target,

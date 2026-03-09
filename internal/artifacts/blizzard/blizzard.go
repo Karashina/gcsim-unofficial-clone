@@ -47,7 +47,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 					return nil, false
 				}
 
-				// Frozen check first so we don't mistaken coexisting cryo
+				// まず凍結をチェック（共存する氷と誤認しないように）
 				if r.AuraContains(attributes.Frozen) {
 					m[attributes.CR] = 0.4
 					return m, true

@@ -41,7 +41,7 @@ func (c *char) newYueguiThrow() *yuegui {
 	yg.Gadget.Duration = 600
 	yg.Gadget.OnThinkInterval = yg.throw
 
-	// they start throwing 29f after being spawned
+	// 召喚後29fでアイテム投げを開始
 	yg.Gadget.ThinkInterval = 29
 
 	yg.Gadget.OnKill = func() {
@@ -67,10 +67,10 @@ func (c *char) newYueguiJump() {
 	player := c.Core.Combat.Player()
 	pos := geometry.CalcOffsetPoint(player.Pos(), geometry.Point{Y: -2}, player.Direction())
 	yg.Gadget = gadget.New(c.Core, pos, 0.5, combat.GadgetTypYueguiJumping)
-	yg.Gadget.Duration = -1 // They last until they get deleted by the burst
+	yg.Gadget.Duration = -1 // 元素爆発によって削除されるまで持続
 	yg.Gadget.OnThinkInterval = yg.throw
 
-	// they start throwing 29f after being spawned
+	// 召喚後29fでアイテム投げを開始
 	yg.Gadget.ThinkInterval = 29
 
 	yg.Gadget.OnKill = func() {
@@ -99,7 +99,7 @@ func (c *char) heal(area combat.AttackPattern, hi info.HealInfo) func() {
 }
 
 func (yg *yuegui) Tick() {
-	// this is needed since both reactable and gadget tick
+	// reactableとgadgetの両方がTickするため必要
 	// yg.Reactable.Tick()
 	yg.Gadget.Tick()
 }
@@ -130,7 +130,7 @@ func (yg *yuegui) throw() {
 	if currHPPerc > 0.7 && enemy != nil {
 		target = enemy.Pos()
 	} else {
-		// really it should be random if no targets are in range and the character's HP is full but we aren't really simming that
+		// 本来は範囲内にターゲットがいない場合やキャラのHPが満タンの場合はランダムだが、シミュレーションでは考慮しない
 		target = yg.Core.Combat.Player().Pos()
 	}
 	radishExplodeAoE := combat.NewCircleHitOnTarget(target, nil, radishRad)
@@ -168,7 +168,7 @@ func (yg *yuegui) getInfos() (combat.AttackInfo, info.HealInfo) {
 	return ai, hi
 }
 
-// TODO: Confirm if yueguis can infuse cryo
+// TODO: 月桂が氷元素を吸収できるか確認が必要
 func (yg *yuegui) HandleAttack(atk *combat.AttackEvent) float64 {
 	// yg.Core.Events.Emit(event.OnGadgetHit, yg, atk)
 	// yg.Attack(atk, nil)

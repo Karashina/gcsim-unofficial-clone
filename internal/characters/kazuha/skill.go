@@ -23,10 +23,10 @@ const (
 )
 
 func init() {
-	// Tap E
+	// 元素スキル（単押し）
 	skillPressFrames = make([][]int, 2)
 	// Tap E -> X
-	skillPressFrames[0] = frames.InitAbilSlice(77) // averaged all abils
+	skillPressFrames[0] = frames.InitAbilSlice(77) // 全アビリティの平均
 	skillPressFrames[0][action.ActionHighPlunge] = 24
 	// Tap E (Glide Cancel) -> X
 	skillPressFrames[1] = frames.InitAbilSlice(69)
@@ -35,10 +35,10 @@ func init() {
 	skillPressFrames[1][action.ActionJump] = 59
 	skillPressFrames[1][action.ActionSwap] = 60
 
-	// Hold E
+	// 元素スキル（長押し）
 	skillHoldFrames = make([][]int, 2)
 	// Hold E -> X
-	skillHoldFrames[0] = frames.InitAbilSlice(175) // averaged all abils
+	skillHoldFrames[0] = frames.InitAbilSlice(175) // 全アビリティの平均
 	skillHoldFrames[0][action.ActionHighPlunge] = 58
 	// Hold E (Glide Cancel) -> X
 	skillHoldFrames[1] = frames.InitAbilSlice(160)
@@ -107,8 +107,8 @@ func (c *char) skillPress(glide int) action.Info {
 		cd = 324
 	}
 	if c.Base.Cons >= 6 {
-		// TODO: when does the infusion kick in?
-		// -> For now, assume that it starts on hitmark.
+		// TODO: 元素付与はいつ発動する？
+		// -> 暫定的にヒットマークで開始すると仮定
 		c.Core.Tasks.Add(func() {
 			c.c6()
 		}, skillPressHitmark)
@@ -123,7 +123,7 @@ func (c *char) skillPress(glide int) action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames[glide]),
 		AnimationLength: skillPressFrames[glide][action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[glide][shortestAction], // earliest cancel
+		CanQueueAfter:   skillPressFrames[glide][shortestAction], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -157,8 +157,8 @@ func (c *char) skillHold(glide int) action.Info {
 		cd = 486
 	}
 	if c.Base.Cons >= 6 {
-		// TODO: when does the infusion kick in?
-		// -> For now, assume that it starts on hitmark.
+		// TODO: 元素付与はいつ発動する？
+		// -> 暫定的にヒットマークで開始すると仮定
 		c.Core.Tasks.Add(func() {
 			c.c6()
 		}, skillHoldHitmark)
@@ -173,7 +173,7 @@ func (c *char) skillHold(glide int) action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames[glide]),
 		AnimationLength: skillHoldFrames[glide][action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[glide][shortestAction], // earliest cancel
+		CanQueueAfter:   skillHoldFrames[glide][shortestAction], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }

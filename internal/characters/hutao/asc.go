@@ -10,8 +10,8 @@ const (
 	a1BuffKey = "hutao-a1"
 )
 
-// When a Paramita Papilio state activated by Guide to Afterlife ends,
-// all allies in the party (excluding Hu Tao herself) will have their CRIT Rate increased by 12% for 8s.
+// 彼岸よって招かれし Paramita Papilio 状態が終了した時、
+// パーティーの全味方（胡桃自身を除く）の会心率12%が8秒間アップする。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 || !c.applyA1 {
 		return
@@ -19,7 +19,7 @@ func (c *char) a1() {
 	c.applyA1 = false
 
 	for i, char := range c.Core.Player.Chars() {
-		// does not affect hutao
+		// 胡桃には適用されない
 		if c.Index == i {
 			continue
 		}
@@ -33,9 +33,9 @@ func (c *char) a1() {
 	}
 }
 
-// When Hu Tao's HP is equal to or less than 50%, her Pyro DMG Bonus is increased by 33%.
+// 胡桃のHPが50%以下の時、炎元素ダメージボーナスが33%アップする。
 //
-// - TODO: in-game this is actually a check every 0.3s. if hp is < 50% then buff is active until the next time check takes places
+// - TODO: ゲーム内では実際には0.3秒ごとのチェック。HPが50%未満なら次のチェックまでバフ有効
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

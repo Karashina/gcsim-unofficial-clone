@@ -27,7 +27,7 @@ func init() {
 	chargeFrames[action.ActionSwap] = 29    // CA -> Swap
 }
 
-// Standard charge attack
+// 標準的な重撃
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

@@ -46,20 +46,20 @@ func NewSet(core *core.Core, char *character.CharWrapper, count int, param map[s
 		m := make([]float64, attributes.EndStatType)
 
 		core.Events.Subscribe(event.OnShielded, func(args ...interface{}) bool {
-			// Character that picks it up must be the petra set holder
+			// 結晶を拾ったキャラが岩の上セット装備者である必要がある
 			if core.Player.Active() != char.Index {
 				return false
 			}
 
-			// Check shield
+			// シールドをチェック
 			shd := args[0].(shield.Shield)
 			if shd.Type() != shield.Crystallize {
 				return false
 			}
 			s.element = shd.Element()
 
-			// Activate
-			// TODO: cd for proc?
+			// 発動
+			// TODO: 発動にクールダウンが必要?
 			core.Log.NewEvent("archaic petra proc'd", glog.LogArtifactEvent, char.Index).
 				Write("ele", s.element)
 
@@ -72,7 +72,7 @@ func NewSet(core *core.Core, char *character.CharWrapper, count int, param map[s
 			m[attributes.DendroP] = 0
 			m[attributes.EleToDmgP(s.element)] = 0.35 // 35%
 
-			// Apply mod to all characters
+			// 全キャラクターにモディファイアを適用
 			for _, c := range core.Player.Chars() {
 				c.AddStatMod(character.StatMod{
 					Base:         modifier.NewBaseWithHitlag("archaic-4pc", 10*60),

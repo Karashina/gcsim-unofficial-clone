@@ -6,7 +6,7 @@ import (
 )
 
 func (h *Handler) AbsorbCheck(idx int, p AttackPattern, prio ...attributes.Element) attributes.Element {
-	// check targets for collision first
+	// まずターゲットの衝突をチェック
 	for _, e := range prio {
 		for _, x := range h.enemies {
 			t, ok := x.(TargetWithAura)

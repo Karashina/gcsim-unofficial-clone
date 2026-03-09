@@ -57,11 +57,11 @@ func init() {
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	// OnRemoved is sometimes called after the next action is executed. so we need to exit nightsoul here too
+	// OnRemovedは次のアクション実行後に呼ばれることがある。そのためここでもナイトソウルを終了する必要がある
 	c.clearNightsoulCB(action.NormalAttackState)
 
 	if c.StatusIsActive(skillStatus) {
-		// TODO: or c.Core.Player.Exec(action.ActionCharge, c.Base.Key, nil)
+		// TODO: c.Core.Player.Exec(action.ActionCharge, c.Base.Key, nil)とするか
 		return c.ChargeAttack(p)
 	}
 	if c.nightsoulState.HasBlessing() {
@@ -93,13 +93,13 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}
 	var ap combat.AttackPattern
 	switch len(attackHitboxes[c.NormalCounter]) {
-	case 1: // circle
+	case 1: // 円形
 		ap = combat.NewCircleHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: attackOffsets[c.NormalCounter]},
 			attackHitboxes[c.NormalCounter][0],
 		)
-	case 2: // box
+	case 2: // 矩形
 		ap = combat.NewBoxHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: attackOffsets[c.NormalCounter]},
@@ -149,13 +149,13 @@ func (c *char) fieryAttack() action.Info {
 
 	var ap combat.AttackPattern
 	switch len(fieryAttackHitboxes[c.NormalCounter]) {
-	case 1: // circle
+	case 1: // 円形
 		ap = combat.NewCircleHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: fieryAttackOffsets[c.NormalCounter]},
 			fieryAttackHitboxes[c.NormalCounter][0],
 		)
-	case 2: // box
+	case 2: // 矩形
 		ap = combat.NewBoxHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: fieryAttackOffsets[c.NormalCounter]},

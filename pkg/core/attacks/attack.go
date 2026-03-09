@@ -24,7 +24,7 @@ const (
 	AttackTagSwirlElectro
 	AttackTagBurningDamage
 	AttackTagBloom
-	AttackTagBountifulCore // special tag for nilou
+	AttackTagBountifulCore // ニィロウ用の特別タグ
 	AttackTagBurgeon
 	AttackTagHyperbloom
 	AttackTagLCDamage

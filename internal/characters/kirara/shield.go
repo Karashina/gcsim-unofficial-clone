@@ -12,7 +12,7 @@ func (c *char) genShield(src string, shieldamt float64) {
 	}
 	shieldamt = min(shieldamt, c.maxShieldHP())
 
-	// add shield
+	// シールドを追加
 	c.Core.Tasks.Add(func() {
 		c.Core.Player.Shields.Add(&shield.Tmpl{
 			ActorIndex: c.Index,

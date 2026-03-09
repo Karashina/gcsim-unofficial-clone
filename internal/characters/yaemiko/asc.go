@@ -9,8 +9,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When casting Great Secret Art: Tenko Kenshin, each Sesshou Sakura destroyed
-// resets the cooldown for 1 charge of Yakan Evocation: Sesshou Sakura.
+// 大秘法・天狐顯真を発動時、破壊された殺生櫻1本につき
+// 野干玉の創出・殺生櫻のCDを1回分リセットする。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -18,7 +18,7 @@ func (c *char) a1() {
 	c.ResetActionCooldown(action.ActionSkill)
 }
 
-// Every point of Elemental Mastery Yae Miko possesses will increase Sesshou Sakura DMG by 0.15%.
+// 八重神子が持つ元素熟知1ポイントごとに殺生櫻のダメージが0.15%増加する。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -27,7 +27,7 @@ func (c *char) a4() {
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("yaemiko-a4", -1),
 		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-			// only trigger on elemental art damage
+			// 元素スキルダメージのみトリガー
 			if atk.Info.AttackTag != attacks.AttackTagElementalArt {
 				return nil, false
 			}

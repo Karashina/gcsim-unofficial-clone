@@ -41,7 +41,7 @@ func (c *char) reduceNightsoulPoints(val float64) {
 
 	c.nightsoulState.ConsumePoints(val * c.nightsoulConsumptionMul())
 
-	// don't exit nightsoul while in NA/Plunge
+	// 通常攻撃/落下攻撃中はナイトソウルを終了しない
 	switch c.Core.Player.CurrentState() {
 	case action.NormalAttackState, action.PlungeAttackState:
 		return
@@ -66,7 +66,7 @@ func (c *char) enterNightsoul() {
 	c.nightsoulState.EnterTimedBlessing(45, duration, c.exitNightsoul)
 	c.skillLastStamF = c.Core.Player.LastStamUse
 	c.Core.Player.LastStamUse = math.MaxInt
-	// Don't queue the task if C2 or higher
+	// 2凸以上の場合はタスクをキューしない
 	if c.Base.Cons < 2 && c.samplersConverted < 3 {
 		c.activeGeoSampler(c.nightsoulSrc)()
 	}
@@ -93,7 +93,7 @@ func (c *char) nightsoulPointReduceTask(src int) {
 		if c.nightsoulSrc != src {
 			return
 		}
-		// reduce 0.5 point every 6f, which is 5 per second
+		// 6fごとに0.5ポイント消費、秒間5ポイント
 		c.reduceNightsoulPoints(0.5)
 		c.nightsoulPointReduceTask(src)
 	}, 60*tickInterval)
@@ -111,7 +111,7 @@ func (c *char) applySamplerShred(ele attributes.Element, enemies []combat.Enemy)
 
 func (c *char) activeGeoSampler(src int) func() {
 	return func() {
-		// Xilonen only has 3 samplers; if all 3 are converted then no geo samplers can remain.
+		// Xilonenは3つのサンプラーしか持たない；3つ全て変換された場合、岩元素サンプラーは残らない
 		if c.samplersConverted >= 3 {
 			return
 		}
@@ -124,7 +124,7 @@ func (c *char) activeGeoSampler(src int) func() {
 				return
 			}
 			if c.StatusIsActive(activeSamplerKey) {
-				// move to activeSamplers
+				// activeSamplersに移行
 				return
 			}
 		}
@@ -145,26 +145,26 @@ func (c *char) activeSamplers(src int) func() {
 
 		enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10), nil)
 		for ele := range c.shredElements {
-			// skip geo when C2 or above since it's always active
+			// 2凸以上の場合、岩元素は常時有効のためスキップ
 			if ele == attributes.Geo && c.Base.Cons >= 2 {
 				continue
 			}
 			c.applySamplerShred(ele, enemies)
 		}
 
-		// QueueCharTask needs to be called on the active char
+		// QueueCharTaskはアクティブキャラクターで呼び出す必要がある
 		active := c.Core.Player.ActiveChar()
 		active.QueueCharTask(c.activeSamplers(src), samplerInterval)
 	}
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	if c.nightsoulState.HasBlessing() { // don't use canUseNightsoul
+	if c.nightsoulState.HasBlessing() { // canUseNightsoulを使用しない
 		c.exitNightsoul()
 		return action.Info{
 			Frames:          func(_ action.Action) int { return 1 },
 			AnimationLength: 1,
-			CanQueueAfter:   1, // earliest cancel
+			CanQueueAfter:   1, // 最速キャンセル
 			State:           action.SkillState,
 		}, nil
 	}
@@ -196,7 +196,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	if c.Core.Player.Stam >= 15 {
 		c.Core.Player.RestoreStam(5)
 	} else {
-		// align to 15
+		// 15に合わせる
 		c.Core.Player.RestoreStam(15 - c.Core.Player.Stam)
 	}
 
@@ -206,7 +206,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

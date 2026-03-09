@@ -17,15 +17,15 @@ func (c *char) Jump(p map[string]int) (action.Info, error) {
 	if !c.StatusIsActive(player.XianyunAirborneBuff) && c.armamentState == bike &&
 		c.nightsoulState.HasBlessing() && c.Core.Player.CurrentState() == action.WalkState {
 		c.canBikePlunge = true
-		// Set plunge availability to false after jump duration
-		// Plunge actions last long enough that we don't need a srcF check
+		// ジャンプ持続時間後に落下攻撃の可否をfalseに設定
+		// 落下攻撃のアクションは十分長いのでsrcFチェックは不要
 		c.QueueCharTask(func() {
 			c.canBikePlunge = false
 		}, bikeJumpFrames[action.InvalidAction])
 		return action.Info{
 			Frames:          frames.NewAbilFunc(bikeJumpFrames),
 			AnimationLength: bikeJumpFrames[action.InvalidAction],
-			CanQueueAfter:   bikeJumpFrames[action.ActionLowPlunge], // earliest cancel
+			CanQueueAfter:   bikeJumpFrames[action.ActionLowPlunge], // 最速キャンセル
 			State:           action.JumpState,
 		}, nil
 	}

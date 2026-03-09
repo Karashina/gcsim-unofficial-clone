@@ -25,15 +25,14 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Increases CRIT Rate by 8% and increases Normal ATK SPD by 12%. Additionally,
-// Normal and Charged Attacks hits on opponents have a 50% chance to trigger a
-// vacuum blade that deals 40% of ATK as DMG in a small AoE. This effect can
-// occur no more than once every 2s.
+// 会心率が8%増加し、通常攻撃速度が12%増加する。さらに、
+// 通常攻撃と重撃が敵に命中した時、50%の確率で真空刃を発動し、
+// 攻撃力40%分のダメージを小範囲AoEで与える。この効果は2秒毎に1回のみ発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	// perm buff
+	// 永続バフ
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CR] = 0.06 + float64(r)*0.02
 	m[attributes.AtkSpd] = 0.12
@@ -49,7 +48,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	atk := .25 + .15*float64(r)
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
-		// check if char is correct?
+		// キャラクターが正しいかチェック
 		if ae.Info.ActorIndex != char.Index {
 			return false
 		}
@@ -59,7 +58,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if ae.Info.AttackTag != attacks.AttackTagNormal && ae.Info.AttackTag != attacks.AttackTagExtra {
 			return false
 		}
-		// check if cd is up
+		// CDがクールダウン中かチェック
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
@@ -67,7 +66,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		// add a new action that deals % dmg immediately
+		// 即座に%ダメージを与える新しいアクションを追加
 		ai := combat.AttackInfo{
 			ActorIndex: char.Index,
 			Abil:       "Skyward Spine Proc",
@@ -82,7 +81,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		trg := args[0].(combat.Target)
 		c.QueueAttack(ai, combat.NewBoxHitOnTarget(trg, nil, 0.1, 0.1), 0, 1)
 
-		// trigger cd
+		// クールダウンを発動
 		char.AddStatus(icdKey, 120, true)
 		return false
 	}, fmt.Sprintf("skyward-spine-%v", char.Base.Key.String()))

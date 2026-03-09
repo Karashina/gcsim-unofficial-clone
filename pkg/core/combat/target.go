@@ -7,30 +7,30 @@ import (
 )
 
 type Target interface {
-	Key() targets.TargetKey        // unique key for the target
-	SetKey(k targets.TargetKey)    // update key
-	Type() targets.TargettableType // type of target
-	Shape() geometry.Shape         // geometry.Shape of target
-	Pos() geometry.Point           // center of target
-	SetPos(p geometry.Point)       // move target
+	Key() targets.TargetKey        // ターゲットのユニークキー
+	SetKey(k targets.TargetKey)    // キーを更新
+	Type() targets.TargettableType // ターゲットの種類
+	Shape() geometry.Shape         // ターゲットの形状
+	Pos() geometry.Point           // ターゲットの中心
+	SetPos(p geometry.Point)       // ターゲットを移動
 	IsAlive() bool
 	SetTag(key string, val int)
 	GetTag(key string) int
 	RemoveTag(key string)
 	HandleAttack(*AttackEvent) float64
-	AttackWillLand(a AttackPattern) (bool, string) // hurtbox collides with AttackPattern
-	IsWithinArea(a AttackPattern) bool             // center is in AttackPattern
-	Tick()                                         // called every tick
+	AttackWillLand(a AttackPattern) (bool, string) // 被ダメボックスがAttackPatternと衝突するか
+	IsWithinArea(a AttackPattern) bool             // 中心がAttackPattern内にあるか
+	Tick()                                         // 毎ティック呼び出し
 	Kill()
-	// for collision check
+	// 衝突判定用
 	CollidableWith(targets.TargettableType) bool
 	CollidedWith(t Target)
 	WillCollide(geometry.Shape) bool
-	// direction related
-	Direction() geometry.Point                           // returns viewing direction as a geometry.Point
-	SetDirection(trg geometry.Point)                     // calculates viewing direction relative to default direction (0, 1)
-	SetDirectionToClosestEnemy()                         // looks for closest enemy
-	CalcTempDirection(trg geometry.Point) geometry.Point // used for stuff like Bow CA
+	// 方向関連
+	Direction() geometry.Point                           // 視線方向をgeometry.Pointとして返す
+	SetDirection(trg geometry.Point)                     // デフォルト方向(0, 1)からの相対的な視線方向を計算
+	SetDirectionToClosestEnemy()                         // 最も近い敵を向く
+	CalcTempDirection(trg geometry.Point) geometry.Point // 弓重撃などに使用
 }
 
 type TargetWithAura interface {

@@ -16,21 +16,21 @@ type Parser struct {
 	res  *info.ActionList
 	prog *ast.BlockStmt
 
-	// other information tracked as we parse
+	// パース中に追跡するその他の情報
 	chars          map[keys.Char]*info.CharacterProfile
 	charOrder      []keys.Char
 	currentCharKey keys.Char
 
-	// lookahead
+	// 先読み
 	token []ast.Token
 	pos   int
 
-	// parseFn
+	// パース関数
 	prefixParseFns map[ast.TokenType]func() (ast.Expr, error)
 	infixParseFns  map[ast.TokenType]func(ast.Expr) (ast.Expr, error)
 
-	// flags
-	constantFolding bool // for TestOrderPrecedence
+	// フラグ
+	constantFolding bool // TestOrderPrecedence テスト用
 }
 
 type parseFn func(*Parser) (parseFn, error)
@@ -46,21 +46,21 @@ func New(input string) *Parser {
 	p.lex = ast.NewLexer(input)
 	p.res = &info.ActionList{
 		Settings: info.SimulatorSettings{
-			EnableHitlag:    true, // default hitlag enabled
-			DefHalt:         true, // default defhalt to true
-			NumberOfWorkers: 20,   // default 20 workers if none set
-			Iterations:      1000, // default 1000 iterations
+			EnableHitlag:    true, // デフォルトでヒットラグ有効
+			DefHalt:         true, // デフォルトでdefhalt有効
+			NumberOfWorkers: 20,   // 未設定時はデフォルト20ワーカー
+			Iterations:      1000, // デフォルト1000イテレーション
 			Delays: info.Delays{
-				Swap: 1, // default swap timer of 1
+				Swap: 1, // デフォルトのスワップタイマー1
 			},
 		},
 		InitialPlayerPos: info.Coord{
-			R: 0.3, // default player radius 0.3, pos 0,0
+			R: 0.3, // デフォルトのプレイヤー半径0.3、座標0,0
 		},
 	}
 	p.prog = ast.NewBlockStmt(0)
 	p.constantFolding = true
-	// expr functions
+	// 式関連の関数
 	p.prefixParseFns[ast.ItemIdentifier] = p.parseIdent
 	p.prefixParseFns[ast.ItemField] = p.parseField
 	p.prefixParseFns[ast.ItemNumber] = p.parseNumber
@@ -87,8 +87,8 @@ func New(input string) *Parser {
 	return p
 }
 
-// consume returns err if next token does not match expected
-// otherwise return next token and nil error
+// consume は次のトークンが期待値と一致しない場合エラーを返す。
+// 一致した場合は次のトークンとnilエラーを返す。
 func (p *Parser) consume(i ast.TokenType) (ast.Token, error) {
 	n := p.next()
 	if n.Typ != i {
@@ -97,27 +97,27 @@ func (p *Parser) consume(i ast.TokenType) (ast.Token, error) {
 	return n, nil
 }
 
-// next returns the next token.
+// next は次のトークンを返す。
 func (p *Parser) next() ast.Token {
 	p.pos++
 	if p.pos == len(p.token) {
-		// grab more from the stream
+		// ストリームからさらに取得
 		n := p.lex.NextItem()
 		p.token = append(p.token, n)
 	}
 	return p.token[p.pos]
 }
 
-// backup backs the input stream up one token.
+// backup は入力ストリームを1トークン戻す。
 func (p *Parser) backup() {
 	p.pos--
-	// no op if at beginning
+	// 先頭の場合は何もしない
 	if p.pos < -1 {
 		p.pos = -1
 	}
 }
 
-// peek returns but does not consume the next token.
+// peek は次のトークンを返すが消費しない。
 func (p *Parser) peek() ast.Token {
 	n := p.next()
 	p.backup()

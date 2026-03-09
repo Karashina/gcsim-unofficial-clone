@@ -40,14 +40,14 @@ func init() {
 
 	// N4 -> x
 	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3], 60)
-	attackFrames[3][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
+	attackFrames[3][action.ActionCharge] = 500 //TODO: この操作は不正。より良い処理方法が必要
 	attackFrames[3][action.ActionDash] = 2
 	attackFrames[3][action.ActionJump] = 3
 	attackFrames[3][action.ActionSwap] = 2
 	attackFrames[3][action.ActionWalk] = 57
 }
 
-// Standard attack function with seal handling
+// 印処理付きの標準攻撃関数
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -68,7 +68,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		if done {
 			return
 		}
-		// check for healing
+		// 回復をチェック
 		if c.Core.Status.Duration(barbSkillKey) > 0 {
 			c.Core.Player.Heal(info.HealInfo{
 				Caller:  c.Index,

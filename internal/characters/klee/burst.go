@@ -39,12 +39,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		CanBeDefenseHalted: true,
 		IsDeployable:       true,
 	}
-	// lasts 10 seconds, starts after 2.2 seconds maybe?
+	// 10秒間持続、2.2秒後に開始？
 	c.Core.Status.Add("kleeq", 600+burstStart)
 
-	// every 1.8 second +on added shoots between 3 to 5, ignore the queue thing.. space it out .2 between each wave i guess
+	// 1.8秒ごとに3～5発発射。キュー処理は無視。各ウェーブ間は0.2秒間隔
 
-	// snapshot at end of animation?
+	// アニメーション終了時にスナップショット？
 	var snap combat.Snapshot
 	c.Core.Tasks.Add(func() {
 		snap = c.Snapshot(&ai)
@@ -52,18 +52,18 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	for _, start := range waveHitmarks {
 		c.Core.Tasks.Add(func() {
-			// no more if burst has ended early
+			// 元素爆発が早期終了した場合は停止
 			if c.Core.Status.Duration("kleeq") <= 0 {
 				return
 			}
-			// wave 1 = 1
+			// ウェーブ1 = 1発
 			c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5), 0)
-			// wave 2 = 1 + 30% chance of 1
+			// ウェーブ2 = 1発 + 30%の確率で追加1発
 			c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5), 12)
 			if c.Core.Rand.Float64() < 0.3 {
 				c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5), 12)
 			}
-			// wave 3 = 1 + 50% chance of 1
+			// ウェーブ3 = 1発 + 50%の確率で追加1発
 			c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5), 24)
 			if c.Core.Rand.Float64() < 0.5 {
 				c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5), 24)
@@ -71,13 +71,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}, start)
 	}
 
-	// every 3 seconds add energy if c6
+	// 6凸の場合、3秒ごとにエネルギーを追加
 	if c.Base.Cons >= 6 {
-		//TODO: this should eventually use hitlag affected queue and duration
-		// but is not big deal right now b/c klee cant experience hitlag without getting hit
+		//TODO: 最終的にはヒットラグ影響付きキューと持続時間を使用すべき
+		// ただしクレーは被弾しないとヒットラグが発生しないため現時点では大きな問題ではない
 		for i := burstStart + 180; i < burstStart+600; i += 180 {
 			c.Core.Tasks.Add(func() {
-				// no more if burst has ended early
+				// 元素爆発が早期終了した場合は停止
 				if c.Core.Status.Duration("kleeq") <= 0 {
 					return
 				}
@@ -91,7 +91,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			}, i)
 		}
 
-		// add 10% pyro for 25s
+		// 25秒間炎元素ダメージ+10%
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.PyroP] = .1
 		for _, x := range c.Core.Player.Chars() {
@@ -113,22 +113,22 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel frames
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最早キャンセルフレーム
 		State:           action.BurstState,
 	}, nil
 }
 
-// clear klee burst when she leaves the field and handle c4
+// クレーがフィールドを離れた時に元素爆発を解除し、4凸を処理する
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
-		// check if burst is active
+		// 元素爆発がアクティブかチェック
 		if c.Core.Status.Duration("kleeq") <= 0 {
 			return false
 		}
 		c.Core.Status.Delete("kleeq")
 
 		if c.Base.Cons >= 4 {
-			// blow up
+			// 爆発
 			ai := combat.AttackInfo{
 				ActorIndex:         c.Index,
 				Abil:               "Sparks'n'Splash C4",

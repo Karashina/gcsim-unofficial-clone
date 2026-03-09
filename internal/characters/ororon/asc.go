@@ -37,7 +37,7 @@ func (c *char) a1Init() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 
-		// ignores ororon himself
+		// オロルン自身は無視
 		if atk.Info.ActorIndex == c.Index {
 			return false
 		}

@@ -12,7 +12,7 @@ type shieldBonusMod struct {
 	Event  glog.Event
 }
 
-// TODO: this probably should be affected by hitlag as well
+// TODO: これもヒットラグの影響を受けるべきかもしれない
 func (h *Handler) ShieldBonus() float64 {
 	n := 0
 	amt := 0.0
@@ -37,11 +37,11 @@ func (h *Handler) ShieldBonusModIsActive(key string) bool {
 			ind = i
 		}
 	}
-	// mod doesnt exist
+	// Modが存在しない
 	if ind == -1 {
 		return false
 	}
-	// check expiry
+	// 有効期限をチェック
 	if h.shieldBonusMods[ind].Expiry < *h.f && h.shieldBonusMods[ind].Expiry > -1 {
 		return false
 	}
@@ -64,7 +64,7 @@ func (h *Handler) AddShieldBonusMod(key string, dur int, f ShieldBonusModFunc) {
 		}
 	}
 
-	// if does not exist, make new and add
+	// 存在しなければ新規作成して追加
 	if ind == -1 {
 		mod.Event = h.log.NewEvent("shield bonus added", glog.LogStatusEvent, -1).
 			Write("overwrite", false).
@@ -75,7 +75,7 @@ func (h *Handler) AddShieldBonusMod(key string, dur int, f ShieldBonusModFunc) {
 		return
 	}
 
-	// otherwise check not expired
+	// そうでなければ有効期限切れでないかチェック
 	if h.shieldBonusMods[ind].Expiry > *h.f || h.shieldBonusMods[ind].Expiry == -1 {
 		h.log.NewEvent(
 			"shield bonus refreshed", glog.LogStatusEvent, -1,
@@ -86,7 +86,7 @@ func (h *Handler) AddShieldBonusMod(key string, dur int, f ShieldBonusModFunc) {
 
 		mod.Event = h.shieldBonusMods[ind].Event
 	} else {
-		// if expired overide the event
+		// 期限切れの場合はイベントを上書き
 		mod.Event = h.log.NewEvent("shield bonus added", glog.LogStatusEvent, -1).
 			Write("overwrite", false).
 			Write("key", mod.Key).

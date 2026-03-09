@@ -62,7 +62,7 @@ func (c *char) a1Throw() {
 
 func (c *char) a4(index, src int) func() {
 	return func() {
-		// TODO: Check if reapplying radish will reset heal timer or not?
+		// TODO: 大根の再適用で回復タイマーがリセットされるか確認する
 		if c.a4Srcs[index] != src {
 			return
 		}

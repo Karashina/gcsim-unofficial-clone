@@ -20,7 +20,7 @@ func init() {
 func (c *char) Jump(p map[string]int) (action.Info, error) {
 	if c.nightsoulState.HasBlessing() {
 		if c.Core.Player.LastAction.Type == action.ActionDash {
-			c.reduceNightsoulPoints(14) // total 24, 10 from dash, 14 from dash jump
+			c.reduceNightsoulPoints(14) // 合計24、ダッシュから10、ダッシュジャンプから14
 		} else {
 			c.reduceNightsoulPoints(2)
 		}

@@ -71,7 +71,7 @@ func (c *char) Init() error {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if it is possible to use E (in Q)
+	// 元素スキルを使用可能かチェック（元素爆発中）
 	if a == action.ActionSkill && c.StatusIsActive(burstKey) {
 		return true, action.NoFailure
 	}

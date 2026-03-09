@@ -10,7 +10,7 @@ import (
 type Sets map[keys.Set]int
 
 func (s Sets) MarshalJSON() ([]byte, error) {
-	// we'll use a custom string builder i guess
+	// カスタム文字列ビルダーを使う
 	var sb strings.Builder
 	sb.WriteString("{")
 	for k, v := range s {

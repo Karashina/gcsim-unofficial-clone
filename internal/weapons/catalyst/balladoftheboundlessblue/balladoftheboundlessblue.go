@@ -22,10 +22,10 @@ type Weapon struct {
 	Index int
 }
 
-// Within 6s after Normal or Charged Attacks hit an opponent,
-// Normal Attack DMG will be increased by 8/10/12/14/16%
-// and Charged Attack DMG will be increased by 6/7.5/8/10.5/12%. Max 3 stacks.
-// This effect can be triggered once every 0.3s.
+// 通常攻撃または重撃が敵に命中した後6秒間、
+// 通常攻撃ダメージが8/10/12/14/16%増加し、
+// 重撃ダメージが6/7.5/8/10.5/12%増加する。最大3スタック。
+// この効果は0.3秒毎に1回発動可能。
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }

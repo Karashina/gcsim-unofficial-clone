@@ -23,11 +23,11 @@ type Weapon struct {
 	Index int
 
 	stacks   int
-	stackSrc int // source frame for stack expiry
+	stackSrc int // スタック失効用のソースフレーム
 	core     *core.Core
 	char     *character.CharWrapper
 
-	// Passive values
+	// パッシブ値
 	dmgPerStack  float64
 	cdmgPerStack float64
 	hasHexBonus  bool
@@ -35,13 +35,13 @@ type Weapon struct {
 
 const (
 	buffKey  = "gest-wolf-hymn"
-	buffDur  = 4 * 60 // 4 seconds
-	stackICD = 1      // 0.01s = ~1 frame ICD
+	buffDur  = 4 * 60 // 4秒
+	stackICD = 1      // 0.01秒 = 約1フレームICD
 )
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error {
-	// Check Hexerei bonus at init time (after party is assembled)
+	// 初期化時にHexereiボーナスをチェック（パーティ編成後）
 	w.hasHexBonus = false
 	hexereiCount := 0
 	for _, char := range w.core.Player.Chars() {
@@ -55,14 +55,14 @@ func (w *Weapon) Init() error {
 	return nil
 }
 
-// Increase ATK SPD by 10%.
-// Every time the equipping character's Normal Attack(s) hit opponent(s),
-// when they cast their Elemental Skill, or when they begin their Charged Attack(s),
-// gain 1/2/2 stacks of Four Winds' Hymn respectively:
-// DMG dealt is increased by 7.5%/9.5%/11.5%/13.5%/15.5% for 4s. Max 4 stacks.
-// This effect can be triggered once every 0.01s.
-// Additionally, when the party has "Hexerei: Secret Rite", each stack of Four Winds' Hymn
-// also increases the equipping character's CRIT DMG by 7.5%/9.5%/11.5%/13.5%/15.5%.
+// 攻撃速度が10%増加。
+// 装備キャラクターの通常攻撃が敵に命中した時、元素スキルを発動した時、
+// または重撃を開始した時、それぞれFour Winds' Hymnを1/2/2スタック獲得：
+// 与えるダメージが4秒間7.5%/9.5%/11.5%/13.5%/15.5%増加。最大4スタック。
+// この効果は0.01秒に1回発動可能。
+// さらに、パーティに「Hexerei: Secret Rite」がある場合、
+// Four Winds' Hymnの各スタックは装備キャラクターの会心ダメージも
+// 7.5%/9.5%/11.5%/13.5%/15.5%増加させる。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		core: c,
@@ -71,10 +71,10 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	r := p.Refine
 
 	w.dmgPerStack = 0.055 + 0.02*float64(r) // R1=7.5%, R2=9.5%, R3=11.5%, R4=13.5%, R5=15.5%
-	w.cdmgPerStack = w.dmgPerStack          // Same values for CRIT DMG
+	w.cdmgPerStack = w.dmgPerStack          // 会心ダメージも同じ値
 
-	// Permanent ATK SPD +10% (always active, does not scale with refine based on description)
-	// Note: ATK SPD is typically a StatMod on AtkSpd
+	// 永続攻撃速度+10%（常時有効、説明文に基づき精錬でスケールしない）
+	// 注: 攻撃速度は通常AtkSpdのStatModで適用
 	atkSpd := make([]float64, attributes.EndStatType)
 	atkSpd[attributes.AtkSpd] = 0.10
 	char.AddStatMod(character.StatMod{
@@ -85,7 +85,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// Subscribe to Normal Attack hits for 1 stack
+	// 通常攻撃命中で1スタック獲得をサブスクライブ
 	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != char.Index {
@@ -98,7 +98,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("gest-wolf-na-%v", char.Base.Key.String()))
 
-	// Subscribe to Skill cast for 2 stacks (on damage, not on cast)
+	// スキル発動で2スタック獲得をサブスクライブ（キャスト時ではなくダメージ時）
 	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != char.Index {
@@ -111,7 +111,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("gest-wolf-skill-%v", char.Base.Key.String()))
 
-	// Subscribe to Charged Attack start for 2 stacks (on damage)
+	// 重撃開始で2スタック獲得をサブスクライブ（ダメージ時）
 	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != char.Index {
@@ -124,7 +124,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("gest-wolf-ca-%v", char.Base.Key.String()))
 
-	// Apply DMG% buff via AttackMod (dynamic based on current stacks)
+	// AttackMod経由でダメージ%バフを適用（現在のスタック数に基づく動的計算）
 	char.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("gest-wolf-dmg", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
@@ -143,15 +143,15 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	return w, nil
 }
 
-// addStacks adds stacks to Four Winds' Hymn buff
+// addStacks はFour Winds' Hymnバフにスタックを追加する
 func (w *Weapon) addStacks(count int) {
-	// ICD check: 0.01s
+	// ICDチェック：0.01秒
 	if w.char.StatusIsActive("gest-wolf-stack-icd") {
 		return
 	}
 	w.char.AddStatus("gest-wolf-stack-icd", stackICD, true)
 
-	// If buff expired, reset stacks
+	// バフが期限切れの場合、スタックをリセット
 	if !w.char.StatusIsActive(buffKey) {
 		w.stacks = 0
 	}
@@ -161,7 +161,7 @@ func (w *Weapon) addStacks(count int) {
 		w.stacks = 4
 	}
 
-	// Refresh duration
+	// 持続時間を更新
 	w.char.AddStatus(buffKey, buffDur, true)
 
 	w.core.Log.NewEvent("gest-wolf stacks updated", glog.LogWeaponEvent, w.char.Index).

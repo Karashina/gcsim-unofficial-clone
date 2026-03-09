@@ -78,12 +78,12 @@ func (c *char) swordCharge() action.Info {
 			Element:            attributes.Electro,
 			Durability:         25,
 			Mult:               mult[c.TalentLvlBurst()] + resolveBonus[c.TalentLvlBurst()]*c.stacksConsumed,
-			HitlagHaltFrames:   0.02 * 60, // all raiden normals have 0.02s hitlag
+			HitlagHaltFrames:   0.02 * 60, // 雷電将軍の全通常攻撃は0.02sのヒットラグ
 			HitlagFactor:       0.01,
 			CanBeDefenseHalted: true,
 		}
-		// Sword hits are dynamic - group snapshots with damage proc
-		if i == 0 { // Only the last hit has hitlag
+		// 刀攻撃は動的 - スナップショットをダメージ発生時にグループ化
+		if i == 0 { // 最後のヒットのみヒットラグあり
 			ai.HitlagHaltFrames = 0
 			ai.CanBeDefenseHalted = false
 		}

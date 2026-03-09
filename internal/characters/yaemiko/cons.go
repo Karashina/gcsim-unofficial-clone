@@ -6,9 +6,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When Sesshou Sakura lightning hits opponents, the Electro DMG Bonus of all nearby party members is increased by 20% for 5s.
+// 殺生櫻の雷が敵にヒットすると、近くの全パーティメンバーの雷元素ダメージバフが5秒間20%増加する。
 func (c *char) c4() {
-	// TODO: does this trigger for yaemiko too? assuming it does
+	// TODO: これは八重神子もトリガーされる？されると仮定
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("yaemiko-c4", 5*60),

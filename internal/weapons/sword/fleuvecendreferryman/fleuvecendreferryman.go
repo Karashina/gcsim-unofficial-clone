@@ -25,12 +25,12 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Increases Elemental Skill CRIT Rate by 8/10/12/14/16%. Additionally, increases Energy Recharge by 16/20/24/28/32% for 5s after using an Elemental Skill.
+// 元素スキルの会心率が8/10/12/14/16%増加する。また、元素スキル使用後5秒間、元素チャージ効率が16/20/24/28/32%増加する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	// skill crit rate
+	// スキル会心率
 	mCR := make([]float64, attributes.EndStatType)
 	mCR[attributes.CR] = 0.06 + 0.02*float64(r)
 	char.AddAttackMod(character.AttackMod{
@@ -43,7 +43,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// er up after skill
+	// スキル後に元素チャージ効率アップ
 	mER := make([]float64, attributes.EndStatType)
 	mER[attributes.ER] = 0.12 + 0.04*float64(r)
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {

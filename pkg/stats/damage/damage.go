@@ -9,7 +9,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
-// 30 = .5s
+// 30 = 0.5秒
 const bucketSize int = 30
 
 func init() {
@@ -43,8 +43,8 @@ func NewStat(core *core.Core) (stats.Collector, error) {
 		damage := args[2].(float64)
 		crit := args[3].(bool)
 
-		// TODO: validate if this is still true?
-		// No need to pull damage stats for non-enemies
+		// TODO: これがまだ正しいか検証する
+		// 敵以外のダメージ統計を取得する必要なし
 		if target.Type() != targets.TargettableEnemy {
 			return false
 		}
@@ -65,7 +65,7 @@ func NewStat(core *core.Core) (stats.Collector, error) {
 			copy(newBucket, last)
 			out.cumuTarget = append(out.cumuTarget, newBucket)
 		}
-		// TODO: subject to break if target key gen changes...
+		// TODO: ターゲットキー生成が変更されると壊れる可能性あり...
 		out.cumuTarget[bucket][targetKey-1] += damage
 
 		for bucket >= len(out.buckets) {
@@ -73,9 +73,9 @@ func NewStat(core *core.Core) (stats.Collector, error) {
 		}
 		out.buckets[bucket] += damage
 
-		// TODO: ActionId population
-		// TODO: Modifiers population
-		// TODO: Mitigation population
+		// TODO: ActionIdの設定
+		// TODO: Modifiersの設定
+		// TODO: Mitigationの設定
 		event := stats.DamageEvent{
 			Frame:   attack.SourceFrame,
 			Source:  attack.Info.Abil,
@@ -130,7 +130,7 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 		}
 	}
 
-	// TODO: working under assumption that enemies are not removed from handler array upon death, subject to break...
+	// TODO: 死亡時に敵がハンドラ配列から削除されない前提で動作。壊れる可能性あり...
 	bucketCount := len(result.DamageBuckets)
 	for e := range core.Combat.Enemies() {
 		result.Enemies[e].CumulativeDamage = make([]float64, bucketCount)

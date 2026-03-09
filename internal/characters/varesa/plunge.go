@@ -23,7 +23,7 @@ var (
 	xianyunFieryHighPlungeFrames []int
 )
 
-// TODO: low_plunge
+// TODO: low_plungeのフレームデータ
 
 const highPlungeHitmark = 37
 const fieryHighPlungeHitmark = 41
@@ -108,9 +108,9 @@ func init() {
 	xianyunFieryHighPlungeFrames[action.ActionSwap] = 46
 }
 
-// High Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 高空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	if c.Core.Player.CurrentState() == action.ChargeAttackState {
@@ -124,9 +124,9 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	}
 }
 
-// Low Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 低空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
@@ -140,7 +140,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *char) highPlungeCA(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -200,7 +200,7 @@ func (c *char) highPlungeCA(p map[string]int) action.Info {
 func (c *char) highPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -260,7 +260,7 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -318,7 +318,7 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 }
 
 func (c *char) newAbilFuncXYPlunge(slice []int, nonNSWalk int) func(action.Action) int {
-	// This is different because the walk frames after plunge change based on if in nightsoul or not
+	// 落下攻撃後の歩行フレームがナイトソウル状態かどうかで変わるため、異なる処理
 	return func(next action.Action) int {
 		if !c.nightsoulState.HasBlessing() && next == action.ActionWalk {
 			return nonNSWalk
@@ -327,8 +327,8 @@ func (c *char) newAbilFuncXYPlunge(slice []int, nonNSWalk int) func(action.Actio
 	}
 }
 
-// Plunge normal falling attack damage queue generator
-// Standard - Always part of high/low plunge attacks
+// 落下攻撃（通常落下）のダメージキュー生成
+// 標準 - 高空/低空落下攻撃に常に含まれる
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex:   c.Index,

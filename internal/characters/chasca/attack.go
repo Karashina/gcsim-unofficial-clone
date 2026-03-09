@@ -40,9 +40,9 @@ func init() {
 	attackSkillTapFrames[action.ActionDash] = attackSkillTapHitmark
 }
 
-// Normal attack damage queue generator
-// relatively standard with no major differences versus other bow characters
-// Has "travel" parameter, used to set the number of frames that the arrow is in the air (default = 10)
+// 通常攻撃のダメージキュー生成
+// 他の弓キャラクターと大きな違いはなく比較的標準的
+// "travel"パラメータあり。矢が空中にいるフレーム数を設定（デフォルト = 10）
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	if c.nightsoulState.HasBlessing() {
 		return c.attackSkillTap(p), nil
@@ -135,7 +135,7 @@ func (c *char) attackSkillTap(_ map[string]int) action.Info {
 			return frames.AtkSpdAdjust(attackSkillTapFrames[next], c.Stat(attributes.AtkSpd))
 		}, 0),
 		AnimationLength: attackSkillTapFrames[action.InvalidAction],
-		CanQueueAfter:   1, // can run out of nightsoul and start falling earlier
+		CanQueueAfter:   1, // ナイトソウル切れで早期落下開始の可能性あり
 		State:           action.NormalAttackState,
 	}
 }

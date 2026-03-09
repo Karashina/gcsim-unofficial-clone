@@ -13,7 +13,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/reactions"
 )
 
-// HasLCCloud returns true if LC Cloud is currently active and this is the global LC Cloud holder.
+// HasLCCloud はLC雲が現在アクティブで、かつこれがグローバルなLC雲保持者である場合にtrueを返す。
 func (r *Reactable) HasLCCloud() bool {
 	if r.core.ActiveLCCloud == nil {
 		return false
@@ -26,27 +26,27 @@ func (r *Reactable) HasLCCloud() bool {
 
 var atk = combat.AttackInfo{}
 
-// lcDamageRecord stores the actor index, precomputed damage value, and expiry frame.
+// lcDamageRecord はアクターインデックス、事前計算ダメージ値、および有効期限フレームを格納する。
 type lcDamageRecord struct {
 	Index  int
 	Damage float64
 	Expiry int // Frame when this contributor's aura expires
 }
 
-// lcDamageResult stores the result of the LC damage calculation.
+// lcDamageResult はLCダメージ計算の結果を格納する。
 type lcDamageResult struct {
 	FinalDamage    float64
 	HighestCR      float64
 	HighestCRIndex int
 }
 
-// TryAddLC attempts to apply the Lunar Charged (LC) status and handles its logic.
+// TryAddLC はルナチャージ（LC）ステータスの適用を試み、そのロジックを処理する。
 func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
-	// --- LC Cloud singleton spec ---
-	// Only one LC Cloud can exist on the field at a time.
-	// If another Reactable tries to add LC, transfer the cloud to it and deactivate the previous one.
+	// --- LC雲シングルトン仕様 ---
+	// フィールド上に存在できるLC雲は1つだけ。
+	// 別のReactableがLCを追加しようとした場合、雲を移動して前のものを無効化する。
 	const lcCloudDuration = 360 // 6 seconds = 360 frames
-	// If another LC Cloud is active, deactivate it
+	// 別のLC雲がアクティブなら無効化する
 	if r.core.ActiveLCCloud != nil && r.core.ActiveLCCloud != r {
 		if prev, ok := r.core.ActiveLCCloud.(*Reactable); ok {
 			prev.lcCloudActive = false
@@ -56,7 +56,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 	r.lcCloudActive = true
 	r.lcCloudExpiry = r.core.F + lcCloudDuration
 	r.core.Tasks.Add(func() {
-		// Deactivate LC Cloud when expired
+		// 期限切れ時にLC雲を無効化
 		if r.lcCloudActive && r.core.F >= r.lcCloudExpiry {
 			r.lcCloudActive = false
 			if r.core.ActiveLCCloud == r {
@@ -65,7 +65,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 		}
 	}, lcCloudDuration)
 
-	// Reset contributor lists when a new reaction is triggered and LC tick is not active
+	// 新しい反応が発動され、LCティックがアクティブでない場合、貢献者リストをリセット
 	if !a.Reacted && r.lcTickSrc == -1 {
 		r.lcContributor = make([]int, 0, 4)
 		r.lcPrecalcDamages = make([]lcDamageRecord, 0, 4)
@@ -84,7 +84,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 		IgnoreDefPercent: 1,
 	}
 
-	// Abort if source durability is insufficient or if frozen durability exists.
+	// ソース元素量が不足、または凍結元素量が存在する場合は中止。
 	if a.Info.Durability < ZeroDur || r.Durability[Frozen] > ZeroDur {
 		return false
 	}
@@ -95,7 +95,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 		char := r.core.Player.ByIndex(actorIdx)
 		em := char.Stat(attributes.EM)
 
-		// On LC creation, also add the last actor of the other element as a contributor.
+		// LC作成時、他の元素の最後のアクターも貢献者として追加する。
 		if !a.Reacted && r.lcTickSrc == -1 {
 			var otherElement attributes.Element
 			if a.Info.Element == attributes.Hydro {
@@ -128,7 +128,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 		}
 
-		// Aura expiry calculation for contributor removal
+		// 貢献者削除用のオーラ有効期限計算
 		existing := r.Durability[a.Info.Element]
 		dur := 0.8 * a.Info.Durability
 		if existing > ZeroDur && dur >= existing {
@@ -138,7 +138,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			a.Info.AuraExpiry = r.core.F + int(6*dur+420)
 		}
 
-		// Add or update the current actor as a contributor.
+		// 現在のアクターを貢献者として追加または更新。
 		found := -1
 		for i, idx := range r.lcContributor {
 			if idx == actorIdx {
@@ -171,7 +171,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 		}
 
-		// Schedule contributor removal at aura expiry
+		// オーラ有効期限時に貢献者削除をスケジュール
 		expiryIndex := actorIdx
 		expiryFrame := a.Info.AuraExpiry
 		if r.expiryTaskMap == nil {
@@ -179,11 +179,11 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 		}
 		r.expiryTaskMap[expiryIndex] = expiryFrame
 		r.core.Tasks.Add(func() {
-			// Only remove if this is the latest expiry for the contributor
+			// この貢献者の最新の有効期限の場合のみ削除
 			if r.expiryTaskMap == nil || r.expiryTaskMap[expiryIndex] != expiryFrame {
 				return
 			}
-			// Remove from lcContributor
+			// lcContributorから削除
 			newContrib := make([]int, 0, len(r.lcContributor))
 			for _, idx := range r.lcContributor {
 				if idx != expiryIndex {
@@ -192,7 +192,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 			r.lcContributor = newContrib
 
-			// Remove from lcPrecalcDamages
+			// lcPrecalcDamagesから削除
 			newDamages := make([]lcDamageRecord, 0, len(r.lcPrecalcDamages))
 			for _, rec := range r.lcPrecalcDamages {
 				if rec.Index != expiryIndex || rec.Expiry != expiryFrame {
@@ -201,7 +201,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 			r.lcPrecalcDamages = newDamages
 
-			// Remove from lcPrecalcDamagesCRIT
+			// lcPrecalcDamagesCRITから削除
 			newDamagesCRIT := make([]lcDamageRecord, 0, len(r.lcPrecalcDamagesCRIT))
 			for _, rec := range r.lcPrecalcDamagesCRIT {
 				if rec.Index != expiryIndex || rec.Expiry != expiryFrame {
@@ -210,11 +210,11 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			}
 			r.lcPrecalcDamagesCRIT = newDamagesCRIT
 
-			// Remove from expiryTaskMap
+			// expiryTaskMapから削除
 			delete(r.expiryTaskMap, expiryIndex)
 		}, expiryFrame-r.core.F)
 
-		// Attach or refill Hydro/Electro durability as appropriate.
+		// 水/雷の元素量を適切に付着または補充。
 		if a.Info.Element == attributes.Hydro {
 			if r.Durability[Electro] < ZeroDur {
 				return false
@@ -235,22 +235,22 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 	}
 
 	a.Reacted = true
-	// Set ActorIndex to the character who triggered LC (the attacker).
+	// ActorIndexをLCを発動したキャラクター（攻撃者）に設定。
 	atk.ActorIndex = a.Info.ActorIndex
 	r.core.Events.Emit(event.OnLunarCharged, r.self, a)
 
-	// Refresh LC expiration time and schedule removal check.
+	// LCの有効期限をリフレッシュし、削除チェックをスケジュール。
 	r.lcActiveExpiry = r.core.F + 360
 	r.core.Tasks.Add(func() {
-		// Remove LC only if still active and expired.
+		// まだアクティブで期限切れの場合のみLCを削除。
 		if r.lcTickSrc != -1 && r.core.F >= r.lcActiveExpiry {
 			r.removeLC()
 		}
 	}, 360)
 
-	// Calculate individual LC damages and queue attacks per contributor
+	// 各貢献者の個別LCダメージを計算し、攻撃をキュー
 	damageList, indexList, isCrit := r.calcLCDamageContrib(r.lcContributor, r.lcPrecalcDamages, r.lcPrecalcDamagesCRIT)
-	// Sort damages (and their indices) in descending order for coefficient assignment
+	// 係数割り当てのためにダメージ（とそのインデックス）を降順にソート
 	type damageWithIndex struct {
 		Dmg  float64
 		Idx  int
@@ -263,11 +263,11 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 	sort.SliceStable(dwiList, func(i, j int) bool {
 		return dwiList[i].Dmg > dwiList[j].Dmg
 	})
-	// Coefficient: 1st=1.0, 2nd=0.5, 3rd/4th=1/12, 5th+=0
+	// 係数: 1番目=1.0, 2番目=0.5, 3/4番目=1/12, 5番目以降=0
 	coefs := []float64{1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0}
 	if r.lcTickSrc == -1 {
 		r.lcTickSrc = r.core.F
-		// Columbina A4: single-roll for extra attack on LC creation
+		// Columbina A4: LC作成時の追加攻撃の単一ロール
 		columbinaExtra := false
 		columbinaIdx := -1
 		for idx, p := range r.core.Player.Chars() {
@@ -290,7 +290,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 			var snap combat.Snapshot
 			char := r.core.Player.ByIndex(dwi.Idx)
 			snap.Stats[attributes.CR] = char.Stat(attributes.CR)
-			snap.Stats[attributes.CD] = 0 // Prevent additional Crit DMG
+			snap.Stats[attributes.CD] = 0 // 追加の会心ダメージを防止
 			snap.CharLvl = char.Base.Level
 			atkCopy := atk
 			atkCopy.ActorIndex = dwi.Idx
@@ -306,7 +306,7 @@ func (r *Reactable) TryAddLC(a *combat.AttackEvent) bool {
 				combat.NewSingleTargetHit(r.self.Key()),
 				9,
 			)
-			// Columbina A4: if rolled, apply one extra attack for the top contributor only
+			// Columbina A4: ロール成功時、最大貢献者のみに追加攻撃を適用
 			if columbinaExtra && i == 0 && columbinaIdx != -1 {
 				colChar := r.core.Player.ByIndex(columbinaIdx)
 				atkExtra := atkCopy
@@ -382,14 +382,14 @@ func (r *Reactable) calcLCDamageContrib(lcContributor []int, lcPrecalcDamages []
 	return
 }
 
-// calcLCDamage calculates the final LC damage based on contributors, crits, and coefficients.
-// Returns the CR and index of the character who contributed the highest damage.
+// calcLCDamage は貢献者、クリティカル、係数に基づいて最終LCダメージを計算する。
+// 最大ダメージを貢献したキャラクターのCRとインデックスを返す。
 func (r *Reactable) calcLCDamage(
 	lcContributor []int,
 	lcPrecalcDamages []lcDamageRecord,
 	lcPrecalcDamagesCRIT []lcDamageRecord,
 ) lcDamageResult {
-	// Roll crit for each contributor.
+	// 各貢献者のクリティカルをロール。
 	isCrit := make([]bool, len(lcContributor))
 	for i, idx := range lcContributor {
 		char := r.core.Player.ByIndex(idx)
@@ -398,7 +398,7 @@ func (r *Reactable) calcLCDamage(
 		isCrit[i] = randVal < cr
 	}
 
-	// Select each contributor's damage based on crit result.
+	// クリティカル結果に基づいて各貢献者のダメージを選択。
 	damageList := make([]float64, len(lcContributor))
 	indexList := make([]int, len(lcContributor))
 	for i, idx := range lcContributor {
@@ -422,7 +422,7 @@ func (r *Reactable) calcLCDamage(
 		indexList[i] = idx
 	}
 
-	// Find the index of the contributor with the highest damage.
+	// 最大ダメージの貢献者インデックスを検索。
 	maxIdx := 0
 	for i := 1; i < len(damageList); i++ {
 		if damageList[i] > damageList[maxIdx] {
@@ -436,7 +436,7 @@ func (r *Reactable) calcLCDamage(
 		highestCR = char.Stat(attributes.CR)
 	}
 
-	// Sort damages (and their indices) in descending order.
+	// ダメージ（とそのインデックス）を降順にソート。
 	type damageWithIndex struct {
 		Dmg float64
 		Idx int
@@ -449,7 +449,7 @@ func (r *Reactable) calcLCDamage(
 		return dwiList[i].Dmg > dwiList[j].Dmg
 	})
 
-	// Apply coefficients: 1st=1.0, 2nd=0.5, 3rd/4th=1/12, 5th+=0.
+	// 係数を適用: 1番目=1.0, 2番目=0.5, 3/4番目=1/12, 5番目以降=0。
 	finalDamage := 0.0
 	for i := 0; i < len(dwiList); i++ {
 		var coef float64
@@ -473,7 +473,7 @@ func (r *Reactable) calcLCDamage(
 	}
 }
 
-// wanelc reduces both Electro and Hydro durability for LC wane.
+// wanelc はLC減衰用に雷と水の元素量を減少させる。
 func (r *Reactable) wanelc() {
 	r.Durability[Electro] -= 10
 	r.Durability[Electro] = max(0, r.Durability[Electro])
@@ -489,7 +489,7 @@ func (r *Reactable) wanelc() {
 		Write("electro", r.Durability[Electro])
 }
 
-// removeLC removes LC status and unsubscribes related events.
+// removeLC はLCステータスを削除し、関連イベントの購読を解除する。
 func (r *Reactable) removeLC() {
 	r.lcTickSrc = -1
 	r.lcActiveExpiry = 0
@@ -505,24 +505,24 @@ func (r *Reactable) removeLC() {
 		Write("electro", r.Durability[Electro])
 }
 
-// nextTickLC handles LC periodic damage ticks using the shared damage calculation logic.
+// nextTickLC は共有ダメージ計算ロジックを使用してLC定期ダメージティックを処理する。
 func (r *Reactable) nextTickLC(src int, lcActorIndex int) func() {
 	return func() {
-		// Only tick if LC is still valid, matches the current tick source, and is the global LC Cloud holder.
+		// LCがまだ有効で、現在のティックソースと一致し、グローバルLC雲保持者である場合のみティックする。
 		if r.lcTickSrc != src || !r.lcCloudActive {
 			return
 		}
 		if r.core.ActiveLCCloud != r {
 			return
 		}
-		// Find the closest enemy to this reactable
+		// このReactableに最も近い敵を検索
 		closest := r.core.Combat.ClosestEnemy(r.self.Pos())
 		if closest == nil {
-			// No valid enemy to target
+			// ターゲット可能な敵がいない
 			r.core.Tasks.Add(r.nextTickLC(src, lcActorIndex), 122+r.core.Rand.Intn(9))
 			return
 		}
-		// Calculate individual LC damages and queue attacks per contributor (tick)
+		// 各貢献者の個別LCダメージを計算し、攻撃をキュー（ティック）
 		damageList, indexList, isCrit := r.calcLCDamageContrib(r.lcContributor, r.lcPrecalcDamages, r.lcPrecalcDamagesCRIT)
 		type damageWithIndex struct {
 			Dmg  float64
@@ -537,7 +537,7 @@ func (r *Reactable) nextTickLC(src int, lcActorIndex int) func() {
 			return dwiList[i].Dmg > dwiList[j].Dmg
 		})
 		coefs := []float64{1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0}
-		// Columbina A4: single-roll for extra attack on LC tick
+		// Columbina A4: LCティック時の追加攻撃の単一ロール
 		columbinaExtra := false
 		columbinaIdx := -1
 		for idx, p := range r.core.Player.Chars() {
@@ -593,7 +593,7 @@ func (r *Reactable) nextTickLC(src int, lcActorIndex int) func() {
 				)
 			}
 		}
-		// Schedule the next LC tick.
+		// 次のLCティックをスケジュール。
 		r.core.Tasks.Add(r.nextTickLC(src, lcActorIndex), 122+r.core.Rand.Intn(9))
 	}
 }

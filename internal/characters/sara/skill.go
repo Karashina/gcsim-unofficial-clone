@@ -30,16 +30,18 @@ func init() {
 	skillFrames[action.ActionSwap] = 50    // E -> Swap
 }
 
-// Implements skill handling. Fairly barebones since most of the actual stuff happens elsewhere
-// Gains Crowfeather Cover for 18s, and when Kujou Sara fires a fully-charged Aimed Shot, Crowfeather Cover will be consumed, and will leave a Crowfeather at the target location.
-// Crowfeathers will trigger Tengu Juurai: Ambush after a short time, dealing Electro DMG and granting the active character within its AoE an ATK Bonus based on Kujou Sara's Base ATK.
-// The ATK Bonuses from different Tengu Juurai will not stack, and their effects and duration will be determined by the last Tengu Juurai to take effect.
-// Also implements C2: Unleashing Tengu Stormcall will leave a Weaker Crowfeather at Kujou Sara's original position that will deal 30% of its original DMG.
+// 元素スキルの処理。実際の処理の大半は他の場所で行われるため簡素な実装。
+// クロウフェザー保護18秒間獲得。九條裟羅がフルチャージ狙い撃ちを放つと、
+// クロウフェザー保護が消費され、着弾地点にクロウフェザーが残る。
+// クロウフェザーは短時間後に天狗呉雷・待ち伏せを発動し、雷元素ダメージを与え、
+// 九條裟羅の基礎攻撃力に基づく攻撃力バフを範囲内のアクティブキャラクターに付与する。
+// 各種天狗呉雷の攻撃力バフは重複せず、最後に発動した天狗呉雷により決定される。
+// 2凸も実装: 天狗召嗚発動時、元の位置に30%ダメージの弱いクロウフェザーを残す。
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// Snapshot for all of the crowfeathers are taken upon cast
+	// クロウフェザーのスナップショットは発動時に取得される
 	c.Core.Status.Add(coverKey, 18*60)
 
-	// C2 handling
+	// 2凸の処理
 	if c.Base.Cons >= 2 {
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -63,7 +65,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionAttack], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionAttack], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -79,8 +81,8 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Electro, c.ParticleDelay)
 }
 
-// Handles attack boost from Sara's skills
-// Checks for the onfield character at the delay frame, then applies buff to that character
+// 裟羅のスキルによる攻撃力バフの処理
+// 遅延フレーム時のオンフィールドキャラクターをチェックし、そのキャラクターにバフを適用する
 func (c *char) attackBuff(a combat.AttackPattern, delay int) {
 	c.Core.Tasks.Add(func() {
 		if collision, _ := c.Core.Combat.Player().AttackWillLand(a); !collision {
@@ -106,7 +108,7 @@ func (c *char) attackBuff(a combat.AttackPattern, delay int) {
 			},
 		})
 
-		// TODO: change this to a ST attack later
+		// TODO: 後で単体攻撃に変更する
 		c.Core.Player.Drain(info.DrainInfo{
 			ActorIndex: active.Index,
 			Abil:       "Tengu Juurai: Ambush",

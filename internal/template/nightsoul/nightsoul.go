@@ -33,8 +33,8 @@ func New(c *core.Core, char *character.CharWrapper) *State {
 	return t
 }
 
-// Set the set of animation states that will prevent NS from expiring
-// If NS would expire during one of the states set here, delay until state expiry instead
+// NSの有効期限切れを防止するアニメーション状態のセットを設定する
+// ここで設定した状態中にNSが期限切れになる場合、状態の終了まで遅延させる
 func (s *State) SetExtendNsStates(states []action.AnimationState) {
 	s.extendNsStates = states
 }
@@ -43,9 +43,9 @@ func (s *State) Duration() int {
 	return s.char.StatusDuration(NightsoulBlessingStatus)
 }
 
-// Change the current duration of the NS status if applicable, and apply cb on expiry.
-// If NS is not currently active, do nothing.
-// The callback will not be called if ExitNightsoul() is used
+// 該当する場合NSステータスの現在の持続時間を変更し、期限切れ時にコールバックを適用する。
+// NSが現在アクティブでない場合は何もしない。
+// ExitNightsoul()が使用された場合、コールバックは呼ばれない
 func (s *State) SetNightsoulExitTimer(duration int, cb func()) {
 	if !s.HasBlessing() {
 		return
@@ -67,13 +67,13 @@ func (s *State) SetNightsoulExitTimer(duration int, cb func()) {
 			return
 		}
 
-		// When the char is off-field, state cannot be extended by animation
+		// キャラがフィールド外の場合、アニメーションで状態を延長できない
 		if !s.c.Player.CharIsActive(s.char.Base.Key) {
 			cb()
 			return
 		}
 
-		// If NS shouldn't expire because the player is in the state; delay expiry until state ends
+		// プレイヤーが状態中のためNSが期限切れすべきでない場合、状態終了まで期限を遅延する
 		evtKey := fmt.Sprintf("%v-%v", delayEventKey, s.char.Base.Key.String())
 		f := func(...interface{}) bool {
 			if s.ExitStateF == src {
@@ -83,7 +83,7 @@ func (s *State) SetNightsoulExitTimer(duration int, cb func()) {
 		}
 		s.c.Events.Subscribe(event.OnStateChange, f, evtKey)
 
-		// Extend NS until removed on state end
+		// 状態終了時に削除されるまでNSを延長
 		s.char.AddStatus(NightsoulBlessingStatus, -1, false)
 		s.c.Log.NewEvent("Action extending timed Nightsoul Blessing",
 			glog.LogActionEvent,
@@ -91,9 +91,9 @@ func (s *State) SetNightsoulExitTimer(duration int, cb func()) {
 	}, duration)
 }
 
-// Enters NS blessing with specified points.
-// If duration is not infinite, expire NS upon duration and optionally trigger a CB.
-// CB will not be called if the duration is changed before expiry.
+// 指定されたポイントでNS祝福に入る。
+// 持続時間が無限でない場合、持続時間経過時にNSを終了し、オプションでCBをトリガーする。
+// 有効期限前に持続時間が変更された場合、CBは呼ばれない。
 func (s *State) EnterTimedBlessing(amount float64, duration int, cb func()) {
 	s.nightsoulPoints = amount
 	s.char.AddStatus(NightsoulBlessingStatus, duration, true)

@@ -26,9 +26,9 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// After a party member triggers a Pyro-related reaction,
-// the equipping character's Elemental Skill DMG is increased by 32% for 8s.
-// This effect can be triggered even when the triggering party member is not on the field.
+// パーティメンバーが炎元素関連の反応を起こした後、
+// 装備キャラクターの元素スキルダメージが8秒間32%増加する。
+// この効果は発動したパーティメンバーがフィールドにいなくても発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

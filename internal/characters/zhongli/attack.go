@@ -26,7 +26,7 @@ var (
 const normalHitNum = 6
 
 func init() {
-	// NA cancels
+	// 通常攻撃キャンセル
 	attackFrames = make([][]int, normalHitNum)
 
 	attackFrames[0] = frames.InitNormalCancelSlice(attackEarliestCancel[0], 30)
@@ -49,7 +49,7 @@ func init() {
 	attackFrames[4][action.ActionJump] = 5
 
 	attackFrames[5] = frames.InitNormalCancelSlice(attackEarliestCancel[5], 54)
-	attackFrames[5][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
+	attackFrames[5][action.ActionCharge] = 500 //TODO: このアクションは不正; より良い処理方法が必要
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
@@ -86,7 +86,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 				attackHitboxes[c.NormalCounter][1],
 			)
 		}
-		// the multihit part generates no hitlag so this is fine
+		// マルチヒット部分はヒットラグを生成しないので問題ない
 		c.Core.QueueAttack(ai, ap, attackHitmarks[c.NormalCounter][i], attackHitmarks[c.NormalCounter][i])
 	}
 

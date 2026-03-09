@@ -1,12 +1,12 @@
 // package queue provide a universal way of handling queuing and executing tasks
 package queue
 
-// TODO: This entire Task queue should be replaced and core's task queue should be used instead
-// In order to replace, the core task queue must support the ability to update the position of a
-// task in the queue.
-// Also will need to consider order. Currently everything that is queued via QueueCharTask will
-// always happen before all entries in the core task queue. If any implementations depend on this order,
-// this will cause additional problems.
+// TODO: このタスクキュー全体を置き換え、coreのタスクキューを代わりに使用すべき
+// 置き換えるには、coreのタスクキューがキュー内のタスクの位置を更新する機能をサポートする必要がある
+// （タスクの位置更新）
+// また、順序も考慮する必要がある。現在、QueueCharTaskでキューに入れられたものは全て
+// coreタスクキューの全エントリの前に実行される。この順序に依存する実装がある場合、
+// 追加の問題が発生する。
 type Task struct {
 	F     func()
 	Delay int

@@ -38,7 +38,7 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// check if stiletto is on-field
+	// 仕込み刀がフィールド上にあるか確認
 	if c.Core.Status.Duration(stilettoKey) > 0 {
 		return c.skillRecast(), nil
 	}
@@ -69,7 +69,7 @@ func (c *char) skillFirst() action.Info {
 		c.c6("skill")
 	}
 
-	// spawn after cd and stays for 5s
+	// CD後に生成し5秒間持続
 	c.Core.Status.Add(stilettoKey, 5*60+20)
 
 	c.SetCDWithDelay(action.ActionSkill, 7*60+30, 20)
@@ -77,13 +77,13 @@ func (c *char) skillFirst() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
 
 func (c *char) skillRecast() action.Info {
-	// C1 DMG happens before Recast DMG
+	// 1凸ダメージは再発動ダメージの前に発生
 	if c.Base.Cons >= 1 {
 		ai := combat.AttackInfo{
 			Abil:       "Stellar Restoration (C1)",
@@ -96,7 +96,7 @@ func (c *char) skillRecast() action.Info {
 			Durability: 25,
 			Mult:       .5,
 		}
-		// 2 dmg instances at start and end
+		// 開始時と終了時に2回のダメージ
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 2),
@@ -133,16 +133,16 @@ func (c *char) skillRecast() action.Info {
 		c.particleCB,
 	)
 
-	// add electro infusion
+	// 雷元素付与を追加
 	c.a1()
 
-	// despawn stiletto
+	// 仕込み刀を消滅
 	c.Core.Status.Delete(stilettoKey)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillRecastFrames),
 		AnimationLength: skillRecastFrames[action.InvalidAction],
-		CanQueueAfter:   skillRecastFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillRecastFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }

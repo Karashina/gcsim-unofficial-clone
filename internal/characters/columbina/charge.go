@@ -15,18 +15,18 @@ var chargeFrames []int
 const chargeHitmark = 45
 
 func init() {
-	// Based on Mona (Hydro Catalyst) pattern with stub values
+	// Mona（水元素法器）パターンに基づくスタブ値
 	chargeFrames = frames.InitAbilSlice(45) // CA -> D
 	chargeFrames[action.ActionAttack] = 83  // CA -> N1
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	// Check if Verdant Dew is available for Moondew Cleanse
+	// 緑の露がMoondew Cleanseに使用可能か確認
 	if c.Core.Player.Verdant.Count() >= 1 {
 		return c.moondewCleanse()
 	}
 
-	// Regular Charged Attack (Hydro DMG)
+	// 通常の重撃（水元素ダメージ）
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Charge Attack (C)",
@@ -39,7 +39,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charge[c.TalentLvlAttack()],
 	}
 
-	// add windup if we're in idle or swap only
+	// 待機または交代時のみ溜め時間を追加
 	windup := 14
 	if c.Core.Player.CurrentState() == action.Idle || c.Core.Player.CurrentState() == action.SwapState {
 		windup = 0
@@ -60,21 +60,21 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          func(next action.Action) int { return chargeFrames[next] - windup },
 		AnimationLength: chargeFrames[action.InvalidAction] - windup,
-		CanQueueAfter:   chargeFrames[action.ActionSwap] - windup, // earliest cancel is before hitmark
+		CanQueueAfter:   chargeFrames[action.ActionSwap] - windup, // 最速キャンセルはヒットマークより前
 		State:           action.ChargeAttackState,
 	}, nil
 }
 
-// moondewCleanse performs the special charged attack when Verdant Dew is available
-// Consumes 1 Verdant Dew to deal 3 instances of AoE Dendro DMG (considered as Lunar-Bloom DMG)
+// moondewCleanseは緑の露が使用可能な時の特殊重撃を実行
+// 緑の露1つを消費し、AoE草元素ダメージを3回与える（Lunar-Bloomダメージとして扱われる）
 func (c *char) moondewCleanse() (action.Info, error) {
-	// Check Verdant Dew first, then Moonridge Dew
+	// まず緑の露を確認、次にMoonridge Dewを確認
 	consumed := c.Core.Player.Verdant.Consume(1)
 	if consumed == 0 && c.moonridgeDew > 0 {
 		c.moonridgeDew--
 	}
 
-	// 3 instances of Dendro DMG considered as Lunar-Bloom DMG
+	// 草元素ダメージ3回をLunar-Bloomダメージとみなす
 	for i := 0; i < 3; i++ {
 		delay := chargeHitmark + i*8
 		c.Core.Tasks.Add(func() {
@@ -90,9 +90,9 @@ func (c *char) moondewCleanse() (action.Info, error) {
 	}, nil
 }
 
-// queueMoondewCleanseHit queues a single Moondew Cleanse hit (Lunar-Bloom DMG)
+// queueMoondewCleanseHitは単一のMoondew Cleanseヒットをキューに入れる（Lunar-Bloomダメージ）
 func (c *char) queueMoondewCleanseHit() {
-	// Use AttackTagLBDamage for "considered as Lunar-Bloom DMG"
+	// Lunar-Bloomダメージとして扱うためAttackTagLBDamageを使用
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
 		Abil:             "Moondew Cleanse (C)",
@@ -105,7 +105,7 @@ func (c *char) queueMoondewCleanseHit() {
 		IgnoreDefPercent: 1,
 	}
 
-	// HP scaling with Lunar-Bloom formula
+	// HP係数 + Lunar-Bloom計算式
 	em := c.Stat(attributes.EM)
 	baseDmg := c.MaxHP() * moondewCleanse[c.TalentLvlAttack()] * (1 + c.LBBaseReactBonus(ai))
 	emBonus := (6 * em) / (2000 + em)
@@ -125,7 +125,7 @@ func (c *char) queueMoondewCleanseHit() {
 
 	c.Core.QueueAttackWithSnap(ai, snap, ap, 0)
 
-	// Emit Lunar-Bloom event for any hit
+	// ヒットがあればLunar-Bloomイベントを発行
 	enemies := c.Core.Combat.EnemiesWithinArea(ap, nil)
 	if len(enemies) > 0 {
 		ae := &combat.AttackEvent{Info: ai}

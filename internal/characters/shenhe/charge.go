@@ -13,7 +13,7 @@ var chargeFrames []int
 const chargeHitmark = 25
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(81) // walk
+	chargeFrames = frames.InitAbilSlice(81) // 歩行
 	chargeFrames[action.ActionAttack] = 48
 	chargeFrames[action.ActionSkill] = 49
 	chargeFrames[action.ActionBurst] = 49
@@ -22,8 +22,8 @@ func init() {
 	chargeFrames[action.ActionSwap] = 46
 }
 
-// Charge attack damage queue generator
-// Very standard - consistent with other characters like Xiangling
+// 重撃のダメージキュー生成
+// 非常に標準的 - 香菱などの他キャラクターと同様
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,

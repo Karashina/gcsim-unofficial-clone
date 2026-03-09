@@ -9,12 +9,12 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// A1 ascension level check happens once inside of burst.go
+// 固有天賦1の突破段階チェックはburst.go内で一度行われる
 const a1Key = "dmc-a1"
 
-// Lea Lotus Lamp will obtain one level of Overflowing Lotuslight every second it is on the field.
+// リーフロータスランプはフィールド上に存在する間、毎秒Overflowing Lotuslightを1レベル獲得する。
 //
-// - Gets removed on swap - from Kolibri
+// - キャラ交代時に解除 - Kolibriより
 func (c *Traveler) a1Init() {
 	if c.Base.Ascension < 1 {
 		return
@@ -27,10 +27,10 @@ func (c *Traveler) a1Init() {
 	}, "dmc-a1-remove")
 }
 
-// Increasing the Elemental Mastery of active character(s) within its AoE by 6.
+// 範囲内のアクティブキャラクターの元素熟知を6増加させる。
 func (c *Traveler) a1Buff(delay int) {
 	m := make([]float64, attributes.EndStatType)
-	// A1/C6 buff ticks every 0.3s and applies for 1s. probably counting from gadget spawn - from Kolibri
+	// 固有天賦1/6凸のバフは0.3秒ごとにティックし、1秒間適用。おそらくガジェット出現からカウント - Kolibriより
 	c.Core.Tasks.Add(func() {
 		if c.Core.Status.Duration(burstKey) <= 0 {
 			return
@@ -50,17 +50,16 @@ func (c *Traveler) a1Buff(delay int) {
 	}, delay)
 }
 
-// Overflowing Lotuslight has a maximum of 10 stacks.
+// Overflowing Lotuslightの最大スタック数は10。
 func (c *Traveler) a1Stack(delay int) {
 	c.Core.Tasks.Add(func() {
-		if c.Core.Status.Duration(burstKey) > 0 && c.burstOverflowingLotuslight < 10 { // burst isn't expired, and stacks aren't capped
+		if c.Core.Status.Duration(burstKey) > 0 && c.burstOverflowingLotuslight < 10 { // 元素爆発が未終了かつスタック上限未到達
 			c.burstOverflowingLotuslight += 1
 		}
 	}, delay)
 }
 
-// Every point of Elemental Mastery the Traveler possesses increases the DMG dealt
-// by Razorgrass Blade by 0.15% and the DMG dealt by Surgent Manifestation by 0.1%.
+// 旅人の元素熟知1ポイントにつき、草薪の刃のダメージが0.15%、激流の結実のダメージが0.1%増加する。
 func (c *Traveler) a4Init() {
 	if c.Base.Ascension < 4 {
 		return

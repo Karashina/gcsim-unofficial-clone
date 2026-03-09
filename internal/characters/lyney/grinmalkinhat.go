@@ -25,7 +25,7 @@ func (c *char) newGrinMalkinHat(pos geometry.Point, hpDrained bool, duration int
 
 	g.pos = pos
 
-	// TODO: double check estimation of hitbox
+	// TODO: ヒットボックスの推定値を再確認
 	g.Gadget = gadget.New(c.Core, g.pos, 1, combat.GadgetTypGrinMalkinHat)
 	g.char = c
 
@@ -59,16 +59,16 @@ func (c *char) newGrinMalkinHat(pos geometry.Point, hpDrained bool, duration int
 func (g *GrinMalkinHat) HandleAttack(atk *combat.AttackEvent) float64 {
 	g.Core.Events.Emit(event.OnGadgetHit, g, atk)
 
-	// TODO: gadget taking damage is not implemented
+	// TODO: ガジェットがダメージを受ける処理は未実装
 
 	return 0
 }
 
 func (g *GrinMalkinHat) skillPyrotechnic(reason string) func() {
 	return func() {
-		// needed for amos and slingshot to work correctly
+		// アモスの弓とスリングショットが正しく動作するために必要
 		g.pyrotechnicSnapshot.SourceFrame = g.Core.F
-		// TODO: snapshot timing
+		// TODO: スナップショットのタイミング
 		g.Core.QueueAttackWithSnap(
 			g.pyrotechnicAI,
 			g.pyrotechnicSnapshot,
@@ -91,9 +91,9 @@ func (g *GrinMalkinHat) skillExplode() {
 	g.pyrotechnicAI.StrikeType = attacks.StrikeTypeBlunt
 	g.pyrotechnicAI.PoiseDMG = 90
 
-	// needed for amos and slingshot to work correctly
+	// アモスの弓とスリングショットが正しく動作するために必要
 	g.pyrotechnicSnapshot.SourceFrame = g.Core.F
-	// TODO: snapshot timing
+	// TODO: スナップショットのタイミング
 	g.Core.QueueAttackWithSnap(
 		g.pyrotechnicAI,
 		g.pyrotechnicSnapshot,
@@ -103,7 +103,7 @@ func (g *GrinMalkinHat) skillExplode() {
 		g.char.makeC4CB(),
 	)
 
-	g.OnKill = nil // prevent additional pyrotechnic attack
+	g.OnKill = nil // 追加のパイロテクニック攻撃を防止
 	g.Kill()
 
 	g.updateHats("skill explode")

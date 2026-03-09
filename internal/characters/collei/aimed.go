@@ -18,12 +18,12 @@ var aimedHitmarks = []int{15, 86}
 func init() {
 	aimedFrames = make([][]int, 2)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(26)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(96)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]

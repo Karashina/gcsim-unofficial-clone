@@ -7,16 +7,16 @@ import (
 	easyjson "github.com/mailru/easyjson"
 )
 
-// Debugw
-// Warnw
+// Debugw用
+// Warnw用
 
-//nolint:staticcheck // staticcheck can't know nocopy is from easyjson and not json: https://github.com/dominikh/go-tools/issues/836
+//nolint:staticcheck // staticcheckはnocopyがjsonではなくeasyjsonからのものであると認識できない: https://github.com/dominikh/go-tools/issues/836
 type keyVal struct {
 	Key string      `json:"key,nocopy"`
 	Val interface{} `json:"val"`
 }
 
-//nolint:staticcheck // staticcheck can't know nocopy is from easyjson and not json: https://github.com/dominikh/go-tools/issues/836
+//nolint:staticcheck // staticcheckはnocopyがjsonではなくeasyjsonからのものであると認識できない: https://github.com/dominikh/go-tools/issues/836
 //easyjson:json
 type LogEvent struct {
 	Event     Source                 `json:"event"`
@@ -41,7 +41,7 @@ func (e *LogEvent) Write(key string, value interface{}) Event {
 }
 
 func (e *LogEvent) WriteBuildMsg(keysAndValues ...interface{}) Event {
-	// should be even number
+	// 偶数であるべき
 	var key string
 	var ok bool
 	for i := 0; i < len(keysAndValues); i++ {
@@ -49,7 +49,7 @@ func (e *LogEvent) WriteBuildMsg(keysAndValues ...interface{}) Event {
 		if !ok {
 			log.Panicf("invalid key %v, expected type to be string", keysAndValues[i].(string))
 		}
-		// make sure there's a corresponding val
+		// 対応する値があることを確認
 		i++
 		if i == len(keysAndValues) {
 			log.Panicf("expected an associated value after key %v, got nothing", key)
@@ -75,7 +75,7 @@ func (e *LogEvent) StartFrame() int   { return e.Frame }
 func (e *LogEvent) Src() int          { return e.CharIndex }
 
 type Ctrl struct {
-	// keep it in an array so we can keep track order it occured
+	// 発生順序を追跡するために配列に保存
 	// events []*Event
 	events map[int]*LogEvent
 	count  int
@@ -119,7 +119,7 @@ func (c *Ctrl) NewEvent(msg string, typ Source, srcChar int) Event {
 		Ended:     *c.f,
 		Event:     typ,
 		CharIndex: srcChar,
-		Logs:      make(map[string]interface{}), //+5 from default just in case we need to add in more keys
+		Logs:      make(map[string]interface{}), // デフォルトに+5、追加のキーが必要になる場合に備えて
 		Ordering:  make(map[string]int),
 	}
 	// c.events = append(c.events, e)

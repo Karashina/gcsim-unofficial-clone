@@ -48,10 +48,10 @@ func ConvertProtoStat(s model.StatType) attributes.Stat {
 	case model.StatType_FIGHT_PROP_PHYSICAL_ADD_HURT:
 		return attributes.PhyP
 	case model.StatType_FIGHT_PROP_SHIELD_COST_MINUS_RATIO_ADD_HURT:
-		//TODO: this is not a stat for gcsim yet
+		//TODO: gcsimではまだステータスとして未実装
 		return attributes.NoStat
 	case model.StatType_FIGHT_PROP_HEALED_ADD:
-		//TODO: this is for incoming heal i believe
+		//TODO: 被回復量のことだと思われる
 		return attributes.NoStat
 	case model.StatType_FIGHT_PROP_BASE_HP:
 		return attributes.BaseHP
@@ -60,7 +60,7 @@ func ConvertProtoStat(s model.StatType) attributes.Stat {
 	case model.StatType_FIGHT_PROP_BASE_DEFENSE:
 		return attributes.BaseDEF
 	case model.StatType_FIGHT_PROP_MAX_HP:
-		//TODO: this is for maxhp which is not a stat for us
+		//TODO: 最大HPのことだが、我々のステータスではない
 		return attributes.NoStat
 	default:
 		return attributes.NoStat
@@ -132,7 +132,7 @@ func ConvertWeaponClass(w model.WeaponClass) WeaponClass {
 	case model.WeaponClass_WEAPON_CATALYST:
 		return WeaponClassCatalyst
 	default:
-		//TODO: we should have an invalid?
+		//TODO: invalidが必要では？
 		return WeaponClassSword
 	}
 }
@@ -150,7 +150,7 @@ func ConvertBodyType(b model.BodyType) BodyType {
 	case model.BodyType_BODY_LOLI:
 		return BodyLoli
 	default:
-		//TODO: no invalid
+		//TODO: invalidなし
 		return BodyMale
 	}
 }

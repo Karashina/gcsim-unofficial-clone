@@ -14,40 +14,40 @@ import (
 )
 
 const (
-	// C1
+	// 1凸
 	c1Key            = "c1-gravity-interference"
 	c1GravitySkipKey = "c1-gravity-skip"
 	c1ICD            = 15 * 60 // 15s ICD
 	c1Elevation      = 0.015   // 1.5% Elevation bonus for all party members
 
-	// C2
+	// 2凸
 	c2Key = "lunar-brilliance"
 	c2Dur = 8 * 60 // 8s duration
 
-	// C4
+	// 4凸
 	c4IcdKey      = "c4-gravity-bonus-icd"
 	c4Energy      = 4
-	c4HPBonusLC   = 0.125 // 12.5% Max HP
-	c4HPBonusLB   = 0.025 // 2.5% Max HP
-	c4HPBonusLCrs = 0.125 // 12.5% Max HP
+	c4HPBonusLC   = 0.125 // 最大HPの12.5%
+	c4HPBonusLB   = 0.025 // 最大HPの2.5%
+	c4HPBonusLCrs = 0.125 // 最大HPの12.5%
 
-	// C6
+	// 6凸
 	c6Key       = "columbina-c6-crit-dmg"
 	c6Dur       = 8 * 60 // 8s duration
 	c6CDBonus   = 0.80   // 80% CRIT DMG
 	c6Elevation = 0.07   // 7% Elevation
 )
 
-// C1: On skill cast, trigger Gravity Interference effect (once per 15s)
-// Effect provides energy restoration, poise restoration, or shield based on dominant type
-// Also provides 1.5% Elevation bonus to all party members' Lunar Reaction DMG
+// 1凸: スキル発動時にGravity Interference効果をトリガー（15sに1回）
+// 効果は支配的タイプに基づき、エネルギー回復、耿力回復、またはシールドを提供
+// また全パーティメンバーにLunar反応ダメージ1.5% Elevationボーナスを提供
 func (c *char) c1Init() {
 	if c.Base.Cons < 1 {
 		return
 	}
 
-	// Apply 1.5% Elevation bonus to all party members for Lunar Reaction DMG only
-	// This is evaluated during precalc (calcLunarChargedDmg, etc.) where atk has the correct AttackTag
+	// 全パーティメンバーにLunar反応ダメージのみに1.5% Elevationボーナスを適用
+	// precalc（calcLunarChargedDmg等）で評価され、atkには正しいAttackTagが設定されている
 	for _, char := range c.Core.Player.Chars() {
 		char.AddElevationMod(character.ElevationMod{
 			Base: modifier.NewBase("columbina-c1-elevation", -1),
@@ -92,17 +92,17 @@ func (c *char) c1OnGravityInterference() {
 
 	switch dominantType {
 	case "lc":
-		// Energy restoration
+		// エネルギー回復
 		c.AddEnergy("c1-energy", 6)
 	case "lcrs":
-		// Summon Rainsea Shield: 12% Max HP, 250% effectiveness vs Hydro DMG, 8s duration
+		// Rainsea Shield召喚: HP上限の12%、水元素ダメージに250%有効性、8s持続
 		shieldAmount := c.MaxHP() * 0.12
-		// Rainsea Shield implementation
-		// 英語コメント: Apply Rainsea Shield (Hydro 250% effectiveness, 8s duration)
+		// Rainsea Shieldの実装
+		// Rainsea Shieldを適用（水元素250%有効性、8s持続）
 		importShield := func() {
 			// gcsim標準のシールドAPIを使用
-			// ShieldType: use EndType+1 for custom (or define ColumbinaShield in shield.go if needed)
-			// Target: active character
+			// ShieldType: カスタム用にEndType+1を使用（必要なら shield.go にColumbinaShieldを定義）
+			// Target: アクティブキャラクター
 			c.Core.Player.Shields.Add(&shield.Tmpl{
 				ActorIndex: c.Index,
 				Target:     c.Core.Player.Active(),
@@ -120,42 +120,41 @@ func (c *char) c1OnGravityInterference() {
 	}
 }
 
-// C2: Rate of accumulating Gravity increases by 34%
-// On Gravity Interference, gain Lunar Brilliance (40% Max HP for 8s) with stat buffs based on dominant Lunar type
-// When moonsign is Ascendant Gleam, apply buffs to active character based on dominant type:
-// - LC: ATK = 1% of Columbina's Max HP
-// - LB: EM = 0.35% of Columbina's Max HP
-// - LCrs: DEF = 1% of Columbina's Max HP
+// 2凸: Gravity蓄積率が34%増加
+// Gravity Interference時、Lunar Brillianceを獲得（HP上限40%、8s間）、支配的Lunarタイプに基づくステータスバフ
+// 月印がAscendant Gleamの場合、支配的タイプに基づいてアクティブキャラにバフを適用:
+// - LC: 攻撃力 = ColumbinaのHP上限の1%
+// - LB: 元素熟知 = ColumbinaのHP上限の0.35%
+// - LCrs: 防御力 = ColumbinaのHP上限の1%
 func (c *char) c2OnGravityInterference(dominantType string) {
 	if c.Base.Cons < 2 {
 		return
 	}
 
-	// Gain Lunar Brilliance (40% Max HP boost to Columbina for 8s)
+	// Lunar Brillianceを獲得（ColumbinaにHP上限40%ブースト8s間）
 	c.AddStatMod(character.StatMod{
 		Base:         modifier.NewBaseWithHitlag(c2Key+"-hp", c2Dur),
 		AffectedStat: attributes.HPP,
 		Amount: func() ([]float64, bool) {
 			m := make([]float64, attributes.EndStatType)
-			m[attributes.HPP] = 0.40 // 40% Max HP
+			m[attributes.HPP] = 0.40 // HP上限40%
 			return m, true
 		},
 	})
 
-	// If Moonsign is Ascendant Gleam, apply additional buffs to active character
+	// 月印がAscendant Gleamの場合、アクティブキャラに追加バフを適用
 	if !c.MoonsignAscendant {
 		return
 	}
 
 	columbinaMHP := c.Stat(attributes.HP)
 
-	// To ensure the buff only affects the character who is currently on-field,
-	// add a StatMod to every party member that returns the buff amount only
-	// when that member is the active character. This way the buff follows
-	// whoever is on the field and will stop applying when swapped out.
+	// バフは現在フィールド上のキャラのみに影響するように、
+	// 全パーティメンバーにStatModを追加し、そのメンバーが
+	// アクティブキャラの時のみバフ量を返す。交代時には適用されなくなる。
 	switch dominantType {
 	case "lc":
-		// ATK increase = 1% of Columbina's Max HP
+		// 攻撃力増加 = ColumbinaのHP上限の1%
 		buffValue := 0.01 * columbinaMHP
 		for _, ch := range c.Core.Player.Chars() {
 			key := fmt.Sprintf("%s-atk-%d", c2Key, ch.Index)
@@ -172,7 +171,7 @@ func (c *char) c2OnGravityInterference(dominantType string) {
 			})
 		}
 	case "lb":
-		// EM increase = 0.35% of Columbina's Max HP
+		// 元素熟知増加 = ColumbinaのHP上限の0.35%
 		buffValue := 0.0035 * columbinaMHP
 		for _, ch := range c.Core.Player.Chars() {
 			key := fmt.Sprintf("%s-em-%d", c2Key, ch.Index)
@@ -189,7 +188,7 @@ func (c *char) c2OnGravityInterference(dominantType string) {
 			})
 		}
 	case "lcrs":
-		// DEF increase = 1% of Columbina's Max HP
+		// 防御力増加 = ColumbinaのHP上限の1%
 		buffValue := 0.01 * columbinaMHP
 		for _, ch := range c.Core.Player.Chars() {
 			key := fmt.Sprintf("%s-def-%d", c2Key, ch.Index)
@@ -213,17 +212,17 @@ func (c *char) c2OnGravityInterference(dominantType string) {
 		Write("duration", c2Dur)
 }
 
-// C4: On Gravity Interference, restore 4 Energy and add HP scaling DMG bonus
-// Lunar Reaction DMG is increased by 12.5%/2.5%/12.5% of Max HP for LC/LB/LCrs respectively
+// 4凸: Gravity Interference時にエネルギー4を回復しHP係数ダメージボーナスを追加
+// Lunar反応ダメージがLC/LB/LCrsでそれぞれHP上限の12.5%/2.5%/12.5%増加
 func (c *char) c4OnGravityInterference(dominantType string) {
 	if c.Base.Cons < 4 {
 		return
 	}
 
-	// Restore energy
+	// エネルギーを回復
 	c.AddEnergy("c4-energy", c4Energy)
 
-	// Record dominant type for C4 bonus application
+	// 4凸ボーナス適用用に支配的タイプを記録
 	c.c4DominantType = dominantType
 
 	c.Core.Log.NewEvent("C4 energy restored", glog.LogCharacterEvent, c.Index).
@@ -231,16 +230,16 @@ func (c *char) c4OnGravityInterference(dominantType string) {
 		Write("dominant_type", dominantType)
 }
 
-// C6: For 8s after characters in the Lunar Domain trigger a Lunar reaction,
-// based on the elements involved, the CRIT DMG for corresponding Elemental DMG is increased by 80%.
-// Effects for the same Element do not stack.
-// Also provides 7% Elevation bonus to all party members' Lunar Reaction DMG.
+// 6凸: Lunar Domain内のキャラがLunar反応をトリガーした後8s間、
+// 関与した元素に応じて対応する元素ダメージの会心ダメージが80%増加。
+// 同じ元素の効果は重複しない。
+// また全パーティメンバーにLunar反応ダメージ7% Elevationボーナスを提供。
 func (c *char) c6Init() {
 	if c.Base.Cons < 6 {
 		return
 	}
 
-	// Apply 7% Elevation bonus to all party members for Lunar Reaction DMG
+	// 全パーティメンバーにLunar反応ダメージ7% Elevationボーナスを適用
 	for _, char := range c.Core.Player.Chars() {
 		char.AddElevationMod(character.ElevationMod{
 			Base: modifier.NewBase("columbina-c6-elevation", -1),
@@ -255,7 +254,7 @@ func (c *char) c6Init() {
 		})
 	}
 
-	// Subscribe to all Lunar reaction events to apply CRIT DMG buff
+	// 全てのLunar反応イベントを購読して会心ダメージバフを適用
 	c.Core.Events.Subscribe(event.OnLunarCharged, func(args ...interface{}) bool {
 		c.c6ApplyBuffToAllChars(attributes.Electro)
 		c.c6ApplyBuffToAllChars(attributes.Hydro)
@@ -275,13 +274,13 @@ func (c *char) c6Init() {
 	}, "columbina-c6-lcrs-trigger")
 }
 
-// c6ApplyBuffToAllChars applies C6 CRIT DMG buff to all party members for corresponding element
+// c6ApplyBuffToAllCharsは全パーティメンバーに対応する元素の6凸会心ダメージバフを適用
 func (c *char) c6ApplyBuffToAllChars(element attributes.Element) {
 	if c.Base.Cons < 6 {
 		return
 	}
 
-	// Apply CRIT DMG buff to all party members
+	// 全パーティメンバーに会心ダメージバフを適用
 	for _, char := range c.Core.Player.Chars() {
 		if char.Base.Element.String() == element.String() {
 			char.AddStatMod(character.StatMod{
@@ -302,11 +301,11 @@ func (c *char) c6ApplyBuffToAllChars(element attributes.Element) {
 		Write("duration", c6Dur)
 }
 
-// C3: All nearby party members' Lunar Reaction DMG is elevated by 1.5%
-// C5: All nearby party members' Lunar Reaction DMG is elevated by 1.5%
-// These stack with C1's 1.5% for a total of 4.5% at C5
+// 3凸: 全周辺パーティメンバーのLunar反応ダメージが1.5% Elevation
+// 5凸: 全周辺パーティメンバーのLunar反応ダメージが1.5% Elevation
+// 1凸の1.5%と重複し、5凸で合計4.5%
 func (c *char) c3c5Init() {
-	// C3: +1.5% Elevation
+	// 3凸: +1.5% Elevation
 	if c.Base.Cons >= 3 {
 		for _, char := range c.Core.Player.Chars() {
 			char.AddElevationMod(character.ElevationMod{
@@ -323,7 +322,7 @@ func (c *char) c3c5Init() {
 		}
 	}
 
-	// C5: +1.5% Elevation (stacks with C3)
+	// 5凸: +1.5% Elevation（3凸と重複）
 	if c.Base.Cons >= 5 {
 		for _, char := range c.Core.Player.Chars() {
 			char.AddElevationMod(character.ElevationMod{

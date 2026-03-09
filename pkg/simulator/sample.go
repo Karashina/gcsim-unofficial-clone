@@ -10,8 +10,8 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// GenerateSampleWithSeed will run one simulation with debug enabled using the given seed and output
-// the debug log. Used for generating debug for min/max runs
+// GenerateSampleWithSeedは指定されたシードでデバッグ有効のシミュレーションを1回実行して出力する
+// デバッグログを出力。最小/最大実行のデバッグ生成に使用
 func GenerateSampleWithSeed(cfg string, seed uint64, opts Options) (*model.Sample, error) {
 	simcfg, gcsl, err := Parse(cfg)
 	if err != nil {
@@ -26,7 +26,7 @@ func GenerateSampleWithSeed(cfg string, seed uint64, opts Options) (*model.Sampl
 	if err != nil {
 		return nil, err
 	}
-	// create a new simulation and run
+	// 新しいシミュレーションを作成して実行
 	s, err := simulation.New(simcfg, eval, c)
 	if err != nil {
 		return &model.Sample{}, err
@@ -36,13 +36,13 @@ func GenerateSampleWithSeed(cfg string, seed uint64, opts Options) (*model.Sampl
 		return &model.Sample{}, err
 	}
 
-	// capture the log
+	// ログをキャプチャ
 	logs, err := c.Log.Dump()
 	if err != nil {
 		return &model.Sample{}, err
 	}
 
-	// TODO: Log.Dump() should not marshal the data. Embedding json as a string in json is just bad
+	// TODO: Log.Dump()はデータをマーシャルすべきでない。JSONの中にJSON文字列を埋め込むのは良くない
 	var events []map[string]interface{}
 	if err := json.Unmarshal(logs, &events); err != nil {
 		return &model.Sample{}, err
@@ -97,8 +97,8 @@ func GenerateSampleWithSeed(cfg string, seed uint64, opts Options) (*model.Sampl
 	return sample, err
 }
 
-// GenerateRawDebugWithSeed runs one simulation with debug enabled using the given seed
-// and returns the raw debug log bytes (JSON array) so callers can convert to NDJSON.
+// GenerateRawDebugWithSeedは指定されたシードでデバッグ有効のシミュレーションを1回実行する
+// 生のデバッグログバイト列（JSON配列）を返し、呼び出し側がNDJSONに変換可能。
 func GenerateRawDebugWithSeed(cfg string, seed uint64, opts Options) ([]byte, error) {
 	simcfg, gcsl, err := Parse(cfg)
 	if err != nil {
@@ -113,7 +113,7 @@ func GenerateRawDebugWithSeed(cfg string, seed uint64, opts Options) ([]byte, er
 	if err != nil {
 		return nil, err
 	}
-	// create a new simulation and run
+	// 新しいシミュレーションを作成して実行
 	s, err := simulation.New(simcfg, eval, c)
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ func GenerateRawDebugWithSeed(cfg string, seed uint64, opts Options) ([]byte, er
 		return nil, err
 	}
 
-	// capture the log as raw JSON array
+	// 生のJSON配列としてログをキャプチャ
 	logs, err := c.Log.Dump()
 	if err != nil {
 		return nil, err

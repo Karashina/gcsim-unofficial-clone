@@ -20,9 +20,9 @@ type Job struct {
 	Seed    int64
 }
 
-// New creates a new Pool. Jobs can be sent to new pool by sending to p.QueueCh
-// Closing p.StopCh will cause the pool to stop executing any queued jobs and currently working
-// workers will no longer send back responses
+// New は新しいPoolを作成する。p.QueueChにジョブを送信できる
+// p.StopChを閉じるとキュー内のジョブの実行を停止し、作業中の
+// ワーカーはレスポンスを返さなくなる
 func New(maxWorker int, respCh chan stats.Result, errCh chan error) *Pool {
 	p := &Pool{
 		respCh:  respCh,
@@ -30,7 +30,7 @@ func New(maxWorker int, respCh chan stats.Result, errCh chan error) *Pool {
 		QueueCh: make(chan Job),
 		StopCh:  make(chan bool),
 	}
-	// create workers
+	// ワーカーを作成
 	for i := 0; i < maxWorker; i++ {
 		go p.worker()
 	}

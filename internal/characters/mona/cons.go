@@ -17,16 +17,16 @@ import (
 
 const c6Key = "mona-c6"
 
-// C1:
-// When any of your own party members hits an opponent affected by an Omen, the effects of Hydro-related Elemental Reactions are enhanced for 8s:
-// - Electro-Charged DMG increases by 15%.
-// - Vaporize DMG increases by 15%.
-// - Hydro Swirl DMG increases by 15%.
-// - Frozen duration is extended by 15%.
+// 1命ノ星座:
+// 自身のパーティメンバーが星異の影響を受けた敵を攻撃すると、水元素関連の元素反応の効果が8秒間強化される:
+// - 感電ダメージが15%増加。
+// - 蒸発ダメージが15%増加。
+// - 水元素拡散ダメージが15%増加。
+// - 凍結時間が15%延長。
 func (c *char) c1() {
-	// TODO: "Frozen duration is extended by 15%." is bugged
+	// TODO: 「凍結時間が15%延長」はバグがある
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		// ignore if target doesn't have debuff
+		// ターゲットにデバフがなければ無視
 		t, ok := args[0].(*enemy.Enemy)
 		if !ok {
 			return false
@@ -34,30 +34,30 @@ func (c *char) c1() {
 		if !t.StatusIsActive(bubbleKey) && !t.StatusIsActive(omenKey) {
 			return false
 		}
-		// add c1 to all party members, delay by 1, because:
-		// "This bonus does not apply in the triggering attack nor from the resulting Hydro DMG dealt by Illusory Bubble in Stellaris Phantasm regardless if they were from resulting reactions."
+		// 全パーティメンバーにc1を追加、1フレーム遅延。理由:
+		// 「このボーナスはトリガーとなった攻撃には適用されず、星天帰還の虚実の泡による水元素ダメージにも、元素反応による場合を含めて適用されない。」
 		for _, x := range c.Core.Player.Chars() {
 			char := x
 			c.Core.Tasks.Add(func() {
-				// TODO: "Vaporize DMG increases by 15%." should be getting snapshot, see https://library.keqingmains.com/evidence/characters/hydro/mona#mona-c1-snapshot-for-vape
-				// requires ReactBonusMod refactor
+				// TODO: 「蒸発ダメージが15%増加」はスナップショットされるべき。参照: https://library.keqingmains.com/evidence/characters/hydro/mona#mona-c1-snapshot-for-vape
+				// ReactBonusMod のリファクタリングが必要
 				char.AddReactBonusMod(character.ReactBonusMod{
 					Base: modifier.NewBase("mona-c1", 8*60),
 					Amount: func(ai combat.AttackInfo) (float64, bool) {
-						// doesn't work off-field
+						// フィールド外では機能しない
 						if c.Core.Player.Active() != char.Index {
 							return 0, false
 						}
-						// Electro-Charged DMG increases by 15%.
+						// 感電ダメージが15%増加。
 						if ai.AttackTag == attacks.AttackTagECDamage {
 							return 0.15, false
 						}
-						// Vaporize DMG increases by 15%.
-						// the only way Hydro Swirl can vape is via an AoE Hydro Swirl which doesn't do damage anyways, so this is fine
+						// 蒸発ダメージが15%増加。
+						// 水元素拡散が蒸発を起こすのはAoE水元素拡散経由のみで、そもそもダメージは発生しないため問題ない
 						if ai.Amped {
 							return 0.15, false
 						}
-						// Hydro Swirl DMG increases by 15%.
+						// 水元素拡散ダメージが15%増加。
 						if ai.AttackTag == attacks.AttackTagSwirlHydro {
 							return 0.15, false
 						}
@@ -76,9 +76,9 @@ func (c *char) c1() {
 	}, "mona-c1-check")
 }
 
-// C2:
-// When a Normal Attack hits, there is a 20% chance that it will be automatically followed by a Charged Attack.
-// This effect can only occur once every 5s.
+// 2凸:
+// 通常攻撃命中時、20%の確率で自動的に重撃が続く。
+// この効果は5秒ごとに1回のみ発動。
 func (c *char) c2(a combat.AttackCB) {
 	trg := a.Target
 	if c.Base.Cons < 2 {
@@ -93,7 +93,7 @@ func (c *char) c2(a combat.AttackCB) {
 	if c.c2icd > c.Core.F {
 		return
 	}
-	c.c2icd = c.Core.F + 300 // every 5 seconds
+	c.c2icd = c.Core.F + 300 // 5秒ごと
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Charge Attack",
@@ -109,8 +109,8 @@ func (c *char) c2(a combat.AttackCB) {
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(trg, nil, 3), 0, 0)
 }
 
-// C4:
-// When any party member attacks an opponent affected by an Omen, their CRIT Rate is increased by 15%.
+// 4凸:
+// パーティメンバーが星異の影響を受けた敵を攻撃すると、会心率が15%増加する。
 func (c *char) c4() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CR] = 0.15
@@ -123,7 +123,7 @@ func (c *char) c4() {
 				if !ok {
 					return nil, false
 				}
-				// ok only if either bubble or omen is present
+				// 泡または星異のどちらかが存在する場合のみ有効
 				if x.StatusIsActive(bubbleKey) || x.StatusIsActive(omenKey) {
 					return m, true
 				}
@@ -133,10 +133,10 @@ func (c *char) c4() {
 	}
 }
 
-// C6:
-// Upon entering Illusory Torrent, Mona gains a 60% increase to the DMG of her next Charged Attack per second of movement.
-// A maximum DMG Bonus of 180% can be achieved in this manner.
-// The effect lasts for no more than 8s.
+// 6命ノ星座:
+// 虚実流動に入ると、モナは移動1秒ごとに次の重撃ダメージが60%増加する。
+// この方法で得られるダメージバフは最大180%。
+// 効果は最大8秒間持続する。
 func (c *char) c6(src int) func() {
 	return func() {
 		if c.c6Src != src {
@@ -145,11 +145,11 @@ func (c *char) c6(src int) func() {
 				Write("new src", c.c6Src)
 			return
 		}
-		// do nothing if not Mona
+		// モナでなければ何もしない
 		if c.Core.Player.Active() != c.Index {
 			return
 		}
-		// do nothing if we aren't dashing anymore
+		// ダッシュ中でなければ何もしない
 		if c.Core.Player.CurrentState() != action.DashState {
 			return
 		}
@@ -173,9 +173,9 @@ func (c *char) c6(src int) func() {
 			},
 		})
 
-		// reset C6 stacks in 8s if we didn't use a CA
+		// 重撃を使用しなかった場合、8秒で6凸スタックをリセット
 		c.Core.Tasks.Add(c.c6TimerReset, 8*60+1)
-		// queue up another stack and buff refresh in 1s
+		// 1秒後に次のスタックとバフ更新をキューに追加
 		c.Core.Tasks.Add(c.c6(src), 60)
 	}
 }
@@ -198,7 +198,7 @@ func (c *char) makeC6CAResetCB() combat.AttackCBFunc {
 }
 
 func (c *char) c6TimerReset() {
-	// handle C6 stack reset if CA not used before c6 buff expires
+	// c6バフが切れる前に重撃を使わなかった場合にC6スタックをリセット
 	if c.c6Stacks > 0 && !c.StatusIsActive(c6Key) {
 		c.c6Stacks = 0
 		c.Core.Log.NewEvent(fmt.Sprintf("%v stacks reset via timer", c6Key), glog.LogCharacterEvent, c.Index)

@@ -6,7 +6,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When Shinobu's HP is not higher than 50%, her Healing Bonus is increased by 15%.
+// 忍のHPが50%以下の場合、与える治癒効果+15%。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -25,9 +25,9 @@ func (c *char) a1() {
 	})
 }
 
-// Sanctifying Ring's abilities will be boosted based on Shinobu's Elemental Mastery:
+// 草薙の稲光の制約の輪のアビリティは忍の元素熟知に基づいて強化される:
 //
-// - Healing amount will be increased by 75% of Elemental Mastery.
+// - 回復量が元素熟知の75%分増加。
 func (c *char) a4Healing() float64 {
 	if c.Base.Ascension < 4 {
 		return 0
@@ -35,9 +35,9 @@ func (c *char) a4Healing() float64 {
 	return c.Stat(attributes.EM) * 0.75
 }
 
-// Sanctifying Ring's abilities will be boosted based on Shinobu's Elemental Mastery:
+// 草薙の稲光の制約の輪のアビリティは忍の元素熟知に基づいて強化される:
 //
-// - DMG dealt is increased by 25% of Elemental Mastery.
+// - ダメージ量が元素熟知の25%分増加。
 func (c *char) a4Damage() float64 {
 	if c.Base.Ascension < 4 {
 		return 0

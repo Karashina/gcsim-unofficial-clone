@@ -53,8 +53,8 @@ func newSnack(c *char, pos geometry.Point) *snack {
 	}
 	p.snapshot = c.Snapshot(&p.attackInfo)
 
-	// we increase snack size to make sure we get it when mizuki is in dreamdrifter state
-	// because mizuki's pickup range is increased while in this state.
+	// Dreamdrifter状態中の瑞希が確実に取得できるようおやつサイズを拡大
+	// この状態中は瑞希の取得範囲が増加するため。
 	// https://docs.google.com/spreadsheets/d/1UU0EVPBatEndl4GRZyIs8Ix8O3kcZUDAwOHqM8_jQJw/edit?gid=339012102#gid=339012102
 	p.Gadget = gadget.New(c.Core, pos, snackSize*snackSizeMizukiMultiplier, combat.GadgetTypYumemiSnack)
 	p.Gadget.Duration = snackDuration
@@ -73,8 +73,8 @@ func newSnack(c *char, pos geometry.Point) *snack {
 			return
 		}
 
-		// default size is increased. The increased size is only valid for mizuki in dreamdrifter state,
-		// so check for collision with actual size if this is not the case
+		// デフォルトサイズは拡大済み。拡大サイズはDreamdrifter状態の瑞希のみ有効なため、
+		// そうでない場合は実際のサイズで衝突判定を行う
 		if !c.StatusIsActive(dreamDrifterStateKey) && !p.collidesWithActiveCharacterDefaultSize() {
 			return
 		}
@@ -99,12 +99,12 @@ func (p *snack) onPickedUp() {
 	mizuki := p.char
 	activeChar := p.Core.Player.ActiveChar()
 
-	// C4 triggers both DMG and Heal
+	// 4凸はダメージと回復の両方を発動
 	if mizuki.Base.Cons >= 4 {
 		dmg = true
 		heal = true
 	} else {
-		// Heals active char if is bellow 70% hp otherwise deals DMG
+		// アクティブキャラのHPが70%以下なら回復、それ以外はダメージ
 		dmg = activeChar.CurrentHP() > (activeChar.MaxHP() * snackHealTriggerHpRatio)
 		heal = !dmg
 	}
@@ -118,7 +118,7 @@ func (p *snack) onPickedUp() {
 	}
 
 	if heal {
-		// Heals double the amount on Mizuki
+		// 瑞希への回復量は2倍
 		healMultiplier := 1.0
 		if activeChar.Index == mizuki.Index {
 			healMultiplier = 2.0
@@ -132,7 +132,7 @@ func (p *snack) onPickedUp() {
 		})
 	}
 
-	// C4 restores 5 energy to mizuki up to 4 times
+	// 4凸は瑞希に元素エネルギーを最大4回まで5回復
 	mizuki.c4()
 
 	p.Kill()
@@ -143,7 +143,7 @@ func (p *snack) explode() {
 }
 
 func (p *snack) HandleAttack(atk *combat.AttackEvent) float64 {
-	// only collisions with the player can affect this or if it expires
+	// プレイヤーとの衝突か期限切れのみがこれに影響する
 	return 0
 }
 

@@ -15,11 +15,11 @@ func (c *char) c1() {
 	m[attributes.ATKP] = 0.2
 	c.Core.Events.Subscribe(event.OnTargetDied, func(args ...interface{}) bool {
 		trg, ok := args[0].(*enemy.Enemy)
-		// ignore if not an enemy
+		// 敵でなければ無視
 		if !ok {
 			return false
 		}
-		// ignore if debuff not on enemy
+		// 敵にデバフがない場合は無視
 		if !trg.StatusIsActive(abDebuff) {
 			return false
 		}
@@ -36,8 +36,8 @@ func (c *char) c1() {
 	}, "yoimiya-c1")
 }
 
-// When Yoimiya's Pyro DMG scores a CRIT Hit, Yoimiya will gain a 25% Pyro DMG Bonus for 6s.
-// This effect can be triggered even when Yoimiya is not the active character.
+// 嬵宮の炎元素ダメージが会心したとき、嬵宮は6秒間25%の炎元素ダメージバフを得る。
+// この効果は嬵宮がアクティブでなくても発動する。
 func (c *char) makeC2CB() combat.AttackCBFunc {
 	if c.Base.Cons < 2 {
 		return nil

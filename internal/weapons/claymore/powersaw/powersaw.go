@@ -34,22 +34,22 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// When the wielder is healed or heals others, they will gain a Stoic's Symbol that lasts 30s, up to a maximum of 3 Symbols.
-// When using their Elemental Skill or Burst, all Symbols will be consumed and the Roused effect will be granted for 10s.
-// For each Symbol consumed, gain 40/50/60/70/80 Elemental Mastery,
-// and 2s after the effect occurs, 2/2.5/3/3.5/4 Energy per Symbol consumed will be restored for said character.
-// The Roused effect can be triggered once every 15s,
-// and Symbols can be gained even when the character is not on the field.
+// 装備者が回復するか他者を回復すると、30秒間持続するStoic's Symbolを獲得。最大3つ。
+// 元素スキルまたは元素爆発を使用すると、全シンボルが消費されRousted効果が10秒間付与される。
+// 消費したシンボル1つにつき元素熟知が40/50/60/70/80増加し、
+// 効果発生の2秒後にシンボル1つにつき2/2.5/3/3.5/4のエネルギーが回復する。
+// Roused効果は15秒に1回発動可能。
+// キャラクターがフィールドにいなくてもシンボルを獲得可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	// gain symbols
+	// シンボルを獲得
 	c.Events.Subscribe(event.OnHeal, func(args ...interface{}) bool {
 		source := args[0].(*info.HealInfo)
 		index := args[1].(int)
 		amount := args[2].(float64)
-		if source.Caller != char.Index && index != char.Index { // heal others and get healed including wielder
+		if source.Caller != char.Index && index != char.Index { // 他者の回復と装備者自身の回復を含む
 			return false
 		}
 		if amount <= 0 {
@@ -68,32 +68,32 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("portable-power-saw-heal-%v", char.Base.Key.String()))
 
-	// consume symbols
+	// シンボルを消費
 	em := 30 + 10*float64(r)
 	refund := 1.5 + 0.5*float64(r)
 	m := make([]float64, attributes.EndStatType)
 	buffFunc := func(args ...interface{}) bool {
-		// skip if no symbols (status not active implies symbols == 0)
+		// シンボルがなければスキップ（ステータス非アクティブはシンボル == 0を意味する）
 		if !char.StatusIsActive(symbolKey) {
 			return false
 		}
-		// skip if trigger on icd
+		// ICD中のトリガーはスキップ
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		// check for active before deleting symbol
+		// シンボル削除前にアクティブ状態をチェック
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// add icd
+		// ICDを追加
 		char.AddStatus(icdKey, icdDuration, true)
 
-		// consume symbols
+		// シンボルを消費
 		count := w.stacks
 		char.DeleteStatus(symbolKey)
 		w.stacks = 0
 
-		// add em buff
+		// 元素熟知バフを追加
 		m[attributes.EM] = em * float64(count)
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(buffKey, buffDuration),
@@ -103,7 +103,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			},
 		})
 
-		// regen energy after 2 secs
+		// 2秒後にエネルギーを回復
 		char.QueueCharTask(func() {
 			char.AddEnergy("portable-power-saw-energy", refund*float64(count))
 		}, 2*60)

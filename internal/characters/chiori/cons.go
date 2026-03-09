@@ -27,15 +27,12 @@ const (
 	c4CenterOffset    = 0
 )
 
-// The AoE of the automaton doll "Tamoto" summoned by Fluttering Hasode is
-// increased by 50%. Additionally, if there is a Geo party member other than
-// Chiori, Fluttering Hasode will trigger the following after the dash is
-// completed:
-// - Summon an additional Tamoto. Only one additional Tamoto can exist at the
-// same time, whether summoned by Chiori this way or through the presence of a
-// Geo Construct.
-// - Triggers the Passive Talent "The Finishing Touch." This effect requires you
-// to first unlock the Passive Talent "The Finishing Touch."
+// オートマトン人形「Tamoto」のAoEが50%増加。
+// また、千織以外に岩元素パーティメンバーがいる場合、
+// 羽ばたきの別れのダッシュ完了後に以下が発動:
+// - 追加のTamotoを召喚。この方法または岩元素設置物により
+// 召喚された追加Tamotoは同時に1体まで存在可能。
+// - 固有天賦「仕亊げ」を発動。固有天賦「仕亊げ」の解放が必要。
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
@@ -51,17 +48,17 @@ func (c *char) c1() {
 			break
 		}
 	}
-	// 50% from description most likely refers to the volume of the AoE
-	// volume of a cylinder is pi*r^2*h, so radius needs to be multiplied by 1.5^2=2.25
+	// 説明の50%はAoEの体積を指すと思われる
+	// 円柱の体積は pi*r^2*h なので、半径に 1.5^2=2.25 を掛ける必要がある
 	c.skillSearchAoE *= 2.25
 }
 
-// For 10s after using Hiyoku: Twin Blades, a simplified automaton doll, "Kinu,"
-// will be summoned next to your active character every 3s. Kinu will attack
-// nearby opponents, dealing AoE Geo DMG equivalent to 170% of Tamoto's DMG. DMG
-// dealt this way is considered Elemental Skill DMG.
+// 飛翼の双刃使用後10秒間、3秒ごとに簡略化オートマトン人形「絹」を
+// アクティブキャラ付近に召喚。「絹」は付近の敵を攻撃し、
+// Tamotoの170%に相当する岩元素範囲ダメージを与える。
+// このダメージは元素スキルダメージ扱い。
 //
-// Kinu will leave the field after 1 attack or after lasting 3s.
+// 「絹」は1回攻撃後または3秒経過後に退場する。
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
@@ -69,11 +66,11 @@ func (c *char) c2() {
 
 	c.Core.Log.NewEvent("c2 activated", glog.LogCharacterEvent, c.Index)
 
-	// kill existing c2 ticker
+	// 既存の2凸ティッカーを破棄
 	c.kill(c.c2Ticker)
 
-	// spawn new c2 ticker
-	// yes, the c2 duration and spawn interval is hitlag affected
+	// 新しい2凸ティッカーを生成
+	// 2凸の持続時間と生成間隔はヒットラグの影響を受ける
 	t := newTicker(c.Core, c2Duration, c.QueueCharTask)
 	t.cb = c.createKinu(c.Core.F, c2CenterOffset, c2MinRandom, c2MaxRandom)
 	t.interval = c2SpawnInterval
@@ -81,15 +78,13 @@ func (c *char) c2() {
 	c.c2Ticker = t
 }
 
-// For 8s after triggering either follow-up effect of the Passive Talent
-// "Tailor-Made," when your current active character's Normal, Charged, or
-// Plunging Attacks hit a nearby opponent, a simplified automaton doll, "Kinu,"
-// will be summoned near this opponent. You can summon 1 Kinu every 1s in this
-// way, and up to 3 Kinu may be summoned this way during each instance of
-// "Tailor-Made"'s Seize the Moment or Tailoring effect. The above effect can be
-// triggered up to once every 15s.
+// 固有天賦「仕亊げ」の追加効果発動後8秒間、アクティブキャラの
+// 通常攻撃、重撃、落下攻撃が付近の敵に命中すると、「絹」を
+// その敵付近に召喚。1秒ごとに1体召喚可能、
+// 「仕亊げ」の好機を見て/Tailoring効果毎に最大3体。
+// 上記効果は15秒ごとに1回まで発動可能。
 //
-// Must unlock the Passive Talent "Tailor-Made" first.
+// 固有天賦「仕亊げ」の解放が必要。
 func (c *char) c4Activation() {
 	if c.Base.Ascension < 1 {
 		return
@@ -103,11 +98,11 @@ func (c *char) c4Activation() {
 
 	c.Core.Log.NewEvent("c4 activated", glog.LogCharacterEvent, c.Index)
 
-	c.AddStatus(c4Lockout, c4LockoutDuration, true) // applied to chiori
+	c.AddStatus(c4Lockout, c4LockoutDuration, true) // 千織に適用
 
 	c.c4AttackCount = 0
 	c.DeleteStatus(c4ICDKey)
-	c.AddStatus(c4Key, c4Duration, false) // applied to team, so not hitlag affected
+	c.AddStatus(c4Key, c4Duration, false) // チームに適用、ヒットラグの影響なし
 }
 
 func (c *char) c4() {
@@ -118,15 +113,15 @@ func (c *char) c4() {
 		return
 	}
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		// c4 status not active
+		// 4凸ステータスがアクティブでない
 		if !c.StatusIsActive(c4Key) {
 			return false
 		}
-		// c4 attack on icd
+		// 4凸攻撃がICD中
 		if c.StatusIsActive(c4ICDKey) {
 			return false
 		}
-		// attack not na/ca/plunge
+		// 通常攻撃/重撃/落下攻撃以外の攻撃
 		atk := args[1].(*combat.AttackEvent)
 		switch atk.Info.AttackTag {
 		case attacks.AttackTagNormal:
@@ -135,20 +130,20 @@ func (c *char) c4() {
 		default:
 			return false
 		}
-		// atk not by active char
+		// アクティブキャラクター以外の攻撃
 		if atk.Info.ActorIndex != c.Core.Player.Active() {
 			return false
 		}
 
-		// apply icd
-		c.AddStatus(c4ICDKey, c4ICD, true) // applied to chiori
+		// ICDを適用
+		c.AddStatus(c4ICDKey, c4ICD, true) // 千織に適用
 
 		c.Core.Log.NewEvent("c4 spawning kinu", glog.LogCharacterEvent, c.Index)
 
-		// spawn kinu
+		// 「絹」を召喚
 		c.createKinu(c.Core.F, c4CenterOffset, c4MinRandom, c4MaxRandom)()
 
-		// increment attack count and delete c4 if reached limit
+		// 攻撃カウントを増加し、上限に達したら4凸を削除
 		c.c4AttackCount++
 		if c.c4AttackCount == c4AttackLimit {
 			c.DeleteStatus(c4Key)
@@ -158,9 +153,9 @@ func (c *char) c4() {
 	}, "chiori-c4")
 }
 
-// After triggering a follow-up effect of the Passive Talent "Tailor-Made,"
-// Chiori's own Fluttering Hasode's CD is decreased by 12s. Must unlock the
-// Passive "Tailor-Made" first.
+// 固有天賦「仕亊げ」の追加効果発動後、
+// 千織自身の羽ばたきの別れのCDが12秒短縮される。
+// 固有天賦「仕亊げ」の解放が必要。
 func (c *char) c6CooldownReduction() {
 	if c.Base.Ascension < 1 {
 		return
@@ -171,8 +166,7 @@ func (c *char) c6CooldownReduction() {
 	c.ReduceActionCooldown(action.ActionSkill, 12*60)
 }
 
-// In addition, the DMG dealt by Chiori's own Normal Attacks is increased by an
-// amount equal to 235% of her own DEF.
+// さらに、千織自身の通常攻撃ダメージが自身の防御力の235%分増加する。
 func (c *char) c6NAIncrease(ai *combat.AttackInfo, snap *combat.Snapshot) {
 	if c.Base.Ascension < 1 {
 		return

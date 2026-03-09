@@ -59,7 +59,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		Count: count,
 	}
 
-	// Normal and Charged Attack DMG +15%
+	// 通常攻撃と重撃ダメージ+15%
 	if count >= 2 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.DmgP] = 0.15
@@ -74,7 +74,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		})
 	}
 
-	// When current HP increases or decreases, CRIT Rate will be increased by 12% for 5s. Max 3 stacks.
+	// 現在のHPが増減すると、会心率12%増加5秒間。最大3スタック。
 	if count < 4 {
 		return &s, nil
 	}
@@ -110,7 +110,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		if amount <= 0 {
 			return false
 		}
-		// do not trigger if at max hp already
+		// 既にHP最大の場合は発動しない
 		if math.Abs(amount-overheal) <= 1e-9 {
 			return false
 		}
@@ -119,7 +119,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		return false
 	}, fmt.Sprintf("mh-4pc-heal-%v", char.Base.Key.String()))
 
-	// TODO: OnCharacterHurt?
+	// TODO: OnCharacterHurt？
 
 	return &s, nil
 }

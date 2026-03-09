@@ -48,7 +48,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		ax := ai
 		ax.Mult = v[c.TalentLvlSkill()]
 		if c.Base.Cons >= 4 {
-			// check if ult is up, if so increase multiplier
+			// 元素爆発が発動中なら倍率を増加
 			if c.StatusIsActive(burstKey) {
 				ax.Mult *= 1.5
 			}
@@ -71,16 +71,16 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		}, skillHitmarks[i])
 	}
 
-	// orbitals apply wet at 44f
+	// オービタルは44fで水元素を付着する
 	c.applyOrbital(15*60, 43) // takes 1 frame to apply it
 
-	// should last 15s, cd 21s
+	// 持続時間15秒、CD21秒
 	c.SetCDWithDelay(action.ActionSkill, 21*60, 10)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

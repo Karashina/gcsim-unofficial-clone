@@ -26,10 +26,10 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Gains the Kagura Dance effect when using an Elemental Skill, causing the
-	// Elemental Skill DMG of the character wielding this weapon to increase by
-	// 12% for 16s. Max 3 stacks. This character will gain 12% All Elemental DMG
-	// Bonus when they possess 3 stacks.
+	// 元素スキル使用時に神楽の舞効果を獲得し、
+	// 装備キャラクターの元素スキルダメージが16秒間12%増加する。
+	// 最大3スタック。スタックが3の時、全元素ダメージボーナスが
+	// 12%増加する。
 	w := &Weapon{}
 	r := p.Refine
 	stacks := 0
@@ -39,20 +39,20 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	const stackKey = "kaguras-verity-stacks"
 	stackDuration := 960 // 16s * 60
 
-	//TODO: this used to be on postskill. make sure nothing broke here
+	//TODO: 以前はpostskillで発動していた。変更で問題がないか確認が必要
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false
 		}
 		if !char.StatusIsActive(stackKey) {
-			// reset stacks back to 0
+			// スタックがリセットされていればスタックを0に戻す
 			stacks = 0
 		}
 		char.AddStatus(stackKey, stackDuration, true)
 		if stacks < 3 {
 			stacks++
 		}
-		// bonus ele damage if 3 stacks
+		// 3スタック時の元素ダメージボーナス
 		if stacks == 3 {
 			val[attributes.PyroP] = dmg
 			val[attributes.HydroP] = dmg
@@ -63,7 +63,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			val[attributes.PhyP] = dmg
 			val[attributes.DendroP] = dmg
 		} else {
-			// clean stacks ele dmg% otherwise
+			// 3スタック未満の場合は元素ダメージ%をクリア
 			val[attributes.PyroP] = 0
 			val[attributes.HydroP] = 0
 			val[attributes.CryoP] = 0
@@ -73,7 +73,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			val[attributes.PhyP] = 0
 			val[attributes.DendroP] = 0
 		}
-		// add mod for duration, override last
+		// 持続時間分の修飾子を追加、前回を上書き
 		char.AddAttackMod(character.AttackMod{
 			Base: modifier.NewBaseWithHitlag("kaguras-verity", stackDuration),
 			Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {

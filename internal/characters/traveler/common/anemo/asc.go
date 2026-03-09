@@ -9,7 +9,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
 )
 
-// The last hit of a Normal Attack combo unleashes a wind blade, dealing 60% of ATK as Anemo DMG to all opponents in its path.
+// 通常攻撃コンボの最終段で風刃を放ち、経路上の全敵に攻撃力の60%の風元素ダメージを与える。
 func (c *Traveler) a1() {
 	if c.Base.Ascension < 1 || c.NormalCounter != c.NormalHitNum-1 {
 		return
@@ -42,8 +42,8 @@ func (c *Traveler) a1() {
 
 const a4ICDKey = "traveleranemo-a4-icd"
 
-// Palm Vortex kills regenerate 2% HP for 5s.
-// This effect can only occur once every 5s.
+// 風の巻で敵を倒すと5秒間HPが2%回復する。
+// この効果は5秒ごとに1回のみ発動。
 func (c *Traveler) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -74,7 +74,7 @@ func (c *Traveler) a4() {
 					Type:    info.HealTypePercent,
 					Src:     0.02,
 				})
-			}, (i+1)*60) // healing starts 1s after death
+			}, (i+1)*60) // 回復は死亡1秒後に開始
 		}
 
 		return false

@@ -89,7 +89,7 @@ var (
 		},
 	}
 	charge = [][][]float64{
-		// Male
+		// 男性
 		{
 			{
 				0.559,
@@ -126,7 +126,7 @@ var (
 				1.6238,
 			},
 		},
-		// Female
+		// 女性
 		{
 			{
 				0.559,
@@ -164,7 +164,7 @@ var (
 			},
 		},
 	}
-	// attack: collision = [8]
+	// 攻撃: collision = [8]
 	collision = []float64{
 		0.639324,
 		0.691362,
@@ -182,7 +182,7 @@ var (
 		1.620612,
 		1.70982,
 	}
-	// attack: highPlunge = [10]
+	// 攻撃: highPlunge = [10]
 	highPlunge = []float64{
 		1.596762,
 		1.726731,
@@ -200,7 +200,7 @@ var (
 		4.047606,
 		4.27041,
 	}
-	// attack: lowPlunge = [9]
+	// 攻撃: lowPlunge = [9]
 	lowPlunge = []float64{
 		1.278377,
 		1.382431,
@@ -218,7 +218,7 @@ var (
 		3.240537,
 		3.418915,
 	}
-	// skill: blazingThreshold = [0]
+	// スキル: blazingThreshold = [0]
 	blazingThreshold = []float64{
 		0.2808,
 		0.30186,
@@ -236,7 +236,7 @@ var (
 		0.6318,
 		0.6669,
 	}
-	// skill: holdDMG = [1]
+	// スキル: holdDMG = [1]
 	holdDMG = []float64{
 		0.988,
 		1.0621,
@@ -254,7 +254,7 @@ var (
 		2.223,
 		2.3465,
 	}
-	// skill: scorchingThreshold = [2]
+	// スキル: scorchingThreshold = [2]
 	scorchingThreshold = []float64{
 		0.8144,
 		0.87548,
@@ -272,7 +272,7 @@ var (
 		1.8324,
 		1.9342,
 	}
-	// burst: burst = [0]
+	// 元素爆発: burst = [0]
 	burst = []float64{
 		4.272,
 		4.5924,

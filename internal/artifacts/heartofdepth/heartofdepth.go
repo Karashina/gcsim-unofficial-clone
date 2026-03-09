@@ -49,12 +49,12 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.DmgP] = 0.30
 
-		//TODO: this used to be on Post, need to be checked
+		//TODO: 以前はPostで処理していた。確認が必要
 		c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 			if c.Player.Active() != char.Index {
 				return false
 			}
-			// add stat mod here
+			// ステータスモディファイアを追加
 			char.AddAttackMod(character.AttackMod{
 				Base: modifier.NewBaseWithHitlag("hod-4pc", buffDuration),
 				Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {

@@ -128,11 +128,11 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	c.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		prev, next := args[0].(int), args[1].(int)
 		if prev == char.Index && char.StatModIsActive(BuffKey) {
-			// swapping out
+			// スワップアウト
 			w.tickSrc = c.F
 			w.extendOffField(w.tickSrc)()
 		} else if next == char.Index {
-			// swapping in
+			// スワップイン
 			w.tickSrc = -1
 		}
 		return false

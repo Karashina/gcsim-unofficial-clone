@@ -59,13 +59,13 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}
 
 	counter := c.NormalCounter
-	// need char queue because of potential hitlag from C4
+	// 4凸のヒットラグの可能性があるためchar queueを使用
 	c.QueueCharTask(func() {
 		burstIndex := 0
 		if c.StatModIsActive(burstBuffKey) {
 			burstIndex = 1
 			if counter == 2 {
-				// q-n3 has different hit lag
+				// 元素爆発中のN3は異なるヒットラグ
 				ai.HitlagHaltFrames = 0.1 * 60
 			}
 			ai.ICDTag = attacks.ICDTagNone

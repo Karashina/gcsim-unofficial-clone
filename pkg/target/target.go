@@ -19,7 +19,7 @@ type Target struct {
 	CollidableTypes [targets.TargettableTypeCount]bool
 	OnCollision     func(combat.Target)
 	Alive           bool
-	// icd related
+	// ICD関連
 	icdTagOnTimer       [MaxTeamSize][attacks.ICDTagLength]bool
 	icdTagCounter       [MaxTeamSize][attacks.ICDTagLength]int
 	icdDamageTagOnTimer [MaxTeamSize][attacks.ICDTagLength]bool
@@ -74,31 +74,31 @@ func (t *Target) WillCollide(s geometry.Shape) bool {
 	}
 }
 func (t *Target) AttackWillLand(a combat.AttackPattern) (bool, string) {
-	// shape shouldn't be nil; panic here
+	// 形状がnilの場合はpanicする
 	if a.Shape == nil {
 		panic("unexpected nil shape")
 	}
 	if !t.Alive {
 		return false, "target dead"
 	}
-	// shape can't be nil now, check if type matches
+	// ここではshapeはnilになり得ない、タイプが一致するか確認
 	// if !a.Targets[t.typ] {
 	// 	return false, "wrong type"
 	// }
-	// swirl aoe shouldn't hit the src of the aoe
+	// 拡散のAoEはソース自身にヒットしない
 	for _, v := range a.IgnoredKeys {
 		if t.Key() == v {
 			return false, "no self harm"
 		}
 	}
-	// check if shape matches
+	// 形状が一致するか確認
 	switch v := a.Shape.(type) {
 	case *geometry.Circle:
 		return t.Shape().IntersectCircle(*v), "intersect circle"
 	case *geometry.Rectangle:
 		return t.Shape().IntersectRectangle(*v), "intersect rectangle"
 	case *geometry.SingleTarget:
-		// only true if
+		// trueになる条件:
 		return v.Target == t.key, "target"
 	default:
 		return false, "unknown shape"
@@ -121,7 +121,7 @@ func (t *Target) SetDirection(trg geometry.Point) {
 }
 func (t *Target) SetDirectionToClosestEnemy() {
 	src := t.Pos()
-	// calculate direction towards closest enemy, or forward direction if none
+	// 最も近い敵への方向を計算、敵がいない場合は正面方向
 	enemy := t.Core.Combat.ClosestEnemy(src)
 	if enemy == nil {
 		t.direction = geometry.DefaultDirection()

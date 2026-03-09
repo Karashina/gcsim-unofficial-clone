@@ -5,7 +5,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
-// need to rewrite Expires
+// Expiresを書き直す必要がある
 type shd struct {
 	*shield.Tmpl
 }

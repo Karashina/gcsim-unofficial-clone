@@ -19,18 +19,18 @@ var aimedHitmarks = []int{15, 86}
 func init() {
 	aimedFrames = make([][]int, 2)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(23)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(94)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
 }
 
-// Once fully charged, deal Hydro DMG and apply the Riptide status.
+// フルチャージ時、水元素ダメージを与えて断流を付与する。
 func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(meleeKey) {
 		return action.Info{}, errors.New("aim called when not in ranged stance")
@@ -62,7 +62,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		Durability:           25,
 		Mult:                 fullaim[c.TalentLvlAttack()],
 		HitWeakPoint:         weakspot == 1,
-		HitlagHaltFrames:     0.12 * 60, // deployable hitlag, but only on weakspot
+		HitlagHaltFrames:     0.12 * 60, // 設置型ヒットラグ（弱点のみ）
 		HitlagFactor:         0.01,
 		HitlagOnHeadshotOnly: true,
 		IsDeployable:         true,
@@ -72,12 +72,12 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		ai.Element = attributes.Physical
 		ai.Mult = aim[c.TalentLvlAttack()]
 	}
-	// if E is activated before it hits:
-	// - phys aimed shot will apply riptide and trigger slash
-	// - fully-charged aimed shot will apply riptide and slash
-	// otherwise:
-	// - phys aimed shot will not do anything
-	// - fully-charged aimed shot will apply riptide
+	// 元素スキルが命中前に発動された場合:
+	// - 物理狙い撃ちは断流を付与し斉しをトリガーする
+	// - フルチャージ狙い撃ちは断流を付与し斉しをトリガーする
+	// そうでない場合:
+	// - 物理狙い撃ちは何もしない
+	// - フルチャージ狙い撃ちは断流を付与する
 	c.Core.QueueAttack(
 		ai,
 		combat.NewBoxHit(
@@ -89,7 +89,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		),
 		aimedHitmarks[hold],
 		aimedHitmarks[hold]+travel,
-		// flash has to happen before applying riptide because it does not get triggered if only doing fully-charged aimed shot
+		// 断流付与前にフラッシュを発動する必要がある（フルチャージ狙い撃ちのみではトリガーされないため）
 		c.rtFlashCallback,
 		c.aimedApplyRiptide,
 		c.rtSlashCallback,

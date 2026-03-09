@@ -85,7 +85,7 @@ func (c *char) BurstRuin(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionAttack], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionAttack], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -114,7 +114,7 @@ func (c *char) BurstInit() {
 			c.AddStatus(burstICDKey, 0.1*60, true)
 			c.burstCount--
 			if c.burstCount <= 0 {
-				// Cannot delete statuses in an attack mod
+				// AttackMod内でステータスを削除できない
 				c.AddStatus(burstExtinctKey, 0, false)
 			}
 			mDmg[attributes.DmgP] = burstDMG[c.burstVoids][c.TalentLvlBurst()]
@@ -127,7 +127,7 @@ func (c *char) BurstExtinction(p map[string]int) (action.Info, error) {
 	c.AddStatus(burstExtinctKey, 12.5*60, false)
 	c.burstCount = 10
 	c.burstVoids = c.absorbVoidRifts()
-	// status used to absorb void rifts constantly during the burst animation
+	// 元素爆発アニメーション中にVoid Riftを常時吸収するためのステータス
 	c.AddStatus(burstAbsorbRiftAnimKey, burstSkillFrames[action.InvalidAction], true)
 
 	c.c2OnBurstExtinction()
@@ -136,7 +136,7 @@ func (c *char) BurstExtinction(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstSkillFrames),
 		AnimationLength: burstSkillFrames[action.InvalidAction],
-		CanQueueAfter:   burstSkillFrames[action.ActionAttack], // earliest cancel
+		CanQueueAfter:   burstSkillFrames[action.ActionAttack], // 最速キャンセル
 		State:           action.BurstState,
 		OnRemoved:       func(next action.AnimationState) { c.DeleteStatus(burstAbsorbRiftAnimKey) },
 	}, nil

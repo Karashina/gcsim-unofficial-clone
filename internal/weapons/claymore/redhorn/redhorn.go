@@ -27,7 +27,7 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// DEF is increased by 28%. Normal and Charged Attack DMG is increased by 40% of DEF.
+	// 防御力が28%増加。通常攻撃と重撃のダメージが防御力の40%分増加。
 	w := &Weapon{}
 	r := p.Refine
 

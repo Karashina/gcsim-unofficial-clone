@@ -17,7 +17,7 @@ func DefaultDirection() Point {
 	return Point{X: 0, Y: 1}
 }
 
-// converts the given angle in degrees into a direction vector; + means clockwise
+// 指定された角度（度）を方向ベクトルに変換する。+は時計回り
 func DegreesToDirection(angle float64) Point {
 	radians := angle * math.Pi / 180
 	return Point{
@@ -26,8 +26,8 @@ func DegreesToDirection(angle float64) Point {
 	}
 }
 
-// dir needs to be magnitude of 1 if passing custom dir;
-// returns a new Point which is pos + rotated offset
+// dir はカスタム方向を渡す場合大きさが1である必要がある。
+// pos + 回転済みオフセットの新しい Point を返す。
 func CalcOffsetPoint(pos, offset, dir Point) Point {
 	if dir == DefaultDirection() {
 		return pos.Add(offset)
@@ -37,16 +37,16 @@ func CalcOffsetPoint(pos, offset, dir Point) Point {
 
 // https://wumbo.net/formulas/angle-between-two-vectors-2d/
 func CalcDirection(src, trg Point) Point {
-	// avoid division by 0 in Normalize()
+	// Normalize()でのゼロ除算を回避
 	if trg == src {
 		return DefaultDirection()
 	}
 	return trg.Sub(src).Normalize()
 }
 
-// generates a random point that is between minRadius and maxRadius distance away from the provided center
+// 中心から minRadius 以上 maxRadius 以下の距離にあるランダムな点を生成する
 func CalcRandomPointFromCenter(center Point, minRadius, maxRadius float64, rand *rand.Rand) Point {
-	// generate random point inside unit circle using rejection sampling
+	// 棄却サンプリングで単位円内のランダム点を生成
 	var result Point
 	for {
 		p := Point{
@@ -56,9 +56,9 @@ func CalcRandomPointFromCenter(center Point, minRadius, maxRadius float64, rand 
 		if p.MagnitudeSquared() <= 1 {
 			minRadiusSquared := minRadius * minRadius
 			maxRadiusSquared := maxRadius * maxRadius
-			// get random radius in the specified range
+			// 指定範囲内のランダム半径を取得
 			r := math.Sqrt(minRadiusSquared + rand.Float64()*(maxRadiusSquared-minRadiusSquared))
-			// scale generated point to be exactly on the random radius and shift it
+			// 生成した点をランダム半径上にスケーリングしてシフト
 			if p.X == 0 && p.Y == 0 {
 				p = Point{X: 0, Y: 1}
 			}
@@ -80,10 +80,10 @@ func AABBTest(a, b []Point) bool {
 
 // https://stackoverflow.com/questions/12234574/calculating-if-an-angle-is-between-two-angles
 func fanAngleAreaCheck(attackCenter, trg, facingDirection Point, fanAngle float64) bool {
-	// facingDirection and targetDirection can be different in multi-target situations
+	// facingDirection と targetDirection は複数ターゲットの場合異なることがある
 	targetDirection := CalcDirection(attackCenter, trg)
 	dot := facingDirection.Dot(targetDirection)
-	// need to clamp the dot product to [-1, 1] because of floating point arithmetic
+	// 浮動小数点演算のため、ドット積を [-1, 1] にクランプする必要がある
 	if dot > 1 {
 		dot = 1
 	}
@@ -94,28 +94,28 @@ func fanAngleAreaCheck(attackCenter, trg, facingDirection Point, fanAngle float6
 	return angleBetweenFacingAndTarget >= -fanAngle/2 && angleBetweenFacingAndTarget <= fanAngle/2
 }
 
-// shared between Circle and Rectangle
+// Circle と Rectangle で共有
 // https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
 // https://yal.cc/rot-rect-vs-circle-intersection/
 func IntersectRectangle(r Rectangle, c Circle) bool {
-	// TODO: rectangle-circle with fanAngle hurtbox/hitbox collision
+	// TODO: fanAngleのハートボックス/ヒットボックスと矩形-円の衝突判定
 	if c.segments != nil {
 		panic("fanAngle hitbox and hurtbox aren't supported in rectangle-circle collision")
 	}
 
-	// AABB test
+	// AABB判定
 	if !AABBTest(r.aabb, c.aabb) {
 		return false
 	}
 
-	// set origin to rectangle center by shifting circle center position
+	// 原点を矩形中心に設定（円の中心位置をシフト）
 	relative := c.center.Sub(r.center)
 
-	// take direction from rectangle and rotate circle center in the opposite direction to remove rectangle rotation
+	// 矩形の回転を除去するため、円の中心を逆方向に回転
 	dir := r.dir.Mul(Point{X: -1, Y: 1})
 	local := relative.Rotate(dir)
 
-	// constrain circle center to one quadrant
+	// 円の中心を1象限に制約
 	local.X = math.Abs(local.X)
 	local.Y = math.Abs(local.Y)
 
@@ -124,19 +124,19 @@ func IntersectRectangle(r Rectangle, c Circle) bool {
 		Y: r.h / 2,
 	}
 
-	// eliminate cases in which the circle center is too far away from rectangle edges
+	// 円の中心が矩形の辺から遠すぎるケースを除外
 	if local.X > c.r+topRight.X || local.Y > c.r+topRight.Y {
 		return false
 	}
 
-	// circle center has to be close enough to the rectangle edges at this point
-	// -> accept if circle center is within the coordinate area 0 <= x <= r.w/2 || 0 <= y <= r.h/2
-	// -> if it's in that area, then it definitely intersects with one edge
+	// この時点で円の中心は矩形の辺に十分近い
+	// -> 円の中心が 0 <= x <= r.w/2 || 0 <= y <= r.h/2 の範囲内なら受理
+	// -> その範囲内なら、確実に一辺と交差している
 	if local.X <= topRight.X || local.Y <= topRight.Y {
 		return true
 	}
 
-	// circle center is in the area r.w/2 < x <= r.w/2+radius && r.h/2 < y <= r.h/2+radius
-	// -> it can only intersect if it's close enough to the topRight corner
+	// 円の中心が r.w/2 < x <= r.w/2+radius && r.h/2 < y <= r.h/2+radius の範囲にある
+	// -> topRightの角に十分近い場合のみ交差
 	return local.Sub(topRight).MagnitudeSquared() <= c.r*c.r
 }

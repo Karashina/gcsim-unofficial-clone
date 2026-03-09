@@ -24,7 +24,7 @@ var (
 )
 
 func init() {
-	// NA cancels (polearm)
+	// 通常攻撃キャンセル（長柄武器）
 	attackFrames = make([][]int, normalHitNum)
 
 	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 35) // N1 -> Walk
@@ -45,7 +45,7 @@ func init() {
 
 	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 71) // N5 -> N1
 	attackFrames[4][action.ActionWalk] = 63
-	attackFrames[4][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
+	attackFrames[4][action.ActionCharge] = 500 //TODO: この操作は不正。より良い処理方法が必要
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {

@@ -12,52 +12,52 @@ import (
 )
 
 const (
-	// C1 state keys
+	// 1凸ステートキー
 	c1CycleKey = "durin-c1-cycle"
 
-	// C1 durations and values
-	c1CycleDuration          = 20 * 60 // 20 seconds
+	// 1凸の持続時間および値
+	c1CycleDuration          = 20 * 60 // 20秒
 	c1MaxStacks              = 20
-	c1PurityFlatDmgPercent   = 0.60 // 60% of Durin's ATK
-	c1DarknessFlatDmgPercent = 1.50 // 150% of Durin's ATK
-	c1DarknessStackCost      = 2    // Consumes 2 stacks per burst hit
-	c1NoConsumeChance        = 0.30 // C4: 30% chance to not consume stacks
+	c1PurityFlatDmgPercent   = 0.60 // デュリンの攻撃力の60%
+	c1DarknessFlatDmgPercent = 1.50 // デュリンの攻撃力の150%
+	c1DarknessStackCost      = 2    // 元素爆発ヒットごとに2スタック消費
+	c1NoConsumeChance        = 0.30 // 4凸: 30%の確率でスタックを消費しない
 
-	// C2 state keys
+	// 2凸ステートキー
 	c2BuffKey    = "durin-c2-buff"
 	c2EleBuffKey = "durin-c2-ele-buff"
 
-	// C2 durations and values
-	c2BuffDuration = 20 * 60 // 20 seconds
-	c2EleDuration  = 6 * 60  // 6 seconds
-	c2DmgBonus     = 0.50    // 50% DMG bonus
+	// 2凸の持続時間および値
+	c2BuffDuration = 20 * 60 // 20秒
+	c2EleDuration  = 6 * 60  // 6秒
+	c2DmgBonus     = 0.50    // 50%ダメージボーナス
 
-	// C4 values
-	c4BurstDmgBonus = 0.40 // 40% Elemental Burst DMG bonus
+	// 4凸の値
+	c4BurstDmgBonus = 0.40 // 40%元素爆発ダメージボーナス
 
-	// C6 state keys
+	// 6凸ステートキー
 	c6DefShredKey = "durin-c6-def-shred"
 
-	// C6 durations and values
-	c6DefShredDuration = 6 * 60 // 6 seconds
-	c6DefShred         = 0.30   // 30% DEF shred
+	// 6凸の持続時間および値
+	c6DefShredDuration = 6 * 60 // 6秒
+	c6DefShred         = 0.30   // 30% DEFデバフ
 )
 
-// C1: Adamah's Redemption
-// After casting Elemental Burst:
-// Purity: Other party members gain 20 stacks of Cycle of Enlightenment (20s)
+// 1凸: アダマの救済 (Adamah's Redemption)
+// 元素爆発発動後:
+// 純化: 他のパーティメンバーに啓示のサイクル20スタックを付与（20秒）
 //
-//	When dealing NA/CA/Plunge/Skill/Burst DMG, consume 1 stack to add 60% of Durin's ATK as flat DMG
+//	通常攻撃/重撃/落下攻撃/元素スキル/元素爆発ダメージを与えた時、1スタック消費してデュリンの攻撃力の60%を固定ダメージとして追加
 //
-// Darkness: Durin gains 20 stacks of Cycle of Enlightenment (20s)
+// 暗闇: デュリンに啓示のサイクル20スタックを付与（20秒）
 //
-//	When dealing Burst DMG, consume 2 stacks to add 150% of Durin's ATK as flat DMG
+//	元素爆発ダメージを与えた時、2スタック消費してデュリンの攻撃力の150%を固定ダメージとして追加
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
 	}
 
-	// Subscribe to OnEnemyHit for flat damage application
+	// 固定ダメージ適用のためOnEnemyHitを購読
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.c1OnEnemyHit, "durin-c1-flat-dmg")
 }
 
@@ -66,10 +66,10 @@ func (c *char) c1OnBurstPurity() {
 		return
 	}
 
-	// Grant stacks to all other party members
+	// 他の全パーティメンバーにスタックを付与
 	for _, char := range c.Core.Player.Chars() {
 		if char.Index == c.Index {
-			continue // Skip Durin
+			continue // デュリンをスキップ
 		}
 		c.cycleStacks[char.Index] = c1MaxStacks
 		c.cycleExpiry[char.Index] = c.Core.F + c1CycleDuration
@@ -84,7 +84,7 @@ func (c *char) c1OnBurstDarkness() {
 		return
 	}
 
-	// Grant stacks to Durin only
+	// デュリンのみにスタックを付与
 	c.cycleStacks[c.Index] = c1MaxStacks
 	c.cycleExpiry[c.Index] = c.Core.F + c1CycleDuration
 
@@ -100,23 +100,23 @@ func (c *char) c1OnEnemyHit(args ...interface{}) bool {
 	atk := args[1].(*combat.AttackEvent)
 	charIndex := atk.Info.ActorIndex
 
-	// Check if this character has stacks
+	// このキャラクターにスタックがあるか確認
 	expiry, ok := c.cycleExpiry[charIndex]
 	if !ok || c.Core.F >= expiry || c.cycleStacks[charIndex] <= 0 {
 		return false
 	}
 
-	// Check if this is Durin's Darkness mode stacks (only applies to Burst DMG)
+	// デュリンの暗闇モードスタックか確認（元素爆発ダメージにのみ適用）
 	if charIndex == c.Index {
-		// Durin's stacks only work with Burst DMG (Darkness mode)
+		// デュリンのスタックは元素爆発ダメージにのみ有効（暗闇モード）
 		if atk.Info.AttackTag != attacks.AttackTagElementalBurst {
 			return false
 		}
 
-		// Consume 2 stacks
+		// 2スタック消費
 		stacksToConsume := c1DarknessStackCost
 
-		// C4: 30% chance to not consume stacks
+		// 4凸: 30%の確率でスタックを消費しない
 		if c.Base.Cons >= 4 && c.Core.Rand.Float64() < c1NoConsumeChance {
 			stacksToConsume = 0
 			c.Core.Log.NewEvent("C4: Cycle of Enlightenment stacks not consumed", glog.LogCharacterEvent, c.Index)
@@ -127,7 +127,7 @@ func (c *char) c1OnEnemyHit(args ...interface{}) bool {
 		}
 		c.cycleStacks[charIndex] -= stacksToConsume
 
-		// Add flat damage: 150% of Durin's ATK
+		// 固定ダメージを追加: デュリンの攻撃力の150%
 		flatDmg := c.TotalAtk() * c1DarknessFlatDmgPercent
 		atk.Info.FlatDmg += flatDmg
 
@@ -138,13 +138,13 @@ func (c *char) c1OnEnemyHit(args ...interface{}) bool {
 		return false
 	}
 
-	// Other party members' stacks (Purity mode)
-	// Check if the character is the active character
+	// 他のパーティメンバーのスタック（純化モード）
+	// アクティブキャラクターか確認
 	if charIndex != c.Core.Player.Active() {
 		return false
 	}
 
-	// Check if valid attack type (NA, CA, Plunge, Skill, Burst)
+	// 有効な攻撃タイプか確認（通常攻撃、重撃、落下攻撃、元素スキル、元素爆発）
 	validTag := atk.Info.AttackTag == attacks.AttackTagNormal ||
 		atk.Info.AttackTag == attacks.AttackTagExtra ||
 		atk.Info.AttackTag == attacks.AttackTagPlunge ||
@@ -156,10 +156,10 @@ func (c *char) c1OnEnemyHit(args ...interface{}) bool {
 		return false
 	}
 
-	// Consume 1 stack
+	// 1スタック消費
 	stacksToConsume := 1
 
-	// C4: 30% chance to not consume stacks
+	// 4凸: 30%の確率でスタックを消費しない
 	if c.Base.Cons >= 4 && c.Core.Rand.Float64() < c1NoConsumeChance {
 		stacksToConsume = 0
 		c.Core.Log.NewEvent("C4: Cycle of Enlightenment stacks not consumed", glog.LogCharacterEvent, charIndex)
@@ -167,7 +167,7 @@ func (c *char) c1OnEnemyHit(args ...interface{}) bool {
 
 	c.cycleStacks[charIndex] -= stacksToConsume
 
-	// Add flat damage: 60% of Durin's ATK
+	// 固定ダメージを追加: デュリンの攻撃力の60%
 	flatDmg := c.TotalAtk() * c1PurityFlatDmgPercent
 	atk.Info.FlatDmg += flatDmg
 
@@ -178,17 +178,17 @@ func (c *char) c1OnEnemyHit(args ...interface{}) bool {
 	return false
 }
 
-// C2: Unsound Visions
-// For 20s after Durin uses Elemental Burst, after party members trigger
-// Vaporize, Melt, Burning, Overloaded, Pyro Swirl, or Pyro Crystallize,
-// or deal Pyro/Dendro DMG to burning opponents, all party members gain
-// 50% Pyro DMG and corresponding elemental DMG bonus for 6s
+// 2凸: 不穏な幻視 (Unsound Visions)
+// デュリンの元素爆発使用後20秒間、パーティメンバーが
+// 蒸発、溶解、燃焼、過負荷、炎元素拡散、炎元素結晶化を発動した後、
+// または燃焼中の敵に炎/草元素ダメージを与えた後、全パーティメンバーに
+// 炎元素ダメージ50%と対応する元素ダメージボーナス50%を6秒間付与
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
 	}
 
-	// Subscribe to reaction events
+	// 元素反応イベントを購読
 	c.Core.Events.Subscribe(event.OnVaporize, c.c2ReactionCB(attributes.Hydro), "durin-c2-vaporize")
 	c.Core.Events.Subscribe(event.OnMelt, c.c2ReactionCB(attributes.Cryo), "durin-c2-melt")
 	c.Core.Events.Subscribe(event.OnBurning, c.c2ReactionCB(attributes.Dendro), "durin-c2-burning")
@@ -196,13 +196,13 @@ func (c *char) c2() {
 	c.Core.Events.Subscribe(event.OnSwirlPyro, c.c2ReactionCB(attributes.Anemo), "durin-c2-pyro-swirl")
 	c.Core.Events.Subscribe(event.OnCrystallizePyro, c.c2ReactionCB(attributes.Geo), "durin-c2-pyro-crystallize")
 
-	// Subscribe for Pyro/Dendro DMG to burning enemies
+	// 燃焼中の敵への炎/草元素ダメージを購読
 	c.Core.Events.Subscribe(event.OnEnemyDamage, c.c2OnDamageCB, "durin-c2-burning-dmg")
 }
 
 func (c *char) c2ReactionCB(otherEle attributes.Element) func(args ...interface{}) bool {
 	return func(args ...interface{}) bool {
-		// Check if within 20s of burst
+		// 元素爆発後20秒以内か確認
 		if !c.StatusIsActive(c2BuffKey) {
 			return false
 		}
@@ -224,12 +224,12 @@ func (c *char) c2OnDamageCB(args ...interface{}) bool {
 		return false
 	}
 
-	// Check if target is burning
+	// 対象が燃焼中か確認
 	if !e.AuraContains(attributes.Pyro, attributes.Dendro) {
 		return false
 	}
 
-	// Check if dealing Pyro or Dendro DMG
+	// 炎または草元素ダメージを与えているか確認
 	if atk.Info.Element != attributes.Pyro && atk.Info.Element != attributes.Dendro {
 		return false
 	}
@@ -239,9 +239,9 @@ func (c *char) c2OnDamageCB(args ...interface{}) bool {
 }
 
 func (c *char) c2ApplyBuff(otherEle attributes.Element) {
-	// Apply 50% Pyro DMG bonus and corresponding elemental DMG bonus to all party members
+	// 全パーティメンバーに炎元素ダメージ50%と対応する元素ダメージボーナスを適用
 	for _, char := range c.Core.Player.Chars() {
-		// Pyro DMG bonus
+		// 炎元素ダメージボーナス
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.PyroP] = c2DmgBonus
 		char.AddStatMod(character.StatMod{
@@ -252,7 +252,7 @@ func (c *char) c2ApplyBuff(otherEle attributes.Element) {
 			},
 		})
 
-		// Corresponding elemental DMG bonus
+		// 対応する元素ダメージボーナス
 		if otherEle != attributes.Pyro {
 			m2 := make([]float64, attributes.EndStatType)
 			switch otherEle {
@@ -284,9 +284,9 @@ func (c *char) c2ApplyBuff(otherEle attributes.Element) {
 		Write("other_element", otherEle.String())
 }
 
-// C4: Emanare's Source
-// Durin's Elemental Burst DMG is increased by 40%
-// Additionally, 30% chance to not consume Cycle of Enlightenment stacks (handled in c1OnEnemyHit)
+// 4凸: エマナレの源泉 (Emanare's Source)
+// デュリンの元素爆発ダメージが40%増加
+// 追加で、啓示のサイクルのスタックを消費しない確犘30%（c1OnEnemyHitで処理）
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
@@ -306,10 +306,10 @@ func (c *char) c4() {
 	})
 }
 
-// C6: Dual Birth
-// Principle of Purity: Burst DMG ignores 30% DEF, Dragon of White Flame reduces enemy DEF by 30% on hit (6 seconds)
-// Principle of Darkness: Burst DMG ignores 70% DEF (30% base + 40% additional)
-// Note: Purity uses "DEF ignore + DEF shred" combination, Darkness uses only "high-rate DEF ignore"
+// 6凸: 双つの誕生 (Dual Birth)
+// 純化の真理: 元素爆発ダメージが30% DEF無視、白焔の龍がヒット時に敵のDEFを30%減少（6秒）
+// 暗闇の真理: 元素爆発ダメージが70% DEF無視（基本30% + 追加40%）
+// 注: 純化は「DEF無視 + DEFデバフ」の組み合わせ、暗闇は「高倍率DEF無視」のみ
 func (c *char) c6DragonWhiteFlameCB(a combat.AttackCB) {
 	if c.Base.Cons < 6 {
 		return
@@ -320,7 +320,7 @@ func (c *char) c6DragonWhiteFlameCB(a combat.AttackCB) {
 		return
 	}
 
-	// Apply DEF shred
+	// DEFデバフを適用
 	e.AddDefMod(combat.DefMod{
 		Base:  modifier.NewBaseWithHitlag(c6DefShredKey, c6DefShredDuration),
 		Value: -c6DefShred,

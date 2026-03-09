@@ -1,5 +1,4 @@
-// Package shield provide a handler to keep track of shields and
-// add shields etc...
+// shield パッケージはシールドの追跡・追加などを行うハンドラを提供する
 package shield
 
 import "github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"

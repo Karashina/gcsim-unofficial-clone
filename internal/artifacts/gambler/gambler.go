@@ -30,11 +30,11 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// 4-Piece Bonus: Resets Skill CD after defeating an enemy
+// 4セット効果: 敵を倒すとスキルCDをリセット
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
-	// 2 Piece: Increases Elemental Skill DMG by 20%.
+	// 2セット: 元素スキルダメージ+20%
 	if count >= 2 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.DmgP] = 0.20
@@ -49,34 +49,34 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		})
 	}
 
-	// 4 Piece: Defeating an opponent has 100% chance to remove Elemental Skill CD. Can only occur once every 15s.
+	// 4セット: 敵を倒すと100%の確率で元素スキルCDを解除。15秒に1回のみ発動可能。
 	if count >= 4 {
 		const icdKey = "gambler-4pc-icd"
 		c.Events.Subscribe(event.OnTargetDied, func(args ...interface{}) bool {
-			// don't proc if on icd
+			// ICD中は発動しない
 			if char.StatusIsActive(icdKey) {
 				return false
 			}
 			_, ok := args[0].(*enemy.Enemy)
-			// ignore if not an enemy
+			// 敵でなければ無視
 			if !ok {
 				return false
 			}
 			atk := args[1].(*combat.AttackEvent)
-			// don't proc if someone else defeated the enemy
+			// 別のキャラクターが敵を倒した場合は発動しない
 			if atk.Info.ActorIndex != char.Index {
 				return false
 			}
-			// don't proc if off-field
+			// フィールド外では発動しない
 			if c.Player.Active() != char.Index {
 				return false
 			}
 
-			// reset skill cd
+			// スキルクールダウンをリセット
 			char.ResetActionCooldown(action.ActionSkill)
 			c.Log.NewEvent("gambler-4pc proc'd", glog.LogArtifactEvent, char.Index)
 
-			// set icd
+			// ICDをセット
 			char.AddStatus(icdKey, 900, true) // 15s
 
 			return false

@@ -38,18 +38,18 @@ func (h *Handler) StamPercentModIsActive(key string) bool {
 			ind = i
 		}
 	}
-	// mod doesnt exist
+	// mod が存在しない
 	if ind == -1 {
 		return false
 	}
-	// check expiry
+	// 有効期限をチェック
 	if h.stamPercentMods[ind].Expiry < *h.F && h.stamPercentMods[ind].Expiry > -1 {
 		return false
 	}
 	return true
 }
 
-// TODO: not sure if this is affected by hitlag?
+// TODO: ヒットラグの影響を受けるか不明？
 func (h *Handler) AddStamPercentMod(key string, dur int, f StamPercentModFunc) {
 	mod := stamPercentMod{
 		Key:    key,
@@ -63,7 +63,7 @@ func (h *Handler) AddStamPercentMod(key string, dur int, f StamPercentModFunc) {
 		}
 	}
 
-	// if does not exist, make new and add
+	// 存在しなければ新規作成して追加
 	if ind == -1 {
 		mod.Event = h.Log.NewEvent("stam mod added", glog.LogStatusEvent, -1).
 			Write("overwrite", false).
@@ -74,7 +74,7 @@ func (h *Handler) AddStamPercentMod(key string, dur int, f StamPercentModFunc) {
 		return
 	}
 
-	// otherwise check not expired
+	// そうでなければ有効期限切れでないかチェック
 	if h.stamPercentMods[ind].Expiry > *h.F || h.stamPercentMods[ind].Expiry == -1 {
 		h.Log.NewEvent(
 			"stam mod refreshed", glog.LogStatusEvent, -1,
@@ -85,7 +85,7 @@ func (h *Handler) AddStamPercentMod(key string, dur int, f StamPercentModFunc) {
 
 		mod.Event = h.stamPercentMods[ind].Event
 	} else {
-		// if expired overide the event
+		// 期限切れの場合はイベントを上書き
 		mod.Event = h.Log.NewEvent("stam mod added", glog.LogStatusEvent, -1).
 			Write("overwrite", false).
 			Write("key", mod.Key).

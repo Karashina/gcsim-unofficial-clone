@@ -15,7 +15,7 @@ type Config struct {
 
 type Aggregator interface {
 	Add(result stats.Result)
-	// TODO: Merge(other Aggregator) Aggregator for multi-threaded aggregations (optional optimization)
+	// TODO: マルチスレッド集計用のMerge(other Aggregator) Aggregator（任意の最適化）
 	Flush(result *model.SimulationStatistics)
 }
 

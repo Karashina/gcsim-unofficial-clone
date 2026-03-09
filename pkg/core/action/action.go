@@ -1,4 +1,4 @@
-// Package action describes the valid actions that any character may take
+// Package action はキャラクターが実行可能な有効なアクションを定義する
 package action
 
 import (
@@ -9,7 +9,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
-// TODO: add a sync.Pool here to save some memory allocs
+// TODO: メモリ割り当て削減のため sync.Pool を追加する
 type Info struct {
 	Frames              func(next Action) int `json:"-"`
 	AnimationLength     int
@@ -17,22 +17,22 @@ type Info struct {
 	State               AnimationState
 	FramePausedOnHitlag func() bool               `json:"-"`
 	OnRemoved           func(next AnimationState) `json:"-"`
-	// following are exposed only so we can log it properly
+	// 以下はログを正しく出力するためにのみ公開
 	TimePassed           float64
 	NormalizedTimePassed float64
 	UseNormalizedTime    func(next Action) bool
-	// hidden stuff
+	// 非公開フィールド
 	queued []queuedAction
 }
 
-// Eval represents a sim action
+// Eval はシミュレーションアクションを表す
 type Eval struct {
 	Char   keys.Char
 	Action Action
 	Param  map[string]int
 }
 
-// Evaluator provides method for getting next action
+// Evaluator は次のアクションを取得するメソッドを提供する
 type Evaluator interface {
 	NextAction() (*Eval, error) // NextAction should reuturn the next action, or nil if no actions left
 	Continue()
@@ -58,7 +58,7 @@ func (a *Info) CanUse(next Action) bool {
 	if a.UseNormalizedTime != nil && a.UseNormalizedTime(next) {
 		return a.NormalizedTimePassed >= float64(a.Frames(next))
 	}
-	// can't use anything if we're frozen
+	// 凍結中は何も使用できない
 	if a.FramePausedOnHitlag != nil && a.FramePausedOnHitlag() {
 		return false
 	}
@@ -70,14 +70,14 @@ func (a *Info) AnimationState() AnimationState {
 }
 
 func (a *Info) Tick() bool {
-	a.NormalizedTimePassed++ // this always increments
-	// time only goes on if either not hitlag function, or not paused
+	a.NormalizedTimePassed++ // これは常にインクリメント
+	// 時間が進むのはヒットラグ関数がないか、一時停止していない場合のみ
 	if a.FramePausedOnHitlag == nil || !a.FramePausedOnHitlag() {
 		a.TimePassed++
 	}
 
-	// execute all action such that timePassed > delay, and then remove from
-	// slice
+	// timePassed > delay の全アクションを実行し、スライスから削除
+	//
 	if a.queued != nil {
 		n := 0
 		for i := 0; i < len(a.queued); i++ {
@@ -91,9 +91,9 @@ func (a *Info) Tick() bool {
 		a.queued = a.queued[:n]
 	}
 
-	// check if animation is over
+	// アニメーションが終了したかチェック
 	if a.TimePassed > float64(a.AnimationLength) {
-		// handle remove
+		// 削除処理
 		if a.OnRemoved != nil {
 			a.OnRemoved(Idle)
 		}
@@ -116,13 +116,13 @@ const (
 	ActionAim
 	ActionDash
 	ActionJump
-	// following action have to implementations
+	// 以下のアクションは実装がない
 	ActionSwap
 	ActionWalk
-	ActionWait  // character should stand around and wait
-	ActionDelay // delay before executing next action
+	ActionWait  // キャラクターが立ち止まって待機する
+	ActionDelay // 次のアクション実行前の遅延
 	EndActionType
-	// these are only used for frames purposes and that's why it's after end
+	// 以下はフレーム目的のみで使用するため end の後に配置
 	ActionSkillHoldFramesOnly
 )
 

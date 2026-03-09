@@ -37,11 +37,11 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// HP is increased by 16/20/24/28/32%.
-// When current HP increases or decreases, Charged Attack DMG will be increased by 14/18/22/26/30% for 4s.
-// Max 3 stacks. This effect can be triggered once every 0.3s.
-// When the character has 3 stacks or a third stack's duration refreshes, 8/9/10/11/12 Energy will be restored.
-// This Energy restoration effect can be triggered once every 12s.
+// HPが16/20/24/28/32%増加する。
+// 現在のHPが増減した時、重撃ダメージが14/18/22/26/30%増加する（4秒間）。
+// 最大3スタック。この効果は0.3秒毎に1回のみ発動可能。
+// キャラクターが3スタック所持時、または3スタック目の持続時間がリフレッシュされた時、元素エネルギーが8/9/10/11/12回復する。
+// このエネルギー回復効果は12秒毎に1回のみ発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		core:   c,
@@ -90,7 +90,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if amount <= 0 {
 			return false
 		}
-		// do not trigger if at max hp already
+		// 既にHP最大の場合は発動しない
 		if math.Abs(amount-overheal) <= 1e-9 {
 			return false
 		}

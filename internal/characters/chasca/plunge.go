@@ -19,14 +19,14 @@ func init() {
 	lowPlungeFrames = frames.InitAbilSlice(80)
 	lowPlungeFrames[action.ActionAttack] = 69
 	lowPlungeFrames[action.ActionCharge] = 65
-	lowPlungeFrames[action.ActionSkill] = 66 // assuming it's the same as burst
+	lowPlungeFrames[action.ActionSkill] = 66 // 元素爆発と同じと仮定
 	lowPlungeFrames[action.ActionBurst] = 66
 	lowPlungeFrames[action.ActionDash] = 52
 	lowPlungeFrames[action.ActionSwap] = 67
 }
 
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
-	// Not in falling state
+	// 落下状態でない
 	if !c.StatusIsActive(plungeAvailableKey) {
 		return action.Info{}, errors.New("only plunge after skill ends")
 	}
@@ -34,7 +34,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not Wanderer does a collision hit
+		collision = 0 // 放浪者が衝突ヒットするかどうか
 	}
 
 	if collision > 0 {
@@ -53,7 +53,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 		Mult:       lowPlunge[c.TalentLvlAttack()],
 	}
 
-	// TODO: check snapshot delay
+	// TODO: スナップショット遅延を確認
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3),
 		lowPlungeHitmark, lowPlungeHitmark)
 

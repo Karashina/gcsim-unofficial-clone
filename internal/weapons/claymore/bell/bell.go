@@ -25,9 +25,9 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Taking DMG generates a shield which absorbs DMG up to 20% of Max HP. This
-	// shield lasts for 10s or until broken, and can only be triggered once every
-	// 45s. While protected by a shield, the character gains 12% increased DMG.
+	// ダメージを受けると最大HPの20%分を吸収するシールドを生成する。この
+	// シールドは10秒間または破壊されるまで持続し、45秒に1回のみ発動可能。
+	// シールドで保護されている間、キャラクターのダメージが12%増加する。
 	const icdKey = "bell-icd"
 	w := &Weapon{}
 	r := p.Refine
@@ -62,7 +62,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("bell-%v", char.Base.Key.String()))
 
-	// add damage if shielded
+	// シールド中の場合ダメージを追加
 	char.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("bell", -1),
 		AffectedStat: attributes.NoStat,

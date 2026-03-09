@@ -16,17 +16,17 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	// Lunar Phase Shift state
+	// 月相転移の状態
 	lunarPhaseShiftActive bool
 	lunarPhaseShiftSrc    int
-	phaseShiftRadiance    int // Current radiance points
-	maxPhaseShiftRadiance int // Default 300
-	spiritSteedUsages     int // Current usages per mode
-	maxSpiritSteedUsages  int // Default 3, C1 increases to 5
-	savedNormalCounter    int // Saved normal counter for C4
-	// Constellation tracking
-	c1FirstStride     bool // C1: first stride bonus
-	c4ScattermoonUsed bool // C4: next N4 does 250% damage
+	phaseShiftRadiance    int // 現在の輝度ポイント
+	maxPhaseShiftRadiance int // デフォルト300
+	spiritSteedUsages     int // モードごとの現在の使用回数
+	maxSpiritSteedUsages  int // デフォルト3、1凸で5に増加
+	savedNormalCounter    int // 4凸用の保存された通常攻撃カウンター
+	// 命ノ星座追跡用
+	c1FirstStride     bool // 1凸: 初回ストライドボーナス
+	c4ScattermoonUsed bool // 4凸: 次のN4が250%ダメージ
 
 }
 
@@ -38,8 +38,8 @@ const (
 	radianceNormalICDKey     = "zibai-radiance-na-icd"
 	radianceLCrsICDKey       = "zibai-radiance-lcrs-icd"
 	lunarPhaseShiftDuration  = 990 // 16.5 seconds
-	spiritSteedRadianceCost  = 70  // Cost to use Spirit Steed's Stride
-	normalPhaseShiftRadiance = 100 // Default max radiance (spec: 最大100まで)
+	spiritSteedRadianceCost  = 70  // 神馬駆けの使用コスト
+	normalPhaseShiftRadiance = 100 // デフォルト最大輝度（仕様: 最大100まで）
 	c6ElevationBuffKey       = "zibai-c6-elevation"
 	radianceTickInterval     = 6
 	radianceTickGain         = 1
@@ -57,7 +57,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.NormalHitNum = normalHitNum
 	c.BurstCon = 5
 	c.SkillCon = 3
-	// Initialize state
+	// 状態を初期化
 	c.lunarPhaseShiftActive = false
 	c.phaseShiftRadiance = 0
 	c.maxPhaseShiftRadiance = normalPhaseShiftRadiance
@@ -72,15 +72,15 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// Initialize Moonsign passive (grants LCrs-Key to party)
+	// 月相パッシブを初期化（パーティにLCrsキーを付与）
 	c.a0Init()
-	// Initialize A1 passive
+	// 固有天賦1を初期化
 	c.a1Init()
-	// Initialize A4 passive
+	// 固有天賦2を初期化
 	if c.Base.Ascension >= 4 {
 		c.a4Init()
 	}
-	// Initialize constellations
+	// 命ノ星座を初期化
 	if c.Base.Cons >= 1 {
 		c.c1Init()
 	}
@@ -106,7 +106,7 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	return c.Character.AnimationStartDelay(k)
 }
 
-// Condition allows querying character state from GCSL
+// Condition はGCSLからキャラクターの状態を問い合わせる
 func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
 	case "lunar-phase-shift":
@@ -127,11 +127,11 @@ func (c *char) Condition(fields []string) (any, error) {
 	return c.Character.Condition(fields)
 }
 
-// ActionReady checks if the Spirit Steed's Stride can be used
+// ActionReady は神馬駆けが使用可能かチェックする
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// Spirit Steed's Stride special check
+	// Spirit Steed's Strideの特殊チェック
 	if a == action.ActionSkill && c.lunarPhaseShiftActive {
-		// Check if can recast (has radiance and usages)
+		// 再発動可能かチェック（輝度と使用回数）
 		if c.phaseShiftRadiance < spiritSteedRadianceCost {
 			return false, action.InsufficientEnergy
 		}
@@ -143,14 +143,14 @@ func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Fail
 	return c.Character.ActionReady(a, p)
 }
 
-// isMoonsignAscendant checks if Moonsign is Ascendant Gleam
+// isMoonsignAscendant は月相がAscendant Gleamかチェックする
 func (c *char) isMoonsignAscendant() bool {
 	return c.MoonsignAscendant
 }
 
-// addPhaseShiftRadiance adds radiance points, capped at max
+// addPhaseShiftRadiance は輝度ポイントを追加する（上限あり）
 func (c *char) addPhaseShiftRadiance(amount int) {
-	// C6: 50% increased gain rate
+	// 6凸: 獲得率50%増加
 	if c.Base.Cons >= 6 {
 		amount = int(float64(amount) * 1.5)
 	}

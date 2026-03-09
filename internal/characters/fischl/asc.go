@@ -12,36 +12,36 @@ import (
 
 const a4IcdKey = "fischl-a4-icd"
 
-// Hexerei Passive constants
+// Hexereiパッシブ定数
 const (
 	hexOverloadAtkKey = "fischl-hex-overload-atk"
 	hexECEMKey        = "fischl-hex-ec-em"
 	hexC6BoostKey     = "fischl-hex-c6-boost"
-	hexDuration       = 10 * 60 // 10 seconds
+	hexDuration       = 10 * 60 // 10秒
 	hexOverloadAtkPct = 0.225   // 22.5% ATK
 	hexECEM           = 90      // +90 EM
 	hexC6Multiplier   = 2.0     // 2x boost when C6 hits
 )
 
-// A1 is not implemented:
-// TODO: When Fischl hits Oz with a fully-charged Aimed Shot, Oz brings down Thundering Retribution, dealing AoE Electro DMG equal to 152.7% of the arrow's DMG.
+// 固有天賦1は未実装:
+// TODO: フィッシュルがフルチャージ狙い撃ちでオズに命中した時、オズは矢のダメージの152.7%に等しい範囲雷元素ダメージを与える。
 
-// If your current active character triggers an Electro-related Elemental Reaction when Oz is on the field,
-// the opponent shall be stricken with Thundering Retribution that deals Electro DMG equal to 80% of Fischl's ATK.
+// オズがフィールド上にいる時、アクティブキャラクターが雷元素関連反応を起こすと、
+// フィッシュルの攻撃力80%の雷元素ダメージを与える。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
 
-	// Hyperbloom comes from a gadget so it doesn't ignore gadgets
-	//nolint:unparam // ignoring for now, event refactor should get rid of bool return of event sub
+	// 超開花はガジェットから発生するため、ガジェットを無視しない
+	//nolint:unparam // 今は無視。イベントリファクタでbool戻り値は不要になるはず
 	a4cb := func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
 
 		if ae.Info.ActorIndex != c.Core.Player.Active() {
 			return false
 		}
-		// do nothing if oz not on field
+		// オズがフィールド上にいない場合は何もしない
 		if !c.StatusIsActive(ozActiveKey) {
 			return false
 		}
@@ -63,8 +63,8 @@ func (c *char) a4() {
 			Mult:       0.8,
 		}
 
-		// A4 uses Oz Snapshot
-		// TODO: this should target closest enemy within 15m of "elemental reaction position"
+		// 固有天賦4はオズのスナップショットを使用
+		// TODO: 「元素反応発生位置」から15m以内の最も近い敵をターゲットすべき
 		c.Core.QueueAttackWithSnap(
 			ai,
 			c.ozSnapshot.Snapshot,
@@ -90,21 +90,21 @@ func (c *char) a4() {
 	c.Core.Events.Subscribe(event.OnAggravate, a4cbNoGadget, "fischl-a4")
 }
 
-// Hexerei Passive:
-// When Oz is on the field, team characters gain the following buffs:
-// - After triggering Overload: Fischl and active character gain +22.5% ATK for 10s
-// - After triggering Electro-Charged or Aggravate: Fischl and active character gain +90 EM for 10s
-// - When C6 is unlocked and C6 attack hits: Above effects are doubled for 10s
+// Hexerei パッシブ:
+// オズがフィールド上にいる時、チームキャラクターは以下のバフを得る:
+// - 過負荷トリガー後: フィッシュルとアクティブキャラが攻撃力+22.5%（10秒）
+// - 感電または激化トリガー後: フィッシュルとアクティブキャラが元素熟知+90（10秒）
+// - 6凸解放時、6凸攻撃命中で上記効果2倍（10秒）
 func (c *char) hexPassive() {
 	if !c.isHexerei {
 		return
 	}
 
-	// Helper to apply ATK% buff
+	// ATK%バフを適用するヘルパー
 	applyAtkBuff := func(multiplier float64) {
 		atkPct := hexOverloadAtkPct * multiplier
 
-		// Buff Fischl
+		// フィッシュルをバフ
 		c.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(hexOverloadAtkKey, hexDuration),
 			AffectedStat: attributes.ATKP,
@@ -118,7 +118,7 @@ func (c *char) hexPassive() {
 			},
 		})
 
-		// Buff active character
+		// アクティブキャラクターをバフ
 		active := c.Core.Player.ActiveChar()
 		active.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(hexOverloadAtkKey, hexDuration),
@@ -134,11 +134,11 @@ func (c *char) hexPassive() {
 		})
 	}
 
-	// Helper to apply EM buff
+	// EMバフを適用するヘルパー
 	applyEMBuff := func(multiplier float64) {
 		em := hexECEM * multiplier
 
-		// Buff Fischl
+		// フィッシュルをバフ
 		c.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(hexECEMKey, hexDuration),
 			AffectedStat: attributes.EM,
@@ -152,7 +152,7 @@ func (c *char) hexPassive() {
 			},
 		})
 
-		// Buff active character
+		// アクティブキャラクターをバフ
 		active := c.Core.Player.ActiveChar()
 		active.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(hexECEMKey, hexDuration),
@@ -168,14 +168,14 @@ func (c *char) hexPassive() {
 		})
 	}
 
-	// Subscribe to Overload
+	// 過負荷を購読
 	c.Core.Events.Subscribe(event.OnOverload, func(args ...interface{}) bool {
-		// Check if Oz is active
+		// オズが有効かチェック
 		if !c.StatusIsActive(ozActiveKey) {
 			return false
 		}
 
-		// Determine multiplier based on C6 boost status
+		// 6凸ブースト状態に基づいて倍率を決定
 		multiplier := 1.0
 		if c.StatusIsActive(hexC6BoostKey) {
 			multiplier = hexC6Multiplier
@@ -185,14 +185,14 @@ func (c *char) hexPassive() {
 		return false
 	}, "fischl-hex-overload")
 
-	// Subscribe to Electro-Charged and Aggravate
+	// 感電と激化を購読
 	ecCallback := func(args ...interface{}) bool {
-		// Check if Oz is active
+		// オズが有効かチェック
 		if !c.StatusIsActive(ozActiveKey) {
 			return false
 		}
 
-		// Determine multiplier based on C6 boost status
+		// 6凸ブースト状態に基づいて倍率を決定
 		multiplier := 1.0
 		if c.StatusIsActive(hexC6BoostKey) {
 			multiplier = hexC6Multiplier
@@ -206,7 +206,7 @@ func (c *char) hexPassive() {
 	c.Core.Events.Subscribe(event.OnAggravate, ecCallback, "fischl-hex-aggravate")
 }
 
-// C6 Hexerei boost: Subscribe to OnEnemyHit to detect C6 attacks
+// 6凸 Hexerei ブースト: OnEnemyHit を購読して6凸攻撃を検出
 func (c *char) hexC6Boost() {
 	if !c.isHexerei || c.Base.Cons < 6 {
 		return
@@ -215,7 +215,7 @@ func (c *char) hexC6Boost() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
 
-		// Check if this is a C6 attack from Fischl
+		// フィッシュルの6凸攻撃かチェック
 		if ae.Info.ActorIndex != c.Index {
 			return false
 		}
@@ -223,7 +223,7 @@ func (c *char) hexC6Boost() {
 			return false
 		}
 
-		// Activate C6 boost for 10 seconds
+		// 6凸ブーストを10秒間有効化
 		c.AddStatus(hexC6BoostKey, hexDuration, true)
 		return false
 	}, "fischl-hex-c6-boost")

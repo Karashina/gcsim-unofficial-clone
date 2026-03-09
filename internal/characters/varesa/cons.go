@@ -97,7 +97,7 @@ func (c *char) c6() {
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
 			switch {
 			case atk.Info.AttackTag == attacks.AttackTagElementalBurst:
-			case atk.Info.AttackTag == attacks.AttackTagPlunge && atk.Info.Durability > 0: // TODO: collision?
+			case atk.Info.AttackTag == attacks.AttackTagPlunge && atk.Info.Durability > 0: // TODO: 衝突判定？
 			default:
 				return nil, false
 			}

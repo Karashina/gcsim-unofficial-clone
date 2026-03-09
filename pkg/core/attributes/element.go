@@ -6,10 +6,10 @@ import (
 	"strings"
 )
 
-// Element is a string representing an element i.e. HYDRO/PYRO/etc...
+// Elementは元素を表す文字列（HYDRO/PYRO等）
 type Element int
 
-// ElementType should be Pyro, Hydro, Cryo, Electro, Geo, Anemo and maybe Dendro
+// ElementTypeはPyro, Hydro, Cryo, Electro, Geo, Anemo、そしておそらくDendro
 const (
 	Electro Element = iota
 	Pyro

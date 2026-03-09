@@ -15,7 +15,7 @@ var skillFrames []int
 const particleICDKey = "sucrose-particle-icd"
 
 func init() {
-	skillFrames = frames.InitAbilSlice(68) // walk
+	skillFrames = frames.InitAbilSlice(68) // 歩行
 	skillFrames[action.ActionAttack] = 57
 	skillFrames[action.ActionCharge] = 56
 	skillFrames[action.ActionSkill] = 56
@@ -59,13 +59,13 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.particleCB,
 	)
 
-	// reduce charge by 1
+	// チャージを1減少
 	c.SetCDWithDelay(action.ActionSkill, 900, 9)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

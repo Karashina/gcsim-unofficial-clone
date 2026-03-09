@@ -30,18 +30,17 @@ func init() {
 	skillFrames[action.ActionSwap] = 33  // E -> Swap
 }
 
-// Faruzan deploys a polyhedron that deals AoE Anemo DMG to nearby opponents.
-// She will also enter the Manifest Gale state. While in the Manifest Gale
-// state, Faruzan's next fully charged shot will consume this state and will
-// become a Hurricane Arrow that deals Anemo DMG to opponents hit. This DMG
-// will be considered Charged Attack DMG.
+// ファルザンが多面体を展開し、付近の敵に範囲風元素ダメージを与える。
+// 同時に「風導」状態に入る。「風導」状態では次のフルチャージ狙い撃ちが
+// この状態を消費し、風元素ダメージを与えるハリケーンアローとなる。
+// このダメージは重撃ダメージとみなされる。
 //
-// Pressurized Collapse
-// The Hurricane Arrow will create a Pressurized Collapse effect at its point
-// of impact, applying the Pressurized Collapse effect to the opponent or
-// character hit. This effect will be removed after a short delay, creating a
-// vortex that deals AoE Anemo DMG and pulls nearby objects and opponents in.
-// The vortex DMG is considered Elemental Skill DMG.
+// 結圧崩壊
+// ハリケーンアローは着弾点に結圧崩壊効果を生成し、
+// 命中した敵またはキャラクターに結圧崩壊効果を適用する。
+// この効果は短時間後に解除され、範囲風元素ダメージを与え、
+// 付近のオブジェクトと敵を引き寄せる渦巻きを生成する。
+// 渦巻きのダメージは元素スキルダメージとみなされる。
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -61,9 +60,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		skillHitmark,
 	)
 
-	// C1: Faruzan can fire off a maximum of 2 Hurricane
-	// Arrows using fully charged Aimed Shots while under a
-	// single Wind Realm of Nasamjnin effect.
+	// 1凸: 風域の効果中、フルチャージ狙い撃ちで
+	// ハリケーンアローを最大2回発射可能。
 	c.hurricaneCount = 1
 	if c.Base.Cons >= 1 {
 		c.hurricaneCount = 2
@@ -77,7 +75,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -107,9 +105,9 @@ func (c *char) pressurizedCollapse(pos geometry.Point) {
 	}
 	snap := c.Snapshot(&ai)
 
-	// A1:
-	// She can apply The Wind's Secret Ways' Perfidious Wind's Bale to opponents
-	// who are hit by the vortex created by Pressurized Collapse.
+	// 固有天賦1:
+	// 結圧崩壊の渦巻きに当たった敵に秘羽の虎風の効果を付与できる。
+	// 彼女は結圧崩壊の渦巻きに命中した敵に秘羽の虎風の結圧の悪風を付与できる。
 	var shredCb combat.AttackCBFunc
 	if c.Base.Ascension >= 1 {
 		shredCb = applyBurstShredCb

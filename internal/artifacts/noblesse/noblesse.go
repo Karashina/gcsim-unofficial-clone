@@ -63,7 +63,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		s.nob4buff = make([]float64, attributes.EndStatType)
 		s.nob4buff[attributes.ATKP] = 0.2
 
-		//TODO: this used to be post. need to check
+		//TODO: 以前はpostだった。確認が必要
 		c.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
 			// s.s.Log.Debugw("\t\tNoblesse 2 pc","frame",s.F, "name", ds.CharName, "abil", ds.AbilType)
 			if c.Player.Active() != char.Index {
@@ -72,10 +72,10 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 
 			for _, x := range s.core.Player.Chars() {
 				this := x
-				// special case if applying 4 Noblesse to holder to fix this mess:
+				// 装備者へ4ノブレスを適用する際の特殊ケース:
 				// https://library.keqingmains.com/evidence/general-mechanics/bugs#noblesse-oblige-4pc-bonus-not-applying-to-some-bursts
 				// https://docs.google.com/spreadsheets/d/1jhIP3C6B16nL1unX9DL_-LhSNaOy_wwhdr29pzikpcg/edit?usp=sharing
-				// TODO: Does the char snapshot 4 Noblesse if 4 Noblesse is already up and they're refreshing the duration? (rn they would snapshot it)
+				// TODO: 4旧貴族が既に有効で持続時間を更新する場合、キャラは4旧貴族をスナップショットするか？（現在はスナップショットされる）
 				delay := 0
 				if this.Base.Key == char.Base.Key && s.charIsSpecialCase {
 					delay = 1

@@ -10,7 +10,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Handles C4: Every 7 Normal and Charged Attacks, Sucrose will reduce the CD of Astable Anemohypostasis Creation-6308 by 1-7s
+// C4処理: 通常攻撃と重撃の7回ごとに、風霊作成・六三〇八のCDを1～7秒短縮する
 func (c *char) makeC4Callback() func(combat.AttackCB) {
 	if c.Base.Cons < 4 {
 		return nil
@@ -31,11 +31,11 @@ func (c *char) makeC4Callback() func(combat.AttackCB) {
 		}
 		c.c4Count = 0
 
-		// Change can be in float. See this Terrapin video for example
+		// 変更は浮動小数点で可能。例としてTerrapinの動画を参照
 		// https://youtu.be/jB3x5BTYWIA?t=20
 		cdReduction := 60 * int(c.Core.Rand.Float64()*6+1)
 
-		// we simply reduce the action cd
+		// アクションCDを単純に減少
 		c.ReduceActionCooldown(action.ActionSkill, cdReduction)
 
 		c.Core.Log.NewEvent("sucrose c4 reducing E CD", glog.LogCharacterEvent, c.Index).

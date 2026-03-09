@@ -37,7 +37,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		return c.ppChargeAttack(), nil
 	}
 
-	// check for particles
+	// 粒子生成をチェック
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Charge Attack",
@@ -73,10 +73,10 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 }
 
 func (c *char) ppChargeAttack() action.Info {
-	// pp slide: add 1.8s to paramita on charge attack start which gets removed once the charge attack ends
+	// PPスライド: 重撃開始時に paramita に1.8秒加算し、重撃終了時に削除される
 	c.ExtendStatus(paramitaBuff, 1.8*60)
 
-	//TODO: currently assuming snapshot is on cast since it's a bullet and nothing implemented re "pp slide"
+	//TODO: 現在は弾丸なのでキャスト時スナップショットと仮定。"PPスライド"は未実装
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Charge Attack",
@@ -105,7 +105,7 @@ func (c *char) ppChargeAttack() action.Info {
 		c.applyBB,
 	)
 
-	// frames changes if previous action is normal
+	// 前のアクションが通常攻撃の場合フレームが変わる
 	prevState := -1
 	if c.Core.Player.LastAction.Char == c.Index && c.Core.Player.LastAction.Type == action.ActionAttack {
 		prevState = c.NormalCounter - 1
@@ -140,7 +140,7 @@ func (c *char) ppChargeAttack() action.Info {
 		case 4: // N5
 			return 3
 		default:
-			return 500 //TODO: this action is illegal; need better way to handle it
+			return 500 //TODO: このアクションは無効。より良いハンドリングが必要
 		}
 	}
 

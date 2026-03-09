@@ -37,10 +37,10 @@ func init() {
 	burstFrames[action.ActionWalk] = 92
 }
 
-// Summons forth countless lovely dreams and nightmares that pull in nearby objects and opponents,
-// dealing AoE Anemo DMG and summoning a Mini Baku.
+// 数え切れないほどの美しい夢と悪夢を呼び出し、周囲のオブジェクトと敵を引き寄せ、
+// 範囲風元素ダメージを与えてミニバクを召喚する。
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// Activation dmg
+	// 発動ダメージ
 	ai := combat.AttackInfo{
 		ActorIndex:   c.Index,
 		Abil:         burstActivationDmgName,
@@ -57,7 +57,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, burstRadius), burstHitmark, burstHitmark)
 
-	// might be useful for checking in scripts
+	// スクリプトでの確認に役立つ可能性あり
 	c.AddStatus(burstKey, burstDuration, false)
 
 	if c.Base.Cons >= 4 {
@@ -88,14 +88,14 @@ func (c *char) queueSnacks() {
 	snackFunc := func() {
 		pos := c.calculateSnackSpawnLocation()
 
-		// randomize a bit the spawn location
+		// スポーン位置を少しランダム化
 		pos.Y += c.Core.Rand.Float64() * snackSpawnLocationVariance * randomSign()
 		pos.X += c.Core.Rand.Float64() * snackSpawnLocationVariance * randomSign()
 
 		newSnack(c, pos)
 	}
 
-	// Spawn timer starts at burst hitmark
+	// スポーンタイマーは元素爆発のヒットマークから開始
 	spawnTime := burstHitmark
 	for i := int(snackInterval); i <= burstDuration; i += snackInterval {
 		c.Core.Tasks.Add(snackFunc, spawnTime+i)
@@ -103,19 +103,19 @@ func (c *char) queueSnacks() {
 }
 
 func (c *char) calculateSnackSpawnLocation() geometry.Point {
-	// According to testing, snacks appear within a small range (1m) in front of the target/player.
-	// However since the enemy direction is not set by default towards the player, we calculate
-	// a position relative to the player/enemy
+	// テストによると、おやつはターゲット/プレイヤーの前方の狭い範囲（1m）に出現する。
+	// ただし敵の方向はデフォルトでプレイヤーに向いていないため、
+	// プレイヤー/敵からの相対位置を計算する
 	playerPos := c.Core.Combat.Player().Pos()
 	finalPosition := playerPos
 
-	// find the closest enemy
+	// 最も近い敵を探す
 	target := c.Core.Combat.ClosestEnemyWithinArea(
 		combat.NewCircleHitOnTarget(playerPos, nil, snackSpawnOnEnemyRadius),
 		nil,
 	)
 
-	// if enemy is found use this, otherwise use the player position
+	// 敵が見つかればそれを使用、見つからなければプレイヤー位置を使用
 	if target != nil {
 		targetShape := target.Shape()
 		finalPosition = targetShape.Pos()
@@ -130,8 +130,8 @@ func (c *char) calculateSnackSpawnLocation() geometry.Point {
 				finalPosition.Y += v.Radius() * direction.Y
 			}
 		} else if _, ok := targetShape.(*geometry.Rectangle); ok {
-			// currently we cannot reliably get an edge to spawn the snack on rectangle.
-			// place it somewhere around the middle
+			// 現在、矩形上でおやつをスポーンさせるエッジを確実に取得できない。
+			// 中央付近に配置する
 			finalPosition.X += direction.X / 2
 			finalPosition.Y += direction.Y / 2
 		}

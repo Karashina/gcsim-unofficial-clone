@@ -5,7 +5,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
 )
 
-// Extends Riptide duration by 8s.
+// 断流の持続時間を8秒延長する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -13,8 +13,8 @@ func (c *char) a1() {
 	c.riptideDuration += 8 * 60
 }
 
-// When Tartaglia is in Foul Legacy: Raging Tide's Melee Stance, on dealing a CRIT hit,
-// Normal and Charged Attacks apply the Riptide status effect to opponents.
+// タルタリヤが断流・近接スタンス中に会心が発生した場合、
+// 通常攻撃と重撃が敵に断流を付与する。
 func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil

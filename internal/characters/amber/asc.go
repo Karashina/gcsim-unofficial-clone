@@ -9,12 +9,12 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Increases the CRIT Rate of Fiery Rain by 10% and widens its AoE by 30%.
+// 灼熱の雨の会心率を10%上昇させ、AoEを30%拡大する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	// crit
+	// 会心
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CR] = .1
 	c.AddAttackMod(character.AttackMod{
@@ -23,11 +23,11 @@ func (c *char) a1() {
 			return m, atk.Info.AttackTag == attacks.AttackTagElementalBurst
 		},
 	})
-	// AoE
+	// AoE拡大
 	c.burstRadius *= 1.3
 }
 
-// Aimed Shot hits on weak points increase ATK by 15% for 10s.
+// 狙い撃ちが弱点に命中すると攻撃力が15%上昇する（10秒間）。
 func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil

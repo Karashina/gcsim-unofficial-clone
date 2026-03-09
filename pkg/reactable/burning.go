@@ -16,22 +16,22 @@ func (r *Reactable) TryBurning(a *combat.AttackEvent) bool {
 
 	dendroDur := r.Durability[Dendro]
 
-	// adding pyro or dendro just adds to durability
+	// 炎または草を追加すると元素量が増加するだけ
 	switch a.Info.Element {
 	case attributes.Pyro:
-		// if there's no existing pyro/burning or dendro/quicken then do nothing
+		// 既存の炎/燃焼または草/激化がなければ何もしない
 		if r.Durability[Dendro] < ZeroDur && r.Durability[Quicken] < ZeroDur {
 			return false
 		}
-		// add to pyro durability
+		// 炎元素量に追加
 		// r.attachOrRefillNormalEle(ModifierPyro, a.Info.Durability)
 	case attributes.Dendro:
-		// if there's no existing pyro/burning or dendro/quicken then do nothing
+		// 既存の炎/燃焼または草/激化がなければ何もしない
 		if r.Durability[Pyro] < ZeroDur && r.Durability[Burning] < ZeroDur {
 			return false
 		}
 		dendroDur = max(dendroDur, a.Info.Durability*0.8)
-		// add to dendro durability
+		// 草元素量に追加
 		// r.attachOrRefillNormalEle(ModifierDendro, a.Info.Durability)
 	default:
 		return false
@@ -48,13 +48,13 @@ func (r *Reactable) TryBurning(a *combat.AttackEvent) bool {
 		if r.burningTickSrc == -1 {
 			r.burningTickSrc = r.core.F
 			if t, ok := r.self.(Enemy); ok {
-				// queue up burning ticks
+				// 燃焼ティックをキュー
 				t.QueueEnemyTask(r.nextBurningTick(r.core.F, 1, t), 15)
 			}
 		}
 		return true
 	}
-	// overwrite burning fuel and recalc burning dmg
+	// 燃焼燃料を上書きし、燃焼ダメージを再計算
 	if a.Info.Element == attributes.Dendro {
 		r.attachBurningFuel(a.Info.Durability, 0.8)
 	}
@@ -64,7 +64,7 @@ func (r *Reactable) TryBurning(a *combat.AttackEvent) bool {
 }
 
 func (r *Reactable) attachBurningFuel(dur, mult reactions.Durability) {
-	// burning fuel always overwrites
+	// 燃焼燃料は常に上書きされる
 	r.Durability[BurningFuel] = mult * dur
 	decayRate := mult * dur / (6*dur + 420)
 	if decayRate < 10.0/60.0 {
@@ -97,17 +97,17 @@ func (r *Reactable) calcBurningDmg(a *combat.AttackEvent) {
 func (r *Reactable) nextBurningTick(src, counter int, t Enemy) func() {
 	return func() {
 		if r.burningTickSrc != src {
-			// source changed, do nothing
+			// ソースが変更されたので何もしない
 			return
 		}
-		// burning SHOULD be active still, since if not we would have
-		// called cleanup and set source to -1
+		// 燃焼はまだアクティブであるはず。そうでなければクリーンアップが
+		// 呼ばれてソースが-1に設定されているはず
 		if r.Durability[BurningFuel] < ZeroDur || r.Durability[Burning] < ZeroDur {
 			return
 		}
-		// so burning is active, which means both auras must still have value > 0, so we can do dmg
+		// 燃焼がアクティブであるため、両オーラの値が0より大きいはずなのでダメージを与える
 		if counter != 9 {
-			// skip the 9th tick because hyv spaghetti
+			// 9番目のティックはスキップ（HoYoverseのスパゲッティコードのため）
 			ai := r.burningAtk
 			ap := combat.NewCircleHitOnTarget(r.self, nil, 1)
 			r.core.QueueAttackWithSnap(
@@ -116,7 +116,7 @@ func (r *Reactable) nextBurningTick(src, counter int, t Enemy) func() {
 				ap,
 				0,
 			)
-			// self damage
+			// 自傷ダメージ
 			ai.Abil += reactions.SelfDamageSuffix
 			ap.SkipTargets[targets.TargettablePlayer] = false
 			ap.SkipTargets[targets.TargettableEnemy] = true
@@ -129,17 +129,17 @@ func (r *Reactable) nextBurningTick(src, counter int, t Enemy) func() {
 			)
 		}
 		counter++
-		// queue up next tick
+		// 次のティックをキュー
 		t.QueueEnemyTask(r.nextBurningTick(src, counter, t), 15)
 	}
 }
 
-// burningCheck purges modifiers if burning no longer active
+// burningCheck は燃焼がアクティブでなくなった場合に修飾子をパージする
 func (r *Reactable) burningCheck() {
 	if r.Durability[Burning] < ZeroDur && r.Durability[BurningFuel] > ZeroDur {
-		// no more burning ticks
+		// 燃焼ティックはもう発生しない
 		r.burningTickSrc = -1
-		// remove burning fuel
+		// 燃焼燃料を除去
 		r.Durability[BurningFuel] = 0
 		r.DecayRate[BurningFuel] = 0
 	}

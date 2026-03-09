@@ -10,22 +10,21 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// a0Init initializes the Moonsign Benediction passive
-// When a party member triggers a Hydro Crystallize reaction, it will be converted
-// into the Lunar-Crystallize reaction, with every 100 DEF that Zibai has increasing
-// Lunar-Crystallize's Base DMG by 0.7%, up to a maximum of 14%.
-// Additionally, when Zibai is in the party, the party's Moonsign will increase by 1 level.
+// a0Init は月相の加護パッシブを初期化する
+// パーティメンバーが水元素結晶反応をトリガーすると、Lunar-Crystallize反応に変換され、
+// ジバイの防御力100ごとにLunar-Crystallizeの基礎ダメージが0.7%増加する（最大14%）。
+// さらに、ジバイがパーティにいると、パーティの月相レベルが1増加する。
 func (c *char) a0Init() {
-	// Grant LCrs-Key to all party members (enables Lunar-Crystallize)
+	// 全パーティメンバーにLCrsキーを付与（Lunar-Crystallizeを有効化）
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatus("LCrs-key", -1, true)
 	}
-	// Grant moonsignKey to Zibai (increases party Moonsign level by 1)
-	// This is counted during party initialization to determine Moonsign state
+	// ジバイにmoonsignKeyを付与（パーティの月相レベルを1増加）
+	// これはパーティ初期化時に月相状態を決定するためにカウントされる
 	c.AddStatus("moonsignKey", -1, true)
-	// Add Lunar-Crystallize Base DMG bonus based on DEF
-	// STUB: This should modify the Lunar-Crystallize reaction damage calculation
-	// Every 100 DEF = 0.7% bonus, max 14% (2000 DEF)
+	// 防御力に基づくLunar-Crystallize基礎ダメージボーナスを追加
+	// STUB: Lunar-Crystallize反応ダメージ計算を修正する必要あり
+	// 防御力100ごとに0.7%ボーナス、最大14%（防御力2000）
 	c.AddLCrsBaseReactBonusMod(character.LCrsBaseReactBonusMod{
 		Base: modifier.NewBase("the-coursing-sun-and-moon-a0", -1),
 		Amount: func(ai combat.AttackInfo) (float64, bool) {
@@ -36,17 +35,17 @@ func (c *char) a0Init() {
 	})
 }
 
-// a1Init initializes The Selenic Adeptus Descends passive
-// When casting the Elemental Skill, or when nearby party members trigger Lunar-Crystallize reaction dmg,
-// Zibai gains the Selenic Descent effect for 4s: The DMG dealt by the 2nd hit of Spirit Steed's Stride
-// is increased by 60% of Zibai's DEF.
+// a1Init は降り立つ仙術パッシブを初期化する
+// 元素スキルを発動するか、近くのパーティメンバーがLunar-Crystallize反応ダメージをトリガーすると、
+// ジバイがSelenic Descent効果を4秒間獲得する: 神馬駆けの2段目のダメージが
+// ジバイの防御力の60%分増加する。
 func (c *char) a1Init() {
 	if c.Base.Ascension < 1 {
 		return
 	}
 	const selenicDescentDuration = 4 * 60 // 4 seconds
 
-	// Subscribe to Skill cast
+	// 元素スキル発動を購読
 	c.Core.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Core.Player.Active() != c.Index {
 			return false
@@ -55,13 +54,13 @@ func (c *char) a1Init() {
 		return false
 	}, "zibai-a1-skill")
 
-	// Subscribe to Lunar-Crystallize reaction damage from party members
+	// パーティメンバーのLunar-Crystallize反応ダメージを購読
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		ae, ok := args[1].(*combat.AttackEvent)
 		if !ok {
 			return false
 		}
-		// Only trigger on Lunar-Crystallize reaction damage
+		// Lunar-Crystallize反応ダメージのみトリガー
 		if ae.Info.Abil != string(reactions.LunarCrystallize) {
 			return false
 		}
@@ -70,7 +69,7 @@ func (c *char) a1Init() {
 	}, "zibai-a1-lcrs")
 }
 
-// applySelenicDescent applies the Selenic Descent buff
+// applySelenicDescent はSelenic Descentバフを適用する
 func (c *char) applySelenicDescent(duration int) {
 	c.AddStatus(selenicDescentKey, duration, true)
 
@@ -78,9 +77,9 @@ func (c *char) applySelenicDescent(duration int) {
 		Write("duration", duration)
 }
 
-// a4Init initializes Layered Peaks Pierce the Clouds passive
-// Other Geo party members increase Zibai's DEF by 15% each.
-// Hydro party members increase her Elemental Mastery by 60 each.
+// a4Init は層峰雲を突くパッシブを初期化する
+// 他の岩元素パーティメンバーがジバイの防御力を15%ずつ増加させる。
+// 水元素パーティメンバーが元素熟知だ60ずつ増加させる。
 func (c *char) a4Init() {
 	if c.Base.Ascension < 4 {
 		return
@@ -91,7 +90,7 @@ func (c *char) a4Init() {
 
 	for _, char := range c.Core.Player.Chars() {
 		if char.Index == c.Index {
-			continue // Skip self
+			continue // 自分をスキップ
 		}
 		switch char.Base.Element {
 		case attributes.Geo:

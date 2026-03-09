@@ -78,19 +78,19 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionAttack], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionAttack], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
 
 func (c *char) queueManChai() {
-	// new man chai can't spawn if one is currently active
+	// 新しいマンチャイは現在アクティブなものがある場合は出現できない
 	if c.StatusIsActive(manChaiKey) {
 		return
 	}
 	c.AddStatus(manChaiKey, c.manChaiWalkBack, false)
 	c.Core.Tasks.Add(func() {
-		// can't link up if off-field
+		// フィールド外では合流不可
 		if c.Core.Player.Active() != c.Index {
 			return
 		}
@@ -102,7 +102,7 @@ func (c *char) queueManChai() {
 
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
-		// do nothing if previous char wasn't gaming
+		// 前のキャラが嘉明でなければ何もしない
 		prev := args[0].(int)
 		if prev != c.Index {
 			return false

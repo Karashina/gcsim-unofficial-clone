@@ -33,7 +33,7 @@ func init() {
 	attackFrames[2][action.ActionCharge] = 42                             // N3 -> CA
 }
 
-// Standard attack function with seal handling
+// 朱印処理付きの標準通常攻撃関数
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	travel, ok := p["travel"]
 	if !ok {
@@ -45,7 +45,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		if a.Target.Type() != targets.TargettableEnemy {
 			return
 		}
-		// doesn't gain seals off-field
+		// フィールド外では朱印を獲得しない
 		if c.Core.Player.Active() != c.Index {
 			return
 		}

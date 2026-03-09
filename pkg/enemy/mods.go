@@ -9,7 +9,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Add.
+// 追加。
 func (e *Enemy) AddStatus(key string, dur int, hitlag bool) {
 	mod := combat.Status{
 		Base: modifier.Base{
@@ -39,7 +39,7 @@ func (e *Enemy) AddDefMod(mod combat.DefMod) {
 	modifier.LogAdd("enemy", -1, &mod, e.Core.Log, overwrote, oldEvt)
 }
 
-// Delete.
+// 削除。
 
 func (e *Enemy) deleteMod(key string) {
 	m := modifier.Delete(&e.mods, key)
@@ -52,7 +52,7 @@ func (e *Enemy) DeleteStatus(key string)    { e.deleteMod(key) }
 func (e *Enemy) DeleteResistMod(key string) { e.deleteMod(key) }
 func (e *Enemy) DeleteDefMod(key string)    { e.deleteMod(key) }
 
-// Active.
+// アクティブ判定。
 func (e *Enemy) modIsActive(key string) bool {
 	_, ok := modifier.FindCheckExpiry(&e.mods, key, e.Core.F)
 	return ok
@@ -61,21 +61,21 @@ func (e *Enemy) StatusIsActive(key string) bool    { return e.modIsActive(key) }
 func (e *Enemy) ResistModIsActive(key string) bool { return e.modIsActive(key) }
 func (e *Enemy) DefModIsActive(key string) bool    { return e.modIsActive(key) }
 
-// Expiry
+// 有効期限。
 
 func (e *Enemy) getModExpiry(key string) int {
 	m := modifier.Find(&e.mods, key)
 	if m != -1 {
 		return e.mods[m].Expiry()
 	}
-	// must be 0 if doesn't exist. avoid using -1 b/c that's infinite
+	// 存在しない場合は0であるべき。-1は無限を意味するため避ける
 	return 0
 }
 func (e *Enemy) StatusExpiry(key string) int { return e.getModExpiry(key) }
 
-// Amount.
+// 量。
 
-// TODO: this needs to purge if done?
+// TODO: 完了時にパージが必要？
 func (e *Enemy) resist(ai *combat.AttackInfo, evt glog.Event) float64 {
 	var logDetails []interface{}
 	var sb strings.Builder
@@ -105,7 +105,7 @@ func (e *Enemy) resist(ai *combat.AttackInfo, evt glog.Event) float64 {
 		}
 	}
 
-	// No need to output if resist was not modified
+	// 耐性が変更されていない場合は出力不要
 	if e.Core.Flags.LogDebug && len(logDetails) > 1 {
 		evt.Write("resist_mods", logDetails)
 	}
@@ -141,7 +141,7 @@ func (e *Enemy) defAdj(evt glog.Event) float64 {
 		}
 	}
 
-	// No need to output if def was not modified
+	// 防御が変更されていない場合は出力不要
 	if e.Core.Flags.LogDebug && len(logDetails) > 1 {
 		evt.Write("def_mods", logDetails)
 	}

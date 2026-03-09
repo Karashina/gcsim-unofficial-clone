@@ -25,17 +25,15 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// A part of the "Millennial Movement" that wanders amidst the winds.
-// Increases DMG by 10%. When the character wielding this weapon triggers
-// Elemental Reactions, they gain a Sigil of Rebellion. This effect can be
-// triggered once every 0.5s and can be triggered even if said character is
-// not on the field. When you possess 2 Sigils of Rebellion, all of them will
-// be consumed and all nearby party members will obtain "Millennial Movement:
-// Song of Resistance" for 12s. "Millennial Movement: Song of Resistance"
-// increases Normal, Charged and Plunging Attack DMG by 16% and increases ATK
-// by 20%. Once this effect is triggered, you will not gain Sigils of
-// Rebellion for 20s. Of the many effects of the "Millennial Movement," buffs
-// of the same type will not stack.
+// 「千年の大楽章」シリーズの一部。風の中をさまよう。
+// ダメージが10%増加する。この武器を装備したキャラクターが
+// 元素反応を起こした時、「叛逆の紋章」を獲得する。この効果は
+// 0.5秒毎に1回発動可能で、キャラがフィールドにいなくても発動する。
+// 紋章を2つ所持すると、全て消費され、近くのパーティメンバー全員が
+// 12秒間「千年の大楽章：抵抗の歌」を得る。通常攻撃、重撃、
+// 落下攻撃のダメージが16%増加し、攻撃力が20%増加する。
+// ただし、この効果発動後20秒間は紋章を獲得できない。
+// 「千年の大楽章」の同種のバフは重複しない。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -83,7 +81,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			stacks = 0
 			char.AddStatus(cdKey, cd, true)
 			for _, char := range c.Player.Chars() {
-				// Attack buff snapshots so it needs to be in a separate mod
+				// 攻撃バフはスナップショットされるため、別のModで設定する必要がある
 				char.AddStatMod(character.StatMod{
 					Base:         modifier.NewBaseWithHitlag(common.MillennialKey, buffDuration),
 					AffectedStat: attributes.ATKP,

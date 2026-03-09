@@ -17,7 +17,7 @@ func (c *char) c1(f, travel int) {
 		return
 	}
 
-	// TODO: Assume that these are 1A (not specified in library)
+	// TODO: 1Aと仮定（ライブラリに指定なし）
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "At Water's Edge (C1)",
@@ -31,7 +31,7 @@ func (c *char) c1(f, travel int) {
 	}
 	ai.FlatDmg = 0.3 * c.MaxHP()
 
-	// TODO: Is this snapshotted/dynamic?
+	// TODO: スナップショット/ダイナミックか不明
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 1.2),
@@ -42,9 +42,9 @@ func (c *char) c1(f, travel int) {
 
 const c4ICDKey = "kokomi-c4-icd"
 
-// C4 (Energy piece only) handling
-// While donning the Ceremonial Garment created by Nereid's Ascension, Sangonomiya Kokomi's Normal Attack SPD is increased by 10%.
-// and Normal Attacks that hit opponents will restore 0.8 Energy for her. This effect can occur once every 0.2s.
+// 4凸（エネルギー回復のみ）の処理
+// 海人の羽衣中、珊瑚宮心海の通常攻撃速度が10%増加。
+// 通常攻撃が敵に命中すると、0.8エネルギーを回復する。この効果は0.2秒に1回のみ発動。
 func (c *char) makeC4CB() combat.AttackCBFunc {
 	if c.Base.Cons < 4 {
 		return nil
@@ -64,9 +64,8 @@ func (c *char) makeC4CB() combat.AttackCBFunc {
 	}
 }
 
-// C6 handling
-// While donning the Ceremonial Garment created by Nereid's Ascension.
-// Sangonomiya Kokomi gains a 40% Hydro DMG Bonus for 4s after her Normal and Charged Attacks heal a character with 80% or more HP.
+// 6凸: 海人の羽衣中、通常攻撃・重撃でHP80%以上のキャラクターを
+// 回復すると、4秒間水元素ダメージ+40%。
 func (c *char) c6() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.HydroP] = .4
@@ -82,7 +81,7 @@ func (c *char) c6() {
 				return m, true
 			},
 		})
-		// No need to continue checking if we found one
+		// 1人見つかれば確認不要
 		break
 	}
 }

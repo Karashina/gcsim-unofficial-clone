@@ -37,7 +37,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Mult:       burstExplosion[c.TalentLvlBurst()],
 	}
 	c.burstPos = c.Core.Combat.Player().Pos()
-	//TODO: this should have its own position
+	//TODO: 独自の位置を持つべき
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.burstPos, nil, 5.5),
@@ -64,7 +64,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionAttack], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionAttack], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

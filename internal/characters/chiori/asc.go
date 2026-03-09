@@ -12,59 +12,56 @@ import (
 )
 
 const (
-	// A1
-	// window in which a1 can be used after skill
+	// 固有天賦1
+	// スキル使用後に固有天賢1を発動可能な時間枠
 	a1WindowKey = "chiori-a1-window"
-	// Tapestry - coordinated attacks
+	// Tapestry - 連携攻撃
 	a1SeizeTheMomentKey         = "chiori-seize-the-moment"
 	a1SeizeTheMomentDuration    = 8 * 60
 	a1SeizeTheMomentICDKey      = "chiori-seize-the-moment-icd"
 	a1SeizeTheMomentICD         = 2 * 60
 	a1SeizeTheMomentAttackLimit = 2
-	// Tailoring - geo infusion
+	// Tailoring - 岩元素付与
 	a1GeoInfusionKey      = "chiori-tailoring"
 	a1GeoInfusionDuration = 5 * 60
-	// A4
+	// 固有天賦2
 	a4BuffKey  = "chiori-a4"
 	a4Duration = 20 * 60
 )
 
-// Gain different effects depending on the next action you take within a short
-// duration after using Fluttering Hasode's upward sweep. If you Press the
-// Elemental Skill, you will trigger the Tapestry effect. If you (Press/Tap) your Normal
-// Attack, the Tailoring effect will be triggered instead.
+// 羽ばたきの別れの上昇攻撃使用後、短時間内に取る次のアクションに応じて異なる効果を得る。
+// 元素スキルを押すと「Tapestry」効果が発動。
+// 通常攻撃を押す/タップすると「Tailoring」効果が発動。
 //
 // Tapestry
-// - Switches to the next character in your roster.
-// - Grants all your party members "Seize the Moment": When your active party
-// member's Normal Attacks, Charged Attacks, and Plunging Attacks hit a nearby
-// opponent, "Tamoto" will execute a coordinated attack, dealing 100% of
-// Fluttering Hasode's upward sweep DMG as AoE Geo DMG at the opponent's
-// location. DMG dealt this way is considered Elemental Skill DMG.
-// - "Seize the Moment" lasts 8s, and 1 of "Tamoto"'s coordinated attack can be
-// unleashed every 2s. 2 such coordinated attacks can occur per "Seize the
-// Moment" effect duration.
+// - ロスターの次のキャラクターに切り替え。
+// - 全パーティメンバーに「好機を見て」を付与: アクティブキャラの通常攻撃、
+// 重撃、落下攻撃が付近の敵に命中すると、「Tamoto」が連携攻撃を実行。
+// 羽ばたきの別れの上昇攻撃ダメージの100%の岩元素範囲ダメージ。
+// このダメージは元素スキルダメージ扱い。
+// - 「好機を見て」は8秒間持続、2秒ごとに1回の連携攻撃が可能。
+// 効果時間中に最大2回の連携攻撃が発生可能。
 //
 // Tailoring
-// - Chiori gains Geo infusion for 5s.
+// - 千織が5秒間岩元素付与を得る。
 //
-// When on the field, if Chiori does not either Press her Elemental Skill or use
-// a Normal Attack within a short time after using Fluttering Hasode's upward
-// sweep, the Tailoring effect will be triggered by default.
+// フィールド上で、羽ばたきの別れの上昇攻撃後短時間内に
+// 元素スキル押しまたは通常攻撃を行わなかった場合、
+// デフォルトでTailoring効果が発動する。
 func (c *char) a1TapestrySetup() {
 	if c.Base.Ascension < 1 {
 		return
 	}
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		// seize the moment not active
+		// 好機を見てがアクティブでない
 		if !c.StatusIsActive(a1SeizeTheMomentKey) {
 			return false
 		}
-		// seize the moment on icd
+		// 好機を見てがICD中
 		if c.StatusIsActive(a1SeizeTheMomentICDKey) {
 			return false
 		}
-		// attack not na/ca/plunge
+		// 通常攻撃/重撃/落下攻撃以外の攻撃
 		atk := args[1].(*combat.AttackEvent)
 		switch atk.Info.AttackTag {
 		case attacks.AttackTagNormal:
@@ -73,11 +70,11 @@ func (c *char) a1TapestrySetup() {
 		default:
 			return false
 		}
-		// atk not by active char
+		// アクティブキャラによる攻撃でない
 		if atk.Info.ActorIndex != c.Core.Player.Active() {
 			return false
 		}
-		// atk not within 30m of player
+		// 攻撃がプレイヤーから30m以内でない
 		t, ok := args[0].(*enemy.Enemy)
 		if !ok {
 			return false
@@ -86,10 +83,10 @@ func (c *char) a1TapestrySetup() {
 			return false
 		}
 
-		// apply icd
+		// ICDを適用
 		c.AddStatus(a1SeizeTheMomentICDKey, a1SeizeTheMomentICD, true)
 
-		// deal dmg
+		// ダメージを与える
 		ai := combat.AttackInfo{
 			Abil:       "Fluttering Hasode (Seize the Moment)",
 			ActorIndex: c.Index,
@@ -106,7 +103,7 @@ func (c *char) a1TapestrySetup() {
 		ai.FlatDmg *= thrustDefScaling[c.TalentLvlSkill()]
 		c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(t, nil, 2.5), 1)
 
-		// increment attack count and delete seize the moment if reached limit
+		// 攻撃カウントを増加し、上限に達した場合は好機を見てを削除
 		c.a1AttackCount++
 		if c.a1AttackCount == a1SeizeTheMomentAttackLimit {
 			c.DeleteStatus(a1SeizeTheMomentKey)
@@ -116,17 +113,17 @@ func (c *char) a1TapestrySetup() {
 	}, a1SeizeTheMomentKey)
 }
 
-// tap and hold skill have different start and duration for a1 window
-// so a1 activation is based on the supplied values
+// 単押しと長押しで固有天賦1ウィンドウの開始と持続時間が異なるため、
+// 固有天賦1の発動は指定された値に基づく
 func (c *char) activateA1Window(start, duration int) {
 	if c.Base.Ascension < 1 {
 		return
 	}
 	c.QueueCharTask(func() {
 		c.AddStatus(a1WindowKey, duration, true)
-		// When on the field, if Chiori does not either Press her Elemental Skill or use
-		// a Normal Attack within a short time after using Fluttering Hasode's upward
-		// sweep, the Tailoring effect will be triggered by default.
+		// フィールド上で、羽ばたきの別れの上昇攻撃後短時間内に
+		// 元素スキル押しまたは通常攻撃を行わなかった場合、
+		// デフォルトでTailoring効果が発動する。
 		c.a1Triggered = false
 		c.QueueCharTask(func() {
 			if c.a1Triggered {
@@ -139,7 +136,7 @@ func (c *char) activateA1Window(start, duration int) {
 
 func (c *char) commonA1Trigger() {
 	c.a1Triggered = true
-	// she can't use skill again if she triggers this
+	// これを発動するとスキルを再使用できなくなる
 	c.DeleteStatus(a1WindowKey)
 	c.c4Activation()
 	c.c6CooldownReduction()
@@ -167,7 +164,7 @@ func (c *char) a1Tailoring() {
 	)
 }
 
-// tailoring proc via na can fail if it was already triggered via a1 window expiring
+// 通常攻撃経由のTailoring発動は、固有天賦1ウィンドウ期限切れで既に発動済みの場合失敗する可能性がある
 func (c *char) tryTriggerA1TailoringNA() {
 	if c.Base.Ascension < 1 {
 		return
@@ -178,7 +175,7 @@ func (c *char) tryTriggerA1TailoringNA() {
 	c.a1Tailoring()
 }
 
-// When a nearby party member creates a Geo Construct, Chiori will gain 20% Geo DMG Bonus for 20s.
+// パーティメンバーが岩元素設置物を生成した時、千織は20秒間岩元素ダメージボーナス+20%を得る。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -191,7 +188,7 @@ func (c *char) a4() {
 	}, a4BuffKey)
 }
 
-// needs to be callable separately because of c1 rock doll activating a4
+// 1凸のrock dollが固有天賦4を発動するため、単独で呼び出せる必要がある
 func (c *char) applyA4Buff() {
 	c.AddStatMod(character.StatMod{
 		Base:         modifier.NewBaseWithHitlag(a4BuffKey, a4Duration),

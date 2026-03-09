@@ -20,13 +20,13 @@ func init() {
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	// GU: 1U (Durability: 25)
-	// ICD Tag: Charged Attack (ICDTagExtraAttack)
-	// ICD Group: Standard (ICDGroupDefault)
+	// 元素量: 1U (元素耐性: 25)
+	// ICDタグ: 重撃 (ICDTagExtraAttack)
+	// ICDグループ: 標準 (ICDGroupDefault)
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Charged Attack",
-		AttackTag:          attacks.AttackTagExtra, // Charged attacks use AttackTagExtra
+		AttackTag:          attacks.AttackTagExtra, // 重撃はAttackTagExtraを使用
 		ICDTag:             attacks.ICDTagExtraAttack,
 		ICDGroup:           attacks.ICDGroupDefault,
 		StrikeType:         attacks.StrikeTypeSlash,

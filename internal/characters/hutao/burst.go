@@ -51,7 +51,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		bbcb = c.applyBB
 	}
 
-	//TODO: currently snapshotting at cast but apparently damage is based on stats on contact, not at cast??
+	//TODO: 現在はキャスト時にスナップショットしているが、ダメージはキャスト時ではなく着弾時のステータスに基づく？？
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Spirit Soother",
@@ -78,7 +78,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

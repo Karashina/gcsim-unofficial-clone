@@ -15,7 +15,7 @@ import (
 var skillFrames []int
 
 const (
-	skillInitHitmark    = 23 // Initial Hit
+	skillInitHitmark    = 23 // 初撃
 	skillAlignedHitmark = 83
 	skillTicks          = 21
 	skillInterval       = 58.5
@@ -60,7 +60,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(skillPos, geometry.Point{Y: -1.5}, 5), skillInitHitmark, skillInitHitmark, c.particleCB, c.makeA4CB())
 
-	// E duration and ticks are not affected by hitlag
+	// スキルの持続時間とTickはヒットラグの影響を受けない
 	c.skillSrc = c.Core.F
 	for i := 0.0; i < skillTicks; i++ {
 		c.Core.Tasks.Add(c.skillTick(c.skillSrc), skillFirstTickDelay+ceil(skillInterval*i))
@@ -73,7 +73,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		}
 		c.AddStatus(skillAlignedICDKey, skillAlignedICD, true)
 		aiBlade := combat.AttackInfo{
-			// TODO: Apply Arkhe
+			// TODO: アルケーを適用
 			ActorIndex: c.Index,
 			Abil:       "Surging Blade (" + c.Base.Key.Pretty() + ")",
 			AttackTag:  attacks.AttackTagElementalArt,
@@ -87,8 +87,8 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(
 			aiBlade,
 			combat.NewCircleHitOnTarget(skillPos, nil, 5),
-			0, // TODO: snapshot delay?
-			0, // TODO: snapshot delay?
+			0, // TODO: スナップショット遅延？
+			0, // TODO: スナップショット遅延？
 			c.makeA4CB(),
 		)
 	}, skillAlignedHitmark)
@@ -101,7 +101,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -134,7 +134,7 @@ func (c *char) skillTick(src int) func() {
 			Durability: 25,
 			Mult:       skillDot[c.TalentLvlSkill()],
 		}
-		// trigger damage
+		// ダメージを発動
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1.5), 0, c.skillTravel, c.makeA4CB())
 	}
 }

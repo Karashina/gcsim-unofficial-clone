@@ -13,7 +13,7 @@ import (
 
 var (
 	skillFrames [][][]int
-	// {Tap E, Short Hold E}
+	// {タップE, 短長押しE}
 	skillHitmark = []int{62, 29}
 	skillCDStart = []int{23, 25}
 )
@@ -21,32 +21,32 @@ var (
 func init() {
 	skillFrames = make([][][]int, 2)
 
-	// Tap E
+	// 元素スキル（単押し）
 	skillFrames[0] = make([][]int, 2)
 
-	// Male
+	// 男性
 	skillFrames[0][0] = frames.InitAbilSlice(81) // Tap E -> N1/Q
 	skillFrames[0][0][action.ActionDash] = 25    // Tap E -> D
 	skillFrames[0][0][action.ActionJump] = 24    // Tap E -> J
 	skillFrames[0][0][action.ActionSwap] = 67    // Tap E -> Swap
 
-	// Female
+	// 女性
 	skillFrames[0][1] = frames.InitAbilSlice(80) // Tap E -> Q
 	skillFrames[0][1][action.ActionAttack] = 79  // Tap E -> N1
 	skillFrames[0][1][action.ActionDash] = 23    // Tap E -> D
 	skillFrames[0][1][action.ActionJump] = 24    // Tap E -> J
 	skillFrames[0][1][action.ActionSwap] = 65    // Tap E -> Swap
 
-	// Short Hold E
+	// 元素スキル（短押し）
 	skillFrames[1] = make([][]int, 2)
 
-	// Male
+	// 男性
 	skillFrames[1][0] = frames.InitAbilSlice(54) // Short Hold E -> N1/Q
 	skillFrames[1][0][action.ActionDash] = 31    // Short Hold E -> D
 	skillFrames[1][0][action.ActionJump] = 31    // Short Hold E -> J
 	skillFrames[1][0][action.ActionSwap] = 39    // Short Hold E -> Swap
 
-	// Female
+	// 女性
 	skillFrames[1][1] = frames.InitAbilSlice(54) // Short Hold E -> N1/Q
 	skillFrames[1][1][action.ActionDash] = 31    // Short Hold E -> D
 	skillFrames[1][1][action.ActionJump] = 32    // Short Hold E -> J
@@ -84,7 +84,7 @@ func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
 	stoneDir := c.Core.Combat.Player().Direction()
 	stonePos := c.Core.Combat.PrimaryTarget().Pos()
 
-	// TODO: check snapshot timing
+	// TODO: スナップショットタイミングを確認
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(stonePos, nil, 3),
@@ -108,7 +108,7 @@ func (c *Traveler) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames[shortHold][c.gender]),
 		AnimationLength: skillFrames[shortHold][c.gender][action.InvalidAction],
-		CanQueueAfter:   skillFrames[shortHold][c.gender][action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[shortHold][c.gender][action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

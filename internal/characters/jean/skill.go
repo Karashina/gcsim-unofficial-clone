@@ -26,7 +26,7 @@ func init() {
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	hold := p["hold"]
-	// hold for p up to 5 seconds
+	// pフレームまで最大5秒間ホールド
 	if hold > 300 {
 		hold = 300
 	}
@@ -62,7 +62,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          func(next action.Action) int { return skillFrames[next] + hold },
 		AnimationLength: skillFrames[action.InvalidAction] + hold,
-		CanQueueAfter:   skillFrames[action.ActionDash] + hold, // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash] + hold, // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

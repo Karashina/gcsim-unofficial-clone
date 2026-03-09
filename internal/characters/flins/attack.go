@@ -43,7 +43,7 @@ func init() {
 
 	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 63)
 	attackFrames[4][action.ActionDash] = 31
-	attackFrames[4][action.ActionCharge] = 500 // Illegal action; needs better handling
+	attackFrames[4][action.ActionCharge] = 500 // 不正なアクション。より適切な処理が必要
 
 	attackFramesE = make([][]int, normalHitNum)
 
@@ -62,14 +62,14 @@ func init() {
 
 	attackFramesE[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 65)
 	attackFramesE[4][action.ActionDash] = 37
-	attackFramesE[4][action.ActionCharge] = 500 // Illegal action; needs better handling
+	attackFramesE[4][action.ActionCharge] = 500 // 不正なアクション。より適切な処理が必要
 }
 
-// Normal attack implementation
+// 通常攻撃の実装
 // Pocztowy Demonspear
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(skillKey) {
-		return c.attackE() // go to Electro-infused attacks during Manifest Flame form
+		return c.attackE() // 「顯現の炎」形態中は雷元素付与攻撃へ
 	}
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{
@@ -94,7 +94,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		)
 		if c.NormalCounter == 0 {
 			ai.StrikeType = attacks.StrikeTypeSpear
-			// Check length before accessing [1]
+			// [1]にアクセスする前に長さをチェック
 			hitbox := attackHitboxes[c.NormalCounter][i]
 			var width float64 = 1.0
 			if len(hitbox) > 1 {
@@ -122,7 +122,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// Normal attack implementation during Manifest Flame form (Electro-infused)
+// 「顯現の炎」形態中の通常攻撃実装（雷元素付与）
 // Ancient Rite: Arcane Light
 func (c *char) attackE() (action.Info, error) {
 	c2CB := c.c2AdditionalDamage()
@@ -150,7 +150,7 @@ func (c *char) attackE() (action.Info, error) {
 		)
 		if c.NormalCounter == 0 {
 			ai.StrikeType = attacks.StrikeTypeSpear
-			// Check length before accessing [1]
+			// [1]にアクセスする前に長さをチェック
 			hitbox := attackHitboxes[c.NormalCounter][i]
 			var width float64 = 1.0
 			if len(hitbox) > 1 {

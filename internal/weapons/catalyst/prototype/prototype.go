@@ -33,13 +33,13 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		// task for self energy gain
+		// 自身のエネルギー回復タスク
 		for i := 120; i <= 360; i += 120 {
 			char.QueueCharTask(func() {
 				char.AddEnergy("prototype-amber", e)
 			}, i)
 		}
-		// task for party heal
+		// パーティ回復タスク
 		for _, x := range c.Player.Chars() {
 			this := x
 			for i := 120; i <= 360; i += 120 {

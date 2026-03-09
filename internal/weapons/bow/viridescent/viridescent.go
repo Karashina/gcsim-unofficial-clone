@@ -25,9 +25,9 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Upon hit, Normal and Charged Attacks have a 50% chance to generate a Cyclone, which will continuously
-	// attract surrounding opponents, dealing 40% of ATK as DMG to these opponents every 0.5s for 4s. This
-	// effect can only occur once every 14s.
+	// 命中時、通常攻撃と重撃は50%の確率でサイクロンを生成し、周囲の敵を引き寄せ続け、
+	// 0.5秒毎に攻撃力40%分のダメージを与える（4秒間）。
+	// この効果は14秒毎に1回のみ発動可能。
 	w := &Weapon{}
 	r := p.Refine
 
@@ -45,7 +45,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 		trg := args[0].(combat.Target)
 
-		// only proc on normal and charge attack
+		// 通常攻撃と重撃でのみ発動
 		switch atk.Info.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagExtra:

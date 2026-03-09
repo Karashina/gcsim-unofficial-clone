@@ -13,7 +13,7 @@ import (
 )
 
 type (
-	// Status is basic mod for keeping track Status; usually affected by hitlag
+	// Status はステータスを追跡するための基本 mod; 通常ヒットラグの影響を受ける
 	Status struct {
 		modifier.Base
 	}
@@ -231,7 +231,7 @@ func (c *CharWrapper) getModExpiry(key string) int {
 	if m != -1 {
 		return c.mods[m].Expiry()
 	}
-	// must be 0 if doesn't exist. avoid using -1 b/c that's infinite
+	// 存在しない場合は 0 である必要がある。-1 は無限を意味するため避ける
 	return 0
 }
 func (c *CharWrapper) StatusExpiry(key string) int { return c.getModExpiry(key) }
@@ -252,16 +252,16 @@ func (c *CharWrapper) StatusDuration(key string) int { return c.getModDuration(k
 
 // Extend.
 
-// extendMod returns true if mod is active and is extended
+// extendMod は mod がアクティブで延長された場合に true を返す
 func (c *CharWrapper) extendMod(key string, ext int) bool {
 	m, active := modifier.FindCheckExpiry(&c.mods, key, *c.f)
 	if m == -1 {
 		return false
 	}
 	if !active {
-		return false // nothing to extend is not active
+		return false // アクティブでなければ延長するものはない
 	}
-	// other wise add to expiry
+	// それ以外の場合は有効期限に加算
 	mod := c.mods[m]
 	mod.Extend(mod.Key(), c.log, c.Index, ext)
 	return true
@@ -272,7 +272,7 @@ func (c *CharWrapper) ExtendStatus(key string, ext int) bool { return c.extendMo
 // Amount.
 
 func (c *CharWrapper) ApplyAttackMods(a *combat.AttackEvent, t combat.Target) []interface{} {
-	// skip if this is reaction damage
+	// 反応ダメージの場合はスキップ
 	if a.Info.AttackTag >= attacks.AttackTagNoneStat &&
 		a.Info.AttackTag != attacks.AttackTagLCDamage &&
 		a.Info.AttackTag != attacks.AttackTagLBDamage &&
@@ -305,7 +305,7 @@ func (c *CharWrapper) ApplyAttackMods(a *combat.AttackEvent, t combat.Target) []
 				a.Info.AttackTag == attacks.AttackTagLBDamage ||
 				a.Info.AttackTag == attacks.AttackTagLCrsDamage
 			for k, v := range amt {
-				// if lunar reaction then only apply CR/CD
+				// 月反応の場合は会心率/会心ダメージのみ適用
 				if isLunar && attributes.Stat(k) != attributes.CR && attributes.Stat(k) != attributes.CD {
 					continue
 				}
@@ -358,7 +358,7 @@ func (c *CharWrapper) CDReduction(a action.Action, dur int) int {
 			n++
 			continue
 		}
-		// if not expired
+		// 有効期限内の場合
 		if m.Expiry() == -1 || m.Expiry() > *c.f {
 			amt := m.Amount(a)
 			c.log.NewEvent("applying cooldown modifier", glog.LogActionEvent, c.Index).
@@ -421,8 +421,8 @@ func (c *CharWrapper) HealBonus() float64 {
 	return amt
 }
 
-// TODO: consider merging this with just attack mods? reaction bonus should
-// maybe just be it's own stat instead of being a separate mod really
+// TODO: 攻撃 mod と統合することを検討すべき? 反応ボーナスは
+// 別の mod ではなく独立したステータスとすべきかもしれない
 func (c *CharWrapper) ReactBonus(atk combat.AttackInfo) float64 {
 	n := 0
 	amt := 0.0

@@ -39,7 +39,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}, burstSpawn)
 
 	c.SetCD(action.ActionBurst, burstCD)
-	c.a1() // same timing as cd start
+	c.a1() // CD開始と同じタイミング
 
 	c.ConsumeEnergy(burstEnergyDelay)
 	c.AddStatus(weaponoutkey, 20*60, false)

@@ -33,12 +33,12 @@ func (t *Handler) Duration(key string) int {
 }
 
 func (t *Handler) Add(key string, dur int) {
-	// check if exists
+	// 存在するか確認
 	a, ok := t.status[key]
 
 	// if ok we want to reuse the old evt
 	if ok && a.expiry > *t.f {
-		// just reuse the old and update expiry + evt.Ended
+		// 既存のものを再利用し、有効期限とevt.Endedを更新
 		a.expiry = *t.f + dur
 		a.evt.SetEnded(a.expiry)
 		t.status[key] = a
@@ -48,7 +48,7 @@ func (t *Handler) Add(key string, dur int) {
 		return
 	}
 
-	// otherwise create a new event
+	// それ以外は新しいイベントを作成
 	a.evt = t.log.NewEvent("status added", glog.LogStatusEvent, -1).
 		Write("key", key).
 		Write("expiry", *t.f+dur)
@@ -61,7 +61,7 @@ func (t *Handler) Add(key string, dur int) {
 func (t *Handler) Extend(key string, amt int) {
 	a, ok := t.status[key]
 
-	// do nothing if status doesn't exist
+	// ステータスが存在しなければ何もしない
 	if !ok || a.expiry <= *t.f {
 		return
 	}
@@ -76,7 +76,7 @@ func (t *Handler) Extend(key string, amt int) {
 }
 
 func (t *Handler) Delete(key string) {
-	// check if it exists first
+	// まず存在するか確認
 	a, ok := t.status[key]
 	if ok && a.expiry > *t.f {
 		a.evt.SetEnded(*t.f)

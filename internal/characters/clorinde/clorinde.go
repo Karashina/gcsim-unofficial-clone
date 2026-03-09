@@ -74,7 +74,7 @@ func (c *char) NextNormalCounter() int {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if a1 window is active is on-field
+	// 固有天賦1のウィンドウがアクティブかつフィールド上かチェック
 	if a == action.ActionSkill && c.StatusIsActive(skillStateKey) {
 		return true, action.NoFailure
 	}

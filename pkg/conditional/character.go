@@ -20,8 +20,8 @@ func evalCharacter(c *core.Core, key keys.Char, fields []string) (any, error) {
 		return 0, fmt.Errorf("character %v not in team when evaluating condition", key)
 	}
 
-	// special case for ability conditions. since fields are swapped
-	// .kokomi.<abil>.<cond>
+	// アビリティ条件の特殊ケース。フィールドが入れ替わっているため
+	// .kokomi.<アビリティ>.<条件>
 	typ := fields[1]
 	act := action.StringToAction(typ)
 	if act != action.InvalidAction {
@@ -53,16 +53,16 @@ func evalCharacter(c *core.Core, key keys.Char, fields []string) (any, error) {
 	case "onfield":
 		return c.Player.Active() == char.Index, nil
 	case "weapon":
-		// Return the canonical weapon name as a string for string comparison
-		// e.g. .varka.weapon == "gestofthemightywolf"
+		// 文字列比較用に正規の武器名を文字列として返す
+		// 例: .varka.weapon == "gestofthemightywolf"
 		return char.Weapon.Key.String(), nil
 	case "weaponkey":
-		// Return the numeric weapon key for backward-compatible numeric comparison
-		// e.g. .varka.weaponkey == .keys.weapon.gestofthemightywolf
+		// 後方互換の数値比較用に数値の武器キーを返す
+		// 例: .varka.weaponkey == .keys.weapon.gestofthemightywolf
 		return int(char.Weapon.Key), nil
 	case "set":
-		// Return the canonical set name of the equipped set with 4+ pieces
-		// e.g. .varka.set == "adcfrw"
+		// 4個以上装備中のセットの正規名を返す
+		// 例: .varka.set == "adcfrw"
 		return evalCharacterMainSet(char), nil
 	case "status":
 		if err := fieldsCheck(fields, 3, charCat); err != nil {
@@ -123,8 +123,8 @@ func evalCharacterSets(char *character.CharWrapper, set string) (float64, error)
 	return float64(setInfo.GetCount()), nil
 }
 
-// evalCharacterMainSet returns the canonical name of the equipped set with the
-// highest piece count (must be >= 4). Returns "" if no 4-piece set is equipped.
+// evalCharacterMainSetは最大ピース数の装備中セット（4個以上必須）の正規名を返す。
+// 4ピースセットが装備されていない場合は""を返す。
 func evalCharacterMainSet(char *character.CharWrapper) string {
 	var bestKey keys.Set
 	bestCount := 0
@@ -162,7 +162,7 @@ func evalCharacterAbil(c *core.Core, char *character.CharWrapper, act action.Act
 		if act == action.ActionSwap {
 			return c.Player.SwapCD == 0 || c.Player.Active() == char.Index, nil
 		}
-		// TODO: nil map may cause problems here??
+		// TODO: nilマップがここで問題を引き起こす可能性がある？
 		ok, _ := char.ActionReady(act, nil)
 		return ok, nil
 	default:

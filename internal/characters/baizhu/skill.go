@@ -48,7 +48,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Snapshot: snap,
 	}
 
-	// trigger a chain of attacks starting at the first target
+	// 最初のターゲットから連鎖攻撃をトリガー
 	atk := *c.skillAtk
 	atk.SourceFrame = c.Core.F
 	atk.Pattern = combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 0.6)
@@ -66,7 +66,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -76,7 +76,7 @@ func (c *char) chain(src, count int) combat.AttackCBFunc {
 		return nil
 	}
 	return func(a combat.AttackCB) {
-		// on hit figure out the next target
+		// 命中時に次のターゲットを決定
 		next := c.Core.Combat.RandomEnemyWithinArea(combat.NewCircleHitOnTarget(a.Target, nil, 10), nil)
 		if next == nil {
 			c.skillHealing()
@@ -84,9 +84,9 @@ func (c *char) chain(src, count int) combat.AttackCBFunc {
 		}
 		delay := skillTickInterval
 		if next.Key() != a.Target.Key() {
-			delay += 6 // add some (estimated) delay in case it's a different target
+			delay += 6 // 異なるターゲットの場合、推定遅延を追加
 		}
-		// queue an attack vs next target
+		// 次のターゲットへの攻撃をキューに追加
 		atk := *c.skillAtk
 		atk.SourceFrame = src
 		atk.Pattern = combat.NewCircleHitOnTarget(next, nil, 0.6)

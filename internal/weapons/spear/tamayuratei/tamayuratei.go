@@ -23,7 +23,7 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Increase ATK by 20% and Movement SPD by 10% for 10s when using an Elemental Skill.
+// 元素スキル使用時、攻撃力が20%、移動速度が10%増加する（10秒間）。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

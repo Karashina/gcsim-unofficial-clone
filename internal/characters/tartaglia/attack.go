@@ -41,8 +41,8 @@ func init() {
 	attackFrames[5] = frames.InitNormalCancelSlice(attackHitmarks[5], 66)
 }
 
-// Normal attack
-// Perform up to 6 consecutive shots with a bow.
+// 通常攻撃
+// 弓で最大6連射を行う。
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(meleeKey) {
 		return c.meleeAttack(), nil
@@ -128,11 +128,11 @@ func init() {
 	// N6 -> x
 	meleeFrames[5] = frames.InitNormalCancelSlice(meleeHitmarks[5][1], 65)
 	meleeFrames[5][action.ActionAttack] = 65
-	meleeFrames[5][action.ActionCharge] = 500 // illegal action
+	meleeFrames[5][action.ActionCharge] = 500 // 不正なアクション
 }
 
-// Melee stance attack.
-// Perform up to 6 consecutive Hydro strikes.
+// 近接スタンスの攻撃。
+// 最大6連続の水元素攻撃を行う。
 func (c *char) meleeAttack() action.Info {
 	for i, mult := range attackE[c.NormalCounter] {
 		ai := combat.AttackInfo{
@@ -170,7 +170,7 @@ func (c *char) meleeAttack() action.Info {
 				ap,
 				0,
 				0,
-				c.makeA4CB(), // riptide can trigger on the same hit that applies
+				c.makeA4CB(), // 断流は付与と同じヒットで発動可能
 				c.rtSlashCallback,
 			)
 		}, meleeHitmarks[c.NormalCounter][i])

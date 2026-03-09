@@ -7,7 +7,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
-// Hits by Jean's Normal Attacks have a 50% chance to regenerate HP equal to 15% of Jean's ATK for all party members.
+// ジンの通常攻撃がヒットすると　50%の確率でチーム全員のHPをジンの攻撃力の15%分回復する。
 func (c *char) makeA1CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 1 {
 		return nil
@@ -35,7 +35,7 @@ func (c *char) makeA1CB() combat.AttackCBFunc {
 	}
 }
 
-// Using Dandelion Breeze will regenerate 20% of its Energy.
+// 蒲公英の風を使用するとエネルギーの20%を回復する。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

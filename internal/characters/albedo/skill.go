@@ -42,18 +42,18 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Durability: 25,
 		Mult:       skill[c.TalentLvlSkill()],
 	}
-	// TODO: damage frame
+	// TODO: ダメージフレーム
 	c.bloomSnapshot = c.Snapshot(&ai)
 
 	player := c.Core.Combat.Player()
 	skillDir := player.Direction()
-	// assuming tap e for hitbox offset
+	// 元素スキル単押しのヒットボックスオフセットを想定
 	skillPos := geometry.CalcOffsetPoint(c.Core.Combat.Player().Pos(), geometry.Point{Y: 3}, player.Direction())
 	c.skillArea = combat.NewCircleHitOnTarget(skillPos, nil, 10)
 
 	c.Core.QueueAttackWithSnap(ai, c.bloomSnapshot, combat.NewCircleHitOnTarget(skillPos, nil, 5), skillHitmark)
 
-	// snapshot for ticks
+	// Tick用のスナップショット
 	ai.Abil = "Abiogenesis: Solar Isotoma (Tick)"
 	ai.ICDTag = attacks.ICDTagElementalArt
 	ai.Mult = skillTick[c.TalentLvlSkill()]
@@ -61,29 +61,29 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	c.skillAttackInfo = ai
 	c.skillSnapshot = c.Snapshot(&c.skillAttackInfo)
 
-	// create a construct
-	// Construct is not fully formed until after the hit lands (exact timing unknown)
+	// 設置物を生成
+	// 設置物はヒット着弾後まで完全に形成されない（正確なタイミングは不明）
 	c.Core.Tasks.Add(func() {
 		c.Core.Constructs.New(c.newConstruct(1800, skillDir, skillPos), true)
 		c.lastConstruct = c.Core.F
 		c.skillActive = true
-		// Reset ICD after construct is created
+		// 設置物生成後にICDをリセット
 		c.DeleteStatus(skillICDKey)
 
-		// Apply Hexerei: Secret Rite buff to party
+		// Hexerei: Secret Riteバフをパーティに適用
 		c.hexereiSecretRite()
 
-		// C1 additional buff: DEF +50% for 20s when using Skill
+		// 1凸追加バフ: スキル使用時に防御力+50%を20秒間
 		if c.Base.Cons >= 1 {
 			c.c1DEFBuff()
 		}
 
-		// add C4 and C6 checks
+		// 4凸と6凸のチェックを追加
 		if c.Base.Cons >= 4 {
-			c.Core.Tasks.Add(c.c4(c.Core.F), 18) // start checking in 0.3s
+			c.Core.Tasks.Add(c.c4(c.Core.F), 18) // 0.3秒後にチェック開始
 		}
 		if c.Base.Cons >= 6 {
-			c.Core.Tasks.Add(c.c6(c.Core.F), 18) // start checking in 0.3s
+			c.Core.Tasks.Add(c.c6(c.Core.F), 18) // 0.3秒後にチェック開始
 		}
 	}, skillHitmark)
 
@@ -121,20 +121,20 @@ func (c *char) skillHook() {
 		if c.StatusIsActive(skillICDKey) {
 			return false
 		}
-		// Can't be triggered by itself when refreshing
+		// 更新時に自身ではトリガーされない
 		if atk.Info.Abil == "Abiogenesis: Solar Isotoma" {
 			return false
 		}
 		if dmg == 0 {
 			return false
 		}
-		// don't proc if target hit is outside of the skill area
+		// 命中したターゲットがスキル範囲外なら発動しない
 		if !trg.IsWithinArea(c.skillArea) {
 			return false
 		}
 
-		// this ICD is most likely tied to the construct, so it's not hitlag extendable
-		c.AddStatus(skillICDKey, 120, false) // proc every 2s
+		// このICDはおそらく設置物に紐づいているため、ヒットラグで延長されない
+		c.AddStatus(skillICDKey, 120, false) // 2秒ごとに発動
 
 		c.Core.QueueAttackWithSnap(
 			c.skillAttackInfo,
@@ -144,18 +144,18 @@ func (c *char) skillHook() {
 			c.particleCB,
 		)
 
-		// c1: skill tick regen 1.2 energy
+		// 1凸: スキル発動時にエネルギー1.2回復
 		if c.Base.Cons >= 1 {
 			c.AddEnergy("albedo-c1", 1.2)
 			c.Core.Log.NewEvent("c1 restoring energy", glog.LogCharacterEvent, c.Index)
 		}
 
-		// c2: skill tick grant stacks, lasts 30s; each stack increase burst dmg by 30% of def, stack up to 4 times
+		// 2凸: スキル発動時にスタック付与、30秒持続; 各スタックで元素爆発ダメージが防御力の30%分増加、最大4スタック
 		if c.Base.Cons >= 2 {
 			if !c.StatusIsActive(c2key) {
 				c.c2stacks = 0
 			}
-			c.AddStatus(c2key, 1800, true) // lasts 30 sec
+			c.AddStatus(c2key, 1800, true) // 30秒持続
 			c.c2stacks++
 			if c.c2stacks > 4 {
 				c.c2stacks = 4

@@ -23,7 +23,7 @@ import (
 
 const nightsoulBurstICDStatus = "nightsoul-burst-icd"
 
-// first is 0 because you can't proc it without the natlan character
+// ナタランキャラクターなしでは発動できないため0番目は0
 var nightsoulBurstICD = []int{0, 18 * 60, 12 * 60, 9 * 60, 9 * 60}
 
 func SetupTargetsInCore(core *core.Core, p geometry.Point, r float64, targets []info.EnemyProfile) error {
@@ -36,7 +36,7 @@ func SetupTargetsInCore(core *core.Core, p geometry.Point, r float64, targets []
 	player := avatar.New(core, p, r)
 	core.Combat.SetPlayer(player)
 
-	// add targets
+	// ターゲットを追加
 	for i := range targets {
 		v := &targets[i]
 		if v.Pos.R == 0 {
@@ -47,14 +47,14 @@ func SetupTargetsInCore(core *core.Core, p geometry.Point, r float64, targets []
 		// s.stats.ElementUptime[i+1] = make(map[core.EleType]int)
 	}
 
-	// default target is closest to player?
+	// デフォルトターゲットはプレイヤーに最も近い敵？
 	defaultEnemy := core.Combat.ClosestEnemy(player.Pos())
 	if defaultEnemy == nil {
 		return errors.New("cannot set default target, got nil")
 	}
 	core.Combat.DefaultTarget = defaultEnemy.Key()
 
-	// initialize player direction
+	// プレイヤーの向きを初期化
 	core.Combat.Player().SetDirection(defaultEnemy.Pos())
 
 	return nil
@@ -68,7 +68,7 @@ func SetupCharactersInCore(core *core.Core, chars []info.CharacterProfile, initi
 
 	active := -1
 	for i := range chars {
-		// if using random stats, ignore all stats except main
+		// ランダムサブステータス使用時はメイン以外の全ステータスを無視
 		if chars[i].RandomSubstats != nil {
 			stats, err := generateRandSubs(chars[i].RandomSubstats, core.Rand)
 			if err != nil {
@@ -103,9 +103,9 @@ func SetupCharactersInCore(core *core.Core, chars []info.CharacterProfile, initi
 func SetupResonance(s *core.Core) {
 	chars := s.Player.Chars()
 	if len(chars) < 4 {
-		return // no resonance if less than 4 chars
+		return // 4人未満の場合元素共鳴なし
 	}
-	// count number of ele first
+	// まず元素数をカウント
 	count := make(map[attributes.Element]int)
 	for _, c := range chars {
 		count[c.Base.Element]++
@@ -130,7 +130,7 @@ func SetupResonance(s *core.Core) {
 				})
 			}
 		case attributes.Hydro:
-			//TODO: reduce pyro duration not implemented; may affect bennett Q?
+			//TODO: 烈火持続時間減少は未実装。ベネットQに影響する可能性がある
 			val := make([]float64, attributes.EndStatType)
 			val[attributes.HPP] = 0.25
 			for _, c := range chars {
@@ -165,7 +165,7 @@ func SetupResonance(s *core.Core) {
 			last := 0
 			//nolint:unparam // ignoring for now, event refactor should get rid of bool return of event sub
 			recoverParticle := func(_ ...interface{}) bool {
-				if s.F-last < 300 && last != 0 { // every 5 seconds
+				if s.F-last < 300 && last != 0 { // 5秒ごと
 					return false
 				}
 				s.Player.DistributeParticle(character.Particle{
@@ -190,14 +190,14 @@ func SetupResonance(s *core.Core) {
 			s.Events.Subscribe(event.OnAggravate, recoverNoGadget, "electro-res")
 			s.Events.Subscribe(event.OnHyperbloom, recoverParticle, "electro-res")
 		case attributes.Geo:
-			// Increases shield strength by 15%. Additionally, characters protected by a shield will have the
-			// following special characteristics:
+			// シールド強度が15%上昇。さらにシールドで保護されたキャラクターは
+			// 以下の特殊効果を得る:
 
-			//	DMG dealt increased by 15%, dealing DMG to enemies will decrease their Geo RES by 20% for 15s.
+			//	DMGが15%上昇、敵にダメージを与えると岩元素耐性-20%（15秒）。
 			f := func() (float64, bool) { return 0.15, true }
 			s.Player.Shields.AddShieldBonusMod("geo-res", -1, f)
 
-			// shred geo res of target
+			// ターゲットの岩元素耐性を下げる
 			s.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 				t, ok := args[0].(*enemy.Enemy)
 				if !ok {
@@ -233,7 +233,7 @@ func SetupResonance(s *core.Core) {
 			s.Player.AddStamPercentMod("anemo-res-stam", -1, func(a action.Action) (float64, bool) {
 				return -0.15, false
 			})
-			// TODO: movement spd increase?
+			// TODO: 移動速度上昇？
 			for _, c := range chars {
 				c.AddCooldownMod(character.CooldownMod{
 					Base:   modifier.NewBase("anemo-res-cd", -1),
@@ -304,7 +304,7 @@ func SetupResonance(s *core.Core) {
 
 func SetupMisc(c *core.Core) {
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		// dmg tag is superconduct, target is enemy
+		// ダメージタグが超伝導で、ターゲットが敵の場合
 		t, ok := args[0].(*enemy.Enemy)
 		if !ok {
 			return false
@@ -313,7 +313,7 @@ func SetupMisc(c *core.Core) {
 		if atk.Info.AttackTag != attacks.AttackTagSuperconductDamage {
 			return false
 		}
-		// add shred
+		// 耐性下降を追加
 		t.AddResistMod(combat.ResistMod{
 			Base:  modifier.NewBaseWithHitlag("superconduct-phys-shred", 12*60),
 			Ele:   attributes.Physical,
@@ -365,7 +365,7 @@ func setupNightsoulBurst(core *core.Core) {
 }
 
 func (s *Simulation) handleEnergy() {
-	// energy once interval=300 amount=1 #once at frame 300
+	// energy once interval=300 amount=1 #フレーム300で一度だけ発生
 	if s.cfg.EnergySettings.Active && s.cfg.EnergySettings.Once {
 		f := s.cfg.EnergySettings.Start
 		s.cfg.EnergySettings.Active = false
@@ -382,7 +382,7 @@ func (s *Simulation) handleEnergy() {
 			Write("amt", s.cfg.EnergySettings.Amount).
 			Write("energy_frame", s.C.F+f)
 	}
-	// energy every interval=300,600 amount=1 #randomly every 300 to 600 frames
+	// energy every interval=300,600 amount=1 #300〜600フレームごとにランダムに発生
 	if s.cfg.EnergySettings.Active && s.C.F-s.cfg.EnergySettings.LastEnergyDrop >= s.cfg.EnergySettings.Start {
 		f := s.C.Rand.Intn(s.cfg.EnergySettings.End - s.cfg.EnergySettings.Start)
 		s.cfg.EnergySettings.LastEnergyDrop = s.C.F + f
@@ -402,7 +402,7 @@ func (s *Simulation) handleEnergy() {
 }
 
 func (s *Simulation) handleHurt() {
-	// hurt once interval=300 amount=1,300 element=physical #once at frame 300 (or nearest)
+	// hurt once interval=300 amount=1,300 element=physical #フレーム300で一度だけ発生（または最も近いフレーム）
 	if s.cfg.HurtSettings.Active && s.cfg.HurtSettings.Once {
 		f := s.cfg.HurtSettings.Start
 		amt := s.cfg.HurtSettings.Min + s.C.Rand.Float64()*(s.cfg.HurtSettings.Max-s.cfg.HurtSettings.Min)
@@ -425,7 +425,7 @@ func (s *Simulation) handleHurt() {
 			ap.SkipTargets[targets.TargettablePlayer] = false
 			ap.SkipTargets[targets.TargettableEnemy] = true
 			ap.SkipTargets[targets.TargettableGadget] = true
-			s.C.QueueAttack(ai, ap, -1, 0) // -1 to avoid snapshot
+			s.C.QueueAttack(ai, ap, -1, 0) // -1でスナップショットを回避
 		}, f)
 
 		s.C.Log.NewEventBuildMsg(glog.LogHurtEvent, -1, "hurt queued (once)").
@@ -434,7 +434,7 @@ func (s *Simulation) handleHurt() {
 			Write("amt", amt).
 			Write("hurt_frame", s.C.F+f)
 	}
-	// hurt every interval=480,720 amount=1,300 element=physical #randomly 1 to 300 dmg every 480 to 720 frames
+	// hurt every interval=480,720 amount=1,300 element=physical #480〜720フレームごとにランダムに1〜300ダメージ
 	if s.cfg.HurtSettings.Active && s.C.F-s.cfg.HurtSettings.LastHurt >= s.cfg.HurtSettings.Start {
 		f := s.C.Rand.Intn(s.cfg.HurtSettings.End - s.cfg.HurtSettings.Start)
 		amt := s.cfg.HurtSettings.Min + s.C.Rand.Float64()*(s.cfg.HurtSettings.Max-s.cfg.HurtSettings.Min)
@@ -457,7 +457,7 @@ func (s *Simulation) handleHurt() {
 			ap.SkipTargets[targets.TargettablePlayer] = false
 			ap.SkipTargets[targets.TargettableEnemy] = true
 			ap.SkipTargets[targets.TargettableGadget] = true
-			s.C.QueueAttack(ai, ap, -1, 0) // -1 to avoid snapshot
+			s.C.QueueAttack(ai, ap, -1, 0) // -1でスナップショットを回避
 		}, f)
 
 		s.C.Log.NewEventBuildMsg(glog.LogHurtEvent, -1, "hurt queued").

@@ -13,14 +13,14 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/reactions"
 )
 
-// tryLunarCrystallize handles Lunar-Crystallize reaction (Geo + Hydro with LCrs-Key)
-// Lunar-Crystallize creates 3 Moondrifts that deal Geo DMG after 3 triggers
+// tryLunarCrystallize はルナ結晶化反応を処理する（岩 + 水 + LCrs-Key）
+// ルナ結晶化は3回のトリガー後に岩元素ダメージを与える3つの月漂いを生成する
 func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 	if a.Info.Durability < ZeroDur {
 		return false
 	}
 
-	// Lunar-Crystallize base coefficient is 0.96
+	// ルナ結晶化の基本係数は0.96
 	lcrsAtk := combat.AttackInfo{
 		DamageSrc:        r.self.Key(),
 		Abil:             string(reactions.LunarCrystallize),
@@ -36,7 +36,7 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 	char := r.core.Player.ByIndex(actorIdx)
 	em := char.Stat(attributes.EM)
 
-	// Reset contributor lists when no active LCrs session
+	// アクティブなLCrsセッションがない場合、貢献者リストをリセット
 	if r.lcrsTickSrc == -1 {
 		r.lcrsContributor = make([]int, 0, 4)
 		r.lcrsPrecalcDamages = make([]lcDamageRecord, 0, 4)
@@ -46,7 +46,7 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		r.lcrsTickSrc = r.core.F
 	}
 
-	// Record the current actor as a contributor
+	// 現在のアクターを貢献者として記録
 	found := -1
 	for i, idx := range r.lcrsContributor {
 		if idx == actorIdx {
@@ -55,7 +55,7 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		}
 	}
 
-	// Aura expiry calculation
+	// オーラ有効期限計算
 	existing := r.Durability[Hydro]
 	dur := 0.8 * a.Info.Durability
 	if existing > ZeroDur && dur >= existing {
@@ -90,7 +90,7 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		}
 	}
 
-	// Schedule contributor removal at aura expiry
+	// オーラ有効期限時に貢献者削除をスケジュール
 	expiryIndex := actorIdx
 	expiryFrame := a.Info.AuraExpiry
 	if r.lcrsExpiryTaskMap == nil {
@@ -101,7 +101,7 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		if r.lcrsExpiryTaskMap == nil || r.lcrsExpiryTaskMap[expiryIndex] != expiryFrame {
 			return
 		}
-		// Remove from lcrsContributor
+		// lcrsContributorから削除
 		newContrib := make([]int, 0, len(r.lcrsContributor))
 		for _, idx := range r.lcrsContributor {
 			if idx != expiryIndex {
@@ -110,7 +110,7 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		}
 		r.lcrsContributor = newContrib
 
-		// Remove from lcrsPrecalcDamages
+		// lcrsPrecalcDamagesから削除
 		newDamages := make([]lcDamageRecord, 0, len(r.lcrsPrecalcDamages))
 		for _, rec := range r.lcrsPrecalcDamages {
 			if rec.Index != expiryIndex || rec.Expiry != expiryFrame {
@@ -119,7 +119,7 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		}
 		r.lcrsPrecalcDamages = newDamages
 
-		// Remove from lcrsPrecalcDamagesCRIT
+		// lcrsPrecalcDamagesCRITから削除
 		newDamagesCRIT := make([]lcDamageRecord, 0, len(r.lcrsPrecalcDamagesCRIT))
 		for _, rec := range r.lcrsPrecalcDamagesCRIT {
 			if rec.Index != expiryIndex || rec.Expiry != expiryFrame {
@@ -131,7 +131,7 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		delete(r.lcrsExpiryTaskMap, expiryIndex)
 	}, expiryFrame-r.core.F)
 
-	// Reduce Hydro durability
+	// 水元素量を減少
 	r.reduce(attributes.Hydro, a.Info.Durability, 0.5)
 	a.Info.Durability = 0
 	a.Reacted = true
@@ -139,10 +139,10 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 	lcrsAtk.ActorIndex = actorIdx
 	r.core.Events.Emit(event.OnLunarCrystallize, r.self, a)
 
-	// Increment trigger count (R-8: accumulate triggers)
+	// トリガーカウントをインクリメント（R-8: トリガーを蓄積）
 	r.lcrsTriggerCount++
 
-	// Refresh LCrs session expiration time
+	// LCrsセッションの有効期限をリフレッシュ
 	r.lcrsActiveExpiry = r.core.F + 360
 	r.core.Tasks.Add(func() {
 		if r.lcrsTickSrc != -1 && r.core.F >= r.lcrsActiveExpiry {
@@ -150,24 +150,24 @@ func (r *Reactable) tryLunarCrystallize(a *combat.AttackEvent) bool {
 		}
 	}, 360)
 
-	// R-8: Fire Moondrifts only after 3 triggers
+	// R-8: 3回のトリガー後にのみ月漂いを発射
 	if r.lcrsTriggerCount >= 3 {
-		// R-9: calcLCrsDamage handles combined damage + highest CR contributor tracking
+		// R-9: calcLCrsDamage が合算ダメージ + 最高CR貢献者の追跡を処理
 		damageResult := r.calcLCrsDamage(
 			r.lcrsContributor,
 			r.lcrsPrecalcDamages,
 			r.lcrsPrecalcDamagesCRIT,
 		)
-		// Fire 3 Moondrift projectiles with combined FinalDamage
+		// 3つの月漂い弾を合算FinalDamageで発射
 		r.fireMoondriftHarmony(lcrsAtk, damageResult, actorIdx)
-		// Reset trigger count for next cycle
+		// 次のサイクル用にトリガーカウントをリセット
 		r.lcrsTriggerCount = 0
 	}
 
 	return true
 }
 
-// calcLunarCrystallizeDmg calculates Lunar-Crystallize damage (base coefficient 0.96)
+// calcLunarCrystallizeDmg はルナ結晶化ダメージを計算する（基本係数 0.96）
 func calcLunarCrystallizeDmg(char *character.CharWrapper, atk combat.AttackInfo, em float64) float64 {
 	lvl := char.Base.Level - 1
 	if lvl > 99 {
@@ -177,11 +177,11 @@ func calcLunarCrystallizeDmg(char *character.CharWrapper, atk combat.AttackInfo,
 		lvl = 0
 	}
 	base := 0.96 * reactionLvlBase[lvl] * (1 + char.LCrsBaseReactBonus(atk))
-	bonus := (6 * em) / (2000 + em) // R-7 fix: was 16*em
+	bonus := (6 * em) / (2000 + em) // R-7修正: 以前は 16*em
 	return base * (1 + bonus + char.LCrsReactBonus(atk)) * (1 + char.ElevationBonus(atk))
 }
 
-// calcLunarCrystallizeDmgCRIT calculates Lunar-Crystallize damage with crit
+// calcLunarCrystallizeDmgCRIT はクリティカル付きのルナ結晶化ダメージを計算する
 func calcLunarCrystallizeDmgCRIT(char *character.CharWrapper, atk combat.AttackInfo, em float64) float64 {
 	lvl := char.Base.Level - 1
 	if lvl > 99 {
@@ -191,18 +191,18 @@ func calcLunarCrystallizeDmgCRIT(char *character.CharWrapper, atk combat.AttackI
 		lvl = 0
 	}
 	base := 0.96 * reactionLvlBase[lvl] * (1 + char.LCrsBaseReactBonus(atk))
-	bonus := (6 * em) / (2000 + em) // R-7 fix: was 16*em
+	bonus := (6 * em) / (2000 + em) // R-7修正: 以前は 16*em
 	cd := char.Stat(attributes.CD)
 	return base * (1 + bonus + char.LCrsReactBonus(atk)) * (1 + cd) * (1 + char.ElevationBonus(atk))
 }
 
-// calcLCrsDamage calculates the final Lunar-Crystallize damage based on contributors
+// calcLCrsDamage は貢献者に基づいて最終ルナ結晶化ダメージを計算する
 func (r *Reactable) calcLCrsDamage(
 	lcrsContributor []int,
 	lcrsPrecalcDamages []lcDamageRecord,
 	lcrsPrecalcDamagesCRIT []lcDamageRecord,
 ) lcDamageResult {
-	// Roll crit for each contributor
+	// 各貢献者のクリティカルをロール
 	isCrit := make([]bool, len(lcrsContributor))
 	for i, idx := range lcrsContributor {
 		char := r.core.Player.ByIndex(idx)
@@ -211,7 +211,7 @@ func (r *Reactable) calcLCrsDamage(
 		isCrit[i] = randVal < cr
 	}
 
-	// Select each contributor's damage based on crit result
+	// クリティカル結果に基づいて各貢献者のダメージを選択
 	damageList := make([]float64, len(lcrsContributor))
 	indexList := make([]int, len(lcrsContributor))
 	for i, idx := range lcrsContributor {
@@ -235,7 +235,7 @@ func (r *Reactable) calcLCrsDamage(
 		indexList[i] = idx
 	}
 
-	// Find the index of the contributor with the highest damage
+	// 最大ダメージの貢献者インデックスを検索
 	maxIdx := 0
 	for i := 1; i < len(damageList); i++ {
 		if damageList[i] > damageList[maxIdx] {
@@ -252,7 +252,7 @@ func (r *Reactable) calcLCrsDamage(
 		highestCR = char.Stat(attributes.CR)
 	}
 
-	// Apply coefficients: 1st=1.0, 2nd=0.5, 3rd/4th=1/12, 5th+=0
+	// 係数を適用: 1番目=1.0, 2番目=0.5, 3/4番目=1/12, 5番目以降=0
 	type damageWithIndex struct {
 		Dmg float64
 		Idx int
@@ -288,10 +288,10 @@ func (r *Reactable) calcLCrsDamage(
 	}
 }
 
-// fireMoondriftHarmony fires 3 projectiles from Moondrifts dealing Geo DMG
+// fireMoondriftHarmony は月漂いから3つの岩元素ダメージ弾を発射する
 func (r *Reactable) fireMoondriftHarmony(lcrsAtk combat.AttackInfo, damageResult lcDamageResult, actorIdx int) {
-	// Fire 3 instances of Geo DMG
-	// Columbina A4: single-roll extra charge across the 3 moondrift projectiles
+	// 3回の岩元素ダメージを発射
+	// Columbina A4: 3つの月漂い弾全体での単一ロール追加チャージ
 	columbinaExtra := false
 	columbinaIdx := -1
 	for idx, p := range r.core.Player.Chars() {
@@ -304,7 +304,7 @@ func (r *Reactable) fireMoondriftHarmony(lcrsAtk combat.AttackInfo, damageResult
 		columbinaExtra = r.core.Rand.Float64() < 0.33
 	}
 	for i := 0; i < 3; i++ {
-		delay := 10 + i*5 // Stagger the hits slightly
+		delay := 10 + i*5 // ヒットを少しずらす
 		idx := i
 		r.core.Tasks.Add(func() {
 			closest := r.core.Combat.ClosestEnemy(r.self.Pos())
@@ -317,7 +317,7 @@ func (r *Reactable) fireMoondriftHarmony(lcrsAtk combat.AttackInfo, damageResult
 			snap.Stats[attributes.CD] = char.Stat(attributes.CD)
 			snap.CharLvl = char.Base.Level
 			lcrsAtk.FlatDmg = damageResult.FinalDamage
-			// Only the first moondrift projectile should carry the reaction tag to avoid duplicate triggers
+			// 重複トリガーを避けるため、最初の月漂い弾のみが反応タグを携帯する
 			lcrsAtkCopy := lcrsAtk
 			if idx == 0 {
 				lcrsAtkCopy.AttackTag = attacks.AttackTagLCrsDamage
@@ -358,7 +358,7 @@ func (r *Reactable) fireMoondriftHarmony(lcrsAtk combat.AttackInfo, damageResult
 		Write("target", r.self.Key())
 }
 
-// removeLCrs removes Lunar-Crystallize status
+// removeLCrs はルナ結晶化ステータスを削除する
 func (r *Reactable) removeLCrs() {
 	r.lcrsTickSrc = -1
 	r.lcrsActiveExpiry = 0

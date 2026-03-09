@@ -16,15 +16,15 @@ func init() {
 	core.RegisterWeaponFunc(keys.LightbearingMoonshard, NewWeapon)
 }
 
-// Lightbearing Moonshard
-// Sword, 4-star
-// Base ATK: 44
-// Sub-stat: CRIT DMG 19.2% (at Lv90)
+// ライトベアリング・ムーンシャード
+// 片手剣、★4
+// 基礎攻撃力: 44
+// サブステータス: 会心ダメージ 19.2% (Lv90時)
 //
-// Passive: Radiance of the Lunar Palace
-// DEF +20/25/30/35/40% (permanent passive)
-// On Elemental Skill use:
-// - Lunar-Crystallize (LCrs) reaction DMG +64/80/96/112/128% for 5s
+// パッシブ: 月宮の輝き
+// 防御力 +20/25/30/35/40%（永続パッシブ）
+// 元素スキル使用時:
+// - Lunar-Crystallize (LCrs) 反応ダメージ +64/80/96/112/128%（5秒間）
 
 const (
 	defKey       = "lightbearingmoonshard-def"
@@ -44,12 +44,12 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	r := p.Refine
 
-	// DEF% bonus by refine level (permanent passive)
+	// 精錬ランク別の防御力%ボーナス（永続パッシブ）
 	defBonus := []float64{0.20, 0.25, 0.30, 0.35, 0.40}
-	// LCrs DMG bonus by refine level
+	// 精錬ランク別のLCrsダメージボーナス
 	lcrsBonus := []float64{0.64, 0.80, 0.96, 1.12, 1.28}
 
-	// W-2: DEF% is a permanent passive, not skill-triggered
+	// W-2: 防御力%は永続パッシブであり、スキルトリガーではない
 	mDef := make([]float64, attributes.EndStatType)
 	mDef[attributes.DEFP] = defBonus[r-1]
 	char.AddStatMod(character.StatMod{
@@ -60,7 +60,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// W-1/W-3: On Elemental Skill use, grant LCrs DMG bonus via LCrsReactBonusMod for 5s
+	// W-1/W-3: 元素スキル使用時、LCrsReactBonusMod経由でLCrsダメージボーナスを5秒間付与
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false

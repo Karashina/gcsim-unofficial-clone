@@ -39,10 +39,10 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Gain 1 stack of Canopy's Favor after hitting an opponent with an Elemental Skill. This can be triggered once every 0.5s.
-// After a nearby party member triggers a Burning or Burgeon reaction, the equipping character will gain 3 stacks.
-// This effect can be triggered once every 2s and can be triggered even when the triggering party member is off-field.
-// Canopy's Favor: Elemental Skill and Burst DMG is increased by 10% for 6s. Max 6 stacks. Each stack is counted independently.
+// 元素スキルで敵に命中後、Canopy's Favorを1スタック獲得。0.5秒に1回発動可能。
+// 近くのパーティメンバーが燃焼または烈開花反応を起こすと、装備キャラクターは3スタック獲得。
+// この効果は2秒に1回発動可能で、発動したパーティメンバーがフィールド外でも発動する。
+// Canopy's Favor：元素スキルと元素爆発のダメージが6秒間10%増加。最大6スタック。各スタックは独立してカウント。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		char:         char,

@@ -24,11 +24,11 @@ const particleICDKey = "candace-particle-icd"
 
 func init() {
 	skillFrames = make([][]int, 2)
-	// Tap E
+	// 元素スキル（単押し）
 	skillFrames[0] = frames.InitAbilSlice(26)
 	skillFrames[0][action.ActionBurst] = 25
 	skillFrames[0][action.ActionSwap] = 25
-	// Hold E
+	// 元素スキル（長押し）
 	skillFrames[1] = frames.InitAbilSlice(113)
 	skillFrames[1][action.ActionAttack] = 112
 	skillFrames[1][action.ActionBurst] = 112
@@ -99,7 +99,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.makeParticleCB(particleCount),
 	)
 
-	// Add shield until skill unleashed (treated as frame when attack hits)
+	// スキル発動まで（攻撃ヒット時のフレームとして扱う）シールドを追加
 	c.Core.Player.Shields.Add(&shield.Tmpl{
 		ActorIndex: c.Index,
 		Target:     c.Index,
@@ -120,7 +120,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          func(next action.Action) int { return skillFrames[chargeLevel][next] - windup },
 		AnimationLength: skillFrames[chargeLevel][action.InvalidAction],
-		CanQueueAfter:   skillFrames[chargeLevel][action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[chargeLevel][action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

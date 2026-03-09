@@ -9,8 +9,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When Rosaria strikes an opponent from behind using Ravaging Confession, Rosaria's CRIT Rate increases by 12% for 5s.
-// TODO: does this need to change if we add player position?
+// 告解の兄姉で敵の背後から攻撃した時、ロサリアの会心率12%が5秒間アップする。
+// TODO: プレイヤー位置が追加された場合、これを変更する必要があるか？
 func (c *char) makeA1CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 1 {
 		return nil
@@ -39,9 +39,9 @@ func (c *char) makeA1CB() combat.AttackCBFunc {
 	}
 }
 
-// Casting Rites of Termination increases CRIT Rate of all nearby party members (except Rosaria herself)
-// by 15% of Rosaria's CRIT Rate for 10s.
-// CRIT Rate Bonus gained this way cannot exceed 15%.
+// 教典のレクイエム発動時、近くの全パーティーメンバー（ロサリア自身を除く）の
+// 会心率がロサリアの会心率15%分アップする（10秒間）。
+// この方法で得られる会心率ボーナスは15%を超えない。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -55,7 +55,7 @@ func (c *char) a4() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CR] = critShare
 	for i, char := range c.Core.Player.Chars() {
-		// skip Rosaria
+		// ロサリアをスキップ
 		if i == c.Index {
 			continue
 		}

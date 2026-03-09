@@ -11,19 +11,18 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When the Shrine of Maya is unleashed and the Elemental Types of the party
-// members are being tabulated, the count will add 1 to the number of Pyro,
-// Electro, and Hydro characters respectively.
+// マヤの祠殿を解き放つときにチームメンバーの元素タイプを集計する際、
+// 炎・雷・水のキャラクター数がそれぞれ1加算される。
 func (c *char) c1() {
 	c.pyroCount++
 	c.hydroCount++
 	c.electroCount++
 }
 
-// Opponents that are marked by Nahida's own Seed of Skandha will be affected by the following effects:
-//   - Burning, Bloom, Hyperbloom, Burgeon Reaction DMG can score CRIT Hits.
-//     CRIT Rate and CRIT DMG are fixed at 20% and 100% respectively.
-//   - Within 8s of being affected by Quicken, Aggravate, Spread, DEF is decreased by 30%.
+// ナヒーダ自身のスカンダの種でマークされた敵に以下の効果が適用される:
+//   - 燃焼・開花・超開花・烈開花の反応ダメージが会心できる。
+//     会心率と会心ダメージはそれぞれ20%と100%に固定。
+//   - 激化・激化促進・拡散の影響を受けて8秒以内に、防御力が30%低下する。
 func (c *char) c2() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		t, ok := args[0].(*enemy.Enemy)
@@ -45,7 +44,7 @@ func (c *char) c2() {
 			return false
 		}
 
-		//TODO: should this really be +=??
+		//TODO: 本当に += でよいのか？
 		ae.Snapshot.Stats[attributes.CR] += 0.2
 		ae.Snapshot.Stats[attributes.CD] += 1
 
@@ -77,9 +76,9 @@ func (c *char) c2() {
 	c.Core.Events.Subscribe(event.OnSpread, cb(event.OnSpread), "nahida-c2-def-shred-spread")
 }
 
-// When 1/2/3/(4 or more) nearby opponents are affected by All Schemes to Know's
-// Seeds of Skandha, Nahida's Elemental Mastery will be increased by
-// 100/120/140/160.
+// 近くの敵が蓮生の洞察のスカンダの種に影響を受けている数が
+// 1/2/3/(4以上)のとき、ナヒーダの元素熔研が
+// 100/120/140/160上昇する。
 func (c *char) c4() {
 	c.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("nahida-c4", -1),
@@ -109,14 +108,12 @@ const (
 	c6ActiveKey = "nahida-c6"
 )
 
-// When Nahida hits an opponent affected by All Schemes to Know's Seeds of
-// Skandha with Normal or Charged Attacks after unleashing Illusory Heart, she
-// will use Tri-Karma Purification: Karmic Oblivion on this opponent and all
-// connected opponents, dealing Dendro DMG based on 200% of Nahida's ATK and 400%
-// of her Elemental Mastery. DMG dealt by Tri-Karma Purification: Karmic Oblivion
-// is considered Elemental Skill DMG and can be triggered once every 0.2s. This
-// effect can last up to 10s and will be removed after Nahida has unleashed 6
-// instances of Tri-Karma Purification: Karmic Oblivion.
+// 幻心を解き放った後、蓮生の洞察のスカンダの種の影響を受けている敵に
+// ナヒーダが通常攻撃または重撃を命中させると、その敵と接続された全ての敵に
+// 三浄浄化・業障基滅を発動し、ナヒーダの攻撃力の200%と元素熔研の400%に基づく
+// 草元素ダメージを与える。三浄浄化・業障基滅のダメージは元素スキルダメージ扱いで、
+// 0.2秒に1回発動可能。この効果は最大10秒間持続し、ナヒーダが6回
+// 三浄浄化・業障基滅を発動した後に解除される。
 func (c *char) makeC6CB() combat.AttackCBFunc {
 	if c.Base.Cons < 6 {
 		return nil

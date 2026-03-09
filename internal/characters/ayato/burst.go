@@ -39,17 +39,17 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Mult:       burst[c.TalentLvlBurst()],
 	}
 
-	// snapshot when the circle forms (is this correct?)
+	// 円形成時にスナップショット（これは正しい？）
 	var snap combat.Snapshot
 	c.Core.Tasks.Add(func() { snap = c.Snapshot(&ai) }, burstStart)
 
 	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10)
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DmgP] = burstatkp[c.TalentLvlBurst()]
-	// tick every 0.5s from burstStart
+	// burstStartから0.5秒ごとにティック
 	for i := 0; i < 18*60; i += 30 {
 		c.Core.Tasks.Add(func() {
-			// burst tick
+			// 元素爆発のTick
 			enemy := c.Core.Combat.RandomEnemyWithinArea(
 				burstArea,
 				func(e combat.Enemy) bool {
@@ -59,14 +59,14 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			var pos geometry.Point
 			if enemy != nil {
 				pos = enemy.Pos()
-				enemy.AddStatus(burstMarkKey, 1.45*60, true) // same enemy can't be targeted again for 1.45s
+				enemy.AddStatus(burstMarkKey, 1.45*60, true) // 同じ敵は1.45秒間再ターゲットされない
 			} else {
 				pos = geometry.CalcRandomPointFromCenter(burstArea.Shape.Pos(), 1.5, 9.5, c.Core.Rand)
 			}
-			// deal dmg after a certain delay
+			// 一定の遅延後にダメージを与える
 			c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(pos, nil, 2.5), 38)
 
-			// buff tick
+			// バフティック
 			if !c.Core.Combat.Player().IsWithinArea(burstArea) {
 				return
 			}
@@ -93,15 +93,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			})
 		}
 	}
-	// add cooldown to sim
+	// シミュレーションにクールダウンを追加
 	c.SetCD(action.ActionBurst, 20*60)
-	// use up energy
+	// エネルギーを消費
 	c.ConsumeEnergy(5)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

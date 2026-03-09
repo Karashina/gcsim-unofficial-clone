@@ -10,13 +10,13 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// The number of After-Sales Service Rounds created by Troubleshooter Shots is increased by 1.
+// トラブルシューターショットが生成するアフターサービス弾の数が1増加する。
 func (c *char) c1() {
 	c.afterCount++
 }
 
-// When you are in combat and the Jinni heals the character it is connected to,
-// it will fire a Jinni Toop from that character's position that deals 50% of Dori's ATK DMG.
+// 戦闘中、ジニーが接続されたキャラクターを回復すると、
+// そのキャラクターの位置からドリーの攻撃力50%のジニー弾を発射する。
 func (c *char) c2(travel int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -42,9 +42,9 @@ func (c *char) c2(travel int) {
 	)
 }
 
-// The character connected to the Jinni will obtain the following buffs based on their current HP and Energy:
-// ·When their HP is lower than 50%, they gain 50% Incoming Healing Bonus.
-// ·When their Energy is less than 50%, they gain 30% Energy Recharge.
+// ジニーに接続されたキャラクターは現在のHPとエネルギーに応じて以下のバフを得る：
+// ・HPが50%未満の場合、受ける治療効果+50%。
+// ・エネルギーが50%未満の場合、元素チャージ効率+30%。
 func (c *char) c4() {
 	active := c.Core.Player.ActiveChar()
 	if active.CurrentHPRatio() < 0.5 {
@@ -55,7 +55,7 @@ func (c *char) c4() {
 			},
 		})
 	}
-	// add energy recharge
+	// 元素チャージ効率を追加
 	if active.Energy/active.EnergyMax < 0.5 {
 		erMod := make([]float64, attributes.EndStatType)
 		erMod[attributes.ER] = 0.3
@@ -72,10 +72,10 @@ func (c *char) c4() {
 const c6ICD = "dori-c6-heal-icd"
 const c6Key = "dori-c6"
 
-// Dori gains the following effects for 3s after using Spirit-Warding Lamp: Troubleshooter Cannon:
-// - Electro Infusion.
-// - When Normal Attacks hit opponents, all nearby party members will heal HP equivalent to 4% of Dori's Max HP.
-// This type of healing can occur once every 0.1s.
+// ドリーは魔除の灯使用後3秒間、以下の効果を得る：
+// - 雷元素付与。
+// - 通常攻撃が敵に命中すると、付近のパーティ全員がドリーのHP上限4%分のHPを回復する。
+// この回復は0.1秒に1回発動可能。
 func (c *char) makeC6CB() combat.AttackCBFunc {
 	if c.Base.Cons < 6 || !c.Core.Player.WeaponInfuseIsActive(c.Index, c6Key) {
 		return nil
@@ -95,7 +95,7 @@ func (c *char) makeC6CB() combat.AttackCBFunc {
 		}
 		c.AddStatus(c6ICD, 0.1*60, true)
 
-		// heal party members
+		// パーティメンバーを回復
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,
 			Target:  -1,

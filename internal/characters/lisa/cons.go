@@ -11,7 +11,7 @@ func (c *char) c6() {
 			return false
 		}
 		if c.Core.Player.Active() == c.Index {
-			// swapped to lisa
+			// リサに切り替えた場合
 			enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5), nil)
 			for _, e := range enemies {
 				e.SetTag(conductiveTag, 3)

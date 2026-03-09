@@ -9,28 +9,27 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/shortcut"
 )
 
-// parseAction returns a node contain a character action, or a block of node containing
-// a list of character actions
+// parseAction はキャラクターアクションを含むノード、またはアクションリストを含むノードブロックを返す
 func (p *Parser) parseAction() (ast.Stmt, error) {
 	char, err := p.consume(ast.ItemCharacterKey)
 	if err != nil {
-		// this really shouldn't happen since we already checked
+		// 既にチェック済みなので、ここに到達するはずがない
 		return nil, fmt.Errorf("ln%v: expecting character key, got %v", char.Line, char.Val)
 	}
 	charKey := shortcut.CharNameToKey[char.Val]
 
-	// should be multiple action keys next
+	// 次に複数のアクションキーが来るはず
 	var actions []*ast.CallExpr
 	if n := p.peek(); n.Typ != ast.ItemActionKey {
 		return nil, fmt.Errorf("ln%v: expecting actions for character %v, got %v", n.Line, char.Val, n.Val)
 	}
 
-	// all actions needs to come before any + flags
+	// 全アクションは + フラグより前に来る必要がある
 Loop:
 	for {
 		switch n := p.next(); n.Typ {
 		case ast.ItemTerminateLine:
-			// stop here
+			// ここで停止
 			break Loop
 		case ast.ItemActionKey:
 			actionKey := action.StringToAction(n.Val)
@@ -43,20 +42,20 @@ Loop:
 				Args: make([]ast.Expr, 0),
 			}
 			expr.Args = append(expr.Args,
-				// char
+				// キャラクター
 				&ast.NumberLit{
 					Pos:      char.Pos,
 					IntVal:   int64(charKey),
 					FloatVal: float64(charKey),
 				},
-				// action
+				// アクション
 				&ast.NumberLit{
 					Pos:      n.Pos,
 					IntVal:   int64(actionKey),
 					FloatVal: float64(actionKey),
 				},
 			)
-			// check for param -> then repeat
+			// パラメータをチェック → 繰り返し
 			param, err := p.acceptOptionalParamReturnMap()
 			if err != nil {
 				return nil, err
@@ -64,8 +63,8 @@ Loop:
 			if param == nil {
 				param = &ast.MapExpr{Pos: n.Pos}
 			}
-			// validate params
-			// TODO: this is inefficient but we don't have a "compile" step yet
+			// パラメータを検証
+			// TODO: "コンパイル"ステップがまだないため非効率だが仕方ない
 			m := param.(*ast.MapExpr).Fields
 			keys := make([]string, 0, len(m))
 			for k := range m {
@@ -77,15 +76,15 @@ Loop:
 			}
 			expr.Args = append(expr.Args, param)
 
-			// optional : and a number
+			// オプションの : と数値
 			count, err := p.acceptOptionalRepeaterReturnCount()
 			if err != nil {
 				return nil, err
 			}
-			// add to array
+			// 配列に追加
 			for i := 0; i < count; i++ {
-				//TODO: all the repeated action will access the same map
-				// ability implement should avoid modifying the maps
+				//TODO: 繰り返しアクションは全て同じマップにアクセスする
+				// アビリティ実装はマップの変更を避けるべき
 				actions = append(actions, expr)
 			}
 
@@ -95,13 +94,13 @@ Loop:
 				break Loop
 			}
 		default:
-			//TODO: fix invalid key error
+			//TODO: 無効なキーのエラーを修正する
 			return nil, fmt.Errorf("ln%v: expecting actions for character %v, got %v", n.Line, char.Val, n.Val)
 		}
 	}
-	// check for optional flags
+	// オプションフラグをチェック
 
-	// build stmt
+	// 文を構築
 	b := ast.NewBlockStmt(char.Pos)
 	for _, v := range actions {
 		b.Append(v)
@@ -110,7 +109,7 @@ Loop:
 }
 
 func (p *Parser) acceptOptionalParamReturnMap() (ast.Expr, error) {
-	// check for params
+	// パラメータをチェック
 	n := p.peek()
 	if n.Typ != ast.ItemLeftSquareParen {
 		return nil, nil
@@ -133,7 +132,7 @@ func (p *Parser) acceptOptionalParamReturnOnlyIntMap() (map[string]int, error) {
 	for k, v := range result.(*ast.MapExpr).Fields {
 		switch v.(type) {
 		case *ast.NumberLit:
-			// skip
+			// スキップ
 		default:
 			return nil, fmt.Errorf("expected number in the map, got %v", v.String())
 		}
@@ -149,12 +148,12 @@ func (p *Parser) acceptOptionalRepeaterReturnCount() (int, error) {
 		p.backup()
 		return count, nil
 	}
-	// should be a number next
+	// 次は数値であるべき
 	n = p.next()
 	if n.Typ != ast.ItemNumber {
 		return count, fmt.Errorf("ln%v: expected a number after : but got %v", n.Line, n)
 	}
-	// parse number
+	// 数値を解析
 	count, err := itemNumberToInt(n)
 	return count, err
 }

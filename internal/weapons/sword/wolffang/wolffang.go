@@ -28,9 +28,9 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// DMG dealt by Elemental Skill and Elemental Burst is increased by 16%. When an Elemental Skill hits an opponent,
-// its CRIT Rate will be increased by 2%. When an Elemental Burst hits an opponent, its CRIT Rate will be increased by 2%.
-// Both of these effects last 10s separately, have 4 max stacks, and can be triggered once every 0.1s.
+// 元素スキルと元素爆発のダメージが16%増加する。元素スキルが敵に命中した時、
+// 会心率が2%増加する。元素爆発が敵に命中した時、会心率が2%増加する。
+// それぞれの効果は独立しており10秒持続、最大4スタック、0.1秒毎に1回発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		refine: p.Refine,

@@ -15,11 +15,11 @@ func parseOptions(p *Parser) (parseFn, error) {
 	for n := p.next(); n.Typ != ast.ItemEOF; n = p.next() {
 		switch n.Typ {
 		case ast.ItemIdentifier:
-			// expecting identifier = some value
+			// 識別子 = 値 の形式が必要
 			switch n.Val {
 			case "debug":
 				_, err = p.acceptSeqReturnLast(ast.ItemAssign, ast.ItemBool)
-				// every run is going to have a debug from now on so we basically ignore what this flag says
+				// 今後は全実行でデバッグが有効になるため、このフラグは基本的に無視される
 			case "defhalt":
 				n, err = p.acceptSeqReturnLast(ast.ItemAssign, ast.ItemBool)
 				p.res.Settings.DefHalt = n.Val == ast.TrueVal
@@ -42,7 +42,7 @@ func parseOptions(p *Parser) (parseFn, error) {
 					p.res.Settings.NumberOfWorkers, err = itemNumberToInt(n)
 				}
 			case "mode":
-				//TODO: this is for backward compatibility for now
+				//TODO: 現時点では後方互換性のため
 				_, err = p.acceptSeqReturnLast(ast.ItemAssign, ast.ItemIdentifier)
 			case "swap_delay":
 				n, err = p.acceptSeqReturnLast(ast.ItemAssign, ast.ItemNumber)

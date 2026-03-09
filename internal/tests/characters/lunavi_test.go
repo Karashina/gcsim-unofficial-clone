@@ -13,7 +13,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// TestApplyAttackModsLunarWhitelistCRCD verifies Lunar tags only receive CR/CD from AttackMods
+// TestApplyAttackModsLunarWhitelistCRCD はLunarタグがAttackModsからCR/CDのみ受け取ることを検証する
 func TestApplyAttackModsLunarWhitelistCRCD(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.TestCharDoNotUse)
@@ -34,12 +34,12 @@ func TestApplyAttackModsLunarWhitelistCRCD(t *testing.T) {
 
 	ch := c.Player.Chars()[idx]
 
-	// Add an AttackMod that provides ATK%, DmgP, CR, CD
+	// ATK%, DmgP, CR, CDを提供するAttackModを追加
 	testMod := make([]float64, attributes.EndStatType)
-	testMod[attributes.ATKP] = 0.50 // should NOT apply to Lunar
-	testMod[attributes.DmgP] = 0.30 // should NOT apply to Lunar
-	testMod[attributes.CR] = 0.15   // should apply to Lunar
-	testMod[attributes.CD] = 0.25   // should apply to Lunar
+	testMod[attributes.ATKP] = 0.50 // Lunarには適用されないべき
+	testMod[attributes.DmgP] = 0.30 // Lunarには適用されないべき
+	testMod[attributes.CR] = 0.15   // Lunarに適用されるべき
+	testMod[attributes.CD] = 0.25   // Lunarに適用されるべき
 	ch.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("test-mod", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
@@ -47,7 +47,7 @@ func TestApplyAttackModsLunarWhitelistCRCD(t *testing.T) {
 		},
 	})
 
-	// Test Lunar-Charged damage tag
+	// Lunar-Chargedダメージタグをテスト
 	lunarTags := []attacks.AttackTag{
 		attacks.AttackTagLCDamage,
 		attacks.AttackTagLBDamage,
@@ -64,7 +64,7 @@ func TestApplyAttackModsLunarWhitelistCRCD(t *testing.T) {
 		atk.Snapshot.Stats = [attributes.EndStatType]float64{}
 		ch.ApplyAttackMods(atk, nil)
 
-		// CR and CD should be applied
+		// CRとCDが適用されているべき
 		if atk.Snapshot.Stats[attributes.CR] < 0.14 {
 			t.Fatalf("tag %v: CR should be applied to Lunar reactions, got %v", tag, atk.Snapshot.Stats[attributes.CR])
 		}
@@ -72,7 +72,7 @@ func TestApplyAttackModsLunarWhitelistCRCD(t *testing.T) {
 			t.Fatalf("tag %v: CD should be applied to Lunar reactions, got %v", tag, atk.Snapshot.Stats[attributes.CD])
 		}
 
-		// ATK% and DmgP should NOT be applied
+		// ATK%とDmgPは適用されないべき
 		if atk.Snapshot.Stats[attributes.ATKP] > 0.001 {
 			t.Fatalf("tag %v: ATKP should NOT be applied to Lunar reactions, got %v", tag, atk.Snapshot.Stats[attributes.ATKP])
 		}
@@ -82,7 +82,7 @@ func TestApplyAttackModsLunarWhitelistCRCD(t *testing.T) {
 	}
 }
 
-// TestApplyAttackModsNormalTagGetsAllStats verifies normal tags receive all stat mods
+// TestApplyAttackModsNormalTagGetsAllStats は通常タグが全ステータス補正を受け取ることを検証する
 func TestApplyAttackModsNormalTagGetsAllStats(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.TestCharDoNotUse)
@@ -115,7 +115,7 @@ func TestApplyAttackModsNormalTagGetsAllStats(t *testing.T) {
 		},
 	})
 
-	// Normal attack tag should get ALL stats
+	// 通常攻撃タグは全ステータスを受け取るべき
 	normalTags := []attacks.AttackTag{
 		attacks.AttackTagNormal,
 		attacks.AttackTagExtra,
@@ -133,7 +133,7 @@ func TestApplyAttackModsNormalTagGetsAllStats(t *testing.T) {
 		atk.Snapshot.Stats = [attributes.EndStatType]float64{}
 		ch.ApplyAttackMods(atk, nil)
 
-		// All stats should be applied
+		// 全ステータスが適用されているべき
 		if atk.Snapshot.Stats[attributes.ATKP] < 0.49 {
 			t.Fatalf("tag %v: ATKP should be applied to normal attacks, got %v", tag, atk.Snapshot.Stats[attributes.ATKP])
 		}
@@ -149,7 +149,7 @@ func TestApplyAttackModsNormalTagGetsAllStats(t *testing.T) {
 	}
 }
 
-// TestApplyAttackModsReactionTagsSkipped verifies non-Lunar reaction tags get no mods
+// TestApplyAttackModsReactionTagsSkipped は非Lunar元素反応タグがmodを受け取らないことを検証する
 func TestApplyAttackModsReactionTagsSkipped(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.TestCharDoNotUse)
@@ -180,7 +180,7 @@ func TestApplyAttackModsReactionTagsSkipped(t *testing.T) {
 		},
 	})
 
-	// Reaction tags (non-Lunar) should be skipped entirely
+	// 元素反応タグ（非Lunar）は完全にスキップされるべき
 	reactionTags := []attacks.AttackTag{
 		attacks.AttackTagOverloadDamage,
 		attacks.AttackTagSuperconductDamage,
@@ -198,21 +198,21 @@ func TestApplyAttackModsReactionTagsSkipped(t *testing.T) {
 		atk.Snapshot.Stats = [attributes.EndStatType]float64{}
 		result := ch.ApplyAttackMods(atk, nil)
 
-		// ApplyAttackMods should return nil for reaction tags
+		// ApplyAttackModsは元素反応タグに対してnilを返すべき
 		if result != nil {
 			t.Fatalf("tag %v: ApplyAttackMods should return nil for reaction tags", tag)
 		}
 
-		// No stats should be applied
+		// ステータスが適用されないべき
 		if atk.Snapshot.Stats[attributes.CR] > 0.001 {
 			t.Fatalf("tag %v: CR should NOT be applied to reaction tags, got %v", tag, atk.Snapshot.Stats[attributes.CR])
 		}
 	}
 }
 
-// TestHexereiPartyDetection verifies Hexerei party detection (2+ Hexerei chars)
+// TestHexereiPartyDetection はHexereiパーティ検出（2人以上のHexereiキャラ）を検証する
 func TestHexereiPartyDetection(t *testing.T) {
-	// Test with 2 Hexerei chars (Varka + Venti)
+	// Hexereiキャラ2人でテスト（Varka + Venti）
 	c1, _ := makeCore(1)
 	profVarka := defProfile(keys.Varka)
 	profVarka.Base.Ascension = 6
@@ -236,7 +236,7 @@ func TestHexereiPartyDetection(t *testing.T) {
 		t.Fatalf("error initializing core: %v", err)
 	}
 
-	// Both should report hexerei = true
+	// 両方がhexerei = trueを報告するべき
 	for i, name := range []string{"Varka", "Venti"} {
 		result, err := c1.Player.Chars()[i].Condition([]string{"hexerei"})
 		if err != nil {
@@ -247,7 +247,7 @@ func TestHexereiPartyDetection(t *testing.T) {
 		}
 	}
 
-	// Test with 1 Hexerei char (Varka only, nohex on Venti)
+	// Hexereiキャラ1人でテスト（Varkaのみ、Ventiはnohex）
 	c2, _ := makeCore(1)
 	profVarka2 := defProfile(keys.Varka)
 	profVarka2.Base.Ascension = 6
@@ -272,14 +272,14 @@ func TestHexereiPartyDetection(t *testing.T) {
 		t.Fatalf("error initializing core: %v", err)
 	}
 
-	// Varka has hexerei but without 2+ chars, hasHexBonus should be false
-	// (Hexerei is a per-character flag, hasHexBonus is a team-wide check)
+	// Varkaはhexereiを持つが2人以上いないため、hasHexBonusはfalseであるべき
+	// （Hexereiはキャラ単位のフラグ、hasHexBonusはチーム全体の判定）
 	varkaResult, _ := c2.Player.Chars()[0].Condition([]string{"hexerei"})
 	if isHex, ok := varkaResult.(bool); !ok || !isHex {
 		t.Fatal("Varka should still have hexerei=true even without bonus")
 	}
 
-	// Venti should have hexerei=false with nohex=1
+	// Ventiはnohex=1でhexerei=falseであるべき
 	ventiResult, _ := c2.Player.Chars()[1].Condition([]string{"hexerei"})
 	if isHex, ok := ventiResult.(bool); ok && isHex {
 		t.Fatal("Venti should have hexerei=false with nohex=1")

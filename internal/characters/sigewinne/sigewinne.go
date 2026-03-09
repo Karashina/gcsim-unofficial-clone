@@ -20,7 +20,7 @@ func init() {
 type char struct {
 	*tmpl.Character
 
-	// skill
+	// 元素スキル
 	skillAttackInfo combat.AttackInfo
 	skillSnapshot   combat.Snapshot
 
@@ -30,14 +30,14 @@ type char struct {
 	currentBubbleTier int
 	collectedHpDebt   float32
 
-	// burst
+	// 元素爆発
 	burstEarlyCancelled bool
 	tickAnimLength      int
 	burstMaxDuration    int
 	burstStartF         int
 	lastSwap            int
 
-	// cons
+	// 命ノ星座
 	c2Shield *shd
 }
 
@@ -82,8 +82,8 @@ func (c *char) Init() error {
 func (c *char) getSourcewaterDroplets() []*sourcewaterdroplet.Gadget {
 	player := c.Core.Combat.Player()
 
-	// Used Neuvillette's droplet tracking
-	// TODO: check if true for Sigewinne
+	// ヌヴィレットの水滴追跡を使用
+	// TODO: シグウィンにも適用されるか確認
 	segment := combat.NewCircleHitOnTargetFanAngle(player, nil, 14, 80)
 	rect := combat.NewBoxHitOnTarget(player, geometry.Point{Y: -7}, 8, 18)
 
@@ -102,7 +102,7 @@ func (c *char) getSourcewaterDroplets() []*sourcewaterdroplet.Gadget {
 	return droplets
 }
 
-// used for early Burst cancel swap cd calculation
+// 元素爆発の早期キャンセル時の交代CD計算用
 func (c *char) onSwap() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		next := args[1].(int)

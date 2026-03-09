@@ -24,8 +24,8 @@ const (
 	dreamDrifterDurationExtension = 2.5 * 60
 )
 
-// When Yumemizuki Mizuki triggers Swirl while in her Dreamdrifter state, Dreamdrifter's duration increases by 2.5s.
-// This effect can trigger once every 0.3s for a maximum of 2 times per Dreamdrifter state.
+// 夢見月瑞希がDreamdrifter状態中に拡散を発動した時、Dreamdrifterの持続時間が2.5秒延長される。
+// この効果は0.3秒に1回、各Dreamdrifter状態につき最大2回発動可能。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -38,17 +38,17 @@ func (c *char) a1() {
 
 		atk := args[1].(*combat.AttackEvent)
 
-		// Mizuki should trigger the swirl
+		// 瑞希が拡散を発動する必要がある
 		if atk.Info.ActorIndex != c.Index {
 			return false
 		}
 
-		// Only when dream drifter is active
+		// Dreamdrifterがアクティブな時のみ
 		if !c.StatusIsActive(dreamDrifterStateKey) {
 			return false
 		}
 
-		// Max 2 extensions per E
+		// スキル1回につき最大2回延長
 		if c.dreamDrifterExtensionsRemaining <= 0 {
 			return false
 		}
@@ -73,8 +73,8 @@ func (c *char) a1() {
 	c.Core.Events.Subscribe(event.OnSwirlCryo, swirlFunc, fmt.Sprintf(a1SwirlKey, attributes.Cryo))
 }
 
-// While Yumemizuki Mizuki is in the Dreamdrifter state, when other nearby party members hit opponents with
-// Pyro, Hydro, Cryo, or Electro attacks, her Elemental Mastery will increase by 100 for 4s.
+// 夢見月瑞希がDreamdrifter状態中、周囲の他のパーティメンバーが炎・水・氷・雷攻撃で敵に命中した時、
+// 彼女の元素熟知が4秒間100増加する。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -88,13 +88,13 @@ func (c *char) a4() {
 			return false
 		}
 
-		// Only when others attack
+		// 他キャラの攻撃時のみ
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex == c.Index {
 			return false
 		}
 
-		// Only when dream drifter is active
+		// Dreamdrifterがアクティブな時のみ
 		if !c.StatusIsActive(dreamDrifterStateKey) {
 			return false
 		}
@@ -105,7 +105,7 @@ func (c *char) a4() {
 		}
 		c.AddStatus(a4ICDKey, a4ICD, true)
 
-		// Only when enemy is hit by Pyro, Hydro, Cryo, Electro
+		// 敵が炎・水・氷・雷でヒットされた時のみ
 		switch atk.Info.Element {
 		case attributes.Electro:
 		case attributes.Hydro:

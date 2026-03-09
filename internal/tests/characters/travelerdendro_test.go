@@ -39,20 +39,20 @@ func TestTravelerDendroBurstAttach(t *testing.T) {
 	}, "hit-check")
 	advanceCoreFrame(c)
 
-	// use burst to create a ball
+	// 元素爆発で玉を生成
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionBurst, keys.AetherDendro, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
-	// wait until dendro gadget is created
+	// 草元素ガジェットが生成されるまで待機
 	for c.Combat.GadgetCount() < 1 {
 		advanceCoreFrame(c)
 	}
-	// skip an additional frame to be safe
+	// 安全のため追加で1フレーム進める
 	advanceCoreFrame(c)
 
-	// check that gadget has dendro on it
+	// ガジェットに草元素が付着していることを確認
 	g := c.Combat.Gadget(0)
 	gr, ok := g.(*dendro.LeaLotus)
 	if !ok {
@@ -64,11 +64,11 @@ func TestTravelerDendroBurstAttach(t *testing.T) {
 		t.Errorf("expecting initial 10 dendro on traveler lea lotus, got %v", gr.Durability[reactable.Dendro])
 	}
 
-	// pattern only hit gadet
+	// パターンはガジェットにのみ命中
 	pattern := combat.NewCircleHitOnTarget(geometry.Point{}, nil, 100)
 	pattern.SkipTargets[targets.TargettableEnemy] = true
 
-	// check the cryo attaches
+	// 氷元素の付着をチェック
 	c.QueueAttackEvent(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Cryo,
@@ -119,20 +119,20 @@ func TestTravelerDendroBurstPyro(t *testing.T) {
 	}, "hit-check")
 	advanceCoreFrame(c)
 
-	// use burst to create a ball
+	// 元素爆発で玉を生成
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionBurst, keys.AetherDendro, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
-	// wait until dendro gadget is created
+	// 草元素ガジェットが生成されるまで待機
 	for c.Combat.GadgetCount() < 1 {
 		advanceCoreFrame(c)
 	}
-	// skip an additional frame to be safe
+	// 安全のため追加で1フレーム進める
 	advanceCoreFrame(c)
 
-	// check that gadget has dendro on it
+	// ガジェットに草元素が付着していることを確認
 	g := c.Combat.Gadget(0)
 	gr, ok := g.(*dendro.LeaLotus)
 	if !ok {
@@ -144,11 +144,11 @@ func TestTravelerDendroBurstPyro(t *testing.T) {
 		t.Errorf("expecting initial 10 dendro on traveler lea lotus, got %v", gr.Durability[reactable.Dendro])
 	}
 
-	// pattern only hit gadet
+	// パターンはガジェットにのみ命中
 	pattern := combat.NewCircleHitOnTarget(geometry.Point{}, nil, 100)
 	pattern.SkipTargets[targets.TargettableEnemy] = true
 
-	// check the cryo attaches
+	// 氷元素の付着をチェック
 	c.QueueAttackEvent(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Pyro,
@@ -163,7 +163,7 @@ func TestTravelerDendroBurstPyro(t *testing.T) {
 		t.Errorf("expecting 0 dendro on traveler lea lotus, got %v", gr.Durability[reactable.Pyro])
 	}
 
-	// should get an explosion 60 frfames later
+	// 60フレーム後に爆発が発生するべき
 	for i := 0; i < 100; i++ {
 		advanceCoreFrame(c)
 	}
@@ -173,9 +173,9 @@ func TestTravelerDendroBurstPyro(t *testing.T) {
 	}
 }
 
-// lotus is expected to tick at frame 37 after appearing, which is 54+37 after cast
-// and then tick every 90 frames after that for the duration
-// duration is either 12s at c0 or 15s at c2
+// lotusは出現後37フレーム目にtickすることが期待される（キャスト後54+37フレーム）
+// その後は持続時間中90フレームごとにtick
+// 持続時間はC0で12秒、C2で15秒
 func TestTravelerDendroBurstTicks(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.AetherDendro)
@@ -203,16 +203,16 @@ func TestTravelerDendroBurstTicks(t *testing.T) {
 	}, "hit-check")
 	advanceCoreFrame(c)
 
-	// use burst to create a ball
+	// 元素爆発で玉を生成
 	p := make(map[string]int)
 	log.Println("casting burst: ", c.F)
 	c.Player.Exec(action.ActionBurst, keys.AetherDendro, p)
 
-	// expecting to take a total of 54 frames to appear + 15s duration
+	// 出現まで合計54フレーム + 15秒の持続時間を期待
 	totalDuration := 15 * 60
 	expectedCount := 1 + (totalDuration-37)/90
 
-	// add 100 for good measures in case bugs from extra ticks
+	// 余分なtickのバグに備えて100フレーム追加
 	for i := 0; i < 54+totalDuration+100; i++ {
 		advanceCoreFrame(c)
 	}
@@ -249,20 +249,20 @@ func TestTravelerDendroBurstElectroTicks(t *testing.T) {
 	}, "hit-check")
 	advanceCoreFrame(c)
 
-	// use burst to create a ball
+	// 元素爆発で玉を生成
 	p := make(map[string]int)
 	log.Println("casting burst: ", c.F)
 	c.Player.Exec(action.ActionBurst, keys.AetherDendro, p)
-	// wait until dendro gadget is created
+	// 草元素ガジェットが生成されるまで待機
 	for c.Combat.GadgetCount() < 1 {
 		advanceCoreFrame(c)
 	}
 
-	// pattern only hit gadet
+	// パターンはガジェットにのみ命中
 	pattern := combat.NewCircleHitOnTarget(geometry.Point{}, nil, 100)
 	pattern.SkipTargets[targets.TargettableEnemy] = true
 
-	// check the cryo attaches
+	// 氷元素の付着をチェック
 	c.QueueAttackEvent(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Electro,
@@ -271,11 +271,11 @@ func TestTravelerDendroBurstElectroTicks(t *testing.T) {
 		Pattern: pattern,
 	}, 0)
 
-	// first tick at 15, then tick every 54 after that
+	// 最初のtickは15フレーム目、その後は54フレームごとにtick
 	totalDuration := 15 * 60
 	expectedCount := 1 + (totalDuration-15)/54
 
-	// add 100 for good measures in case bugs from extra ticks
+	// 余分なtickのバグに備えて100フレーム追加
 	for i := 0; i < totalDuration+100; i++ {
 		advanceCoreFrame(c)
 	}

@@ -7,15 +7,15 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player"
 )
 
-// ActionStam provides default implementation for stam cost for charge and dash
-// character should override this though
+// ActionStam は重撃とダッシュのスタミナコストのデフォルト実装を提供する
+// キャラクターはこれをオーバーライドすべき
 func (c *Character) ActionStam(a action.Action, p map[string]int) float64 {
 	switch a {
 	case action.ActionCharge:
-		// 20 sword (most)
-		// 25 polearm
-		// 40 per second claymore
-		// 50 catalyst
+		// 20 片手剣（大半）
+		// 25 長柄武器
+		// 40/秒 両手剣
+		// 50 法器
 		switch c.Weapon.Class {
 		case info.WeaponClassSword:
 			return 20
@@ -31,7 +31,7 @@ func (c *Character) ActionStam(a action.Action, p map[string]int) float64 {
 			return 0
 		}
 	case action.ActionDash:
-		// 18 per
+		// 1回あたり18
 		return 18
 	default:
 		return 0
@@ -39,10 +39,10 @@ func (c *Character) ActionStam(a action.Action, p map[string]int) float64 {
 }
 
 func (c *Character) Dash(p map[string]int) (action.Info, error) {
-	// Execute dash CD logic
+	// ダッシュクールダウンのロジックを実行
 	c.ApplyDashCD()
 
-	// consume stamina at end of the dash
+	// ダッシュ終了時にスタミナを消費
 	c.QueueDashStaminaConsumption(p)
 
 	length := c.DashLength()
@@ -62,7 +62,7 @@ func (c *Character) Dash(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// set the dash CD. If the dash was on CD when this dash executes, lockout dash
+// ダッシュCDを設定する。このダッシュ実行時にCDが残っていた場合、ダッシュをロックアウトする
 func (c *Character) ApplyDashCD() {
 	var evt glog.Event
 
@@ -82,7 +82,7 @@ func (c *Character) ApplyDashCD() {
 }
 
 func (c *Character) QueueDashStaminaConsumption(p map[string]int) {
-	// consume stam at the end
+	// 終了時にスタミナを消費
 	c.Core.Tasks.Add(func() {
 		req := c.Core.Player.AbilStamCost(c.Index, action.ActionDash, p)
 		c.Core.Player.UseStam(req, action.ActionDash)
@@ -116,7 +116,7 @@ func (c *Character) DashToJumpLength() int {
 func (c *Character) Jump(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(player.XianyunAirborneBuff) {
 		c.Core.Player.SetAirborne(player.AirborneXianyun)
-		// 4/8 for claymore/bow/catalyst and 5/9 for sword/polearm
+		// 両手剣/弓/法器は4/8、片手剣/長柄武器は5/9
 		lowPlunge := 4
 		highPlunge := 8
 		switch c.Weapon.Class {
@@ -125,7 +125,7 @@ func (c *Character) Jump(p map[string]int) (action.Info, error) {
 			highPlunge = 9
 		}
 
-		animLength := 60 // Upperbound for jump for high/low plunge
+		animLength := 60 // 高空/低空落下攻撃のジャンプの上限値
 		return action.Info{
 			Frames: func(a action.Action) int {
 				switch a {
@@ -134,11 +134,11 @@ func (c *Character) Jump(p map[string]int) (action.Info, error) {
 				case action.ActionHighPlunge:
 					return highPlunge
 				default:
-					return animLength // This is expected to later lead to action error because no other action besides plunges can be done while AirborneXianyun
+					return animLength // AirborneXianyun 中は落下攻撃以外のアクションができないため、後にアクションエラーになることが想定される
 				}
 			},
 			AnimationLength: animLength,
-			CanQueueAfter:   lowPlunge, // earliest cancel
+			CanQueueAfter:   lowPlunge, // 最速キャンセル
 			State:           action.JumpState,
 		}, nil
 	}

@@ -13,8 +13,8 @@ func GenerateCharacterDetails(cfg *info.ActionList) ([]*model.Character, error) 
 	if err != nil {
 		return nil, err
 	}
-	// create a new simulation and run
-	//TODO: nil shoudl be fine here
+	// 新しいシミュレーションを作成して実行
+	//TODO: ここでnilでも問題ないはず
 	sim, err := simulation.New(cpy, nil, c)
 	if err != nil {
 		return nil, err

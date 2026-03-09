@@ -11,7 +11,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
-// TestZibaiSkillActivatesPhaseShift verifies Skill enters Lunar Phase Shift mode
+// TestZibaiSkillActivatesPhaseShift はスキル使用でLunar Phase Shiftモードに入ることを検証する
 func TestZibaiSkillActivatesPhaseShift(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Zibai)
@@ -35,7 +35,7 @@ func TestZibaiSkillActivatesPhaseShift(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Before skill: Phase Shift should be inactive (0)
+	// スキル前: Phase Shiftは非アクティブ(0)であるべき
 	result, err := c.Player.Chars()[idx].Condition([]string{"lunar-phase-shift"})
 	if err != nil {
 		t.Fatalf("lunar-phase-shift condition error: %v", err)
@@ -44,21 +44,21 @@ func TestZibaiSkillActivatesPhaseShift(t *testing.T) {
 		t.Fatal("Phase Shift should be 0 (inactive) before skill use")
 	}
 
-	// Execute skill
+	// 元素スキルを実行
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionSkill, keys.Zibai, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// After skill: Phase Shift should be active (1)
+	// スキル後: Phase Shiftはアクティブ(1)であるべき
 	result, _ = c.Player.Chars()[idx].Condition([]string{"lunar-phase-shift"})
 	if active, ok := result.(int); !ok || active != 1 {
 		t.Fatalf("Phase Shift should be 1 (active) after skill use, got %v (%T)", result, result)
 	}
 }
 
-// TestZibaiRadianceConditionQuery verifies Radiance starts at expected value
+// TestZibaiRadianceConditionQuery はRadianceが期待値で開始することを検証する
 func TestZibaiRadianceConditionQuery(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Zibai)
@@ -82,14 +82,14 @@ func TestZibaiRadianceConditionQuery(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Activate Phase Shift
+	// Phase Shiftを有効化
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionSkill, keys.Zibai, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// After activation, radiance should be 0 (or 100 with C1)
+	// 有効化後、radianceは0であるべき（C1の場合は100）
 	result, err := c.Player.Chars()[idx].Condition([]string{"phase-shift-radiance"})
 	if err != nil {
 		t.Fatalf("phase-shift-radiance condition error: %v", err)
@@ -98,13 +98,13 @@ func TestZibaiRadianceConditionQuery(t *testing.T) {
 	if !ok {
 		t.Fatalf("radiance should return int, got %T", result)
 	}
-	// C0: radiance resets to 0 on skill
+	// C0: スキル使用でradianceが0にリセット
 	if radiance < 0 {
 		t.Fatalf("radiance should be non-negative, got %v", radiance)
 	}
 }
 
-// TestZibaiRadianceAccumulation verifies Radiance increases over time during Phase Shift
+// TestZibaiRadianceAccumulation はPhase Shift中にRadianceが時間経過で増加することを検証する
 func TestZibaiRadianceAccumulation(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Zibai)
@@ -128,23 +128,23 @@ func TestZibaiRadianceAccumulation(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Enter Phase Shift
+	// Phase Shiftに入る
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionSkill, keys.Zibai, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// Get initial radiance
+	// 初期radianceを取得
 	result, _ := c.Player.Chars()[idx].Condition([]string{"phase-shift-radiance"})
 	initialRadiance, _ := result.(int)
 
-	// Advance several seconds (radiance gains 1 per 6 frames)
+	// 数秒分進める（radianceは6フレームごとに1増加）
 	for i := 0; i < 300; i++ { // ~5 seconds
 		advanceCoreFrame(c)
 	}
 
-	// Radiance should have increased
+	// Radianceが増加しているべき
 	result, _ = c.Player.Chars()[idx].Condition([]string{"phase-shift-radiance"})
 	laterRadiance, _ := result.(int)
 
@@ -154,7 +154,7 @@ func TestZibaiRadianceAccumulation(t *testing.T) {
 	}
 }
 
-// TestZibaiPhaseShiftExpires verifies Phase Shift mode expires after 16.5 seconds
+// TestZibaiPhaseShiftExpires はPhase Shiftモードが16.5秒後に終了することを検証する
 func TestZibaiPhaseShiftExpires(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Zibai)
@@ -178,32 +178,32 @@ func TestZibaiPhaseShiftExpires(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Enter Phase Shift
+	// Phase Shiftに入る
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionSkill, keys.Zibai, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// Verify it's active (1)
+	// アクティブ(1)であることを確認
 	result, _ := c.Player.Chars()[idx].Condition([]string{"lunar-phase-shift"})
 	if active, ok := result.(int); !ok || active != 1 {
 		t.Fatal("Phase Shift should be active after skill")
 	}
 
-	// Advance 17 seconds (1020 frames) — past 16.5s duration
+	// 17秒分進める（1020フレーム）— 16.5秒の持続時間を超過
 	for i := 0; i < 1020; i++ {
 		advanceCoreFrame(c)
 	}
 
-	// Phase Shift should have expired (0)
+	// Phase Shiftは終了しているべき(0)
 	result, _ = c.Player.Chars()[idx].Condition([]string{"lunar-phase-shift"})
 	if active, ok := result.(int); ok && active != 0 {
 		t.Fatal("Phase Shift should expire after 16.5 seconds")
 	}
 }
 
-// TestZibaiBurstDealsDamage verifies Burst deals 2 hits
+// TestZibaiBurstDealsDamage は元素爆発が2ヒットすることを検証する
 func TestZibaiBurstDealsDamage(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Zibai)
@@ -250,7 +250,7 @@ func TestZibaiBurstDealsDamage(t *testing.T) {
 	}
 }
 
-// TestZibaiC1Setup verifies C1 initializes correctly
+// TestZibaiC1Setup はC1が正しく初期化されることを検証する
 func TestZibaiC1Setup(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Zibai)
@@ -271,7 +271,7 @@ func TestZibaiC1Setup(t *testing.T) {
 	}
 }
 
-// TestZibaiC6Setup verifies C6 initializes correctly
+// TestZibaiC6Setup はC6が正しく初期化されることを検証する
 func TestZibaiC6Setup(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Zibai)
@@ -292,7 +292,7 @@ func TestZibaiC6Setup(t *testing.T) {
 	}
 }
 
-// TestZibaiAllActionsDoNotPanic verifies all actions don't panic
+// TestZibaiAllActionsDoNotPanic は全アクションがパニックしないことを検証する
 func TestZibaiAllActionsDoNotPanic(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Zibai)

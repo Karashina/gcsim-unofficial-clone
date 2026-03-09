@@ -42,16 +42,16 @@ func TestDaybreakHitIncreasesBonus(t *testing.T) {
 
 	char := c.Player.Chars()[idx]
 
-	// Ensure frame is past ICD so first hit applies
+	// ICDを超過したフレームであることを確認し、最初のヒットが適用されるようにする
 	c.F = hitICDFrames + 1
 
-	// Simulate a hit to increase the NA bonus
+	// ヒットをシミュレートして通常攻撃ボーナスを増加させる
 	hit := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
 	c.Events.Emit(event.OnEnemyHit, nil, hit)
 
-	// Now build an attack and apply attack mods; DMG percent should be applied
+	// 攻撃を構築してアタックModを適用；ダメージ%が適用されるべき
 	atk := &combat.AttackEvent{Info: combat.AttackInfo{ActorIndex: idx, AttackTag: attacks.AttackTagNormal}}
-	// Snapshot stats default to zero; ApplyAttackMods will populate snapshot
+	// スナップショットのステータスはデフォルトでゼロ；ApplyAttackModsがスナップショットを設定する
 	char.ApplyAttackMods(atk, nil)
 	if atk.Snapshot.Stats[attributes.DmgP] <= 0 {
 		t.Fatalf("expected DmgP bonus to be applied after hit, got %v", atk.Snapshot.Stats[attributes.DmgP])

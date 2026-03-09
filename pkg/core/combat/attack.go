@@ -8,13 +8,13 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
-// attack returns true if the attack lands
+// attack は攻撃が命中した場合にtrueを返す
 func (h *Handler) attack(t Target, a *AttackEvent) (float64, bool) {
 	willHit, reason := t.AttackWillLand(a.Pattern)
 	if !willHit {
-		// Move target logs into the "Sim" event log to avoid cluttering main display for stuff like Guoba
-		// And obvious things like "Fischl A4 is single target so it didn't hit targets 2-4"
-		// TODO: Maybe want to add a separate set of log events for this?
+		// Guobaなどのメイン表示を散らかさないよう、ターゲットログを"Sim"イベントログに移動
+		// 「Fischl A4は単体攻撃なのでターゲット2-4には命中しない」のような自明なことも含む
+		// TODO: このための別のログイベントセットを追加すべきか？
 		if h.Debug && t.Type() != targets.TargettablePlayer {
 			h.Log.NewEventBuildMsg(glog.LogDebugEvent, a.Info.ActorIndex, "skipped ", a.Info.Abil, " ", reason).
 				Write("attack_tag", a.Info.AttackTag).
@@ -25,7 +25,7 @@ func (h *Handler) attack(t Target, a *AttackEvent) (float64, bool) {
 		}
 		return 0, false
 	}
-	// make a copy first
+	// まずコピーを作成
 	cpy := *a
 	dmg := t.HandleAttack(&cpy)
 	return dmg, true
@@ -36,12 +36,12 @@ func (h *Handler) ApplyAttack(a *AttackEvent) float64 {
 	// died := false
 	var total float64
 	var landed bool
-	// check player
+	// プレイヤーをチェック
 	if !a.Pattern.SkipTargets[targets.TargettablePlayer] {
-		//TODO: we don't check for landed here since attack that hit player should never generate hitlag?
+		//TODO: プレイヤーへの攻撃はヒットラグを生成しないはずなので、ここではlandedをチェックしない
 		h.attack(h.player, a)
 	}
-	// check enemies
+	// 敵をチェック
 	if !a.Pattern.SkipTargets[targets.TargettableEnemy] {
 		for _, v := range h.enemies {
 			if v == nil {
@@ -57,17 +57,17 @@ func (h *Handler) ApplyAttack(a *AttackEvent) float64 {
 			}
 		}
 	}
-	// check gadgets
+	// ガジェットをチェック
 	if !a.Pattern.SkipTargets[targets.TargettableGadget] {
 		for i := 0; i < len(h.gadgets); i++ {
-			// sanity check here; possible gadgets died and have not been cleaned up yet
+			// 死亡してクリーンアップがまだのガジェットがありえるので、ここで安全性チェック
 			if h.gadgets[i] == nil {
 				continue
 			}
 			h.attack(h.gadgets[i], a)
 		}
 	}
-	// add hitlag to actor but ignore if this is deployable
+	// アクターにヒットラグを追加（設置物の場合は無視）
 	if h.EnableHitlag && landed && !a.Info.IsDeployable {
 		dur := a.Info.HitlagHaltFrames
 		if h.DefHalt && a.Info.CanBeDefenseHalted {

@@ -15,15 +15,15 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	// Burst state
+	// 元素爆発状態
 	orioleSongActive        bool
 	orioleSongSrc           int
 	nightingaleSongStacks   int
-	c2StackCounter          int // Track stacks consumed for C2
-	geoConstructBonusStacks int // Track additional stacks from Geo Constructs (max 15)
-	// Moonsign state
+	c2StackCounter          int // 2命用の消費スタック追跡
+	geoConstructBonusStacks int // 岩元素構築物からの追加スタック追跡（最大15）
+	// 月相状態
 	moonsignAscendant bool
-	// A4 party composition tracking
+	// 固有天賦4のパーティ構成追跡
 	a4HydroCount int
 	a4GeoCount   int
 }
@@ -43,7 +43,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.BurstCon = 5
 	c.SkillCon = 3
 
-	// Initialize state
+	// 状態を初期化
 	c.orioleSongActive = false
 	c.orioleSongSrc = -1
 	c.nightingaleSongStacks = 0
@@ -56,22 +56,22 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// Initialize A4 passive (party composition tracking)
+	// 固有天賦4を初期化（パーティ構成追跡）
 	c.a4Init()
 
-	// Initialize constellations
+	// 命ノ星座を初期化
 	c.consInit()
 
-	// Grant moonsignKey for A0 (Moonsign Level +1)
+	// A0のmoonsignKeyを付与（月相レベル+1）
 	c.AddStatus("moonsignKey", -1, true)
 
-	// Subscribe to moonsign state updates
+	// 月相状態の更新を購読
 	c.updateMoonsignState()
 
 	return nil
 }
 
-// updateMoonsignState updates Illuga's internal moonsign state based on party-wide flags
+// updateMoonsignState はパーティ全体のフラグに基づいてイルーガの内部月相状態を更新する
 func (c *char) updateMoonsignState() {
 	c.moonsignAscendant = c.MoonsignAscendant
 }
@@ -83,7 +83,7 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	return c.Character.AnimationStartDelay(k)
 }
 
-// Condition allows querying character state from GCSL
+// Condition はGCSLからキャラクター状態をクエリすることを可能にする
 func (c *char) Condition(fields []string) (any, error) {
 	switch fields[0] {
 	case "oriole-song":
@@ -102,8 +102,8 @@ func (c *char) Condition(fields []string) (any, error) {
 	return c.Character.Condition(fields)
 }
 
-// isMoonsignAscendant checks if Moonsign is Ascendant Gleam
-// Queries the party-wide Moonsign status set during initialization
+// isMoonsignAscendant は月相がAscendant Gleamかチェックする
+// 初期化時に設定されたパーティ全体の月相ステータスをクエリする
 func (c *char) isMoonsignAscendant() bool {
 	return c.MoonsignAscendant
 }

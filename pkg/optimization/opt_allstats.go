@@ -7,7 +7,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 )
 
-// Calculate per-character per-substat "gradients" at initial state using finite differences
+// 有限差分法を使用して、初期状態でのキャラクターごと・サブステータスごとの「勾配」を計算
 func (stats *SubstatOptimizerDetails) optimizeERAndDMGSubstats() []string {
 	var (
 		opDebug   []string
@@ -23,14 +23,14 @@ func (stats *SubstatOptimizerDetails) optimizeERAndDMGSubstats() []string {
 	return opDebug
 }
 
-// This function assumes that there are now all subs allocated. For every sub of ER we gain, we will lose one sub of damage
-// We compare the damage loss of 1 DMG sub against the damage gain of 1 ER sub.
-// We deallocate that DMG sub and allocate 1 ER sub if it would be an overall gain
-// Repeat until we cannot allocate ER subs or the DMG loss would be greater than the gain
-// The ER dmg gain is prone to noise, so we need to do more iterations
+// この関数は全てのサブステータスが割り当て済みであることを前提とする。ERのサブを得るごとにダメージのサブを1つ失う
+// 1つのDMGサブのダメージ損失と1つのERサブのダメージ利得を比較する
+// 全体的に利得がある場合、そのDMGサブを解除して1つのERサブを割り当てる
+// ERサブを割り当てられなくなるか、DMG損失が利得を上回るまで繰り返す
+// ERのダメージ利得はノイズの影響を受けやすいため、より多くのイテレーションが必要
 //
-// We also check if losing an ER sub and gaining a DMG sub is an overall gain. This will cover when the initial ER heuristic fails
-// due to if .char.burst.ready { char burst; } lines not being modified as recommended.
+// また、ERサブを失いDMGサブを得ることが全体的に利得かどうかも確認する。これは初期ERヒューリスティックが
+// if .char.burst.ready { char burst; } 行が推奨通りに変更されていない場合に失敗するケースをカバーする。
 func (stats *SubstatOptimizerDetails) optimizeERAndDMGSubstatsForChar(
 	idxChar int,
 	char info.CharacterProfile,
@@ -46,7 +46,7 @@ func (stats *SubstatOptimizerDetails) optimizeERAndDMGSubstatsForChar(
 	}
 
 	addedEr := false
-	// Check if adding ER subs adds damage
+	// ERサブの追加がダメージを増やすか確認
 	for stats.charMaxExtraERSubs[idxChar] > 0.0 && stats.charSubstatFinal[idxChar][attributes.ER] < stats.charSubstatLimits[idxChar][attributes.ER] {
 		origIter := stats.simcfg.Settings.Iterations
 		stats.simcfg.Settings.IgnoreBurstEnergy = true
@@ -66,7 +66,7 @@ func (stats *SubstatOptimizerDetails) optimizeERAndDMGSubstatsForChar(
 			}
 		}
 
-		// If the overall damage gain is less than 0, we are done
+		// 全体的なダメージ利得0以下の場合、終了
 		if erGainGradient[0]+lowestLoss <= 0 || lowestSub == attributes.NoStat {
 			break
 		}
@@ -80,11 +80,12 @@ func (stats *SubstatOptimizerDetails) optimizeERAndDMGSubstatsForChar(
 		stats.charMaxExtraERSubs[idxChar] -= 1
 	}
 
-	// Check if removing ER subs adds damage
-	// We use less iterations and a higher threshold here because we prefer having more ER for better stddev.
-	// This should help cover the case where users don't apply the suggestions to modify .char.burst.ready into
-	// their intended rotation change. This still might get stuck in a local minima.
-	// TODO: How to adjust for local minima?
+	// ERサブを減らすことでダメージが増えるか確認
+	// より良い標準偏差のためにERを多めに持つことを優先するため、
+	// ここではイテレーション数を少なくし、より高い閾値を使用する。
+	// これはユーザーが.char.burst.readyを意図したローテーション変更に適用しないケースをカバーするが、
+	// 局所的最小値に引っかかる可能性がある。
+	// TODO: 局所的最小値に対する調整方法は？
 	for !addedEr && stats.charSubstatFinal[idxChar][attributes.ER] > 0 {
 		origIter := stats.simcfg.Settings.Iterations
 		stats.simcfg.Settings.IgnoreBurstEnergy = true
@@ -104,7 +105,7 @@ func (stats *SubstatOptimizerDetails) optimizeERAndDMGSubstatsForChar(
 			}
 		}
 
-		// If the overall damage gain is less than 100, we are done
+		// 全体的なダメージ利得が100以下の場合、終了
 		if erGainGradient[0]+largestGain <= 100 || largestSub == attributes.NoStat {
 			break
 		}

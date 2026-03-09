@@ -26,12 +26,12 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Increases CRIT DMG by 20%. Hits have a 60% chance to inflict a small AoE attack, dealing 125% Physical
-	// ATK DMG. Can only occur once every 4s.
+	// 会心ダメージ20%増加。命中時に60%の確率で小範囲AoE攻撃を行い、
+	// 物理攻撃力125%分のダメージを与える。4秒毎に1回のみ発動可能。
 	w := &Weapon{}
 	r := p.Refine
 
-	// free crit damage
+	// 無条件会心ダメージ
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CD] = 0.15 + float64(r)*0.05
 	char.AddStatMod(character.StatMod{
@@ -42,7 +42,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// procs
+	// 発動処理
 	prob := 0.5 + 0.1*float64(r)
 	const icdKey = "skyward-harp-icd"
 	cd := 270 - 30*r

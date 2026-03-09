@@ -33,7 +33,7 @@ func init() {
 	attackFrames[1][action.ActionAttack] = 21                             // N2 -> CA
 
 	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 58) // N3 -> N1
-	attackFrames[2][action.ActionCharge] = 500                            //TODO: this action is illegal; need better way to handle it
+	attackFrames[2][action.ActionCharge] = 500                            //TODO: このアクションは無効。より良いハンドリングが必要
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
@@ -71,7 +71,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			attackHitboxes[c.NormalCounter][1],
 		)
 	}
-	// no multihits so no need for char queue here
+	// マルチヒットなしなのでキャラタスクキュー不要
 	c.Core.QueueAttack(ai, ap, attackHitmarks[c.NormalCounter], attackHitmarks[c.NormalCounter])
 
 	defer c.AdvanceNormalIndex()

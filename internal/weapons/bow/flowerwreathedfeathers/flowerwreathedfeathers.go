@@ -37,9 +37,8 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Decreases Gliding Stamina consumption by 15%. When using Aimed Shots, the DMG dealt by Charged Attacks
-// increases by 6% every 0.5s. This effect can stack up to 6 times and will be removed 10s after leaving
-// Aiming Mode.
+// 滑空のスタミナ消費が15%減少する。狙い撃ち時、重撃ダメージが0.5秒毎に6%増加する。
+// この効果は最大6スタックまで重複し、狙い撃ちモード解除後10秒で解除される。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		c:    c,
@@ -47,7 +46,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}
 	r := p.Refine
 
-	// "Gliding Stamina consumption" not implemented
+	// 「滑空のスタミナ消費」は未実装
 
 	m := make([]float64, attributes.EndStatType)
 	buff := 0.045 + 0.015*float64(r)

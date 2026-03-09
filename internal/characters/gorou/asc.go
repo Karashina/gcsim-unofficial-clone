@@ -6,7 +6,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// After using Juuga: Forward Unto Victory, all nearby party members' DEF is increased by 25% for 12s.
+// 戦陣の誉を使用後、12秒間付近の全パーティメンバーの防御力が25%増加する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -22,9 +22,9 @@ func (c *char) a1() {
 	}
 }
 
-// Gorou receives the following DMG Bonuses to his attacks based on his DEF:
+// ゴローは防御力に基づいて以下のダメージボーナスを受ける:
 //
-// - Inuzaka All-Round Defense: Skill DMG increased by 156% of DEF
+// - 犬坂鐌繰の昭: スキルダメージが防御力の156%分増加
 func (c *char) a4Skill() float64 {
 	if c.Base.Ascension < 4 {
 		return 0
@@ -32,9 +32,9 @@ func (c *char) a4Skill() float64 {
 	return c.TotalDef(false) * 1.56
 }
 
-// Gorou receives the following DMG Bonuses to his attacks based on his DEF:
+// ゴローは防御力に基づいて以下のダメージボーナスを受ける:
 //
-// - Juuga: Forward Unto Victory: Skill DMG and Crystal Collapse DMG increased by 15.6% of DEF
+// - 戦陣の誉: スキルダメージとCrystal Collapseダメージが防御力の15.6%分増加
 func (c *char) a4Burst() float64 {
 	if c.Base.Ascension < 4 {
 		return 0

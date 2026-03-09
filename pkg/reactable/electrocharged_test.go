@@ -29,7 +29,7 @@ func TestEC(t *testing.T) {
 	c.QueueAttackEvent(makeAOEAttack(attributes.Hydro, 25), 0)
 	c.Tick()
 	c.QueueAttackEvent(makeAOEAttack(attributes.Electro, 25), 0)
-	// tick once every 60 second. we should get 2 ticks total
+	// 60フレームごとに1回Tickする。合計2回のTickが発生するはず
 	for i := 0; i < 121; i++ {
 		advanceCoreFrame(c)
 	}

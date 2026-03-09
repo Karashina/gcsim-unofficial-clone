@@ -68,7 +68,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		return action.Info{}, fmt.Errorf("%v: Cannot early cancel Super Saturated Syringing with Elemental Skill", c.Base.Key)
 	}
 
-	// TODO: rework it like kirara/sayu skill?
+	// TODO: 綺良々/早柚のスキルのようにリワークする？
 	skillHitmark := skillPressHitmark
 	skillCDStart := skillPressCDStart
 	c.currentBubbleTier = 0
@@ -148,7 +148,7 @@ func (c *char) bolsteringBubblebalm(src, tick int) func() {
 		}
 
 		c.bubbleTierLoseTask(tick)
-		// TODO: hitlag affected?
+		// TODO: ヒットラグの影響を受ける？
 		c.Core.Tasks.Add(c.bolsteringBubblebalm(src, tick+1), bubbleHitInterval)
 	}
 }
@@ -201,7 +201,7 @@ func (c *char) bubbleHealing() {
 		return
 	}
 
-	// heal everyone except Sigewinne
+	// シグウィン以外の全員を回復
 	for _, other := range c.Core.Player.Chars() {
 		if other.Index == c.Index {
 			continue
@@ -222,7 +222,7 @@ func (c *char) bubbleFinalHealing() {
 	if !c.StatusIsActive(skillKey) {
 		return
 	}
-	// heal only Sigewinne
+	// シグウィンのみ回復
 	skillBonus := float64(c.currentBubbleTier) * bubbleTierBuff
 	c.Core.Player.Heal(info.HealInfo{
 		Caller:  c.Index,
@@ -258,7 +258,7 @@ func (c *char) bubbleTierDamageMod() {
 }
 
 func (c *char) energyBondClearMod() {
-	// TODO: override healing functions?
+	// TODO: 回復関数をオーバーライドする？
 	c.Core.Events.Subscribe(event.OnHPDebt, func(args ...interface{}) bool {
 		index := args[0].(int)
 		if index != c.Index {
@@ -297,7 +297,7 @@ func (c *char) particleCB(ac combat.AttackCB) {
 		return
 	}
 
-	// once per skill
+	// スキルごとに1回
 	c.particleGenerated = true
 	c.Core.QueueParticle(c.Base.Key.String(), particleCount, attributes.Hydro, c.ParticleDelay)
 }

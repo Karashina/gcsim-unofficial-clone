@@ -23,7 +23,7 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Using an Elemental Skill increases DEF by 16/20/24/28/32% for 15s.
+// 元素スキル使用時、防御力が15秒間16/20/24/28/32%増加する。
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}

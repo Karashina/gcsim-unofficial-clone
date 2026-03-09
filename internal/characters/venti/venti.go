@@ -23,16 +23,16 @@ type char struct {
 	absorbCheckLocation combat.AttackPattern
 	aiAbsorb            combat.AttackInfo
 	snapAbsorb          combat.Snapshot
-	// Hexerei mode (default true unless nohex=1)
+	// Hexereiモード（nohex=1が指定されない限りデフォルトtrue）
 	isHexerei   bool
-	hasHexBonus bool // 2+ hexerei characters in party
+	hasHexBonus bool // パーティに2人以上のHexereiキャラ
 
-	// Hexerei burst eye tracking
-	burstEnd       int // absolute frame when burst eye expires
-	normalHexCount int // number of hex normal attack triggers per burst (max 2)
-	lastHexTrigger int // last frame hex normal attack trigger fired
+	// Hexerei元素爆発の眼の追跡
+	burstEnd       int // 元素爆発の眼が失効する絶対フレーム
+	normalHexCount int // 元素爆発ごとのHex通常攻撃トリガー数（最大2）
+	lastHexTrigger int // Hex通常攻撃トリガーが最後に発火したフレーム
 
-	// C1 hexerei: Stormwind Arrow split tracking (0.25s ICD = 15 frames)
+	// 1凸六角術: Stormwind Arrow分裂追跡（0.25秒ICD = 15フレーム）
 	lastStormwindSplit int
 }
 
@@ -45,7 +45,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 	c.BurstCon = 3
 	c.SkillCon = 5
 
-	// Default is Hexerei character unless nohex=1 is specified
+	// nohex=1が指定されない限りデフォルトはHexereiキャラクター
 	c.isHexerei = true
 	if nohex, ok := p.Params["nohex"]; ok && nohex == 1 {
 		c.isHexerei = false
@@ -57,18 +57,18 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// Check Hexerei bonus (2+ hexerei characters in party)
+	// Hexereiボーナスを確認（パーティに2人以上のHexereiキャラ）
 	c.checkHexereiBonus()
 
-	// A0: Hexerei Secret Rite passive (swirl → DMG buff + burst boost)
+	// A0：Hexerei秘術パッシブ（拡散 → ダメージバフ + 元素爆発強化）
 	c.a0HexereiInit()
 
-	// C4 (original): Venti gains Anemo DMG +25% for 10s when picking up particle
+	// 4凸（オリジナル）：粒子取得時にVentiが10秒間風元素ダメージ+25%を得る
 	if c.Base.Cons >= 4 {
 		c.c4Old()
 	}
 
-	// C6: persistent AttackMod for CRIT DMG bonus against burst-affected enemies (hexerei only)
+	// 6凸：元素爆発で影響を受けた敵に対する会心ダメージボーナスの永続AttackMod（Hexereiのみ）
 	if c.Base.Cons >= 6 {
 		c.c6AttackModInit()
 	}
@@ -91,7 +91,7 @@ func (c *char) Condition(fields []string) (any, error) {
 	}
 }
 
-// checkHexereiBonus determines if party has 2+ hexerei characters.
+// checkHexereiBonusはパーティに2人以上のHexereiキャラがいるか判定する。
 func (c *char) checkHexereiBonus() {
 	if !c.isHexerei {
 		c.hasHexBonus = false

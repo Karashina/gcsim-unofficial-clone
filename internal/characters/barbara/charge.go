@@ -46,9 +46,9 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		if done {
 			return
 		}
-		// check for healing
+		// 回復をチェック
 		if c.Core.Status.Duration(barbSkillKey) > 0 {
-			// heal target
+			// ターゲットを回復
 			c.Core.Player.Heal(info.HealInfo{
 				Caller:  c.Index,
 				Target:  -1,
@@ -66,22 +66,22 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 			if a.Target.Type() != targets.TargettableEnemy {
 				return
 			}
-			// check for healing
+			// 回復をチェック
 			if c.Core.Status.Duration(barbSkillKey) > 0 && energyCount < 5 {
-				// regen energy
+				// エネルギー回復
 				c.AddEnergy("barbara-c4", 1)
 				energyCount++
 			}
 		}
 	}
 
-	// skip CA windup if we're in NA animation
+	// 通常攻撃アニメーション中の場合は重撃溜め時間をスキップ
 	windup := 0
 	if c.Core.Player.CurrentState() == action.NormalAttackState {
 		windup = 14
 	}
 
-	// TODO: Not sure of snapshot timing
+	// TODO: スナップショットのタイミングが不明
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 5}, 3),

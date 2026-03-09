@@ -90,7 +90,7 @@ func (c *char) c6() {
 			HitlagHaltFrames: 0.09 * 60,
 		}
 		ap := combat.NewCircleHitOnTarget(t, nil, 4)
-		// delay is an estimate
+		// 遅延は推定値
 		c.Core.QueueAttack(ai, ap, 0, 0.3*60)
 		c.QueueCharTask(func() { c.ruptureDendroCores(ap) }, 0.3*60)
 

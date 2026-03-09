@@ -64,7 +64,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionWalk], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionWalk], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -120,7 +120,7 @@ func (c *char) getRandomEnemyPosition(area combat.AttackPattern) geometry.Point 
 	var pos geometry.Point
 	if enemy != nil {
 		pos = enemy.Pos()
-		enemy.AddStatus(burstMarkKey, c.burstMarkDuration, true) // same enemy can't be targeted again for 0.7s
+		enemy.AddStatus(burstMarkKey, c.burstMarkDuration, true) // 同じ敵は0.7秒間再ターゲット不可
 	} else {
 		pos = geometry.CalcRandomPointFromCenter(area.Shape.Pos(), 0.5, burstRadius, c.Core.Rand)
 	}

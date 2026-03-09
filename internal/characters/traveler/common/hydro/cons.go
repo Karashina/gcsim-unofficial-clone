@@ -11,15 +11,14 @@ import (
 
 const c4ICDKey = "travelerhydro-c4-icd"
 
-// When using Aquacrest Saber, an Aquacrest Aegis that can absorb 10% of the Traveler's Max HP in DMG will be
-// created and will absorb Hydro DMG with 250% effectiveness. It will persist until the Traveler finishes using the skill.
-// Once every 2s, after a Dewdrop hits an opponent, if the Traveler is being protected by Aquacrest Aegis,
-// the DMG Absorption of the Aegis will be restored to 10% of the Traveler's Max HP. If the Traveler is not presently
-// being protected by an Aegis, one will be redeployed.
+// 水紋の剣使用時、旅人の最大HPの10%のダメージを吸収できる水紋の盾を生成し、
+// 水元素ダメージを250%の効率で吸収する。元素スキルの使用が終了するまで持続する。
+// 2秒ごとに、水珠が敵に命中した後、旅人が水紋の盾で保護されている場合、
+// 盾のダメージ吸収量が旅人の最大HPの10%に回復する。盾がない場合は再展開される。
 func (c *Traveler) c4() {
 	existingShield := c.Core.Player.Shields.Get(shield.TravelerHydroC4)
 	if existingShield != nil {
-		// update hp
+		// HPを更新
 		shd, _ := existingShield.(*shield.Tmpl)
 		shd.HP = 0.1 * c.MaxHP()
 		c.Core.Log.NewEvent("update shield hp", glog.LogCharacterEvent, c.Index).
@@ -27,7 +26,7 @@ func (c *Traveler) c4() {
 		return
 	}
 
-	// add shield
+	// シールドを追加
 	c.Core.Player.Shields.Add(&shield.Tmpl{
 		ActorIndex: c.Index,
 		Target:     c.Index,
@@ -70,8 +69,8 @@ func (c *Traveler) c4Remove() {
 	shd.Expires = c.Core.F + 1
 }
 
-// When the Traveler picks up a Sourcewater Droplet, they will restore HP to a nearby party member with the lowest
-// remaining HP percentage based on 6% of said member's Max HP.
+// 旅人が源水の雫を拾うと、他のパーティメンバーの中で残りHP割合が最も低いキャラクターの
+// 最大HPの6%に基づいてHPを回復する。
 func (c *Traveler) c6() {
 	lowest := c.Index
 	chars := c.Core.Player.Chars()

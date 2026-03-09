@@ -21,7 +21,7 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// Stage 1: Single target damage
+	// ステージ1: 単体ダメージ
 	aiStage1 := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Musecatcher (Stage 1)",
@@ -40,7 +40,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		skillStage1Hitmark,
 	)
 
-	// Stage 2: AoE damage
+	// ステージ2: 範囲ダメージ
 	aiStage2 := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Musecatcher (Stage 2)",

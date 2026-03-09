@@ -106,7 +106,7 @@ func (c *char) WeaponReactionHandler() {
 			return false
 		}
 		if ele == attributes.Hydro && !c.StatusIsActive(weaponoutkey) && !c.StatusIsActive("bennett-field") {
-			return false // for whatever reason, candace infusion will not work if she is not holding weapon
+			return false // 何らかの理由で、キャンディスの付与は武器を持っていないと機能しない
 		}
 		infai := combat.AttackInfo{
 			ActorIndex: index,

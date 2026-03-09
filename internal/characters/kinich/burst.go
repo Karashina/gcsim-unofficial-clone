@@ -32,7 +32,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.ajawSrc = c.Core.F
 	c.AddStatus(burstKey, ajawDuration, false)
 	if c.nightsoulState.HasBlessing() {
-		// extend Nightsoul's Blessing time limit countdown
+		// ナイトソウルの祝福の時間制限カウントダウンを延長
 		duration := c.nightsoulState.Duration()
 		if duration > 0 {
 			c.nightsoulState.SetNightsoulExitTimer(duration+1.7*60, c.cancelNightsoul)
@@ -59,7 +59,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -69,11 +69,11 @@ func (c *char) QueueLaser(step, src int) func() {
 		if c.ajawSrc != src {
 			return
 		}
-		// duration expired
+		// 持続時間が終了
 		if !c.StatusIsActive(burstKey) {
 			return
 		}
-		// condition to track number of hits just in case
+		// 念のためヒット数を追跡する条件
 		if step == 7 {
 			c.DeleteStatus(burstKey)
 			return
@@ -92,7 +92,7 @@ func (c *char) QueueLaser(step, src int) func() {
 			HitlagFactor:   0.05,
 			IsDeployable:   true,
 		}
-		// TODO: approximate
+		// TODO: 近似値
 		ap := combat.NewBoxHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 1, 10)
 		c.Core.QueueAttack(ai, ap, 0, 0)
 		c.Core.Tasks.Add(c.QueueLaser(step+1, src), ajawHitmarks[c.Core.Rand.Intn(2)])

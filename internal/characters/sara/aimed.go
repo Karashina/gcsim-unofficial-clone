@@ -19,15 +19,15 @@ var aimedHitmarks = []int{15, 86}
 const aimedA1Hitmark = 50
 
 func init() {
-	// outside of E status
+	// スキルステータス外
 	aimedFrames = make([][]int, 2)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(25)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(96)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
@@ -38,10 +38,10 @@ func init() {
 	aimedA1Frames[action.ActionJump] = aimedA1Hitmark
 }
 
-// Aimed charge attack damage queue generator
-// Additionally handles crowfeather state, E skill damage, and A4
-// Has two parameters, "travel", used to set the number of frames that the arrow is in the air (default = 10)
-// weak_point, used to determine if an arrow is hitting a weak point (default = 1 for true)
+// 狙い撃ち重撃のダメージキュー生成
+// クロウフェザー状態、元素スキルダメージ、固有天賦4も処理する
+// "travel"パラメータあり。矢が空中にいるフレーム数を設定（デフォルト = 10）
+// weak_pointは矢が弱点に命中するかどうか（デフォルト = 1）
 func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	hold, ok := p["hold"]
 	if !ok {
@@ -59,8 +59,8 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	}
 	weakspot := p["weakspot"]
 
-	// A1:
-	// While in the Crowfeather Cover state provided by Tengu Stormcall, Aimed Shot charge times are decreased by 60%.
+	// 固有天賦1:
+	// 天狗召嗚のクロウフェザー保護状態中、狙い撃ちのチャージ時間が60%短縮される。
 	skillActive := c.Base.Ascension >= 1 && c.Core.Status.Duration(coverKey) > 0
 
 	ai := combat.AttackInfo{
@@ -116,7 +116,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		a.CanQueueAfter+travel,
 	)
 
-	// Cover state handling - drops crowfeather, which explodes after 1.5 seconds
+	// 保護状態の処理 - クロウフェザーを落とし、1.5秒後に爆発する
 	if skillActive && hold == attacks.AimParamLv1 {
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -131,8 +131,8 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		}
 		ap := combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 6)
 
-		// TODO: snapshot?
-		// Particles are emitted after the ambush thing hits
+		// TODO: スナップショットのタイミング？
+		// 粒子は待ち伏せ攻撃が命中した後に生成される
 		c.Core.QueueAttack(ai, ap, aimedA1Hitmark, aimedA1Hitmark+travel+90, c.makeA4CB(), c.particleCB)
 		c.attackBuff(ap, aimedA1Hitmark+travel+90)
 

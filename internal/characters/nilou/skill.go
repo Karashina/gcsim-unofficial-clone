@@ -122,7 +122,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -252,7 +252,7 @@ func (c *char) SwordDance(p map[string]int) action.Info {
 			return frames.AtkSpdAdjust(swordDanceFrames[s][next], atkspd)
 		},
 		AnimationLength: swordDanceFrames[s][action.InvalidAction],
-		CanQueueAfter:   swordDanceFrames[s][action.ActionJump], // earliest cancel
+		CanQueueAfter:   swordDanceFrames[s][action.ActionJump], // 最速キャンセル
 		State:           action.NormalAttackState,
 	}
 }
@@ -297,7 +297,7 @@ func (c *char) WhirlingSteps(p map[string]int) action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(whirlingStepsFrames[s]),
 		AnimationLength: whirlingStepsFrames[s][action.InvalidAction],
-		CanQueueAfter:   whirlingStepsFrames[s][action.ActionJump], // earliest cancel
+		CanQueueAfter:   whirlingStepsFrames[s][action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -327,7 +327,7 @@ func (c *char) TranquilityAura(src int) func() {
 	}
 }
 
-// Clears Nilou skill when she leaves the field
+// ニィロウがフィールドを離れた時にスキルをクリア
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		c.DeleteStatus(pirouetteStatus)

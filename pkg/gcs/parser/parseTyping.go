@@ -7,9 +7,9 @@ import (
 )
 
 func (p *Parser) parseOptionalType() (ast.ExprType, error) {
-	// the only time typing information should be present is either in a fn signature or after a let stmt
-	// should be safe to assume that if the next token is either an identifier or fn, it should be typing info
-	// if it's not either then we return nil
+	// 型情報が存在するのはfnシグネチャまたはlet文の後のみ
+	// 次のトークンが識別子またはfnであれば型情報と仮定して安全
+	// どちらでもなければnilを返す
 	n := p.peek()
 	switch n.Typ {
 	case ast.ItemIdentifier:
@@ -21,9 +21,9 @@ func (p *Parser) parseOptionalType() (ast.ExprType, error) {
 }
 
 func (p *Parser) parseTyping() (ast.ExprType, error) {
-	// next should be an ident with one of the following value, otherwise error
-	// - number
-	// - string
+	// 次は以下のいずれかの値を持つ識別子であること、そうでなければエラー
+	// - 数値
+	// - 文字列
 	// - fn(...) : ...
 	n := p.peek()
 	switch n.Typ {
@@ -54,10 +54,10 @@ func (p *Parser) parseBasicType() (ast.ExprType, error) {
 }
 
 func (p *Parser) parseFnType() (ast.ExprType, error) {
-	// expecting something like: fn(number) : number
-	// this is also valid:
+	// 以下のような形式を期待: fn(number) : number
+	// 以下も有効:
 	//   fn(fn(number):number, number) : fn(number)
-	// going to end up with lots of recursive calls...
+	// 再帰呼び出しが多くなる...
 	var err error
 	n := p.next()
 	if n.Typ != ast.KeywordFn {
@@ -66,50 +66,49 @@ func (p *Parser) parseFnType() (ast.ExprType, error) {
 	res := &ast.FuncType{
 		Pos: n.Pos,
 	}
-	// we're expecting, in order:
+	// 以下の順序を期待する:
 	// - (
-	// - comma separate types
+	// - カンマ区切りの型
 	// - )
-	// - optional return value
+	// - オプションの戻り値
 	n = p.next()
 	if n.Typ != ast.ItemLeftParen {
 		return nil, fmt.Errorf("ln%v: expecting ( after fn parsing typing, got %v", n.Line, n.Val)
 	}
 	done := false
-	// if next is rightparen then this fn has no arguments
+	// 次が右括弧ならこの関数は引数なし
 	if l := p.peek(); l.Typ == ast.ItemRightParen {
-		// consume the token
+		// トークンを消費
 		p.next()
 		done = true
 	}
 	for !done {
-		// we expect the first token or group of token to be typing info
+		// 最初のトークンまたはトークン群が型情報であることを期待する
 		typ, err := p.parseTyping()
 		if err != nil {
 			return nil, err
 		}
 		res.ArgsType = append(res.ArgsType, typ)
 
-		// the next token is either a ) signifiying we're done, or a comma meaning we should
-		// continue parsing
+		// 次のトークンは ) で終了を示すか、カンマでパースの継続を意味する
 		n = p.next()
 		switch n.Typ {
 		case ast.ItemRightParen:
-			// if next is ) then we're done
+			// 次が ) なら終了
 			done = true
 		case ast.ItemComma:
-			// comma means we keep going
+			// カンマは継続を意味する
 		default:
-			// unexpected token
+			// 予期しないトークン
 			return nil, fmt.Errorf("ln%v: unexpected token parsing fn type: %v", n.Line, n.Val)
 		}
 	}
-	// check for optional return type
+	// オプションの戻り値型を確認
 	res.ResultType, err = p.parseOptionalType()
 	if err != nil {
 		return nil, err
 	}
-	//TODO: this is only here for compatability reasons; to be removed??
+	//TODO: これは互換性のためのみ存在する; 削除すべき?
 	if res.ResultType == nil {
 		res.ResultType = &ast.NumberType{Pos: n.Pos}
 	}

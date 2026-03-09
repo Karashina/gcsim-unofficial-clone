@@ -17,8 +17,8 @@ func calcSwirlAtkDurability(consumed, src reactions.Durability) reactions.Durabi
 }
 
 func (r *Reactable) queueSwirl(rt reactions.ReactionType, ele attributes.Element, tag attacks.AttackTag, icd attacks.ICDTag, dur reactions.Durability, charIndex int) {
-	// swirl triggers two attacks; one self with no gauge
-	// and one aoe with gauge
+	// 拡散は2つの攻撃を発動；ゲージなしの自身への攻撃と
+	// ゲージありのAoE攻撃
 	ai := combat.AttackInfo{
 		ActorIndex:       charIndex,
 		DamageSrc:        r.self.Key(),
@@ -34,14 +34,14 @@ func (r *Reactable) queueSwirl(rt reactions.ReactionType, ele attributes.Element
 	em := char.Stat(attributes.EM)
 	flatdmg, snap := calcReactionDmg(char, ai, em)
 	ai.FlatDmg = 0.6 * flatdmg
-	// first attack is self no hitbox
+	// 最初の攻撃は自身へ、ヒットボックスなし
 	r.core.QueueAttackWithSnap(
 		ai,
 		snap,
 		combat.NewSingleTargetHit(r.self.Key()),
 		1,
 	)
-	// next is aoe - hydro swirls never do AoE damage, as they only spread the element
+	// 次はAoE - 水拡散はAoEダメージを与えず、元素を広げるだけ
 	if ele == attributes.Hydro {
 		ai.FlatDmg = 0
 	}
@@ -68,10 +68,10 @@ func (r *Reactable) TrySwirlElectro(a *combat.AttackEvent) bool {
 	atkDur := calcSwirlAtkDurability(rd, a.Info.Durability)
 	a.Info.Durability -= rd
 	a.Reacted = true
-	// queue an attack first
+	// まず攻撃をキューに追加
 	r.core.Events.Emit(event.OnSwirlElectro, r.self, a)
 
-	// 0.1s gcd on swirl electro attack
+	// 雷拡散攻撃の0.1秒GCD
 	if !(r.swirlElectroGCD != -1 && r.core.F < r.swirlElectroGCD) {
 		r.swirlElectroGCD = r.core.F + 0.1*60
 		r.queueSwirl(
@@ -84,12 +84,12 @@ func (r *Reactable) TrySwirlElectro(a *combat.AttackEvent) bool {
 		)
 	}
 
-	// at this point if any durability left, we need to check for prescence of
-	// hydro in case of EC
+	// この時点で元素量が残っている場合、感電反応のために
+	// 水の存在をチェックする必要がある
 	if a.Info.Durability > ZeroDur && r.Durability[Hydro] > ZeroDur {
-		// trigger swirl hydro
+		// 水拡散を発動
 		r.TrySwirlHydro(a)
-		// check EC clean up
+		// 感電反応のクリーンアップをチェック
 		r.checkEC()
 	}
 	return true
@@ -106,10 +106,10 @@ func (r *Reactable) TrySwirlHydro(a *combat.AttackEvent) bool {
 	atkDur := calcSwirlAtkDurability(rd, a.Info.Durability)
 	a.Info.Durability -= rd
 	a.Reacted = true
-	// queue an attack first
+	// まず攻撃をキューに追加
 	r.core.Events.Emit(event.OnSwirlHydro, r.self, a)
 
-	// 0.1s gcd on swirl hydro attack
+	// 水拡散攻撃の0.1秒GCD
 	if !(r.swirlHydroGCD != -1 && r.core.F < r.swirlHydroGCD) {
 		r.swirlHydroGCD = r.core.F + 0.1*60
 		r.queueSwirl(
@@ -136,7 +136,7 @@ func (r *Reactable) TrySwirlCryo(a *combat.AttackEvent) bool {
 	atkDur := calcSwirlAtkDurability(rd, a.Info.Durability)
 	a.Info.Durability -= rd
 	a.Reacted = true
-	// queue an attack first
+	// まず攻撃をキューに追加
 	r.core.Events.Emit(event.OnSwirlCryo, r.self, a)
 
 	// 0.1s gcd on swirl cryo attack
@@ -167,10 +167,10 @@ func (r *Reactable) TrySwirlPyro(a *combat.AttackEvent) bool {
 	a.Info.Durability -= rd
 	a.Reacted = true
 	r.burningCheck()
-	// queue an attack first
+	// まず攻撃をキューに追加
 	r.core.Events.Emit(event.OnSwirlPyro, r.self, a)
 
-	// 0.1s gcd on swirl pyro attack
+	// 炎拡散攻撃の0.1秒GCD
 	if !(r.swirlPyroGCD != -1 && r.core.F < r.swirlPyroGCD) {
 		r.swirlPyroGCD = r.core.F + 0.1*60
 		r.queueSwirl(
@@ -197,7 +197,7 @@ func (r *Reactable) TrySwirlFrozen(a *combat.AttackEvent) bool {
 	atkDur := calcSwirlAtkDurability(rd, a.Info.Durability)
 	a.Info.Durability -= rd
 	a.Reacted = true
-	// queue an attack first
+	// まず攻撃をキューに追加
 	r.core.Events.Emit(event.OnSwirlCryo, r.self, a)
 
 	// 0.1s gcd on swirl cryo attack

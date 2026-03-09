@@ -11,11 +11,11 @@ import (
 
 var chargeFrames []int
 
-// hitmark frame, includes CA windup
+// ヒットマークフレーム（重撃の溜め時間を含む）
 const chargeHitmark = 54
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(71) // walk
+	chargeFrames = frames.InitAbilSlice(71) // 歩行
 	chargeFrames[action.ActionAttack] = 69
 	chargeFrames[action.ActionCharge] = 66
 	chargeFrames[action.ActionSkill] = 60
@@ -38,7 +38,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charge[c.TalentLvlAttack()],
 	}
 
-	// skip CA windup if we're in NA/CA animation
+	// 通常攻撃/重撃アニメーション中は重撃ワインドアップをスキップ
 	windup := 0
 	switch c.Core.Player.CurrentState() {
 	case action.NormalAttackState, action.ChargeAttackState:

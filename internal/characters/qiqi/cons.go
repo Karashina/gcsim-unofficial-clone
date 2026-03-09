@@ -25,7 +25,7 @@ func (c *char) c1(a combat.AttackCB) {
 		Write("target", a.Target.Key())
 }
 
-// Qiqi's Normal and Charge Attack DMG against opponents affected by Cryo is increased by 15%.
+// 七七の通常攻撃と重撃の、氷元素の影響を受けた敵に対するダメージが15%増加する。
 func (c *char) c2() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DmgP] = .15

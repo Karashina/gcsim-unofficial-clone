@@ -20,7 +20,7 @@ func init() {
 	burstFramesNormal[action.ActionJump] = 96
 	burstFramesNormal[action.ActionSwap] = 94
 
-	// Includes Falling down for swap
+	// 交代時の落下を含む
 	burstFramesE = frames.InitAbilSlice(145)
 	burstFramesE[action.ActionAttack] = 117
 	burstFramesE[action.ActionCharge] = 119
@@ -29,21 +29,21 @@ func init() {
 	burstFramesE[action.ActionWalk] = 117
 }
 
-// First Hitmark
+// 最初のヒットマーク
 const burstHitmark = 92
 
-// Delay between each additional hit
+// 追加ヒット間の遅延
 const burstHitmarkDelay = 6
 
-// Frames until snapshot stage is reached
-// TODO: Determine correct Frame
+// スナップショット段階までのフレーム数
+// TODO: 正確なフレームを確認
 const burstSnapshotDelay = 55
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	delay := c.checkForSkillEnd()
 
 	if c.StatusIsActive(skillKey) {
-		// Can only occur if delay == 0, so it can be disregarded
+		// delay == 0の場合のみ発生するため、無視可能
 		return c.WindfavoredBurst(p)
 	}
 
@@ -98,9 +98,9 @@ func (c *char) WindfavoredBurst(p map[string]int) (action.Info, error) {
 	c.SetCD(action.ActionBurst, 15*60)
 	c.ConsumeEnergy(5)
 
-	// Necessary, as transitioning into the SwapState is impossible otherwise
+	// 必要（SwapStateへの遷移がそれ以外に不可能なため）
 	c.Core.Player.SwapCD = 26
-	// reset skydwellerPoints here
+	// ここで空居ポイントをリセット
 	c.skydwellerPoints = 0
 
 	return action.Info{

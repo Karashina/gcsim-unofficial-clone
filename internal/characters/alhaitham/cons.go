@@ -16,21 +16,21 @@ const (
 	c2MaxStacks = 4
 )
 
-// When a Projection Attack hits an opponent, Universality: An Elaboration on Form's CD is decreased by 1.2s.
-// This effect can be triggered once every 1s.
+// 投影攻撃が敵に命中した時、共相・理式摹写のCDが1.2秒減少する。
+// この効果は1秒ごとに1回のみ発動可能。
 func (c *char) c1(a combat.AttackCB) {
-	// ignore if c1 on icd
+	// 1凸がICD中なら無視
 	if c.StatusIsActive(c1IcdKey) {
 		return
 	}
-	c.ReduceActionCooldown(action.ActionSkill, 72) // reduced by 1.2s
+	c.ReduceActionCooldown(action.ActionSkill, 72) // 1.2秒短縮
 	c.AddStatus(c1IcdKey, 60, true)                // 1s icd affected by hitlag
 }
 
-// When Alhaitham generates a Chisel-Light Mirror, his Elemental Mastery will be increased by 50 for 8 seconds,
-// max 4 stacks.
-// Each stack's duration is counted independently.
-// This effect can be triggered even when the maximum number of Chisel-Light Mirrors has been reached.
+// アルハイゼムが琢光鏡を生成した時、元素熟知が8秒間50増加する。
+// 最大4スタック。
+// 各スタックの持続時間は独立してカウントされる。
+// この効果は琢光鏡の最大数に達しても発動する。
 func (c *char) c2(generated int) {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.EM] = 50
@@ -42,7 +42,7 @@ func (c *char) c2(generated int) {
 				return m, true
 			},
 		})
-		c.c2Counter = (c.c2Counter + 1) % c2MaxStacks // stacks are independent from each other, this will cycle them
+		c.c2Counter = (c.c2Counter + 1) % c2MaxStacks // スタックは互いに独立しており、循環する
 	}
 }
 
@@ -50,11 +50,10 @@ func c2ModName(num int) string {
 	return fmt.Sprintf("alhaitham-c2-%v-stack", num)
 }
 
-// When Particular Field: Fetters of Phenomena is unleashed, the following effects will become active
-// based on the number of Chisel-Light Mirrors consumed and created this time around:
-// ·Each Mirror consumed will increase the Elemental Mastery of all other nearby party members by 30 for 15s.
-// ·Each Mirror generated will grant Alhaitham a 10% Dendro DMG Bonus for 15s.
-// The pre-existing duration of the aforementioned effects will be cleared if you use Particular Field: Fetters of Phenomena again while they are in effect
+// 殊境・顕象結縛が発動された時、消費・生成された琢光鏡の数に応じて以下の効果が発動する:
+// ・消費した鏡ごとに、他の周囲のパーティーメンバーの元素熟知が15秒間30増加する。
+// ・生成した鏡ごとに、アルハイゼムの草元素ダメージバーナスが15秒間10%増加する。
+// 上記効果の持続中に再度殊境・顕象結縛を使用すると、既存の持続時間はクリアされる
 func (c *char) c4Loss(consumed int) {
 	if consumed <= 0 {
 		return
@@ -62,7 +61,7 @@ func (c *char) c4Loss(consumed int) {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.EM] = 30.0 * float64(consumed)
 	for i, char := range c.Core.Player.Chars() {
-		// skip Alhaitham
+		// アルハイゼムをスキップ
 		if i == c.Index {
 			continue
 		}
@@ -91,13 +90,12 @@ func (c *char) c4Gain(generated int) {
 	})
 }
 
-// Alhaitham gains the following effects:
-// · 2 seconds after Particular Field: Fetters of Phenomena is unleashed,
-// he will generate 3 Chisel-Light Mirrors regardless of the number of mirrors consumed.
+// アルハイゼムが以下の効果を得る:
+// ・殊境・顕象結縛発動の2秒後、消費した鏡の数に関係なく琢光鏡を3枚生成する。
 //
-// · If Alhaitham generates Chisel-Light Mirrors when their numbers have already maxed out,
-// his CRIT Rate and CRIT DMG will increase by 10% and 70% respectively for 6s.
-// If this effect is triggered again during its initial duration, the duration remaining will be increased by 6s.
+// ・琢光鏡が最大数の時に琢光鏡を生成した場合、
+// 会心率10%、会心ダメージ70%が6秒間増加する。
+// この効果が持続中に再度発動した場合、残り持続時間が6秒延長される。
 const c6key = "alhaitham-c6"
 
 func (c *char) c6(generated int) {

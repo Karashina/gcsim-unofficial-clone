@@ -41,12 +41,11 @@ var procEvents = []event.Event{
 	event.OnBurgeon,
 }
 
-// After triggering Burning, Quicken, Aggravate, Spread, Bloom, Hyperbloom, or
-// Burgeon, a Leaf of Consciousness will be created around the character for a
-// maximum of 10s. When picked up, the Leaf will grant the character
-// 60/75/90/105/120 Elemental Mastery for 12s. Only 1 Leaf can be generated
-// this way every 20s. This effect can still be triggered if the character is
-// not on the field. The Leaf of Consciousness' effect cannot stack.
+// 燃焼、激化、超激化、草激化、開花、超開花、
+// 烈開花を発動した後、キャラクターの周囲に意識の葉が最大10秒間生成される。
+// 拾うとキャラクターの元素熟知が12秒間60/75/90/105/120増加する。
+// この方法で生成できる葉は20秒に1枚のみ。この効果はキャラクターが
+// フィールドにいなくても発動可能。意識の葉の効果は重ね掛け不可。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

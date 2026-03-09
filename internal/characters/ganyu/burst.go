@@ -44,14 +44,14 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.Core.Status.Add("ganyuburst", 15*60+burstStart)
 
 	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10)
-	// a4 related
+	// 固有天賦4関連
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CryoP] = 0.2
-	// tick every 0.3s from burstStart
+	// burstStartから0.3秒ごとにTick
 	for i := 0; i < 15*60; i += 18 {
-		// c4 related
+		// 4凸関連
 		c.Core.Tasks.Add(func() {
-			// burst tick
+			// 元素爆発のTick
 			enemy := c.Core.Combat.RandomEnemyWithinArea(
 				burstArea,
 				func(e combat.Enemy) bool {
@@ -61,15 +61,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			var pos geometry.Point
 			if enemy != nil {
 				pos = enemy.Pos()
-				enemy.AddStatus(burstMarkKey, 1.45*60, true) // same enemy can't be targeted again for 1.45s
+				enemy.AddStatus(burstMarkKey, 1.45*60, true) // 同じ敵は1.45秒間再ターゲットされない
 			} else {
 				pos = geometry.CalcRandomPointFromCenter(burstArea.Shape.Pos(), 0.5, 9.5, c.Core.Rand)
 			}
-			// deal dmg after a certain delay
+			// 一定の遅延後にダメージを与える
 			c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(pos, nil, 2.5), 8)
 
-			// A4:
-			// Celestial Shower grants a 20% Cryo DMG Bonus to active party members in the AoE.
+			// 固有天賦2:
+			// 降璃天華はAoE内のアクティブパーティメンバーに氷元素ダメージ+20%を付与。
 			if c.Base.Ascension >= 4 && c.Core.Combat.Player().IsWithinArea(burstArea) {
 				active := c.Core.Player.ActiveChar()
 				active.AddStatMod(character.StatMod{
@@ -80,11 +80,11 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 					},
 				})
 			}
-			// c4 debuff tick
+			// 4凸デバフTick
 			if c.Base.Cons >= 4 {
 				enemies := c.Core.Combat.EnemiesWithinArea(burstArea, nil)
-				// increase stacks every 3s but apply c4 status on every tick
-				// c4 lingers for 3s
+				// 3秒ごとにスタック増加するが4凸ステータスは毎Tick適用
+				// 4凸は3秒間持続
 				increase := i%180 == 0
 				for _, e := range enemies {
 					e.AddStatus(c4Key, c4Dur, true)
@@ -103,15 +103,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}, i+burstStart)
 	}
 
-	// add cooldown to sim
+	// シミュレーションにクールダウンを追加
 	c.SetCD(action.ActionBurst, 15*60)
-	// use up energy
+	// エネルギーを消費
 	c.ConsumeEnergy(3)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

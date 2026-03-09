@@ -30,7 +30,7 @@ func init() {
 
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
-	// last action hold skill
+	// 最後のアクションはスキル長押し
 	if c.Core.Player.LastAction.Type == action.ActionSkill &&
 		c.Core.Player.LastAction.Param["hold"] >= 1 {
 		return c.lowPlungeC(), nil

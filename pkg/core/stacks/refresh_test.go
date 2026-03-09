@@ -10,24 +10,24 @@ func TestStackTracker(t *testing.T) {
 
 	st := NewMultipleRefreshNoRemove(3, tq.queue, &f)
 
-	// add up to 3
-	st.Add(10) // expires at f = 10
+	// 最大3まで追加
+	st.Add(10) // f=10で期限切れ
 	if st.Count() != 1 {
 		t.Errorf("expecting 1 stack, got %v", st.Count())
 	}
 	f++
-	st.Add(10) // expires at f = 11
+	st.Add(10) // f=11で期限切れ
 	if st.Count() != 2 {
 		t.Errorf("expecting 2 stack, got %v", st.Count())
 	}
 	f++
-	st.Add(10) // expires at f = 12
+	st.Add(10) // f=12で期限切れ
 	if st.Count() != 3 {
 		t.Errorf("expecting 3 stack, got %v", st.Count())
 	}
-	// this add should replace the one at f = 0
+	// この追加はf=0のものを置き換えるべき
 	f++
-	st.Add(10) // expires at f = 13
+	st.Add(10) // f=13で期限切れ
 	if st.Count() != 3 {
 		t.Errorf("expecting 3 stack, got %v", st.Count())
 	}

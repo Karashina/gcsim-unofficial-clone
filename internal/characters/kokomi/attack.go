@@ -30,8 +30,8 @@ func init() {
 	attackFrames[2][action.ActionWalk] = 60
 }
 
-// Standard attack damage function
-// Has "travel" parameter, used to set the number of frames that the projectile is in the air (default = 10)
+// 標準通常攻撃ダメージ関数
+// "travel"パラメータで弾の飛行フレーム数を設定（デフォルト=10）
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	travel, ok := p["travel"]
 	if !ok {
@@ -56,7 +56,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		radius = 1.2
 	}
 
-	// TODO: Assume that this is not dynamic (snapshot on projectile release)
+	// TODO: ダイナミックではないと仮定（弾発射時にスナップショット）
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, radius),

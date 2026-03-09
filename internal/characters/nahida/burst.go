@@ -34,15 +34,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.burstSrc = c.Core.F
 		src := c.Core.F
 		c.Core.Status.Add(burstKey, f)
-		// a1 buff is calculated at the start of burst
+		// 固有天賦1のバフは元素爆発開始時に計算される
 		c.calcA1Buff()
 		for i := 30; i <= f; i += 30 {
 			c.Core.Tasks.Add(func() {
-				// don't tick if another burst has already started
+				// 別の元素爆発が既に開始している場合はTickしない
 				if src != c.burstSrc {
 					return
 				}
-				// don't apply anything if outside of burst area
+				// 元素爆発の範囲外にいる場合は何も適用しない
 				if !c.Core.Combat.Player().IsWithinArea(burstArea) {
 					return
 				}
@@ -60,11 +60,11 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			}, i)
 		}
 		if c.Base.Cons >= 6 {
-			// lasts 10s
-			//TODO: should this be delayed until animation end?
+			// 10秒間持続
+			//TODO: アニメーション終了まで遅延すべきか？
 			c.AddStatus(c6ActiveKey, 600, true)
 			c.c6Count = 0
-			c.DeleteStatus(c6ICDKey) //TODO: check if this resets icd?
+			c.DeleteStatus(c6ICDKey) //TODO: ICDがリセットされるか確認が必要
 		}
 	}, 66)
 
@@ -73,7 +73,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

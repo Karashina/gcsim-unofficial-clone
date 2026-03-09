@@ -24,21 +24,21 @@ func (c *char) c1shard() {
 		return
 	}
 	Area := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 8)
-	// suck in all crystallize shard
+	// 全ての結晶シャードを吸引
 	for _, g := range c.Core.Combat.Gadgets() {
 		cs, ok := g.(*reactable.CrystallizeShard)
-		// skip if no shard
+		// 結晶がなければスキップ
 		if !ok {
 			continue
 		}
-		// skip if shard not in area
+		// シャードが範囲外ならスキップ
 		if !cs.IsWithinArea(Area) {
 			continue
 		}
-		// approximate sucking in as 0.4m per frame
+		// 吸引をフレームあたり0.4mと近似
 		distance := cs.Pos().Distance(Area.Shape.Pos())
 		travel := int(math.Ceil(distance / 0.4))
-		// special check to account for edge case if shard just spawned and will arrive before it can be picked up
+		// 結晶が生成直後で拾える前に到着するエッジケースのための特別チェック
 		if c.Core.F+travel < cs.EarliestPickup {
 			continue
 		}
@@ -53,7 +53,7 @@ func (c *char) c1() {
 		return
 	}
 	c.Core.Events.Subscribe(event.OnShielded, func(args ...interface{}) bool {
-		// Check shield
+		// シールドをチェック
 		shd := args[0].(shield.Shield)
 		if shd.Type() != shield.Crystallize {
 			return false

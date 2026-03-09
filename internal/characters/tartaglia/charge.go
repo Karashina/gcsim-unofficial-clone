@@ -24,8 +24,8 @@ func init() {
 	chargeFrames[action.ActionSwap] = 52
 }
 
-// since E is aoe, so this should be considered aoe too
-// hitWeakPoint: tartaglia can proc Prototype Cresent's Passive on Geovishap's weakspots.
+// 元素スキルが範囲攻撃なので、これも範囲攻撃とみなすべき
+// hitWeakPoint: タルタリヤはヴィシャップの弱点でPrototype Crescentのパッシブを発動できる。
 // Evidence: https://youtu.be/oOfeu5pW0oE
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	if !c.StatusIsActive(meleeKey) {
@@ -56,15 +56,15 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 2.2),
 			chargeHitmarks[i],
 			chargeHitmarks[i],
-			c.makeA4CB(),      // callback for applying riptide
-			c.rtSlashCallback, // callback for triggering slash
+			c.makeA4CB(),      // 断流付与用コールバック
+			c.rtSlashCallback, // 斉しトリガー用コールバック
 		)
 	}
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(chargeFrames),
 		AnimationLength: chargeFrames[action.InvalidAction],
-		CanQueueAfter:   chargeFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   chargeFrames[action.ActionDash], // 最速キャンセル
 		State:           action.ChargeAttackState,
 	}, nil
 }

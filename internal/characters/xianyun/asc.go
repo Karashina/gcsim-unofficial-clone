@@ -18,10 +18,10 @@ const a1Dur = 20 * 60
 
 var a1Crit = []float64{0.0, 0.04, 0.06, 0.08, 0.10}
 
-// a1: For every enemy hit by Driftcloud Wave,
-// all party members gain 1 stack of Boost, lasting 20s, max 4 stacks.
-// Boost increases Plunge DMG's Crit Rate by 4%/6%/8%/10%,
-// each stack's duration is calculated independently.
+// 固有天賦1: 鶴雲波が敵に命中するたびに、
+// チーム全員がブーストを1スタック獲得（20秒間、最大4スタック）。
+// ブーストは落下攻撃ダメージの会心率を4%/6%/8%/10%上昇させ、
+// 各スタックの持続時間は独立して計算される。
 
 func (c *char) a1() {
 	for i, char := range c.Core.Player.Chars() {
@@ -58,8 +58,8 @@ func (c *char) a1cb() combat.AttackCBFunc {
 			char.AddStatus(a1Key, a1Dur, true)
 			char.SetTag(a1Key, min(c.a1Buffer[idx], 4))
 			char.QueueCharTask(func() {
-				// tags currently aren't visible in the results UI
-				// the user can still access it using .char.tags.xianyun-a1
+				// タグは現在結果UIには表示されない
+				// ユーザーは .char.tags.xianyun-a1 でアクセス可能
 				c.a1Buffer[idx] -= 1
 				char.SetTag(a1Key, min(c.a1Buffer[idx], 4))
 			}, a1Dur)
@@ -86,9 +86,9 @@ func (c *char) a4AtkUpdate(src int) func() {
 	}
 }
 
-// a4: When the Starwicker created by Stars Gather at Dusk has Adeptal Assistance stacks,
-// nearby active characters' Plunging Attack shockwave DMG will be increased by 200% of Xianyun's ATK.
-// The maximum DMG increase that can be achieved this way is 9000.
+// 固有天賦4: 星と月の夕べが生成した星翼が仙助スタックを持つとき、
+// 近くのアクティブキャラクターの落下攻撃衝撃波ダメージが閑雲の攻撃力の200%分増加する。
+// この方法で得られる最大ダメージ増加量は9000。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -103,7 +103,7 @@ func (c *char) a4() {
 			return false
 		}
 
-		// Collision has 0 durability. Don't buff collision damage
+		// 衝突は元素量0。衝突ダメージにはバフを適用しない
 		if ae.Info.Durability == 0 {
 			return false
 		}
@@ -116,7 +116,7 @@ func (c *char) a4() {
 			return false
 		}
 
-		// A4 cap
+		// 固有天賦4の上限
 		amt := min(c.a4Max, c.a4Ratio*c.a4Atk)
 
 		c.Core.Log.NewEvent("Xianyun A4 proc dmg add", glog.LogPreDamageMod, ae.Info.ActorIndex).

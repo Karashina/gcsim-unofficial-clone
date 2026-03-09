@@ -5,7 +5,7 @@ import (
 )
 
 func (c *char) Dash(p map[string]int) (action.Info, error) {
-	// anything but NA/E -> E should reset savedNormalCounter
+	// 通常攻撃/スキル以外 -> スキルはsavedNormalCounterをリセットすべき
 	switch c.Core.Player.LastAction.Type {
 	case action.ActionAttack:
 	case action.ActionSkill:

@@ -27,12 +27,12 @@ func init() {
 	skillFrames = frames.InitAbilSlice(41) // E -> D/J
 }
 
-// Ceil helper for tick timing
+// Tickタイミング用のCeilヘルパー
 func ceil(x float64) int {
 	return int(math.Ceil(x))
 }
 
-// Skill ability implementation
+// 元素スキルの実装
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	skillPos := c.Core.Combat.Player()
 	ai := combat.AttackInfo{
@@ -52,7 +52,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		skillInitHitmark, skillInitHitmark, c.particleCB,
 	)
 
-	// E duration and ticks are not affected by hitlag
+	// スキルの持続時間とTickはヒットラグの影響を受けない
 	c.skillSrc = c.Core.F
 	for i := 0.0; i < skillTicks; i++ {
 		c.Core.Tasks.Add(c.skillTick(c.skillSrc), skillFirstTickDelay+ceil(skillInterval*i))
@@ -65,12 +65,12 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
 
-// Particle generation callback for skill
+// スキルの粒子生成コールバック
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -84,7 +84,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Electro, c.ParticleDelay)
 }
 
-// Skill tick logic for DoT
+// スキルのDoT Tickロジック
 func (c *char) skillTick(src int) func() {
 	return func() {
 		if src != c.skillSrc {

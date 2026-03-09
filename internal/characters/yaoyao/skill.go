@@ -23,7 +23,7 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// yuegui spawns after 48f
+	// 月桂は48フレーム後に出現
 	c.Core.Status.Add("yuegui", 600+yueguiThrowSpawn)
 
 	c.Core.Tasks.Add(func() {
@@ -40,7 +40,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

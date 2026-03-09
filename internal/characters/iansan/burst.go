@@ -67,7 +67,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	if c.Base.Cons >= 6 {
 		duration += 3.0
 	}
-	c.AddStatus(burstStatus, duration, false) // TODO: hitlag affected?
+	c.AddStatus(burstStatus, duration, false) // TODO: ヒットラグの影響？
 	c.SetCD(action.ActionBurst, 18*60)
 	c.ConsumeEnergy(3)
 

@@ -26,15 +26,14 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// A part of the "Millennial Movement" that wanders amidst the winds.
-// Increases Elemental Mastery by 60. When the Elemental Skills or Elemental Bursts
-// of the character wielding this weapon hit opponents, that character gains a Sigil of Remembrance.
-// This effect can be triggered once every 0.2s and can be triggered even if said character
-// is not on the field. When you possess 4 Sigils of Remembrance, all of them will be consumed
-// and all nearby party members will obtain the "Millennial Movement: Farewell Song" effect for 12s.
-// "Millennial Movement: Farewell Song" increases Elemental Mastery by 100 and increases ATK by 20%.
-// Once this effect is triggered, you will not gain Sigils of Remembrance for 20s.
-// Of the many effects of the "Millennial Movement," buffs of the same type will not stack.
+// 風の中をさまよう「千年の大楽章」の一部。
+// 元素熟知が60増加する。この武器を装備したキャラクターの元素スキルまたは元素爆発が敵に命中すると、
+// 追憶のシグルが1つ獲得される。この効果は0.2秒毎に1回発動でき、キャラクターがフィールドにいなくても
+// 発動可能。追憶のシグルを4つ所持すると、全て消費され、
+// 近くのパーティメンバー全員が12秒間「千年の大楽章・別れの歌」の効果を獲得する。
+// 「千年の大楽章・別れの歌」は元素熟知を100、攻撃力を20%増加させる。
+// この効果が発動すると、20秒間追憶のシグルを獲得できなくなる。
+// 「千年の大楽章」の複数の効果のうち、同じ種類のバフは重複しない。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

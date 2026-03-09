@@ -12,8 +12,8 @@ import (
 
 const c4ICDKey = "chongyun-c4-icd"
 
-// Chongyun regenerates 1 Energy every time he hits an opponent affected by Cryo.
-// This effect can only occur once every 2s.
+// 重雲が氷元素の影響を受けた敵に命中すると、元素エネルギーを毎回1回復する。
+// この効果は2秒に1回のみ発動可能。
 func (c *char) makeC4Callback() combat.AttackCBFunc {
 	if c.Base.Cons < 4 {
 		return nil

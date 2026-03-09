@@ -25,10 +25,10 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Using an Elemental Skill grants the Jade-Forged Crown effect:
-// Every 1,000 Max HP will increase the Normal Attack DMG
-// dealt by the equipping character by 1% for 10s.
-// Normal Attack DMG can be increased this way by a maximum of 32%.
+// 元素スキル使用時、翡翠の冠効果を獲得する:
+// HP上限1,000毎に、装備キャラクターの通常攻撃ダメージが
+// 1%増加する（10秒間）。
+// 通常攻撃ダメージの増加は最大32%まで。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

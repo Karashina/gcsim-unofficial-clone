@@ -28,8 +28,8 @@ var (
 	scalespikerFrames []int
 )
 
-var blindSpotAppearanceDelays = []int{5, 30} // tap, hold (both tap and hold for entering nightsoul)
-var scalespikerReleases = []int{35, 17}      // tap, hold
+var blindSpotAppearanceDelays = []int{5, 30} // 単押し, 長押し（両方ともナイトソウル進入用）
+var scalespikerReleases = []int{35, 17}      // 単押し, 長押し
 
 func init() {
 	skillFrames = frames.InitAbilSlice(42) // E -> D/J
@@ -138,7 +138,7 @@ func (c *char) ScalespikerCannon(p map[string]int) (action.Info, error) {
 
 	var snap combat.Snapshot
 	c.QueueCharTask(func() {
-		// Nightsoul points are drained before snapshot
+		// ナイトソウルポイントはスナップショット前に消費される
 		c.nightsoulState.ClearPoints()
 		snap = c.Snapshot(&ai)
 		c.Core.Tasks.Add(c.createBlindSpot, blindSpotDelay)
@@ -196,7 +196,7 @@ func (c *char) cancelNightsoul() {
 	c.nightsoulSrc = -1
 	c.blindSpotAngularPosition = -1
 
-	// Clear desolation status from all enemies
+	// 全ての敵からdesolationステータスを削除
 	for _, t := range c.Core.Combat.Enemies() {
 		if e, ok := t.(*enemy.Enemy); ok {
 			e.DeleteStatus(desolationKey)

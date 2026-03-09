@@ -35,15 +35,15 @@ const (
 	dmgWindowDuration = 0.2 * 60
 )
 
-// Increases ATK by 20/25/30/35/40%. When party members obtain Elemental Shards from Crystallize reactions,
-// the equipping character will gain 1 Seal, increasing Elemental Skill DMG by 18/22.5/27/31.5/36%.
-// The Seal lasts for 15s, and the equipper may have up to 2 Seals at once.
-// All of the equipper's Seals will disappear 0.2s after their Elemental Skill deals DMG.
+// 攻撃力が20/25/30/35/40%増加。パーティメンバーが結晶化反応で元素欠片を獲得すると、
+// 装備キャラクターはシール1つを獲得し、元素スキルダメージが18/22.5/27/31.5/36%増加。
+// シールは15秒間持続し、装備者は同時に最大2つのシールを所持可能。
+// 装備者の元素スキルがダメージを与えた0.2秒後に全シールが消滅する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	// perm buff
+	// 永続バフ
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.ATKP] = 0.15 + float64(r)*0.05
 	char.AddStatMod(character.StatMod{
@@ -54,9 +54,9 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// seal gain on crystallize shard pickup
+	// 結晶化シャード取得でシール獲得
 	c.Events.Subscribe(event.OnShielded, func(args ...interface{}) bool {
-		// Check shield
+		// シールドをチェック
 		shd := args[0].(shield.Shield)
 		if shd.Type() != shield.Crystallize {
 			return false
@@ -74,7 +74,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("verdict-seal-%v", char.Base.Key.String()))
 
-	// skill dmg increase while seals active
+	// 紋章アクティブ中のスキルダメージ増加
 	skillDmg := 0.135 + float64(r)*0.045
 	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
@@ -84,13 +84,13 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if atk.Info.AttackTag != attacks.AttackTagElementalArt && atk.Info.AttackTag != attacks.AttackTagElementalArtHold {
 			return false
 		}
-		// don't do anything if not in buff
+		// バフ中でなければ何もしない
 		if !char.StatusIsActive(buffKey) {
 			return false
 		}
-		// otherwise if this is first time proccing
-		// - set duration for dmg window
-		// - reset buff once window is over
+		// 初回発動の場合
+		// - ダメージウィンドウの持続時間を設定
+		// - ウィンドウ終了時にバフをリセット
 		if !char.StatusIsActive(dmgWindowKey) {
 			char.AddStatus(dmgWindowKey, dmgWindowDuration, true)
 			char.QueueCharTask(func() {

@@ -29,7 +29,7 @@ func (r *Reactable) TryCrystallizeElectro(a *combat.AttackEvent) bool {
 
 func (r *Reactable) TryCrystallizeHydro(a *combat.AttackEvent) bool {
 	if r.Durability[Hydro] > ZeroDur {
-		// Check if the character has LCrs-Key status for Lunar-Crystallize
+		// キャラクターが LCrs-Key ステータスを持っているかチェック（ルナ結晶化用）
 		char := r.core.Player.ByIndex(a.Info.ActorIndex)
 		if char.StatusIsActive("LCrs-Key") {
 			return r.tryLunarCrystallize(a)
@@ -62,7 +62,7 @@ func (r *Reactable) TryCrystallizeFrozen(a *combat.AttackEvent) bool {
 	return false
 }
 
-// Lunar-Crystallize functions moved to lunarcrystallize.go
+// ルナ結晶化の関数は lunarcrystallize.go に移動済み
 
 func (r *Reactable) tryCrystallizeWithEle(a *combat.AttackEvent, ele attributes.Element, rt reactions.ReactionType, evt event.Event) bool {
 	if a.Info.Durability < ZeroDur {
@@ -74,14 +74,14 @@ func (r *Reactable) tryCrystallizeWithEle(a *combat.AttackEvent, ele attributes.
 	r.crystallizeGCD = r.core.F + 60
 	char := r.core.Player.ByIndex(a.Info.ActorIndex)
 	r.addCrystallizeShard(char, rt, ele, r.core.F)
-	// reduce
+	// 元素量を減少
 	r.reduce(ele, a.Info.Durability, 0.5)
-	//TODO: confirm u can only crystallize once
+	//TODO: 結晶化は1回しか発生しないことを確認
 	a.Info.Durability = 0
 	a.Reacted = true
-	// event
+	// イベント発行
 	r.core.Events.Emit(evt, r.self, a)
-	// check freeze + ec
+	// 凍結と感電反応をチェック
 	switch {
 	case ele == attributes.Electro && r.Durability[Hydro] > ZeroDur:
 		r.checkEC()
@@ -217,19 +217,19 @@ var shieldBaseHP = []float64{
 
 type CrystallizeShard struct {
 	*gadget.Gadget
-	// earliest that a shard can be picked up after spawn
+	// スポーン後にシャードを拾える最速タイミング
 	EarliestPickup int
-	// captures the shield because em snapshots
+	// EMスナップショットのためシールドをキャプチャ
 	Shield *CrystallizeShield
-	// for logging purposes
+	// ログ出力用
 	src    int
 	expiry int
 }
 
 func (r *Reactable) addCrystallizeShard(char *character.CharWrapper, rt reactions.ReactionType, typ attributes.Element, src int) {
-	// delay shard spawn
+	// シャード生成を遅延
 	r.core.Tasks.Add(func() {
-		// grab current snapshot for shield
+		// シールド用の現在のスナップショットを取得
 		ai := combat.AttackInfo{
 			ActorIndex: char.Index,
 			DamageSrc:  r.self.Key(),
@@ -237,9 +237,9 @@ func (r *Reactable) addCrystallizeShard(char *character.CharWrapper, rt reaction
 		}
 		snap := char.Snapshot(&ai)
 		lvl := snap.CharLvl
-		// shield snapshots em on shard spawn
+		// シールドはシャード生成時の元素熟知でスナップショットされる
 		em := snap.Stats[attributes.EM]
-		// expiry will get set properly later
+		// 有効期限は後で正しく設定される
 		shd := NewCrystallizeShield(char.Index, typ, src, lvl, em, -1)
 		cs := NewCrystallizeShard(r.core, r.self.Shape(), shd)
 		r.core.Combat.AddGadget(cs)
@@ -262,14 +262,14 @@ func NewCrystallizeShard(c *core.Core, shp geometry.Shape, shd *CrystallizeShiel
 		panic("rectangle target hurtbox is not supported for crystallize shard spawning")
 	}
 
-	// for simplicity, crystallize shards spawn randomly at radius + 0.5
+	// 簡略化のため、結晶化シャードは半径+0.5のランダム位置に生成される
 	r := circ.Radius() + 0.5
-	// radius 2 is ok
+	// 半径2でOK
 	cs.Gadget = gadget.New(c, geometry.CalcRandomPointFromCenter(circ.Pos(), r, r, c.Rand), 2, combat.GadgetTypCrystallizeShard)
 
-	// shard lasts for 15s from shard spawn
+	// シャードは生成から15秒持続
 	cs.Gadget.Duration = 15 * 60
-	// earliest shard pickup is 54f from crystallize text, so 31f from shard spawn
+	// 最短シャード拾得は結晶化テキストから54f、シャード生成から31f
 	cs.EarliestPickup = c.F + 31
 	cs.Shield = shd
 	cs.src = c.F
@@ -279,7 +279,7 @@ func NewCrystallizeShard(c *core.Core, shp geometry.Shape, shd *CrystallizeShiel
 }
 
 func (cs *CrystallizeShard) AddShieldKillShard() bool {
-	// don't pick up if shard is not available for pick up yet
+	// シャードがまだ拾得可能でない場合は拾わない
 	if cs.Core.F < cs.EarliestPickup {
 		cs.Core.Log.NewEvent(
 			fmt.Sprintf("%v crystallize shard could not be picked up", cs.Shield.Ele),
@@ -299,10 +299,10 @@ func (cs *CrystallizeShard) AddShieldKillShard() bool {
 		Write("src", cs.src).
 		Write("expiry", cs.expiry).
 		Write("earliest_pickup", cs.EarliestPickup)
-	// add shield
-	cs.Shield.Expires = cs.Core.F + 15.1*60 // shield lasts for 15.1s from shard pickup
+	// シールドを追加
+	cs.Shield.Expires = cs.Core.F + 15.1*60 // シールドはシャード拾得から15.1秒持続
 	cs.Core.Player.Shields.Add(cs.Shield)
-	// kill self
+	// 自身を消滅
 	cs.Kill()
 	return true
 }

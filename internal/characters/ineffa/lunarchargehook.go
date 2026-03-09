@@ -9,7 +9,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
-// Special Lunar Charged damage handler for Ineffa
+// Ineffa専用のLunar Chargedダメージハンドラ
 func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 	n := args[0].(combat.Target)
 	ae := args[1].(*combat.AttackEvent)
@@ -96,7 +96,7 @@ func (c *char) onLunarChargedIneffaSpecial(args ...interface{}) bool {
 	return false
 }
 
-// Register Ineffa's special Lunar Charged callback
+// IneffaのLunar Chargedコールバックを登録
 func (c *char) InitLCallback() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.onLunarChargedIneffaSpecial, "lc-ineffa-special")
 }

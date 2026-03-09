@@ -11,31 +11,31 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
-// Frame data: Animation lock and cancellable timing for each skill action
+// フレームデータ: 各元素スキルアクションのアニメーションロックとキャンセル可能タイミング
 var (
-	skillEssentialFrames []int // Frame data for Essential Transmutation
-	skillFrames          []int // Frame data for Confirmation of Purity
-	skillDenialFrames    []int // Frame data for Denial of Darkness
+	skillEssentialFrames []int // Essential Transmutationのフレームデータ
+	skillFrames          []int // 純化の肯定のフレームデータ
+	skillDenialFrames    []int // 暗黒の否定のフレームデータ
 )
 
-// Timing constants: Hitmarks, cooldowns, durations
+// タイミング定数: ヒットマーク、クールダウン、持続時間
 const (
-	skillHitmark        = 33      // Hitmark for Confirmation of Purity (frames)
-	skillDenialHitmark1 = 15      // Hitmark for Denial of Darkness 1st hit
-	skillDenialHitmark2 = 25      // Hitmark for Denial of Darkness 2nd hit
-	skillDenialHitmark3 = 35      // Hitmark for Denial of Darkness 3rd hit
-	skillCD             = 12 * 60 // Skill cooldown: 12 seconds
-	stateDuration       = 30 * 60 // Transmutation state duration: 30 seconds
-	energyRegenICD      = 6 * 60  // Energy restoration internal cooldown: 6 seconds
-	skillParticleCount  = 4       // Elemental particle count
+	skillHitmark        = 33      // 純化の肯定のヒットマーク（フレーム）
+	skillDenialHitmark1 = 15      // 暗黒の否定1段目ヒットマーク
+	skillDenialHitmark2 = 25      // 暗黒の否定2段目ヒットマーク
+	skillDenialHitmark3 = 35      // 暗黒の否定3段目ヒットマーク
+	skillCD             = 12 * 60 // 元素スキルクールダウン: 12秒
+	stateDuration       = 30 * 60 // 変容状態の持続時間: 30秒
+	energyRegenICD      = 6 * 60  // エネルギー回復の内部クールダウン: 6秒
+	skillParticleCount  = 4       // 元素粒子数
 )
 
-// State management keys: Status identifiers used internally in the simulator
+// 状態管理キー: シミュレータ内部で使用するステータス識別子
 const (
-	essentialTransmutationKey = "durin-essential-transmutation" // Essential Transmutation state
-	confirmationStateKey      = "durin-confirmation-state"      // Confirmation of Purity state
-	denialStateKey            = "durin-denial-state"            // Denial of Darkness state
-	skillRecastCDKey          = "durin-skill-recast-cd"         // CD for second consecutive skill use
+	essentialTransmutationKey = "durin-essential-transmutation" // Essential Transmutationステート
+	confirmationStateKey      = "durin-confirmation-state"      // 純化の肯定ステート
+	denialStateKey            = "durin-denial-state"            // 暗黒の否定ステート
+	skillRecastCDKey          = "durin-skill-recast-cd"         // 2回目のスキル連続使用のCD
 )
 
 func init() {
@@ -62,18 +62,18 @@ func init() {
 	skillDenialFrames[action.ActionSwap] = 50
 }
 
-// Skill is the entry point for Elemental Skill
-// Branches to Confirmation of Purity or Denial of Darkness based on Essential Transmutation state
+// Skill は元素スキルのエントリーポイント
+// Essential Transmutation状態に基づいて純化の肯定または暗黒の否定に分岐
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(essentialTransmutationKey) {
-		c.particleIcd = false         // Reset particle ICD for new skill use
-		return c.skillConfirmation(p) // During Essential Transmutation → Confirmation of Purity
+		c.particleIcd = false         // 新しいスキル使用のため粒子ICDをリセット
+		return c.skillConfirmation(p) // Essential Transmutation中 → 純化の肯定
 	}
-	return c.skillEssentialTransmutation(p) // Normal state → Enter Essential Transmutation
+	return c.skillEssentialTransmutation(p) // 通常状態 → Essential Transmutationに移行
 }
 
-// skillEssentialTransmutation enters Essential Transmutation state
-// Next skill use will enable Confirmation of Purity or Denial of Darkness
+// skillEssentialTransmutation はEssential Transmutation状態に移行
+// 次のスキル使用で純化の肯定または暗黒の否定が使用可能になる
 func (c *char) skillEssentialTransmutation(p map[string]int) (action.Info, error) {
 	c.AddStatus(essentialTransmutationKey, stateDuration, true)
 	c.stateDenial = false
@@ -90,12 +90,12 @@ func (c *char) skillEssentialTransmutation(p map[string]int) (action.Info, error
 	}, nil
 }
 
-// skillConfirmation executes Confirmation of Purity: AoE Pyro DMG
-// Triggered when using skill again after entering Essential Transmutation via normal attack
+// skillConfirmation は純化の肯定を実行: 範囲炎元素ダメージ
+// 通常攻撃経由でEssential Transmutationに入った後、再度スキルを使用するとトリガー
 func (c *char) skillConfirmation(p map[string]int) (action.Info, error) {
-	// GU: 1U (Durability: 25)
-	// ICD Tag: None (ICDTagNone)
-	// ICD Group: None - ICDGroup is ignored when using ICDTagNone
+	// 元素量: 1U (元素耐性: 25)
+	// ICDタグ: なし (ICDTagNone)
+	// ICDグループ: なし - ICDTagNone使用時はICDGroupは無視される
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Transmutation: Confirmation of Purity",
@@ -118,7 +118,7 @@ func (c *char) skillConfirmation(p map[string]int) (action.Info, error) {
 	)
 
 	c.transitionToConfirmationState()
-	c.AddStatus(skillRecastCDKey, 0, true) // Mark recast as used
+	c.AddStatus(skillRecastCDKey, 0, true) // 再発動を使用済みとしてマーク
 
 	c.Core.Log.NewEvent("Durin uses Confirmation of Purity", glog.LogCharacterEvent, c.Index)
 
@@ -130,8 +130,8 @@ func (c *char) skillConfirmation(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// skillDenialOfDarkness executes Denial of Darkness: 3 consecutive single-target Pyro DMG hits
-// Triggered when using skill again after entering Essential Transmutation via charged attack
+// skillDenialOfDarkness は暗黒の否定を実行: 単体炎元素ダメージ3連続ヒット
+// 重撃経由でEssential Transmutationに入った後、再度スキルを使用するとトリガー
 func (c *char) skillDenialOfDarkness(p map[string]int) (action.Info, error) {
 	hitmarks := []int{skillDenialHitmark1, skillDenialHitmark2, skillDenialHitmark3}
 	mults := [][]float64{skillDenial1, skillDenial2, skillDenial3}
@@ -143,7 +143,7 @@ func (c *char) skillDenialOfDarkness(p map[string]int) (action.Info, error) {
 	}
 
 	c.transitionToDenialState()
-	c.AddStatus(skillRecastCDKey, 0, true) // Mark recast as used
+	c.AddStatus(skillRecastCDKey, 0, true) // 再発動を使用済みとしてマーク
 	c.Core.Log.NewEvent("Durin uses Denial of Darkness", glog.LogCharacterEvent, c.Index)
 
 	return action.Info{
@@ -154,12 +154,12 @@ func (c *char) skillDenialOfDarkness(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// makeSkillDenialAttackInfo generates attack info for each hit of Denial of Darkness
-// Called for each of the 3 hits
+// makeSkillDenialAttackInfo は暗黒の否定の各ヒットの攻撃情報を生成
+// 3ヒットそれぞれに対して呼び出される
 func (c *char) makeSkillDenialAttackInfo(hitNum int, mult []float64) combat.AttackInfo {
-	// GU: 1U (Durability: 25)
-	// ICD Tag: Elemental Skill (ICDTagElementalArt)
-	// ICD Group: Standard (ICDGroupDefault)
+	// 元素量: 1U (元素耐性: 25)
+	// ICDタグ: 元素スキル (ICDTagElementalArt)
+	// ICDグループ: 標準 (ICDGroupDefault)
 	return combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Transmutation: Denial of Darkness (Hit " + string(rune('0'+hitNum)) + ")",
@@ -173,10 +173,10 @@ func (c *char) makeSkillDenialAttackInfo(hitNum int, mult []float64) combat.Atta
 	}
 }
 
-// State transition helper functions
+// 状態遷移ヘルパー関数
 
-// transitionToConfirmationState transitions to Confirmation of Purity state
-// This state persists for 30 seconds after using Confirmation of Purity
+// transitionToConfirmationState は純化の肯定状態に遷移
+// この状態は純化の肯定使用後30秒間持続
 func (c *char) transitionToConfirmationState() {
 	c.DeleteStatus(essentialTransmutationKey)
 	c.stateDenial = false
@@ -184,14 +184,14 @@ func (c *char) transitionToConfirmationState() {
 	c.AddStatus(confirmationStateKey, stateDuration, true)
 }
 
-// transitionToDenialState transitions to Denial of Darkness state
-// This state persists for 30 seconds after using Denial of Darkness, then reverts to Confirmation of Purity
+// transitionToDenialState は暗黒の否定状態に遷移
+// この状態は暗黒の否定使用後30秒間持続し、その後純化の肯定に戻る
 func (c *char) transitionToDenialState() {
 	c.DeleteStatus(essentialTransmutationKey)
 	c.stateDenial = true
 	c.AddStatus(denialStateKey, stateDuration, true)
 
-	// Schedule revert to Confirmation after duration
+	// 持続時間後に純化の肯定に戻るようスケジュール
 	c.Core.Tasks.Add(func() {
 		if c.StatusIsActive(denialStateKey) {
 			c.stateDenial = false
@@ -202,9 +202,9 @@ func (c *char) transitionToDenialState() {
 	}, stateDuration)
 }
 
-// Callback functions: Additional effects on attack hit
+// コールバック関数: 攻撃ヒット時の追加効果
 
-// skillParticleCB generates elemental particles on skill hit
+// skillParticleCB は元素スキルヒット時に元素粒子を生成
 func (c *char) skillParticleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -216,13 +216,13 @@ func (c *char) skillParticleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), skillParticleCount, attributes.Pyro, c.ParticleDelay)
 }
 
-// skillEnergyRegenCB restores elemental energy on skill hit
-// Has a 6 second internal cooldown
+// skillEnergyRegenCB は元素スキルヒット時に元素エネルギーを回復
+// 6秒の内部クールダウンあり
 func (c *char) skillEnergyRegenCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
-	// Check 6 second ICD
+	// 6秒ICDを確認
 	if c.Core.F-c.lastEnergyRestoreFrame < energyRegenICD {
 		return
 	}

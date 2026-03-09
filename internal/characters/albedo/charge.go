@@ -12,7 +12,7 @@ import (
 )
 
 var chargeFrames []int
-var chargeHitmarks = []int{20, 20} // CA-1 and CA-2 hit at the same time
+var chargeHitmarks = []int{20, 20} // 重撃-1と重撃-2は同時にヒット
 
 func init() {
 	chargeFrames = frames.InitAbilSlice(56)                                 // CA -> N1

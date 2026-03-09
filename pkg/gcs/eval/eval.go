@@ -17,10 +17,10 @@ type Eval struct {
 	AST  ast.Node
 	Log  *log.Logger
 
-	next chan bool         // wait on this before continuing
-	work chan *action.Eval // send work to this chan
-	// set to non-nil by the first error encountered
-	// this is necessary because Run() could have exited already with an err but
+	next chan bool         // 続行前にこのチャネルを待機する
+	work chan *action.Eval // このチャネルに作業を送信する
+	// 最初に発生したエラーで non-nil に設定される
+	// Run() が既にエラーで終了している可能性があるため必要
 	err error
 
 	isTerminated bool
@@ -48,7 +48,7 @@ func NewEnv(parent *Env) *Env {
 	}
 }
 
-//nolint:gocritic // non-pointer type for *Obj doesn't make sense
+//nolint:gocritic // *Obj に対して非ポインタ型は意味をなさない
 func (e *Env) v(s string) (*Obj, error) {
 	v, ok := e.varMap[s]
 	if ok {
@@ -60,9 +60,9 @@ func (e *Env) v(s string) (*Obj, error) {
 	return nil, fmt.Errorf("variable %v does not exist", s)
 }
 
-// Tell eval to exit now
+// eval に即座に終了を指示する
 func (e *Eval) Exit() error {
-	// drain work if any
+	// 残っている作業があれば排出する
 	select {
 	case <-e.work:
 	default:
@@ -70,7 +70,7 @@ func (e *Eval) Exit() error {
 	if e.isTerminated {
 		return e.err
 	}
-	// make sure we can't send or continue anymore
+	// これ以上送信や続行ができないようにする
 	e.isTerminated = true
 	close(e.next)
 	close(e.work)
@@ -84,7 +84,7 @@ func (e *Eval) Continue() {
 	e.next <- true
 }
 
-// NextAction asks eval to return the next action. Return nil, nil if no more action
+// NextAction は eval に次のアクションを返すよう要求する。アクションがなければ nil, nil を返す
 func (e *Eval) NextAction() (*action.Eval, error) {
 	next, ok := <-e.work
 	if !ok {
@@ -94,7 +94,7 @@ func (e *Eval) NextAction() (*action.Eval, error) {
 }
 
 func (e *Eval) Start() {
-	//TODO: consider catching panic here
+	//TODO: ここでパニックをキャッチすることを検討する
 	e.Run()
 }
 
@@ -102,30 +102,30 @@ func (e *Eval) Err() error {
 	return e.err
 }
 
-// Run will execute the provided AST. Any genshin specific actions will be available
-// via NextAction()
-// TODO: remove defer in favour of every function actually returning error
+// Run は提供された AST を実行する。原神固有のアクションは
+// NextAction() 経由で利用可能となる
+// TODO: すべての関数が実際にエラーを返すようにして defer を除去する
 //
 //nolint:nonamedreturns,nakedret // not possible to perform the res, err modification without named return
 func (e *Eval) Run() (res Obj, err error) {
 	defer func() {
-		// this defer ensures that e.err is set correctly; this has to be the first defer
-		// as defers are called last in first out so this needs to be before any panic handling
+		// この defer は e.err が正しく設定されることを保証する。これは最初の defer でなければならない
+		// defer は後入れ先出しで呼ばれるため、パニック処理より前に定義する必要がある
 		e.err = err
 	}()
-	//TODO: this should hopefully be removed in the future
+	//TODO: 将来的にはこれを除去したい
 	defer func() {
-		// recover from panic if one occured. Set err to nil otherwise.
+		// パニックが発生した場合は回復する。それ以外の場合 err は nil に設定する。
 		if pErr := recover(); pErr != nil {
 			err = fmt.Errorf("panic occured: %v", pErr)
 		}
 	}()
-	// make sure to close work since we are the only sender
+	// 唯一の送信者であるため work を必ず閉じる
 	defer e.Exit()
 	if e.Log == nil {
 		e.Log = log.New(io.Discard, "", log.LstdFlags)
 	}
-	// make sure ErrTerminate is discarded
+	// ErrTerminate が破棄されるようにする
 	defer func() {
 		if errors.Is(err, ErrTerminated) {
 			err = nil
@@ -135,15 +135,15 @@ func (e *Eval) Run() (res Obj, err error) {
 	global := NewEnv(nil)
 	e.initSysFuncs(global)
 
-	// start running once we get the signal to go
+	// 開始シグナルを受け取ったら実行を開始する
 	err = e.waitForNext()
 	if err != nil {
 		return
 	}
 
-	// this should run until it hits an Action
-	// it will then pass the action on a resp channel
-	// it will then wait for Next before running again
+	// これは Action に到達するまで実行される
+	// その後アクションを resp チャネルに渡す
+	// そして Next を待ってから再度実行する
 	res, err = e.evalNode(e.AST, global)
 	return
 }
@@ -151,7 +151,7 @@ func (e *Eval) Run() (res Obj, err error) {
 func (e *Eval) waitForNext() error {
 	_, ok := <-e.next
 	if !ok {
-		return ErrTerminated // no more work, shutting down
+		return ErrTerminated // これ以上の作業なし、シャットダウン
 	}
 	return nil
 }
@@ -199,7 +199,7 @@ func (o ObjTyp) String() string {
 	return "unknown"
 }
 
-// various Obj types
+// 各種 Obj 型
 type (
 	null   struct{}
 	number struct {
@@ -239,15 +239,15 @@ type (
 	}
 )
 
-// null.
+// null 型
 func (n *null) Inspect() string { return "null" }
 func (n *null) Typ() ObjTyp     { return typNull }
 
-// terminate.
+// terminate 型
 // func (n *terminate) Inspect() string { return "terminate" }
 // func (n *terminate) Typ() ObjTyp     { return typTerminate }
 
-// number.
+// number 型
 func (n *number) Inspect() string {
 	if n.isFloat {
 		return strconv.FormatFloat(n.fval, 'f', -1, 64)
@@ -256,25 +256,25 @@ func (n *number) Inspect() string {
 }
 func (n *number) Typ() ObjTyp { return typNum }
 
-// strval.
+// strval 型
 func (s *strval) Inspect() string { return s.str }
 func (s *strval) Typ() ObjTyp     { return typStr }
 
-// funcval.
+// funcval 型
 func (f *funcval) Inspect() string { return "function" }
 func (f *funcval) Typ() ObjTyp     { return typFun }
 
-// bfuncval.
+// bfuncval 型
 func (b *bfuncval) Inspect() string { return "built-in function" }
 func (b *bfuncval) Typ() ObjTyp     { return typBif }
 
-// retval.
+// retval 型
 func (r *retval) Inspect() string {
 	return r.res.Inspect()
 }
 func (r *retval) Typ() ObjTyp { return typRet }
 
-// mapval.
+// mapval 型
 func (m *mapval) Inspect() string {
 	str := "["
 	done := false
@@ -291,7 +291,7 @@ func (m *mapval) Inspect() string {
 }
 func (m *mapval) Typ() ObjTyp { return typMap }
 
-// ctrl.
+// ctrl 型
 func (c *ctrl) Inspect() string {
 	switch c.typ {
 	case ast.CtrlContinue:

@@ -33,7 +33,7 @@ func init() {
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	// C6: Additionally, Searing Onslaught will not interrupt the Normal Attack combo.
+	// 6凸: さらに、逆焔の刃は通常攻撃のコンボを中断しない
 	if c.Base.Cons >= 6 && c.Core.Player.CurrentState() == action.SkillState {
 		c.NormalCounter = c.savedNormalCounter
 	}

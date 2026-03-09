@@ -55,7 +55,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if shd.ShieldOwner() != char.Index {
 			return false
 		}
-		// TODO: Not sure if the character needs to be on the field
+		// TODO: キャラクターがフィールドにいる必要があるか不明
 		if c.Player.Active() != char.Index {
 			return false
 		}

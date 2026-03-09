@@ -19,11 +19,11 @@ var (
 )
 
 const (
-	skillOzSpawn     = 18 // same as CD start
+	skillOzSpawn     = 18 // CD開始と同じ
 	skillOzHitmark   = 38
 	skillOzFirstTick = 64
-	ozTickInterval   = 59 // assume consistent 59f tick rate
-	skillRecastCD    = 92 // 2f CD delay
+	ozTickInterval   = 59 // 一貫した59fのティックレートと仮定
+	skillRecastCD    = 92 // 2fのCD遅延
 	skillRecastCDKey = "fischl-skill-recast-cd"
 	particleICDKey   = "fischl-particle-icd"
 	ozActiveKey      = "oz-active"
@@ -46,7 +46,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	if p["recast"] != 0 && c.ozActive && !c.StatusIsActive(skillRecastCDKey) {
 		return c.skillRecast(), nil
 	}
-	// always trigger electro no ICD on initial summon
+	// 初回召喚時は常に雷元素付与、ICDなし
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Oz (Summon)",
@@ -64,7 +64,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		ai.Mult += 2
 		radius = 3
 	}
-	// hitmark is 5 frames after oz spawns
+	// ヒットマークはオズ出現から5フレーム後
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), geometry.Point{Y: 1.5}, radius),
@@ -72,23 +72,23 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		skillOzHitmark,
 	)
 
-	// CD Delay is 18 frames, but things break if Delay > CanQueueAfter
-	// so we add 18 to the duration instead. this probably mess up CDR stuff
+	// CD遅延は18フレームだが、Delay > CanQueueAfter だと問題が発生するので
+	// 代わりに18を持続時間に加算。CDRに影響する可能性あり
 	c.SetCD(action.ActionSkill, 25*60+skillOzSpawn)
 
 	c.Core.Tasks.Add(func() {
 		c.AddStatus(skillRecastCDKey, skillRecastCD, false)
 	}, skillOzSpawn)
 
-	// set oz to active at the start of the action
+	// アクション開始時にオズをアクティブに設定
 	c.ozActive = true
-	// set on field oz to be this one
+	// フィールド上のオズをこれに設定
 	c.queueOz("Skill", skillOzSpawn, skillOzFirstTick)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -102,7 +102,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 	}
 	c.AddStatus(particleICDKey, 0.1*60, true)
 	if c.Core.Rand.Float64() < .67 {
-		// TODO: this delay used to be 120
+		// TODO: この遅延は以前120だった
 		c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Electro, c.ParticleDelay)
 	}
 }
@@ -110,7 +110,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 func (c *char) skillRecast() action.Info {
 	c.AddStatus(skillRecastCDKey, skillRecastCD, false)
 	c.Core.Tasks.Add(func() {
-		c.ozTickSrc = c.Core.F // reset attack timer
+		c.ozTickSrc = c.Core.F // 攻撃タイマーをリセット
 		c.Core.Tasks.Add(c.ozTick(c.ozTickSrc), 60)
 		c.ozSnapshot.Snapshot = c.Snapshot(&c.ozSnapshot.Info)
 		c.Core.Log.NewEvent("Recasting oz", glog.LogCharacterEvent, c.Index).
@@ -119,24 +119,24 @@ func (c *char) skillRecast() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillRecastFrames),
 		AnimationLength: skillRecastFrames[action.InvalidAction],
-		CanQueueAfter:   skillRecastFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillRecastFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
 
 func (c *char) queueOz(src string, ozSpawn, firstTick int) {
-	// calculate oz duration
+	// オズの持続時間を計算
 	dur := 600
 	if c.Base.Cons == 6 {
 		dur += 120
 	}
 	spawnFn := func() {
-		// setup variables for tracking oz
+		// オズ追跡用の変数をセットアップ
 		c.ozActive = true
 		c.ozSource = c.Core.F
 		c.ozTickSrc = c.Core.F
 		c.AddStatus(ozActiveKey, dur, false)
-		// queue up oz removal at the end of the duration for gcsl conditional
+		// gcsl条件判定用に持続時間終了時のオズ削除をキュー
 		c.Core.Tasks.Add(c.removeOz(c.Core.F), dur)
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -174,7 +174,7 @@ func (c *char) queueOz(src string, ozSpawn, firstTick int) {
 
 func (c *char) ozTick(src int) func() {
 	return func() {
-		// if src != ozSource then this is no longer the same oz, do nothing
+		// src != ozSource なら別のオズなので何もしない
 		if src != c.ozTickSrc {
 			return
 		}
@@ -186,7 +186,7 @@ func (c *char) ozTick(src int) func() {
 			Write("next expected tick", c.Core.F+60).
 			Write("src", src)
 
-		// trigger damage
+		// ダメージを発動
 		ae := c.ozSnapshot
 		ae.Pattern = combat.NewBoxHit(
 			c.ozPos,
@@ -203,7 +203,7 @@ func (c *char) ozTick(src int) func() {
 
 func (c *char) removeOz(src int) func() {
 	return func() {
-		// if src != ozSource then this is no longer the same oz, do nothing
+		// src != ozSource なら別のオズなので何もしない
 		if c.ozSource != src {
 			c.Core.Log.NewEvent("Oz not removed, src changed", glog.LogCharacterEvent, c.Index).
 				Write("src", src)

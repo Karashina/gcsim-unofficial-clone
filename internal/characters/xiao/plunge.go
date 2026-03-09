@@ -33,7 +33,7 @@ const highPlungeHitmarkXYX = 44 + 3
 const collisionHitmarkXYX = lowPlungeHitmarkXYX - 6
 
 func init() {
-	// from xiao
+	// 魈のフレームデータ
 	lowPlungeFramesX = frames.InitAbilSlice(62)
 	lowPlungeFramesX[action.ActionAttack] = 60
 	lowPlungeFramesX[action.ActionSkill] = 59
@@ -45,7 +45,7 @@ func init() {
 	highPlungeFramesX[action.ActionJump] = 65
 	highPlungeFramesX[action.ActionSwap] = 64
 
-	// from xianyun
+	// 閑雲のフレームデータ
 	lowPlungeFramesXY = frames.InitAbilSlice(73)
 	lowPlungeFramesXY[action.ActionAttack] = 59
 	lowPlungeFramesXY[action.ActionSkill] = 58
@@ -62,11 +62,11 @@ func init() {
 	highPlungeFramesXY[action.ActionJump] = 60
 	highPlungeFramesXY[action.ActionSwap] = 63
 
-	// from xiao + xianyun
+	// 魈+閑雲のフレームデータ
 	lowPlungeFramesXYX = frames.InitAbilSlice(73)
 	lowPlungeFramesXYX[action.ActionAttack] = 59
 	lowPlungeFramesXYX[action.ActionSkill] = 58
-	lowPlungeFramesXYX[action.ActionBurst] = 58 // assumed to be same as skill
+	lowPlungeFramesXYX[action.ActionBurst] = 58 // スキルと同じと仮定
 	lowPlungeFramesXYX[action.ActionDash] = 59
 	lowPlungeFramesXYX[action.ActionJump] = 60
 	lowPlungeFramesXYX[action.ActionSwap] = 62
@@ -74,15 +74,15 @@ func init() {
 	highPlungeFramesXYX = frames.InitAbilSlice(75)
 	highPlungeFramesXYX[action.ActionAttack] = 61
 	highPlungeFramesXYX[action.ActionSkill] = 62
-	highPlungeFramesXYX[action.ActionBurst] = 62 // assumed to be same as skill
+	highPlungeFramesXYX[action.ActionBurst] = 62 // スキルと同じと仮定
 	highPlungeFramesXYX[action.ActionDash] = 62
 	highPlungeFramesXYX[action.ActionJump] = 62
 	highPlungeFramesXYX[action.ActionSwap] = 64
 }
 
-// Low Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 低空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	if c.Core.Player.CurrentState() != action.JumpState {
@@ -91,7 +91,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not Xiao does a collision hit
+		collision = 0 // 魈が衝突ヒットするかどうか
 	}
 
 	var a action.Info
@@ -123,7 +123,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 		lowPlungeHitmark = lowPlungeHitmarkXY
 		collisionHitmark = collisionHitmarkXY
 	default:
-		// assumed to be Xiao burst active
+		// 魈の元素爆発中と仮定
 		a = action.Info{
 			Frames:          frames.NewAbilFunc(lowPlungeFramesX),
 			AnimationLength: lowPlungeFramesX[action.InvalidAction],
@@ -163,9 +163,9 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	return a, nil
 }
 
-// High Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 高空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	if c.Core.Player.CurrentState() != action.JumpState {
@@ -174,7 +174,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not Xiao does a collision hit
+		collision = 0 // 魈が衝突ヒットするかどうか
 	}
 
 	var a action.Info
@@ -206,7 +206,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 		highPlungeHitmark = highPlungeHitmarkXY
 		collisionHitmark = collisionHitmarkXY
 	default:
-		// assumed to be Xiao burst active
+		// 魈の元素爆発中と仮定
 		a = action.Info{
 			Frames:          frames.NewAbilFunc(highPlungeFramesX),
 			AnimationLength: highPlungeFramesX[action.InvalidAction],
@@ -246,8 +246,8 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	return a, nil
 }
 
-// Plunge normal falling attack damage queue generator
-// Standard - Always part of high/low plunge attacks
+// 落下攻撃（通常落下）のダメージキュー生成
+// 標準 - 高空/低空落下攻撃に常に含まれる
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

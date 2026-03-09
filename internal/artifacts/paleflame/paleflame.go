@@ -77,7 +77,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		// reset stacks if expired
+		// 期限切れの場合はスタックをリセット
 		if !char.StatModIsActive(pf4key) {
 			s.stacks = 0
 		}

@@ -43,9 +43,9 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}, burstHitmarks[i])
 	}
 
-	// approx 73 frames per cycle
-	// max is either 10s or 14s, plus animation
-	// TODO: anim length idk if this is accurate or not
+	// 約73フレームごとのサイクル
+	// 最大10秒または14秒 + アニメーション
+	// TODO: アニメーション長が正確かどうか不明
 	a := 56
 
 	burstHit := combat.AttackInfo{
@@ -60,7 +60,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Mult:       pyronadoSpin[c.TalentLvlBurst()],
 	}
 
-	// delay the spinny for a; should be affected by hitlag
+	// 回転攻撃をaフレーム遅延させる。ヒットラグの影響を受けるべき
 	c.QueueCharTask(func() {
 		maxDuration := 10 * 60
 		if c.Base.Cons >= 4 {
@@ -68,8 +68,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}
 		c.Core.Status.Add("xianglingburst", maxDuration)
 		snap := c.Snapshot(&burstHit)
-		for delay := 0; delay <= maxDuration; delay += 73 { // first hit 1f before the 3rd initial hit
-			// TODO: proper hitbox
+		for delay := 0; delay <= maxDuration; delay += 73 { // 最初のヒットは3回目の初撃の1f前
+			// TODO: 適切なヒットボックス
 			c.Core.Tasks.Add(func() {
 				c.Core.QueueAttackWithSnap(
 					burstHit,
@@ -79,21 +79,21 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				)
 			}, delay)
 		}
-		// add an effect starting at frame 56 to end of duration to increase pyro dmg by 15% if c6
+		// 6凸の場合、56フレーム目から持続時間終了まで炎元素ダメージ+15%の効果を追加
 		if c.Base.Cons >= 6 {
 			c.c6(maxDuration)
 		}
 	}, a)
 
-	// add cooldown to sim
+	// シミュレーションにクールダウンを追加
 	c.SetCDWithDelay(action.ActionBurst, 20*60, 18)
-	// use up energy
+	// エネルギーを消費
 	c.ConsumeEnergy(24)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

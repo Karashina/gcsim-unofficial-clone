@@ -16,7 +16,7 @@ const windup = 2
 var (
 	attackFrames [][]int
 
-	// The n1 hitmark includes 2f of windup
+	// N1ヒットマークには2fのワインドアップが含まれる
 	attackHitmarks        = [][]int{{11 + windup}, {7}, {8, 8 + 14}, {11}, {35}}
 	attackHitlagHaltFrame = [][]float64{{0.02}, {0.03}, {0.03, 0.00}, {0.05}, {0.06}}
 	attackHitlagFactor    = [][]float64{{0.01}, {0.01}, {0.01, 0.00}, {0.01}, {0.01}}
@@ -79,7 +79,7 @@ func init() {
 	attackSkillFrames[4][action.ActionCharge] = 42                                     // N5 -> CA
 }
 
-// Standard attack - nothing special
+// 標準的な攻撃 - 特殊処理なし
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(skillKey) {
 		return c.AttackSkill(p)
@@ -87,7 +87,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 
 	windupRemove := 0
 
-	// skip N1 windup out of NA and Q
+	// 通常攻撃とQからのN1ワインドアップをスキップ
 	if c.NormalCounter == 0 {
 		switch c.Core.Player.CurrentState() {
 		case action.BurstState:
@@ -149,11 +149,11 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// Standard attack - nothing special
+// 標準的な攻撃 - 特殊処理なし
 func (c *char) AttackSkill(p map[string]int) (action.Info, error) {
 	windupRemove := 0
 
-	// skip N1 windup out of NA
+	// 通常攻撃外からのN1ワインドアップをスキップ
 	if c.NormalCounter == 0 && c.Core.Player.CurrentState() == action.NormalAttackState {
 		windupRemove = windup
 	}

@@ -45,33 +45,33 @@ func init() {
 	skillFrames[action.ActionSwap] = 30    // E -> Swap
 }
 
-// Weaves memories of lovely dreams, entering a Dreamdrifter state where she floats above the ground, and dealing
-// 1 instance of AoE Anemo DMG to nearby opponents.
+// 美しい夢の記憶を紡ぎ、地面の上に浮遊するDreamdrifter状態に入り、
+// 周囲の敵に範囲風元素ダメージを1回与える。
 //
 // Dreamdrifter
 //
-//   - While in the Dreamdrifter state, Yumemizuki Mizuki will continuously drift forward, dealing AoE Anemo DMG to nearby
-//     opponents at regular intervals.
+//   - Dreamdrifter状態中、夢見月瑞希は継続的に前方に漂いながら、
+//     一定間隔で周囲の敵に範囲風元素ダメージを与える。
 //
-//   - During this time, Yumemizuki Mizuki can control her direction of drift, and the pick-up distance of Yumemi Style
-//     Special Snacks from the Elemental Burst Anraku Secret Spring Therapy will be increased.
+//   - この間、夢見月瑞希は漂う方向を制御でき、元素爆発「安楽秘湯浴」の
+//     夢見式特製おやつの拾得距離が増加する。
 //
-//   - Increases the Swirl DMG that nearby party members deal based on Yumemizuki Mizuki's Elemental Mastery.
+//   - 夢見月瑞希の元素熟知に基づいて、周囲のパーティメンバーの拡散ダメージが増加する。
 //
-//     Dreamdrifter will end when Mizuki leaves the field or uses her Elemental Skill again.
+//     瑞希がフィールドを離れるか、再度元素スキルを使用するとDreamdrifterは終了する。
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// if used while in dreamDrifter state, cancel the state.
+	// Dreamdrifter状態中に使用した場合、状態をキャンセルする。
 	if c.StatusIsActive(dreamDrifterStateKey) {
 		c.cancelDreamDrifterState()
 		return action.Info{
 			Frames:          frames.NewAbilFunc(skillFrames),
 			AnimationLength: skillFrames[action.InvalidAction],
-			CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel is swap
+			CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセルはスワップ
 			State:           action.SkillState,
 		}, nil
 	}
 
-	// Activation DMG
+	// 発動ダメージ
 	activationAttack := combat.AttackInfo{
 		ActorIndex:   c.Index,
 		Abil:         skillActivateDmgName,
@@ -115,7 +115,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel is swap
+		CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセルは交代
 		State:           action.SkillState,
 	}, nil
 }
@@ -126,8 +126,8 @@ func (c *char) applyDreamDrifterEffect(travel int) {
 	c.startCloudAttacks(travel)
 
 	if c.Base.Cons >= 1 {
-		// Debuff does not take 3.5s to apply but does not trigger on initial skill activation swirl according to testing.
-		// First cloud (0.45s after skill activation) can trigger it so queue it a few frames later
+		// テストによるとデバフは3.5秒かからずに適用されるが、スキル発動時の初回拡散では発動しない。
+		// 最初のクラウド（スキル発動後0.45秒）で発動可能なので数フレーム後にキューに入れる
 		c.c1Task(c.cloudSrc, skillHitmark+2)
 	}
 }
@@ -140,9 +140,9 @@ func (c *char) skillInit() {
 				if !c.StatusIsActive(dreamDrifterStateKey) {
 					return 0, false
 				}
-				// These flags imply AOE Swirl, in which case this Swirl DMG bonus does not apply because
-				// it was calculated in a prior call of this callback. In these cases the other reaction bonuses
-				// apply instead (e.g. Melt DMG Bonus, Aggravate DMG Bonus, etc.)
+				// これらのフラグはAoE拡散を意味し、その場合この拡散ダメージボーナスは適用されない。
+				// 先行のコールバック呼び出しで計算済みのため。この場合は他の反応ボーナスが
+				// 代わりに適用される（例：蒸発ダメージボーナス、激化ダメージボーナス等）
 				if ai.Amped || ai.Catalyzed {
 					return 0, false
 				}
@@ -160,7 +160,7 @@ func (c *char) skillInit() {
 		})
 	}
 
-	// Remove the dreamDrifter state when she leaves the field
+	// フィールドを離れた時にDreamdrifter状態を解除する
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		prev := args[0].(int)
 
@@ -173,7 +173,7 @@ func (c *char) skillInit() {
 }
 
 func (c *char) startCloudAttacks(travel int) {
-	// clouds DMG snapshots on activation
+	// クラウドのダメージは発動時にスナップショット
 	c.cloudAttack = combat.AttackInfo{
 		ActorIndex:   c.Index,
 		Abil:         cloudDmgName,
@@ -189,12 +189,12 @@ func (c *char) startCloudAttacks(travel int) {
 	}
 	c.cloudSnap = c.Snapshot(&c.cloudAttack)
 
-	// First cloud is launched at approximately 20f after skill activation.
+	// 最初のクラウドはスキル発動後約20フレームで発射される。
 	c.cloudSrc = c.Core.F
 	c.cloudTask(travel, c.cloudSrc, cloudFirstHit)
 }
 
-// Generates up to 4 particles on each E DMG either on activation or cloud.
+// 発動時またはクラウドの各Eダメージにつき最大4個の粒子を生成する。
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return

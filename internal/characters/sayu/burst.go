@@ -45,7 +45,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstHitmark,
 	)
 
-	// heal
+	// 回復
 	atk := snap.Stats.TotalATK()
 	heal := initHealFlat[c.TalentLvlBurst()] + atk*initHealPP[c.TalentLvlBurst()]
 	c.Core.Player.Heal(info.HealInfo{
@@ -56,36 +56,36 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Bonus:   snap.Stats[attributes.Heal],
 	})
 
-	// ticks
+	// Tick処理
 	d := c.createBurstSnapshot()
 	atk = d.Snapshot.Stats.TotalATK()
 	heal = burstHealFlat[c.TalentLvlBurst()] + atk*burstHealPP[c.TalentLvlBurst()]
 
 	if c.Base.Cons >= 6 {
-		// TODO: is it snapshots?
+		// TODO: スナップショットか？
 		d.Info.FlatDmg += atk * min(d.Snapshot.Stats[attributes.EM]*0.002, 4.0)
 		heal += min(d.Snapshot.Stats[attributes.EM]*3, 6000)
 	}
 
-	// make sure that this task gets executed:
-	// - after q initial hit hitlag happened
-	// - before sayu can get affected by any more hitlag
+	// このタスクが以下の条件で実行されるようにする:
+	// - 元素爆発初撃のヒットラグが発生した後
+	// - 早柚がさらなるヒットラグの影響を受ける前
 	c.QueueCharTask(func() {
-		// first tick is at 145
+		// 最初のTickは145フレーム目
 		for i := 145 - tickTaskDelay; i < 145+540-tickTaskDelay; i += 90 {
 			c.Core.Tasks.Add(func() {
-				// check for player
-				// only check HP of active character
+				// プレイヤーをチェック
+				// アクティブキャラクターのHPのみ確認
 				char := c.Core.Player.ActiveChar()
 				hasC1 := c.Base.Cons >= 1
-				// C1 ignores HP limit
+				// 1凸はHP制限を無視
 				needHeal := c.Core.Combat.Player().IsWithinArea(burstArea) && (char.CurrentHPRatio() <= 0.7 || hasC1)
 
-				// check for enemy
+				// 敵をチェック
 				enemy := c.Core.Combat.ClosestEnemyWithinArea(burstArea, nil)
 
-				// determine whether to attack or heal
-				// - C1 makes burst able to attack both an enemy and heal the player at the same time
+				// 攻撃か回復かを判断
+				// - 1凸は元素爆発が敵への攻撃とプレイヤーの回復を同時に行えるようになる
 				needAttack := enemy != nil && (!needHeal || hasC1)
 				if needAttack {
 					d.Pattern = combat.NewCircleHitOnTarget(enemy, nil, c.qTickRadius)
@@ -110,12 +110,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
 
-// TODO: is this helper function needed?
+// TODO: このヘルパー関数は必要か？
 func (c *char) createBurstSnapshot() *combat.AttackEvent {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

@@ -40,16 +40,16 @@ func (c *Traveler) newLeaLotusLamp() *LeaLotus {
 		s.Duration += 3 * 60
 	}
 
-	// burst status last the duration of the gadget but is removed if pyro applied
+	// 元素爆発ステータスはガジェットの持続時間中維持されるが、炎元素が適用されると消される
 	c.Core.Status.Add(burstKey, s.Duration)
 
-	// First hitmark is 37f after spawn, all other pre-transfig hits will be 90f between.
+	// 最初のヒットマークは出現後37f、変容前の他のヒットは90f間隔。
 	c.Core.Tasks.Add(func() {
 		if !s.Alive {
 			return
 		}
 		s.QueueAttack(0)
-		// repeat attack every 90
+		// 90フレームごとに攻撃を繰り返す
 		s.Gadget.OnThinkInterval = func() {
 			s.QueueAttack(0)
 		}
@@ -113,9 +113,9 @@ func (s *LeaLotus) HandleAttack(atk *combat.AttackEvent) float64 {
 		}
 	}
 
-	// apply damage delay is only there to make sure aura gets applied at the end of current frame
-	// however because we can only hold cryo, we'll only call this if atk is cryo and there
-	// is durability left
+	// ダメージ遅延は現在のフレームの最後に元素オーラが付与されるようにするためのもの
+	// ただし氷元素のみ保持できるため、攻撃が氷元素でかつ
+	// 元素量の残りがある
 	if atk.Info.Element != attributes.Cryo {
 		return 0
 	}
@@ -132,7 +132,7 @@ func (s *LeaLotus) HandleAttack(atk *combat.AttackEvent) float64 {
 }
 
 func (s *LeaLotus) attachEle(atk *combat.AttackEvent) {
-	// check for ICD first
+	// まずICDをチェック
 	existing := s.Reactable.ActiveAuraString()
 	applied := atk.Info.Durability
 	s.AttachOrRefill(atk)
@@ -153,7 +153,7 @@ func (s *LeaLotus) attachEle(atk *combat.AttackEvent) {
 }
 
 func (s *LeaLotus) Tick() {
-	// this is needed since gadget tick
+	// ガジェットのTickに必要
 	s.Reactable.Tick()
 	s.Gadget.Tick()
 }
@@ -172,7 +172,7 @@ func (s *LeaLotus) QueueAttack(delay int) {
 }
 
 func (s *LeaLotus) React(a *combat.AttackEvent) {
-	// only check the ones possible
+	// 可能なものだけチェック
 	switch a.Info.Element {
 	case attributes.Electro:
 		s.TryAggravate(a)

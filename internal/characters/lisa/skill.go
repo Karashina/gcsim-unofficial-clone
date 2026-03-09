@@ -42,7 +42,7 @@ func init() {
 	skillHoldFrames[action.ActionSwap] = 117
 }
 
-// p = 0 for no hold, p = 1 for hold
+// p = 0: 短押し、p = 1: 長押し
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	hold := p["hold"]
 	if hold == 1 {
@@ -62,7 +62,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), 5, attributes.Electro, c.ParticleDelay)
 }
 
-// TODO: how long do stacks last?
+// TODO: スタックの持続時間は？
 func (c *char) skillPress() action.Info {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -77,7 +77,7 @@ func (c *char) skillPress() action.Info {
 	}
 
 	cb := func(a combat.AttackCB) {
-		// doesn't stack off-field
+		// オフフィールドではスタックが蓄積されない
 		if c.Core.Player.Active() != c.Index {
 			return
 		}
@@ -104,15 +104,15 @@ func (c *char) skillPress() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
 
-// After an extended casting time, calls down lightning from the heavens, dealing massive Electro DMG to all nearby opponents.
-// Deals great amounts of extra damage to opponents based on the number of Conductive stacks applied to them, and clears their Conductive status.
+// 長時間の詠唱後、天から雷を呼び降ろし、周囲の敵に大規模な雷元素ダメージを与える。
+// 導電スタックの数に応じて大きな追加ダメージを与え、導電状態を解除する。
 func (c *char) skillHold() action.Info {
-	// no multiplier as that's target dependent
+	// 倍率なし（ターゲット依存のため）
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Violet Arc (Hold)",
@@ -124,9 +124,9 @@ func (c *char) skillHold() action.Info {
 		Durability: 50,
 	}
 
-	// c2 add defense? no interruptions either way
+	// 2凸: 防御力上昇。いずれにせよ中断なし
 	if c.Base.Cons >= 2 {
-		// increase def for the duration of this abil in however many frames
+		// このアビリティの持続フレーム中、防御力を上昇させる
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.DEFP] = 0.25
 		c.AddStatMod(character.StatMod{
@@ -155,8 +155,7 @@ func (c *char) skillHold() action.Info {
 		}
 	}
 
-	// [8:31 PM] ArchedNosi | Lisa Unleashed: yeah 4-5 50/50 with Hold
-	// [9:13 PM] ArchedNosi | Lisa Unleashed: @gimmeabreak actually wait, xd i noticed i misread my sheet, Lisa Hold E always gens 5 orbs
+	// [8:31 PM] ArchedNosi | Lisa Unleashed: 長押しで常に5個のオーブを生成
 	enemies := c.Core.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10), nil)
 	for _, e := range enemies {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(e, nil, 0.2), 0, skillHoldHitmark, c1cb, c.particleCB)
@@ -167,7 +166,7 @@ func (c *char) skillHold() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames),
 		AnimationLength: skillHoldFrames[action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillHoldFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -186,7 +185,7 @@ func (c *char) skillHoldMult() {
 
 		atk.Info.Mult = skillHold[stacks][c.TalentLvlSkill()]
 
-		// consume the stacks
+		// スタックを消費
 		t.SetTag(conductiveTag, 0)
 
 		return false

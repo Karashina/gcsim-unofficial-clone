@@ -13,11 +13,12 @@ const (
 	a1IcdStatus = "kirara-a1-icd"
 )
 
-// When Kirara is in the Urgent Neko Parcel state of Meow-teor Kick, each impact against an opponent will grant her a stack of Reinforced Packaging.
-// This effect can be triggered once for each opponent hit every 0.5s. Max 3 stacks. When the Urgent Neko Parcel state ends, each stack of Reinforced
-// Packaging will create 1 Shield of Safe Transport for Kirara. The shields that are created this way will have 20% of the DMG absorption that
-// the Shield of Safe Transport produced by Meow-teor Kick would have. If Kirara is already protected by a Shield of Safe Transport created by
-// Meow-teor Kick, its DMG absorption will stack with these shields and its duration will reset.
+// 緋球玄縄のUrgent Neko Parcel状態の時、敵に当たるたびに強化梱包のスタックを獲得する。
+// この効果は各敵に対して0.5秒に1回発動可能。最大3スタック。Urgent Neko Parcel状態終了時、
+// 各スタックにつき1枚の安全輸送シールドを生成する。このシールドは
+// 緋球玄縄が生成する安全輸送シールドのダメージ吸収量の20%を持つ。
+// 既に緋球玄縄の安全輸送シールドがある場合、
+// ダメージ吸収量が累積し持続時間がリセットされる。
 func (c *char) a1StackGain(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -37,7 +38,7 @@ func (c *char) a1() {
 	c.genShield("Shield of Safe Transport", shieldamt)
 }
 
-// Every 1,000 Max HP Kirara possesses will increase the DMG dealt by Meow-teor Kick by 0.4%, and the DMG dealt by Secret Art: Surprise Dispatch by 0.3%.
+// キララのHP上限1,000ごとに緋球玄縄のダメージが0.4%増加し、秘技・緋球天眼通のダメージが0.3%増加する。
 func (c *char) a4() {
 	mSkill := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{

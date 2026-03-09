@@ -31,7 +31,7 @@ func TestFrozenSuperconduct(t *testing.T) {
 		t.FailNow()
 	}
 
-	// trigger a freeze
+	// 凍結を発生させる
 	c.QueueAttackEvent(makeAOEAttack(attributes.Cryo, 25), 0)
 	c.Tick()
 	c.QueueAttackEvent(makeAOEAttack(attributes.Hydro, 25), 0)

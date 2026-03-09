@@ -31,7 +31,7 @@ const (
 	buffKey = "ironsting"
 )
 
-// Dealing Elemental DMG increases all DMG by 6% for 6s. Max 2 stacks. Can occur once every 1s.
+// 元素ダメージを与えると、全ダメージが6秒間6%増加する。最大2スタック。1秒毎に1回発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -61,7 +61,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			w.stacks++
 			w.buff[attributes.DmgP] = dmgbuff * float64(w.stacks)
 		}
-		// refresh mod
+		// 修飾子を更新
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("ironsting", 360),
 			AffectedStat: attributes.NoStat,

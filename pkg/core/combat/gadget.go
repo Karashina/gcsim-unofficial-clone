@@ -57,9 +57,9 @@ func (h *Handler) RemoveGadget(key targets.TargetKey) {
 }
 
 func (h *Handler) AddGadget(t Gadget) {
-	// check for hard coded limit
+	// ハードコードされた上限をチェック
 	if gadgetLimits[t.GadgetTyp()] > 0 {
-		// should kill oldest one if > limit
+		// 上限を超えた場合、最も古いものを削除する
 		f := math.MaxInt
 		oldest := -1
 		count := 0
@@ -82,7 +82,7 @@ func (h *Handler) AddGadget(t Gadget) {
 }
 
 func (h *Handler) ReplaceGadget(key targets.TargetKey, t Gadget) {
-	// do nothing if not found
+	// 見つからない場合は何もしない
 	for i, v := range h.gadgets {
 		if v != nil && v.Key() == key {
 			h.gadgets[i] = t

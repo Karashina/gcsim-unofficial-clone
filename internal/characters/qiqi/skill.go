@@ -24,14 +24,14 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// +1 to avoid end duration issues
-	// Qiqi E is a deployable after Initial Hit, so it shouldn't be hitlag extendable
+	// 終了時刻の問題を避けるため+1
+	// 七七の元素スキルは初撃後は設置物なので、ヒットラグによる延長はされない
 	c.AddStatus(skillBuffKey, 15*60+1, false)
 	c.skillLastUsed = c.Core.F
 	src := c.Core.F
 
-	// Initial damage
-	// Both healing and damage are snapshot
+	// 初撃ダメージ
+	// 回復とダメージの両方がスナップショット
 	c.Core.Tasks.Add(func() {
 		ai := combat.AttackInfo{
 			ActorIndex:         c.Index,
@@ -49,7 +49,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		}
 		snap := c.Snapshot(&ai)
 
-		// One healing proc happens immediately on cast
+		// 発動時に1回の回復が即座に発生
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,
 			Target:  c.Core.Player.Active(),
@@ -58,29 +58,29 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			Bonus:   snap.Stats[attributes.Heal],
 		})
 
-		// Healing and damage instances are snapshot
-		// Separately cloned snapshots are fed into each function to ensure nothing interferes with each other
+		// 回復とダメージのインスタンスはスナップショット
+		// 別々にクローンされたスナップショットが各関数に渡され、相互干渉を防止
 
-		// Queue up continuous healing instances
-		// No exact frame data on when the healing ticks happen. Just roughly guessing here
-		// Healing ticks happen 3 additional times during the skill - assume ticks are roughly 4.5s apart
-		// so in sec (0 = skill cast), 1, 5.5, 10, 14.5
+		// 継続回復インスタンスをキューに追加
+		// 回復Tickの正確なフレームデータはない。ここでは大まかに推定
+		// 回復Tickはスキル中に追加3回発生 - Tick間隔は約4.5秒と仮定
+		// 秒単位（0 = スキル発動）: 1, 5.5, 10, 14.5
 		c.skillHealSnapshot = snap
 		c.Core.Tasks.Add(c.skillHealTickTask(src), 4.5*60)
 
-		// Queue up damage swipe instances.
-		// No exact frame data on when the damage ticks happen. Just roughly guessing here
-		// Occurs 9 times over the course of the skill
-		// Once shortly after initial cast, then 8 additional procs over the rest of the duration
-		// Each proc occurs in "pairs" of two swipes each spaced around 2.25s apart
-		// The time between each swipe in a pair is about 1s
-		// No exact frame data available plus the skill duration is affected by hitlag
-		// Damage procs occur (in sec 0 = skill cast): 1.5, 3.75, 4.75, 7, 8, 10.25, 11.25, 13.5, 14.5
+		// ダメージスワイプインスタンスをキューに追加。
+		// ダメージTickの正確なフレームデータはない。ここでは大まかに推定
+		// スキル期間中に9回発生
+		// 初回は発動直後、その後残りの持続時間にわたっ8回追加発動
+		// 各発動は約2.25秒間隔の「ペア」で2回ずつ発生
+		// ペア内の各スワイプの間隔は約1秒
+		// 正確なフレームデータがなく、スキル持続時間はヒットラグの影響を受ける
+		// ダメージ発動（秒単位 0 = スキル発動）: 1.5, 3.75, 4.75, 7, 8, 10.25, 11.25, 13.5, 14.5
 
 		aiTick := ai
 		aiTick.Abil = "Herald of Frost: Skill Damage"
 		aiTick.Mult = skillDmgCont[c.TalentLvlSkill()]
-		aiTick.IsDeployable = true // ticks still apply hitlag but is a deployable so doesnt affect qiqi
+		aiTick.IsDeployable = true // ティックはヒットラグを適用するが設置物なので七七に影響しない
 
 		snapTick := c.Snapshot(&aiTick)
 		tickAE := &combat.AttackEvent{
@@ -89,11 +89,11 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			SourceFrame: c.Core.F,
 		}
 
-		// assumes ruin guard hitlag as extra delay (E Tick 1 gets delayed by E Initial hitlag)
-		// can't use char queue for this because hitlag from other sources shouldn't count
+		// 遮光器ヒットラグを追加遅延として仮定（元素スキルTick 1は初撃ヒットラグで遅延）
+		// 他のソースからのヒットラグはカウントしないため、キャラキューは使用不可
 		c.Core.Tasks.Add(c.skillDmgTickTask(src, tickAE, 60), 57+7)
 
-		// Apply damage needs to take place after above takes place to ensure stats are handled correctly
+		// ステータスが正しく処理されるよう、ダメージ適用は上記の後に実行する必要がある
 		c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 2.5), 0)
 	}, skillHitmark)
 
@@ -102,28 +102,28 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionJump], // earliest cancel is before skillHitmark
+		CanQueueAfter:   skillFrames[action.ActionJump], // 最速キャンセルはスキルヒットマークより前
 		State:           action.SkillState,
 	}, nil
 }
 
-// Handles skill damage swipe instances
-// Also handles C1:
-// When the Herald of Frost hits an opponent marked by a Fortune-Preserving Talisman, Qiqi regenerates 2 Energy.
+// 元素スキルのダメージスワイプインスタンスを処理
+// 1命ノ星座も処理:
+// 寒病鬼差が寿命の箓が付与された敵に命中すると、七七は元素エネルギーを2回復する。
 func (c *char) skillDmgTickTask(src int, ae *combat.AttackEvent, lastTickDuration int) func() {
 	return func() {
 		if !c.StatusIsActive(skillBuffKey) {
 			return
 		}
 
-		// TODO: Not sure how this interacts with sac sword... Treat it as only one instance can be up at a time for now
+		// TODO: 祭礼の剣との相互作用が不明...一度に1つのインスタンスのみとして扱う
 		if c.skillLastUsed > src {
 			return
 		}
 
-		// Clones initial snapshot
-		tick := *ae // deference the pointer here
-		// pattern shouldn't snapshot on attack event creation because the skill follows the player
+		// 初期スナップショットを複製
+		tick := *ae // ポインタを参照解除
+		// スキルがプレイヤーに追従するため、AttackEvent生成時にスナップショットすべきではない
 		tick.Pattern = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 2.5)
 
 		if c.Base.Cons >= 1 {
@@ -140,14 +140,14 @@ func (c *char) skillDmgTickTask(src int, ae *combat.AttackEvent, lastTickDuratio
 	}
 }
 
-// Handles skill auto healing ticks
+// 元素スキルの自動回復Tickを処理
 func (c *char) skillHealTickTask(src int) func() {
 	return func() {
 		if !c.StatusIsActive(skillBuffKey) {
 			return
 		}
 
-		// TODO: Not sure how this interacts with sac sword... Treat it as only one instance can be up at a time for now
+		// TODO: 祭礼の剣との相互作用が不明...一度に1つのインスタンスのみとして扱う
 		if c.skillLastUsed > src {
 			return
 		}
@@ -160,7 +160,7 @@ func (c *char) skillHealTickTask(src int) func() {
 			Bonus:   c.skillHealSnapshot.Stats[attributes.Heal],
 		})
 
-		// Queue next instance
+		// 次のインスタンスをキューに追加
 		c.Core.Tasks.Add(c.skillHealTickTask(src), 4.5*60)
 	}
 }

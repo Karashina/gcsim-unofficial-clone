@@ -20,16 +20,16 @@ type char struct {
 	// dolls
 	skillSearchAoE   float64
 	skillDoll        *ticker // 1st doll
-	rockDoll         *ticker // 2nd doll from c1 / construct
+	rockDoll         *ticker // 1凸の2体目の人形 / 構造物
 	constructChecker *ticker
 
-	// a1 tracking
+	// 固有天賦1の追跡
 	a1Triggered   bool
 	a1AttackCount int
 
 	a4Buff []float64
 
-	// cons
+	// 命ノ星座
 	c1Active bool
 	kinus    []*ticker
 	c2Ticker *ticker
@@ -62,7 +62,7 @@ func (c *char) Init() error {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if a1 window is active is on-field
+	// 固有天賦1のウィンドウがアクティブかつフィールド上かチェック
 	if a == action.ActionSkill && c.StatusIsActive(a1WindowKey) {
 		return true, action.NoFailure
 	}

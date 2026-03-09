@@ -17,10 +17,10 @@ func init() {
 func (c *char) Init() error {
 	c.c6StackCounts = [4]int{0, 0, 0, 0}
 
-	// setup overcharged ball
+	// 過充填弾のセットアップ
 	c.overchargedBallEventSub()
 
-	// make sure to use the same key everywhere so that these passives don't stack
+	// 同じキーを全箇所で使用してこれらのパッシブが重複しないようにする
 	c.Core.Player.AddStamPercentMod("utility-dash", -1, func(a action.Action) (float64, bool) {
 		if a == action.ActionDash && c.CurrentHPRatio() > 0 {
 			return -0.2, false
@@ -28,7 +28,7 @@ func (c *char) Init() error {
 		return 0, false
 	})
 
-	// start subscribing for a1/c1
+	// 固有天賦1/1凸のイベント購読を開始
 	c.a1()
 	c.c1()
 	return nil

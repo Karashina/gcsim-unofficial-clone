@@ -45,7 +45,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 2.6)
 	c.QueueCharTask(func() {
 		var c6cb combat.AttackCBFunc
-		// TODO: Check if DMG bonus still applies if c6 runs out between start of CA and the hit
+		// TODO: 重撃開始からヒットまでの間に6凸が切れた場合、ダメージボーナスが適用されるか要確認
 		if c.Base.Cons >= 6 && c.StatusIsActive(c6Key) {
 			ai.FlatDmg = c.c6BonusDMG()
 			c6cb = c.c6cb
@@ -70,7 +70,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		}
 	}
 
-	// +1 so that c6 evaluates DMG bonus/Heal status correctly
+	// +1してc6のダメージボーナス/回復ステータスが正しく評価されるようにする
 	c.QueueCharTask(arkheChangeFunc, chargeHitmark-windup+1)
 
 	return action.Info{

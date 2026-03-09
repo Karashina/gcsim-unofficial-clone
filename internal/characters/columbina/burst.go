@@ -25,7 +25,7 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// Initial burst damage (AoE Hydro DMG)
+	// 初期爆発ダメージ（AoE水元素ダメージ）
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Moonlit Melancholy (Q)",
@@ -41,19 +41,19 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 8)
 	c.Core.QueueAttack(ai, ap, burstHitmark, burstHitmark)
 
-	// Activate Lunar Domain
+	// Lunar Domainを有効化
 	c.AddStatus(lunarDomainKey, lunarDomainDur, true)
 	c.lunarDomainSrc = c.Core.F
 	c.lunarDomainActive = true
 
-	// Apply Lunar Domain buff to all party members
+	// 全パーティメンバーにLunar Domainバフを適用
 	c.applyLunarDomainBuff()
 
 	c.Core.Log.NewEvent("Lunar Domain activated", glog.LogCharacterEvent, c.Index).
 		Write("duration", lunarDomainDur).
 		Write("bonus", burstBonus[c.TalentLvlBurst()])
 
-	// Schedule cleanup
+	// クリーンアップをスケジュール
 	c.Core.Tasks.Add(func() {
 		if c.lunarDomainSrc != c.Core.F-lunarDomainDur {
 			return
@@ -61,7 +61,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.lunarDomainActive = false
 	}, lunarDomainDur)
 
-	// Energy and cooldown
+	// エネルギーとクールダウン
 	c.ConsumeEnergy(3)
 	c.SetCDWithDelay(action.ActionBurst, 15*60, 1)
 
@@ -73,7 +73,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// applyLunarDomainBuff applies Lunar Reaction DMG Bonus to all party members
+// applyLunarDomainBuffは全パーティメンバーにLunar反応ダメージボーナスを適用
 func (c *char) applyLunarDomainBuff() {
 	if c.Base.Ascension >= 4 {
 		for _, char := range c.Core.Player.Chars() {
@@ -85,7 +85,7 @@ func (c *char) applyLunarDomainBuff() {
 	dur := lunarDomainDur
 
 	for _, char := range c.Core.Player.Chars() {
-		// Add Lunar-Charged reaction bonus
+		// Lunar-Charged反応ボーナスを追加
 		char.AddLCReactBonusMod(character.LCReactBonusMod{
 			Base: modifier.NewBaseWithHitlag(lunarDomainModKey+"-lc", dur),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
@@ -93,7 +93,7 @@ func (c *char) applyLunarDomainBuff() {
 			},
 		})
 
-		// Add Lunar-Bloom reaction bonus
+		// Lunar-Bloom反応ボーナスを追加
 		char.AddLBReactBonusMod(character.LBReactBonusMod{
 			Base: modifier.NewBaseWithHitlag(lunarDomainModKey+"-lb", dur),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
@@ -101,7 +101,7 @@ func (c *char) applyLunarDomainBuff() {
 			},
 		})
 
-		// Add Lunar-Crystallize reaction bonus
+		// Lunar-Crystallize反応ボーナスを追加
 		char.AddLCrsReactBonusMod(character.LCrsReactBonusMod{
 			Base: modifier.NewBaseWithHitlag(lunarDomainModKey+"-lcrs", dur),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {

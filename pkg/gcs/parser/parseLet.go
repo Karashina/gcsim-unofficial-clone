@@ -6,13 +6,13 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/gcs/ast"
 )
 
-// expecting let ident = expr;
+// let ident = expr; の形式を期待
 func (p *Parser) parseLet() (ast.Stmt, error) {
 	n := p.next()
 
 	ident, err := p.consume(ast.ItemIdentifier)
 	if err != nil {
-		// next token not an identifier
+		// 次のトークンが識別子でない
 		return nil, fmt.Errorf("ln%v: expecting identifier after let, got %v", ident.Line, ident.Val)
 	}
 
@@ -21,7 +21,7 @@ func (p *Parser) parseLet() (ast.Stmt, error) {
 		Ident: ident,
 	}
 
-	// optional typing info; if not present assume number
+	// オプションの型情報; 存在しない場合は数値型と仮定
 	if l := p.peek(); l.Typ != ast.ItemAssign {
 		stmt.Type, err = p.parseTyping()
 		if err != nil {
@@ -34,7 +34,7 @@ func (p *Parser) parseLet() (ast.Stmt, error) {
 
 	a, err := p.consume(ast.ItemAssign)
 	if err != nil {
-		// next token not and identifier
+		// 次のトークンが識別子でない
 		return nil, fmt.Errorf("ln%v: expecting = after identifier in let statement, got %v", a.Line, a.Val)
 	}
 

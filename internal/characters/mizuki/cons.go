@@ -28,10 +28,10 @@ const (
 	c6CD                = 1.0
 )
 
-// When Yumemizuki Mizuki is in the Dreamdrifter state, she will continuously apply the "Twenty-Three Nights' Awaiting"
-// effect to nearby opponents for 3s every 3.5s. When an opponent is affected by Anemo DMG-triggered Swirl reactions
-// while the aforementioned effect is active, the effect will be canceled and this Swirl instance has its DMG against
-// this opponent increased by 1100% of Mizuki's Elemental Mastery.
+// 夢見月瑞希がDreamdrifter状態中、3.5秒ごとに周囲の敵に3秒間「二十三夜の待望」効果を継続的に付与する。
+// 前述の効果がアクティブな間に風元素ダメージによる拡散反応を受けた敵は、
+// その効果がキャンセルされ、この拡散のその敵に対するダメージが
+// 瑞希の元素熟知の1100%分増加する。
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
@@ -44,12 +44,12 @@ func (c *char) c1() {
 			return false
 		}
 
-		// Check if enemy has the debuff
+		// 敵がデバフを持っているか確認
 		if !e.StatusIsActive(c1Key) {
 			return false
 		}
 
-		// Only on swirls. The swirl source does not matter, it can be either mizuki or another anemo char.
+		// 拡散のみ。拡散の発生源は問わず、瑞希でも他の風元素キャラでもよい。
 		switch atk.Info.AttackTag {
 		case attacks.AttackTagSwirlCryo:
 		case attacks.AttackTagSwirlElectro:
@@ -59,7 +59,7 @@ func (c *char) c1() {
 			return false
 		}
 
-		// do not proc on 0 DMG swirls (e.g. hydro AOE swirls or swirl ICD)
+		// 0ダメージの拡散では発動しない（例：水元素範囲拡散や拡散ICD）
 		if atk.Info.FlatDmg == 0 {
 			return false
 		}
@@ -74,7 +74,7 @@ func (c *char) c1() {
 		atk.Info.FlatDmg += additionalDmg
 		atk.Info.Abil += " (Mizuki C1)"
 
-		// Cancel the effect
+		// 効果をキャンセル
 		e.DeleteStatus(c1Key)
 
 		return false
@@ -94,7 +94,7 @@ func (c *char) c1Task(src, hitmark int) {
 		area := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, c1Range)
 		for _, target := range c.Core.Combat.EnemiesWithinArea(area, nil) {
 			if e, ok := target.(*enemy.Enemy); ok {
-				// is it even possible to verify if it is affected by hitlag?
+				// ヒットラグの影響を受けているか確認する方法はあるのか？
 				e.AddStatus(c1Key, c1Duration, true)
 			}
 		}
@@ -102,8 +102,8 @@ func (c *char) c1Task(src, hitmark int) {
 	}, hitmark)
 }
 
-// When Yumemizuki Mizuki enters the Dreamdrifter state, every Elemental Mastery point she has will increase all nearby
-// party members' Pyro, Hydro, Cryo, and Electro DMG Bonuses by 0.04% until the Dreamdrifter state ends.
+// 夢見月瑞希がDreamdrifter状態に入った時、彼女の元素熟知1ポイントにつき、
+// 周囲のパーティメンバー全員の炎・水・氷・雷元素ダメージボーナスが0.04%増加する（Dreamdrifter状態終了まで）。
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
@@ -116,7 +116,7 @@ func (c *char) c2() {
 		if char.Index == c.Index {
 			continue
 		}
-		// TODO: Test whether this is indeed a static buff once we have C2
+		// TODO: 2凸を入手したら、これが本当に静的バフかテストする
 		char.AddStatMod(character.StatMod{
 			Base: modifier.NewBase(c2Key, -1),
 			Amount: func() ([]float64, bool) {
@@ -145,9 +145,9 @@ func (c *char) c2UpdateTask() {
 	}, c2Interval)
 }
 
-// Picking up a Yumemi Style Special Snack from the Elemental Burst Anraku Secret Spring Therapy will both deal DMG
-// and heal, and will restore 5 Energy to Yumemizuki Mizuki. Energy can be restored this way 4 times per Anraku
-// Secret Spring Therapy duration.
+// 元素爆発「安楽秘湯浴」の夢見式特製おやつを拾うとダメージと回復の両方が発生し、
+// 夢見月瑞希に元素エネルギーを5回復する。この方法でのエネルギー回復は
+// 安楽秘湯浴1回につき最大4回まで。
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
@@ -159,8 +159,8 @@ func (c *char) c4() {
 	}
 }
 
-// While Yumemizuki Mizuki is in the Dreamdrifter state, Swirl DMG dealt by nearby party members can Crit,
-// with CRIT Rate fixed at 30%, and CRIT DMG fixed at 100%.
+// 夢見月瑞希がDreamdrifter状態中、周囲のパーティメンバーの拡散ダメージが会心可能になる。
+// 会心率は30%固定、会心ダメージは100%固定。
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
@@ -174,7 +174,7 @@ func (c *char) c6() {
 
 		ae := args[1].(*combat.AttackEvent)
 
-		// Only on swirls. The swirl source does not matter, it can be either mizuki or other anemo char.
+		// 拡散のみ。拡散の発生源は問わず、瑞希でも他の風元素キャラでもよい。
 		switch ae.Info.AttackTag {
 		case attacks.AttackTagSwirlPyro:
 		case attacks.AttackTagSwirlCryo:
@@ -184,12 +184,12 @@ func (c *char) c6() {
 			return false
 		}
 
-		// The effect is only when mizuki is in dreamDrifter state
+		// 瑞希がDreamdrifter状態中のみ効果あり
 		if !c.StatusIsActive(dreamDrifterStateKey) {
 			return false
 		}
 
-		// Crit rate/DMG is fixed to 30% CR and 100% CD
+		// 会心率/ダメージは30% CR、100% CDに固定
 		ae.Snapshot.Stats[attributes.CR] = c6CR
 		ae.Snapshot.Stats[attributes.CD] = c6CD
 

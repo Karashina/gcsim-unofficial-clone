@@ -28,13 +28,13 @@ func init() {
 
 /*
 *
-Provides up to 3 buffs to active characters within the skill's AoE based on the number of Geo characters in
-the party at the time of casting:
-• 1 Geo character: Adds "Standing Firm" - DEF Bonus.
-• 2 Geo characters: Adds "Impregnable" - Increased resistance to interruption.
-• 3 Geo characters: Adds "Crunch" - Geo DMG Bonus.
-Gorou can deploy only 1 General's War Banner on the field at any one time. Characters can only benefit from
-1 General's War Banner at a time. When a party member leaves the field, the active buff will last for 2s.
+パーティ内の岩元素キャラクターの数に応じて、スキルAoE内のアクティブキャラクターに
+最大3つのバフを付与（発動時の人数で決定）:
+• 岩元素キャラ1人: 「積石」追加 - 防御力ボーナス。
+• 岩元素キャラ2人: 「集岩」追加 - 中断耐性向上。
+• 岩元素キャラ3人: 「碎岩」追加 - 岩元素ダメージボーナス。
+ゴローは「大将旗」をフィールド上に1つしか配置できない。キャラクターは1つの「大将旗」の恩恵しか受けられない。
+パーティメンバーがフィールドを離れると、アクティブなバフは2秒間持続する。
 *
 */
 func (c *char) Skill(p map[string]int) (action.Info, error) {
@@ -55,30 +55,30 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.eFieldArea = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 2}, 8)
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.eFieldArea.Shape.Pos(), nil, 5), 0, 0, c.particleCB)
 
-		// E
-		// so it looks like gorou fields works much the same was as bennett field
-		// however e field cant be placed if q field still active
+		// 元素スキル
+		// ゴローのフィールドはベネットのフィールドと同様に動作する
+		// ただし元素爆発フィールドがアクティブの場合、元素スキルフィールドは配置できない
 		if c.Core.Status.Duration(generalGloryKey) == 0 {
 			c.eFieldSrc = c.Core.F
-			c.Core.Tasks.Add(c.gorouSkillBuffField(c.Core.F), 17) // 17 so we get one last tick
+			c.Core.Tasks.Add(c.gorouSkillBuffField(c.Core.F), 17) // 17にして最後のTickを取得
 
-			// add a status for general's banner, 10 seconds
+			// 大将旗のステータスを追加、10秒
 			c.Core.Status.Add(generalWarBannerKey, 600)
 		}
 
-		// C6
+		// 6凸
 		if c.Base.Cons == 6 {
 			c.c6()
 		}
 	}, skillHitmark)
 
-	// 10s cooldown
+	// 10秒CD
 	c.SetCDWithDelay(action.ActionSkill, 600, 32)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -94,37 +94,37 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), 2, attributes.Geo, c.ParticleDelay)
 }
 
-// recursive function for queueing up ticks
+// Tickをキューに追加する再帰関数
 func (c *char) gorouSkillBuffField(src int) func() {
 	return func() {
-		// do nothing if this has been overwritten
+		// 上書きされている場合は何もしない
 		if c.eFieldSrc != src {
 			return
 		}
-		// do nothing if both field expired
+		// 両方のフィールドが期限切れなら何もしない
 		eActive := c.Core.Status.Duration(generalWarBannerKey) > 0
 		qActive := c.Core.Status.Duration(generalGloryKey) > 0
 		if !eActive && !qActive {
 			return
 		}
-		// do nothing if only e is up and player is outside of the field area
-		// if q is up then the player is always inside of the field area
+		// 元素スキルのみアクティブでプレイヤーがフィールド範囲外の場合は何もしない
+		// 元素爆発がアクティブならプレイヤーは常にフィールド内
 		if eActive && !qActive && !c.Core.Combat.Player().IsWithinArea(c.eFieldArea) {
 			return
 		}
 
-		// add buff to active char based on number of geo chars
-		// ok to overwrite existing mod
+		// 岩元素キャラ数に応じたバフをアクティブキャラに追加
+		// 既存のモディファイアを上書きして問題ない
 		active := c.Core.Player.ActiveChar()
 		active.AddStatMod(character.StatMod{
-			Base:         modifier.NewBaseWithHitlag(defenseBuffKey, 120), // looks like it lasts 2 seconds
+			Base:         modifier.NewBaseWithHitlag(defenseBuffKey, 120), // 2秒間持続
 			AffectedStat: attributes.NoStat,
 			Amount: func() ([]float64, bool) {
 				return c.gorouBuff, true
 			},
 		})
 
-		// looks like tick every 0.3s
+		// 0.3秒ごとにTick
 		c.Core.Tasks.Add(c.gorouSkillBuffField(src), 18)
 	}
 }

@@ -15,7 +15,7 @@ func init() {
 	core.RegisterWeaponFunc(keys.CoolSteel, NewWeapon)
 }
 
-// Increases DMG against enemies affected by Hydro or Cryo by 12-24%.
+// 水元素か氷元素の影響を受けた敵に対するダメージが12-24%増加。
 type Weapon struct {
 	Index int
 }

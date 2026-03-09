@@ -13,7 +13,7 @@ func TestBurning(t *testing.T) {
 
 	c.Init()
 
-	//TODO: write tests for burning (this is copypasted from quicken for now)
+	//TODO: 燃焼のテストを作成する（現状は激化からコピペ）
 	trg.AttachOrRefill(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Dendro,
@@ -26,7 +26,7 @@ func TestBurning(t *testing.T) {
 			Durability: 25,
 		},
 	})
-	// dendro electro gone; 20 quicken
+	// 草と雷が消滅、激化20が残る
 	if !durApproxEqual(20, trg.Durability[Quicken], 0.00001) {
 		t.Errorf("expecting 20 cryo attached, got %v", trg.Durability[Quicken])
 	}

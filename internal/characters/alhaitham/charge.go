@@ -42,7 +42,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 			combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 2.5),
 			chargeHitmarks[i],
 			chargeHitmarks[i],
-			c.makeA1CB(), // A1 adds a stack before the mirror count for the Projection Attack is determined
+			c.makeA1CB(), // A1は投影攻撃の琢光鏡数が決定される前にスタックを追加する
 			c.projectionAttack,
 		)
 	}

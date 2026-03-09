@@ -54,7 +54,7 @@ func (c *char) Condition(fields []string) (any, error) {
 func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
 	ds := c.Character.Snapshot(ai)
 
-	if c.Character.StatusIsActive(a1Key) { // weapon infusion can't be overriden for navia
+	if c.Character.StatusIsActive(a1Key) { // ナヴィアの武器付与は上書き不可
 		switch ai.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagPlunge:

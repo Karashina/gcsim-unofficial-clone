@@ -30,9 +30,9 @@ const (
 	otherBuffKey = "mountain-bracing-bolt-other"
 )
 
-// Decreases Climbing Stamina Consumption by 15% and increases Elemental Skill DMG by 12%.
-// Also, after other nearby party members use Elemental Skills,
-// the equipping character's Elemental Skill DMG will also increase by 12% for 8s.
+// 登攀スタミナ消費が15%減少し、元素スキルダメージが12%増加する。
+// さらに、周囲の他パーティメンバーが元素スキルを使用した時、
+// 装備キャラクターの元素スキルダメージも8秒間12%増加する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

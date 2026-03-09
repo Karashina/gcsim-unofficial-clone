@@ -41,7 +41,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	w := &Weapon{}
 	r := p.Refine
 
-	// base CR
+	// 基本会心率
 	mCR := make([]float64, attributes.EndStatType)
 	mCR[attributes.CR] = 0.06 + float64(r)*0.02 // r1..r5 -> 8%..16%
 	char.AddStatMod(character.StatMod{
@@ -52,7 +52,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// On skill: grant Secret of Lies (EM buff for 12s)
+	// スキル使用時: Secret of Liesを付与 (元素熟知バフ 12秒)
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false
@@ -76,9 +76,9 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("reliquaryoftruth-skill-%v", char.Base.Key.String()))
 
-	// On Lunar-Bloom: grant Moon of Truth (CRIT DMG buff for 4s)
+	// Lunar-Bloom命中時: Moon of Truthを付与 (会心ダメージバフ 4秒)
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		// args: target, *combat.AttackEvent
+		// 引数: target, *combat.AttackEvent
 		atk, ok := args[1].(*combat.AttackEvent)
 		if !ok {
 			return false

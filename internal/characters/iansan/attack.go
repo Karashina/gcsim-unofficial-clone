@@ -33,12 +33,12 @@ func init() {
 
 	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 34)
 	attackFrames[2][action.ActionAttack] = 49
-	attackFrames[2][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
+	attackFrames[2][action.ActionCharge] = 500 // TODO: このアクションは不正。より良い処理方法が必要
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(fastSkill) {
-		// TODO: or c.Core.Player.Exec(action.ActionCharge, c.Base.Key, nil)
+		// TODO: または c.Core.Player.Exec(action.ActionCharge, c.Base.Key, nil)
 		return c.ChargeAttack(p)
 	}
 

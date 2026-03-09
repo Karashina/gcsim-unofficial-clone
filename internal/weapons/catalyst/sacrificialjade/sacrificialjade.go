@@ -36,8 +36,8 @@ func (w *Weapon) Init() error {
 	return nil
 }
 
-// When not on the field for more than 5s, Max HP will be increased by 32% and Elemental Mastery will be increased by 40.
-// These effects will be canceled after the wielder has been on the field for 10s.
+// フィールドに5秒以上いない時、HP上限が32%増加し、元素熟知が40増加する。
+// これらの効果は装備者がフィールドに10秒以上いた後に解除される。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		refine:   p.Refine,

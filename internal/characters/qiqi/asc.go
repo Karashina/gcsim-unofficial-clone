@@ -7,11 +7,11 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When a character under the effects of Adeptus Art: Herald of Frost triggers an Elemental Reaction,
-// their Incoming Healing Bonus is increased by 20% for 8s.
-// - implements event hook and incoming healing bonus function
-// - TODO: Could possibly change this so the AddIncHealBonus occurs at start, then event subscription occurs upon using Qiqi skill?
-// - TODO: Likely more efficient to not maintain event subscription always, but grouping the two for clarity currently
+// 仙法·寒病鬼差の効果を受けているキャラクターが元素反応をトリガーしたとき、
+// 受ける治療ボーナスが8秒間20%増加する。
+// - イベントフックと受治療ボーナス関数を実装
+// - TODO: AddIncHealBonusを開始時に追加し、七七の元素スキル使用時にイベント購読を行う方法に変更できる可能性あり
+// - TODO: イベント購読を常時維持しない方が効率的だが、現状は明確さのためまとめている
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -22,7 +22,7 @@ func (c *char) a1() {
 		}
 		atk := args[1].(*combat.AttackEvent)
 
-		// Active char is the only one under the effects of Qiqi skill
+		// アクティブキャラが七七の元素スキル効果を受けている唯一のキャラ
 		active := c.Core.Player.ActiveChar()
 		if atk.Info.ActorIndex != active.Index {
 			return false
@@ -43,8 +43,8 @@ func (c *char) a1() {
 	}
 }
 
-// A4 is implemented in burst.go:
-// When Qiqi hits opponents with her Normal and Charged Attacks,
-// she has a 50% chance to apply a Fortune-Preserving Talisman to them for 6s.
-// This effect can only occur once every 30s.
+// 固有天賦4はburst.goに実装:
+// 七七が通常攻撃と重撃で敵に命中したとき、
+// 50%の確率で敵に寿命の箓を付与する（6秒間）。
+// この効果は30秒に1回のみ発動。
 const a4ICDKey = "qiqi-a4-icd"

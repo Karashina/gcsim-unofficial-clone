@@ -66,7 +66,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 					continue
 				}
 
-				// set icd after loop
+				// ループ後にICDを設定
 				if char.StatusIsActive(fmt.Sprintf(icdKey, charEle)) {
 					continue
 				}

@@ -30,33 +30,33 @@ const (
 )
 
 func init() {
-	// Tap E
+	// 元素スキル（単押し）
 	skillPressFrames = make([][]int, 2)
 
-	// outside of Q
+	// 元素爆発外
 	skillPressFrames[0] = frames.InitAbilSlice(74) // Tap E -> Swap
 	skillPressFrames[0][action.ActionAttack] = 70  // Tap E -> N1
 	skillPressFrames[0][action.ActionBurst] = 69   // Tap E -> Q
 	skillPressFrames[0][action.ActionDash] = 31    // Tap E -> D
 	skillPressFrames[0][action.ActionJump] = 31    // Tap E -> J
 
-	// inside of Q
+	// 元素爆発中
 	skillPressFrames[1] = frames.InitAbilSlice(76) // Tap E -> Swap
 	skillPressFrames[1][action.ActionSwap] = 75    // Tap E -> N1
 	skillPressFrames[1][action.ActionDash] = 32    // Tap E -> D
 	skillPressFrames[1][action.ActionJump] = 32    // Tap E -> J
 
-	// Hold E
+	// 元素スキル（長押し）
 	skillHoldFrames = make([][]int, 2)
 
-	// outside of Q
+	// 元素爆発外
 	skillHoldFrames[0] = frames.InitAbilSlice(103) // Hold E -> Q
 	skillHoldFrames[0][action.ActionAttack] = 102  // Hold E -> N1
 	skillHoldFrames[0][action.ActionDash] = 52     // Hold E -> D
 	skillHoldFrames[0][action.ActionJump] = 52     // Hold E -> J
 	skillHoldFrames[0][action.ActionSwap] = 91     // Hold E -> Swap
 
-	// inside of Q
+	// 元素爆発中
 	skillHoldFrames[1] = frames.InitAbilSlice(96) // Hold E -> N1
 	skillHoldFrames[1][action.ActionDash] = 53    // Hold E -> D
 	skillHoldFrames[1][action.ActionJump] = 52    // Hold E -> J
@@ -64,7 +64,7 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// check if Q is up for different E frames
+	// 異なるEフレームのために爆発が有効か確認
 	burstActive := 0
 	if c.StatusIsActive(burstBuffKey) {
 		burstActive = 1
@@ -127,7 +127,7 @@ func (c *char) SkillPress(burstActive int) action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames[burstActive]),
 		AnimationLength: skillPressFrames[burstActive][action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[burstActive][action.ActionDash], // earliest cancel is 1f before skillPressHitmark
+		CanQueueAfter:   skillPressFrames[burstActive][action.ActionDash], // 最速キャンセルはスキル単押しヒットマークの1f前
 		State:           action.SkillState,
 	}
 }
@@ -177,7 +177,7 @@ func (c *char) SkillHold(burstActive int) action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames[burstActive]),
 		AnimationLength: skillHoldFrames[burstActive][action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[burstActive][action.ActionJump], // earliest cancel is 3f before skillHoldHitmark
+		CanQueueAfter:   skillHoldFrames[burstActive][action.ActionJump], // 最速キャンセルはスキル長押しヒットマークの3f前
 		State:           action.SkillState,
 	}
 }
@@ -210,7 +210,7 @@ func (c *char) addSigil(done bool) combat.AttackCBFunc {
 			c.sigils++
 		}
 
-		// add sigil er buff
+		// 印の元素チャージ効率バフを追加
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.ER] = float64(c.sigils) * 0.2
 		c.AddStatMod(character.StatMod{

@@ -25,7 +25,7 @@ var (
 func init() {
 	attackFrames = make([][]int, normalHitNum)
 
-	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 33) // walk
+	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 33) // 歩行
 	attackFrames[0][action.ActionAttack] = 23
 	attackFrames[0][action.ActionCharge] = 22
 	attackFrames[0][action.ActionSkill] = 13
@@ -34,7 +34,7 @@ func init() {
 	attackFrames[0][action.ActionJump] = 13
 	attackFrames[0][action.ActionSwap] = 11
 
-	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 32) // walk
+	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 32) // 歩行
 	attackFrames[1][action.ActionAttack] = 22
 	attackFrames[1][action.ActionCharge] = 24
 	attackFrames[1][action.ActionSkill] = 11
@@ -43,7 +43,7 @@ func init() {
 	attackFrames[1][action.ActionJump] = 10
 	attackFrames[1][action.ActionSwap] = 8
 
-	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 67) // walk
+	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 67) // 歩行
 	attackFrames[2][action.ActionAttack] = 54
 	attackFrames[2][action.ActionCharge] = 52
 	attackFrames[2][action.ActionSkill] = 32
@@ -54,7 +54,7 @@ func init() {
 
 	sharkBiteFrames = make([][]int, 4)
 
-	sharkBiteFrames[0] = frames.InitAbilSlice(215) // swap
+	sharkBiteFrames[0] = frames.InitAbilSlice(215) // キャラ交代
 	sharkBiteFrames[0][action.ActionAttack] = 109
 	sharkBiteFrames[0][action.ActionSkill] = 39
 	sharkBiteFrames[0][action.ActionBurst] = 40
@@ -65,7 +65,7 @@ func init() {
 	sharkBiteFrames[1] = sharkBiteFrames[0]
 	sharkBiteFrames[2] = sharkBiteFrames[0]
 
-	sharkBiteFrames[3] = frames.InitAbilSlice(258) // swap
+	sharkBiteFrames[3] = frames.InitAbilSlice(258) // キャラ交代
 	sharkBiteFrames[3][action.ActionAttack] = 144
 	sharkBiteFrames[3][action.ActionSkill] = 79
 	sharkBiteFrames[3][action.ActionBurst] = 82
@@ -188,7 +188,7 @@ func (c *char) sharkBite(p map[string]int) action.Info {
 	}
 	return action.Info{
 		Frames:          frames.NewAbilFunc(sharkBiteFrames[momentumStacks]),
-		AnimationLength: sharkBiteFrames[momentumStacks][action.WalkState], // shorter animation state so that a single bite doesn't make 3 yelan/xq waves. In game it only does 1.
+		AnimationLength: sharkBiteFrames[momentumStacks][action.WalkState], // 1回の噌みつきで3回のイェラン/行秋波動が発生しないよう短いアニメーション状態にする。ゲーム内で1回のみ
 		CanQueueAfter:   sharkBiteFrames[momentumStacks][minAction],
 		State:           action.NormalAttackState,
 	}

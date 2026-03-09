@@ -16,7 +16,7 @@ func init() {
 	core.RegisterWeaponFunc(keys.LionsRoar, NewWeapon)
 }
 
-// Increases DMG against enemies affected by Hydro or Electro by 20/24/28/32/36%.
+// 水元素か雷元素の影響を受けた敵に対するダメージが20/24/28/32/36%増加。
 type Weapon struct {
 	Index int
 }

@@ -76,7 +76,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 				attackHitboxes[c.NormalCounter][1],
 			)
 		}
-		// multihit on N4 only has hitlag on last hit so no need for char queue here
+		// N4のマルチヒットは最後のヒットのみヒットラグがあるため、char queueは不要
 		c.Core.QueueAttack(ai, ap, attackHitmarks[c.NormalCounter][i], attackHitmarks[c.NormalCounter][i])
 	}
 

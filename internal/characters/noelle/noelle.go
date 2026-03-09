@@ -45,12 +45,12 @@ func (c *char) Init() error {
 	return nil
 }
 
-// Noelle Geo infusion can't be overridden, so it must be a snapshot modification rather than a weapon infuse
+// ノエルの岩元素付与は上書きされないため、武器付与ではなくスナップショット修正で実装
 func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
 	ds := c.Character.Snapshot(ai)
 
 	if c.StatModIsActive(burstBuffKey) {
-		// infusion to attacks only
+		// 攻撃のみに元素付与
 		switch ai.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagPlunge:

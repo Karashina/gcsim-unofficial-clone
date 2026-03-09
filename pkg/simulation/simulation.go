@@ -1,4 +1,4 @@
-// Package simulation provide the functionality required to run one simulation
+// Package simulation は1回のシミュレーションを実行するための機能を提供する
 package simulation
 
 import (
@@ -15,15 +15,15 @@ type Simulation struct {
 	// f    int
 	preActionDelay int
 	C              *core.Core
-	// action list stuff
+	// アクションリスト関連
 	cfg           *info.ActionList
 	queue         []*action.Eval
 	eval          action.Evaluator
 	noMoreActions bool
 	collectors    []stats.Collector
 
-	// track previous action, when it was used at, and the earliest
-	// useable frame for all other chained actions
+	// 前回のアクション、その使用フレーム、および他のチェーンアクションの
+	// 最早使用可能フレームを追跡
 }
 
 /**
@@ -63,7 +63,7 @@ func New(cfg *info.ActionList, eval action.Evaluator, c *core.Core) (*Simulation
 		return nil, err
 	}
 
-	// nightsoul require char stats to be initialized
+	// 夜魂はキャラクターのステータス初期化後に必要
 	setupNightsoulBurst(c)
 
 	for _, collector := range stats.Collectors() {
@@ -78,7 +78,7 @@ func New(cfg *info.ActionList, eval action.Evaluator, c *core.Core) (*Simulation
 		s.collectors = append(s.collectors, stat)
 	}
 
-	// calling just for the debug logging
+	// デバッグログ出力のために呼び出す
 	if s.C.Combat.Debug {
 		s.CharacterDetails()
 	}

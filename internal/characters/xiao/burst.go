@@ -21,23 +21,23 @@ func init() {
 	burstFrames[action.ActionSwap] = 66    // Q -> Swap
 }
 
-// Sets Xiao's burst damage state
+// 魉の元素爆発ダメージ状態を設定
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	var hpICD int
 	hpICD = 0
 
-	// Per previous code, believe that the burst duration starts ticking down from after the animation is done
-	// TODO: No indication of that in library though
+	// 以前のコードによれば、元素爆発の持続時間はアニメーション完了後からカウント開始
+	// TODO: ライブラリにその記載はない
 	c.AddStatus(burstBuffKey, 900+burstStart, true)
 	c.qStarted = c.Core.F
 	c.a1()
 
-	// HP Drain - removes HP every 1 second tick after burst is activated
-	// Per gameplay video, HP ticks start after animation is finished
+	// HPドレイン - 元素爆発発動後、1秒ごとにHPが減少
+	// ゲームプレイ動画によると、HPティックはアニメーション完了後に開始
 	for i := burstStart + 60; i < 900+burstStart; i++ {
 		c.Core.Tasks.Add(func() {
 			if c.StatusIsActive(burstBuffKey) && c.Core.F >= hpICD {
-				// TODO: not sure if this is affected by hitlag
+				// TODO: これがヒットラグの影響を受けるか不明
 				hpICD = c.Core.F + 60
 				c.Core.Player.Drain(info.DrainInfo{
 					ActorIndex: c.Index,
@@ -54,12 +54,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
 
-// Hook to end Xiao's burst prematurely if he leaves the field
+// 魉がフィールドを離れたら元素爆発を早期終了するフック
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
 		c.DeleteStatus(burstBuffKey)

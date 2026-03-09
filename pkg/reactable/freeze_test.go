@@ -24,7 +24,7 @@ func TestFreezePlusCryoHydro(t *testing.T) {
 			Durability: 25,
 		},
 	})
-	// without ticking, we should have 50 frozen here
+	// Tick処理なしの場合、ここで凍結50があるはず
 	if !durApproxEqual(40, trg.Durability[Frozen], 0.00001) {
 		t.Errorf("frozen expected to be 40, got %v", trg.Durability[Frozen])
 		t.FailNow()
@@ -37,7 +37,7 @@ func TestFreezePlusCryoHydro(t *testing.T) {
 		},
 	})
 
-	// should have frozen + cryo here
+	// ここで凍結+氷元素があるはず
 	if !durApproxEqual(20, trg.Durability[Cryo], 0.00001) {
 		t.Errorf("expecting 20 cryo attached, got %v", trg.Durability[Cryo])
 	}
@@ -60,7 +60,7 @@ func TestFreezePlusAddFreeze(t *testing.T) {
 			Durability: 25,
 		},
 	})
-	// without ticking, we should have 50 frozen here
+	// Tick処理なしの場合、ここで凍結50があるはず
 	if !durApproxEqual(40, trg.Durability[Frozen], 0.00001) {
 		t.Errorf("frozen expected to be 40, got %v", trg.Durability[Frozen])
 		t.FailNow()
@@ -69,7 +69,7 @@ func TestFreezePlusAddFreeze(t *testing.T) {
 	trg.AttachOrRefill(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Cryo,
-			Durability: 50, // gives us 40 attached
+			Durability: 50, // 付与後は40になる
 		},
 	})
 	trg.React(&combat.AttackEvent{
@@ -79,7 +79,7 @@ func TestFreezePlusAddFreeze(t *testing.T) {
 		},
 	})
 
-	// should have frozen + cryo here
+	// ここで凍結+氷元素があるはず
 	if !durApproxEqual(80, trg.Durability[Frozen], 0.00001) {
 		t.Errorf("expecting 80 frozen attached, got %v", trg.Durability[Frozen])
 	}

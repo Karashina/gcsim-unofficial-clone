@@ -19,7 +19,7 @@ func init() {
 	burstFrames = frames.InitAbilSlice(114)
 }
 
-// Burst ability implementation
+// 元素爆発の実装
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -44,7 +44,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.c2()
 	c.SetCD(action.ActionBurst, 15*60)
 
-	// resummon E
+	// Eを再召喚
 	c.skillSrc = c.Core.F
 	for i := 0.0; i < skillTicks; i++ {
 		c.Core.Tasks.Add(c.skillTick(c.skillSrc), skillFirstTickDelay+ceil(skillInterval*i))
@@ -56,7 +56,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

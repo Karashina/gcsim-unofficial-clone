@@ -13,7 +13,7 @@ import (
 var burstFrames []int
 var burstTravel = 20
 
-// initial hit
+// 初撃
 const burstHitmark = 76
 const c2Hitmark = 17
 
@@ -46,10 +46,10 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstTravel = travel
 	}
 
-	// apply hydro every 3rd hit
-	// triggered on normal attack or yelan's skill
+	// 水元素を3回ごとに付与
+	// 通常攻撃または夜蘭のスキルで発動
 
-	// Initial hit
+	// 初撃
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{X: -1.5, Y: -1.7}, 6),
@@ -57,12 +57,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstHitmark,
 	)
 
-	//TODO: check if we need to add f to this
+	//TODO: フレーム数の加算が必要か確認
 	c.Core.Tasks.Add(func() {
 		c.AddStatus(burstKey, 15*60, false)
-		c.a4() //TODO: does this call need to be delayed?
+		c.a4() //TODO: この呼び出しは遅延が必要か？
 	}, burstHitmark)
-	if c.Base.Cons >= 6 { // C6 passive, lasts 20 seconds
+	if c.Base.Cons >= 6 { // 6凸パッシブ、20秒間持続
 		c.Core.Status.Add(c6Status, 20*60)
 		c.c6count = 0
 	}
@@ -75,7 +75,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -119,7 +119,7 @@ func (c *char) summonExquisiteThrow() {
 		ai.ICDGroup = attacks.ICDGroupDefault
 		ai.FlatDmg = 14.0 / 100 * hp
 		c.c2icd = c.Core.F + 1.8*60
-		//TODO: frames timing on this?
+		//TODO: このフレームタイミングは？
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHit(

@@ -26,13 +26,13 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Increases Elemental Burst DMG by 12%. When Elemental Burst hits opponents,
-	// there is a 100% chance of summoning a huge onrush of tuna that deals 100%
-	// ATK as AoE DMG. This effect can occur once every 15s.
+	// 元素爆発のダメージが12%増加。元素爆発が敵に命中すると、
+	// 100%の確率で攻撃力の100%分の範囲ダメージを与えるマグロの群れを召喚する。
+	// この効果は15秒に1回発動可能。
 	w := &Weapon{}
 	r := p.Refine
 
-	// perm burst dmg increase
+	// 永続の元素爆発ダメージ増加
 	burstDmgIncrease := .09 + float64(r)*0.03
 	val := make([]float64, attributes.EndStatType)
 	val[attributes.DmgP] = burstDmgIncrease

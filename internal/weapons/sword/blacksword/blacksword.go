@@ -18,8 +18,8 @@ func init() {
 	core.RegisterWeaponFunc(keys.TheBlackSword, NewWeapon)
 }
 
-// Increases DMG dealt by Normal and Charged Attacks by 20%. Additionally,
-// regenerates 60% of ATK as HP when Normal and Charged Attacks score a CRIT Hit. This effect can occur once every 5s.
+// 通常攻撃と重撃のダメージが20%増加する。また、通常攻撃と重撃が
+// 会心時、攻撃力の60%に相当するHPを回復する。この効果は5秒毎に1回のみ発動可能。
 type Weapon struct {
 	Index int
 }
@@ -68,8 +68,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 				Src:     heal * atk.Snapshot.Stats.TotalATK(),
 				Bonus:   char.Stat(attributes.Heal),
 			})
-			// trigger cd
-			char.AddStatus(icdKey, 300, true) // every 5s
+			// クールダウンを発動
+			char.AddStatus(icdKey, 300, true) // 5秒毎
 		}
 		return false
 	}, fmt.Sprintf("black-sword-%v", char.Base.Key.String()))

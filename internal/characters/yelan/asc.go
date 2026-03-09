@@ -7,7 +7,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When the party has 1/2/3/4 Elemental Types, Yelan's Max HP is increased by 6%/12%/18%/30%.
+// パーティの元素タイプが1/2/3/4種類の場合、夜蘭のHP上限が6%/12%/18%/30%上昇する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -33,9 +33,9 @@ func (c *char) a1() {
 	})
 }
 
-// So long as an Exquisite Throw is in play, your own active character deals 1% more DMG.
-// This increases by a further 3.5% DMG every second. The maximum increase to DMG dealt is 50%.
-// The pre-existing effect will be dispelled if Depth-Clarion Dice is recast during its duration.
+// 玉瓒一擲が発動中、自身のフィールド上キャラクターのダメージが1%上昇する。
+// 毎秒さらに3.5%ずつ上昇する。ダメージ上昇の最大値は50%。
+// 持続時間中に深境カードを再発動すると、既存の効果は消去される。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -46,11 +46,11 @@ func (c *char) a4() {
 		this.AddAttackMod(character.AttackMod{
 			Base: modifier.NewBase("yelan-a4", 15*60),
 			Amount: func(_ *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-				// char must be active
+				// キャラクターがフィールド上にいる必要がある
 				if c.Core.Player.Active() != this.Index {
 					return nil, false
 				}
-				// floor time elapsed
+				// 経過時間を切り捨て
 				dmg := float64((c.Core.F-started)/60)*0.035 + 0.01
 				if dmg > 0.5 {
 					dmg = 0.5

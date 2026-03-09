@@ -94,12 +94,12 @@ func (c *char) shootStars(src int, last combat.Enemy, particleCB combat.AttackCB
 			return
 		}
 
-		// find near target
+		// 近くのターゲットを検索
 		enemy := c.Core.Combat.ClosestEnemyWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10), nil)
 		enemyNotFound := enemy == nil
 
 		if last == nil {
-			// if not found
+			// 見つからない場合
 			if enemyNotFound {
 				c.Core.Tasks.Add(c.shootStars(src, nil, particleCB), 0.1*60)
 				return

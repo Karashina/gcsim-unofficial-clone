@@ -11,10 +11,10 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 		return c.Character.Dash(p)
 	}
 
-	// Execute dash CD logic
+	// ダッシュクールダウンのロジックを実行
 	c.ApplyDashCD()
 
-	// consume stamina at end of the dash
+	// ダッシュ終了時にスタミナを消費
 	c.Core.Tasks.Add(func() {
 		req := c.Core.Player.AbilStamCost(c.Index, action.ActionDash, p)
 		c.Core.Player.UseStam(req, action.ActionDash)

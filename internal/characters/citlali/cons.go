@@ -16,9 +16,9 @@ const (
 	c4SkullIcd  = "c4-skull-icd"
 )
 
-// Additionally, when Citlali is using her leap, or is Aiming or using her
-// Charged Attack in mid-air, her Phlogiston consumption is decreased by 45%.
-// NOT IMPLEMENTED
+// また、シトラリが飛び上がった際、またはエイムモード中や空中で重撃を使用する際、
+// フロギストン消費が45%減少する。
+// 未実装
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
@@ -87,7 +87,7 @@ func (c *char) c2() {
 			Base:         modifier.NewBase("citlali-c2-em", -1),
 			AffectedStat: attributes.EM,
 			Amount: func() ([]float64, bool) {
-				// character should be followed by Itzpapa, i.e. the character is active
+				// キャラクターはItzpapaに追従される必要がある（＝キャラクターがアクティブであること）
 				if c.Core.Player.Active() != this.Index {
 					return nil, false
 				}
@@ -123,7 +123,7 @@ func (c *char) c4SkullCB(a combat.AttackCB) {
 		Durability:     25,
 		FlatDmg:        18 * c.Stat(attributes.EM),
 	}
-	// TODO: the actual hitmark
+	// TODO: 実際のヒットマーク
 	hitmark := spiritVesselSkullHitmark - iceStormHitmark
 	c.Core.QueueAttack(
 		aiSpiritVesselSkull,

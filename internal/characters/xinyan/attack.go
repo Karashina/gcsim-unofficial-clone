@@ -80,4 +80,4 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// TODO: charged attack
+// TODO: 重撃未実装

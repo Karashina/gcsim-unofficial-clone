@@ -26,11 +26,11 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Elemental Skill and Elemental Burst DMG increased by 12%. After a Normal Attack, Charged Attack,
-	// Elemental Skill or Elemental Burst hits an opponent, 1 stack of Ashen Nightstar will be gained for 12s.
-	// When 1/2/3/4 stacks of Ashen Nightstar are present, ATK is increased by 10/20/30/48%. The stack of Ashen
-	// Nightstar created by the Normal Attack, Charged Attack, Elemental Skill or Elemental Burst will be counted
-	// independently of the others.
+	// 元素スキルと元素爆発のダメージが12%増加。通常攻撃、重撃、
+	// 元素スキル、元素爆発が敵に命中した時、Ashen Nightstarのスタックを1つ獲得する（12秒間）。
+	// Ashen Nightstarが1/2/3/4スタック時、攻撃力が10/20/30/48%増加する。
+	// 通常攻撃、重撃、元素スキル、元素爆発それぞれのスタックは
+	// 独立してカウントされる。
 	w := &Weapon{}
 	r := p.Refine
 

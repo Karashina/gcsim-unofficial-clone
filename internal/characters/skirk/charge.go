@@ -42,7 +42,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		return c.ChargeAttackSkill(p)
 	}
 
-	// If the previous attack is N1 to N4 of skill state, this CA is also in skill state
+	// 直前の攻撃がスキル状態のN1〜N4であれば、この重撃もスキル状態
 	if c.Core.Player.CurrentState() == action.NormalAttackState && c.Core.Player.ActiveChar().NormalCounter > 0 && c.prevNASkillState {
 		return c.ChargeAttackSkill(p)
 	}
@@ -60,7 +60,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	for i, mult := range charge {
 		ai.Mult = mult[c.TalentLvlAttack()]
 		ai.Abil = fmt.Sprintf("Charge %v", i)
-		// TODO: y=1 offset when no target in range. What is the range?
+		// TODO: ターゲットが範囲外の時y=1オフセット。範囲はどのくらい？
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(
@@ -96,7 +96,7 @@ func (c *char) ChargeAttackSkill(p map[string]int) (action.Info, error) {
 	for i, mult := range skillCharge {
 		ai.Mult = mult[c.TalentLvlSkill()]
 		ai.Abil = fmt.Sprintf("Charge (Skill) %v", i)
-		// TODO: y=1 offset when no target in range. What is the range?
+		// TODO: ターゲットが範囲外の時y=1オフセット。範囲はどのくらい？
 		c.Core.QueueAttack(
 			ai,
 			combat.NewCircleHitOnTarget(
@@ -113,7 +113,7 @@ func (c *char) ChargeAttackSkill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(chargeSkillFrames),
 		AnimationLength: chargeSkillFrames[action.InvalidAction],
-		CanQueueAfter:   chargeSkillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   chargeSkillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.ChargeAttackState,
 	}, nil
 }

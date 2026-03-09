@@ -13,7 +13,7 @@ import (
 var burstFrames []int
 
 func init() {
-	burstFrames = frames.InitAbilSlice(65) // walk
+	burstFrames = frames.InitAbilSlice(65) // 歩行
 	burstFrames[action.ActionAttack] = 49
 	burstFrames[action.ActionCharge] = 48
 	burstFrames[action.ActionSkill] = 48
@@ -23,19 +23,19 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// tag a4
-	// first hit at 137, then 113 frames between hits
+	// 固有天賦2のタグ
+	// 最初のヒットは137フレーム、以降113フレーム間隔
 	duration := 360
 	if c.Base.Cons >= 2 {
 		duration = 480
 	}
 
-	// reset location
+	// 位置をリセット
 	player := c.Core.Combat.Player()
 	c.qAbsorb = attributes.NoElement
-	// there's no collision logic for the gadget thrown by Sucrose
-	// from tests in abyss it looks like the gadget lands around 2 abyss tiles away from Sucrose which is about 5m
-	// at that pos there's an offset of Y: -1, which is why it's Y: 4 here
+	// スクロースが投げるガジェットには衝突ロジックがない
+	// 深境螺旋でのテストからガジェットはスクロースから約2タイル（約5m）の距離に着地
+	// その位置ではY: -1のオフセットがあるため、ここではY: 4
 	c.absorbCheckLocation = combat.NewBoxHitOnTarget(player, geometry.Point{Y: 4}, 2.5, 2.5)
 
 	c.Core.Status.Add("sucroseburst", duration)
@@ -52,9 +52,9 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 	ap := combat.NewCircleHitOnTarget(player, geometry.Point{Y: 5}, 8)
 
-	//TODO: does sucrose burst snapshot?
+	//TODO: スクロースの爆発はスナップショットするか？
 	snap := c.Snapshot(&ai)
-	//TODO: does burst absorb snapshot
+	//TODO: 爆発の元素吸収はスナップショットするか？
 	aiAbs := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Forbidden Creation-Isomer 75/Type II (Absorb)",
@@ -83,7 +83,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				aiAbs.Element = c.qAbsorb
 				c.Core.QueueAttackWithSnap(aiAbs, snapAbs, ap, 0)
 			}
-			// check if absorbed
+			// 元素吸収されたかチェック
 		}, i)
 	}
 
@@ -95,7 +95,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -113,7 +113,7 @@ func (c *char) absorbCheck(src, count, maxcount int) func() {
 			}
 			return
 		}
-		// otherwise queue up
+		// それ以外はキューに追加
 		c.Core.Tasks.Add(c.absorbCheck(src, count+1, maxcount), 18)
 	}
 }

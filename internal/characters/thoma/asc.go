@@ -4,9 +4,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
-// When your current active character obtains or refreshes a Blazing Barrier,
-// this character's Shield Strength will increase by 5% for 6s.
-// This effect can be triggered once every 0.3s seconds. Max 5 stacks.
+// 現在のアクティブキャラクターが烈炎の障壁を取得または更新した時、
+// そのキャラクターのシールド強度が6秒間5%上昇する。
+// この効果は0.3秒ごとに1回発動可能。最大5重。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -27,7 +27,7 @@ func (c *char) a1() {
 	}, "thoma-a1-swap")
 }
 
-// DMG dealt by Crimson Ooyoroi's Fiery Collapse is increased by 2.2% of Thoma's Max HP.
+// 真紅の炎槌の炎崩壊によるダメージがトーマのHP上限の2.2%分上昇する。
 func (c *char) a4() float64 {
 	if c.Base.Ascension < 1 {
 		return 0

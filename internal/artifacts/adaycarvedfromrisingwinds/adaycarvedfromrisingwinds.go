@@ -1,6 +1,8 @@
 package adaycarvedfromrisingwinds
 
 import (
+	"fmt"
+
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attacks"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
@@ -26,20 +28,18 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// A Day Carved From Rising Winds
-// 2-set: ATK +18%.
-// 4-set: After a Normal Attack, Charged Attack, Elemental Skill or Elemental Burst
-// hits an opponent, gain the Blessing of Pastoral Winds effect for 6s: ATK is increased by 25%.
-// If the equipping character has completed Witch's Homework, Blessing of Pastoral Winds
-// will be upgraded to Resolve of Pastoral Winds, which also increases the CRIT Rate
-// of the equipping character by an additional 20%.
-// This effect can be triggered even when the character is off-field.
+// 2セット効果: 攻撃力+18%
+// 4セット効果: 通常攻撃・重撃・元素スキル・元素爆発が敵に命中すると、
+// 「牧歌の風の祝福」効果を6秒間獲得し、攻撃力が25%増加する。
+// 装備キャラクターが「魔女の宿題」を完了している場合、「牧歌の風の祝福」は
+// 「牧歌の風の決意」にアップグレードされ、装備キャラクターの会心率がさらに20%増加する。
+// この効果はキャラクターが控えにいる場合でも発動可能。
 
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
 	if count >= 2 {
-		// 2pc: ATK +18%
+		// 2セット: 攻撃力+18%
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.ATKP] = 0.18
 		char.AddStatMod(character.StatMod{
@@ -53,32 +53,33 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 
 	if count >= 4 {
 		const buffKey = "adaycarved-4pc-buff"
-		buffDuration := 360 // 6s
+		buffDuration := 360 // 6秒
 
-		// Subscribe to attack hit events
+		// 攻撃命中イベントを購読
 		c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 			atk := args[1].(*combat.AttackEvent)
 			if atk.Info.ActorIndex != char.Index {
 				return false
 			}
 
-			// Check if it's Normal, Charged, Skill, or Burst attack
+			// 通常攻撃・重撃・スキル（単押し/長押し）・爆発攻撃かチェック
 			if atk.Info.AttackTag != attacks.AttackTagNormal &&
 				atk.Info.AttackTag != attacks.AttackTagExtra &&
 				atk.Info.AttackTag != attacks.AttackTagElementalArt &&
+				atk.Info.AttackTag != attacks.AttackTagElementalArtHold &&
 				atk.Info.AttackTag != attacks.AttackTagElementalBurst {
 				return false
 			}
 
-			// Activate buff
+			// バフを有効化
 			char.AddStatus(buffKey, buffDuration, true)
 
 			c.Log.NewEvent("a day carved from rising winds 4pc triggered", glog.LogArtifactEvent, char.Index)
 
 			return false
-		}, "adaycarved-4pc")
+		}, fmt.Sprintf("adaycarved-4pc-%v", char.Base.Key.String()))
 
-		// ATK bonus from buff
+		// バフによる攻撃力ボーナス
 		atkVal := make([]float64, attributes.EndStatType)
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBase("adaycarved-4pc-atk", -1),
@@ -92,8 +93,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			},
 		})
 
-		// CRIT Rate bonus if Witch's Homework is completed
-		// Witch's Homework is a status that should be set by the simulation or character logic
+		// ヘクセライ（魔女の宿題）属性を持つキャラクターの場合、会心率ボーナスを付与
 		crVal := make([]float64, attributes.EndStatType)
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBase("adaycarved-4pc-cr", -1),
@@ -102,8 +102,13 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 				if !char.StatusIsActive(buffKey) {
 					return nil, false
 				}
-				// Check if Witch's Homework is completed
-				if !char.StatusIsActive("witchs-homework") {
+				// キャラクターがヘクセライ属性を持つかチェック
+				result, err := char.Condition([]string{"hexerei"})
+				if err != nil {
+					return nil, false
+				}
+				isHexerei, ok := result.(bool)
+				if !ok || !isHexerei {
 					return nil, false
 				}
 				crVal[attributes.CR] = 0.20

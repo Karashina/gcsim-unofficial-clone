@@ -41,12 +41,13 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 				return nil, false
 			}
 			active := c.Player.ByIndex(atk.Info.ActorIndex)
+			// タルタリヤの近接攻撃には適用しない
 			if active.Base.Key == keys.Tartaglia &&
 				atk.Info.StrikeType == attacks.StrikeTypeSlash {
 				return nil, false
 			}
 
-			// chasca E/A4 bullets and C2/C4 Aoe don't count
+			// Chasca E/A4の弾丸およびC2/C4のAoEはカウントしない
 			if char.Base.Key == keys.Chasca && slices.Contains(atk.Info.AdditionalTags, attacks.AdditionalTagNightsoul) {
 				return nil, false
 			}

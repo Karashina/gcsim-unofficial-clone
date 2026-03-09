@@ -37,7 +37,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Mult:       guobaTick[c.TalentLvlSkill()],
 	}
 
-	// delay in frames from guoba expiry until the a4 chili pepper is picked up
+	// グゥオパァー消滅から固有天賦4の唐辛子取得までのフレーム遅延
 	a4Delay, ok := p["a4_delay"]
 	if !ok {
 		a4Delay = -1
@@ -46,13 +46,13 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		a4Delay = 10 * 60
 	}
 
-	// guoba spawns at cd frame
-	// lasts 7.3 seconds, shoots every 100 frames
+	// グゥオパァーはCDフレームにスポーン
+	// 7.3秒間持続、100フレームごとに発射
 	c.Core.Tasks.Add(func() {
 		guoba := c.newGuoba(ai)
 		c.AddStatus("xianglingguoba", guoba.Duration, false)
 		c.Core.Combat.AddGadget(guoba)
-		// queue up a4 relative to guoba expiry
+		// グゥオパァー消滅に対する固有天賦4をキューに追加
 		if a4Delay < 0 {
 			return
 		}
@@ -64,7 +64,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

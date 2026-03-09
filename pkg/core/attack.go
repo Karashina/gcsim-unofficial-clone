@@ -18,7 +18,7 @@ func (c *Core) QueueAttackWithSnap(
 		Snapshot:    s,
 		SourceFrame: c.F,
 	}
-	// add callbacks only if not nil
+	// nilでないコールバックのみ追加
 	for _, f := range callbacks {
 		if f != nil {
 			ae.Callbacks = append(ae.Callbacks, f)
@@ -38,21 +38,21 @@ func (c *Core) QueueAttack(
 	dmgDelay int,
 	callbacks ...combat.AttackCBFunc,
 ) {
-	// panic if dmgDelay < snapshotDelay; this should not happen. if it happens then there's something wrong with the
-	// character's code
+	// dmgDelay < snapshotDelay は起きてはならない。発生した場合は
+	// キャラクターコードに問題がある
 	if dmgDelay < snapshotDelay {
 		panic("dmgDelay cannot be less than snapshotDelay")
 	}
 	if dmgDelay < 0 {
 		panic("dmgDelay cannot be less than 0")
 	}
-	// create attackevent
+	// AttackEvent を生成
 	ae := combat.AttackEvent{
 		Info:        a,
 		Pattern:     p,
 		SourceFrame: c.F,
 	}
-	// add callbacks only if not nil
+	// nilでないコールバックのみ追加
 	for _, f := range callbacks {
 		if f != nil {
 			ae.Callbacks = append(ae.Callbacks, f)
@@ -61,14 +61,13 @@ func (c *Core) QueueAttack(
 
 	switch {
 	case snapshotDelay < 0:
-		// snapshotDelay < 0 means we don't need a snapshot; optimization for reaction
-		// damage essentially
+		// snapshotDelay < 0 はスナップショット不要を意味する。元素反応ダメージの最適化
 		c.queueDmg(&ae, dmgDelay)
 	case snapshotDelay == 0:
 		c.generateSnapshot(&ae)
 		c.queueDmg(&ae, dmgDelay)
 	default:
-		// use add task ctrl to queue; no need to track here
+		// タスクキューに追加。ここでの追跡は不要
 		c.Tasks.Add(func() {
 			c.generateSnapshot(&ae)
 			c.queueDmg(&ae, dmgDelay-snapshotDelay)
@@ -76,10 +75,10 @@ func (c *Core) QueueAttack(
 	}
 }
 
-// This code here should probably be handled in player not core
-// since it's a convenience function wrapped around queuedamage
+// このコードはcoreではなくplayerで処理すべきかもしれない
+// queuedamage のラッパー的な便利関数であるため
 //
-// does it make sense for core to have any knowledge of teams? probably not??
+// coreがチーム情報を持つのは適切か？おそらく不適切
 func (c *Core) generateSnapshot(a *combat.AttackEvent) {
 	a.Snapshot = c.Player.ByIndex(a.Info.ActorIndex).Snapshot(&a.Info)
 }

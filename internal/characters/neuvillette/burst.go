@@ -66,7 +66,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}
 
 		c.QueueCharTask(func() {
-			// spawn droplets for current tick using random point from player pos with offset
+			// プレイヤー位置からオフセット付きランダムポイントで現在のティックの水の雫を生成
 			for j := 0; j < dropletCount; j++ {
 				sourcewaterdroplet.New(
 					c.Core,
@@ -85,13 +85,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			}
 			c.Core.Combat.Log.NewEvent(fmt.Sprint("Burst: Spawned ", dropletCount, " droplets"), glog.LogCharacterEvent, c.Index)
 
-			// determine attack pattern
-			// initial tick
+			// 攻撃パターンを決定
+			// 初回ティック
 			ap := combat.NewCircleHitOnTarget(player, geometry.Point{Y: 1}, 8)
-			// 2nd and 3rd tick
+			// 2回目と3回目のティック
 			if i > 0 {
-				// determine attack pattern pos
-				// default assumption: no target in range -> ticks should spawn at specific offset from player
+				// 攻撃パターンの位置を決定
+				// デフォルト仮定: 射程内にターゲットなし → プレイヤーからの特定オフセットにティックを生成
 				apPos := geometry.CalcOffsetPoint(
 					player.Pos(),
 					geometry.Point{
@@ -101,12 +101,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 					player.Direction(),
 				)
 
-				// check if target is within range
+				// ターゲットが射程内か確認
 				target := c.Core.Combat.PrimaryTarget()
 				if target.IsWithinArea(combat.NewCircleHitOnTarget(player, nil, 10)) {
-					// target in range -> adjust pos
-					// pos is a point in random range from target pos + offset
-					// TODO: offset is not accurate because currently target is always looking in default direction
+					// ターゲットが射程内 → 位置を調整
+					// 位置はターゲット位置+オフセットからのランダム範囲内の点
+					// TODO: 現在ターゲットは常にデフォルト方向を向いているためオフセットが不正確
 					apPos = geometry.CalcRandomPointFromCenter(
 						geometry.CalcOffsetPoint(
 							target.Pos(),
@@ -118,7 +118,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 						c.Core.Rand,
 					)
 				}
-				// create attack pattern for tick after determining pos
+				// 位置決定後にティック用の攻撃パターンを生成
 				ap = combat.NewCircleHitOnTarget(apPos, nil, 5)
 			}
 
@@ -137,7 +137,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

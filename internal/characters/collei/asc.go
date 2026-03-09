@@ -16,11 +16,11 @@ const (
 	a4Key            = "collei-a4-modcheck"
 )
 
-// If one of your party members has triggered Burning, Quicken, Aggravate, Spread, Bloom, Hyperbloom, or Burgeon reactions
-// before the Floral Ring returns, it will grant the character the Sprout effect upon return, which will continuously deal
-// Dendro DMG equivalent to 40% of Collei's ATK to nearby opponents for 3s.
-// If another Sprout effect is triggered during its initial duration, the initial effect will be removed.
-// DMG dealt by Sprout is considered Elemental Skill DMG.
+// パーティメンバーがフローラルリングの帰還前に燃焼、激化、超激化、草激化、開花、超開花、烈開花の
+// 元素反応を発動した場合、帰還時にキャラクターに「新芽」効果を付与し、3秒間
+// コレイの攻撃力40%に相当する草元素ダメージを周囲の敵に継続的に与える。
+// 初期効果の持続中に別の「新芽」効果が発動された場合、初期効果は除去される。
+// 「新芽」によるダメージは元素スキルダメージとみなされる。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -68,9 +68,9 @@ func (c *char) a1AttackInfo() combat.AttackInfo {
 	}
 }
 
-// When a character within the Cuilein-Anbar Zone triggers Burning, Quicken, Aggravate, Spread, Bloom, Hyperbloom, or Burgeon reactions,
-// the Zone's duration will be increased by 1s.
-// A single Trump-Card Kitty can be extended this way by up to 3s.
+// クイラーアンバーゾーン内のキャラクターが燃焼、激化、超激化、草激化、開花、超開花、烈開花の元素反応を発動した場合、
+// ゾーンの持続時間が1秒延長される。
+// 1回の切り札キティで最大3秒まで延長可能。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

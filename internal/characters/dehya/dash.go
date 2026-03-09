@@ -5,23 +5,23 @@ import (
 )
 
 const (
-	burstDashDuration      = 7 // estimation for min dash duration if canceled by jump inside burst
+	burstDashDuration      = 7 // 元素爆発中にジャンプキャンセルした場合の最小ダッシュ時間の推定値
 	jumpKickWindowKey      = "dehya-jump-kick-window"
-	jumpKickWindowDuration = 17 // estimation
+	jumpKickWindowDuration = 17 // 推定値
 )
 
 func (c *char) Dash(p map[string]int) (action.Info, error) {
-	// determine frames
+	// フレーム数を決定
 	length := c.DashLength()
 	canQueueAfter := length
-	// if burst is active then need to adjust frames
+	// 元素爆発がアクティブならフレーム数を調整する必要がある
 	if c.StatusIsActive(burstKey) {
 		canQueueAfter = burstDashDuration
-		// add status for window where a jump will make dehya transition into a kick
+		// ジャンプでディヘヤがキックに遷移するウィンドウのステータスを追加
 		c.AddStatus(jumpKickWindowKey, jumpKickWindowDuration, false)
 	}
 
-	// call default implementation to handle stamina
+	// スタミナ処理のデフォルト実装を呼び出す
 	c.Character.Dash(p)
 
 	return action.Info{

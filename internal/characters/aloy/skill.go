@@ -15,7 +15,7 @@ import (
 
 var skillFrames []int
 
-const skillRelease = 20 // release frame for the Bomb, travel comes on top, bomb_delay comes on top afterwards
+const skillRelease = 20 // ボムのリリースフレーム、travelが上乗せ、その後bomb_delayが上乗せ
 
 func init() {
 	skillFrames = frames.InitAbilSlice(49) // E -> Dash
@@ -30,17 +30,17 @@ const (
 	rushingIceDuration = 600
 )
 
-// Skill - Handles main damage, bomblet, and coil effects
+// 元素スキル - メインダメージ、ボムレット、コイル効果を処理
 //
-// Has 3 parameters:
+// 3つのパラメータを持つ：
 //
-// - "travel" = Delay in frames until main damage, bomblets spawn on main damage
+// - "travel" = メインダメージまでのフレーム遅延、ボムレットはメインダメージ時に生成
 //
-// - "bomblets" = Number of bomblets that hit
+// - "bomblets" = ヒットするボムレットの数
 //
-// - "bomb_delay" = Delay in frames before bomblets go off and coil stacks get added
+// - "bomb_delay" = ボムレットが爆発しコイルスタックが追加されるまでのフレーム遅延
 //
-// - too many potential bomblet hit variations to keep syntax short, so we simplify how they can be handled here
+// - ボムレットヒットのバリエーションが多すぎるため構文を短くできない。ここで簡略化して処理
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	travel, ok := p["travel"]
 	if !ok {
@@ -68,7 +68,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Durability: 25,
 		Mult:       skillMain[c.TalentLvlSkill()],
 	}
-	// TODO: accurate snapshot timing, assumes snapshot on release and not on hit/bomb creation
+	// TODO: 正確なスナップショットタイミング、ヒット/ボム生成時ではなく発動時にスナップショットと仮定
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 4),
@@ -77,7 +77,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.makeParticleCB(),
 	)
 
-	// Bomblets snapshot on cast
+	// ボムレットは発動時にスナップショット
 	ai = combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Chillwater Bomblets",
@@ -92,7 +92,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		IsDeployable:       true,
 	}
 
-	// Queue up bomblets
+	// ボムレットをキューに追加
 	for i := 0; i < bomblets; i++ {
 		c.Core.QueueAttack(
 			ai,
@@ -127,7 +127,7 @@ func (c *char) makeParticleCB() combat.AttackCBFunc {
 	}
 }
 
-// Handles coil stacking and associated effects, including triggering rushing ice
+// コイルスタックと関連効果（ラッシュアイスのトリガーを含む）を処理
 func (c *char) coilStacks(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -135,7 +135,7 @@ func (c *char) coilStacks(a combat.AttackCB) {
 	if c.coilICDExpiry > c.Core.F {
 		return
 	}
-	// Can't gain coil stacks while in rushing ice
+	// ラッシュアイス中はコイルスタックを獲得できない
 	if c.StatusIsActive(rushingIceKey) {
 		return
 	}
@@ -153,12 +153,12 @@ func (c *char) coilStacks(a combat.AttackCB) {
 	}
 }
 
-// Handles rushing ice state
+// ラッシュアイス状態を処理
 func (c *char) rushingIce() {
 	c.AddStatus(rushingIceKey, rushingIceDuration, true)
 	c.Core.Player.AddWeaponInfuse(c.Index, "aloy-rushing-ice", attributes.Cryo, 600, true, attacks.AttackTagNormal)
 
-	// Rushing ice NA bonus
+	// ラッシュアイス通常攻撃ボーナス
 	val := make([]float64, attributes.EndStatType)
 	val[attributes.DmgP] = skillRushingIceNABonus[c.TalentLvlSkill()]
 	c.AddAttackMod(character.AttackMod{
@@ -174,8 +174,8 @@ func (c *char) rushingIce() {
 	c.a4()
 }
 
-// Add coil mod at the beginning of the sim
-// Can't be made dynamic easily as coils last until 30s after when Aloy swaps off field
+// シミュレーション開始時にコイルModを追加
+// アーロイのフィールド離脱後30秒までコイルが持続するため、動的にするのは容易ではない
 func (c *char) coilMod() {
 	val := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{
@@ -190,7 +190,7 @@ func (c *char) coilMod() {
 	})
 }
 
-// Exit Field Hook to start timer to clear coil stacks
+// コイルスタックをクリアするタイマーを開始するフィールド離脱フック
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		prev := args[0].(int)

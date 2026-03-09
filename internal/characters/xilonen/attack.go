@@ -43,7 +43,7 @@ func init() {
 
 	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2][0], 70)
 	attackFrames[2][action.ActionAttack] = 57
-	attackFrames[2][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
+	attackFrames[2][action.ActionCharge] = 500 //TODO: このアクションは不正；より良い処理方法が必要
 
 	rollerFrames = make([][]int, rollerHitNum)
 
@@ -64,7 +64,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	if c.canUseNightsoul() {
 		return c.nightsoulAttack(), nil
 	} else if c.nightsoulState.HasBlessing() {
-		// OnRemoved is sometimes called after the next action is executed. so we need to check/exit nightsoul here too
+		// OnRemovedは次のアクション実行後に呼ばれることがある。そのためここでもナイトソウルを終了する必要がある
 		c.exitNightsoul()
 	}
 

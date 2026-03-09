@@ -65,7 +65,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		StrikeType: attacks.StrikeTypeDefault,
 		Element:    attributes.Physical,
 	}
-	ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 0.1, 5) // TODO: approximate hitbox
+	ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 0.1, 5) // TODO: 近似ヒットボックス
 
 	c.Core.QueueAttack(ai, ap, detectHitmark+hold, detectHitmark+hold, c.leapBack())
 
@@ -83,7 +83,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			return skillFrames[next] + hold
 		},
 		AnimationLength: skillHitFrames[action.InvalidAction] + hold,
-		CanQueueAfter:   detectHitmark + hold, // earliest cancel
+		CanQueueAfter:   detectHitmark + hold, // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -107,7 +107,7 @@ func (c *char) leapBack() func(combat.AttackCB) {
 		done = true
 		c.AddStatus(leapBackStatus, leapBackDuration, true)
 
-		// generate the shield with element absorb
+		// 元素吸収付きシールドを生成
 		c.absorbedElement = c.absorbA1()
 		c.Core.Player.Tasks.Add(func() { c.genShield(c.absorbedElement) }, hitGenerateShield)
 	}

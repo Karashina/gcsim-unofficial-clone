@@ -18,30 +18,30 @@ func (r *Reactable) TryAddEC(a *combat.AttackEvent) bool {
 	if a.Info.Durability < ZeroDur {
 		return false
 	}
-	// if there's still frozen left don't try to ec
-	// game actively rejects ec reaction if frozen is present
+	// 凍結がまだ残っている場合、感電反応を試みない
+	// ゲームは凍結が存在する場合感電反応を積極的に拒否する
 	if r.Durability[Frozen] > ZeroDur {
 		return false
 	}
 
-	// adding ec or hydro just adds to durability
+	// 感電または水の追加は元素量を増加させるだけ
 	switch a.Info.Element {
 	case attributes.Hydro:
-		// if there's no existing hydro or electro then do nothing
+		// 既存の水または雷がなければ何もしない
 		if r.Durability[Electro] < ZeroDur {
 			return false
 		}
-		// add to hydro durability (can't add if the atk already reacted)
-		//TODO: this shouldn't happen here
+		// 水元素量に追加（攻撃が既に反応していたら追加できない）
+		//TODO: ここで発生すべきではない
 		if !a.Reacted {
 			r.attachOrRefillNormalEle(Hydro, a.Info.Durability)
 		}
 	case attributes.Electro:
-		// if there's no existing hydro or electro then do nothing
+		// 既存の水または雷がなければ何もしない
 		if r.Durability[Hydro] < ZeroDur {
 			return false
 		}
-		// add to electro durability (can't add if the atk already reacted)
+		// 雷元素量に追加（攻撃が既に反応していたら追加できない）
 		if !a.Reacted {
 			r.attachOrRefillNormalEle(Electro, a.Info.Durability)
 		}
@@ -52,8 +52,8 @@ func (r *Reactable) TryAddEC(a *combat.AttackEvent) bool {
 	a.Reacted = true
 	r.core.Events.Emit(event.OnElectroCharged, r.self, a)
 
-	// at this point ec is refereshed so we need to trigger a reaction
-	// and change ownership
+	// この時点で感電反応がリフレッシュされたので、反応を発動し
+	// 所有権を変更する必要がある
 	atk := combat.AttackInfo{
 		ActorIndex:       a.Info.ActorIndex,
 		DamageSrc:        r.self.Key(),
@@ -72,9 +72,9 @@ func (r *Reactable) TryAddEC(a *combat.AttackEvent) bool {
 	r.ecAtk = atk
 	r.ecSnapshot = snap
 
-	// if this is a new ec then trigger tick immediately and queue up ticks
-	// otherwise do nothing
-	//TODO: need to check if refresh ec triggers new tick immediately or not
+	// 新規感電反応なら即座にティックを発動し、ティックをキューする
+	// そうでなければ何もしない
+	//TODO: 感電反応のリフレッシュが即座に新しいティックを発動するか確認が必要
 	if r.ecTickSrc == -1 {
 		r.ecTickSrc = r.core.F
 		r.core.QueueAttackWithSnap(
@@ -85,29 +85,29 @@ func (r *Reactable) TryAddEC(a *combat.AttackEvent) bool {
 		)
 
 		r.core.Tasks.Add(r.nextTick(r.core.F), 60+10)
-		// subscribe to wane ticks
+		// 減衰ティックを購読
 		r.core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-			// target should be first, then snapshot
+			// ターゲットが最初、次にスナップショット
 			n := args[0].(combat.Target)
 			a := args[1].(*combat.AttackEvent)
 			dmg := args[2].(float64)
-			//TODO: there's no target index
+			//TODO: ターゲットインデックスがない
 			if n.Key() != r.self.Key() {
 				return false
 			}
 			if a.Info.AttackTag != attacks.AttackTagECDamage {
 				return false
 			}
-			// ignore if this dmg instance has been wiped out due to icd
+			// ICDによりこのダメージが消された場合は無視
 			if dmg == 0 {
 				return false
 			}
-			// ignore if we no longer have both electro and hydro
+			// 雷と水の両方がなくなった場合は無視
 			if r.Durability[Electro] < ZeroDur || r.Durability[Hydro] < ZeroDur {
 				return true
 			}
 
-			// wane in 0.1 seconds
+			// 0.1秒後に減衰
 			r.core.Tasks.Add(func() {
 				r.waneEC()
 			}, 6)
@@ -115,8 +115,8 @@ func (r *Reactable) TryAddEC(a *combat.AttackEvent) bool {
 		}, fmt.Sprintf("ec-%v", r.self.Key()))
 	}
 
-	// ticks are 60 frames since last tick
-	// taking tick dmg resets last tick
+	// ティックは前回のティックから60フレーム間隔
+	// ティックダメージを受けると前回のティックがリセットされる
 	return true
 }
 
@@ -134,7 +134,7 @@ func (r *Reactable) waneEC() {
 		Write("hydro", r.Durability[Hydro]).
 		Write("electro", r.Durability[Electro])
 
-	// ec is gone
+	// 感電反応が終了
 	r.checkEC()
 }
 
@@ -156,16 +156,16 @@ func (r *Reactable) checkEC() {
 func (r *Reactable) nextTick(src int) func() {
 	return func() {
 		if r.ecTickSrc != src {
-			// source changed, do nothing
+			// ソースが変更されたので何もしない
 			return
 		}
-		// ec SHOULD be active still, since if not we would have
-		// called cleanup and set source to -1
+		// 感電反応はまだアクティブであるはず。そうでなければクリーンアップが
+		// 呼ばれてソースが-1に設定されているはず
 		if r.Durability[Electro] < ZeroDur || r.Durability[Hydro] < ZeroDur {
 			return
 		}
 
-		// so ec is active, which means both aura must still have value > 0; so we can do dmg
+		// 感電反応がアクティブなので、両オーラの値が0より大きいはず；ダメージを与える
 		r.core.QueueAttackWithSnap(
 			r.ecAtk,
 			r.ecSnapshot,
@@ -173,7 +173,7 @@ func (r *Reactable) nextTick(src int) func() {
 			0,
 		)
 
-		// queue up next tick
+		// 次のティックをキュー
 		r.core.Tasks.Add(r.nextTick(src), 60)
 	}
 }

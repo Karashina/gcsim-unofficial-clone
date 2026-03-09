@@ -58,10 +58,10 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		)
 	}, skillHitmark)
 
-	// put skill on cd first then check for construct/c2
+	// 先にスキルをCD状態にしてから設置物/2凸を確認
 	c.SetCD(action.ActionSkill, 720)
 
-	// create a construct
+	// 設置物を生成
 	c.Core.Constructs.New(c.newScreen(1800, screenDir, screenPos), true) // 30 seconds
 
 	c.lastScreen = c.Core.F

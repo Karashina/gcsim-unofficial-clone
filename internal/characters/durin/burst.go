@@ -10,64 +10,64 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
-// Frame data: Animation lock and cancellable timing for each elemental burst
+// フレームデータ: 各元素爆発のアニメーションロックとキャンセル可能タイミング
 var (
-	burstFrames         []int // Frame data for Principle of Purity
-	burstFramesDarkness []int // Frame data for Principle of Darkness
+	burstFrames         []int // 純化の真理のフレームデータ
+	burstFramesDarkness []int // 暗闇の真理のフレームデータ
 )
 
-// Timing constants - Principle of Purity
+// タイミング定数 - 純化の真理
 const (
-	burstPurityHitmark1       = 98  // 1st hit hitmark
-	burstPurityHitmark2       = 122 // 2nd hit hitmark
-	burstPurityHitmark3       = 148 // 3rd hit hitmark
-	burstPurityFirstDragonHit = 157 // Dragon of White Flame first hit
-	dragonWhiteFlameInterval  = 59  // Dragon of White Flame attack interval
+	burstPurityHitmark1       = 98  // 1段目ヒットマーク
+	burstPurityHitmark2       = 122 // 2段目ヒットマーク
+	burstPurityHitmark3       = 148 // 3段目ヒットマーク
+	burstPurityFirstDragonHit = 157 // 白焔の龍の初回ヒット
+	dragonWhiteFlameInterval  = 59  // 白焔の龍の攻撃間隔
 )
 
-// Timing constants - Principle of Darkness
+// タイミング定数 - 暗闇の真理
 const (
-	burstDarknessHitmark1       = 87  // 1st hit hitmark
-	burstDarknessHitmark2       = 128 // 2nd hit hitmark
-	burstDarknessHitmark3       = 154 // 3rd hit hitmark
-	burstDarknessFirstDragonHit = 175 // Dragon of Dark Decay first hit
-	dragonDarkDecayInterval     = 74  // Dragon of Dark Decay attack interval
+	burstDarknessHitmark1       = 87  // 1段目ヒットマーク
+	burstDarknessHitmark2       = 128 // 2段目ヒットマーク
+	burstDarknessHitmark3       = 154 // 3段目ヒットマーク
+	burstDarknessFirstDragonHit = 175 // 暗蝕の龍の初回ヒット
+	dragonDarkDecayInterval     = 74  // 暗蝕の龍の攻撃間隔
 )
 
-// Common elemental burst constants
+// 元素爆発共通定数
 const (
-	burstCD        = 18 * 60 // Elemental Burst cooldown: 18 seconds
-	dragonDuration = 20 * 60 // Dragon duration: 20 seconds
+	burstCD        = 18 * 60 // 元素爆発クールダウン: 18秒
+	dragonDuration = 20 * 60 // 龍の持続時間: 20秒
 )
 
-// Dragon state keys: Status identifiers used internally in the simulator
+// 龍ステートキー: シミュレータ内部で使用するステータス識別子
 const (
-	dragonWhiteFlameKey = "durin-dragon-white-flame" // Dragon of White Flame state
-	dragonDarkDecayKey  = "durin-dragon-dark-decay"  // Dragon of Dark Decay state
+	dragonWhiteFlameKey = "durin-dragon-white-flame" // 白焔の龍ステート
+	dragonDarkDecayKey  = "durin-dragon-dark-decay"  // 暗蝕の龍ステート
 )
 
 func init() {
-	// Principle of Purity frames
+	// 純化の真理のフレーム
 	burstFrames = frames.InitAbilSlice(122)
 
-	// Principle of Darkness frames
+	// 暗闇の真理のフレーム
 	burstFramesDarkness = frames.InitAbilSlice(103)
 }
 
-// Burst is the entry point for Elemental Burst
-// Triggers Principle of Purity or Principle of Darkness based on transmutation state
+// Burst は元素爆発のエントリーポイント
+// 変容状態に基づいて純化の真理または暗闇の真理を発動
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	if c.stateDenial {
-		return c.burstDarkness(p) // Denial of Darkness state → Principle of Darkness
+		return c.burstDarkness(p) // 暗黒の否定状態 → 暗闇の真理
 	}
-	return c.burstPurity(p) // Confirmation of Purity state → Principle of Purity
+	return c.burstPurity(p) // 純化の肯定状態 → 純化の真理
 }
 
-// makeBurstAttackInfo is a helper function that generates attack info for elemental burst
+// makeBurstAttackInfo は元素爆発の攻撃情報を生成するヘルパー関数
 func (c *char) makeBurstAttackInfo(abilName string, mult []float64) combat.AttackInfo {
-	// GU: 1U (Durability: 25)
-	// ICD Tag: Elemental Burst (ICDTagElementalBurst)
-	// ICD Group: Standard (ICDGroupDefault)
+	// 元素量: 1U (元素耐性: 25)
+	// ICDタグ: 元素爆発 (ICDTagElementalBurst)
+	// ICDグループ: 標準 (ICDGroupDefault)
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       abilName,
@@ -83,11 +83,11 @@ func (c *char) makeBurstAttackInfo(abilName string, mult []float64) combat.Attac
 	return ai
 }
 
-// makeBurstDarknessAttackInfo is a helper function that generates attack info for Principle of Darkness (Elemental Burst)
+// makeBurstDarknessAttackInfo は暗闇の真理（元素爆発）の攻撃情報を生成するヘルパー関数
 func (c *char) makeBurstDarknessAttackInfo(abilName string, mult []float64) combat.AttackInfo {
-	// GU: 1U (Durability: 25)
-	// ICD Tag: Elemental Burst (ICDTagElementalBurst)
-	// ICD Group: Standard (ICDGroupDefault)
+	// 元素量: 1U (元素耐性: 25)
+	// ICDタグ: 元素爆発 (ICDTagElementalBurst)
+	// ICDグループ: 標準 (ICDGroupDefault)
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       abilName,
@@ -103,48 +103,48 @@ func (c *char) makeBurstDarknessAttackInfo(abilName string, mult []float64) comb
 	return ai
 }
 
-// applyC6DefIgnore is a helper function that applies C6 Constellation DEF ignore effect
-// Principle of Purity: 30% DEF ignore (additionally Dragon of White Flame applies DEF shred on hit - implemented in cons.go)
-// Principle of Darkness: 70% DEF ignore (30% base + 40% additional)
+// applyC6DefIgnore は6凸（命ノ星座6）のDEF無視効果を適用するヘルパー関数
+// 純化の真理: 30% DEF無視（加えて白焔の龍がヒット時にDEFデバフを適用 - cons.goで実装）
+// 暗闇の真理: 70% DEF無視（基本30% + 追加40%）
 func (c *char) applyC6DefIgnore(attacks []*combat.AttackInfo, isDarkness bool) {
 	if c.Base.Cons < 6 {
 		return
 	}
 	defIgnore := 0.3
 	if isDarkness {
-		defIgnore = 0.7 // 30% base + 40% additional
+		defIgnore = 0.7 // 基本30% + 追加40%
 	}
 	for _, ai := range attacks {
 		ai.IgnoreDefPercent = defIgnore
 	}
 }
 
-// applyBurstEffects is a helper function that applies common elemental burst effects
-// Handles A4 talent, C2 constellation, energy consumption, and cooldown setting
+// applyBurstEffects は元素爆発の共通効果を適用するヘルパー関数
+// A4天賦、2凸（命ノ星座2）、エネルギー消費、クールダウン設定を処理
 func (c *char) applyBurstEffects() {
-	// A4: Gain Primordial Fusion stacks (10 stacks, 20 seconds)
+	// A4: 原初融合スタックを獲得（10スタック、20秒）
 	c.a4OnBurst()
 
-	// C2: Enable elemental reaction buff window (20 seconds)
+	// 2凸: 元素反応バフウィンドウを有効化（20秒）
 	if c.Base.Cons >= 2 {
 		c.AddStatus(c2BuffKey, c2BuffDuration, true)
 	}
 
-	// Consume elemental energy and set cooldown
+	// 元素エネルギーを消費しクールダウンを設定
 	c.ConsumeEnergy(4)
 	c.SetCDWithDelay(action.ActionBurst, burstCD, 2)
 }
 
-// clearExistingDragons clears any existing dragons when a new burst is used
-// This prevents overlapping dragon effects
+// clearExistingDragons は新しい元素爆発使用時に既存の龍をクリアする
+// 龍の効果が重複するのを防止
 func (c *char) clearExistingDragons() {
-	// Clear dragon flags
+	// 龍フラグをクリア
 	c.dragonWhiteFlame = false
 	c.dragonDarkDecay = false
 	c.dragonExpiry = 0
-	c.dragonSrc++ // Increment source ID to invalidate old dragon tasks
+	c.dragonSrc++ // ソースIDをインクリメントして古い龍タスクを無効化
 
-	// Delete status keys (will prevent scheduled attacks from executing)
+	// ステータスキーを削除（予約済み攻撃の実行を防止）
 	c.DeleteStatus(dragonWhiteFlameKey)
 	c.DeleteStatus(dragonDarkDecayKey)
 
@@ -152,31 +152,31 @@ func (c *char) clearExistingDragons() {
 		Write("new_dragon_src", c.dragonSrc)
 }
 
-// burstPurity executes Principle of Purity: As the Light Shifts
-// 3 instances of AoE Pyro DMG + summon Dragon of White Flame (20 seconds duration, attacks every 59 frames in AoE)
+// burstPurity は純化の真理: 光の転回を実行
+// 3回の範囲炎元素ダメージ + 白焔の龍を召喚（20秒持続、59フレームごとに範囲攻撃）
 func (c *char) burstPurity(p map[string]int) (action.Info, error) {
-	// Clear any existing dragons before summoning new one
+	// 新しい龍を召喚する前に既存の龍をクリア
 	c.clearExistingDragons()
 
-	// Create 3 attack instances
+	// 3つの攻撃インスタンスを生成
 	ai1 := c.makeBurstAttackInfo("Principle of Purity: As the Light Shifts (Hit 1)", burstPurity1)
 	ai2 := c.makeBurstAttackInfo("Principle of Purity: As the Light Shifts (Hit 2)", burstPurity2)
 	ai3 := c.makeBurstAttackInfo("Principle of Purity: As the Light Shifts (Hit 3)", burstPurity3)
 
-	// C6: Apply DEF ignore
+	// 6凸: DEF無視を適用
 	c.applyC6DefIgnore([]*combat.AttackInfo{&ai1, &ai2, &ai3}, false)
 
-	// Queue attacks
+	// 攻撃をキューに追加
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 2}, 5.0)
 	c.Core.QueueAttack(ai1, ap, burstPurityHitmark1, burstPurityHitmark1)
 	c.Core.QueueAttack(ai2, ap, burstPurityHitmark2, burstPurityHitmark2)
 	c.Core.QueueAttack(ai3, ap, burstPurityHitmark3, burstPurityHitmark3)
 
-	// Summon dragon and apply effects
+	// 龍を召喚し効果を適用
 	c.summonDragonWhiteFlame()
 	c.applyBurstEffects()
 
-	// C1: Apply Cycle of Enlightenment to other party members
+	// 1凸: 他のパーティメンバーに啓示のサイクルを付与
 	if c.Base.Cons >= 1 {
 		c.c1OnBurstPurity()
 	}
@@ -191,31 +191,31 @@ func (c *char) burstPurity(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// burstDarkness executes Principle of Darkness: As the Stars Smolder
-// 3 instances of AoE Pyro DMG + summon Dragon of Dark Decay (20 seconds duration, attacks every 74 frames in single-target)
+// burstDarkness は暗闇の真理: 星々の燻りを実行
+// 3回の範囲炎元素ダメージ + 暗蝕の龍を召喚（20秒持続、74フレームごとに単体攻撃）
 func (c *char) burstDarkness(p map[string]int) (action.Info, error) {
-	// Clear any existing dragons before summoning new one
+	// 新しい龍を召喚する前に既存の龍をクリア
 	c.clearExistingDragons()
 
-	// Create 3 attack instances
+	// 3つの攻撃インスタンスを生成
 	ai1 := c.makeBurstDarknessAttackInfo("Principle of Darkness: As the Stars Smolder (Hit 1)", burstDarkness1)
 	ai2 := c.makeBurstDarknessAttackInfo("Principle of Darkness: As the Stars Smolder (Hit 2)", burstDarkness2)
 	ai3 := c.makeBurstDarknessAttackInfo("Principle of Darkness: As the Stars Smolder (Hit 3)", burstDarkness3)
 
-	// C6: Apply DEF ignore (70% for Darkness)
+	// 6凸: DEF無視を適用（暗闇は70%）
 	c.applyC6DefIgnore([]*combat.AttackInfo{&ai1, &ai2, &ai3}, true)
 
-	// Queue attacks
+	// 攻撃をキューに追加
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 2}, 5.0)
 	c.Core.QueueAttack(ai1, ap, burstDarknessHitmark1, burstDarknessHitmark1)
 	c.Core.QueueAttack(ai2, ap, burstDarknessHitmark2, burstDarknessHitmark2)
 	c.Core.QueueAttack(ai3, ap, burstDarknessHitmark3, burstDarknessHitmark3)
 
-	// Summon dragon and apply effects
+	// 龍を召喚し効果を適用
 	c.summonDragonDarkDecay()
 	c.applyBurstEffects()
 
-	// C1: Apply Cycle of Enlightenment to Durin
+	// 1凸: デュリンに啓示のサイクルを付与
 	if c.Base.Cons >= 1 {
 		c.c1OnBurstDarkness()
 	}
@@ -230,13 +230,13 @@ func (c *char) burstDarkness(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// makeDragonAttackInfo is a helper function that generates attack info for dragon attacks
-// C6: Dragon of White Flame has 30% DEF ignore and applies DEF shred on hit (handled via callback)
-// C6: Dragon of Dark Decay has 70% DEF ignore (30% base + 40% additional)
+// makeDragonAttackInfo は龍の攻撃情報を生成するヘルパー関数
+// 6凸: 白焔の龍は30% DEF無視でヒット時にDEFデバフを適用（コールバックで処理）
+// 6凸: 暗蝕の龍は70% DEF無視（基本30% + 追加40%）
 func (c *char) makeDragonAttackInfo(abilName string, mult []float64, isDarkness bool) combat.AttackInfo {
-	// GU: 1U (Durability: 25)
-	// ICD Tag: Durin DoT (ICDTagDurinDoT)
-	// ICD Group: Time-based (White Flame 90f, Dark Decay 120f)
+	// 元素量: 1U (元素耐性: 25)
+	// ICDタグ: Durin DoT (ICDTagDurinDoT)
+	// ICDグループ: 時間ベース (白焰 90f, 暗蚀 120f)
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       abilName,
@@ -249,25 +249,25 @@ func (c *char) makeDragonAttackInfo(abilName string, mult []float64, isDarkness 
 		Mult:       mult[c.TalentLvlBurst()],
 	}
 
-	// Dragon of Dark Decay uses 120f ICD group
+	// 暗蝕の龍は120フレームICDグループを使用
 	if isDarkness {
 		ai.ICDGroup = attacks.ICDGroupDurinDoTDarkDecay
 	}
 
-	// C6: DEF ignore
+	// 6凸: DEF無視
 	if c.Base.Cons >= 6 {
 		if isDarkness {
-			ai.IgnoreDefPercent = 0.7 // 30% base + 40% additional
+			ai.IgnoreDefPercent = 0.7 // 基本30% + 追加40%
 		} else {
-			ai.IgnoreDefPercent = 0.3 // Dragon also applies DEF shred on hit via callback
+			ai.IgnoreDefPercent = 0.3 // 龍はヒット時にコールバック経由でDEFデバフも適用
 		}
 	}
 
 	return ai
 }
 
-// summonDragonWhiteFlame summons Dragon of White Flame
-// Lasts 20 seconds, deals AoE Pyro DMG every 59 frames
+// summonDragonWhiteFlame は白焔の龍を召喚
+// 20秒持続、59フレームごとに範囲炎元素ダメージを与える
 func (c *char) summonDragonWhiteFlame() {
 	c.dragonDarkDecay = false
 	c.dragonWhiteFlame = true
@@ -276,7 +276,7 @@ func (c *char) summonDragonWhiteFlame() {
 	c.AddStatus(dragonWhiteFlameKey, dragonDuration, true)
 	c.DeleteStatus(dragonDarkDecayKey)
 
-	// Capture current source ID for this dragon instance
+	// この龍インスタンスの現在のソースIDをキャプチャ
 	dragonSrc := c.dragonSrc
 
 	c.Core.Log.NewEvent("Dragon of White Flame summoned", glog.LogCharacterEvent, c.Index).
@@ -288,10 +288,10 @@ func (c *char) summonDragonWhiteFlame() {
 	}, burstPurityFirstDragonHit)
 }
 
-// dragonWhiteFlameAttack executes periodic attacks of Dragon of White Flame
-// Automatically schedules next attack while duration is active
+// dragonWhiteFlameAttack は白焔の龍の定期攻撃を実行
+// 持続時間中は自動的に次の攻撃をスケジュール
 func (c *char) dragonWhiteFlameAttack(attackNum int, src int) {
-	// Check if this dragon instance is still valid
+	// この龍インスタンスがまだ有効か確認
 	if src != c.dragonSrc {
 		return
 	}
@@ -315,8 +315,8 @@ func (c *char) dragonWhiteFlameAttack(attackNum int, src int) {
 	}, dragonWhiteFlameInterval)
 }
 
-// summonDragonDarkDecay summons Dragon of Dark Decay
-// Lasts 20 seconds, deals single-target Pyro DMG every 74 frames
+// summonDragonDarkDecay は暗蝕の龍を召喚
+// 20秒持続、74フレームごとに単体炎元素ダメージを与える
 func (c *char) summonDragonDarkDecay() {
 	c.dragonWhiteFlame = false
 	c.dragonDarkDecay = true
@@ -325,7 +325,7 @@ func (c *char) summonDragonDarkDecay() {
 	c.AddStatus(dragonDarkDecayKey, dragonDuration, true)
 	c.DeleteStatus(dragonWhiteFlameKey)
 
-	// Capture current source ID for this dragon instance
+	// この龍インスタンスの現在のソースIDをキャプチャ
 	dragonSrc := c.dragonSrc
 
 	c.Core.Log.NewEvent("Dragon of Dark Decay summoned", glog.LogCharacterEvent, c.Index).
@@ -337,10 +337,10 @@ func (c *char) summonDragonDarkDecay() {
 	}, burstDarknessFirstDragonHit)
 }
 
-// dragonDarkDecayAttack executes periodic attacks of Dragon of Dark Decay
-// Automatically schedules next attack while duration is active
+// dragonDarkDecayAttack は暗蝕の龍の定期攻撃を実行
+// 持続時間中は自動的に次の攻撃をスケジュール
 func (c *char) dragonDarkDecayAttack(attackNum int, src int) {
-	// Check if this dragon instance is still valid
+	// この龍インスタンスがまだ有効か確認
 	if src != c.dragonSrc {
 		return
 	}

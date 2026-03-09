@@ -8,7 +8,7 @@ import (
 )
 
 func (e *Enemy) ApplyHitlag(factor, dur float64) {
-	//TODO: extend all hitlag affected buff expiry by dur * (1 - factor) i think
+	//TODO: ヒットラグの影響を受ける全バフの有効期限をdur * (1 - factor)で延長すべきと思われる
 	ext := int(math.Ceil(dur * (1 - factor)))
 	e.frozenFrames += ext
 
@@ -24,7 +24,7 @@ func (e *Enemy) ApplyHitlag(factor, dur float64) {
 			SetEnded(e.Core.F + int(math.Ceil(dur)))
 	}
 
-	// check resist mods
+	// 耐性修飾子を確認
 	for i, v := range e.mods {
 		if v.AffectedByHitlag() && v.Expiry() != -1 && v.Expiry() > e.Core.F {
 			mod := e.mods[i]
@@ -49,23 +49,23 @@ func (e *Enemy) QueueEnemyTask(f func(), delay int) {
 }
 
 func (e *Enemy) Tick() {
-	// dead enemy don't tick
+	// 死亡した敵はティックしない
 	if !e.Target.Alive {
 		return
 	}
-	// decrement frozen time first
+	// まず凍結時間を減少
 	e.frozenFrames -= 1
 	left := 0
 	if e.frozenFrames < 0 {
 		left = -e.frozenFrames
 		e.frozenFrames = 0
 	}
-	// if any left then increase time passed
+	// 残りがあれば経過時間を増加
 	if left <= 0 {
 		e.Core.Log.NewEvent("enemy skipping tick", glog.LogHitlagEvent, -1).
 			Write("target", e.Key()).
 			Write("frozen_for", e.frozenFrames)
-		// do nothing this tick
+		// このTickでは何もしない
 		return
 	}
 	e.timePassed += left

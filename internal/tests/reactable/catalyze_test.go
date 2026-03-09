@@ -81,7 +81,7 @@ func TestElectroDoesNotReduceQuicken(t *testing.T) {
 	advanceCoreFrame(c)
 
 	trg := c.Combat.Enemies()[0].(*enemy.Enemy)
-	if math.Abs(float64(trg.Durability[reactable.Quicken])-19.933333) > 0.000001 { // 2f decay
+	if math.Abs(float64(trg.Durability[reactable.Quicken])-19.933333) > 0.000001 { // 2f減衰
 		t.Errorf(
 			"expected electro attack to not consume quicken aura, got quicken=%v",
 			trg.Durability[reactable.Quicken],

@@ -20,11 +20,10 @@ const (
 	a1CryoKey       = "wanderer-a1-cryo"
 )
 
-// When the Wanderer hits opponents with Kuugo: Fushoudan or Kuugo: Toufukai in his Windfavored state,
-// he has a 16% chance to obtain the Descent effect.
-// For each Kuugo: Fushoudan and Kuugo: Toufukai that does not produce this effect, the next attack
-// of those types will have a 12% increased chance of producing it.
-// The calculation of the effect production is done once every 0.1s.
+// 放浪者が「風の恵み」状態で「空居・風崇弾」または「空居・風柄打」で敵に命中した際、
+// 16%の確率で「随風」効果を獲得する。
+// この効果が発生しなかった攻撃ごとに、次の攻撃での発動確率が12%増加する。
+// 効果発動の判定は0.1秒ごとに1回行われる。
 func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil
@@ -55,9 +54,9 @@ func (c *char) makeA4CB() combat.AttackCBFunc {
 	}
 }
 
-// The next time the Wanderer accelerates in mid-air while in this instance of the Windfavored state,
-// this effect will be removed, this acceleration instance will not consume any Kuugoryoku Points,
-// and he will fire off 4 wind arrows that deal 35% of his ATK as Anemo DMG each.
+// 放浪者が「風の恵み」状態で次に空中加速する際、
+// この効果が削除され、その加速は空居力を消費せず、
+// 攻撃力の35%の風元素ダメージを与える風矢4本を発射する。
 func (c *char) a4() bool {
 	if !c.StatusIsActive(a4Key) {
 		return false
@@ -66,7 +65,7 @@ func (c *char) a4() bool {
 		return false
 	}
 	c.DeleteStatus(a4Key)
-	c.AddStatus(a4Prevent, 20, true) // prevent a4 proccing again for 20f, should be enough to prevent 2 procs in single dash
+	c.AddStatus(a4Prevent, 20, true) // 20フレーム内の固有天賦4の再発動を防止（1回のダッシュでの2重発動防止）
 
 	c.Core.Log.NewEvent("wanderer-a4 proc'd", glog.LogCharacterEvent, c.Index)
 
@@ -96,12 +95,12 @@ func (c *char) a4() bool {
 	return true
 }
 
-// If Hanega: Song of the Wind comes into contact with Hydro/Pyro/Cryo/Electro when it is unleashed,
-// this instance of the Windfavored state will obtain buffs.
+// 「羽唄・風喀」が発動時に水/炎/氷/雷元素と接触した場合、
+// その「風の恵み」状態にバフが付与される。
 func (c *char) absorbCheckA1() {
 	a1AbsorbCheckLocation := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5)
 	a1Proc := false // for C4
-	// max 2 A1 elements from absorb check
+	// 吸収チェックから最大2つの固有天賦1元素を取得
 	for i := 0; i < 2; i++ {
 		absorbCheck := c.Core.Combat.AbsorbCheck(c.Index, a1AbsorbCheckLocation, c.a1ValidBuffs...)
 		if absorbCheck == attributes.NoElement {
@@ -114,7 +113,7 @@ func (c *char) absorbCheckA1() {
 			"wanderer a1 absorbed ", absorbCheck.String(),
 		)
 	}
-	// add A1 buff from C4 if at least 1 A1 element was absorbed
+	// 少なくとも1つの固有天賦1元素が吸収された場合、第4命ノ星座で固有天賦1バフを追加
 	if c.Base.Cons >= 4 && a1Proc {
 		chosenElement := c.a1ValidBuffs[c.Core.Rand.Intn(len(c.a1ValidBuffs))]
 		c.addA1Buff(chosenElement)
@@ -125,17 +124,17 @@ func (c *char) absorbCheckA1() {
 	}
 }
 
-// - Hydro: Kuugoryoku Point cap increases by 20.
+// - 水: 空居力上限が20増加。
 //
-// - Pyro: ATK increases by 30%.
+// - 炎: 攻撃力が30%増加。
 //
-// - Cryo: CRIT Rate increases by 20%.
+// - 氷: 会心率が20%増加。
 //
-// - Electro: When Normal and Charged Attacks hit an opponent, 0.8 Energy will be restored. Energy can be restored this way once every 0.2s.
+// - 雷: 通常攻撃と重撃が敵に命中すると、0.8エネルギーが回復する。0.2秒に1回発動可能。
 //
-// You can have up to 2 different kinds of these buffs simultaneously.
+// 同時に最大2種類のバフを持つことができる。
 func (c *char) addA1Buff(absorbCheck attributes.Element) {
-	// buffs, need to be manually removed when state is ending
+	// バフ（「風の恵み」状態終了時に手動で削除が必要）
 	switch absorbCheck {
 	case attributes.Hydro:
 		c.maxSkydwellerPoints += 20
@@ -168,7 +167,7 @@ func (c *char) addA1Buff(absorbCheck attributes.Element) {
 	}
 }
 
-// When Normal and Charged Attacks hit an opponent, 0.8 Energy will be restored. Energy can be restored this way once every 0.2s.
+// 通常攻撃と重撃が敵に命中すると、0.8エネルギーが回復する。0.2秒に1回発動可能。
 func (c *char) makeA1ElectroCB() combat.AttackCBFunc {
 	if c.Base.Ascension < 1 {
 		return nil

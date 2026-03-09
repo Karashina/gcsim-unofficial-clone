@@ -84,7 +84,7 @@ func (c *char) c4cb(src int) combat.AttackCBFunc {
 			Durability:     25,
 			Mult:           4,
 		}
-		// TODO: get the actual target range
+		// TODO: 実際のターゲット範囲を取得
 		ap := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5)
 		c.Core.QueueAttack(ai, ap, 0, 1)
 	}
@@ -104,7 +104,7 @@ func (c *char) c6() {
 	c.AddStatus(c6key, 3*60, true)
 }
 
-// if c6 is active, mark the aim attack as buffed (instant bullet load + cdmg) and remove the status
+// C6がアクティブな場合、狙い撃ちを強化済み（即時弾丸装填+会心ダメージ）としてマークしステータスを削除
 func (c *char) c6AddBuff() {
 	if c.Base.Cons < 6 {
 		return

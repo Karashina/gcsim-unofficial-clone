@@ -72,7 +72,7 @@ func (stats *SubstatOptimizerDetails) allocateSomeSubstatGradientsForChar(
 		}
 	}
 
-	// TODO: No relevant substat can be allocated/deallocated, alloc/dealloc some random other substat??
+	// TODO: 関連するサブステータスの割り当て/解除ができない場合、ランダムな他のサブステータスを割り当て/解除すべき？
 	opDebug = append(opDebug, "Couldn't alloc/dealloc anything?????")
 	return opDebug
 }
@@ -91,10 +91,10 @@ func (stats *SubstatOptimizerDetails) calculateSubstatGradientsForChar(
 		stats.optimizer.logger.Fatal(err.Error())
 	}
 	init.Flush()
-	// TODO: Test if median or mean gives better results
+	// TODO: 中央値と平均値のどちらがより良い結果を出すかテストする
 	initialMean := mean(init.ExpectedDps)
 	substatGradients := make([]float64, len(relevantSubstats))
-	// Build "gradient" by substat
+	// サブステータスごとに「勾配」を構築
 	for idxSubstat, substat := range relevantSubstats {
 		stats.charProfilesCopy[idxChar].Stats[substat] += float64(amount) * stats.substatValues[substat] * stats.charSubstatRarityMod[idxChar]
 
@@ -108,8 +108,8 @@ func (stats *SubstatOptimizerDetails) calculateSubstatGradientsForChar(
 		a.Flush()
 
 		substatGradients[idxSubstat] = mean(a.ExpectedDps) - initialMean
-		// fixes cases in which fav holders don't get enough crit rate to reliably proc fav (an important example would be fav kazuha)
-		// might give them "too much" cr (= max out liquid cr subs or overcap crit beyond 100%) but that's probably not a big deal
+		// 西風武器所持者が西風を安定的に発動するための十分な会心率を得られないケースを修正（代表例: 西風カズハ）
+		// 「過剰な」会心率を与える可能性がある（=液体CRサブを最大化、または会心率100%超過）が、大きな問題ではない
 		if stats.simcfg.Settings.IgnoreBurstEnergy && stats.charWithFavonius[idxChar] && substat == attributes.CR {
 			substatGradients[idxSubstat] += 1000 * float64(amount)
 		}
@@ -123,7 +123,7 @@ func (stats *SubstatOptimizerDetails) setInitialSubstats(fixedSubstatCount int) 
 	stats.calculateERBaseline()
 }
 
-// Copy to save initial character state with fixed allocations (2 of each substat)
+// 固定割り当て（各サブステータス2個）で初期キャラクター状態を保存するためのコピー
 func (stats *SubstatOptimizerDetails) cloneStatsWithFixedAllocations(fixedSubstatCount int) {
 	for i := range stats.simcfg.Characters {
 		stats.charProfilesInitial[i] = stats.simcfg.Characters[i].Clone()

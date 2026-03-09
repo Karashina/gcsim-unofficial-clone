@@ -11,8 +11,8 @@ import (
 
 var burstFrames []int
 
-const burstHitmark = 75                        // Initial Hit
-const fatalBlossomHitmark = 145 - burstHitmark // Fatal Blossom, accounting for task queuing
+const burstHitmark = 75                        // 初撃
+const fatalBlossomHitmark = 145 - burstHitmark // Fatal Blossom、タスクキューイングを考慮
 
 func init() {
 	burstFrames = frames.InitAbilSlice(96) // Q -> N1/E
@@ -22,7 +22,7 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// C6 Hexerei additional effect: destroy Silver Isotomas and buff Fatal Blossom
+	// 6凸Hexerei追加効果: Silver Isotomaを破壊してFatal Blossomを強化
 	if c.Base.Cons >= 6 && c.isHexerei {
 		c.c6BlossomBuffOnBurst()
 	}
@@ -42,14 +42,14 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c2Count := 0
 	hasC2 := c.Base.Cons >= 2 && c.StatusIsActive(c2key)
-	// C2 damage for initial hit is calculated on burst start
+	// 2凸の初撃ダメージは元素爆発開始時に計算される
 	if hasC2 {
 		c2Count = c.c2stacks
 		c.c2stacks = 0
 		ai.FlatDmg = c.TotalDef(false) * float64(c2Count) * 0.3
 	}
 
-	// initial damage
+	// 初撃ダメージ
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTargetFanAngle(c.Core.Combat.Player(), nil, 8, 120),
@@ -57,10 +57,10 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstHitmark,
 	)
 
-	// A4 and Fatal Blossom
-	// delay Fatal Blossom triggering until burstHitmark because that's when it:
-	// - checks whether the skill is still active
-	// - recalculates C2 damage
+	// 固有天賦4とFatal Blossom
+	// Fatal Blossomの発動をburstHitmarkまで遅延させる。そのタイミングで:
+	// - スキルがまだアクティブかチェックする
+	// - 2凸ダメージを再計算する
 	c.Core.Tasks.Add(func() {
 		c.a4()
 
@@ -72,31 +72,31 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		ai.PoiseDMG = 30
 		ai.Mult = burstPerBloom[c.TalentLvlBurst()]
 
-		// C2 damage is recalculated once on burstHitmark
+		// 2凸ダメージはburstHitmark時に1度だけ再計算される
 		if hasC2 {
 			ai.FlatDmg = c.TotalDef(false) * float64(c2Count) * 0.3
 		}
 
-		// C6 Hexerei additional effect: add 250% DEF to Fatal Blossom DMG
+		// 6凸Hexerei追加効果: Fatal Blossomのダメージに防御力の250%を加算
 		if c.Base.Cons >= 6 && c.isHexerei && c.StatusIsActive(c6BlossomBuffKey) {
-			ai.FlatDmg += c.TotalDef(false) * 2.5 // 250% DEF
+			ai.FlatDmg += c.TotalDef(false) * 2.5 // 防御力の250%
 		}
 
-		// generate 7 blossoms
+		// 7個のBlossomを生成
 		maxBlossoms := 7
 		enemies := c.Core.Combat.RandomEnemiesWithinArea(c.skillArea, nil, maxBlossoms)
 		tracking := len(enemies)
 		var center geometry.Point
 		for i := 0; i < maxBlossoms; i++ {
 			if i < tracking {
-				// each blossom targets a separate enemy if possible
+				// 可能な限り各Blossomは別々の敵をターゲットする
 				center = enemies[i].Pos()
 			} else {
-				// if a blossom has no enemy then it randomly spawns in the skill area
+				// Blossomに敵がいない場合はスキル範囲内にランダムに出現
 				center = geometry.CalcRandomPointFromCenter(c.skillArea.Shape.Pos(), 0.5, 9.5, c.Core.Rand)
 			}
-			// Blossoms are generated on a slight delay from initial hit
-			// TODO: no precise frame data for time between Blossoms
+			// Blossomは初撃からわずかに遅れて生成される
+			// TODO: Blossom間の正確なフレームデータなし
 			c.Core.QueueAttackWithSnap(
 				ai,
 				c.bloomSnapshot,

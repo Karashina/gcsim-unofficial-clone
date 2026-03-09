@@ -19,36 +19,36 @@ func (s *Simulation) resFromCurrentState() stats.Result {
 }
 
 func (s *Simulation) run() (stats.Result, error) {
-	// core loop roughly as follows:
-	//  - initialize:
-	//		- setup
-	//		- advance frame by 1
-	//		- move to queue phase
-	//  - queue phase:
-	//		- ask for next action
-	//		- move to ready check phase
-	//	- ready check phase
-	//		- check if action ready (both animation + player); if not ready advance frame until ready
-	//		- move to execute action phase
-	//	- execute action phase:
-	//		- if action has pre-action wait; advance frame until wait is consumed
-	//		- execute action and empty queue
-	//		- if executed action is no-op, move directly to queue phase
-	//		- else advance frame until CanQueueAfter then move to queue phase
+	// コアループの大まかな流れ:
+	//  - 初期化:
+	//		- セットアップ
+	//		- フレームを1つ進める
+	//		- キューフェーズへ移動
+	//  - キューフェーズ:
+	//		- 次のアクションを要求
+	//		- 準備チェックフェーズへ移動
+	//	- 準備チェックフェーズ
+	//		- アクションが準備完了か確認（アニメーションとプレイヤーの両方）; 準備未完了ならフレームを進めて待つ
+	//		- アクション実行フェーズへ移動
+	//	- アクション実行フェーズ:
+	//		- アクション前の待機がある場合; 待機が消化されるまでフレームを進める
+	//		- アクションを実行しキューを空にする
+	//		- 実行されたアクションがno-opの場合、直接キューフェーズへ移動
+	//		- そうでなければ CanQueueAfter までフレームを進めてからキューフェーズへ移動
 	//
-	// frame advance will perform the following;
-	//	- increment frame counter by 1
-	//  - execute any ticks
-	//  - check for eneryg procs
-	//  - emit OnTick
-	//  - perform exit check
+	// フレーム進行は以下を実行する:
+	//	- フレームカウンターを1増加
+	//  - ティックを実行
+	//  - エネルギー処理を確認
+	//  - OnTick を発火
+	//  - 終了チェックを実行
 	//
-	// exit check checks for:
-	//	- frame limit
-	//  - all enemies dead
-	//  - no more actions left
+	// 終了チェックの確認項目:
+	//	- フレーム上限
+	//  - 全敵が死亡
+	//  - 残りアクションなし
 
-	//TODO: do we need to catch panic here still? or can it be done outside in the worker
+	//TODO: ここでまだパニックをキャッチする必要があるか？ワーカー側で処理できないか？
 	var err error
 	for state := initialize; state != nil; {
 		state, err = state(s)
@@ -109,7 +109,7 @@ func (s *Simulation) popQueue() int {
 
 func initialize(s *Simulation) (stateFn, error) {
 	go s.eval.Start()
-	// run sim for 90s if no duration set
+	// durationが未設定の場合、90秒でシミュレーションを実行
 	if s.cfg.Settings.Duration == 0 {
 		// fmt.Println("no duration set, running for 90s")
 		s.cfg.Settings.Duration = 90
@@ -128,20 +128,20 @@ func queuePhase(s *Simulation) (stateFn, error) {
 	if err != nil {
 		return nil, err
 	}
-	// skip a frame and come back to queue phase if eval does not have any more actions
-	// relying on advance frame to exit if need be
+	// evalにアクションが残っていない場合、1フレームスキップしてキューフェーズに戻る
+	// 必要に応じて advanceFrame の終了処理に依存する
 	if next == nil {
 		s.noMoreActions = true
-		// we do the same skip here as if eval doesn't have any more ations
+		// evalにアクションが残っていない場合と同じスキップ処理を行う
 		return s.advanceFrames(1, queuePhase)
 	}
-	// handle sleep here since it's just a frame skip before requeing next
+	// sleepはフレームスキップしてから次をキューに戻すだけなのでここで処理する
 	if next.Action == action.ActionWait {
 		return s.handleWait(next)
 	}
-	// if next action is delay, we can just queue up the action after that right now
+	// 次のアクションがdelayの場合、その後のアクションを即座にキューに追加できる
 	if next.Action == action.ActionDelay {
-		// append here because we can have multiple delay chained
+		// 複数のdelayが連鎖する可能性があるためappendする
 		delay := next.Param["f"]
 		s.preActionDelay += delay
 		s.C.Log.NewEvent(fmt.Sprintf("delay added %v, total: %v", delay, s.preActionDelay), glog.LogActionEvent, s.C.Player.Active()).
@@ -149,25 +149,25 @@ func queuePhase(s *Simulation) (stateFn, error) {
 			Write("total", s.preActionDelay)
 		return queuePhase, nil
 	}
-	// IMPORTANT: evaluator should handle adding in implicit swaps if next char is not active
-	// we add a sanity check here just to guard against evaluator error
+	// 重要: 次のキャラがアクティブでない場合、evaluatorが暗黙のスワップを追加する必要がある
+	// evaluatorのエラーに備えてここでサニティチェックを追加する
 	if next.Char != s.C.Player.ActiveChar().Base.Key && next.Action != action.ActionSwap {
 		return nil, fmt.Errorf("internal error: requested next char %v is not active and next action is not swap", next.Char)
 	}
-	// TODO: consider changing queue to single item. no need for slice without swap in here
+	// TODO: キューを単一アイテムに変更することを検討。ここにスワップがないのでスライスは不要
 	s.queue = append(s.queue, next)
 	return actionReadyCheckPhase, nil
 }
 
 func actionReadyCheckPhase(s *Simulation) (stateFn, error) {
-	//TODO: this sanity check is probably not necessary
+	//TODO: このサニティチェックはおそらく不要
 	if len(s.queue) == 0 {
 		return nil, errors.New("unexpected queue length is 0")
 	}
 	q := s.queue[0]
 
-	// check if the next queue item is valid
-	// example: most sword characters can't do charge if the previous action was not attack
+	// 次のキューアイテムが有効か確認する
+	// 例: ほとんどの片手剣キャラは前のアクションが攻撃でない場合、重撃を実行できない
 	char := s.C.Player.ActiveChar()
 	if err := char.NextQueueItemIsValid(q.Char, q.Action, q.Param); err != nil {
 		switch {
@@ -178,9 +178,9 @@ func actionReadyCheckPhase(s *Simulation) (stateFn, error) {
 		}
 	}
 
-	//TODO: this loop should be optimized to skip more than 1 frame at a time
+	//TODO: このループは一度に1フレーム以上スキップするよう最適化すべき
 	if err := s.C.Player.ReadyCheck(q.Action, q.Char, q.Param); err != nil {
-		// repeat this phase until action is ready
+		// アクションが準備完了になるまでこのフェーズを繰り返す
 		switch {
 		case errors.Is(err, player.ErrActionNotReady):
 			s.C.Log.NewEvent(fmt.Sprintf("could not execute %v; action not ready", q.Action), glog.LogSimEvent, s.C.Player.Active())
@@ -188,7 +188,7 @@ func actionReadyCheckPhase(s *Simulation) (stateFn, error) {
 		case errors.Is(err, player.ErrPlayerNotReady):
 			return s.advanceFrames(1, actionReadyCheckPhase)
 		case errors.Is(err, player.ErrActionNoOp):
-			// don't do anything here
+			// ここでは何もしない
 		default:
 			return nil, err
 		}
@@ -198,10 +198,10 @@ func actionReadyCheckPhase(s *Simulation) (stateFn, error) {
 }
 
 func (s *Simulation) handleWait(q *action.Eval) (stateFn, error) {
-	// to maintain existing functionality, wait (alias sleep) is always ready and should cause
-	// advanceFrames to be called equal to the param f
+	// 既存の機能を維持するため、wait（sleepのエイリアス）は常に準備完了であり、
+	// パラメータ f と同じ数だけ advanceFrames を呼び出す
 	skip := q.Param["f"]
-	// log wait(0) differently to make it obvious
+	// wait(0) であることが分かりやすいように別途ログに記録する
 	if skip == 0 {
 		s.C.Log.NewEvent("executed noop wait(0)", glog.LogActionEvent, s.C.Player.Active()).
 			Write("f", skip)
@@ -210,7 +210,7 @@ func (s *Simulation) handleWait(q *action.Eval) (stateFn, error) {
 			Write("f", skip)
 	}
 	if l := s.popQueue(); l > 0 {
-		// don't go back to queue if there are more actions already queued
+		// 既にキューにアクションがある場合はキューに戻らない
 		return s.advanceFrames(skip, actionReadyCheckPhase)
 	}
 	return s.advanceFrames(skip, queuePhase)
@@ -223,12 +223,12 @@ func executeActionDelay(s *Simulation) (stateFn, error) {
 		}
 		return s.advanceFrames(1, executeActionDelay)
 	}
-	// go back to the ready check phase in case an action becomes unavailable after delay
+	// delay後にアクションが利用不可になった場合に備えて準備チェックフェーズに戻る
 	return actionReadyCheckPhase, nil
 }
 
 func executeActionPhase(s *Simulation) (stateFn, error) {
-	//TODO: this sanity check is probably not necessary
+	//TODO: このサニティチェックはおそらく不要
 	if len(s.queue) == 0 {
 		return nil, errors.New("unexpected queue length is 0")
 	}
@@ -241,21 +241,21 @@ func executeActionPhase(s *Simulation) (stateFn, error) {
 	q := s.queue[0]
 	err := s.C.Player.Exec(q.Action, q.Char, q.Param)
 	if err != nil {
-		//TODO: this check probably doesn't do anything
+		//TODO: このチェックはおそらく何もしない
 		if errors.Is(err, player.ErrActionNoOp) {
 			if l := s.popQueue(); l > 0 {
-				// don't go back to queue if there are more actions already queued
+				// 既にキューにアクションがある場合はキューに戻らない
 				return actionReadyCheckPhase, nil
 			}
 			return queuePhase, nil
 		}
-		// this is now unexpected since action should be ready now
-		// wrap the error for more context
+		// アクションは準備完了のはずなので、ここでのエラーは想定外
+		// コンテキストを追加するためエラーをラップする
 		return nil, fmt.Errorf("error encountered on %v executing %v: %w", q.Char.String(), q.Action.String(), err)
 	}
-	//TODO: this check here is probably unnecessary
+	//TODO: ここのチェックはおそらく不要
 	if l := s.popQueue(); l > 0 {
-		// don't go back to queue if there are more actions already queued
+		// 既にキューにアクションがある場合はキューに戻らない
 		return actionReadyCheckPhase, nil
 	}
 
@@ -269,7 +269,7 @@ func skipUntilCanQueue(s *Simulation) (stateFn, error) {
 	return queuePhase, nil
 }
 
-// nextFrame moves up the frame by 1, performing
+// advanceFrames はフレームを指定数だけ進め、各フレームで処理を実行する
 func (s *Simulation) advanceFrames(f int, next stateFn) (stateFn, error) {
 	for i := 0; i < f; i++ {
 		done, err := s.nextFrame()
@@ -297,11 +297,11 @@ func (s *Simulation) nextFrame() (bool, error) {
 
 func (s *Simulation) stopCheck() bool {
 	if s.C.Combat.DamageMode {
-		// stop if no more actions
+		// アクションが残っていない場合は停止
 		if s.noMoreActions {
 			return true
 		}
-		// stop if all targets are reporting dead
+		// 全ターゲットが死亡を報告している場合は停止
 		allDead := true
 		for _, t := range s.C.Combat.Enemies() {
 			if t.IsAlive() {
@@ -314,12 +314,12 @@ func (s *Simulation) stopCheck() bool {
 	return s.C.F == int(s.cfg.Settings.Duration*60)
 }
 
-// TODO: remove defer in favour of every function actually returning error
+// TODO: 各関数が実際にerrorを返すようにしてdeferを削除する
 //
-//nolint:nonamedreturns,nakedret // not possible to perform the res, err modification without named return
+//nolint:nonamedreturns,nakedret // 名前付き戻り値なしでは res, err の変更ができないため
 func (s *Simulation) Run() (res stats.Result, err error) {
 	defer func() {
-		// recover from panic if one occured. Set err to nil otherwise.
+		// パニックが発生した場合はリカバリする。それ以外の場合は err を nil に設定する。
 		if r := recover(); r != nil {
 			res = stats.Result{Seed: uint64(s.C.Seed), Duration: s.C.F + 1}
 			err = fmt.Errorf("simulation panic occured: %v \n"+string(debug.Stack()), r)

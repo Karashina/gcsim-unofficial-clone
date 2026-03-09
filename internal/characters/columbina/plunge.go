@@ -15,7 +15,7 @@ var (
 	lowPlungeFrames  []int
 )
 
-// TODO: Frame data not measured, using stub values
+// TODO: フレームデータ未計測、スタブ値を使用
 const (
 	collisionHitmark  = 999
 	highPlungeHitmark = 999
@@ -23,7 +23,7 @@ const (
 )
 
 func init() {
-	// TODO: Frame data not measured, using stub values
+	// TODO: フレームデータ未計測、スタブ値を使用
 	plungeFrames = frames.InitAbilSlice(999)
 	plungeFrames[action.ActionAttack] = 999
 	plungeFrames[action.ActionSkill] = 999
@@ -52,7 +52,7 @@ func init() {
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 
-	// Collision
+	// 衝突
 	_, ok := p["collision"]
 	if !ok {
 		aiCollision := combat.AttackInfo{
@@ -74,7 +74,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 		)
 	}
 
-	// High Plunge
+	// 高空落下攻撃
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "High Plunge (HP)",
@@ -105,7 +105,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 
-	// Collision
+	// 衝突
 	_, ok := p["collision"]
 	if !ok {
 		aiCollision := combat.AttackInfo{
@@ -127,7 +127,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 		)
 	}
 
-	// Low Plunge
+	// 低空落下攻撃
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Low Plunge (LP)",

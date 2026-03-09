@@ -12,10 +12,10 @@ import (
 )
 
 func parseCharacter(p *Parser) (parseFn, error) {
-	// expecting one of:
-	//	char lvl etc
-	// 	add
-	// should be any action here
+	// 以下のいずれかを期待:
+	//	char lvl 等
+	// 	追加
+	// ここでは任意のアクションが来るはず
 	switch n := p.next(); n.Typ {
 	case ast.KeywordChar:
 		return parseCharDetails, nil
@@ -82,17 +82,17 @@ func parseCharDetails(p *Parser) (parseFn, error) {
 			if err != nil {
 				return nil, err
 			}
-		case ast.ItemPlus: // optional flags
+		case ast.ItemPlus: // オプションフラグ
 			n = p.next()
 			switch n.Typ {
 			case ast.KeywordParams:
-				// expecting =[
+				// =[を期待
 				_, err = p.acceptSeqReturnLast(ast.ItemAssign, ast.ItemLeftSquareParen)
 				if err != nil {
 					return nil, fmt.Errorf("ln%v: invalid token after param;", n.Line)
 				}
 				p.backup()
-				// overriding here if it already exists
+				// 既に存在する場合は上書き
 				c.Params, err = p.acceptOptionalParamReturnOnlyIntMap()
 			default:
 				err = fmt.Errorf("ln%v: unexpected token after +: %v", n.Line, n)
@@ -108,7 +108,7 @@ func parseCharDetails(p *Parser) (parseFn, error) {
 }
 
 func parseCharacterAdd(p *Parser) (parseFn, error) {
-	// after add we expect either weapon, set, or stats
+	// add の後には weapon、set、または stats を期待
 	n := p.next()
 	switch n.Typ {
 	case ast.KeywordWeapon:
@@ -151,17 +151,17 @@ func parseCharAddSet(p *Parser) (parseFn, error) {
 			if err == nil {
 				count, err = itemNumberToInt(x)
 			}
-		case ast.ItemPlus: // optional flags
+		case ast.ItemPlus: // オプションフラグ
 			n = p.next()
 			switch n.Typ {
 			case ast.KeywordParams:
-				// expecting =[
+				// =[を期待
 				_, err = p.acceptSeqReturnLast(ast.ItemAssign, ast.ItemLeftSquareParen)
 				if err != nil {
 					return nil, fmt.Errorf("ln%v: invalid token after param", n.Line)
 				}
 				p.backup()
-				// overriding here if it already exists
+				// 既に存在する場合は上書き
 				c.SetParams[label], err = p.acceptOptionalParamReturnOnlyIntMap()
 			default:
 				err = fmt.Errorf("ln%v: unexpected token after +: %v", n.Line, n)
@@ -212,17 +212,17 @@ func parseCharAddWeapon(p *Parser) (parseFn, error) {
 				c.Weapon.Refine, err = itemNumberToInt(x)
 				refineOk = true
 			}
-		case ast.ItemPlus: // optional flags
+		case ast.ItemPlus: // オプションフラグ
 			n = p.next()
 			switch n.Typ {
 			case ast.KeywordParams:
-				// expecting =[
+				// =[を期待
 				_, err = p.acceptSeqReturnLast(ast.ItemAssign, ast.ItemLeftSquareParen)
 				if err != nil {
 					return nil, fmt.Errorf("ln%v: invalid token after param", n.Line)
 				}
 				p.backup()
-				// overriding here if it already exists
+				// 既に存在する場合は上書き
 				c.Weapon.Params, err = p.acceptOptionalParamReturnOnlyIntMap()
 			default:
 				err = fmt.Errorf("ln%v: unexpected token after +: %v", n.Line, n)
@@ -249,7 +249,7 @@ func parseCharAddStats(p *Parser) (parseFn, error) {
 	// xiangling add stats hp=4780 atk=311 er=.518 pyro%=0.466 cr=0.311;
 	c := p.chars[p.currentCharKey]
 
-	// each line will be parsed separately into the map
+	// 各行はマップに個別にパースされる
 	var line = make([]float64, attributes.EndStatType)
 	var key string
 
@@ -263,7 +263,7 @@ func parseCharAddStats(p *Parser) (parseFn, error) {
 			if err != nil {
 				return nil, err
 			}
-			// TODO: use attributes.StrToStatType?
+			// TODO: attributes.StrToStatType を使うべき？
 			pos := ast.StatKeys[n.Val]
 			line[pos] += amt
 		case ast.KeywordLabel:
@@ -273,7 +273,7 @@ func parseCharAddStats(p *Parser) (parseFn, error) {
 			}
 			key = x.Val
 		case ast.ItemTerminateLine:
-			// add stats into label
+			// ステータスをラベルに追加
 			m, ok := c.StatsByLabel[key]
 			if !ok {
 				m = make([]float64, attributes.EndStatType)
@@ -299,15 +299,15 @@ func parseCharAddStats(p *Parser) (parseFn, error) {
 func parseCharAddRandomStats(p *Parser) (parseFn, error) {
 	// xiangling add stats random rarity=5 sand=hp% goblet=pyro% circlet=cr
 
-	// note that plume/flower not specified and will be ignored
+	// 羽根/花は指定されず無視される点に注意
 	rs := &info.RandomSubstats{
-		Rarity: 5, // default to 5 star
+		Rarity: 5, // デフォルトは★5つ
 	}
 
 	for n := p.next(); n.Typ != ast.ItemEOF; n = p.next() {
 		switch n.Typ {
 		case ast.ItemTerminateLine:
-			// check to make sure all values are valid
+			// すべての値が有効であることを確認
 			err := rs.Validate()
 			if err != nil {
 				return nil, fmt.Errorf("ln%v: %w", n.Line, err)
@@ -358,7 +358,7 @@ func (p *Parser) acceptLevelReturnBaseMax() (int, int, error) {
 	base := 0
 	maxlvl := 0
 	var err error
-	// expect =xx/yy
+	// =xx/yyの形式を期待
 	var x ast.Token
 	x, err = p.consume(ast.ItemAssign)
 	if err != nil {

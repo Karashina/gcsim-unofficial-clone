@@ -115,22 +115,20 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		buff:          make([]float64, attributes.EndStatType),
 		nightsoulBuff: make([]float64, attributes.EndStatType),
 	}
-	// 2 Piece: When a nearby party member triggers a Nightsoul Burst, the equipping
-	// character regenerates 6 Elemental Energy.
+	// 2セット: 近くのパーティメンバーがNightsoul Burstを発動すると、装備
+	// キャラクターの元素エネルギーが6回復。
 	if count >= 2 {
 		c.Combat.Events.Subscribe(event.OnNightsoulBurst, func(args ...interface{}) bool {
 			char.AddEnergy("scroll-2pc", 6)
 			return false
 		}, fmt.Sprintf("scroll-2pc-%v", char.Base.Key.String()))
 	}
-	// 4 Piece: After the equipping character triggers a reaction related to their
-	// Elemental Type, all nearby party members gain a 12% Elemental DMG Bonus for
-	// the Elemental Types involved in the elemental reaction for 15s. If the
-	// equipping character is in the Nightsoul's Blessing state when triggering this
-	// effect, all nearby party members gain an additional 28% Elemental DMG Bonus
-	// for the Elemental Types involved in the elemental reaction for 20s. The
-	// equipping character can trigger this effect while off-field, and the DMG bonus
-	// from Artifact Sets with the same name do not stack.
+	// 4セット: 装備キャラが自身の元素タイプに関連する反応を発動すると、
+	// 全周囲のパーティメンバーが反応に関与した元素の元素ダメージ+12%を15秒間獲得。
+	// 装備キャラが夜魂の祝福状態の場合、
+	// さらに元素ダメージ+28%を20秒間追加獲得。
+	// 装備キャラはフィールド外でも発動可能。
+	// 同名の聖遺物セットのダメージボーナスは重複しない。
 	if count >= 4 {
 		for evt, react := range map[event.Event]reactions.ReactionType{
 			event.OnOverload:           reactions.Overload,

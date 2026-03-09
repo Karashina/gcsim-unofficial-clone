@@ -33,7 +33,7 @@ func (s *Set) Init() error {
 	case info.WeaponClassSword:
 	case info.WeaponClassClaymore:
 	default:
-		// don't add this mod if wrong weapon class
+		// 武器種が一致しない場合、このModを追加しない
 		return nil
 	}
 

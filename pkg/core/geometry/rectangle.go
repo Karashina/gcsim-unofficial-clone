@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-// center = true center of rect
-// spawn = point rect extends outward from (centered on x, on y edge)
+// center = 矩形の真の中心
+// spawn = 矩形が外側に広がる起点（xは中央、yは端）
 type Rectangle struct {
 	center  Point
 	spawn   Point
@@ -29,13 +29,13 @@ func NewRectangle(spawn Point, w, h float64, dir Point) *Rectangle {
 }
 
 func calcCorners(spawn Point, w, h float64, dir Point) ([]Point, Point) {
-	// spawn is on the bottomLeft - bottomRight edge and not the middle point of the rectangle
+	// spawn は bottomLeft - bottomRight の端上にあり、矩形の中心ではない
 	topLeft := Point{X: -w / 2, Y: h}
 	topRight := Point{X: w / 2, Y: h}
 	bottomRight := Point{X: w / 2, Y: 0}
 	bottomLeft := Point{X: -w / 2, Y: 0}
 	corners := []Point{topLeft, topRight, bottomRight, bottomLeft}
-	// add rotation
+	// 回転を適用
 	for i := 0; i < len(corners); i++ {
 		rotatedCorner := corners[i].Rotate(dir)
 		corners[i] = rotatedCorner.Add(spawn)
@@ -91,18 +91,18 @@ func (r *Rectangle) String() string {
 	return fmt.Sprintf("w: %v h: %v center: %v topLeft: %v topRight: %v bottomRight: %v bottomLeft: %v dir: %v", r.w, r.h, r.center, r.corners[0], r.corners[1], r.corners[2], r.corners[3], r.dir)
 }
 
-// collision related
+// 衝突関連
 
 func (r *Rectangle) PointInShape(p Point) bool {
-	// set origin to rectangle center by shifting point
-	// effectively makes rectangle center X:0, Y:0
+	// 点をシフトして原点を矩形の中心に設定
+	// 実質的に矩形の中心を X:0, Y:0 にする
 	relative := p.Sub(r.center)
 
-	// take direction from rectangle and rotate point in the opposite direction to remove rectangle rotation
+	// 矩形の方向を取得し、点を逆方向に回転させて回転を除去
 	dir := r.dir.Mul(Point{X: -1, Y: 1})
 	local := relative.Rotate(dir)
 
-	// check against unrotated rectangle
+	// 回転されていない矩形に対してチェック
 	checkX := local.X
 	checkY := local.Y
 
@@ -121,23 +121,23 @@ func (r *Rectangle) IntersectCircle(c Circle) bool {
 	return IntersectRectangle(*r, c)
 }
 
-// this exists but is unused because targets are all circles
-// other interesting links:
+// これは存在するが、ターゲットが全て円であるため未使用
+// その他の参考リンク:
 // https://stackoverflow.com/a/115520
 // https://gist.github.com/shamansir/3007244
 // https://stackoverflow.com/a/6016515
 func (r *Rectangle) IntersectRectangle(r2 Rectangle) bool {
-	// AABB test
+	// AABB判定
 	if !AABBTest(r.aabb, r2.aabb) {
 		return false
 	}
 
-	// can skip SAT if both rectangles are axis aligned
+	// 両方の矩形が軸に沿っている場合はSATをスキップ可能
 	if (r.dir.X == 0 || r.dir.Y == 0) && (r2.dir.X == 0 || r2.dir.Y == 0) {
 		return true
 	}
 
-	// SAT test
+	// SAT テスト
 	// https://dyn4j.org/2010/01/sat/
 	r1Axes := r.getAxes()
 	r2Axes := r2.getAxes()

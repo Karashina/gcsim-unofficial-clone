@@ -28,7 +28,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 	s := Set{Count: count}
 
 	if count >= 2 {
-		// shield bonus always active
+		// シールドボーナスは常時有効
 		c.Player.Shields.AddShieldBonusMod("bolide-2pc", -1, func() (float64, bool) {
 			return 0.35, false
 		})

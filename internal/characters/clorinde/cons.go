@@ -23,14 +23,13 @@ const (
 	c6GlimbrightAtkP           = 2
 )
 
-var c1Hitmarks = []int{1, 1} // TODO hitmark for each c1 hit
+var c1Hitmarks = []int{1, 1} // TODO: 各１凸ヒットのヒットマーク
 
-// While Hunter's Vigil's Night Vigil state is active,
-// when Electro DMG from  Clorinde's Normal Attacks hit opponents,
-// they will trigger 2 coordinated attacks from a Nightvigil Shade
-// summoned near the hit opponent, each dealing 30% of Clorinde's ATK as Electro DMG.
-// This effect can occur once every 1.2s. DMG dealt this way is considered
-// Normal Attack DMG.
+// 狩人の律の夜巡状態中、クロリンデの通常攻撃の電元素ダメージが敵に命中した時、
+// 命中した敵の近くに召喚された夜巡の影から2回の追撃を行い、
+// それぞれクロリンデの攻撃力の30%の電元素ダメージを与える。
+// この効果は1.2秒ごとに1回のみ発動。このダメージは
+// 通常攻撃ダメージとみなされる。
 
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
@@ -81,10 +80,10 @@ func (c *char) c1() {
 	}, "clorinde-c1")
 }
 
-// When Last Lightfall deals DMG to opponent(s),
-// DMG dealt is increased based on Clorinde's Bond of Life percentage.
-// Every 1% of her current Bond of Life will increase Last Lightfall DMG by 2%.
-// The maximum Last Lightfall DMG increase achievable this way is 200%.
+// ラストライトフォールが敵にダメージを与えた時、
+// クロリンデの命の契約の割合に応じてダメージが増加する。
+// 現在の命の契約1%ごとにラストライトフォールのダメージ2%増加。
+// 最大増加は200%。
 
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
@@ -104,8 +103,8 @@ func (c *char) c4() {
 	})
 }
 
-// For 12s after Hunter's Vigil is used,
-// Clorinde's CRIT Rate will be increased by 10%, and her CRIT DMG by 70%.
+// 狩人の律使用後12秒間、
+// クロリンデの会心率10%アップ、会心ダメージ70%アップ。
 func (c *char) c6skill() {
 	if c.Base.Cons < 6 {
 		return
@@ -140,10 +139,9 @@ func (c *char) c6skill() {
 	})
 }
 
-// Additionally, while Night Vigil is active, a Glimbright Shade
-// will appear under specific circumstances, executing an attack
-// that deals 200% of Clorinde's ATK as Electro DMG.
-// DMG dealt this way is considered Normal Attack DMG.
+// また、夜巡中に特定の条件でグリムブライトシェードが出現し、
+// クロリンデの攻撃力の200%の電元素ダメージを与える攻撃を実行する。
+// このダメージは通常攻撃ダメージとみなされる。
 func (c *char) c6() {
 	if c.StatusIsActive(c6GlimbrightIcdKey) {
 		return

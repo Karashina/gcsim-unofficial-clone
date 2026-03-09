@@ -26,15 +26,14 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Increases Elemental Skill DMG by 6%. After Elemental Skill hits an
-	// opponent, the character loses 3 Energy but regenerates 3 Energy every 2s
-	// for the next 6s. This effect can occur once every 10s. Can be triggered
-	// even when the character is not on the field.
+	// 元素スキルのダメージが6%増加する。元素スキルが敵に命中した後、
+	// エネルギーが3減少するが、その後6秒間、2秒毎にエネルギーを3回復する。
+	// この効果は10秒毎に1回発動可能。キャラクターがフィールドにいなくても発動できる。
 	w := &Weapon{}
 	r := p.Refine
 	const icdKey = "kitain-icd"
 
-	// permanent increase
+	// 永続増加
 	m := make([]float64, attributes.EndStatType)
 	base := 0.045 + float64(r)*0.015
 	m[attributes.DmgP] = base
@@ -63,7 +62,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		char.AddStatus(icdKey, 600, true)
 		char.AddEnergy("kitain", -3)
 		for i := 120; i <= 360; i += 120 {
-			// assuming the ticks gets affected by hitlag
+			// ヒットラグの影響を受けると仮定
 			char.QueueCharTask(func() {
 				char.AddEnergy("kitain", regen)
 			}, i)

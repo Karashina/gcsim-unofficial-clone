@@ -36,7 +36,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	mATK := make([]float64, attributes.EndStatType)
 	atkp := 0.009 + float64(r)*0.003
-	// to avoid infinite loop when calling MaxHP
+	// MaxHP呼び出し時の無限ループを避けるため
 	char.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("jadecutter-atk-buff", -1),
 		AffectedStat: attributes.ATK,

@@ -13,7 +13,7 @@ import (
 var burstFrames []int
 
 const (
-	initialHeal = 97 // depends on ping
+	initialHeal = 97 // pingに依存
 	hitmark     = 92
 )
 
@@ -39,7 +39,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: -1.5}, 7), 0, 0, c.makeA4CB())
 	}, hitmark)
 
-	// initial heal
+	// 初期回復
 	c.QueueCharTask(func() {
 		heal := burstHealFlat[c.TalentLvlBurst()] + burstHealPer[c.TalentLvlBurst()]*c.TotalAtk()
 		c.Core.Player.Heal(info.HealInfo{
@@ -60,7 +60,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

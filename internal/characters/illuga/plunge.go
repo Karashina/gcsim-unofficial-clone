@@ -45,7 +45,7 @@ func init() {
 	highPlungeFrames[action.ActionSwap] = 47
 }
 
-// LowPlungeAttack performs low plunge attack
+// LowPlungeAttack は低空落下攻撃を実行する
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
@@ -94,7 +94,7 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// HighPlungeAttack performs high plunge attack
+// HighPlungeAttack は高空落下攻撃を実行する
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
@@ -143,7 +143,7 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// Collision attack for plunge
+// 落下攻撃の衝突ダメージ
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

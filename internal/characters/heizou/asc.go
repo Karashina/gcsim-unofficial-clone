@@ -10,9 +10,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When Shikanoin Heizou activates a Swirl reaction while on the field,
-// he will gain 1 Declension stack for Heartstopper Strike.
-// This effect can be triggered once every 0.1s.
+// 鹿野院平蔵がフィールド上で拡散反応を発動した時、
+// 勉ぎの心の譲り重ねスタックを1層獲得する。
+// この効果は0.1秒に1回発動可能。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -38,7 +38,7 @@ func (c *char) a1() {
 			default:
 				return false
 			}
-			// icd is triggered regardless if stacks are maxed or not
+			// スタックが上限であってもICDは発動する
 			c.AddStatus(a1IcdKey, 6, true)
 			c.addDecStack()
 			return false
@@ -48,8 +48,8 @@ func (c *char) a1() {
 	c.Core.Events.Subscribe(event.OnEnemyDamage, swirlCB(), "heizou-a1")
 }
 
-// After Shikanoin Heizou's Heartstopper Strike hits an opponent,
-// increases all party members' (excluding Shikanoin Heizou) Elemental Mastery by 80 for 10s.
+// 鹿野院平蔵の勉ぎの心が敵に命中した後、
+// パーティー全員（平蔵を除く）の元素熔煙が10秒間80アップする。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -58,7 +58,7 @@ func (c *char) a4() {
 	dur := 60 * 10
 	for i, char := range c.Core.Player.Chars() {
 		if i == c.Index {
-			continue // nothing for heizou
+			continue // 平蔵自身には適用しない
 		}
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("heizou-a4", dur),

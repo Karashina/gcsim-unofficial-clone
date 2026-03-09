@@ -29,9 +29,9 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// 2-Piece Bonus: Dendro DMG Bonus +15%.
-// 4-Piece Bonus: After Elemental Skills or Bursts hit opponents, the targets’ Dendro RES will be decreased by 30% for 8s.
-// This effect can be triggered even if the equipping character is not on the field.
+// 2セット効果: 草元素ダメージボーナス +15%
+// 4セット効果: 元素スキルまたは元素爆発が敵に命中後、対象の草元素耐性が8秒間30%低下。
+// この効果は装備キャラがフィールド上にいなくても発動可能。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 

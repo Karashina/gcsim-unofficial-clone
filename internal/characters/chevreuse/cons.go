@@ -19,10 +19,10 @@ const (
 	c4StatusKey = "chev-c4"
 )
 
-// When the active character with the "Coordinated Tactics" status (not including Chevreuse herself)
-// triggers the Overloaded reaction, they will recover 6 Energy.
-// This effect can be triggered once every 10s.
-// You must first unlock the Passive Talent "Vanguard's Coordinated Tactics."
+// 「共同戦術」状態のアクティブキャラクター（シュヴルーズ自身を除く）が
+// 過負荷反応を起こすと、元素エネルギー6を回復する。
+// この効果は10秒に1回発動可能。
+// 固有天賦「先峰隊の協同戦術」の解放が必要。
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
@@ -33,15 +33,15 @@ func (c *char) c1() {
 
 	c.Core.Events.Subscribe(event.OnOverload, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
-		// does not include chevreuse
+		// シュヴルーズ自身は含まない
 		if atk.Info.ActorIndex == c.Index {
 			return false
 		}
-		// does not trigger off-field
+		// フィールド外ではトリガーしない
 		if atk.Info.ActorIndex != c.Core.Player.Active() {
 			return false
 		}
-		// does not trigger if on cd
+		// CD中はトリガーしない
 		if c.StatusIsActive(c1ICDKey) {
 			return false
 		}
@@ -54,16 +54,16 @@ func (c *char) c1() {
 	}, "chev-c1")
 }
 
-// After Holding Short-Range Rapid Interdiction Fire and hitting a target,
-// 2 chain explosions will be triggered near the location where said target is hit.
-// Each explosion deals Pyro DMG equal to 120% of Chevreuse's ATK.
-// This effect can be triggered up to once every 10s,
-// and DMG dealt this way is considered Elemental Skill DMG.
+// 近距離キャノン急射の長押しでターゲットに命中した後、
+// 命中位置付近で2回の連鎖爆発がトリガーされる。
+// 各爆発はシュヴルーズの攻撃力120%分の炎元素ダメージを与える。
+// この効果は10秒に1回までトリガー可能で、
+// ダメージは元素スキルダメージとみなされる。
 func (c *char) c2() combat.AttackCBFunc {
 	if c.Base.Cons < 2 {
 		return nil
 	}
-	// triggers on hitting anything, not just enemy
+	// 敵だけでなく何かに命中した時にトリガー
 	return func(a combat.AttackCB) {
 		if c.StatusIsActive(c2ICDKey) {
 			return
@@ -74,7 +74,7 @@ func (c *char) c2() combat.AttackCBFunc {
 			ActorIndex: c.Index,
 			Abil:       "Sniper Induced Explosion (C2)",
 			AttackTag:  attacks.AttackTagElementalArt,
-			// should be ElementalArtExtra but no other chevreuse attack shares this tag so this is ok
+			// ElementalArtExtra であるべきだが、他の Chevreuse の攻撃はこのタグを共有していないので問題ない
 			ICDTag:     attacks.ICDTagElementalArt,
 			ICDGroup:   attacks.ICDGroupDefault,
 			StrikeType: attacks.StrikeTypeBlunt,
@@ -84,16 +84,16 @@ func (c *char) c2() combat.AttackCBFunc {
 			Mult:       1.2,
 		}
 
-		// calc pos
+		// 位置を計算
 		player := c.Core.Combat.Player()
 		targetPos := a.Target.Pos()
-		// TODO: using player direction here is inaccurate since it should maybe be the direction from which it was hit?
+		// TODO: ここでプレイヤーの方向を使用しているのは不正確。被弾方向を使うべきかもしれない
 		bomb1Pos := geometry.CalcOffsetPoint(targetPos, geometry.Point{X: -1.5}, player.Direction())
 		bomb2Pos := geometry.CalcOffsetPoint(targetPos, geometry.Point{X: 1.5}, player.Direction())
 
-		// calc delay
-		// random between 0.6s and 1s from hit
-		// not shared between bombs
+		// 遅延を計算
+		// 命中から0.6秒～1秒のランダム
+		// 爆弾間で共有されない
 		bomb1Delay := int(60 * (0.6 + c.Core.Rand.Float64()*(1-0.6)))
 		bomb2Delay := int(60 * (0.6 + c.Core.Rand.Float64()*(1-0.6)))
 
@@ -113,10 +113,10 @@ func (c *char) c2() combat.AttackCBFunc {
 	}
 }
 
-// After using Ring of Bursting Grenades, the Hold mode of Short-Range Rapid Interdiction Fire
-// will not go on cooldown when Chevreuse uses it.
-// This effect is removed after Short-Range Rapid Interdiction Fire
-// has been fired twice using Hold or after 6s.
+// 手榴弾一斉発射使用後、近距離キャノン急射の長押しは
+// CDに入らなくなる。
+// この効果は長押しで2回発射するか、
+// 6秒経過後に解除される。
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
@@ -125,8 +125,8 @@ func (c *char) c4() {
 	c.c4ShotsLeft = 2
 }
 
-// After 12s of the healing effect from Short-Range Rapid Interdiction Fire,
-// all nearby party members recover HP equivalent to 10% of Chevreuse's Max HP once.
+// 近距離キャノン急射の回復効果から12秒後、
+// 付近の全パーティメンバーはシュヴルーズのHP上限の10%のHPを回復する。
 func (c *char) c6TeamHeal() {
 	if c.Base.Cons < 6 {
 		return

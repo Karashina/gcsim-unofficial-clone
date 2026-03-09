@@ -41,12 +41,11 @@ var procEvents = []event.Event{
 	event.OnBurgeon,
 }
 
-// After triggering Burning, Quicken, Aggravate, Spread, Bloom, Hyperbloom, or
-// Burgeon, a Leaf of Revival will be created around the character for a
-// maximum of 10s. When picked up, the Leaf will grant the character
-// 16/20/24/28/32% ATK for 12s. Only 1 Leaf can be generated this way every
-// 20s. This effect can still be triggered if the character is not on the
-// field.
+// 燃焼、激化、超激化、草激化、開花、超開花、烈開花の反応発動後、
+// キャラクターの周囲に復活の葉が生成される（最大10秒）。
+// 拾うと、キャラクターの攻撃力が12秒間16/20/24/28/32%増加する。
+// 葉は20秒毎に1枚のみ生成可能。
+// キャラクターがフィールドにいなくても発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

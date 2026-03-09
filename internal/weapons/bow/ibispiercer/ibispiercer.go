@@ -25,8 +25,8 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// The character's Elemental Mastery will increase by 40/50/60/70/80 within 6s after Charged Attacks hit opponents.
-// Max 2 stacks. This effect can triggered once every 0.5s.
+// 重撃が敵に命中した後6秒間、キャラクターの元素熟知が40/50/60/70/80増加する。
+// 最大2スタック。この効果は0.5秒毎に1回発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -45,41 +45,41 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 
-		// Attack belongs to the equipped character
+		// 武器装備者からの攻撃かチェック
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
 
-		// Active character has weapon equipped
+		// 武器装備キャラクターがフィールド上にいるかチェック
 		if c.Player.Active() != char.Index {
 			return false
 		}
 
-		// Only apply on charged attacks
+		// 重撃でのみ適用
 		if atk.Info.AttackTag != attacks.AttackTagExtra {
 			return false
 		}
 
-		// Check if cd is up
+		// クールダウン中かチェック
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
 
-		// Reset stacks if they've expired
+		// スタックが期限切れの場合リセット
 		if !char.StatusIsActive(stackKey) {
 			stacks = 0
 		}
 
-		// Checks done, proc weapon passive
-		// Increment stack count
+		// チェック完了、武器パッシブを発動
+		// スタック数を増加
 		if stacks < maxStacks {
 			stacks++
 		}
 
-		// trigger cd
+		// クールダウンを発動
 		char.AddStatus(icdKey, cd, true)
 
-		// add buff
+		// バフを追加
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(stackKey, stackDuration),
 			AffectedStat: attributes.EM,

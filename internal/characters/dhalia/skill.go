@@ -18,7 +18,7 @@ const (
 )
 
 func init() {
-	// Tap E
+	// 元素スキル（単押し）
 	skillFrames = frames.InitAbilSlice(32)
 	skillFrames[action.ActionBurst] = 33
 	skillFrames[action.ActionDash] = 33
@@ -53,7 +53,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

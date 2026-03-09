@@ -21,7 +21,7 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// 1st Hit DMG (Geo, DEF-scaling, Durability 25, No ICD)
+	// 1段目ダメージ（岩元素、防御力スケーリング、元素量25、ICDなし）
 	ai1 := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Tri-Sphere Eminence 1-Hit",
@@ -41,7 +41,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(ai1, ap, 0, 0)
 	}, burstHitmark1)
 
-	// 2nd Hit DMG (Lunar-Crystallize Reaction DMG)
+	// 2段目ダメージ（Lunar-Crystallize反応ダメージ）
 	ai2 := combat.AttackInfo{
 		ActorIndex:       c.Index,
 		Abil:             "Tri-Sphere Eminence 2-Hit (Lunar-Crystallize)",
@@ -54,10 +54,10 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		IgnoreDefPercent: 1,
 	}
 
-	// Calculate 2nd hit multiplier with bonuses
+	// 2段目ヒットの倍率をボーナス込みで計算
 	secondHitMult := 1.6 * burstSecond[c.TalentLvlBurst()]
 
-	// DEF scaling with Lunar-Crystallize formula
+	// Lunar-Crystallize式による防御力スケーリング
 	em := c.Stat(attributes.EM)
 	baseDmg := c.TotalDef(false) * secondHitMult
 	emBonus := (6 * em) / (2000 + em)
@@ -72,14 +72,14 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttackWithSnap(ai2, snap, ap, 0)
 	}, burstHitmark2)
 
-	// If in Lunar Phase Shift mode, extend duration by 1.7s
+	// 月相転移モード中なら持続時間を1.7秒延長
 	if c.lunarPhaseShiftActive {
 		c.extendLunarPhaseShift(102) // 1.7s = 102 frames
 	}
 
-	// Set cooldown (15s)
+	// クールダウンを設定（15秒）
 	c.SetCDWithDelay(action.ActionBurst, 15*60, burstHitmark1)
-	// Consume energy
+	// エネルギーを消費
 	c.ConsumeEnergy(4)
 
 	c.Core.Log.NewEvent("Zibai uses Tri-Sphere Eminence", glog.LogCharacterEvent, c.Index).

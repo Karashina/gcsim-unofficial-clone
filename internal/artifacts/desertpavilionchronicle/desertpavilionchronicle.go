@@ -28,10 +28,10 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// 2pc - Anemo DMG Bonus +15%
-// 4pc - When Charged Attacks hit opponents, the equipping character's Normal Attack SPD will increase by 10% while Normal,
+// 2セット - 風元素ダメージボーナス +15%
+// 4セット - 重撃が敵に命中すると、装備キャラの通常攻撃速度が10%上昇し、通常攻撃・
 //
-//	Charged, and Plunging Attack DMG will increase by 40% for 15s.
+//	重撃・落下攻撃のダメージが15秒間40%増加。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 

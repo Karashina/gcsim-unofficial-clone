@@ -11,15 +11,15 @@ import (
 
 const a1Key = "cyno-a1"
 
-// When Cyno is in the Pactsworn Pathclearer state activated by Sacred Rite: Wolf's Swiftness,
-// Cyno will enter the Endseer stance at intervals. If he activates Secret Rite: Chasmic Soulfarer whle affected by this stance,
-// he will activate the Judication effect, increasing the DMG of this Secret Rite: Chasmic Soulfarer by 35%,
-// and firing off 3 Duststalker Bolts that deal 50% of Cyno's ATK as Electro DMG.
-// Duststalker Bolt DMG is considered Elemental Skill DMG.
+// セノが「圣儀・狼駆」で発動した「契約の导砂者」状態の際、
+// 一定間隔で「末途見」の構えに入る。この構え中に「秘儀・裂置の将」を発動すると、
+// 「裁定」効果が発動し、その「秘儀・裂置の将」のダメージが35%増加し、
+// セノの攻撃力の50%の雷元素ダメージを与える「砂の矢」を3本発射する。
+// 「砂の矢」のダメージは元素スキルダメージとみなされる。
 //
-// - checks for ascension level in burst.go to avoid queuing this up only to fail the ascension level check
+// - 突破レベルチェックは burst.go で行い、突破レベルチェックが失敗するだけのキューを避ける
 //
-// - other parts of a1 depend on the status that this task applies so they don't need an extra ascension check
+// - 固有天賦1の他の部分はこのタスクが適用するステータスに依存するため、追加の突破チェックは不要
 func (c *char) a1() {
 	if !c.StatusIsActive(burstKey) {
 		return
@@ -32,12 +32,12 @@ func (c *char) a1() {
 func (c *char) a1Buff() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DmgP] = 0.35
-	// game also implements dmg buff with 1s modifier
+	// ゲームでも1秒の modifier でダメージバフを実装している
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBaseWithHitlag("cyno-a1-dmg", 60),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
-			// actual game uses AttackTagElementalArtExtra for a1, this is a decent
-			// workaround
+			// 実際のゲームでは固有天賦1に AttackTagElementalArtExtra を使用、これは適切な
+			// 回避策
 			if atk.Info.Abil != skillBName {
 				return nil, false
 			}
@@ -46,8 +46,8 @@ func (c *char) a1Buff() {
 	})
 }
 
-// If Cyno dashes with the a1 modifier, he will increase the modifier's
-// durability by 20. This translates to a 0.28s extension.
+// 固有天賦1の modifier がアクティブの状態でダッシュすると、
+// modifier の耐久が20増加する。0.28秒の延長に相当。
 func (c *char) a1Extension() {
 	c.Core.Events.Subscribe(event.OnDash, func(_ ...interface{}) bool {
 		if c.a1Extended {
@@ -65,9 +65,9 @@ func (c *char) a1Extension() {
 	}, "cyno-a1-dash")
 }
 
-// Cyno's DMG values will be increased based on his Elemental Mastery as follows:
+// セノのダメージ値は元素熔化に基づき以下の通り増加する:
 //
-// - Pactsworn Pathclearer's Normal Attack DMG is increased by 150% of his Elemental Mastery.
+// - 「契約の导砂者」の通常攻撃ダメージが元素熔化の150%分増加。
 func (c *char) a4NormalAttack() float64 {
 	if c.Base.Ascension < 4 {
 		return 0
@@ -75,9 +75,9 @@ func (c *char) a4NormalAttack() float64 {
 	return c.Stat(attributes.EM) * 1.5
 }
 
-// Cyno's DMG values will be increased based on his Elemental Mastery as follows:
+// セノのダメージ値は元素熔化に基づき以下の通り増加する:
 //
-// - Duststalker Bolt DMG from his Passive Talent Featherfall Judgment is increased by 250% of his Elemental Mastery.
+// - 固有天賦「羽落ちの裁定」の「砂の矢」ダメージが元素熔化の250%分増加。
 func (c *char) a4Bolt() float64 {
 	if c.Base.Ascension < 4 {
 		return 0

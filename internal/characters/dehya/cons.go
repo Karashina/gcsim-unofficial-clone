@@ -12,14 +12,14 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Dehya's Max HP is increased by 20%, and she deals bonus DMG based on her Max HP when using the following attacks:
-// ·Molten Inferno's DMG will be increased by 3.6% of her Max HP.
-// ·Leonine Bite's DMG will be increased by 6% of her Max HP.
+// ディヘヤのHP上限が20%増加する。また、以下の攻撃を行う際、HP上限に基づくダメージボーナスを獲得する：
+// ・熔鉄の炎のダメージがHP上限の3.6%分増加する。
+// ・獅子拳のダメージがHP上限の6%分増加する。
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
 	}
-	// 20% hp
+	// HP20%増加
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.HPP] = 0.2
 	c.AddStatMod(character.StatMod{
@@ -29,12 +29,12 @@ func (c *char) c1() {
 			return m, true
 		},
 	})
-	// abil flat dmg
+	// アビリティのフラットダメージ
 	c.c1FlatDmgRatioE = 0.036
 	c.c1FlatDmgRatioQ = 0.06
 }
 
-// When Dehya uses Molten Inferno: Ranging Flame, the duration of the recreated Fiery Sanctum field will be increased by 6s.
+// ディヘヤが熔鉄の炎・烈炎潜伝を使用した際、再生成される浄焔の領域の持続時間が6秒延長される。
 func (c *char) c2IncreaseDur() {
 	if c.Base.Cons < 2 {
 		return
@@ -42,8 +42,8 @@ func (c *char) c2IncreaseDur() {
 	c.sanctumSavedDur += 360
 }
 
-// Additionally, when a Fiery Sanctum exists on the field, DMG dealt by its next coordinated attack will be
-// increased by 50% when active character(s) within the Fiery Sanctum field are attacked.
+// また、浄焔の領域がフィールドに存在する時、領域内のアクティブキャラクターが攻撃を受けると、
+// 次の追撃ダメージが50%増加する。
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
@@ -61,15 +61,15 @@ func (c *char) c2() {
 	})
 	c.Core.Events.Subscribe(event.OnPlayerHit, func(args ...interface{}) bool {
 		char := args[0].(int)
-		// don't trigger if active char not hit
+		// アクティブキャラがヒットされていなければ発動しない
 		if char != c.Core.Player.Active() {
 			return false
 		}
-		// field needs to be active
+		// 領域がアクティブである必要がある
 		if !c.StatusIsActive(dehyaFieldKey) {
 			return false
 		}
-		// player needs to be in field
+		// プレイヤーが領域内にいる必要がある
 		if !c.Core.Combat.Player().IsWithinArea(c.skillArea) {
 			return false
 		}
@@ -79,8 +79,8 @@ func (c *char) c2() {
 	}, "dehya-c2")
 }
 
-// When Flame-Mane's Fist and Incineration Drive attacks unleashed during Leonine Bite hit opponents,
-// they will restore 1.5 Energy for Dehya and 2.5% of her Max HP. This effect can be triggered once every 0.2s.
+// 獅子拳中に発動する炎鬣の拳と焼尽の駆動が敵に命中した際、
+// ディヘヤのエネルギーを1.5回復し、HP上限の2.5%分のHPを回復する。この効果は0.2秒毎に1回発動可能。
 const c4Key = "dehya-c4"
 const c4ICDKey = "dehya-c4-icd"
 
@@ -108,10 +108,10 @@ func (c *char) c4CB() combat.AttackCBFunc {
 	}
 }
 
-// The CRIT Rate of Leonine Bite is increased by 10%.
-// Additionally, after a Flame-Mane's Fist attack hits an opponent and deals CRIT Hits during a single Blazing Lioness state,
-// it will cause the CRIT DMG of Leonine Bite to increase by 15% for the rest of Blazing Lioness's duration and extend that duration by 0.5s.
-// This effect can be triggered every 0.2s. The duration can be extended for a maximum of 2s and CRIT DMG can be increased by a maximum of 60% this way.
+// 獅子拳の会心率が10%上昇する。
+// また、一回の炎鬣獅子状態中に炎鬣の拳が敵に命中し会心が発生すると、
+// 獅子拳の会心ダメージが残りの炎鬣獅子の持続時間中15%増加し、持続時間が0.5秒延長される。
+// この効果は0.2秒毎に1回発動可能。持続時間は最大2秒延長可能、会心ダメージは最大60%まで増加可能。
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return

@@ -44,7 +44,7 @@ func (c *char) Init() error {
 	c.a4Buff = make([]float64, attributes.EndStatType)
 	c.a4Buff[attributes.EM] = 80
 
-	// make sure to use the same key everywhere so that these passives don't stack
+	// 同じキーを全箇所で使用してこれらのパッシブが重複しないようにする
 	c.Core.Player.AddStamPercentMod("utility-dash", -1, func(a action.Action) (float64, bool) {
 		if a == action.ActionDash && c.CurrentHPRatio() > 0 {
 			return -0.2, false
@@ -78,7 +78,7 @@ func (c *char) Condition(fields []string) (any, error) {
 }
 
 func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]int) error {
-	// cannot use charge without attack beforehand unlike most of the other catalyst users
+	// 他の法器キャラと異なり、通常攻撃なしでは重撃を使用できない
 	if a == action.ActionCharge && c.Core.Player.LastAction.Type != action.ActionAttack {
 		return player.ErrInvalidChargeAction
 	}

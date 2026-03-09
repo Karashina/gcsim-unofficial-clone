@@ -28,8 +28,8 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// On hit, Normal or Charged Attacks increase ATK and DEF by 6% for 6s. Max 4
-	// stacks. This effect can only occur once every 0.5s.
+	// 命中時、通常攻撃または重撃で攻撃力と防御力が6秒間6%増加。最大4
+	// スタック。この効果は0.5秒に1回のみ発動。
 	w := &Weapon{}
 	r := p.Refine
 
@@ -59,12 +59,12 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 		if w.stacks < 4 {
 			w.stacks++
-			// update buff
+			// バフを更新
 			w.buff[attributes.ATKP] = amt * float64(w.stacks)
 			w.buff[attributes.DEFP] = amt * float64(w.stacks)
 		}
 
-		// refresh mod
+		// 修飾子を更新
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("whiteblind", 360),
 			AffectedStat: attributes.NoStat,

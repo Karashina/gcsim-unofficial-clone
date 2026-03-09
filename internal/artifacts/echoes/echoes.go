@@ -31,12 +31,12 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// 2pc - ATK +18%.
-// 4pc - When Normal Attacks hit opponents, there is a 36% chance that it will trigger Valley Rite, which will increase Normal Attack DMG by 70% of ATK.
+// 2セット - 攻撃力 +18%
+// 4セット - 通常攻撃が敵に命中すると、36%の確率でValley Riteが発動し、通常攻撃ダメージが攻撃力の70%分増加。
 //
-//	This effect will be dispelled 0.05s after a Normal Attack deals DMG.
-//	If a Normal Attack fails to trigger Valley Rite, the odds of it triggering the next time will increase by 20%.
-//	This trigger can occur once every 0.2s.
+//	この効果は通常攻撃がダメージを与えた0.05秒後に解除。
+//	Valley Riteが発動しなかった場合、次回の発動確率が20%増加。
+//	このトリガーは0.2秒に1回発動可能。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	procDuration := 3 // 0.05s
 
@@ -69,12 +69,12 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			return false
 		}
 
-		// If attack does not belong to the equipped character then ignore
+		// 装備キャラクターの攻撃でなければ無視
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		// If this is not a normal attack then ignore
+		// 通常攻撃でなければ無視
 		if atk.Info.AttackTag != attacks.AttackTagNormal {
 			return false
 		}
@@ -92,7 +92,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			return false
 		}
 
-		// If Artifact set effect is still on CD then ignore
+		// 聖遺物セット効果がまだCD中なら無視
 		if c.F < s.icd {
 			c.Log.NewEvent("echoes 4pc failed to proc due icd", glog.LogArtifactEvent, char.Index).
 				Write("icd_up", s.icd)

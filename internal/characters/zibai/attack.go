@@ -23,7 +23,7 @@ var (
 
 const normalHitNum = 4
 
-// N4 additional hit delay (distinct from Spirit Steed's Stride)
+// N4追加ヒット遅延（神馬駆けとは別）
 const n4AdditionalHitmark = 35
 
 func init() {
@@ -47,12 +47,12 @@ func init() {
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	// Check if in Lunar Phase Shift mode
+	// 月相転移モードかチェック
 	if c.lunarPhaseShiftActive {
 		return c.lunarPhaseShiftAttack(p)
 	}
 
-	// Normal attack (Physical)
+	// 通常攻撃（物理）
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{
 			ActorIndex:         c.Index,
@@ -90,9 +90,9 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// lunarPhaseShiftAttack handles attacks during Lunar Phase Shift mode (Geo, DEF-scaling)
+// lunarPhaseShiftAttack は月相転移モード中の攻撃を処理する（岩元素、防御力スケーリング）
 func (c *char) lunarPhaseShiftAttack(p map[string]int) (action.Info, error) {
-	// C4: Normal Attack sequence will not reset in Lunar Phase Shift mode
+	// 4凸: 月相転移モード中に通常攻撃シーケンスがリセットされない
 	if c.Base.Cons >= 4 {
 		c.NormalCounter = c.savedNormalCounter
 	}
@@ -126,15 +126,15 @@ func (c *char) lunarPhaseShiftAttack(p map[string]int) (action.Info, error) {
 		c.QueueCharTask(func() {
 			c.Core.QueueAttack(ai, ap, 0, 0, c.radianceGainCB, c.particleCB)
 
-			// N4 additional hit when Moonsign is Ascendant Gleam
+			// 月相がAscendant Gleamの時にN4追加ヒット
 			if currentN == 3 && c.isMoonsignAscendant() {
 				c.queueN4AdditionalHit()
 			}
 		}, hitmark)
 	}
 
-	// C4: After Spirit Steed's Stride hits, next N4 additional attack deals 250% damage
-	// (checked in queueN4AdditionalHit)
+	// 4凸: 神馬駆け命中後、次のN4追加攻撃が250%ダメージ
+	// （queueN4AdditionalHitでチェック）
 
 	defer func() {
 		c.AdvanceNormalIndex()
@@ -151,7 +151,7 @@ func (c *char) lunarPhaseShiftAttack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// queueN4AdditionalHit queues the additional Lunar-Crystallize damage on N4
+// queueN4AdditionalHit はN4のLunar-Crystallize追加ダメージをキューに追加する
 func (c *char) queueN4AdditionalHit() {
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
@@ -165,16 +165,16 @@ func (c *char) queueN4AdditionalHit() {
 		IgnoreDefPercent: 1,
 	}
 
-	// C4 bonus
+	// 4凸ボーナス
 	mult := 1.0
 
-	// C4: Scattermoon Splendor - 250% of original damage
+	// 4凸: Scattermoon Splendor - 元のダメージの250%
 	if c.c4ScattermoonUsed {
 		mult = 2.5
 		c.c4ScattermoonUsed = false
 	}
 
-	// DEF scaling with Lunar-Crystallize formula (includes ×1.6 LCrs base multiplier)
+	// Lunar-Crystallize式による防御力スケーリング（×1.6 LCrs基本倍率を含む）
 	em := c.Stat(attributes.EM)
 	baseDmg := c.TotalDef(false) * 1.6 * lunarPhaseShift4Additional[c.TalentLvlSkill()]
 	emBonus := (6 * em) / (2000 + em)
@@ -192,7 +192,7 @@ func (c *char) queueN4AdditionalHit() {
 	}, n4AdditionalHitmark)
 }
 
-// radianceGainCB callback for gaining Phase Shift Radiance on hit
+// radianceGainCB は命中時に月相転移輝度を獲得するコールバック
 func (c *char) radianceGainCB(a combat.AttackCB) {
 	if !c.lunarPhaseShiftActive {
 		return

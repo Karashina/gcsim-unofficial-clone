@@ -74,7 +74,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	delay := c.checkForSkillEnd()
 
 	if c.StatusIsActive(skillKey) {
-		// Can only occur if delay == 0, so it can be disregarded
+		// delay == 0の場合のみ発生するため、無視可能
 		return c.WindfavoredAttack(p)
 	}
 
@@ -128,7 +128,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 }
 
 func (c *char) WindfavoredAttack(p map[string]int) (action.Info, error) {
-	// TODO: E can expire during N3, not implemented yet
+	// TODO: 元素スキルがN3中に期限切れになる場合は未実装
 
 	windup := c.attackWindupE()
 

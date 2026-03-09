@@ -4,10 +4,10 @@ type Source int
 
 const (
 	LogInvalid     Source = iota
-	LogDamageEvent        // tracks damages
+	LogDamageEvent        // ダメージを追跡
 	LogPreDamageMod
-	LogCalc         // detailed calcs
-	LogElementEvent // tracks elemental application
+	LogCalc         // 詳細な計算
+	LogElementEvent // 元素付与を追跡
 	LogSnapshotEvent
 	LogStatusEvent
 	LogActionEvent
@@ -20,14 +20,14 @@ const (
 	LogShieldEvent
 	LogConstructEvent
 	LogICDEvent
-	LogDebugEvent    // for debug purposes
-	LogWarnings      // for things that go wrong
-	LogPlayerEvent   // for events related to player i.e. stamina, swap cd, healing, taking dmg etc..
-	LogHealEvent     // healing events
-	LogHurtEvent     // taking dmg event
-	LogCooldownEvent // for tracking things going on and off cooldown
-	LogHitlagEvent   // for debugging hitlag
-	LogUserEvent     // user print event
+	LogDebugEvent    // デバッグ用
+	LogWarnings      // 問題が発生した場合
+	LogPlayerEvent   // プレイヤー関連イベント（スタミナ、スワップCD、回復、被ダメージ等）
+	LogHealEvent     // 回復イベント
+	LogHurtEvent     // 被ダメージイベント
+	LogCooldownEvent // クールダウンの開始/終了を追跡
+	LogHitlagEvent   // ヒットラグのデバッグ用
+	LogUserEvent     // ユーザー print イベント
 )
 
 var LogSourceFromString = map[string]Source{

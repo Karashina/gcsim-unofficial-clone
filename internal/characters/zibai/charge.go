@@ -19,12 +19,12 @@ func init() {
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	// Check if in Lunar Phase Shift mode
+	// 月相転移モードかチェック
 	if c.lunarPhaseShiftActive {
 		return c.lunarPhaseShiftCharge(p)
 	}
 
-	// Normal charged attack (Physical) - 2 hits
+	// 通常重撃（物理） - 2ヒット
 	mults := [][]float64{charge_1, charge_2}
 	for i, mult := range mults {
 		ai := combat.AttackInfo{
@@ -61,9 +61,9 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// lunarPhaseShiftCharge handles charged attacks during Lunar Phase Shift mode (Geo, DEF-scaling)
+// lunarPhaseShiftCharge は月相転移モード中の重撃を処理する（岩元素、防御力スケーリング）
 func (c *char) lunarPhaseShiftCharge(p map[string]int) (action.Info, error) {
-	// Lunar Phase Shift charged attack (Geo, DEF-scaling) - 2 hits
+	// 月相転移重撃（岩元素、防御力スケーリング） - 2ヒット
 	mults := [][]float64{lunarPhaseShiftCharge_1, lunarPhaseShiftCharge_2}
 	for i, mult := range mults {
 		ai := combat.AttackInfo{

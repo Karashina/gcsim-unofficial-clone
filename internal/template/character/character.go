@@ -24,7 +24,7 @@ type Character struct {
 	AvailableCDCharge      []int
 	additionalCDCharge     []int
 
-	// hp
+	// HP
 	currentHPRatio float64
 	currentHPDebt  float64
 }
@@ -73,10 +73,10 @@ func (c *Character) Snapshot(a *combat.AttackInfo) combat.Snapshot {
 			Write("icd_group", a.ICDGroup)
 	}
 
-	// snapshot the stats
+	// ステータスをスナップショットする
 	s.Stats, debug = c.Stats()
 
-	// check infusion
+	// 元素付与をチェック
 	var inf attributes.Element
 	if !a.IgnoreInfusion {
 		inf = c.Core.Player.Infused(c.Index, a.AttackTag)
@@ -85,7 +85,7 @@ func (c *Character) Snapshot(a *combat.AttackInfo) combat.Snapshot {
 		}
 	}
 
-	// check if we need to log
+	// ログ出力が必要か確認
 	if c.Core.Flags.LogDebug {
 		evt.WriteBuildMsg(debug...)
 		evt.Write("final_stats", attributes.PrettyPrintStatsSlice(s.Stats[:]))
@@ -138,7 +138,7 @@ func (c *Character) NextQueueItemIsValid(_ keys.Char, a action.Action, p map[str
 	if a == action.ActionCharge {
 		switch c.Weapon.Class {
 		case info.WeaponClassSword, info.WeaponClassSpear:
-			// cannot do charge on most sword/polearm characters without attack beforehand
+			// ほとんどの片手剣/長柄武器キャラクターは事前に通常攻撃なしでは重撃できない
 			if c.Core.Player.LastAction.Type != action.ActionAttack {
 				return player.ErrInvalidChargeAction
 			}

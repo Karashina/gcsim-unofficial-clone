@@ -75,7 +75,7 @@ func (c *char) skillPress() action.Info {
 			if a.Target.Type() != targets.TargettableEnemy {
 				return
 			}
-			if !gen { // ignore a first enemy
+			if !gen { // 最初の敵を無視
 				gen = true
 				return
 			}
@@ -99,7 +99,7 @@ func (c *char) skillPress() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionWalk], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionWalk], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -133,7 +133,7 @@ func (c *char) skillHold() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames),
 		AnimationLength: skillHoldFrames[action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillHoldFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }

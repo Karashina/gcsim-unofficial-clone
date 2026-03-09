@@ -36,7 +36,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		FlatDmg:    burstEm[c.TalentLvlSkill()] * c.Stat(attributes.EM),
 	}
 
-	// X number of hits depending on mirrors when casted
+	// 発動時の琢光鏡数に応じたヒット数
 	for i := 0; i < 4+2*c.mirrorCount; i++ {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 7.1}, 6.8), 67, burstHitmark+i*21)
 	}
@@ -50,7 +50,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		generated = 3
 	}
 
-	c.mirrorLoss(c.lastInfusionSrc, consumed)() // consume mirrors right away
+	c.mirrorLoss(c.lastInfusionSrc, consumed)() // 鏡を直ちに消費
 	if hasC4 {
 		c.c4Loss(consumed)
 	}
@@ -68,7 +68,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

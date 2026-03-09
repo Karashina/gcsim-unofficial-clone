@@ -31,8 +31,8 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// anything but NA/E -> E should reset savedNormalCounter
-	// can't use CurrentState here since AnimationLength of Dash is the same as Dash -> Skill, so it switches to Idle instead of staying DashState
+	// 通常攻撃/スキル以外 -> スキルはsavedNormalCounterをリセットすべき
+	// ここで CurrentState を使えない（ダッシュの AnimationLength がダッシュ->スキルと同じなので Idle になる）
 	switch c.Core.Player.LastAction.Type {
 	case action.ActionAttack:
 	case action.ActionSkill:
@@ -50,7 +50,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionBurst], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionBurst], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

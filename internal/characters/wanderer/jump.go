@@ -38,7 +38,7 @@ func (c *char) WindfavoredJump(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(EJumpFrames),
 		AnimationLength: EJumpFrames[action.ActionJump],
-		CanQueueAfter:   EJumpFrames[action.ActionSkill], // earliest cancel
+		CanQueueAfter:   EJumpFrames[action.ActionSkill], // 最速キャンセル
 		State:           action.JumpState,
 	}, nil
 }

@@ -1,4 +1,4 @@
-// Package enemy implements an enemey target
+// Package enemy は敵ターゲットを実装する
 package enemy
 
 import (
@@ -26,12 +26,12 @@ type Enemy struct {
 
 	damageTaken       float64
 	lastParticleDrop  int
-	particleDropIndex int // for custom HP drops
+	particleDropIndex int // カスタムHPドロップ用
 
-	// mods
+	// 修飾子
 	mods []modifier.Mod
 
-	// hitlag stuff
+	// ヒットラグ関連
 	timePassed   int
 	frozenFrames int
 	queue        *task.Handler
@@ -41,9 +41,9 @@ func New(core *core.Core, p info.EnemyProfile) *Enemy {
 	e := &Enemy{}
 	e.queue = task.New(&e.timePassed)
 	e.Level = p.Level
-	//TODO: do we need to clone this map isntead?
+	//TODO: 代わりにこのマップをクローンする必要があるか？
 	e.resists = p.Resist
-	//TODO: this is kinda redundant to keep both profile and lvl/resist
+	//TODO: プロファイルとレベル/耐性の両方を保持するのは冗長
 	e.prof = p
 	e.Target = target.New(core, geometry.Point{X: p.Pos.X, Y: p.Pos.Y}, p.Pos.R)
 	e.Reactable = &reactable.Reactable{}
@@ -65,10 +65,10 @@ func (e *Enemy) Kill() {
 	e.Alive = false
 	if e.Key() == e.Core.Combat.DefaultTarget {
 		player := e.Core.Combat.Player()
-		// try setting default target to closest enemy to player if target died
+		// ターゲットが死亡した場合、プレイヤーに最も近い敵をデフォルトターゲットに設定
 		enemy := e.Core.Combat.ClosestEnemy(player.Pos())
 		if enemy == nil {
-			// all enemies dead, do nothing for now
+			// 全敵が死亡、現時点では何もしない
 			return
 		}
 		e.Core.Combat.DefaultTarget = enemy.Key()

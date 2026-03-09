@@ -35,7 +35,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.c6Count = 0
 	c.sanctumSavedDur = 0
 	if c.StatusIsActive(dehyaFieldKey) {
-		// pick up field at start
+		// 開始時にフィールドを回収
 		c.pickUpField()
 	}
 
@@ -46,7 +46,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.burstPunchFunc(c.burstHitSrc)()
 	}, burstPunch1Hitmark)
 
-	c.ConsumeEnergy(15) //TODO: If this is ping related, this could be closer to 1 at 0 ping
+	c.ConsumeEnergy(15) //TODO: これがping依存なら、0pingでは1に近い可能性がある
 	c.SetCDWithDelay(action.ActionBurst, 18*60, 1)
 
 	return action.Info{
@@ -100,7 +100,7 @@ func (c *char) burstPunchFunc(src int) func() {
 
 func (c *char) burstKickFunc(src int) func() {
 	return func() {
-		if src != c.burstHitSrc { // prevents duplicates
+		if src != c.burstHitSrc { // 重複を防止
 			return
 		}
 		if c.Core.Player.Active() != c.Index {
@@ -126,7 +126,7 @@ func (c *char) burstKickFunc(src int) func() {
 			0,
 			c.c4CB(),
 		)
-		if dur := c.sanctumSavedDur; dur > 0 { // place field with 1f delay to avoid self-trigger
+		if dur := c.sanctumSavedDur; dur > 0 { // 自己トリガーを回避するため1フレーム遅延で領域を設置
 			c.sanctumSavedDur = 0
 			c.Core.Tasks.Add(func() {
 				c.AddStatus(skillICDKey, c.sanctumICD, false)
@@ -162,7 +162,7 @@ func (c *char) burstPunch(src int, auto bool) action.Info {
 		Frames:          func(action.Action) int { return hitmark },
 		AnimationLength: hitmark,
 		CanQueueAfter:   hitmark,
-		State:           action.Idle, // TODO: cannot use burst state because burst state implies iframes
+		State:           action.Idle, // TODO: 元素爆発ステートは無敵フレームを意味するため使用不可
 	}
 }
 
@@ -171,7 +171,7 @@ func (c *char) burstKick(src int) action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(kickFrames),
 		AnimationLength: kickFrames[action.ActionAttack],
-		CanQueueAfter:   kickFrames[action.ActionSwap], // earliest cancel
-		State:           action.Idle,                   // TODO: cannot use burst state because burst state implies iframes
+		CanQueueAfter:   kickFrames[action.ActionSwap], // 最速キャンセル
+		State:           action.Idle,                   // TODO: 元素爆発ステートは無敵フレームを意味するため使用不可
 	}
 }

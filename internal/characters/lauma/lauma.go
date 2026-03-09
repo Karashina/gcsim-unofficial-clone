@@ -38,14 +38,14 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// mark this character as a potential moonsign holder for team initialization
+	// チーム初期化のためこのキャラクターをムーンサイン保持候補としてマーク
 	c.AddStatus("moonsignKey", -1, false)
 	c.setupPaleHymnEffects()
 	c.a0()
-	c.a4()                // initialize A4 AddAttackMod
-	c.c6Init()            // initialize C6 Ascendant Elevation bonus
-	c.verdantDewCheck()   // initialize Verdant Dew monitoring
-	c.applyResReduction() // initialize RES reduction monitoring
+	c.a4()                // A4 AddAttackModを初期化
+	c.c6Init()            // 6凸 Ascendant Elevationボーナスを初期化
+	c.verdantDewCheck()   // 翠露の監視を初期化
+	c.applyResReduction() // 耐性低下の監視を初期化
 	return nil
 }
 
@@ -56,15 +56,15 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 	return c.Character.AnimationStartDelay(k)
 }
 
-// verdantDewCheck subscribes to Bloom events and grants Verdant Dew to the party.
-// Verdant Dew is capped at 3 and gains are queued after the charging period.
+// verdantDewCheckは開花イベントをサブスクライブし、パーティに翠露を付与する。
+// 翠露は最大3で、獲得は充填期間後にキューに入る。
 func (c *char) verdantDewCheck() {
 	c.Core.Events.Subscribe(event.OnBloom, func(args ...interface{}) bool {
 		if !c.StatusIsActive("LB-Key") {
 			return false
 		}
 		duradd := c.StatusDuration("dewchargingkey")
-		c.AddStatus("dewchargingkey", 150, true) // 2.5s charging period
+		c.AddStatus("dewchargingkey", 150, true) // 2.5秒の充填期間
 		c.QueueCharTask(func() {
 			if c.verdantDew < 3 {
 				c.verdantDew++

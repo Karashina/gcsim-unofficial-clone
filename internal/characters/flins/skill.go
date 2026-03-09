@@ -30,16 +30,16 @@ func init() {
 
 // E
 /*
-Flins enters Manifest Flame form and obtains skillKey. This form has the following characteristics:
-· Flins's Normal and Charged Attack's element is converted into Electro and he is unable to use Plunging Attacks.
-· His Elemental Skill: "Ancient Rite: Arcane Light" is replaced with the special Elemental Skill: "Northland Spearstorm".
+Flinsが「顯現の炎」形態に入り、skillKeyを取得する。この形態には以下の特性がある:
+・Flinsの通常攻撃と重撃の元素が雷元素に変換され、落下攻撃が使用不可になる。
+・元素スキル「Ancient Rite: Arcane Light」が特殊元素スキル「北地の槍嵐」に置き換わる。
 
-Northland Spearstorm
-Deals AoE Electro DMG and gives him northlandKey for the next 6s.
+北地の槍嵐
+範囲雷元素ダメージを与え、次の6秒間northlandKeyを付与する。
 
----ADDITIONAL INFO FOR COPILOT---
-for implementation of "Flins's Normal and Charged Attack's element is converted into Electro and he is unable to use Plunging Attacks",
-this should be handled in attack.go and charge.go. for additional example, see implementation of cyno.
+---COPILOT向け追加情報---
+「Flinsの通常攻撃と重撃の元素が雷元素に変換され、落下攻撃が使用不可になる」の実装は、
+attack.goとcharge.goで処理すべき。追加の実装例はcynoを参照。
 */
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(skillKey) {
@@ -63,7 +63,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.AddStatus(northlandKey, 6*60, true)
 		c.AddStatus(northlandCdKey, c.northlandCD, true)
 
-		// C2: Set status for additional damage on next Normal Attack
+		// 2命ノ星座: 次の通常攻撃で追加ダメージのステータスを設定
 		if c.Base.Cons >= 2 {
 			c.AddStatus(c2NorthlandKey, 6*60, true)
 		}
@@ -71,7 +71,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		return action.Info{
 			Frames:          frames.NewAbilFunc(northlandFrames),
 			AnimationLength: northlandFrames[action.InvalidAction],
-			CanQueueAfter:   northlandFrames[action.ActionSwap], // earliest cancel
+			CanQueueAfter:   northlandFrames[action.ActionSwap], // 最速キャンセル
 			State:           action.SkillState,
 		}, nil
 	} else {
@@ -81,13 +81,13 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		return action.Info{
 			Frames:          frames.NewAbilFunc(skillFrames),
 			AnimationLength: skillFrames[action.InvalidAction],
-			CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+			CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセル
 			State:           action.SkillState,
 		}, nil
 	}
 }
 
-// Particle generation callback for skill - called every time an Electro-converted attack is landed
+// 粒子生成コールバック - 雷元素付与攻撃が命中するたびに呼び出される
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return

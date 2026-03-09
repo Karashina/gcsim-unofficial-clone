@@ -41,7 +41,7 @@ func (c *char) a4Init() {
 		char.AddAttackMod(character.AttackMod{
 			Base: modifier.NewBase(a4BufKey, -1),
 			Amount: func(_ *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-				// char must be active
+				// キャラクターがフィールド上にいる必要がある
 				if c.Core.Player.Active() != char.Index {
 					return nil, false
 				}

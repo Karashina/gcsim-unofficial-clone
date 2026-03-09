@@ -85,7 +85,7 @@ func (s *Server) Init() error {
 	if err != nil {
 		return err
 	}
-	// make sure cache dirs exists
+	// キャッシュディレクトリが存在することを確認
 	s.logger.Info("creating cache dirs...")
 	os.MkdirAll(path.Join(s.cacheDir, "/"+AssetTypeAvatars.String()), fs.ModePerm)
 	os.MkdirAll(path.Join(s.cacheDir, "/"+AssetTypeWeapons.String()), fs.ModePerm)

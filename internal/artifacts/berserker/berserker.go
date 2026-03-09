@@ -26,7 +26,7 @@ func (s *Set) Init() error      { return nil }
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
-	// 2 Piece: CRIT Rate +12%
+	// 2セット: 会心率 +12%
 	if count >= 2 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.CR] = 0.12
@@ -38,7 +38,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			},
 		})
 	}
-	// 4 Piece: When HP is below 70%, CRIT Rate increases by an additional 24%.
+	// 4セット: HPが70%未満の場合、会心率がさらに24%増加。
 	if count >= 4 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.CR] = 0.24

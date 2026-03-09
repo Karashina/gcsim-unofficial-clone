@@ -60,7 +60,7 @@ func (c *char) c2() {
 
 func (c *char) c4() {
 	for i, char := range c.Core.Player.Chars() {
-		// does not affect collei
+		// コレイには影響しない
 		if c.Index == i {
 			continue
 		}
@@ -80,7 +80,7 @@ func (c *char) c6(t combat.Target) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Forest of Falling Arrows (C6)",
-		AttackTag:  attacks.AttackTagNone, // in game has this as AttackTagColleiC6
+		AttackTag:  attacks.AttackTagNone, // ゲーム内ではAttackTagColleiC6だがここではNone
 		ICDTag:     attacks.ICDTagNone,
 		ICDGroup:   attacks.ICDGroupDefault,
 		StrikeType: attacks.StrikeTypeDefault,

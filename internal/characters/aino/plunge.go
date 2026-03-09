@@ -46,7 +46,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	case 0:
 		return action.Info{}, errors.New("low plunge can only be used while airborne")
 	case 1:
-		// collision
+		// 衝突
 		if _, ok := p["collision"]; ok {
 			c.plungeCollision(collisionHitmark)
 		}
@@ -88,7 +88,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	case 1:
 		return action.Info{}, errors.New("high plunge must be executed while airborne and above 1 meter of the ground")
 	default:
-		// collision
+		// 衝突
 		if _, ok := p["collision"]; ok {
 			c.plungeCollision(collisionHitmark)
 		}

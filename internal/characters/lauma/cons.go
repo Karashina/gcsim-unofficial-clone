@@ -15,19 +15,19 @@ const (
 	c1ICDKey = "lauma-c1-heal-icd"
 )
 
-// C1
-// After Lauma uses her Elemental Skill or Elemental Burst, she will gain Threads of Life for 20s.
-// During this time, when nearby party members trigger Lunar-Bloom reactions,
-// nearby active characters will recover HP equal to 500% of Lauma's Elemental Mastery. This effect can be triggered once every 1.9s.
+// 1凸
+// Laumaが元素スキルまたは元素爆発を使用した後、20秒間「命の糸」を獲得する。
+// この間、周囲のパーティメンバーがLunar-Bloom反応を発動した時、
+// 周囲のアクティブキャラクターはLaumaの元素熟知の500%に等しいHPを回復する。この効果は1.9秒に1回発動可能。
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
 	}
 
-	// Grant Threads of Life buff for 20s
+	// 「命の糸」バフを20秒間付与
 	c.AddStatus(c1Key, 20*60, true)
 
-	// Set up healing on Lunar-Bloom reactions
+	// Lunar-Bloom反応時の回復を設定
 	c.Core.Events.Subscribe(event.OnLunarBloom, func(args ...interface{}) bool {
 		if !c.StatusIsActive(c1Key) {
 			return false
@@ -48,35 +48,35 @@ func (c *char) c1() {
 			})
 		}
 
-		// Set ICD for 1.9s
-		c.AddStatus(c1ICDKey, 114, true) // 1.9s * 60 = 114 frames
+		// 1.9秒のICDを設定
+		c.AddStatus(c1ICDKey, 114, true) // 1.9秒 × 60 = 114フレーム
 		return false
 	}, "lauma-c1-heal")
 }
 
-// C2
-// If Moonsign: Ascendant Gleam is active on elemental burst activation, All nearby party members' Lunar-Bloom DMG is increased by 40%.
+// 2凸
+// 元素爆発発動時にムーンサイン：Ascendant Gleamがアクティブの場合、周囲のパーティメンバー全員のLunar-Bloomダメージが40%増加する。
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
 	}
 
 	if c.MoonsignAscendant {
-		// Apply 40% Lunar-Bloom damage bonus for duration of burst effects
+		// 元素爆発効果の持続時間中、Lunar-Bloomダメージ40%ボーナスを適用
 		for _, char := range c.Core.Player.Chars() {
 			char.AddLBReactBonusMod(character.LBReactBonusMod{
-				Base: modifier.NewBase("lauma-c2-ascendant-lb-boost", 15*60), // Same duration as Pale Hymn
+				Base: modifier.NewBase("lauma-c2-ascendant-lb-boost", 15*60), // 淡き讃歌と同じ持続時間
 				Amount: func(ai combat.AttackInfo) (float64, bool) {
-					return 0.4, false // 40% additive bonus
+					return 0.4, false // 40%加算ボーナス
 				},
 			})
 		}
 	}
 }
 
-// C4
-// When attacks from the Frostgrove Sanctuary summoned by her Elemental Skill hit opponents,
-// Lauma will regain 4 Elemental Energy. This effect can be triggered once every 5s.
+// 4凸
+// 元素スキルで召喚した霜林の聖域の攻撃が敵に命中した時、
+// Laumaは元素エネルギーを4回復する。この効果は5秒に1回発動可能。
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
@@ -85,20 +85,20 @@ func (c *char) c4() {
 		return
 	}
 	c.AddEnergy("lauma C4", 4)
-	c.AddStatus("lauma-c4-energy-icd", 5*60, true) // 5s ICD
+	c.AddStatus("lauma-c4-energy-icd", 5*60, true) // 5秒のICD
 }
 
-// C6
-// When the Frostgrove Sanctuary attacks opponents, it will deal 1 additional instance of AoE Dendro DMG equal to 185% of Lauma's Elemental Mastery.
-// This DMG is considered Lunar-Bloom DMG. This instance of DMG will not consume any Pale Hymn stacks and will provide Lauma with 2 stacks of Pale Hymn,
-// as well as refreshing the duration of Pale Hymn stacks gained in this manner.
-// This effect can occur up to 8 times during each Frostgrove Sanctuary.
-// When using the Elemental Skill Runo: Dawnless Rest of Karsikko, all Pale Hymn stacks gained in this manner will be removed.
-// Additionally, when Lauma uses a Normal Attack while she has Pale Hymn stacks,
-// she will consume 1 stack to convert this to deal Dendro DMG equal to 150% of her Elemental Mastery. This DMG is considered Lunar-Bloom DMG.
-// Moonsign: Ascendant Gleam: All nearby party members' Lunar-Bloom DMG is multiplied by 1.25.
+// 6凸
+// 霜林の聖域が敵を攻撃した時、Laumaの元素熟知の185%に等しい範囲草元素ダメージを追加で1回与える。
+// このダメージはLunar-Bloomダメージとみなされる。このダメージは淡き讃歌スタックを消費せず、Laumaに淡き讃歌を2スタック付与し、
+// この方法で獲得した淡き讃歌スタックの持続時間を更新する。
+// この効果は各霜林の聖域につき最大8回発生する。
+// 元素スキル「ルーノ：カルシッコの夜明けなき安息」使用時、この方法で獲得した淡き讃歌スタックは全て削除される。
+// また、Laumaが淡き讃歌スタックを持っている間に通常攻撃を使用すると、
+// 1スタックを消費して元素熟知の150%に等しい草元素ダメージに変換する。このダメージはLunar-Bloomダメージとみなされる。
+// ムーンサイン：Ascendant Gleam：周囲のパーティメンバー全員のLunar-Bloomダメージが1.25倍になる。
 
-// C6 helper for normal attack conversion
+// 6凸：通常攻撃変換のヘルパー
 func (c *char) c6NormalAttackConversion() bool {
 	if c.Base.Cons < 6 {
 		return false
@@ -107,10 +107,10 @@ func (c *char) c6NormalAttackConversion() bool {
 		return false
 	}
 
-	// Consume 1 Pale Hymn stack
+	// 淡き讃歌を1スタック消費
 	c.paleHymn--
 
-	// Deal Dendro DMG equal to 150% of EM as Lunar-Bloom DMG
+	// 元素熟知の150%に等しい草元素ダメージをLunar-Bloomダメージとして与える
 	em := c.Stat(attributes.EM)
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
@@ -123,7 +123,7 @@ func (c *char) c6NormalAttackConversion() bool {
 		IgnoreDefPercent: 1,
 	}
 
-	ai.FlatDmg = (1.5*em*(1+c.LBBaseReactBonus(ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(ai)) + c.burstLBBuff // 150% of EM
+	ai.FlatDmg = (1.5*em*(1+c.LBBaseReactBonus(ai)))*(1+((6*em)/(2000+em))+c.LBReactBonus(ai)) + c.burstLBBuff // 元素熟知の150%
 	snap := combat.Snapshot{
 		CharLvl: c.Base.Level,
 	}
@@ -139,8 +139,8 @@ func (c *char) c6NormalAttackConversion() bool {
 	return true
 }
 
-// C6 Moonsign: Ascendant Gleam - All nearby party members' Lunar-Bloom DMG is multiplied by 1.25
-// This is implemented via ElevationMod (+25% Elevation for LB damage)
+// 6凸 ムーンサイン：Ascendant Gleam - 周囲のパーティメンバー全員のLunar-Bloomダメージが1.25倍
+// ElevationModで実装（LBダメージに+25%のElevation）
 func (c *char) c6Init() {
 	if c.Base.Cons < 6 {
 		return
@@ -149,7 +149,7 @@ func (c *char) c6Init() {
 		return
 	}
 
-	// Apply 25% Elevation bonus to all party members for Lunar-Bloom DMG
+	// 全パーティメンバーにLunar-Bloomダメージの25% Elevationボーナスを適用
 	for _, char := range c.Core.Player.Chars() {
 		char.AddElevationMod(character.ElevationMod{
 			Base: modifier.NewBase("lauma-c6-ascendant-elevation", -1),

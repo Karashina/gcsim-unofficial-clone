@@ -15,9 +15,9 @@ const (
 	c2ResDebuff    = "flins-c2-res-debuff"
 )
 
-// C1
-// The basic cooldown of the special Elemental Skill: Northland Spearstorm is reduced to 4s.
-// Additionally, when party members trigger Lunar-Charged reactions, Flins will recover 8 Elemental Energy. This effect can occur once every 5.5s.
+// 1命ノ星座
+// 特殊元素スキル「北地の槍嵐」の基本クールダウンが4秒に短縮される。
+// また、パーティメンバーがルナチャージ反応を発動すると、Flinsの元素エネルギーが8回復する。この効果は5.5秒に1回発動可能。
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		c.northlandCD = 6 * 60
@@ -25,7 +25,7 @@ func (c *char) c1() {
 	}
 	c.northlandCD = 4 * 60
 
-	// Subscribe to Lunar-Charged reaction events for energy recovery
+	// ルナチャージ反応イベントを購読してエネルギー回復
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.AttackTag != attacks.AttackTagLCDamage {
@@ -40,19 +40,19 @@ func (c *char) c1() {
 	}, "flins-c1-energy")
 }
 
-// C2
-// For the next 6s after using the special Elemental Skill: Northland Spearstorm, when Flins's next Normal Attack hits an opponent, it will deal an additional 50% of Flins's ATK as AoE Electro DMG. This DMG is considered Lunar-Charged DMG.
-// When the moonsign is Moonsign: Ascendant Gleam, While Flins is on the field, after his Electro attacks hit an opponent, that opponent's Electro RES will be decreased by 25% for 7s.
+// 2命ノ星座
+// 特殊元素スキル「北地の槍嵐」使用後6秒間、Flinsの次の通常攻撃が敵に命中すると、Flinsの攻撃力の50%に相当する雷元素範囲ダメージを追加で与える。このダメージはルナチャージダメージとみなされる。
+// ムーンサインが「ムーンサイン: 昇詼の輝き」の場合、Flinsがフィールド上にいる間、雷元素攻撃が敵に命中すると、その敵の雷元素耐性が7秒間25%減少する。
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
 	}
 
-	// Part 1: Additional damage after Northland Spearstorm
-	// This is handled via a callback that checks for c2NorthlandKey status
-	// The callback will be added to Normal Attacks in the attackE() function
+	// パート1: 北地の槍嵐後の追加ダメージ
+	// c2NorthlandKeyステータスをチェックするコールバックで処理
+	// コールバックはattackE()関数内で通常攻撃に追加される
 
-	// Part 2: Electro RES decrease when Moonsign: Ascendant Gleam is active
+	// パート2: 「ムーンサイン: 昇詼の輝き」時の雷元素耐性減少
 	if !c.MoonsignAscendant {
 		return
 	}
@@ -82,7 +82,7 @@ func (c *char) c2() {
 	}, "flins-c2-res")
 }
 
-// C2 callback for additional damage after Northland Spearstorm
+// 2命ノ星座: 北地の槍嵐後の追加ダメージコールバック
 func (c *char) c2AdditionalDamage() combat.AttackCBFunc {
 	if c.Base.Cons < 2 {
 		return nil
@@ -104,7 +104,7 @@ func (c *char) c2AdditionalDamage() combat.AttackCBFunc {
 		done = true
 		c.DeleteStatus(c2NorthlandKey)
 
-		// Additional 50% ATK as Electro DMG (Lunar-Charged)
+		// 攻撃力の50%を雷元素ダメージとして追加（ルナチャージ）
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       "Flins C2 Dummy",
@@ -114,15 +114,15 @@ func (c *char) c2AdditionalDamage() combat.AttackCBFunc {
 	}
 }
 
-// C4
-// Flins's ATK is increased by 20%.
-// Additionally, his Ascension Talent "Whispering Flame" is changed: Flins's Elemental Mastery is increased by 10% of his ATK. The maximum increase obtainable this way is 220.
+// 4命ノ星座
+// Flinsの攻撃力が20%増加する。
+// また、固有天賦「囁きの炎」が変更される: Flinsの元素熟知が攻撃力の10%分増加する。この方法で得られる最大増加量は220。
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
 	}
 
-	// ATK 20% increase
+	// 攻撃力20%増加
 	m := make([]float64, attributes.EndStatType)
 	c.AddStatMod(character.StatMod{
 		Base: modifier.NewBaseWithHitlag("Flins C4 ATK", -1),
@@ -133,15 +133,15 @@ func (c *char) c4() {
 	})
 }
 
-// C6
-// The DMG dealt to opponents by Flins's Lunar-Charged reactions is multiplied by 35%.
-// When the moonsign is Moonsign: Ascendant Gleam, All nearby party members' Lunar-Charged DMG is multiplied by 10%.
+// 6命ノ星座
+// Flinsのルナチャージ反応が敵に与えるダメージが35%増加する。
+// ムーンサインが「ムーンサイン: 昇詼の輝き」の場合、付近のパーティメンバー全員のルナチャージダメージが10%増加する。
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
 	}
 
-	// Flins's own Lunar-Charged DMG bonus: 35%
+	// Flins自身のルナチャージダメージボーナス: 35%
 	c.AddElevationMod(character.ElevationMod{
 		Base: modifier.NewBase("Flins C6", -1),
 		Amount: func(ai combat.AttackInfo) (float64, bool) {
@@ -153,7 +153,7 @@ func (c *char) c6() {
 		},
 	})
 
-	// Team-wide Lunar-Charged DMG bonus when Moonsign: Ascendant Gleam: 10%
+	// 「ムーンサイン: 昇詼の輝き」時のチーム全体ルナチャージダメージボーナス: 10%
 	if c.MoonsignAscendant {
 		for _, char := range c.Core.Player.Chars() {
 			char.AddElevationMod(character.ElevationMod{

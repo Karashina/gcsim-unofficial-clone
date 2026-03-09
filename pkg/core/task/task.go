@@ -1,12 +1,12 @@
 package task
 
-// TODO: the behavior of delay<=0 is inconsistent
-// TODO: consider merging all tasks into a single handler
-// Currently tasks are executed in the following order: (enemy1, enemy2, ...), (char1, char2, ...), (core tasks)
-// In order to replace, the core task queue must support the ability to update the position of a task in the queue.
-// Also will need to consider order. Currently everything that is queued via QueueCharTask/QueueEnemyTask will
-// always happen before all entries in the core task queue. If any implementations depend on this order,
-// this will cause additional problems.
+// TODO: delay<=0 の挙動が一貫していない
+// TODO: 全タスクを単一ハンドラーに統合することを検討
+// 現在のタスク実行順序: (enemy1, enemy2, ...), (char1, char2, ...), (core tasks)
+// 置き換えるにはcoreタスクキューがタスク位置の更新をサポートする必要がある。
+// また実行順序も考慮が必要。現在 QueueCharTask/QueueEnemyTask でキューされたものは
+// 常にcoreタスクキューの全エントリより先に実行される。この順序に依存する実装がある場合、
+// 追加の問題が発生する。
 
 import "container/heap"
 
@@ -50,7 +50,7 @@ func (s *Handler) Add(f func(), delay int) {
 	s.counter += 1
 }
 
-// min heap functions
+// 最小ヒープ関数
 
 func (h minHeap) Len() int {
 	return len(h)

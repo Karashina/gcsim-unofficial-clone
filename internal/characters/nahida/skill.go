@@ -68,7 +68,7 @@ func (c *char) skillPress() action.Info {
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 0.2}, 4.6),
-		0, //TODO: snapshot delay?
+		0, //TODO: スナップショットの遅延？
 		skillPressHitmark,
 		c.skillMarkTargets,
 	)
@@ -78,15 +78,15 @@ func (c *char) skillPress() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
 
 func (c *char) skillHold(p map[string]int) (action.Info, error) {
 	hold := p["hold"]
-	// earliest hold can be let go is roughly 16.5, max is 317
-	// adds the value in hold onto the minimum length of 16, so hold=1 gives 17f and hold=5 gives a 22f delay until hitmark.
+	// 最短の長押し解放は約16.5フレーム、最大は317フレーム
+	// hold値を最小の16フレームに加算するので、hold=1は17フレーム、hold=5は22フレームのヒットマーク遅延となる。
 	if hold > 300 {
 		hold = 300
 	}
@@ -109,7 +109,7 @@ func (c *char) skillHold(p map[string]int) (action.Info, error) {
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 25),
-		0, // TODO: snapshot timing
+		0, // TODO: スナップショットのタイミング
 		hold+3+16,
 		c.skillMarkTargets,
 	)
@@ -119,7 +119,7 @@ func (c *char) skillHold(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          func(next action.Action) int { return hold - 17 + skillHoldFrames[next] },
 		AnimationLength: hold - 17 + 30 + skillHoldFrames[action.InvalidAction],
-		CanQueueAfter:   hold - 17 + 30 + skillHoldFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   hold - 17 + 30 + skillHoldFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -140,8 +140,7 @@ func (c *char) skillMarkTargets(a combat.AttackCB) {
 	if !ok {
 		return
 	}
-	// assuming it's mark per skill cast; in this case refresh regardless if
-	// target already marked up until 8
+	// スキル使用ごとのマークと仮定。既にマーク済みのターゲットも8体まで更新する
 	if c.markCount < 8 {
 		t.AddStatus(skillMarkKey, 1500, true)
 		c.markCount++
@@ -157,7 +156,7 @@ func (c *char) updateTriKarmaInterval() {
 		c.Core.Log.NewEvent("tri-karma cd reduced", glog.LogCharacterEvent, c.Index).Write("cooldown", cd)
 		c.triKarmaInterval = cd
 	}
-	c.QueueCharTask(c.updateTriKarmaInterval, 60) // check every 1s
+	c.QueueCharTask(c.updateTriKarmaInterval, 60) // 1秒ごとにチェック
 }
 
 func (c *char) triKarmaOnReaction(args ...interface{}) bool {
@@ -174,7 +173,7 @@ func (c *char) triKarmaOnBloomDamage(args ...interface{}) bool {
 	if !ok {
 		return false
 	}
-	// only on bloom, burgeon, hyperbloom damage
+	// 開花・超開花・烈開花のダメージのみ対象
 	ae, ok := args[1].(*combat.AttackEvent)
 	if !ok {
 		return false
@@ -198,7 +197,7 @@ func (c *char) triggerTriKarmaDamageIfAvail(t *enemy.Enemy) {
 	if !t.StatusIsActive(skillMarkKey) {
 		return
 	}
-	c.AddStatus(skillICDKey, c.triKarmaInterval, true) //TODO: this is affected by hitlag?
+	c.AddStatus(skillICDKey, c.triKarmaInterval, true) //TODO: ヒットラグの影響を受ける？
 	done := false
 	for _, v := range c.Core.Combat.Enemies() {
 		e, ok := v.(*enemy.Enemy)

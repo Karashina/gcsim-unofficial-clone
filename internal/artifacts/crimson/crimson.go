@@ -49,13 +49,13 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 
 	if count >= 4 {
 		mStacks := make([]float64, attributes.EndStatType)
-		// post snap shot to increase stacks
+		// スナップショット後にスタックを増加
 		c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 			if c.Player.Active() != char.Index {
 				return false
 			}
 
-			// every exectuion, add 1 stack, to a max of 3, reset cd to 10 seconds
+			// 実行ごとに1スタック追加、最大3、CDを10秒にリセット
 			if !char.StatusIsActive(cw4pc) {
 				s.stacks = 0
 			}

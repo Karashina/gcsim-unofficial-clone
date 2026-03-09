@@ -7,24 +7,24 @@ import (
 )
 
 func (c *char) Jump(p map[string]int) (action.Info, error) {
-	// jumping in jump kick window leads to kick being done
+	// ジャンプキックウィンドウ中のジャンプでキックが実行される
 	if c.StatusIsActive(burstKey) && c.StatusIsActive(jumpKickWindowKey) {
-		c.burstHitSrc++                   // invalidate any other punch/kick tasks
-		c.DeleteStatus(jumpKickWindowKey) // delete window
+		c.burstHitSrc++                   // 他のパンチ/キックタスクを無効化
+		c.DeleteStatus(jumpKickWindowKey) // ウィンドウを削除
 		return c.burstKick(c.burstHitSrc), nil
 	}
 
-	// jumping during a kick is not allowed
-	// TODO: not sure if this can even happen...
+	// キック中のジャンプは許可されない
+	// TODO: これが実際に発生し得るか不明…
 	if c.StatusIsActive(kickKey) {
 		return action.Info{}, errors.New("can't jump cancel burst kick")
 	}
 
-	// if burst is active at time of jump and it was not during jump kick window
+	// ジャンプ時に元素爆発がアクティブで、ジャンプキックウィンドウ中でなかった場合
 	if c.StatusIsActive(burstKey) {
-		c.burstHitSrc = -1       // invalidate any other punch/kick tasks
-		c.DeleteStatus(burstKey) // delete burst
-		// place field
+		c.burstHitSrc = -1       // 他のパンチ/キックタスクを無効化
+		c.DeleteStatus(burstKey) // 元素爆発を削除
+		// 領域を設置
 		if dur := c.sanctumSavedDur; dur > 0 {
 			c.sanctumSavedDur = 0
 			c.addField(dur)

@@ -16,7 +16,7 @@ const normalHitNum = 5
 var (
 	attackFrames   [][]int
 	attackHitmarks = [][]int{{14}, {9}, {14}, {14, 27}, {34}}
-	// same between polearm and burst attacks so just use these arrays for both
+	// 長柄武器と爆発攻撃で共通なので、両方にこの配列を使用
 	attackHitlagHaltFrame = [][]float64{{0.02}, {0.02}, {0.02}, {0, 0}, {0.02}}
 	attackDefHalt         = [][]bool{{true}, {true}, {true}, {false, false}, {true}}
 	attackHitboxes        = [][]float64{{1.8, 2.8}, {2.5}, {1.8, 4}, {2.8}, {3}}
@@ -25,7 +25,7 @@ var (
 )
 
 func init() {
-	// NA cancels (polearm)
+	// 通常攻撃キャンセル（長柄武器）
 	attackFrames = make([][]int, normalHitNum)
 
 	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 24)
@@ -41,7 +41,7 @@ func init() {
 	attackFrames[3][action.ActionAttack] = 41
 
 	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 50)
-	attackFrames[4][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
+	attackFrames[4][action.ActionCharge] = 500 //TODO: このアクションは無効。より良い制御方法が必要
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
@@ -101,7 +101,7 @@ var (
 )
 
 func init() {
-	// NA cancels (burst)
+	// 通常攻撃キャンセル（元素爆発時）
 	swordFrames = make([][]int, normalHitNum)
 
 	swordFrames[0] = frames.InitNormalCancelSlice(swordHitmarks[0][0], 21)
@@ -117,7 +117,7 @@ func init() {
 	swordFrames[3][action.ActionAttack] = 44
 
 	swordFrames[4] = frames.InitNormalCancelSlice(swordHitmarks[4][0], 59)
-	swordFrames[4][action.ActionCharge] = 500 //TODO: this action is illegal; need better way to handle it
+	swordFrames[4][action.ActionCharge] = 500 //TODO: このアクションは無効。より良い制御方法が必要
 }
 
 func (c *char) swordAttack() action.Info {
@@ -138,7 +138,7 @@ func (c *char) swordAttack() action.Info {
 		if c.NormalCounter == 2 {
 			ai.StrikeType = attacks.StrikeTypeSpear
 		}
-		// Sword hits are dynamic - group snapshots with damage proc
+		// 刀攻撃は動的 - スナップショットをダメージ発生時にグループ化
 		ai.Mult = mult[c.TalentLvlBurst()]
 		ai.Mult += resolveBonus[c.TalentLvlBurst()] * c.stacksConsumed
 		if c.Base.Cons >= 2 {

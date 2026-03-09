@@ -42,7 +42,7 @@ func init() {
 	attackFrames[attack0Stacks][0][action.ActionAttack] = 33  // N1 -> N2
 	attackFrames[attack0Stacks][1][action.ActionAttack] = 36  // N2 -> N3
 	attackFrames[attack0Stacks][2][action.ActionAttack] = 43  // N3 -> N4
-	attackFrames[attack0Stacks][3][action.ActionCharge] = 500 // N4 -> CA0, TODO: this action is illegal; need better way to handle it
+	attackFrames[attack0Stacks][3][action.ActionCharge] = 500 // N4 -> CA0, TODO: このアクションは不正; より良い処理方法が必要
 
 	attackFrames[attack1PlusStacks] = make([][]int, normalHitNum)
 	attackFrames[attack1PlusStacks][0] = frames.InitNormalCancelSlice(attackHitmarks[0], 33) // N1 -> N2
@@ -58,26 +58,26 @@ func init() {
 
 func (c *char) attackState() ittoAttackState {
 	if c.Tags[strStackKey] == 0 {
-		// 0 stacks: use NX -> CA0 frames
+		// 0スタック: NX -> CA0 フレームを使用
 		return attack0Stacks
 	}
-	// 1+ stacks: use NX -> CA1/CAF frames (they are the same here)
+	// 1+スタック: NX -> CA1/CAF フレームを使用（ここでは同一）
 	return attack1PlusStacks
 }
 
-// Normal Attack:
-// Perform up to 4 consecutive strikes.
-// When the 2nd and 4th strikes hit opponents, Itto will gain 1 and 2 stacks of Superlative Superstrength, respectively.
-// Max 5 stacks. Triggering this effect will refresh the current duration of any existing stacks.
-// Additionally, Itto's Normal Attack combo does not immediately reset after sprinting or using his Elemental Skill, "Masatsu Zetsugi: Akaushi Burst!"
+// 通常攻撃:
+// 最大4段の連続攻撃を行う。
+// 2段目と4段目が敵に命中すると、一斗はそれぞれ怒髪衝天スタックを1と2獲得する。
+// 最大5スタック。この効果が発動すると、既存スタックの持続時間がリセットされる。
+// さらに、一斗の通常攻撃コンボはダッシュや元素スキル「魔殺絶技・岩牛発破!」使用後にリセットされない。
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	// Additionally, Itto's Normal Attack combo does not immediately reset after sprinting or using his Elemental Skill
+	// さらに、一斗の通常攻撃コンボはダッシュや元素スキル使用後にリセットされない
 	switch c.Core.Player.CurrentState() {
 	case action.DashState, action.SkillState:
 		c.NormalCounter = c.savedNormalCounter
 	}
 
-	// Attack
+	// 攻撃
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
@@ -94,7 +94,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		CanBeDefenseHalted: true,
 	}
 
-	// check burst status for hitbox
+	// 元素爆発状態をヒットボックスのために確認
 	attackIndex := 0
 	if c.StatModIsActive(burstBuffKey) {
 		attackIndex = 1
@@ -112,11 +112,11 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			attackHitboxes[attackIndex][c.NormalCounter][1],
 		)
 	}
-	// TODO: hitmark is not getting adjusted for atk speed
+	// TODO: ヒットマークが攻撃速度で調整されていない
 	c.Core.QueueAttack(ai, ap, attackHitmarks[c.NormalCounter], attackHitmarks[c.NormalCounter])
 
-	// TODO: assume NAs always hit. since it is not possible to know if the next CA is CA0 or CA1/CAF when deciding what CA frames to return.
-	// Add superlative strength stacks on damage
+	// TODO: 通常攻撃は常に命中すると仮定。重撃フレームを決定する際に次の重撃がCA0かCA1/CAFか判別不可能なため。
+	// ダメージ時に怒髪衝天スタックを追加
 	n := c.NormalCounter
 	if n == 1 {
 		c.addStrStack("attack", 1)
@@ -127,7 +127,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		c.addStrStack("q-attack", 1)
 	}
 
-	// handle NX -> CA0/CA1/CAF frames
+	// NX -> CA0/CA1/CAF フレームを処理
 	state := c.attackState()
 
 	defer func() {

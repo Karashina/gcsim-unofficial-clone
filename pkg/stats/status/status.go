@@ -9,7 +9,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/stats"
 )
 
-// 6 = .1s. TODO: figure out best bucket size
+// 6 = 0.1秒。TODO: 最適なバケットサイズを決定
 const bucketSize int = 1
 
 func init() {
@@ -63,7 +63,7 @@ func avgUpdate(arr []float64, index int, value float64) []float64 {
 func damageMod(c *character.CharWrapper, elvl int) float64 {
 	def := c.TotalDef(false)
 	defmod := 1 - (def / (def + 5*float64(elvl) + 500))
-	// TODO: implement resmod
+	// TODO: resmodを実装
 	resmod := 1.0
 
 	return defmod * resmod
@@ -157,7 +157,7 @@ func (b buffer) Flush(core *core.Core, result *stats.Result) {
 	fill := bucketSize - (core.F % bucketSize) - 1
 	bucket := core.F / bucketSize
 
-	// for averages, last bucket is inaccurate. Fill to fix
+	// 平均値の場合、最後のバケットが不正確。補填して修正
 	for i := 0; i < fill; i++ {
 		b.damageMitigation = avgUpdate(
 			b.damageMitigation, bucket, damageMod(core.Player.ActiveChar(), b.maxEnemyLvl))

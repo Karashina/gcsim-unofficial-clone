@@ -31,7 +31,7 @@ const (
 )
 
 func init() {
-	// Tap E
+	// 元素スキル（単押し）
 	skillPressFrames = frames.InitAbilSlice(38) // E -> Walk
 	skillPressFrames[action.ActionAttack] = 34
 	skillPressFrames[action.ActionSkill] = 34
@@ -40,7 +40,7 @@ func init() {
 	skillPressFrames[action.ActionJump] = 35
 	skillPressFrames[action.ActionSwap] = 33
 
-	// Short Hold E
+	// 元素スキル（短押し）
 	skillShortHoldFrames = frames.InitAbilSlice(79) // Short Hold E -> Walk
 	skillShortHoldFrames[action.ActionAttack] = 72
 	skillShortHoldFrames[action.ActionSkill] = 75
@@ -49,7 +49,7 @@ func init() {
 	skillShortHoldFrames[action.ActionJump] = 74
 	skillShortHoldFrames[action.ActionSwap] = 72
 
-	// Hold E
+	// 元素スキル（長押し）
 	skillHoldFrames = frames.InitAbilSlice(668) // Hold E -> Walk
 	skillHoldFrames[action.ActionAttack] = 659
 	skillHoldFrames[action.ActionSkill] = 662
@@ -139,15 +139,15 @@ func (c *char) skillPress() action.Info {
 }
 
 func (c *char) skillShortHold() action.Info {
-	// 1 tick
+	// 1ティック
 	d := c.createSkillHoldSnapshot()
 	c.Core.Tasks.Add(func() {
-		// pattern shouldn't snapshot on attack event creation because the skill follows the player
+		// スキルがプレイヤーに追従するため、AttackEvent生成時にスナップショットすべきではない
 		d.Pattern = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3)
 		c.Core.QueueAttackEvent(d, 0)
 	}, 17)
 
-	// Flipclaw Strike DMG
+	// 反転爪撃ダメージ
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Flipclaw Strike",
@@ -184,24 +184,24 @@ func (c *char) skillShortHold() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillShortHoldFrames),
 		AnimationLength: skillShortHoldFrames[action.InvalidAction],
-		CanQueueAfter:   skillShortHoldFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillShortHoldFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
 
 func (c *char) skillHold(duration int) action.Info {
-	// ticks
+	// Tick処理
 	d := c.createSkillHoldSnapshot()
 
 	for i := 16; i <= duration+12; i += 0.5 * 60 {
 		c.Core.Tasks.Add(func() {
-			// pattern shouldn't snapshot on attack event creation because the skill follows the player
+			// スキルがプレイヤーに追従するため、AttackEvent生成時にスナップショットすべきではない
 			d.Pattern = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3)
 			c.Core.QueueAttackEvent(d, 0)
 		}, i)
 	}
 
-	// Flipclaw Strike DMG
+	// 反転爪撃ダメージ
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Flipclaw Strike",
@@ -239,7 +239,7 @@ func (c *char) skillHold(duration int) action.Info {
 	return action.Info{
 		Frames:          func(next action.Action) int { return skillHoldFrames[next] - 600 + duration },
 		AnimationLength: skillHoldFrames[action.InvalidAction] - 600 + duration,
-		CanQueueAfter:   skillHoldFrames[action.ActionAttack] - 600 + duration, // earliest cancel
+		CanQueueAfter:   skillHoldFrames[action.ActionAttack] - 600 + duration, // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -257,7 +257,7 @@ func (c *char) createSkillHoldSnapshot() *combat.AttackEvent {
 		Mult:       catDmg[c.TalentLvlSkill()],
 	}
 	snap := c.Snapshot(&ai)
-	// pattern shouldn't snapshot on attack event creation because the skill follows the player
+	// スキルがプレイヤーに追従するため、AttackEvent生成時にスナップショットすべきではない
 	ae := combat.AttackEvent{
 		Info:        ai,
 		SourceFrame: c.Core.F,

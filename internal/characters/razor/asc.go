@@ -7,7 +7,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Decreases Claw and Thunder's CD by 18%.
+// 爪雷のCDが18%減少する。
 func (c *char) a1CDReduction(cd int) int {
 	if c.Base.Ascension < 1 {
 		return cd
@@ -15,7 +15,7 @@ func (c *char) a1CDReduction(cd int) int {
 	return int(float64(cd) * 0.82)
 }
 
-// Using Lightning Fang resets the CD of Claw and Thunder.
+// 雷牙使用時に爪雷のCDをリセットする。
 func (c *char) a1CDReset() {
 	if c.Base.Ascension < 1 {
 		return
@@ -23,7 +23,7 @@ func (c *char) a1CDReset() {
 	c.ResetActionCooldown(action.ActionSkill)
 }
 
-// When Razor's Energy is below 50%, increases Energy Recharge by 30%.
+// Razorのエネルギーが50%未満の時、元素チャージ効率が30%上昇する。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

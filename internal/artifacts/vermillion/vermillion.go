@@ -32,7 +32,7 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 func (s *Set) updateBuff() {
-	// 8% base + 10% per stack
+	// 基本8% + スタックごとに10%
 	s.buff[attributes.ATKP] = 0.08 + float64(s.stacks)*0.1
 }
 
@@ -55,13 +55,11 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		})
 	}
 
-	// 4 Piece: After using an Elemental Burst, this character will gain the
-	// Nascent Light effect, increasing their ATK by 8% for 16s. When the
-	// character's HP decreases, their ATK will further increase by 10%. This
-	// increase can occur this way a maximum of 4 times. This effect can be
-	// triggered once every 0.8s. Nascent Light will be dispelled when the
-	// character leaves the field. If an Elemental Burst is used again during the
-	// duration of Nascent Light, the original Nascent Light will be dispelled.
+	// 4セット: 元素爆発使用後、「新生の光」効果を獲得し、
+	// 攻撃力8%増加16秒間。HPが減少すると攻撃力がさらに10%増加。
+	// この増加は最大4回まで。この効果は0.8秒に1回発動可能。
+	// キャラクターがフィールドを離れると新生の光は解除される。
+	// 持続中に元素爆発を再使用すると元の新生の光は解除される。
 	if count < 4 {
 		return &s, nil
 	}
@@ -71,7 +69,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 
 	s.buff = make([]float64, attributes.EndStatType)
 
-	//TODO: this used to be post. need to check
+	//TODO: 以前はpostだった。確認が必要
 	c.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false

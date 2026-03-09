@@ -16,11 +16,11 @@ const (
 func init() {
 	burstFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	burstFrames[0] = frames.InitAbilSlice(58)
 	burstFrames[0][action.ActionSwap] = 57 // Q -> Swap
 
-	// Female
+	// 女性
 	burstFrames[1] = frames.InitAbilSlice(58)
 	burstFrames[1][action.ActionSwap] = 57 // Q -> Swap
 }
@@ -29,17 +29,17 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	c.SetCD(action.ActionBurst, 1200)
 	c.ConsumeEnergy(2)
 
-	// Duration counts from first hitmark
+	// 持続時間は最初のヒットマークからカウント
 
 	c.Core.Tasks.Add(func() {
 		s := c.newLeaLotusLamp()
 
 		if c.Base.Ascension >= 1 {
-			// A1 adds a stack per second
+			// 固有天賦1は毎秒スタックを追加
 			for delay := 0; delay <= s.Gadget.Duration; delay += 60 {
 				c.a1Stack(delay)
 			}
-			// A1/C6 buff ticks every 0.3s and applies for 1s. probably counting from gadget spawn - Kolibri
+			// 固有天賦1/6凸のバフは0.3秒ごとにティックし、1秒間適用。おそらくガジェット出現からカウント - Kolibri
 			for delay := 0; delay <= s.Gadget.Duration; delay += 0.3 * 60 {
 				c.a1Buff(delay)
 			}
@@ -56,7 +56,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames[c.gender]),
 		AnimationLength: burstFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   burstFrames[c.gender][action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[c.gender][action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

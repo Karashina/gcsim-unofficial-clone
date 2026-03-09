@@ -8,11 +8,11 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// For 5s after Shikanoin Heizou takes the field, his Normal Attack SPD is increased by 15%.
-// He also gains 1 Declension stack for Heartstopper Strike. This effect can be triggered once every 10s.
+// 鹿野院平蔵がフィールドに登場してから5秒間、通常攻撃速度+15%。
+// また、勉ぎの心の譲り重ねスタックを1層獲得する。この効果は10秒に1回発動可能。
 func (c *char) c1() {
 	const c1Icd = "heizou-c1-icd"
-	// No log value saved as stat mod already shows up in debug view
+	// ステータスモッドがデバッグビューに表示されるため、ログ値は保存しない
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		if c.StatusIsActive(c1Icd) {
 			return false
@@ -34,9 +34,9 @@ func (c *char) c1() {
 	}, "heizou enter")
 }
 
-// The first Windmuster Iris explosion in each Windmuster Kick will regenerate 9 Elemental Energy for Shikanoin Heizou.
-// Every subsequent explosion in that Windmuster Kick will each regenerate an additional 1.5 Energy for Heizou.
-// One Windmuster Kick can regenerate a total of 13.5 Energy for Heizou in this manner.
+// 彩風の暴風の最初の「風の患い」爆発は平蔵の元素エネルギーを9回復する。
+// その後の爆発はそれぞれ追加で1.5エネルギー回復。
+// 1回の彩風の暴風で合訓13.5エネルギー回復可能。
 func (c *char) c4(i int) {
 	switch i {
 	case 1:
@@ -46,8 +46,8 @@ func (c *char) c4(i int) {
 	}
 }
 
-// Each Declension stack will increase the CRIT Rate of the Heartstopper Strike unleashed by 4%.
-// When Heizou possesses Conviction, this Heartstopper Strike's CRIT DMG is increased by 32%.
+// 譲り重ねスタック1層あたり、勉ぎの心の会心率+4%。
+// 平蔵が「釈然」状態で発動した場合、会心ダメージ+32%。
 func (c *char) c6() (float64, float64) {
 	cr := 0.04 * float64(c.decStack)
 

@@ -24,8 +24,8 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Charged Attack hits on weak spots deal an additional 100/125/150/175/200% ATK DMG as CRIT DMG.
-// Can only occur once every 10s.
+// 重撃が弱点に命中した時、攻撃力100/125/150/175/200%分の追加ダメージを会心ダメージとして与える。
+// 10秒毎に1回のみ発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -36,26 +36,26 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		trg := args[0].(combat.Target)
-		// don't proc if dmg not from weapon holder
+		// 武器装備者からのダメージでなければ発動しない
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		// don't proc if off-field
+		// フィールド外では発動しない
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// don't proc if not hitting weakspot
+		// 弱点に命中していなければ発動しない
 		if !atk.Info.HitWeakPoint {
 			return false
 		}
-		// don't proc if on icd
+		// ICD中は発動しない
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		// set icd
+		// ICDをセット
 		char.AddStatus(icdKey, 10*60, true) // 10s icd
 
-		// queue single target proc
+		// 単体ターゲットの追加ダメージをキュー
 		ai := combat.AttackInfo{
 			ActorIndex:   char.Index,
 			Abil:         "Messenger Proc",

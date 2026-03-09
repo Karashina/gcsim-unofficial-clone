@@ -1,7 +1,7 @@
 package simulation
 
 import (
-	// stats collectors
+	// ステータスコレクター
 	_ "github.com/Karashina/gcsim-unofficial-clone/pkg/stats/action"
 	_ "github.com/Karashina/gcsim-unofficial-clone/pkg/stats/damage"
 	_ "github.com/Karashina/gcsim-unofficial-clone/pkg/stats/endstats"
@@ -13,7 +13,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/pkg/stats/status"
 	_ "github.com/Karashina/gcsim-unofficial-clone/pkg/stats/swap"
 
-	// artifacts
+	// 聖遺物
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/adaycarvedfromrisingwinds"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/archaic"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/aubadeofmorningstarandmoon"
@@ -66,7 +66,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/vourukashasglow"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/artifacts/wanderer"
 
-	// weapons
+	// 武器
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/alley"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/amos"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/aqua"

@@ -16,11 +16,11 @@ func init() {
 
 type char struct {
 	*tmpl.Character
-	// Gravity system for Elemental Skill
+	// 元素スキル用のGravityシステム
 	gravity           int
-	gravityLC         int // Gravity from Lunar-Charged
-	gravityLB         int // Gravity from Lunar-Bloom
-	gravityLCrs       int // Gravity from Lunar-Crystallize
+	gravityLC         int // Lunar-ChargedからのGravity
+	gravityLB         int // Lunar-BloomからのGravity
+	gravityLCrs       int // Lunar-CrystallizeからのGravity
 	gravityRippleSrc  int
 	gravityRippleExp  int
 	lunarDomainActive bool
@@ -30,10 +30,10 @@ type char struct {
 	moonridgeDew      int
 	moonridgeICD      int
 	c4ICD             int
-	c4DominantType    string // Track the dominant type for C4 bonus
-	// Gravity Accumulation state
+	c4DominantType    string // 4凸ボーナス用の支配的タイプを追跡
+	// Gravity蓄積状態
 	activeGravityType string
-	// A4 tracking
+	// 固有天賦4の追跡
 	a4LCSrc     int
 	a4LCCount   int
 	a4LBSrc     int
@@ -58,7 +58,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 	c.EnergyMax = 60
 	c.NormalHitNum = normalHitNum
 
-	// Initialize state
+	// 状態を初期化
 	c.gravityRippleSrc = -1
 	c.lunacyStacks = 0
 	c.moonridgeDew = 0
@@ -71,10 +71,10 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// Initialize passives
+	// パッシブを初期化
 	c.a0Init()
 	c.a1Init()
-	// Initialize constellations
+	// 命ノ星座を初期化
 	if c.Base.Cons >= 1 {
 		c.c1Init()
 	}
@@ -85,14 +85,14 @@ func (c *char) Init() error {
 		c.c6Init()
 	}
 
-	// Subscribe to Lunar reaction events for Gravity accumulation
+	// Lunar反応イベントを購読してGravity蓄積を開始
 	c.subscribeToLunarReactions()
 
 	return nil
 }
 
 func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
-	// Moondew Cleanse does not consume stamina when Verdant Dew >= 1
+	// Moondew Cleanseは緑の露が1以上の時スタミナを消費しない
 	if a == action.ActionCharge && c.Core.Player.Verdant.Count() >= 1 {
 		return 0
 	}
@@ -129,15 +129,15 @@ func (c *char) Condition(fields []string) (any, error) {
 	return c.Character.Condition(fields)
 }
 
-// getDominantLunarType returns the Lunar reaction type with the most accumulated Gravity
-// Returns: "lc" for Lunar-Charged, "lb" for Lunar-Bloom, "lcrs" for Lunar-Crystallize
+// getDominantLunarTypeは最もGravityが蓄積されたLunar反応タイプを返す
+// 戻り値: Lunar-Chargedは"lc"、Lunar-Bloomは"lb"、Lunar-Crystallizeは"lcrs"
 func (c *char) getDominantLunarType() string {
 	if c.gravityLB == 0 && c.gravityLCrs == 0 && c.gravityLC == 0 {
-		// Check teammates' element for priority: Electro->"lc", Dendro->"lb", Geo->"lcrs"
+		// チームメイトの元素で優先度を確認: 雷->"lc"、草->"lb"、岩->"lcrs"
 		hasElectro, hasDendro, hasGeo := false, false, false
 		for _, ch := range c.Core.Player.Chars() {
 			if ch == nil || ch.Base.Key == c.Base.Key {
-				continue // skip self or nil
+				continue // 自分自身とnilをスキップ
 			}
 			switch ch.Base.Element.String() {
 			case "Electro":
@@ -159,7 +159,7 @@ func (c *char) getDominantLunarType() string {
 			return "lcrs"
 		}
 
-		// fallback: random
+		// フォールバック: ランダム
 		r := c.Core.Rand.Float64()
 		if r < 0.33 {
 			return "lc"

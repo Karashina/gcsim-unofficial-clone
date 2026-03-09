@@ -8,9 +8,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// After Tighnari fires a Wreath Arrow, his Elemental Mastery is increased by 50 for 4s.
+// Tighnariが花筒矢を放った後、4秒間元素熔通が50上昇する。
 //
-// - checks for ascension level in aimed.go to avoid queuing this up only to fail the ascension level check
+// - aimed.goで聴天等級チェックを行い、失敗を回避するためここではチェックしない
 func (c *char) a1() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.EM] = 50
@@ -23,8 +23,8 @@ func (c *char) a1() {
 	})
 }
 
-// For every point of Elemental Mastery Tighnari possesses, his Charged Attack and Fashioner's Tanglevine Shaft DMG are increased by 0.06%.
-// The maximum DMG Bonus obtainable this way is 60%.
+// Tighnariの元素熔通1ポイントにつき、重撃と織用素翠の祠矢のダメージが0.06%上昇する。
+// この方法で得られるダメージボーナスの上限は60%。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

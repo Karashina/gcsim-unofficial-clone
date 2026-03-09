@@ -30,16 +30,16 @@ func init() {
 	burstFrames[action.ActionSwap] = 60   // Q -> Swap
 }
 
-// Faruzan deploys a Dazzling Polyhedron that deals AoE Anemo DMG and releases
-// a Whirlwind Pulse. While the Dazzling Polyhedron persists, it will
-// continuously move along a triangular path. Once it reaches each corner of
-// that triangular path, it will unleash 1 more Whirlwind Pulse.
+// ファルザンが美しき多面体を展開し、範囲風元素ダメージを与え、
+// 旋風パルスを放つ。多面体が存在する間、三角形の
+// 経路に沿って継続的に移動する。三角形の各頂点に到達するたびに、
+// 更に1つの旋風パルスを放つ。
 //
-// Whirlwind Pulse
-// - When the Whirlwind Pulse hits opponents, it will apply Perfidious Wind's
-// Ruin to them, decreasing their Anemo RES.
-// - The Whirlwind Pulse will also apply Prayerful Wind's Gift to all nearby
-// characters when it is unleashed, granting them Anemo DMG Bonus.
+// 旋風パルス
+// - 旋風パルスが敵に命中すると、「虎風の褒」を付与し、
+// 敵の風耐性を減少させる。
+// - 旋風パルスが放たれると、付近の全キャラクターに
+// 「祝福の風」を付与し、風元素ダメージボーナスを増加させる。
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -61,8 +61,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		applyBurstShredCb,
 	)
 
-	// C2: The duration of the Dazzling Polyhedron created by
-	// The Wind's Secret Ways increased by 6s.
+	// 2凸: 美しき多面体の持続時間が6秒延長
 	duration := 745
 	if c.Base.Cons >= 2 {
 		duration += 360
@@ -107,12 +106,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}
 	}
 
-	// In-game refreshes 0.1s. We give buff every 239f to reduce spam.
+	// ゲーム内では0.1秒ごとにリフレッシュ。スパム削減のため239fごとにバフを付与。
 	for i := 0; i <= duration; i += 239 {
 		c.Core.Tasks.Add(buffFunc, 43+i)
 	}
 
-	// Last refresh to account for 0.1s tick period
+	// 0.1秒ティック周期を考慮した最後のリフレッシュ
 	c.Core.Tasks.Add(buffFunc, 43+duration)
 
 	c.SetCD(action.ActionBurst, 1200)
@@ -121,7 +120,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

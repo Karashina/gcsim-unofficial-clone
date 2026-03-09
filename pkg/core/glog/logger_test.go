@@ -14,14 +14,14 @@ func TestEventWriteKeyOnlyPanic(t *testing.T) {
 		CharIndex: 0,
 		Logs:      map[string]interface{}{},
 	}
-	// test writing
+	// 書き込みテスト
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("The code did not panic")
 		}
 	}()
 
-	// this should panic
+	// これは panic するべき
 	e.WriteBuildMsg("keyonly")
 }
 
@@ -33,14 +33,14 @@ func TestEventWriteNonStringKeyPanic(t *testing.T) {
 		CharIndex: 0,
 		Logs:      map[string]interface{}{},
 	}
-	// test writing
+	// 書き込みテスト
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("The code did not panic")
 		}
 	}()
 
-	// this should panic
+	// これは panic するべき
 	e.WriteBuildMsg(1)
 }
 
@@ -54,7 +54,7 @@ func TestEventWriteKeyVal(t *testing.T) {
 		Ordering:  make(map[string]int),
 	}
 
-	// this should be ok no panic
+	// panic せず正常に動作するべき
 	// e.Write("stuff", 1, "goes", true, "here", "two")
 	e.Write("stuff", 1).
 		Write("goes", true).
@@ -62,9 +62,9 @@ func TestEventWriteKeyVal(t *testing.T) {
 }
 
 func BenchmarkEasyJSONSerialization(b *testing.B) {
-	// generate roughly 2 lines of debug per frame over 90s
-	// each line should be roughly 10 fields
-	// so that's 10800 events
+	// 90秒間で1フレームあたり約2行のデバッグを生成
+	// 各行は約10フィールド
+	// つまり10800イベント
 	count := 10800
 	var testdata EventArr
 	testdata = make([]*LogEvent, 0, count)
@@ -102,7 +102,7 @@ func (t *testVariadic) Write(kv ...interface{}) {}
 
 func BenchmarkChainCalls(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		// write 10 kv pairs
+		// 10個のkvペアを書き込み
 		var x testChain
 		x.Write("key", "val").
 			Write("key", "val").
@@ -119,7 +119,7 @@ func BenchmarkChainCalls(b *testing.B) {
 
 func BenchmarkChainVariadic(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		// write 10 kv pairs
+		// 10個のkvペアを書き込み
 		var x testVariadic
 		x.Write(
 			"key", "val",

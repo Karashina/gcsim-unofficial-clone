@@ -52,7 +52,7 @@ func init() {
 	highPlungeFrames[action.ActionWalk] = 86
 	highPlungeFrames[action.ActionSwap] = 69
 
-	// special plunge
+	// 特殊落下攻撃
 	specialPlungeFrames = frames.InitAbilSlice(99)
 	specialPlungeFrames[action.ActionAttack] = 52
 	specialPlungeFrames[action.ActionSkill] = 52
@@ -62,9 +62,9 @@ func init() {
 	specialPlungeFrames[action.ActionSwap] = 69
 }
 
-// Low Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 低空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	if c.Core.Player.LastAction.Type == action.ActionSkill {
 		return c.specialPlunge(p), nil
@@ -82,7 +82,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -116,9 +116,9 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// High Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 高空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	if c.Core.Player.LastAction.Type == action.ActionSkill {
 		return c.specialPlunge(p), nil
@@ -136,7 +136,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *char) highPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -170,8 +170,8 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// Plunge normal falling attack damage queue generator
-// Standard - Always part of high/low plunge attacks
+// 落下攻撃（通常落下）のダメージキュー生成
+// 標準 - 高空/低空落下攻撃に常に含まれる
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -218,17 +218,17 @@ func (c *char) specialPlunge(p map[string]int) action.Info {
 		c.makeC4CB(),
 	)
 
-	// queue man chai and drain hp 1f after hitmark
+	// マンチャイをキューし、ヒットマークの1フレーム後にHPを消費
 	c.Core.Tasks.Add(func() {
 		if c.StatusIsActive(burstKey) && c.CurrentHPRatio() > 0.5 {
 			c.queueManChai()
 		}
-		// only drain HP when above 10% HP
+		// HPが10%超の場合のみHPを消費
 		if c.CurrentHPRatio() > hpDrainThreshold {
 			currentHP := c.CurrentHP()
 			maxHP := c.MaxHP()
 			hpdrain := 0.15 * currentHP
-			// The HP consumption from using this skill can only bring him to 10% HP.
+			// このスキルにHP消費は10%までしか減らせない。
 			if (currentHP-hpdrain)/maxHP <= hpDrainThreshold {
 				hpdrain = currentHP - hpDrainThreshold*maxHP
 			}

@@ -16,7 +16,7 @@ func init() {
 }
 
 func (c *char) Dash(p map[string]int) (action.Info, error) {
-	// call default implementation to handle stamina
+	// スタミナ処理のデフォルト実装を呼び出す
 	c.Character.Dash(p)
 	return action.Info{
 		Frames:          frames.NewAbilFunc(dashFrames),

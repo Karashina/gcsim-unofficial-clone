@@ -30,14 +30,14 @@ func (c *char) skillActivate() action.Info {
 	c.AddStatus(skillKey, 20*60, true)
 	c.Core.Player.SwapCD = math.MaxInt16
 
-	// Add 10 seconds worth of skydwellerPoints (1 point = 6 frames)
+	// 空居ポイント10秒分を追加（1ポイント = 6フレーム）
 	c.skydwellerPoints = 100
 	c.maxSkydwellerPoints = 100
 	c.c6Count = 0
 
 	c.Core.Tasks.Add(c.depleteSkydwellerPoints, 6)
 
-	// Initial Skill Damage
+	// 元素スキル初撃ダメージ
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Hanega: Song of the Wind",
@@ -52,7 +52,7 @@ func (c *char) skillActivate() action.Info {
 
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6), skillHitmark, skillHitmark)
 
-	// A1
+	// 固有天賦1
 	if c.Base.Ascension >= 1 {
 		c.a1ValidBuffs = []attributes.Element{attributes.Pyro, attributes.Hydro, attributes.Electro, attributes.Cryo}
 		c.absorbCheckA1()
@@ -60,11 +60,11 @@ func (c *char) skillActivate() action.Info {
 
 	c.c1()
 
-	// Return ActionInfo
+	// ActionInfoを返す
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFramesNormal),
 		AnimationLength: skillFramesNormal[action.InvalidAction],
-		CanQueueAfter:   skillFramesNormal[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFramesNormal[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -108,22 +108,22 @@ func (c *char) skillEndRoutine() int {
 	c.a4Prob = 0.16
 	c.SetCD(action.ActionSkill, 360)
 
-	// Delete Ascension Buffs
+	// 固有天賦バフを削除
 	c.DeleteStatMod(a1PyroKey)
 	c.DeleteStatMod(a1CryoKey)
 	c.DeleteStatus(a1ElectroKey)
 
-	// Delete c1 buff if active
+	// 第1命ノ星座バフがアクティブなら削除
 	if c.StatusIsActive("wanderer-c1-atkspd") {
 		c.DeleteStatus("wanderer-c1-atkspd")
 	}
 
-	// Delay due to falling
+	// 落下による遅延
 	c.Core.Log.NewEvent("adding delay due to falling", glog.LogCharacterEvent, c.Index)
 
 	c.AddStatus(plungeAvailableKey, 26, true)
 
-	// Shorter delay for plunging is hard coded in the plunge action
+	// 落下攻撃用の短い遅延は落下攻撃アクション内にハードコードされている
 	return 26
 }
 

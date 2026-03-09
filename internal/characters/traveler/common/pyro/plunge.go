@@ -52,12 +52,12 @@ func init() {
 	highPlungeFrames[1][action.ActionSwap] = 62
 }
 
-// Low Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 低空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *Traveler) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	if c.gender == 0 {
-		// aether not implemented
+		// 空 未実装
 		return action.Info{}, fmt.Errorf("%v: action low_plunge not implemented", c.CharWrapper.Base.Key)
 	}
 	defer c.Core.Player.SetAirborne(player.Grounded)
@@ -72,7 +72,7 @@ func (c *Traveler) LowPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *Traveler) lowPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -111,12 +111,12 @@ func (c *Traveler) lowPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// High Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 高空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *Traveler) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	if c.gender == 0 {
-		// aether not implemented
+		// 空 未実装
 		return action.Info{}, fmt.Errorf("%v: action low_plunge not implemented", c.CharWrapper.Base.Key)
 	}
 
@@ -132,7 +132,7 @@ func (c *Traveler) HighPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *Traveler) highPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -171,8 +171,8 @@ func (c *Traveler) highPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// Plunge normal falling attack damage queue generator
-// Standard - Always part of high/low plunge attacks
+// 落下攻撃（通常落下）のダメージキュー生成
+// 標準 - 高空/低空落下攻撃に常に含まれる
 func (c *Traveler) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

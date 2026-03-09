@@ -30,15 +30,15 @@ const (
 	burstStackICDKey = "eula-q-stack-icd"
 )
 
-// ult 365 to 415, 60fps = 120
-// looks like ult charges for 8 seconds
+// 元素爆発 365～415フレーム、60fps = 120
+// 元素爆発のチャージ時間は約8秒
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.burstCounter = 0
 	if c.Base.Cons >= 6 {
 		c.burstCounter = 5
 	}
 
-	// add initial damage
+	// 初撃ダメージを追加
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Glacial Illumination",
@@ -59,33 +59,33 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	)
 	c.a4()
 
-	// handle Eula Q status start
-	// lightfall sword lights up ~9.5s from cast
-	// deployable; not affected by hitlag
+	// ユーラ元素爆発ステータス開始処理
+	// 光落の剣は発動から約9.5秒後に点灯
+	// 設置物：ヒットラグの影響を受けない
 	c.Core.Tasks.Add(func() {
 		c.Core.Status.Add(burstKey, 600-lightfallHitmark-burstFrames[action.ActionWalk]+1)
 		c.Core.Log.NewEvent("eula burst started", glog.LogCharacterEvent, c.Index).
 			Write("stacks", c.burstCounter).
 			Write("expiry", c.Core.F+600-lightfallHitmark-burstFrames[action.ActionWalk]+1)
-	}, burstFrames[action.ActionWalk]) // start Q status at earliest point
+	}, burstFrames[action.ActionWalk]) // 最も早いタイミングで元素爆発ステータスを開始
 
-	// handle Eula Q damage
-	// lightfall hitmark is 600f from cast
+	// ユーラ元素爆発ダメージ処理
+	// 光落の剣のヒットマークは発動から600フレーム
 	c.Core.Tasks.Add(func() {
-		// check to make sure it hasn't already exploded due to exiting field
+		// フィールド退場による早期爆発がまだ発生していないことを確認
 		if c.Core.Status.Duration(burstKey) > 0 {
 			c.triggerBurst()
 		}
-	}, 600-lightfallHitmark) // check if we can trigger Q damage right before Q status would normally expire
+	}, 600-lightfallHitmark) // 元素爆発ステータスが通常期限切れする直前にダメージをトリガーできるか確認
 
-	// energy does not deplete until after animation
+	// エネルギーはアニメーション後まで消費されない
 	c.ConsumeEnergy(107)
 	c.SetCDWithDelay(action.ActionBurst, 20*60, 97)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionWalk], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionWalk], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -121,8 +121,8 @@ func (c *char) triggerBurst() {
 	c.burstCounter = 0
 }
 
-// When Eula's own Normal Attack, Elemental Skill, and Elemental Burst deal DMG to opponents,
-// they will charge the Lightfall Sword, which can gain an energy stack once every 0.1s.
+// ユーラ自身の通常攻撃、元素スキル、元素爆発が敵にダメージを与えた時、
+// 光落の剣がチャージされ、0.1秒ごとにエネルギースタックを1つ獲得できる。
 func (c *char) burstStackCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -139,14 +139,14 @@ func (c *char) burstStackCB(a combat.AttackCB) {
 	if c.StatusIsActive(burstStackICDKey) {
 		return
 	}
-	//TODO: looks like the icd is dependent on gadget timer. need to double check
+	//TODO: ICDはガジェットタイマーに依存しているようだ。要再確認
 	c.AddStatus(burstStackICDKey, 0.1*60, false)
 
-	// add to counter
+	// カウンターに追加
 	c.burstCounter++
 	c.Core.Log.NewEvent("eula burst add stack", glog.LogCharacterEvent, c.Index).
 		Write("stack count", c.burstCounter)
-	// check for c6
+	// 6命ノ星座をチェック
 	if c.Base.Cons == 6 && c.Core.Rand.Float64() < 0.5 {
 		c.burstCounter++
 		c.Core.Log.NewEvent("eula c6 add additional stack", glog.LogCharacterEvent, c.Index).

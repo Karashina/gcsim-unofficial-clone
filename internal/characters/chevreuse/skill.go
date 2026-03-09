@@ -83,23 +83,23 @@ func (c *char) skillPress() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
 
 func (c *char) skillHold(p map[string]int) action.Info {
 	hold := p["hold"]
-	// earliest hold hitmark is ~19f
-	// latest hold hitmark is ~319f
-	// hold=1 gives 19f and hold=301 gives a 319f delay until hitmark.
+	// 最も早い長押しヒットマークは約19f
+	// 最も遅い長押しヒットマークは約319f
+	// hold=1で19f、hold=301で319fのヒットマークまでの遅延を得る
 	if hold < 1 {
 		hold = 1
 	}
 	if hold > 301 {
 		hold = 301
 	}
-	// subtract 1 to account for needing to supply > 0 to indicate hold
+	// 長押しを示すために>0を供給する必要があるため1を引く
 	hold -= 1
 	hitmark := hold + skillHoldHitmark
 	cdStart := hold + skillHoldCDStart
@@ -122,7 +122,7 @@ func (c *char) skillHold(p map[string]int) action.Info {
 		}
 
 		ap = combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5)
-		// remove status once overcharged is ball shot
+		// 過充填弾発射後にステータスを削除
 		c.overChargedBall = false
 		c.Core.Tasks.Add(c.a4, cdStart)
 	} else {
@@ -140,7 +140,7 @@ func (c *char) skillHold(p map[string]int) action.Info {
 		ap = combat.NewBoxHitOnTarget(c.Core.Combat.PrimaryTarget(), geometry.Point{Y: -0.5}, 3, 7)
 	}
 
-	// c4
+	// 4凸
 	if c.StatModIsActive(c4StatusKey) {
 		c.c4ShotsLeft -= 1
 		if c.c4ShotsLeft == 0 {
@@ -165,13 +165,13 @@ func (c *char) skillHold(p map[string]int) action.Info {
 	return action.Info{
 		Frames:          func(next action.Action) int { return hold + skillHoldFrames[next] },
 		AnimationLength: hold + skillHoldFrames[action.InvalidAction],
-		CanQueueAfter:   hold + skillHoldFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   hold + skillHoldFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
 
 func (c *char) arkhe(delay int) combat.AttackCBFunc {
-	// triggers on hitting anything, not just enemy
+	// 敵だけでなく何かに命中した時にトリガー
 	return func(a combat.AttackCB) {
 		if c.StatusIsActive(arkheICDKey) {
 			return
@@ -200,16 +200,16 @@ func (c *char) arkhe(delay int) combat.AttackCBFunc {
 }
 
 func (c *char) skillHeal(delay int) {
-	skillDur := 12*60 + 1 // heal on last tick of expiry
+	skillDur := 12*60 + 1 // 有効期限の最後のティックで回復
 	c.Core.Tasks.Add(func() {
-		// only refresh skill heal status on retrigger while still active (c4+)
+		// C4+でスキル回復がまだ有効な場合のみステータスをリフレッシュ
 		if c.StatusIsActive(skillHealKey) {
-			c.AddStatus(skillHealKey, skillDur, false) // not hitlag extendable
+			c.AddStatus(skillHealKey, skillDur, false) // ヒットラグ延長なし
 			return
 		}
-		c.AddStatus(skillHealKey, skillDur, false)               // not hitlag extendable
-		c.Core.Tasks.Add(c.startSkillHealing, skillHealInterval) // first heal comes after 2s
-		// don't queue up c6 team heal if there is one already queued up
+		c.AddStatus(skillHealKey, skillDur, false)               // ヒットラグ延長なし
+		c.Core.Tasks.Add(c.startSkillHealing, skillHealInterval) // 最初の回復は2秒後
+		// 既にキュー済みの6凸チーム回復がある場合は再キューしない
 		if c.c6HealQueued {
 			return
 		}
@@ -241,13 +241,13 @@ func (c *char) particleCB(a combat.AttackCB) {
 	if c.StatusIsActive(particleICDKey) {
 		return
 	}
-	c.AddStatus(particleICDKey, 10*60, false) // chev has 10s particle icd, not hitlag extendable
+	c.AddStatus(particleICDKey, 10*60, false) // シュヴルーズは10秒の粒子ICD、ヒットラグ延長なし
 	c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Pyro, c.ParticleDelay)
 }
 
 func (c *char) overchargedBallEventSub() {
 	c.Core.Events.Subscribe(event.OnOverload, func(args ...interface{}) bool {
-		// don't proc on gadgets
+		// ガジェットには発動しない
 		if _, ok := args[0].(*enemy.Enemy); !ok {
 			return false
 		}

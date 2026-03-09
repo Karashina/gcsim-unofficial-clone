@@ -26,7 +26,7 @@ const highPlungePoiseDMG = 200.0
 const highPlungeRadius = 5.0
 
 func init() {
-	// low_plunge -> x (borrowed from Diluc)
+	// low_plunge -> x（Dilucから借用）
 	lowPlungeFrames = frames.InitAbilSlice(78)
 	lowPlungeFrames[action.ActionAttack] = 49
 	lowPlungeFrames[action.ActionSkill] = 50
@@ -45,7 +45,7 @@ func init() {
 }
 
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
-	// Cannot plunge during Sturm und Drang
+	// Sturm und Drang中は落下攻撃不可
 	if c.sturmActive {
 		return action.Info{}, errors.New("cannot plunge during Sturm und Drang")
 	}
@@ -97,7 +97,7 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 }
 
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
-	// Cannot plunge during Sturm und Drang
+	// Sturm und Drang中は落下攻撃不可
 	if c.sturmActive {
 		return action.Info{}, errors.New("cannot plunge during Sturm und Drang")
 	}

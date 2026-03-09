@@ -95,14 +95,14 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 
 	var ap combat.AttackPattern
 	switch {
-	case len(attackHitboxes[c.NormalCounter]) == 2: // box
+	case len(attackHitboxes[c.NormalCounter]) == 2: // 矩形
 		ap = combat.NewBoxHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: attackOffsets[c.NormalCounter]},
 			attackHitboxes[c.NormalCounter][0],
 			attackHitboxes[c.NormalCounter][1],
 		)
-	default: // circle
+	default: // 円形
 		ap = combat.NewCircleHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: attackOffsets[c.NormalCounter]},
@@ -124,7 +124,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// Mavuika's bike normals do not immediately reset after sprinting and will carry the counter upon losing NS Blessing (Handled in Dash)
+// マヴイカのバイク通常攻撃はダッシュ後すぐにリセットされず、ナイトソウルの加護を失った時にカウンターを引き継ぐ（Dashで処理）
 func (c *char) bikeAttack() action.Info {
 	delay := bikeAttackHitmarks[c.NormalCounter]
 	ai := combat.AttackInfo{
@@ -151,14 +151,14 @@ func (c *char) bikeAttack() action.Info {
 
 	var ap combat.AttackPattern
 	switch {
-	case len(hitboxes[c.NormalCounter]) == 2: // box
+	case len(hitboxes[c.NormalCounter]) == 2: // 矩形
 		ap = combat.NewBoxHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: bikeAttackOffsets[c.NormalCounter]},
 			hitboxes[c.NormalCounter][0],
 			hitboxes[c.NormalCounter][1],
 		)
-	default: // circle
+	default: // 円形
 		ap = combat.NewCircleHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: bikeAttackOffsets[c.NormalCounter]},

@@ -38,7 +38,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	w.dmgBuff = make([]float64, attributes.EndStatType)
 	w.dmgBuff[attributes.DmgP] = 0.15 + float64(r)*0.05
-	// queue up first tick of the dmg buff
+	// ダメージバフの最初のチェックをキューに追加
 	char.QueueCharTask(w.enemyCheck(char, c), 30)
 
 	return w, nil

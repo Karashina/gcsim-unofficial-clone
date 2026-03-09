@@ -32,7 +32,7 @@ func init() {
 	skillFrames[action.ActionJump] = 32
 	skillFrames[action.ActionSwap] = 42
 
-	// burst frames
+	// 元素爆発中のフレーム
 	skillBFrames = frames.InitAbilSlice(34)
 	skillBFrames[action.ActionDash] = 30
 	skillBFrames[action.ActionJump] = 31
@@ -74,7 +74,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -101,10 +101,10 @@ func (c *char) skillB() (action.Info, error) {
 		6,
 	)
 	particleCB := c.makeParticleCB(true)
-	if !c.StatusIsActive(a1Key) { // check for endseer buff
+	if !c.StatusIsActive(a1Key) { // 「末途見」バフをチェック
 		c.Core.QueueAttack(ai, ap, skillBHitmark, skillBHitmark, particleCB)
 	} else {
-		// apply the extra damage on skill
+		// 元素スキルの追加ダメージを適用
 		c.a1Buff()
 		if c.Base.Cons >= 1 && c.StatusIsActive(c1Key) {
 			c.c1()
@@ -112,7 +112,7 @@ func (c *char) skillB() (action.Info, error) {
 		c.c6Init()
 
 		c.Core.QueueAttack(ai, ap, skillBHitmark, skillBHitmark, particleCB)
-		// Apply the extra hit
+		// 元素スキルの追加ダメージを適用
 		ai.Abil = "Duststalker Bolt"
 		ai.Mult = 1.0
 		ai.FlatDmg = c.a4Bolt()
@@ -124,7 +124,7 @@ func (c *char) skillB() (action.Info, error) {
 		ai.HitlagFactor = 0
 		ai.HitlagHaltFrames = 0
 
-		// 3 instances
+		// 3インスタンス
 		for i := 0; i < 3; i++ {
 			c.Core.QueueAttack(
 				ai,
@@ -140,7 +140,7 @@ func (c *char) skillB() (action.Info, error) {
 			)
 		}
 	}
-	if c.burstExtension < 2 { // burst can only be extended 2 times per burst cycle (up to 18s, 10s base and +4 each time)
+	if c.burstExtension < 2 { // 元素爆発ど1回につき最大2回延長可能（基本10秒 + 每回4秒で最大18秒）
 		c.ExtendStatus(burstKey, 240) // 4s*60
 		c.burstExtension++
 	}
@@ -152,7 +152,7 @@ func (c *char) skillB() (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillBFrames),
 		AnimationLength: skillBFrames[action.InvalidAction],
-		CanQueueAfter:   skillBFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillBFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

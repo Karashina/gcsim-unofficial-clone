@@ -20,7 +20,7 @@ func (c *char) c6Wave() {
 		Mult:       0.3,
 	}
 
-	// C6 uses Oz Snapshot
+	// 6凸はオズのスナップショットを使用
 	c.Core.QueueAttackWithSnap(
 		ai,
 		c.ozSnapshot.Snapshot,

@@ -45,8 +45,8 @@ func init() {
 	attackFrames[2][action.ActionSwap] = 41
 }
 
-// Standard attack damage function
-// Has "travel" parameter, used to set the number of frames that the projectile is in the air (default = 10)
+// 標準的な攻撃ダメージ関数
+// "travel"パラメータがあり、弾が空中にいるフレーム数を設定する（デフォルト = 10）
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	travel, ok := p["travel"]
 	if !ok {

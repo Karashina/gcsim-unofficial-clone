@@ -15,7 +15,7 @@ var (
 )
 
 const (
-	burstHitmark     = 36 // Initial Hit
+	burstHitmark     = 36 // 初撃
 	burstTickHitmark = 60
 )
 
@@ -27,7 +27,7 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// first zap has no icd and hits everyone
+	// 最初のzapはICDなしで全員に命中
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
 		Abil:           "Ritual DMG",
@@ -64,7 +64,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -92,7 +92,7 @@ func (c *char) burstTick(src int) {
 			Mult:           soundwave[c.TalentLvlBurst()],
 			HitlagFactor:   0.02,
 		}
-		// TODO: make 3 boxes (bullets?) hits instead of 1 circle hit?
+		// TODO: 1つの円形ヒットではなく3つのボックス（弾丸？）ヒットにすべきか？
 		c.Core.QueueAttack(
 			ai,
 			c.burstArea,

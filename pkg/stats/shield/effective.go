@@ -27,7 +27,7 @@ func computeEffective(shields map[string][]stats.ShieldInterval) map[string][]st
 		n += len(v)
 	}
 
-	// populate and sort endpoints
+	// エンドポイントを生成してソート
 	endpoints := make([]endpoint, 0, n*2)
 	for name := range shields {
 		for i := range shields[name] {
@@ -47,7 +47,7 @@ func computeEffective(shields map[string][]stats.ShieldInterval) map[string][]st
 	current := make(map[attributes.Element]*stats.ShieldInterval)
 	active := make(map[*stats.ShieldInterval]bool)
 	handleEnd := func(endpoint endpoint) {
-		// if other shields are active, need to elect greatest as new effective
+		// 他のシールドがアクティブなら、最大のものを新しい有効シールドとして選出する必要がある
 		var normalizedHP float64
 		normalizedEnd := math.MaxInt
 		for _, e := range elements {
@@ -58,7 +58,7 @@ func computeEffective(shields map[string][]stats.ShieldInterval) map[string][]st
 						best = k
 					}
 				}
-				// only add if this new interval is at least 1 frame wide
+				// この新しい区間が少なくと1フレーム幅がある場合のみ追加
 				if best.End > endpoint.pos {
 					current[e] = best
 					out[e.String()] = append(out[e.String()], stats.ShieldSingleInterval{
@@ -71,7 +71,7 @@ func computeEffective(shields map[string][]stats.ShieldInterval) map[string][]st
 			}
 			normalizedHP += out[e.String()][len(out[e.String()])-1].HP
 		}
-		// at least one of the effective elementals got a new interval, so recompute normalized
+		// 有効元素シールドの少なくと1つが新しい区間を得たので、正規化値を再計算
 		if normalizedEnd >= math.MaxInt {
 			return
 		}
@@ -92,10 +92,10 @@ func computeEffective(shields map[string][]stats.ShieldInterval) map[string][]st
 			continue
 		}
 
-		// start endpoint, add this interval to active set
+		// 開始エンドポイント、この区間をアクティブセットに追加
 		active[endpoint.interval] = true
 
-		// only 1 active shield == effective shield
+		// アクティブシールドが1つだけ == 有効シールド
 		if len(active) == 1 {
 			for _, e := range elements {
 				out[e.String()] = append(out[e.String()], stats.ShieldSingleInterval{
@@ -114,7 +114,7 @@ func computeEffective(shields map[string][]stats.ShieldInterval) map[string][]st
 			continue
 		}
 
-		// for each element if new interval > current, end current early and add new to effective
+		// 各元素について、新しい区間が現在より大きい場合、現在を早期終了して新しいものを有効に追加
 		var normalizedHP float64
 		modified := false
 		for _, e := range elements {
@@ -129,7 +129,7 @@ func computeEffective(shields map[string][]stats.ShieldInterval) map[string][]st
 				modified = true
 
 				if out[e.String()][currentIdx].Start == endpoint.pos {
-					// this shield is a replacement rather than append
+					// このシールドは追加ではなく置き換え
 					out[e.String()][currentIdx] = newShieldInterval
 				} else {
 					out[e.String()][currentIdx].End = endpoint.pos

@@ -16,13 +16,13 @@ func (c *char) addJadeShield() {
 	c.Core.Player.Shields.Add(c.newShield(shield, 1200))
 	c.Tags["shielded"] = 1
 
-	// add resist mod whenever we get a shield
+	// シールド獲得時に耐性バフを追加
 	res := []attributes.Element{attributes.Pyro, attributes.Hydro, attributes.Cryo, attributes.Electro, attributes.Geo, attributes.Anemo, attributes.Physical, attributes.Dendro}
 
-	// shield applies res shred every 0.3s for 1s to all enemies within a certain area around the player
+	// シールドはプレイヤー周囲の一定範囲内の全敵に0.3秒ごとに1秒間の耐性デバフを付与
 	for i := 0; i <= 1200; i += 18 {
 		c.Core.Tasks.Add(func() {
-			// stop applying if not shielded
+			// シールドがない場合は付与を停止
 			if c.Tags["shielded"] != 1 {
 				return
 			}
@@ -72,10 +72,10 @@ func (s *shd) OnExpire() {
 
 func (s *shd) OnDamage(dmg float64, ele attributes.Element, bonus float64) (float64, bool) {
 	taken, ok := s.Tmpl.OnDamage(dmg, ele, bonus)
-	// try healing first
+	// まず回復を試行
 	if s.c.Base.Cons >= 6 {
-		// 40% of dmg is converted into healing, but cannot exceed 8% of each char max hp
-		// so we have to go through each char one at a time....
+		// ダメージの40%を回復に変換、ただし各キャラのHP上限の8%を超えない
+		// そのため各キャラクターを個別に処理する必要がある...
 
 		active := s.c.Core.Player.ActiveChar()
 		heal := 0.4 * dmg

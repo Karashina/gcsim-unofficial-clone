@@ -9,33 +9,33 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// C1:
-// After using Royal Descent: Behold, Itto the Evil!, Arataki Itto gains 2 stacks of Superlative Superstrength.
-// After 1s, Itto will gain 1 stack of Superlative Superstrength every 0.5s for 1.5s.
-// TODO: add link to itto-c1-mechanics tcl entry later
+// 1凸:
+// 「荒瀧の王」使用後、荒瀧一斗は怒髪衝天スタックを2つ獲得する。
+// 1秒後、一斗は0.5秒ごとに怒髪衝天スタックを1つ獲得する（1.5秒間）。
+// TODO: itto-c1-mechanics TCLエントリへのリンクを後で追加
 func (c *char) c1() {
-	// gain 2 initial stacks around 75f after pressing Q
+	// Q入力後約75fで初期2スタックを獲得
 	c.addStrStack("itto-c1-cast", 2)
-	// "After 1s" refers to 1s after gaining the initial 2 stacks, so queue up the stacks properly
+	// 「1秒後」は初期2スタック獲得から1秒後を指すため、適切にキューに追加
 	for i := 60; i <= 120; i += 30 {
 		c.QueueCharTask(func() { c.addStrStack("itto-c1-timer", 1) }, i)
 	}
 }
 
-// C2:
-// After using Royal Descent: Behold, Itto the Evil!,
-// each party member whose Element is Geo will decrease that skill's CD by 1.5s
-// and restore 6 Energy to Arataki Itto.
-// CD can be decreased by up to 4.5s in this manner.
-// Max 18 Energy can be restored in this manner.
+// 2凸:
+// 「荒瀧の王」使用後、
+// パーティ内の岩元素キャラクターごとにそのスキルのCDが1.5秒減少し、
+// 荒瀧一斗のエネルギーが6回復する。
+// この方法でCDを最大4.5秒減少できる。
+// この方法で最大18エネルギー回復できる。
 func (c *char) c2() {
 	c.AddEnergy("itto-c2", float64(c.c2GeoMemberCount)*6)
 	c.ReduceActionCooldown(action.ActionBurst, c.c2GeoMemberCount*(1.5*60))
 }
 
-// C4:
-// When the Raging Oni King state caused by Royal Descent: Behold, Itto the Evil! ends,
-// all nearby party members gain 20% DEF and 20% ATK for 10s.
+// 4凸:
+// 「荒瀧の王」による鬼王状態が終了すると、
+// 周囲のパーティメンバー全員が10秒間、防御力+20%と攻撃力+20%を獲得する。
 func (c *char) c4() {
 	if !c.applyC4 {
 		return
@@ -56,8 +56,8 @@ func (c *char) c4() {
 	}
 }
 
-// First Part of C6:
-// Arataki Itto's Charged Attacks deal +70% Crit DMG.
+// 6凸の前半部分:
+// 荒瀧一斗の重撃の会心ダメージが+70%。
 func (c *char) c6() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CD] = 0.7

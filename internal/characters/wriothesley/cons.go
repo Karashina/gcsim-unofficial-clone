@@ -23,57 +23,57 @@ func (c *char) c1Ready() bool {
 	return c.c1N5Proc || (c.CurrentHPRatio() < 0.6 && !c.StatusIsActive(c1ICDKey))
 }
 
-// The Gracious Rebuke from the Passive Talent "There Shall Be a Plea for Justice" is changed to this:
-// When Wriothesley's HP is less than 60% or while he is in the Chilling Penalty state caused by Icefang Rush,
-// when the fifth attack of Repelling Fists hits, it will create a Gracious Rebuke.
-// 1 Gracious Rebuke effect can be obtained every 2.5s.
-// Additionally, Rebuke: Vaulting Fist will obtain the following enhancement:
-// - The DMG Bonus gained will be further increased to 200%.
-// - When it hits while Wriothesley is in the Chilling Penalty state, that state's duration is extended by 4s. 1 such extension can occur per 1 Chilling Penalty duration.
-// You must first unlock the Passive Talent "There Shall Be a Plea for Justice."
+// 固有天賦「司罪の傅執」の「重裁の嘃き」が以下に変更される:
+// リオセスリのHPが60%未満、または「氷牙の突進」による「氷牙の罰」状態の際、
+// 「極寒の拳」の5段目が命中すると「重裁の嘃き」を獲得する。
+// 2.5秒に1回獲得可能。
+// さらに「重裁の嘃き：飛蹴」に以下の強化が加わる:
+// - ダメージボーナスが200%に増加。
+// - 「氷牙の罰」状態で命中時、その状態の持続時間が4秒延長。「氷牙の罰」1回につき1回延長可能。
+// 固有天賦「司罪の傅執」を先に解放する必要がある。
 func (c *char) c1(ai *combat.AttackInfo, snap *combat.Snapshot) (combat.AttackCBFunc, bool) {
 	if !c.c1Ready() {
 		return nil, false
 	}
 	c.c1N5Proc = false
 
-	// add status that is removed on consumption
+	// 消費時に削除されるステータスを追加
 	c.AddStatus(c1Status, -1, false)
 
-	// adjust ai
+	// AIを調整
 	ai.Abil = "Rebuke: Vaulting Fist"
 	ai.HitlagFactor = 0.03
 	ai.HitlagHaltFrames = 0.12 * 60
 
-	// 200% increased DMG
+	// ダメージ200%増加
 	dmg := 2.0
 	snap.Stats[attributes.DmgP] += dmg
 	c.Core.Log.NewEvent("adding c1", glog.LogCharacterEvent, c.Index).Write("dmg%", dmg)
 
-	// add c6 if applicable
+	// 該当する場合第6命ノ星座を追加
 	c.addC6Buff(snap)
 
-	// return callback to heal, extend E, remove C1 and apply 2.5s cd
+	// コールバックで回復、元素スキル延長、第1命ノ星座削除、2.5秒CD適用
 	return func(a combat.AttackCB) {
 		if a.Target.Type() != targets.TargettableEnemy {
 			return
 		}
-		// do not proc if C1 not active
+		// 第1命ノ星座がアクティブでない場合は発動しない
 		if !c.StatusIsActive(c1Status) {
 			return
 		}
-		// remove C1 and apply CD
+		// 第1命ノ星座を削除しCDを適用
 		c.DeleteStatus(c1Status)
 		c.AddStatus(c1ICDKey, c1ICD, true)
 
-		// E extension
+		// 元素スキル延長
 		if !c.c1SkillExtensionProc && c.StatusIsActive(skillKey) {
 			c.ExtendStatus(skillKey, c1SkillExtension)
 			c.c1SkillExtensionProc = true
 			c.Core.Log.NewEvent("c1: skill duration is extended", glog.LogCharacterEvent, c.Index)
 		}
 
-		// heal
+		// 回復
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,
 			Target:  c.Index,
@@ -92,11 +92,11 @@ func (c *char) makeC1N5CB() combat.AttackCBFunc {
 		if a.Target.Type() != targets.TargettableEnemy {
 			return
 		}
-		// check if E active
+		// 元素スキルがアクティブかチェック
 		if !c.StatusIsActive(skillKey) {
 			return
 		}
-		// check CD
+		// CDチェック
 		if c.StatusIsActive(c1ICDKey) {
 			return
 		}
@@ -112,9 +112,9 @@ func (c *char) resetC1SkillExtension() {
 	c.c1SkillExtensionProc = false
 }
 
-// When using Darkgold Wolfbite, each Prosecution Edict stack from the Passive Talent
-// "There Shall Be a Reckoning for Sin" will increase said ability's DMG dealt by 40%.
-// You must first unlock the Passive Talent "There Shall Be a Reckoning for Sin."
+// 「暗金狼嚀」使用時、固有天賦「罪に対する清算」の「弾劾の勅令」スタックごとに
+// 該当元素爆発のダメージが40%増加する。
+// 固有天賦「罪に対する清算」を先に解放する必要がある。
 func (c *char) c2(snap *combat.Snapshot) {
 	if c.Base.Ascension < 4 {
 		return
@@ -131,12 +131,11 @@ func (c *char) c2(snap *combat.Snapshot) {
 	c.Core.Log.NewEvent("adding c2", glog.LogCharacterEvent, c.Index).Write("dmg%", dmg)
 }
 
-// The HP restored to Wriothesley through Rebuke: Vaulting Fist will be increased to 50%
-// of his Max HP. You must first unlock the Passive Talent "There Shall Be a Plea for Justice."
-// Additionally, when Wriothesley is healed, if the amount of healing overflows, the following
-// effects will occur depending on whether his is on the field or not. If he is on the field,
-// his ATK SPD will be increased by 20% for 4s. If he is off-field, all party members' ATK SPD
-// will be increased by 10% for 6s. These two ATK SPD increasing methods cannot stack.
+// 「重裁の嘃き：飛蹴」によるリオセスリのHP回復量がHP上限の50%に増加。
+// 固有天賦「司罪の傅執」を先に解放する必要がある。
+// さらにリオセスリが回復を受けた際、回復量が超過した場合、
+// フィールド上: 攻撃速度+20% 4秒。フィールド外: チーム全員の攻撃速度+10% 6秒。
+// この2つの攻撃速度増加ၯ重複しない。
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		c.caHeal = 0.3
@@ -161,7 +160,7 @@ func (c *char) c4() {
 		chars := c.Core.Player.Chars()
 		m := make([]float64, attributes.EndStatType)
 
-		// remove old buffs
+		// 古いバフを削除
 		for _, char := range chars {
 			char.DeleteStatus(c4Status)
 		}
@@ -192,7 +191,7 @@ func (c *char) c4() {
 	}, "wriothesley-c4-heal")
 }
 
-// The CRIT Rate of Rebuke: Vaulting Fist will be increased by 10%, and its CRIT DMG by 80%.
+// 「重裁の嘃き：飛蹴」の会心率が10%、会心ダメージが80%増加。
 func (c *char) addC6Buff(snap *combat.Snapshot) {
 	if c.Base.Cons < 6 {
 		return

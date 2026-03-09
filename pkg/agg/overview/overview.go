@@ -46,7 +46,7 @@ func NewAgg(cfg *info.ActionList) (agg.Aggregator, error) {
 	return &out, nil
 }
 
-// TODO: push looping/summation to StatsCollector for peformance boost
+// TODO: パフォーマンス向上のためループ/集計をStatsCollectorに移行
 func (b *buffer) Add(result stats.Result) {
 	b.totalDamage.Add(result.TotalDamage)
 

@@ -19,7 +19,7 @@ var (
 	attackHitlagHaltFrame = []float64{0.06, 0.06, 0.06, 0.09}
 	attackHitboxes        = [][]float64{{2.2}, {2.2}, {2, 3}, {2.4}}
 	attackOffsets         = []float64{0.5, 0.5, -0.5, 0.5}
-	attackFrostDelay      = []int{10, 9, 10, 10} // delay from hitmark, approximation
+	attackFrostDelay      = []int{10, 9, 10, 10} // ヒットマークからの遅延、近似値
 )
 
 const normalHitNum = 4

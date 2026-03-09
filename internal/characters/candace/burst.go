@@ -57,7 +57,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 
 	c.burstSrc = c.Core.F
-	// timer starts at hitmark
+	// タイマーはヒットマークで開始
 	c.Core.Tasks.Add(func() {
 		c.AddStatus(burstKey, duration, true)
 		c.burstInfuseFn(c.CharWrapper, c.burstSrc)
@@ -69,7 +69,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

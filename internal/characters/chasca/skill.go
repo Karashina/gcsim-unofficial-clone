@@ -24,7 +24,7 @@ func init() {
 	skillFrames[action.ActionAim] = 17
 	skillFrames[action.ActionBurst] = 6
 	skillFrames[action.ActionDash] = 6
-	skillFrames[action.ActionSwap] = 586 + 37 // wait for nightsoul to run out and fall onto the ground
+	skillFrames[action.ActionSwap] = 586 + 37 // ナイトソウルが尽きて地面に落下するのを待つ
 
 	skillCancelFrames = frames.InitAbilSlice(40) // E -> Dash/Jump
 	skillCancelFrames[action.ActionAttack] = 38
@@ -40,16 +40,16 @@ func (c *char) reduceNightsoulPoints(val float64) {
 	c.checkNS()
 }
 
-// Checks the current number of nightsoul points and exits nightsoul if there aren't enough. Returns the status of NS after the check
+// 現在のナイトソウルポイント数を確認し、不足している場合はナイトソウルを抜ける。チェック後のNSステータスを返す
 func (c *char) checkNS() {
 	if c.nightsoulState.Points() < 0.001 {
 		c.exitNightsoul()
 	}
 }
 
-// If NS expired gives the skillCancelFrames, otherwise gives the next frames as input
+// NSが切れた場合はskillCancelFramesを、それ以外は入力されたフレームを返す
 func (c *char) skillNextFrames(f func(next action.Action) int, extraDelay int) func(next action.Action) int {
-	// this is used to calculate the hitlag effect time elapsed since action start
+	// これはアクション開始からのヒットラグ効果経過時間を計算するために使用
 	actionStart := c.TimePassed
 	actionEnd := -1
 	return func(next action.Action) int {
@@ -59,7 +59,7 @@ func (c *char) skillNextFrames(f func(next action.Action) int, extraDelay int) f
 		if actionEnd < 0 {
 			actionEnd = c.TimePassed
 		}
-		// TODO: set fall down animation to be "falling/idle" when this occurs?
+		// TODO: この場合に落下アニメーションを「落下/待機」に設定する？
 		return actionEnd - actionStart + skillCancelFrames[next] + extraDelay
 	}
 }
@@ -84,7 +84,7 @@ func (c *char) exitNightsoul() {
 
 	switch c.Core.Player.CurrentState() {
 	case action.AimState:
-		// keep charging bullets for up to 10f after NS ends
+		// NS終了後も最大10フレームまで弾丸の充填を継続
 		c.QueueCharTask(c.fireBullets, skillAimChargeDelay)
 		c.QueueCharTask(c.nigthsoulFallingMsg, skillAimFallDelay)
 	case action.Idle:
@@ -109,7 +109,7 @@ func (c *char) nightsoulPointReduceFunc(src int) func() {
 			return
 		}
 		c.reduceNightsoulPoints(0.8)
-		// reduce 0.8 point per 6, which is 8 per second
+		// 6フレームごとに0.8ポイント減少、つまり1秒あたり8
 		c.Core.Tasks.Add(c.nightsoulPointReduceFunc(src), 6)
 	}
 }
@@ -120,7 +120,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		return action.Info{
 			Frames:          frames.NewAbilFunc(skillCancelFrames),
 			AnimationLength: skillFrames[action.InvalidAction],
-			CanQueueAfter:   skillFrames[action.ActionLowPlunge], // earliest cancel
+			CanQueueAfter:   skillFrames[action.ActionLowPlunge], // 最速キャンセル
 			State:           action.SkillState,
 		}, nil
 	}
@@ -147,7 +147,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          c.skillNextFrames(frames.NewAbilFunc(skillFrames), 0),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

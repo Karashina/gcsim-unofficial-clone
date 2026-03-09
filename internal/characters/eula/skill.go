@@ -55,8 +55,8 @@ func (c *char) addGrimheartStack() {
 		c.Core.Log.NewEvent("eula: grimheart stack", glog.LogCharacterEvent, c.Index).
 			Write("current count", c.grimheartStacks)
 	}
-	// refresh grimheart duration regardless
-	c.AddStatus(grimheartDuration, 1080, true) // 18 sec
+	// 冷酷な心の持続時間を無条件で更新
+	c.AddStatus(grimheartDuration, 1080, true) // 18秒
 }
 
 func (c *char) currentGrimheartStacks() int {
@@ -98,7 +98,7 @@ func (c *char) pressSkill() action.Info {
 		HitlagFactor:       0.01,
 		CanBeDefenseHalted: true,
 	}
-	// add 1 to grim heart if not capped by icd
+	// ICDで制限されていなければ冷酷な心を1追加
 	cb := func(a combat.AttackCB) {
 		if a.Target.Type() != targets.TargettableEnemy {
 			return
@@ -124,7 +124,7 @@ func (c *char) pressSkill() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -146,9 +146,9 @@ func (c *char) pressParticleCB(a combat.AttackCB) {
 }
 
 func (c *char) holdSkill() action.Info {
-	// hold e
-	// 296 to 341, but cd starts at 322
-	// 60 fps = 108 frames cast, cd starts 62 frames in so need to + 62 frames to cd
+	// 長押しスキル
+	// 296～341フレーム、CDは322で開始
+	// 60fps = 108フレーム詠唱、CDは62フレーム目に開始するので+62フレーム必要
 	lvl := c.TalentLvlSkill()
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
@@ -176,7 +176,7 @@ func (c *char) holdSkill() action.Info {
 
 	v := c.currentGrimheartStacks()
 
-	// shred
+	// 耐性ダウン
 	var shredCB combat.AttackCBFunc
 	if v > 0 {
 		shredCB = func(a combat.AttackCB) {
@@ -198,8 +198,8 @@ func (c *char) holdSkill() action.Info {
 	}
 
 	for i := 0; i < v; i++ {
-		// multiple brand hits
-		//TODO: need to double check if this is affected by hitlag; might be a deployable
+		// 複数のブランドヒット
+		//TODO: ヒットラグの影響を受けるか要再確認。設置物の可能性あり
 		icewhirlAI := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       "Icetide Vortex (Icewhirl)",
@@ -212,7 +212,7 @@ func (c *char) holdSkill() action.Info {
 			Mult:       icewhirl[lvl],
 		}
 		if i == 0 {
-			// per shizuka first swirl is not affected by hitlag?
+			// shizukaによると最初の渦はヒットラグの影響を受けない？
 			c.Core.QueueAttack(
 				icewhirlAI,
 				combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3.5),
@@ -223,7 +223,7 @@ func (c *char) holdSkill() action.Info {
 			)
 		} else {
 			c.QueueCharTask(func() {
-				// spacing it out for stacks
+				// スタック用に間隔を空ける
 				c.Core.QueueAttack(
 					icewhirlAI,
 					combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3.5),
@@ -239,9 +239,9 @@ func (c *char) holdSkill() action.Info {
 		c.a1()
 	}
 
-	// c1 add debuff
+	// 1命ノ星座デバフ追加
 	if c.Base.Cons >= 1 && v > 0 {
-		//TODO: check if the duration is right
+		//TODO: 持続時間が正しいか要確認
 		c.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("eula-c1", (6*v+6)*60),
 			AffectedStat: attributes.PhyP,
@@ -254,14 +254,14 @@ func (c *char) holdSkill() action.Info {
 	c.consumeGrimheartStacks()
 	cd := 10
 	if c.Base.Cons >= 2 {
-		cd = 4 // press and hold have same cd TODO: check if this is right
+		cd = 4 // 短押しと長押しのCDが同じ TODO: これが正しいか要確認
 	}
 	c.SetCDWithDelay(action.ActionSkill, cd*60, 46)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames),
 		AnimationLength: skillHoldFrames[action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillHoldFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }

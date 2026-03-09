@@ -24,7 +24,7 @@ type char struct {
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := char{}
 	c.Character = tmpl.NewWithWrapper(s, w)
-	c.CharWrapper.ParticleDelay = 80 // special default for bennett
+	c.CharWrapper.ParticleDelay = 80 // ベネットの特殊デフォルト
 
 	c.EnergyMax = 60
 	c.NormalHitNum = normalHitNum

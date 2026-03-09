@@ -11,7 +11,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
-// TestColumbinaSkillActivation verifies Skill deals Hydro DMG and activates Gravity Ripple
+// TestColumbinaSkillActivation はスキルが水元素ダメージを与えGravity Rippleを有効化することを検証する
 func TestColumbinaSkillActivation(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Columbina)
@@ -49,7 +49,7 @@ func TestColumbinaSkillActivation(t *testing.T) {
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
-	// Extra frames for hitmark processing
+	// ヒットマーク処理のための追加フレーム
 	for i := 0; i < 60; i++ {
 		advanceCoreFrame(c)
 	}
@@ -59,7 +59,7 @@ func TestColumbinaSkillActivation(t *testing.T) {
 	}
 }
 
-// TestColumbinaGravityConditionQuery verifies Condition fields work correctly
+// TestColumbinaGravityConditionQuery はConditionフィールドが正しく動作することを検証する
 func TestColumbinaGravityConditionQuery(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Columbina)
@@ -82,7 +82,7 @@ func TestColumbinaGravityConditionQuery(t *testing.T) {
 
 	ch := c.Player.Chars()[idx]
 
-	// Test gravity query — should be 0 initially
+	// gravityクエリをテスト — 初期値は0であるべき
 	result, err := ch.Condition([]string{"gravity"})
 	if err != nil {
 		t.Fatalf("gravity condition error: %v", err)
@@ -93,7 +93,7 @@ func TestColumbinaGravityConditionQuery(t *testing.T) {
 		t.Fatalf("gravity should be 0 initially, got %v", grav)
 	}
 
-	// Test lunacy query — should be 0 initially
+	// lunacyクエリをテスト — 初期値は0であるべき
 	result, err = ch.Condition([]string{"lunacy"})
 	if err != nil {
 		t.Fatalf("lunacy condition error: %v", err)
@@ -104,7 +104,7 @@ func TestColumbinaGravityConditionQuery(t *testing.T) {
 		t.Fatalf("lunacy should be 0 initially, got %v", lunacy)
 	}
 
-	// Test lunar-domain query — should be 0 initially (0=inactive, 1=active)
+	// lunar-domainクエリをテスト — 初期値は0であるべき（0=非アクティブ, 1=アクティブ）
 	result, err = ch.Condition([]string{"lunar-domain"})
 	if err != nil {
 		t.Fatalf("lunar-domain condition error: %v", err)
@@ -116,7 +116,7 @@ func TestColumbinaGravityConditionQuery(t *testing.T) {
 	}
 }
 
-// TestColumbinaBurstDealsDamage verifies Burst activation and Lunar Domain
+// TestColumbinaBurstDealsDamage は元素爆発の発動とLunar Domainを検証する
 func TestColumbinaBurstDealsDamage(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Columbina)
@@ -154,7 +154,7 @@ func TestColumbinaBurstDealsDamage(t *testing.T) {
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
-	// Extra frames for damage ticks
+	// ダメージtickのための追加フレーム
 	for i := 0; i < 200; i++ {
 		advanceCoreFrame(c)
 	}
@@ -163,14 +163,14 @@ func TestColumbinaBurstDealsDamage(t *testing.T) {
 		t.Fatalf("Columbina Burst should deal at least 1 hit, got %v", hitCount)
 	}
 
-	// Lunar Domain should be active after burst (1=active)
+	// 元素爆発後、Lunar Domainがアクティブであるべき（1=アクティブ）
 	result, _ := c.Player.Chars()[idx].Condition([]string{"lunar-domain"})
 	if active, ok := result.(int); !ok || active != 1 {
 		t.Fatalf("Lunar Domain should be 1 (active) after burst, got %v (%T)", result, result)
 	}
 }
 
-// TestColumbinaAllActionsDoNotPanic verifies all actions don't panic
+// TestColumbinaAllActionsDoNotPanic は全アクションがパニックしないことを検証する
 func TestColumbinaAllActionsDoNotPanic(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Columbina)
@@ -221,7 +221,7 @@ func TestColumbinaAllActionsDoNotPanic(t *testing.T) {
 	}
 }
 
-// TestColumbinaC6Setup verifies C6 constellation initializes without error
+// TestColumbinaC6Setup はC6命の座がエラーなく初期化されることを検証する
 func TestColumbinaC6Setup(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Columbina)

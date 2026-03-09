@@ -12,9 +12,9 @@ import (
 
 const c4Key = "layla-c4"
 
-// When Nights of Formal Focus starts to fire off Shooting Stars, it will grant all nearby party members the Dawn Star effect,
-// causing their Normal and Charged Attack DMG to increase based on 5% of Layla's Max HP.
-// Dawn Star can last up to 3s and will be removed 0.05s after dealing Normal or Charged Attack DMG.
+// ひとしきりの夜がシューティングスターを発射し始めると、近くのパーティメンバー全員に「暁の星」効果を付与し、
+// レイラの最大HPの5%に基づき通常攻撃・重撃ダメージが増加する。
+// 暁の星は最大3秒間持続し、通常攻撃または重撃ダメージを与えた0.05秒後に削除される。
 func (c *char) c4() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
@@ -39,8 +39,8 @@ func (c *char) c4() {
 	}, "layla-c4")
 }
 
-// Shooting Stars from Nights of Formal Focus deal 40% increased DMG, and Starlight Slugs from Dream of the Star-Stream Shaker deal 40% increased DMG.
-// Additionally, the interval between the creation of Night Stars via Nights of Formal Focus is decreased by 20%.
+// ひとしきりの夜のシューティングスターのダメージが40%増加し、星竜の蜜恋のStarlight Slugのダメージが40%増加する。
+// また、ひとしきりの夜による星の生成間隔が20%短縮される。
 func (c *char) c6() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DmgP] = 0.4

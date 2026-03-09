@@ -77,21 +77,21 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 
 		var ap combat.AttackPattern
 		switch {
-		case len(attackHitboxes[c.NormalCounter]) == 2: // box
+		case len(attackHitboxes[c.NormalCounter]) == 2: // 矩形
 			ap = combat.NewBoxHitOnTarget(
 				c.Core.Combat.Player(),
 				geometry.Point{Y: attackOffsets[c.NormalCounter]},
 				attackHitboxes[c.NormalCounter][0],
 				attackHitboxes[c.NormalCounter][1],
 			)
-		case attackFanAngles[c.NormalCounter] > 0: // circle with fan angle
+		case attackFanAngles[c.NormalCounter] > 0: // 扇形角度付き円形
 			ap = combat.NewCircleHitOnTargetFanAngle(
 				c.Core.Combat.Player(),
 				geometry.Point{Y: attackOffsets[c.NormalCounter]},
 				attackHitboxes[c.NormalCounter][0],
 				attackFanAngles[c.NormalCounter],
 			)
-		default: // circle
+		default: // 円形
 			ap = combat.NewCircleHitOnTarget(
 				c.Core.Combat.Player(),
 				geometry.Point{Y: attackOffsets[c.NormalCounter]},
@@ -161,7 +161,7 @@ func (c *char) reathermoonRingsDetail(abilName string, hitmarks []int) {
 			c.Core.QueueAttack(ai, ap, hitmark, hitmark, c.particleCB)
 		}
 
-		// TODO: approximated
+		// TODO: 近似値
 		next := c.Core.Combat.RandomEnemyWithinArea(combat.NewCircleHitOnTarget(target, nil, 8), func(t combat.Enemy) bool {
 			return target.Key() != t.Key()
 		})

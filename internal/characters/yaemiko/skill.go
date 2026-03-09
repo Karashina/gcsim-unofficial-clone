@@ -10,7 +10,7 @@ import (
 
 var skillFrames []int
 
-// kitsune spawn frame
+// 狐の生成フレーム
 const (
 	skillStart     = 34
 	particleICDKey = "yaemiko-particle-icd"
@@ -32,7 +32,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -45,5 +45,5 @@ func (c *char) particleCB(a combat.AttackCB) {
 		return
 	}
 	c.AddStatus(particleICDKey, 2.5*60, true)
-	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Electro, c.ParticleDelay) // TODO: this used to be 30?
+	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Electro, c.ParticleDelay) // TODO: 以前は30だった？
 }

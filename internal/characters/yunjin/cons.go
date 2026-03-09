@@ -15,7 +15,7 @@ const (
 	c6Key = "yunjin-c6"
 )
 
-// After Cliffbreaker's Banner is unleashed, all nearby party members' Normal Attack DMG is increased by 15% for 12s.
+// 破嶂の旗が展開された後、近くの全パーティメンバーの通常攻撃ダメージが12秒間15%増加する。
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
@@ -44,7 +44,7 @@ func (c *char) deleteC2() {
 	}
 }
 
-// When Yun Jin triggers the Crystallize Reaction, her DEF is increased by 20% for 12s.
+// 雲菫が結晶反応を発動すると、防御力が12秒間20%増加する。
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
@@ -77,7 +77,7 @@ func (c *char) c4() {
 	c.Core.Events.Subscribe(event.OnCrystallizeHydro, charModFunc, "yunjin-c4")
 }
 
-// Characters under the effects of the Flying Cloud Flag Formation have their Normal ATK SPD increased by 12%.
+// 飛雲旗陣の影響下のキャラクターは通常攻撃速度が12%増加する。
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
@@ -88,7 +88,7 @@ func (c *char) c6() {
 			Base:         modifier.NewBaseWithHitlag(c6Key, 12*60),
 			AffectedStat: attributes.AtkSpd,
 			Amount: func() ([]float64, bool) {
-				//TODO: i assume this buff should go away if stacks are gone?
+				//TODO: スタックがなくなればこのバフも消えるはず？
 				if this.Tags[burstBuffKey] == 0 {
 					return nil, false
 				}

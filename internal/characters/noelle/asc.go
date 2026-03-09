@@ -13,11 +13,11 @@ import (
 
 const a1IcdKey = "noelle-a1-icd"
 
-// When Noelle is in the party but not on the field,
-// this ability triggers automatically when your active character's HP falls below 30%:
-// Creates a shield for your active character that lasts for 20s and absorbs DMG equal to 400% of Noelle's DEF.
-// The shield has a 150% DMG Absorption effectiveness against all Elemental and Physical DMG.
-// This effect can only occur once every 60s.
+// ノエルがパーティーにいるがフィールド上にいない時、
+// アクティブキャラクターのHPが30%を下回ると自動発動:
+// ノエルの防御力400%分のダメージを吸収するシールドを生成。持続20秒。
+// 全元素・物理ダメージに対して150%の吸収効率。
+// この効果は60秒に1回のみ発動。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -42,7 +42,7 @@ func (c *char) a1() {
 		}
 		snap := c.Snapshot(&ai)
 
-		// add shield
+		// シールドを追加
 		c.Core.Player.Shields.Add(&shield.Tmpl{
 			ActorIndex: c.Index,
 			Target:     active.Index,
@@ -51,14 +51,15 @@ func (c *char) a1() {
 			Name:       "Noelle A1",
 			HP:         snap.Stats.TotalDEF() * 4,
 			Ele:        attributes.Cryo,
-			Expires:    c.Core.F + 1200, // 20 sec
+			Expires:    c.Core.F + 1200, // 20秒
 		})
 		return false
 	}, "noelle-a1")
 }
 
-// Noelle will decrease the CD of Breastplate by 1s for every 4 Normal or Charged Attack hits she scores on opponents.
-// One hit may be counted every 0.1s.
+// ノエルの通常攻撃または重撃が敵に4回命中するごとに、
+// 護心のCDが1秒短縮される。
+// ヒットは0.1秒ごとに1回カウントされる。
 func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil

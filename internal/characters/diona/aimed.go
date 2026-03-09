@@ -21,17 +21,17 @@ const aimedC4Hitmark = 50
 func init() {
 	aimedFrames = make([][]int, 2)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(23)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(94)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
 
-	// Fully-Charged Aimed Shot (C4)
+	// フルチャージ狙い撃ち (4凸)
 	aimedC4Frames = frames.InitAbilSlice(58)
 	aimedC4Frames[action.ActionDash] = aimedC4Hitmark
 	aimedC4Frames[action.ActionJump] = aimedC4Hitmark

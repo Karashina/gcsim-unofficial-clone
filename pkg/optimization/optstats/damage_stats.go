@@ -27,15 +27,15 @@ func OptimizerDmgStat(core *core.Core) (CollectorCustomStats[CustomDamageStatsBu
 		damage := args[2].(float64)
 		crit := args[3].(bool)
 
-		// TODO: validate if this is still true?
-		// No need to pull damage stats for non-enemies
+		// TODO: これがまだ正しいか検証する？
+		// 非敵ターゲットのダメージ統計は不要
 		if target.Type() != targets.TargettableEnemy {
 			return false
 		}
 		cr := attack.Snapshot.Stats[attributes.CR]
 		cd := attack.Snapshot.Stats[attributes.CD]
 
-		// TODO: Do we need to ensure that 1 + cd > 0 ?
+		// TODO: 1 + cd > 0 を保証する必要がある？
 		if crit && 1+cd > 0 {
 			damage /= (1 + cd)
 		}

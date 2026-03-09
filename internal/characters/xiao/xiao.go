@@ -17,7 +17,7 @@ func init() {
 	core.RegisterCharFunc(keys.Xiao, NewChar)
 }
 
-// Xiao specific character implementation
+// 魉固有のキャラクター実装
 type char struct {
 	*tmpl.Character
 	qStarted int
@@ -26,8 +26,8 @@ type char struct {
 	c6Count  int
 }
 
-// Initializes character
-// TODO: C4 is not implemented - don't really care about def
+// キャラクターを初期化
+// TODO: 4凸は未実装 - 防御力はそこまで重要ではない
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := char{}
 	c.Character = tmpl.NewWithWrapper(s, w)
@@ -61,25 +61,25 @@ func (c *char) Init() error {
 	return nil
 }
 
-// Xiao specific Snapshot implementation for his burst bonuses. Similar to Hu Tao
-// Implements burst anemo attack damage conversion and DMG bonus
-// Also implements A1:
-// While under the effects of Bane of All Evil, all DMG dealt by Xiao is increased by 5%. DMG is increased by an additional 5% for every 3s the ability persists. The maximum DMG Bonus is 25%
+// 魉固有の Snapshot 実装（元素爆発ボーナス用）。胡桃と同様。
+// 元素爆発の風元素攻撃変換とダメージボーナスを実装。
+// 固有天賦1も実装:
+// 「妞降」の効果中、全ダメージ+5%。3秒ごとにさらに+5%。最大25%。
 func (c *char) Snapshot(a *combat.AttackInfo) combat.Snapshot {
 	ds := c.Character.Snapshot(a)
 
 	if c.StatusIsActive("xiaoburst") {
-		// Anemo conversion and dmg bonus application to normal, charged, and plunge attacks
-		// Also handle burst CA ICD change to share with Normal
+		// 通常攻撃、重撃、落下攻撃への風元素変換とダメージボーナス適用
+		// 元素爆発中の重撃ICD変更も処理（通常攻撃と共有）
 		switch a.AttackTag {
 		case attacks.AttackTagNormal:
-			// QN1-1 has different hitlag from N1-1
+			// 元素爆発中のN1-1は通常N1-1と異なるヒットラグ
 			if a.Abil == "Normal 0" {
-				// this also overwrites N1-2 HitlagHaltFrames but they have the same value so it's fine
+				// N1-2のHitlagHaltFramesも上書きされるが、同じ値なので問題ない
 				a.HitlagHaltFrames = 0.01 * 60
 			}
 		case attacks.AttackTagExtra:
-			// Q-CA has different hitlag from CA
+			// 元素爆発中の重撃は通常重撃と異なるヒットラグ
 			a.ICDTag = attacks.ICDTagNormalAttack
 			a.HitlagHaltFrames = 0.04 * 60
 		case attacks.AttackTagPlunge:

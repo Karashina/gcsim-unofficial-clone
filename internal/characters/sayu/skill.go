@@ -35,17 +35,17 @@ const (
 )
 
 func init() {
-	// Tap E
+	// 元素スキル（単押し）
 	skillPressFrames = frames.InitAbilSlice(44) // Tap E -> N1/D
 	skillPressFrames[action.ActionBurst] = 43   // Tap E -> Q
 	skillPressFrames[action.ActionJump] = 45    // Tap E -> J
 	skillPressFrames[action.ActionSwap] = 42    // Tap E -> Swap
 
-	// Short Hold E
+	// 元素スキル（短押し）
 	skillShortHoldFrames = frames.InitAbilSlice(89) // Short Hold E -> N1/Q/D/J
 	skillShortHoldFrames[action.ActionSwap] = 87    // Short Hold E -> Swap
 
-	// Hold E
+	// 元素スキル（長押し）
 	skillHoldFrames = frames.InitAbilSlice(709) // Hold E -> N1/Q
 	skillHoldFrames[action.ActionDash] = 708    // Hold E -> J
 	skillHoldFrames[action.ActionJump] = 708    // Hold E -> J
@@ -96,7 +96,7 @@ func (c *char) rollParticleCB(a combat.AttackCB) {
 func (c *char) skillPress() action.Info {
 	c.c2Bonus = 0.033
 
-	// Fuufuu Windwheel DMG
+	// ふうふう風車ダメージ
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Fuufuu Windwheel (DoT Press)",
@@ -116,7 +116,7 @@ func (c *char) skillPress() action.Info {
 		skillPressDoTHitmark,
 	)
 
-	// Fuufuu Whirlwind Kick Press DMG
+	// れんこつむじかぜキック（単押し）ダメージ
 	ai = combat.AttackInfo{
 		ActorIndex:       c.Index,
 		Abil:             "Fuufuu Whirlwind (Kick Press)",
@@ -144,7 +144,7 @@ func (c *char) skillPress() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -157,12 +157,12 @@ func (c *char) skillShortHold() action.Info {
 	c.eAbsorbTag = attacks.ICDTagNone
 	c.absorbCheckLocation = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.2)
 
-	// 1 DoT Tick
+	// 1 DoTティック
 	d := c.createSkillHoldSnapshot()
 	c.Core.Tasks.Add(c.absorbCheck(c.Core.F, 0, 1), 18+12)
 
 	c.Core.Tasks.Add(func() {
-		// pattern shouldn't snapshot on attack event creation because the skill follows the player
+		// スキルがプレイヤーに追従するため、AttackEvent生成時にスナップショットすべきではない
 		d.Pattern = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3)
 		c.Core.QueueAttackEvent(d, 0)
 
@@ -173,7 +173,7 @@ func (c *char) skillShortHold() action.Info {
 		}
 	}, 18)
 
-	// Fuufuu Whirlwind Kick Hold DMG
+	// Fuufuu Whirlwind Kick長押しダメージ
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
 		Abil:             "Fuufuu Whirlwind (Kick Hold)",
@@ -196,13 +196,13 @@ func (c *char) skillShortHold() action.Info {
 		c.kickParticleCB,
 	)
 
-	// 6.2s cooldown
+	// 6.2秒のCD
 	c.SetCDWithDelay(action.ActionSkill, 372, skillShortHoldCDStart)
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillShortHoldFrames),
 		AnimationLength: skillShortHoldFrames[action.InvalidAction],
-		CanQueueAfter:   skillShortHoldFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillShortHoldFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -215,13 +215,13 @@ func (c *char) skillHold(duration int) action.Info {
 	c.eAbsorbTag = attacks.ICDTagNone
 	c.absorbCheckLocation = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.2)
 
-	// ticks
+	// Tick処理
 	d := c.createSkillHoldSnapshot()
 	c.Core.Tasks.Add(c.absorbCheck(c.Core.F, 0, duration/12), 18+12)
 
 	for i := 0; i <= duration; i += 30 { // 1 tick for sure
 		c.Core.Tasks.Add(func() {
-			// pattern shouldn't snapshot on attack event creation because the skill follows the player
+			// スキルがプレイヤーに追従するため、AttackEvent生成時にスナップショットすべきではない
 			d.Pattern = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3)
 			c.Core.QueueAttackEvent(d, 0)
 
@@ -233,7 +233,7 @@ func (c *char) skillHold(duration int) action.Info {
 		}, 18+i)
 	}
 
-	// Fuufuu Whirlwind Kick Hold DMG
+	// Fuufuu Whirlwind Kick長押しダメージ
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
 		Abil:             "Fuufuu Whirlwind (Kick Hold)",
@@ -256,18 +256,18 @@ func (c *char) skillHold(duration int) action.Info {
 		c.kickParticleCB,
 	)
 
-	// +2 frames for not proc the sacrificial by "Yoohoo Art: Fuuin Dash (Elemental DMG)"
+	// 祝福の祠典の"よぶぶきの術・風隠急進（元素ダメージ）"による発動を防ぐため+2フレーム
 	c.SetCDWithDelay(action.ActionSkill, int(6*60+float64(duration)*0.5), (skillHoldCDStart-600)+duration+2)
 
 	return action.Info{
 		Frames:          func(next action.Action) int { return skillHoldFrames[next] - 600 + duration },
 		AnimationLength: skillHoldFrames[action.InvalidAction] - 600 + duration,
-		CanQueueAfter:   skillHoldFrames[action.ActionSwap] - 600 + duration, // earliest cancel
+		CanQueueAfter:   skillHoldFrames[action.ActionSwap] - 600 + duration, // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
 
-// TODO: is this helper needed?
+// TODO: このヘルパーは必要か？
 func (c *char) createSkillHoldSnapshot() *combat.AttackEvent {
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
@@ -284,7 +284,7 @@ func (c *char) createSkillHoldSnapshot() *combat.AttackEvent {
 		IsDeployable:     true,
 	}
 	snap := c.Snapshot(&ai)
-	// pattern shouldn't snapshot on attack event creation because the skill follows the player
+	// スキルがプレイヤーに追従するため、AttackEvent生成時にスナップショットすべきではない
 	ae := combat.AttackEvent{
 		Info:        ai,
 		SourceFrame: c.Core.F,
@@ -342,9 +342,9 @@ func (c *char) rollAbsorb() {
 		}
 
 		switch atk.Info.AttackTag {
-		// DoT always has ElementalArtHold tag
+		// DoTは常に ElementalArtHold タグを持つ
 		case attacks.AttackTagElementalArtHold:
-			// DoT Elemental DMG
+			// DoT元素ダメージ
 			ai := combat.AttackInfo{
 				ActorIndex: c.Index,
 				Abil:       "Fuufuu Windwheel Elemental (Elemental DoT Hold)",
@@ -357,9 +357,9 @@ func (c *char) rollAbsorb() {
 				Mult:       skillAbsorb[c.TalentLvlSkill()],
 			}
 			c.Core.QueueAttack(ai, combat.NewSingleTargetHit(e.Key()), 1, 1)
-		// Kick always has ElementalArt tag
+		// キックは常に ElementalArt タグを持つ
 		case attacks.AttackTagElementalArt:
-			// Kick Elemental DMG
+			// キック元素ダメージ
 			ai := combat.AttackInfo{
 				ActorIndex: c.Index,
 				Abil:       "Fuufuu Whirlwind Elemental (Elemental Kick Hold)",

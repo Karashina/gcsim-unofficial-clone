@@ -26,11 +26,11 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/worker"
 )
 
-// Options sets out the settings to run the sim by (such as debug mode, etc..)
+// Options はシムの実行設定を定義する（デバッグモード等）
 type Options struct {
-	ResultSaveToPath string // file name (excluding ext) to save the result file; if "" then nothing is saved to file
-	GZIPResult       bool   // should the result file be gzipped; only if ResultSaveToPath is not ""
-	ConfigPath       string // path to the config file to read
+	ResultSaveToPath string // 結果ファイルの保存パス（拡張子除く）。空の場合はファイルに保存しない
+	GZIPResult       bool   // 結果ファイルをgzip圧縮するか。ResultSaveToPathが空でない場合のみ有効
+	ConfigPath       string // 読み込む設定ファイルのパス
 }
 
 var (
@@ -66,7 +66,7 @@ func Parse(cfg string) (*info.ActionList, ast.Node, error) {
 		return &info.ActionList{}, nil, err
 	}
 
-	// check other errors as well
+	// 他のエラーもチェック
 	if len(simcfg.Errors) != 0 {
 		fmt.Println("The config has the following errors: ")
 		errMsgs := ""
@@ -81,7 +81,7 @@ func Parse(cfg string) (*info.ActionList, ast.Node, error) {
 	return simcfg, gcsl, nil
 }
 
-// Run will run the simulation given number of times
+// Run はシミュレーションを指定回数実行する
 func Run(ctx context.Context, opts Options) (*model.SimulationResult, error) {
 	start := time.Now()
 
@@ -98,11 +98,11 @@ func Run(ctx context.Context, opts Options) (*model.SimulationResult, error) {
 	return RunWithConfig(ctx, cfg, simcfg, gcsl, opts, start)
 }
 
-// Runs the simulation with a given parsed config
-// TODO: cfg string should be in the action list instead
-// TODO: need to add a context here to avoid infinite looping
+// RunWithConfig はパース済みの設定でシミュレーションを実行する
+// TODO: cfg 文字列は ActionList に含めるべき
+// TODO: 無限ループを避けるためにコンテキストを追加する必要がある
 func RunWithConfig(ctx context.Context, cfg string, simcfg *info.ActionList, gcsl ast.Node, opts Options, start time.Time) (*model.SimulationResult, error) {
-	// initialize aggregators
+	// アグリゲータを初期化
 	var aggregators []agg.Aggregator
 	for _, aggregator := range agg.Aggregators() {
 		enabled := simcfg.Settings.CollectStats
@@ -116,16 +116,15 @@ func RunWithConfig(ctx context.Context, cfg string, simcfg *info.ActionList, gcs
 		aggregators = append(aggregators, a)
 	}
 
-	// set up a pool
+	// プールをセットアップ
 	respCh := make(chan stats.Result)
 	errCh := make(chan error)
 	pool := worker.New(simcfg.Settings.NumberOfWorkers, respCh, errCh)
 	pool.StopCh = make(chan bool)
 
-	// spin off a go func that will queue jobs for as long as the total queued < iter
-	// this should block as queue gets full
+	// ジョブをキューに入れるgoroutineを起動。キューが一杯になるとブロックされる
 	go func() {
-		// make all the seeds
+		// 全シードを作成
 		wip := 0
 		for wip < simcfg.Settings.Iterations {
 			pool.QueueCh <- worker.Job{
@@ -139,7 +138,7 @@ func RunWithConfig(ctx context.Context, cfg string, simcfg *info.ActionList, gcs
 
 	defer close(pool.StopCh)
 
-	// start reading respCh, queueing a new job until wip == number of iterations
+	// respChを読み取り、全イテレーション完了まで待機
 	count := 0
 	for count < simcfg.Settings.Iterations {
 		select {
@@ -149,7 +148,7 @@ func RunWithConfig(ctx context.Context, cfg string, simcfg *info.ActionList, gcs
 			}
 			count += 1
 		case err := <-errCh:
-			// error encountered
+			// エラーが発生
 			return &model.SimulationResult{}, err
 		case <-ctx.Done():
 			return &model.SimulationResult{}, ctx.Err()
@@ -161,7 +160,7 @@ func RunWithConfig(ctx context.Context, cfg string, simcfg *info.ActionList, gcs
 		return result, err
 	}
 
-	// generate final agg results
+	// 最終アグリゲート結果を生成
 	stats := &model.SimulationStatistics{}
 	for _, a := range aggregators {
 		a.Flush(stats)
@@ -171,18 +170,18 @@ func RunWithConfig(ctx context.Context, cfg string, simcfg *info.ActionList, gcs
 	return result, nil
 }
 
-// Note: this generation should be iteration independent (iterations do not change output)
+// GenerateResult はイテレーションに依存しない結果を生成する（イテレーション数によって出力は変わらない）
 func GenerateResult(cfg string, simcfg *info.ActionList) (*model.SimulationResult, error) {
 	out := &model.SimulationResult{
-		// THIS MUST ALWAYS BE IN SYNC WITH THE VIEWER UPGRADE DIALOG IN UI
-		// ONLY CHANGE SCHEMA WHEN THE RESULTS SCHEMA CHANGES. THIS INCLUDES AGG RESULTS CHANGES
-		// SemVer spec
-		//    Major: increase & reset minor to zero if new schema is backwards incompatible
-		//        Ex - changed the location of a critical column (the config file), major refactor
-		//    Minor: increase if new schema is backwards compatible with previous
-		//        Ex - added new data for new graph on UI. UI still functional if this data is missing
-		// Increasing the version will result in the UI flagging all old sims as outdated
-		SchemaVersion: &model.Version{Major: "4", Minor: "2"}, // MAKE SURE UI VERSION IS IN SYNC in ui/packages/ui/src/Pages/Viewer/UpgradeDialog.tsx
+		// これは常にUIのビューアーアップグレードダイアログと同期する必要がある
+		// 結果スキーマが変更された場合のみスキーマを変更する。AGG結果の変更も含む
+		// SemVer 仕様:
+		//    Major: 新スキーマに後方互換性がない場合に上げ、minorを0にリセット
+		//        例 - 重要なカラムの位置変更、大規模リファクタリング
+		//    Minor: 新スキーマに後方互換性がある場合に上げる
+		//        例 - UIの新グラフ用データ追加。データがなくてもUIは機能する
+		// バージョンを上げるとUIが全ての古いシムを古いとフラグする
+		SchemaVersion: &model.Version{Major: "4", Minor: "2"}, // UIバージョンと同期すること ui/packages/ui/src/Pages/Viewer/UpgradeDialog.tsx
 		SimVersion:    &sha1ver,
 		BuildDate:     buildTime,
 		Modified:      &modified,
@@ -268,7 +267,7 @@ func GenerateResult(cfg string, simcfg *info.ActionList) (*model.SimulationResul
 	return out, nil
 }
 
-// cryptoRandSeed generates a random seed using crypo rand
+// CryptoRandSeed は暗号学的乱数を使用してランダムシードを生成する
 func CryptoRandSeed() int64 {
 	var b [8]byte
 	_, err := rand.Read(b[:])
@@ -280,22 +279,21 @@ func CryptoRandSeed() int64 {
 
 var reImport = regexp.MustCompile(`(?m)^import "(.+)"$`)
 
-// readConfig will load and read the config at specified path. Will resolve any import statements
-// as well
+// ReadConfig は指定パスの設定を読み込む。import文も解決する。
 func ReadConfig(fpath string) (string, error) {
 	src, err := os.ReadFile(fpath)
 	if err != nil {
 		return "", err
 	}
 
-	// check for imports
+	// importをチェック
 	var data strings.Builder
 
 	rows := strings.Split(strings.ReplaceAll(string(src), "\r\n", "\n"), "\n")
 	for _, row := range rows {
 		match := reImport.FindStringSubmatch(row)
 		if match != nil {
-			// read import
+			// importを読み込む
 			p := path.Join(path.Dir(fpath), match[1])
 			src, err = os.ReadFile(p)
 			if err != nil {

@@ -26,8 +26,8 @@ func init() {
 	skillFrames[action.ActionSwap] = 44    // E -> Swap
 }
 
-// Yanfei skill - Straightforward as it has little interactions with the rest of her kit
-// Summons flames that deal AoE Pyro DMG. Opponents hit by the flames will grant Yanfei the maximum number of Scarlet Seals.
+// 煙绯の元素スキル - 他のキットとの相互作用が少なく単純
+// 炎を召喚して範囲炎元素ダメージを与える。ヒットした敵は煙绯に最大数の朱印を付与する。
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	done := false
 	addSeal := func(a combat.AttackCB) {
@@ -37,7 +37,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		if done {
 			return
 		}
-		// Create max seals on hit
+		// ヒット時に朱印を最大数付与
 		if c.sealCount < c.maxTags {
 			c.sealCount = c.maxTags
 		}
@@ -59,7 +59,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Durability: 25,
 		Mult:       skill[c.TalentLvlSkill()],
 	}
-	// TODO: Not sure of snapshot timing
+	// TODO: スナップショットのタイミングが不明
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHit(
@@ -79,7 +79,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel is before skillHitmark
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセルはスキルヒットマークより前
 		State:           action.SkillState,
 	}, nil
 }

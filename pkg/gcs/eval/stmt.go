@@ -34,9 +34,9 @@ func (e *Eval) evalStmt(s ast.Stmt, env *Env) (Obj, error) {
 }
 
 func (e *Eval) evalBlock(b *ast.BlockStmt, env *Env) (Obj, error) {
-	// blocks are effectively a list of statements, so we just need to loop through
-	// and evalNode
-	// blocks should create a new environment
+	// ブロックは実質的にステートメントのリストなので、
+	// ループして evalNode を実行するだけでよい
+	// ブロックは新しい環境を生成する
 	scope := NewEnv(env)
 	var last Obj
 	for _, n := range b.List {
@@ -46,11 +46,11 @@ func (e *Eval) evalBlock(b *ast.BlockStmt, env *Env) (Obj, error) {
 		}
 		switch v.(type) {
 		case *retval:
-			// these object should stop execution of current block
+			// これらのオブジェクトは現在のブロックの実行を停止する
 			return v, nil
 		case *ctrl:
-			// TODO: how do we check for invalid continue or break here
-			// prob need to add some sort of context to env
+			// TODO: 無効な continue や break をどうチェックするか
+			// おそらく env に何らかのコンテキストを追加する必要がある
 			return v, nil
 		}
 		last = v
@@ -59,12 +59,12 @@ func (e *Eval) evalBlock(b *ast.BlockStmt, env *Env) (Obj, error) {
 }
 
 func (e *Eval) evalLet(l *ast.LetStmt, env *Env) (Obj, error) {
-	// variable assignment, expr should evaluate to a number
+	// 変数代入: 式は数値に評価されるべき
 	res, err := e.evalExpr(l.Val, env)
 	if err != nil {
 		return nil, err
 	}
-	// res should be a number
+	// res は数値であるべき
 	// v, ok := res.(*number)
 	e.Log.Printf("let expr: %v, type: %T\n", res, res)
 	// if !ok {
@@ -80,7 +80,7 @@ func (e *Eval) evalLet(l *ast.LetStmt, env *Env) (Obj, error) {
 }
 
 func (e *Eval) evalFnStmt(l *ast.FnStmt, env *Env) (Obj, error) {
-	// functionally, a FnStmt is just a special type of let statement
+	// 機能的には FnStmt は特殊な形の let 文である
 	_, exist := env.varMap[l.Ident.Val]
 	if exist {
 		return nil, fmt.Errorf("function %v already exists; cannot redeclare", l.Ident.Val)
@@ -142,7 +142,7 @@ func (e *Eval) evalIfStmt(i *ast.IfStmt, env *Env) (Obj, error) {
 
 func (e *Eval) evalWhileStmt(w *ast.WhileStmt, env *Env) (Obj, error) {
 	for {
-		// if condition is false, break
+		// 条件が偽ならループを抜ける
 		cond, err := e.evalExpr(w.Condition, env)
 		if err != nil {
 			return nil, err
@@ -151,13 +151,13 @@ func (e *Eval) evalWhileStmt(w *ast.WhileStmt, env *Env) (Obj, error) {
 			break
 		}
 
-		// execute block
+		// ブロックを実行
 		res, err := e.evalBlock(w.WhileBlock, env)
 		if err != nil {
 			return nil, err
 		}
 
-		// if result is a break stmt, stop loo
+		// 結果が break 文ならループを停止
 		if t, ok := res.(*ctrl); ok && t.typ == ast.CtrlBreak {
 			break
 		}
@@ -173,7 +173,7 @@ func (e *Eval) evalForStmt(f *ast.ForStmt, env *Env) (Obj, error) {
 
 	for {
 		if f.Cond != nil {
-			// if condition is false, break
+			// 条件が偽ならループを抜ける
 			cond, err := e.evalExpr(f.Cond, scope)
 			if err != nil {
 				return nil, err
@@ -183,13 +183,13 @@ func (e *Eval) evalForStmt(f *ast.ForStmt, env *Env) (Obj, error) {
 			}
 		}
 
-		// execute block
+		// ブロックを実行
 		res, err := e.evalBlock(f.Body, scope)
 		if err != nil {
 			return nil, err
 		}
 
-		// if result is a break stmt, stop loo
+		// 結果が break 文ならループを停止
 		if t, ok := res.(*ctrl); ok && t.typ == ast.CtrlBreak {
 			break
 		}
@@ -207,8 +207,8 @@ func (e *Eval) evalSwitchStmt(swt *ast.SwitchStmt, env *Env) (Obj, error) {
 		return nil, err
 	}
 
-	// condition should be a number
-	// res should be a number
+	// 条件は数値であるべき
+	// res は数値であるべき
 	var v *number
 	if _, ok := cond.(*null); !ok {
 		val, ok := cond.(*number)
@@ -220,9 +220,9 @@ func (e *Eval) evalSwitchStmt(swt *ast.SwitchStmt, env *Env) (Obj, error) {
 	}
 	ft := false
 	found := false
-	// loop through the cases, executing first one that evals true
+	// ケースをループし、最初に true と評価されるものを実行
 	for i := range swt.Cases {
-		// each case expr needs to evaluate to a number
+		// 各 case 式は数値に評価される必要がある
 		cc, err := e.evalExpr(swt.Cases[i].Condition, env)
 		if err != nil {
 			return nil, err
@@ -247,7 +247,7 @@ func (e *Eval) evalSwitchStmt(swt *ast.SwitchStmt, env *Env) (Obj, error) {
 					return &null{}, nil
 				}
 			default:
-				// switch is done
+				// switch 終了
 				return res, nil
 			}
 		}

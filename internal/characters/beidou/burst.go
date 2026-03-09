@@ -51,7 +51,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	)
 
 	dur := 15 * 60
-	// beidou burst is not hitlag extendable
+	// 北斗の爆発はヒットラグで延長されない
 	c.AddStatus(burstKey, dur, false)
 
 	procAI := combat.AttackInfo{
@@ -72,7 +72,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 
 	if c.Base.Cons >= 1 {
-		// create a shield
+		// シールドを作成
 		c.Core.Player.Shields.Add(&shield.Tmpl{
 			ActorIndex: c.Index,
 			Target:     -1,
@@ -85,7 +85,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		})
 	}
 
-	// apply after hitmark
+	// ヒットマーク後に適用
 	if c.Base.Cons >= 6 {
 		for i := 30; i <= dur; i += 30 {
 			c.Core.Tasks.Add(func() {
@@ -107,7 +107,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -119,7 +119,7 @@ func (c *char) burstProc() {
 		if ae.Info.AttackTag != attacks.AttackTagNormal && ae.Info.AttackTag != attacks.AttackTagExtra {
 			return false
 		}
-		// make sure the person triggering the attack is on field still
+		// 攻撃をトリガーしたキャラクターがまだフィールドにいることを確認
 		if ae.Info.ActorIndex != c.Core.Player.Active() {
 			return false
 		}
@@ -131,7 +131,7 @@ func (c *char) burstProc() {
 			return false
 		}
 
-		// trigger a chain of attacks starting at the first target
+		// 最初のターゲットから連鎖攻撃をトリガー
 		atk := *c.burstAtk
 		atk.SourceFrame = c.Core.F
 		atk.Pattern = combat.NewSingleTargetHit(t.Key())
@@ -145,7 +145,7 @@ func (c *char) burstProc() {
 			Write("char", ae.Info.ActorIndex).
 			Write("attack tag", ae.Info.AttackTag)
 
-		// this ICD is most likely tied to the deployable, so it's not hitlag extendable
+		// このICDはおそらく設置物に紐づいているため、ヒットラグで延長されない
 		c.AddStatus(burstICDKey, 60, false)
 		return false
 	}, "beidou-burst")
@@ -159,15 +159,15 @@ func (c *char) chain(src, count int) combat.AttackCBFunc {
 		return nil
 	}
 	return func(a combat.AttackCB) {
-		// on hit figure out the next target
+		// 命中時に次のターゲットを決定
 		next := c.Core.Combat.RandomEnemyWithinArea(combat.NewCircleHitOnTarget(a.Target, nil, 8), func(t combat.Enemy) bool {
 			return a.Target.Key() != t.Key()
 		})
 		if next == nil {
-			// do nothing if no other target other than this one
+			// 自身以外のターゲットがなければ何もしない
 			return
 		}
-		// queue an attack vs next target
+		// 次のターゲットへの攻撃をキューに追加
 		atk := *c.burstAtk
 		atk.SourceFrame = src
 		atk.Pattern = combat.NewSingleTargetHit(next.Key())

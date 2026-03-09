@@ -8,17 +8,17 @@ import (
 )
 
 func (c *char) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
-	// no healing if in skill state; otherwise behave as normal
+	// スキル状態中は回復無効。それ以外は通常通り
 	if !c.StatusIsActive(skillStateKey) {
 		return c.Character.ReceiveHeal(hi, healAmt)
 	}
 
-	// keep heal by clorinde by default
+	// クロリンデ自身の回復はデフォルトで保持
 	if hi.Caller == c.Index && strings.HasPrefix(hi.Message, "Impale the Night") {
 		return c.Character.ReceiveHeal(hi, healAmt)
 	}
 
-	// amount is converted into bol
+	// 回復量を命の契約に変換
 	factor := healingBOL[c.TalentLvlSkill()]
 	if c.Base.Ascension >= 4 {
 		factor = 1

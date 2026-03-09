@@ -21,14 +21,14 @@ func (c *char) c2() {
 }
 
 func (c *char) c6() {
-	// c6 should last for the duration of the burst
-	// lasts 12.5 second, ticks every 0.5s; adds mod to active char for 2s
+	// 6凸は元素爆発の持続中有効
+	// 12.5秒持続、0.5秒ごとにtick; アクティブキャラに2秒間のバフを付与
 	for i := 30; i <= 750; i += 30 {
 		c.Core.Tasks.Add(func() {
 			if !c.Core.Combat.Player().IsWithinArea(c.burstBuffArea) {
 				return
 			}
-			// add 200EM to active char
+			// アクティブキャラに元素熟知200を追加
 			active := c.Core.Player.ActiveChar()
 			if active.CurrentHPRatio() > 0.5 {
 				active.AddStatMod(character.StatMod{
@@ -39,12 +39,12 @@ func (c *char) c6() {
 					},
 				})
 			} else {
-				// add healing bonus if hp <= 0.5
-				// bonus only lasts for 120 frames
+				// HP50%以下の場合、受ける治療効果アップを追加
+				// ボーナスは120フレームのみ持続
 				active.AddHealBonusMod(character.HealBonusMod{
 					Base: modifier.NewBaseWithHitlag("diona-c6-healbonus", 120),
 					Amount: func() (float64, bool) {
-						// is this log even needed?
+						// このログは必要か？
 						c.Core.Log.NewEvent("diona c6 incomming heal bonus activated", glog.LogCharacterEvent, c.Index)
 						return 0.3, false
 					},

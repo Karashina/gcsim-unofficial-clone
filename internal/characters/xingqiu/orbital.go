@@ -7,8 +7,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
-// start a new orbital or extended if already active; duration is length
-// and delay is first tick starting
+// 新しいオービタルを開始または既にアクティブなら延長する。durationは持続時間、
+// delayは最初のTick開始までの遅延
 func (c *char) applyOrbital(duration, delay int) {
 	src := c.Core.F
 	c.Core.Log.NewEvent(
@@ -16,10 +16,10 @@ func (c *char) applyOrbital(duration, delay int) {
 	).Write(
 		"current status", c.StatusExpiry(orbitalKey),
 	)
-	// check if orbitals already active, if active extend duration
-	// other wise start first tick func
+	// オービタルが既にアクティブか確認。アクティブなら持続時間を延長
+	// そうでなければ最初のTickを開始
 	if !c.orbitalActive {
-		// use hitlag affected queue
+		// ヒットラグ影響キューを使用
 		c.QueueCharTask(c.orbitalTickTask(src), delay)
 		c.orbitalActive = true
 		c.Core.Log.NewEvent(
@@ -72,7 +72,7 @@ func (c *char) orbitalTickTask(src int) func() {
 			"src", src,
 		)
 
-		// queue up next instance
+		// 次のインスタンスをキューに追加
 		c.QueueCharTask(c.orbitalTickTask(src), 135)
 
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 1.2), -1, 1)

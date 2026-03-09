@@ -14,7 +14,7 @@ import (
 var (
 	skillFrames            [][]int
 	skillHitmarks          = []int{21, 37}
-	skillCDStarts          = []int{19, 34} // same as doll spawn
+	skillCDStarts          = []int{19, 34} // 人形の出現と同じ
 	skillA1WindowStarts    = []int{26, 42}
 	skillA1WindowDurations = []int{78, 77}
 )
@@ -24,7 +24,7 @@ const (
 	skillDollStartDelay             = int(0.6 * 60)
 	skillDollAttackInterval         = int(3.6 * 60)
 	skillDollConstructCheckInterval = int(0.5 * 60)
-	skillDollAttackDelay            = 5 // should be 0.08s
+	skillDollAttackDelay            = 5 // 0.08秒であるべき
 	skillDollXOffset                = 1.2
 	skillDollYOffset                = -0.3
 	skillDollAoE                    = 1.2
@@ -39,7 +39,7 @@ const (
 func init() {
 	skillFrames = make([][]int, 2)
 
-	// Tap E
+	// 元素スキル（単押し）
 	skillFrames[0] = frames.InitAbilSlice(51) // Tap E -> Walk
 	skillFrames[0][action.ActionAttack] = 42
 	skillFrames[0][action.ActionSkill] = 30
@@ -48,7 +48,7 @@ func init() {
 	skillFrames[0][action.ActionJump] = 42
 	skillFrames[0][action.ActionSwap] = 49
 
-	// Hold E
+	// 元素スキル（長押し）
 	skillFrames[1] = frames.InitAbilSlice(88) // Hold E -> N1/Q/D/J
 	skillFrames[1][action.ActionLowPlunge] = 52
 	skillFrames[1][action.ActionSkill] = 44
@@ -56,19 +56,19 @@ func init() {
 	skillFrames[1][action.ActionSwap] = 87
 }
 
-// Dashes nimbly forward with silken steps. Once this dash ends, Chiori will
-// summon the automaton doll "Tamoto" beside her and sweep her blade upward,
-// dealing AoE Geo DMG to nearby opponents based on her ATK and DEF. Holding the
-// Skill will cause it to behave differently.
+// 絹の歩みで素早く前方にダッシュ。ダッシュ終了時、千織は
+// オートマトン人形「Tamoto」を召喚し、刃を振り上げて
+// 攻撃力と防御力に基づく岩元素範囲ダメージを与える。
+// 長押しで異なる動作をする。
 //
-// Hold Enter Aiming Mode to adjust the dash direction.
+// 長押しで照準モードに入り、ダッシュ方向を調整。
 //
 // Tamoto
-// - Will slash at nearby opponents at intervals, dealing AoE Geo DMG based on
-// Chiori's ATK and DEF.
-// - While active, when Geo Construct(s) are created nearby, an additional Tamoto
-// will be summoned next to Chiori. Only 1 additional Tamoto can be summoned in
-// this manner, and its duration is independently counted.
+// - 一定間隔で付近の敵を斜り、千織の攻撃力と防御力に基づく
+// 岩元素範囲ダメージを与える。
+// - アクティブ中、付近に岩元素設置物が生成されると、追加のTamotoが
+// 千織の横に召喚される。この方法では1体のみ追加可能で、
+// 持続時間は独立してカウントされる。
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	hold := p["hold"]
 	if hold < 0 {
@@ -78,13 +78,13 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		hold = 1
 	}
 
-	// if this is second press, swap and activate a1
+	// 2回目の押下ならスワップして固有天賦1を発動
 	if c.StatusIsActive(a1WindowKey) {
 		return c.skillRecast()
 	}
 
-	// splitting this is currently not necessary but allows for future change
-	// if hold does something special
+	// 現時点では分割は不要だが、将来の変更に対応可能
+	// 長押しが特別な動作をする場合に備えて
 	c.handleSkill(hold)
 
 	return action.Info{
@@ -97,7 +97,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 func (c *char) skillRecast() (action.Info, error) {
 	c.a1Tapestry()
-	// find next char
+	// 次のキャラを検索
 	next := c.Index + 1
 	if next >= len(c.Core.Player.Chars()) {
 		next = 0
@@ -107,7 +107,7 @@ func (c *char) skillRecast() (action.Info, error) {
 		c.Core.Log.NewEventBuildMsg(glog.LogCharacterEvent, c.Index, "forcing swap to ", k.String())
 		c.Core.Player.Exec(action.ActionSwap, k, nil)
 	}, 1)
-	// TODO: doesn't seem like this duration actually matters because of the forced swap, it just needs to cover the 1f until the swap is executed
+	// TODO: 強制スワップのためこの持続時間は実際には重要でない、スワップが実行されるまでの1fをカバーするだけでよい
 	return action.Info{
 		Frames:          func(action.Action) int { return c.Core.Player.Delays.Swap },
 		AnimationLength: c.Core.Player.Delays.Swap,
@@ -117,7 +117,7 @@ func (c *char) skillRecast() (action.Info, error) {
 }
 
 func (c *char) handleSkill(hold int) {
-	// handle upward sweep
+	// 上昇攻撃を処理
 	c.Core.Tasks.Add(func() {
 		ai := combat.AttackInfo{
 			Abil:       "Fluttering Hasode (Upward Sweep)",
@@ -139,22 +139,22 @@ func (c *char) handleSkill(hold int) {
 		c.Core.QueueAttackWithSnap(ai, snap, combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 5.5, 3.5), 0)
 	}, skillHitmarks[hold])
 
-	// trigger cd and activate a1 window
+	// CDをトリガーし、固有天賦1ウィンドウをアクティブ化
 	c.SetCDWithDelay(action.ActionSkill, skillCD, skillCDStarts[hold])
 	c.activateA1Window(skillA1WindowStarts[hold], skillA1WindowDurations[hold])
 
-	// handle doll spawn
+	// 人形の生成を処理
 	c.Core.Tasks.Add(func() {
-		// create 1st doll
+		// 1体目の人形を生成
 		c.createDoll()
 
-		// create construct checker that should spawn the rock doll if not c1
+		// 1凸でない場合、rock dollを生成する設置物チェッカーを作成
 		if !c.c1Active {
 			c.createDollConstructChecker()
 			return
 		}
 
-		// create rock doll from c1 and trigger a4
+		// 1凸からrock dollを生成し、固有天賦4を発動
 		c.Core.Log.NewEvent("c1 spawning rock doll", glog.LogCharacterEvent, c.Index)
 		c.createRockDoll()
 		c.applyA4Buff()
@@ -162,10 +162,10 @@ func (c *char) handleSkill(hold int) {
 }
 
 func (c *char) createDoll() {
-	// kill existing doll
+	// 既存の人形を破棄
 	c.kill(c.skillDoll)
 
-	// determine doll pos
+	// 人形の位置を決定
 	player := c.Core.Combat.Player()
 	dollPos := geometry.CalcOffsetPoint(
 		player.Pos(),
@@ -175,7 +175,7 @@ func (c *char) createDoll() {
 
 	c.Core.Log.NewEvent("spawning doll", glog.LogCharacterEvent, c.Index)
 
-	// spawn new doll
+	// 新しい人形を生成
 	doll := newTicker(c.Core, skillDollDuration, nil)
 	doll.cb = c.skillDollAttack(c.Core.F, "Fluttering Hasode (Tamato)", dollPos)
 	doll.interval = skillDollAttackInterval
@@ -184,14 +184,14 @@ func (c *char) createDoll() {
 }
 
 func (c *char) createDollConstructChecker() {
-	// kill existing construct checker
+	// 既存の設置物チェッカーを破棄
 	c.kill(c.constructChecker)
 
-	// spawn associated construct checker to spawn the rock doll
+	// rock dollを生成するための関連設置物チェッカーを生成
 	cc := newTicker(c.Core, skillDollDuration, nil)
 	cc.cb = c.skillDollConstructCheck
 	cc.interval = skillDollConstructCheckInterval
-	cc.tick() // start ticking at t = 0s
+	cc.tick() // t = 0sでティック開始
 	c.constructChecker = cc
 }
 
@@ -215,8 +215,8 @@ func (c *char) skillDollAttack(src int, abil string, pos geometry.Point) func() 
 			ai.FlatDmg = snap.Stats.TotalDEF()
 			ai.FlatDmg *= turretDefScaling[c.TalentLvlSkill()]
 
-			// if the player has an attack target it will always choose this enemy
-			// so just need to make sure that it is within the search AoE
+			// プレイヤーに攻撃ターゲットがある場合は常にこの敵を選択する
+			// 検索AoE内にあることを確認するだけでよい
 			t := c.Core.Combat.PrimaryTarget()
 			if !t.IsWithinArea(combat.NewCircleHitOnTarget(pos, nil, c.skillSearchAoE)) {
 				return
@@ -230,13 +230,13 @@ func (c *char) skillDollAttack(src int, abil string, pos geometry.Point) func() 
 }
 
 func (c *char) skillDollConstructCheck() {
-	// cannot spawn rock doll if construct exists
+	// 設置物が存在する場合、rock dollを生成できない
 	if c.rockDoll != nil && c.rockDoll.alive {
 		return
 	}
-	// TODO: technically should check for constructs within 30m radius of the skill doll
-	// doll pos is already passed to the attack func so can reuse that here
-	// not too important and construct handler doesn't directly expose that so not doing that for now
+	// TODO: 技術的にはスキル人形から30m半径内の設置物をチェックすべき
+	// 人形の位置は既に攻撃関数に渡されているので再利用可能
+	// それほど重要ではなく、設置物ハンドラが直接公開していないため未実装
 	if c.Core.Constructs.Count() == 0 {
 		return
 	}
@@ -244,15 +244,15 @@ func (c *char) skillDollConstructCheck() {
 	c.Core.Log.NewEvent("construct spawning rock doll", glog.LogCharacterEvent, c.Index)
 	c.createRockDoll()
 
-	// make sure this check doesn't happen again
+	// このチェックが再度発生しないようにする
 	c.kill(c.constructChecker)
 }
 
 func (c *char) createRockDoll() {
-	// kill existing
+	// 既存を破棄
 	c.kill(c.rockDoll)
 
-	// determine doll pos
+	// 人形の位置を決定
 	player := c.Core.Combat.Player()
 	dollPos := geometry.CalcOffsetPoint(
 		player.Pos(),
@@ -260,7 +260,7 @@ func (c *char) createRockDoll() {
 		player.Direction(),
 	)
 
-	// spawn new rock doll
+	// 新しいrock dollを生成
 	rd := newTicker(c.Core, skillDollDuration, nil)
 	rd.cb = c.skillDollAttack(c.Core.F, "Fluttering Hasode (Tamato - Construct)", dollPos)
 	rd.interval = skillDollAttackInterval

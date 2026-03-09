@@ -38,17 +38,17 @@ const (
 func init() {
 	aimedFrames = make([][]int, 2)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(23)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(80)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
 
-	// Fully-Charged Aimed Shot (Prop Arrow)
+	// フルチャージ狙い撃ち（マジック弾）
 	aimedPropFrames = frames.InitAbilSlice(111)
 	aimedPropFrames[action.ActionDash] = aimedPropRelease
 	aimedPropFrames[action.ActionJump] = aimedPropRelease
@@ -160,7 +160,7 @@ func (c *char) PropAimed(p map[string]int) (action.Info, error) {
 			c.makeC4CB(),
 		)
 
-		// hp drain should happen right after prop arrow snapshot to avoid getting the newly gained mh stack on it
+		// HP消費はマジック弾のスナップショット直後に行い、新しく得たスタックが反映されないようにする
 		// https://youtu.be/QblKD2-9WNE?si=xcd4NAl2Wq-46fQI
 		hpDrained := c.propSurplus()
 
@@ -177,14 +177,14 @@ func (c *char) PropAimed(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// not implemented: The effect will be removed after the character spends 30s out of combat.
+// 未実装: キャラクターが戦闘外で30秒経過すると効果が解除される。
 func (c *char) propSurplus() bool {
-	// When firing the Prop Arrow, and when Lyney has more than 60% HP,
-	// he will consume a portion of his HP to obtain 1 Prop Surplus stack.
+	// マジック弾を発射する際、リネのHPが60%以上の場合、
+	// HPの一部を消費してマジック余剰スタックを1つ獲得する。
 	if c.CurrentHPRatio() < propSurplusHPDrainThreshold {
 		return false
 	}
-	// check for == 60%, with tolerance
+	// 60%ちょうどの場合を許容誤差付きでチェック
 	if math.Abs(c.CurrentHPRatio()-propSurplusHPDrainThreshold) < propSurplusRoundingTolerance {
 		return false
 	}
@@ -192,7 +192,7 @@ func (c *char) propSurplus() bool {
 	currentHP := c.CurrentHP()
 	maxHP := c.MaxHP()
 	hpdrain := propSurplusHPDrainRatio * maxHP
-	// The lowest Lyney can drop to through this method is 60% of his Max HP.
+	// この方法でリネのHPが下がる最低値はHP上限の60%。
 	if (currentHP-hpdrain)/maxHP <= propSurplusHPDrainThreshold {
 		hpdrain = currentHP - propSurplusHPDrainThreshold*maxHP
 	}
@@ -246,7 +246,7 @@ func (c *char) makeGrinMalkinHat(pos geometry.Point, hpDrained bool) func() {
 	return func() {
 		hatIncrease := 1 + c.c1HatIncrease()
 		for i := 0; i < hatIncrease; i++ {
-			// kill existing hat if reached limit
+			// 上限に達した場合、既存のハットを破壊
 			if len(c.hats) == c.maxHatCount {
 				c.hats[0].Kill()
 			}

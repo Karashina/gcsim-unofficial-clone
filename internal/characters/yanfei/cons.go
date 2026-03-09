@@ -10,8 +10,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Hook for C2:
-// Increases Yan Fei's Charged Attack CRIT Rate by 20% against enemies below 50% HP.
+// 2凸フック：
+// HPが50%以下の敵に対して煙绯の重撃会心率を20%増加させる。
 func (c *char) c2() {
 	if c.Core.Combat.DamageMode {
 		m := make([]float64, attributes.EndStatType)
@@ -35,10 +35,10 @@ func (c *char) c2() {
 	}
 }
 
-// Handles C4 shield creation
-// When Done Deal is used:
-// Creates a shield that absorbs up to 45% of Yan Fei's Max HP for 15s
-// This shield absorbs Pyro DMG 250% more effectively
+// 4凸シールド生成を処理
+// 「丹書契約」使用時：
+// 15秒間、煙绯のHP上限の45%を吸収するシールドを生成
+// このシールドは炎元素ダメージを250%多く吸収する
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return

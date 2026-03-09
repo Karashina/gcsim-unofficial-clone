@@ -31,10 +31,10 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// 2pc - Electro DMG Bonus +15%
-// 4pc - Increases DMG caused by Overloaded, Electro-Charged, Superconduct, and Hyperbloom by 40%,
-// and the DMG Bonus conferred by Aggravate is increased by 20%. When Quicken or the aforementioned
-// Elemental Reactions are triggered, Elemental Skill CD is decreased by 1s. Can only occur once every 0.8s.
+// 2セット - 雷元素ダメージボーナス +15%
+// 4セット - 過負荷、感電、超伝導、超開花によるダメージが40%増加、
+// 激化によるダメージボーナスが20%増加。超開や上記元素反応発動時、
+// 元素スキルCDが1秒減少。0.8秒に1回のみ発動可能。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 

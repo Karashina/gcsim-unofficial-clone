@@ -31,9 +31,9 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// After a Charged Attack hits an opponent, a Sunfire Arrow will descend upon the opponent hit, dealing 60% ATK as DMG,
-// and applying the Heartsearer effect to the opponent damaged by said Arrow for 10s. Opponents affected by Heartsearer
-// take 28% more Charged Attack DMG from the wielder. A Sunfire Arrow can be triggered once every 10s.
+// 重撃が敵に命中した後、命中した敵にSunfire Arrowが降り注ぎ、攻撃力60%分のダメージを与え、
+// そのArrowでダメージを受けた敵に10秒間Heartsearerの効果を付与する。Heartsearerの影響を受けた敵は
+// 武器装備者からの重撃ダメージが28%増加する。Sunfire Arrowは10秒毎に1回発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

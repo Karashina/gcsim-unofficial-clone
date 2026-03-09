@@ -71,7 +71,7 @@ func (c *char) onVoidAbsorb(count int) {
 }
 
 func (c *char) createVoidRift() {
-	// absorb the rift immediately if currently in the hE/ or E-Burst animation
+	// 長押しEまたはE-爆発アニメーション中であれば即座にリフトを吸収
 	if c.StatusIsActive(skillAbsorbRiftAnimKey) {
 		c.onVoidAbsorb(1)
 	}

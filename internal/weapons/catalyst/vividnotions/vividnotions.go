@@ -96,7 +96,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		// TODO: hitlag affected?
+		// TODO: ヒットラグの影響？
 		plungeF := char.StatusExpiry(plungeBuff)
 		skillBurstF := char.StatusExpiry(skillBurstBuff)
 		char.QueueCharTask(func() {

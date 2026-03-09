@@ -33,7 +33,7 @@ func init() {
 }
 
 func (c *char) Skill(_ map[string]int) (action.Info, error) {
-	// do initial attack
+	// 初撃を実行
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
 		Abil:           "Obsidian Tzitzimitl DMG",
@@ -55,15 +55,15 @@ func (c *char) Skill(_ map[string]int) (action.Info, error) {
 		c.particleCB,
 	)
 
-	// to do with delay
+	// ディレイ付きで実行
 	c.QueueCharTask(func() {
 		c.SetCD(action.ActionSkill, 16*60)
 
-		// summon Itzpapa and immediately check if Opal Fire state can be activated
+		// Itzpapaを召喚し、Opal Fire状態が発動可能か即座に確認
 		c.nightsoulState.EnterTimedBlessing(c.nightsoulState.Points()+24, 20*60, c.exitNightsoul)
 		c.tryEnterOpalFireState()
 
-		// apply cryo
+		// 氷元素を付与
 		player, ok := c.Core.Combat.Player().(*avatar.Player)
 		if !ok {
 			panic("target 0 should be Player but is not!!")
@@ -73,7 +73,7 @@ func (c *char) Skill(_ map[string]int) (action.Info, error) {
 
 	c.QueueCharTask(c.addShield, 37)
 
-	// to do now
+	// 即時実行
 	if c.Base.Cons >= 1 {
 		c.numStellarBlades = 10
 	}
@@ -105,7 +105,7 @@ func (c *char) generateNightsoulPoints(amount float64) {
 	c.tryEnterOpalFireState()
 }
 
-// try to activate Opal Fire each time Citlali gains NS points to avoid event subscribtion
+// イベント購読を避けるため、CitlaliがNSポイントを獲得するたびにOpal Fireの発動を試みる
 func (c *char) tryEnterOpalFireState() {
 	if !c.nightsoulState.HasBlessing() {
 		return
@@ -113,7 +113,7 @@ func (c *char) tryEnterOpalFireState() {
 	if c.nightsoulState.Points() < 50 && c.Base.Cons < 6 {
 		return
 	}
-	// if it's activation or REactivation (of Opal Fire state)
+	// Opal Fire状態の発動または再発動の場合
 	if c.StatusIsActive(opalFireStateKey) {
 		return
 	}
@@ -133,7 +133,7 @@ func (c *char) nightsoulPointReduceTask(src int) {
 			return
 		}
 
-		// reduce 0.8 point every 6f, which is 8 per second
+		// 6fごとに0.8ポイント減少（毎秒8ポイント）
 		prev := c.nightsoulState.Points()
 		c.nightsoulState.ConsumePoints(0.8)
 		if c.Base.Cons >= 6 {

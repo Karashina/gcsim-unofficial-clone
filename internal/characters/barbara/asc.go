@@ -6,19 +6,19 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
-// The Stamina Consumption of characters within Let the Show Begin♪'s Melody Loop is reduced by 12%.
+// 公演、開幕♪のメロディーループ内のキャラクターのスタミナ消費が12%減少する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	// a1 lasts for duration of barb skill which is 900 frames
+	// 固有天賦1はバーバラのスキル持続時間（900フレーム）の間持続
 	c.Core.Player.AddStamPercentMod("barb-a1-stam", skillDuration, func(a action.Action) (float64, bool) {
 		return -0.12, false
 	})
 }
 
-// When your active character gains an Elemental Orb/Particle, the duration of the Melody Loop of Let the Show Begin♪ is extended by 1s.
-// The maximum extension is 5s.
+// アクティブキャラクターが元素オーブ/粒子を取得した時、公演、開幕♪のメロディーループの持続時間が1秒延長される。
+// 最大延長は5秒。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

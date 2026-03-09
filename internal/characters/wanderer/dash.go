@@ -29,13 +29,13 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 		return c.WindfavoredDash(p)
 	}
 
-	// defer dash cd and stamina consumption til after delay (delay simulates falling)
+	// 遅延後までダッシュCDとスタミナ消費を延期（遅延は落下をシミュレート）
 	c.Core.Tasks.Add(func() {
 		c.ApplyDashCD()
 		c.QueueDashStaminaConsumption(p)
 	}, delay)
 
-	// length is standard dash length + skill end delay (to simulate falling)
+	// 長さは標準ダッシュ長 + スキル終了遅延（落下をシミュレート）
 	length := c.DashLength() + delay
 	return action.Info{
 		Frames:          func(action.Action) int { return length },

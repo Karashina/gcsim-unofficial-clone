@@ -14,7 +14,7 @@ import (
 
 var burstFrames []int
 
-const burstHitmark = 31 // Initial Hit
+const burstHitmark = 31 // 初撃
 
 func init() {
 	burstFrames = frames.InitAbilSlice(56) // Q -> E
@@ -25,8 +25,8 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// Initial Hit
-	// A1/C6/Q duration all start on Initial Hit
+	// 初撃
+	// A1/C6/Qの持続時間は全て初撃時に開始
 	c.Core.Tasks.Add(func() {
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -44,30 +44,30 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5), 0, 0)
 
-		// Q General's Glory:
-		// Like the General's War Banner created by Inuzaka All-Round Defense, provides buffs to active characters
-		// within the skill's AoE based on the number of Geo characters in the party. Also moves together with
-		// your active character.
+		// Q General's Glory（獣牙突撃陣形）:
+		// 犬坂鐌繰の昭で作成される「大将旗」と同様に、スキルAoE内の
+		// 岩元素キャラ数に応じたバフをアクティブキャラに付与。
+		// アクティブキャラと共に移動する。
 		c.eFieldSrc = c.Core.F
-		c.Core.Tasks.Add(c.gorouSkillBuffField(c.Core.F), 17) // 17 so we get one last tick
+		c.Core.Tasks.Add(c.gorouSkillBuffField(c.Core.F), 17) // 17にして最後のTickを取得
 
-		// If a General's War Banner created by Gorou currently exists on the field when this ability is used,
-		// it will be destroyed. In addition, for the duration of General's Glory, Gorou's
-		// Elemental Skill "Inuzaka All-Round Defense" will not create the General's War Banner.
+		// このアビリティ使用時にゴローが作成した「大将旗」がフィールド上に存在する場合、
+		// それは破壊される。さらに、General's Gloryの持続中、ゴローの
+		// 元素スキル「犬坂鐌繰の昭」は「大将旗」を作成しない。
 		c.Core.Status.Delete(generalWarBannerKey)
-		c.Core.Status.Add(generalGloryKey, generalGloryDuration) // field starts on Hitmark Initial
+		c.Core.Status.Add(generalGloryKey, generalGloryDuration) // フィールドはヒットマーク初撃から開始
 
-		// Generates 1 Crystal Collapse every 1.5s that deals AoE Geo DMG to 1 opponent within the skill's AoE.
-		// Pulls 1 elemental shard in the skill's AoE to your active character's position every 1.5s (elemental
-		// shards are created by Crystallize reactions).
+		// 1.5秒ごとに1つのCrystal Collapseを生成し、スキルAoE内の敵1体にAoE岩元素ダメージ。
+		// 1.5秒ごとにスキルAoE内の元素結晶片を1つアクティブキャラの位置に引き寄せる
+		// （元素結晶片は結晶反応で生成される）。
 		c.qFieldSrc = c.Core.F
-		c.Core.Tasks.Add(c.gorouCrystalCollapse(c.Core.F), 90) // first crystal collapse is 1.5s after Hitmark Initial
+		c.Core.Tasks.Add(c.gorouCrystalCollapse(c.Core.F), 90) // 最初のCrystal Collapseは初撃ヒットマーク後1.5秒
 
 		c.a1()
 
-		// C4
+		// 4凸
 		if c.Base.Cons >= 4 && c.geoCharCount > 1 {
-			// TODO: not sure if this actually snapshots stats
+			// TODO: 実際にステータスをスナップショットするか不明...
 			// ai := combat.AttackInfo{
 			// 	Abil:      "Inuzaka All-Round Defense C4",
 			// 	AttackTag: attacks.AttackTagNone,
@@ -76,13 +76,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			c.Core.Tasks.Add(c.gorouBurstHealField(c.Core.F), 90)
 		}
 
-		// C6
+		// 6凸
 		if c.Base.Cons >= 6 {
 			c.c6()
 		}
 	}, burstHitmark)
 
-	//TODO:  If Gorou falls, the effects of General's Glory will be cleared.
+	//TODO: ゴローが倒れると、General's Gloryの効果は解除される。
 
 	c.c2Extension = 0
 
@@ -92,23 +92,23 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
 
-// recursive function for dealing damage
+// ダメージを与える再帰関数
 func (c *char) gorouCrystalCollapse(src int) func() {
 	return func() {
-		// do nothing if this has been overwritten
+		// 上書きされている場合は何もしない
 		if c.qFieldSrc != src {
 			return
 		}
-		// do nothing if field expired
+		// フィールドが期限切れなら何もしない
 		if c.Core.Status.Duration(generalGloryKey) == 0 {
 			return
 		}
-		// trigger damage
+		// ダメージを発動
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       "Crystal Collapse",
@@ -125,25 +125,25 @@ func (c *char) gorouCrystalCollapse(src int) func() {
 		collapseArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 8)
 		enemy := c.Core.Combat.ClosestEnemyWithinArea(collapseArea, nil)
 		if enemy != nil {
-			//TODO: skill damage frames
+			//TODO: スキルダメージのフレーム
 			c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(enemy, nil, 3.5), 0, 1)
 		}
 
-		// suck in 1 crystallize shard
+		// 元素結晶片を1つ吸引
 		for _, g := range c.Core.Combat.Gadgets() {
 			cs, ok := g.(*reactable.CrystallizeShard)
-			// skip if no shard
+			// 結晶がなければスキップ
 			if !ok {
 				continue
 			}
-			// skip if shard not in area
+			// 結晶片が範囲外ならスキップ
 			if !cs.IsWithinArea(collapseArea) {
 				continue
 			}
-			// approximate sucking in as 0.4m per frame (~8m distance took 20f to arrive at gorou)
+			// 吸引を0.4m/フレームとして近似（約8mの距離がゴローまで20fで到着）
 			distance := cs.Pos().Distance(collapseArea.Shape.Pos())
 			travel := int(math.Ceil(distance / 0.4))
-			// special check to account for edge case if shard just spawned and will arrive before it can be picked up
+			// 結晶が生成直後で拾える前に到着するエッジケースのための特別チェック
 			if c.Core.F+travel < cs.EarliestPickup {
 				continue
 			}
@@ -153,23 +153,23 @@ func (c *char) gorouCrystalCollapse(src int) func() {
 			break
 		}
 
-		// tick every 1.5s
+		// 1.5秒ごとにTick
 		c.Core.Tasks.Add(c.gorouCrystalCollapse(src), 90)
 	}
 }
 
 func (c *char) gorouBurstHealField(src int) func() {
 	return func() {
-		// do nothing if this has been overwritten
+		// 上書きされている場合は何もしない
 		if c.qFieldSrc != src {
 			return
 		}
-		// do nothing if field expired
+		// フィールドが期限切れなら何もしない
 		if c.Core.Status.Duration(generalGloryKey) == 0 {
 			return
 		}
-		// When General's Glory is in the "Impregnable" or "Crunch" states, it will also heal active characters
-		// within its AoE by 50% of Gorou's own DEF every 1.5s.
+		// 「集岩」または「碎岩」状態のGeneral's Gloryは、AoE内のアクティブキャラを
+		// 1.5秒ごとにゴロー自身の防御力の50%分回復する。
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,
 			Target:  c.Core.Player.Active(),
@@ -178,7 +178,7 @@ func (c *char) gorouBurstHealField(src int) func() {
 			Bonus:   c.Stat(attributes.Heal),
 		})
 
-		// tick every 1.5s
+		// 1.5秒ごとにTick
 		c.Core.Tasks.Add(c.gorouBurstHealField(src), 90)
 	}
 }

@@ -60,8 +60,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		// Although from the description it can be implied that anyone's swirl can trigger it,
-		// only the wielder swirls trigger.
+		// 説明文からは誰の拡散でも発動できるように見えるが、
+		// 実際には装備者の拡散のみが発動する。
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != char.Index {
 			return false
@@ -70,7 +70,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 		if frameSwirlBuffApplied == c.F {
-			// avoid doing this 2 times on double swirls
+			// ダブル拡散時に2回発動するのを防止
 			return false
 		}
 		frameSwirlBuffApplied = c.F

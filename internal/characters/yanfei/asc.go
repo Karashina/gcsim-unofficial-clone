@@ -9,10 +9,10 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When Yanfei consumes Scarlet Seals by using a Charged Attack,
-// each Scarlet Seal will increase Yanfei's Pyro DMG Bonus by 5%.
-// This effects lasts for 6s. When a Charged Attack is used again
-// during the effect's duration, it will dispel the previous effect.
+// 煙绯が重撃で朱印を消費すると、
+// 朱印1枚ごとに煙绯の炎元素ダメージバフが5%増加する。
+// この効果は6秒間持続する。効果持続中に再度重撃を使用すると、
+// 前の効果が解除される。
 func (c *char) a1(stacks int) {
 	if c.Base.Ascension < 1 {
 		return
@@ -27,9 +27,9 @@ func (c *char) a1(stacks int) {
 	})
 }
 
-// When Yanfei's Charged Attack deals a CRIT Hit to opponents,
-// she will deal an additional instance of AoE Pyro DMG equal to 80% of her ATK.
-// This DMG counts as Charged Attack DMG.
+// 煙绯の重撃が敵に会心ヒットした場合、
+// 攻撃力80%の追加の範囲炎元素ダメージを与える。
+// このダメージは重撃ダメージとみなされる。
 func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil

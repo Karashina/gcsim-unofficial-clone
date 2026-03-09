@@ -56,13 +56,13 @@ func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Fail
 		return c.Character.ActionReady(a, p)
 	}
 
-	// Allow to press E while in dreamDrifter that cancels the effect
+	// Dreamdrifter中にEを押して効果をキャンセルできるようにする
 	if a == action.ActionSkill {
-		// cancel
+		// キャンセル
 		return true, action.NoFailure
 	}
 
-	// restrict actions that can be performed while in dreamDrifter stat to swap, dash, burst
+	// Dreamdrifter状態中に実行可能なアクションをスワップ、ダッシュ、元素爆発に制限
 	if a != action.ActionDash && a != action.ActionSwap && a != action.ActionBurst {
 		return false, action.NoFailure
 	}

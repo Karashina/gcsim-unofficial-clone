@@ -32,7 +32,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Durability: 25,
 	}
 
-	// 5 second, 20 ticks, so once every 15 frames, bloom after 5 seconds
+	// 5秒間、20ティック、つまり15フレームごとに1回、5秒後にブルーム
 	ai.Mult = burstBloom[c.TalentLvlBurst()]
 	ai.StrikeType = attacks.StrikeTypeDefault
 	ai.Abil = "Soumetsu (Bloom)"
@@ -49,13 +49,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.c4,
 	)
 
-	// C2 mini-frostflake bloom
+	// 2凸ミニ霜華のブルーム
 	var aiC2 combat.AttackInfo
 	if c.Base.Cons >= 2 {
 		aiC2 = ai
 		aiC2.Mult = burstBloom[c.TalentLvlBurst()] * .2
 		aiC2.Abil = "C2 Mini-Frostflake Seki no To (Bloom)"
-		// TODO: Not sure about the positioning/size...
+		// TODO: 位置/サイズが不明確...
 		for i := 0; i < 2; i++ {
 			c.Core.QueueAttack(
 				aiC2,
@@ -89,12 +89,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			c.c4,
 		)
 
-		// C2 mini-frostflake cutting
+		// 2凸ミニ霜華のカッティング
 		if c.Base.Cons >= 2 {
-			aiC2.Mult = burstCut[c.TalentLvlBurst()] * .2
+			aiC2.Mult = burstCut[c.TalentLvlBurst()] * .20
 			aiC2.StrikeType = attacks.StrikeTypeSlash
 			aiC2.Abil = "C2 Mini-Frostflake Seki no To (Cutting)"
-			// TODO: Not sure about the positioning/size...
+			// TODO: 位置/サイズが不明確...
 			for j := 0; j < 2; j++ {
 				c.Core.QueueAttack(
 					aiC2,
@@ -118,7 +118,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionJump], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

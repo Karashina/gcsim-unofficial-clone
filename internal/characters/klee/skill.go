@@ -33,8 +33,8 @@ func init() {
 	skillCanceledFrames[action.ActionBurst] = 5
 }
 
-// Has two parameters, "bounce" determines the number of bounces that hit
-// "mine" determines the number of mines that hit the enemy
+// パラメータ2つ："bounce" はバウンスの命中回数を決定する
+// "mine" は敵に命中する地雷の数を決定する
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	type attackData struct {
 		ai   combat.AttackInfo
@@ -59,7 +59,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			Durability: 25,
 			Mult:       jumpy[c.TalentLvlSkill()],
 		}
-		// 3rd bounce is 2B
+		// 3回目のバウンスは2B（50元素量）
 		if i == 2 {
 			ai.Durability = 50
 		}

@@ -12,9 +12,9 @@ import (
 
 var burstFrames []int
 
-const burstStart = 47           // lines up with cd start
-const burstInitialHitmark = 51  // Initial Hit
-const burstClusterHitmark = 100 // First Cluster Hit
+const burstStart = 47           // CD開始と同時
+const burstInitialHitmark = 51  // 初撃
+const burstClusterHitmark = 100 // 最初のクラスターヒット
 
 func init() {
 	burstFrames = frames.InitAbilSlice(80) // Q -> CA
@@ -25,15 +25,17 @@ func init() {
 	burstFrames[action.ActionSwap] = 56    // Q -> Swap
 }
 
-// Casts down Tengu Juurai: Titanbreaker, dealing AoE Electro DMG. Afterwards, Tengu Juurai: Titanbreaker spreads out into 4 consecutive bouts of Tengu Juurai: Stormcluster, dealing AoE Electro DMG.
-// Tengu Juurai: Titanbreaker and Tengu Juurai: Stormcluster can provide the active character within their AoE with the same ATK Bonus as given by the Elemental Skill, Tengu Stormcall. The ATK Bonus provided by various kinds of Tengu Juurai will not stack, and their effects and duration will be determined by the last Tengu Juurai to take effect.
+// 天狗呉雷・螢重を落とし、範囲雷元素ダメージを与える。その後、天狗呉雷・螢重は4回の
+// 天狗呉雷・雷砤に分散し、範囲雷元素ダメージを与える。
+// 天狗呉雷・螢重と天狗呉雷・雷砤は、元素スキルと同じ攻撃力バフを範囲内のアクティブキャラクターに付与する。
+// 各種天狗呉雷の攻撃力バフは重複せず、効果と持続時間は最後に発動した天狗呉雷により決定される。
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// Entire burst snapshots sometime after activation but before 1st hit.
-	// For now, assume that it snapshots on cd delay
-	// Flagged as no ICD since the stormclusters do not share ICD with the main hit
-	// No ICD should not functionally matter as this only hits once
+	// 元素爆発全体が発動後、初撃前のどこかでスナップショットされる。
+	// 現状、CD遅延時にスナップショットされると仮定
+	// ICDなしと設定（雷砤は主撃とICDを共有しないため）
+	// ICDなしは、これが1回しかヒットしないため実質的に影響なし
 
-	// titanbreaker
+	// 螢重
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Tengu Juurai: Titanbreaker",
@@ -71,7 +73,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	stormClusterRadius := 3.0
 	var stormClusterCount float64
 	if c.Base.Cons >= 4 {
-		// The number of Tengu Juurai: Stormcluster released by Subjugation: Koukou Sendou is increased to 6.
+		// 征服・號令による天狗呉雷・雷砤の発生回数が6回に増加する。
 		stormClusterCount = 6
 	} else {
 		stormClusterCount = 4
@@ -79,11 +81,11 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	stepSize := 360 / stormClusterCount
 
 	for i := 0.0; i < stormClusterCount; i++ {
-		// every stormcluster has its own direction
+		// 各雷砤はそれぞれ独自の方向を持つ
 		direction := geometry.DegreesToDirection(i * stepSize).Rotate(burstInitialDirection)
-		// 6 ticks per stormcluster
+		// 1雷砤あたり6Tick
 		for j := 0; j < 6; j++ {
-			// start at 3.6 m offset, move 1.35m per tick
+			// 3.6mのオフセットから開始、Tickごとに1.35m移動
 			stormClusterPos := geometry.CalcOffsetPoint(burstInitialPos, geometry.Point{Y: 3.6 + 1.35*float64(j)}, direction)
 			stormClusterAp := combat.NewCircleHitOnTarget(stormClusterPos, nil, stormClusterRadius)
 
@@ -98,7 +100,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

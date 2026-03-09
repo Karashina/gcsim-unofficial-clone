@@ -8,22 +8,22 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// C1:
-// Party members within the radius of Wake of Earth have their CRIT Rate increased by 10%
+// 1凸:
+// 岩潮の範囲内のパーティメンバーは会心率10%増加、
 //
-//	and have increased resistance against interruption.
+//	中断耐性が向上。
 func (c *Traveler) c1(ticks int) func() {
 	return func() {
-		// different Q fields can co-exist at C6 if you do the following:
-		// - cast another Q after Q cooldown is up (after 15s) but before Q field expires (before 20s)
-		// so it's ok that they're both queueing up c1 ticks
+		// 6凸では異なるQフィールドが共存可能:
+		// - QのCT復帰後(15秒後)でQフィールド消滅前(20秒前)に再度Qを発動
+		// そのため両方がc1ティックをキューに入れても問題ない
 
-		// if Q construct isn't up, then don't apply buff / queue another tick
+		// Qの構造物がない場合、バフを適用せず次のティックもキューしない
 		if c.Core.Constructs.CountByType(construct.GeoConstructTravellerBurst) == 0 {
 			return
 		}
 
-		// this makes sure that every Q field only ticks 15/20 times at <C6/C6
+		// 各Qフィールドが6凸未満/6凸でそれぞれ15/20回だけティックするようにする
 		if ticks > c.c1TickCount {
 			return
 		}
@@ -31,7 +31,7 @@ func (c *Traveler) c1(ticks int) func() {
 		c.Core.Log.NewEvent("geo-traveler field ticking", glog.LogCharacterEvent, -1).
 			Write("tick_number", ticks)
 
-		// apply C1 buff to active char for 2s
+		// アクティブキャラに1凸バフを2秒間適用
 		if c.Core.Combat.Player().IsWithinArea(c.burstArea) {
 			m := make([]float64, attributes.EndStatType)
 			m[attributes.CR] = .1
@@ -46,7 +46,7 @@ func (c *Traveler) c1(ticks int) func() {
 			})
 		}
 
-		// check again in 1s
+		// 1秒後に再チェック
 		ticks += 1
 		c.Core.Tasks.Add(c.c1(ticks), 60)
 	}

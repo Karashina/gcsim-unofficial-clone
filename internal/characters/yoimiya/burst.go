@@ -25,7 +25,7 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// assume it does skill dmg at end of it's animation
+	// アニメーション終了時にスキルダメージを与えると仮定
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Aurous Blaze",
@@ -48,13 +48,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6),
 		0,
 		burstHitmark,
-		c.applyAB, // callback to apply Aurous Blaze
+		c.applyAB, // Aurous Blazeを適用するコールバック
 		c.makeC2CB(),
 	)
 
-	// add cooldown to sim
+	// シミュレーションにクールダウンを追加
 	c.SetCD(action.ActionBurst, 15*60)
-	// use up energy
+	// エネルギーを消費
 	c.ConsumeEnergy(5)
 
 	c.abApplied = false
@@ -62,23 +62,23 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
 
 func (c *char) applyAB(a combat.AttackCB) {
-	// marker an opponent after first hit
-	// ignore the bouncing around for now (just assume it's always target 0)
-	// icd of 2s, removed if down
+	// 初撃命中後に敵にマーカーを付与
+	// バウンス処理は無視（常にターゲット0と仮定）
+	// ICD 2秒、擃破時に削除
 
-	// do nothing if ab already applied on enemy
+	// 既に敵に過蒸の炎が適用済みなら何もしない
 	if c.abApplied {
 		return
 	}
 
 	trg, ok := a.Target.(*enemy.Enemy)
-	// do nothing if not an enemy
+	// 敵でなければ何もしない
 	if !ok {
 		return
 	}
@@ -88,32 +88,32 @@ func (c *char) applyAB(a combat.AttackCB) {
 	if c.Base.Cons >= 1 {
 		duration = 840
 	}
-	trg.AddStatus(abDebuff, duration, true) // apply Aurous Blaze
+	trg.AddStatus(abDebuff, duration, true) // Aurous Blazeを適用
 }
 
 func (c *char) burstHook() {
-	// check on attack landed for target 0
-	// if aurous active then trigger dmg if not on cd
+	// ターゲット0の攻撃着弾時にチェック
+	// 過蒸の炎がアクティブならCDでない場合にダメージを発動
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		ae := args[1].(*combat.AttackEvent)
 		trg, ok := args[0].(*enemy.Enemy)
-		// ignore if not an enemy
+		// 敵でなければ無視
 		if !ok {
 			return false
 		}
-		// ignore if debuff not on enemy
+		// 敵にデバフがない場合は無視
 		if !trg.StatusIsActive(abDebuff) {
 			return false
 		}
-		// ignore for self
+		// 自分自身の攻撃は無視
 		if ae.Info.ActorIndex == c.Index {
 			return false
 		}
-		// ignore if on icd
+		// ICD中は無視
 		if trg.StatusIsActive(abIcdKey) {
 			return false
 		}
-		// ignore if wrong tags
+		// 対象外の攻撃タグは無視
 		switch ae.Info.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagExtra:
@@ -124,7 +124,7 @@ func (c *char) burstHook() {
 		default:
 			return false
 		}
-		// do explosion, set icd
+		// 爆発を実行し、ICDを設定
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       "Aurous Blaze (Explode)",
@@ -139,9 +139,9 @@ func (c *char) burstHook() {
 		}
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(trg, nil, 3), 0, 1, c.makeC2CB())
 
-		trg.AddStatus(abIcdKey, 120, true) // trigger Aurous Blaze ICD
+		trg.AddStatus(abIcdKey, 120, true) // 過蒸の炎のICDを発動
 
-		// C4
+		// 4凸
 		if c.Base.Cons >= 4 {
 			c.ReduceActionCooldown(action.ActionSkill, 72)
 		}
@@ -150,10 +150,10 @@ func (c *char) burstHook() {
 	}, "yoimiya-burst-check")
 
 	if c.Core.Flags.DamageMode {
-		// add check for if yoimiya dies
+		// 嬵宮が死亡した場合のチェックを追加
 		c.Core.Events.Subscribe(event.OnPlayerHPDrain, func(_ ...interface{}) bool {
 			if c.CurrentHPRatio() <= 0 {
-				// remove Aurous Blaze from target
+				// ターゲットから過蒸の炎を削除
 				for _, x := range c.Core.Combat.Enemies() {
 					trg := x.(*enemy.Enemy)
 					if trg.StatusIsActive(abDebuff) {

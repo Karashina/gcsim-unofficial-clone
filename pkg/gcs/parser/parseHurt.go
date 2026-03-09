@@ -8,7 +8,7 @@ import (
 )
 
 func parseHurt(p *Parser) (parseFn, error) {
-	// hurt once interval=300 amount=1,300 element=physical #once at frame 300 (or nearest)
+	// hurt once interval=300 amount=1,300 element=physical #フレーム300（または最も近い）で1回
 	// hurt every interval=480,720 amount=1,300 element=physical #randomly 1 to 300 dmg every 480 to 720 frames
 	n := p.next()
 	switch n.Typ {
@@ -29,7 +29,7 @@ func parseHurt(p *Parser) (parseFn, error) {
 }
 
 func parseHurtOnce(p *Parser) (parseFn, error) {
-	// hurt once interval=300 amount=1,300 element=physical #once at frame 300
+	// hurt once interval=300 amount=1,300 element=physical #フレーム300で1回
 	var err error
 	p.res.HurtSettings.Active = true
 	p.res.HurtSettings.Once = true

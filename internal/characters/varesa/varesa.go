@@ -104,7 +104,7 @@ func (c *char) clearNightsoul() {
 }
 
 func (c *char) clearNightsoulCB(next action.AnimationState) {
-	// ignore volcanic kablam
+	// volcanic kablamを無視
 	if next == action.BurstState {
 		return
 	}

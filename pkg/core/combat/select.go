@@ -6,7 +6,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 )
 
-// all targets
+// 全ターゲット
 
 func enemiesWithinAreaFiltered(a AttackPattern, filter func(t Enemy) bool, originalEnemies []Target) []Enemy {
 	var enemies []Enemy
@@ -37,7 +37,7 @@ func gadgetsWithinAreaFiltered(a AttackPattern, filter func(t Gadget) bool, orig
 		if v == nil {
 			continue
 		}
-		// check if gadget is enemy camp, abilities don't target allied gadgets
+		// ガジェットが敵陣営かチェック、味方ガジェットはアビリティの対象にならない
 		if !(v.GadgetTyp() > StartGadgetTypEnemy && v.GadgetTyp() < EndGadgetTypEnemy) {
 			continue
 		}
@@ -55,7 +55,7 @@ func gadgetsWithinAreaFiltered(a AttackPattern, filter func(t Gadget) bool, orig
 	return gadgets
 }
 
-// returns enemies within the given area, no sorting, pass nil for no filter
+// 指定範囲内の敵を返す。ソートなし。フィルター不要の場合はnilを渡す
 func (h *Handler) EnemiesWithinArea(a AttackPattern, filter func(t Enemy) bool) []Enemy {
 	enemies := enemiesWithinAreaFiltered(a, filter, h.enemies)
 	if len(enemies) == 0 {
@@ -64,7 +64,7 @@ func (h *Handler) EnemiesWithinArea(a AttackPattern, filter func(t Enemy) bool) 
 	return enemies
 }
 
-// returns gadgets within the given area, no sorting, pass nil for no filter
+// 指定範囲内のガジェットを返す。ソートなし。フィルター不要の場合はnilを渡す
 func (h *Handler) GadgetsWithinArea(a AttackPattern, filter func(t Gadget) bool) []Gadget {
 	gadgets := gadgetsWithinAreaFiltered(a, filter, h.gadgets)
 	if len(gadgets) == 0 {
@@ -73,9 +73,9 @@ func (h *Handler) GadgetsWithinArea(a AttackPattern, filter func(t Gadget) bool)
 	return gadgets
 }
 
-// random targets
+// ランダムターゲット
 
-// returns a random enemy within the given area, pass nil for no filter
+// 指定範囲内のランダムな敵を返す。フィルター不要の場合はnilを渡す
 func (h *Handler) RandomEnemyWithinArea(a AttackPattern, filter func(t Enemy) bool) Enemy {
 	enemies := h.EnemiesWithinArea(a, filter)
 	if enemies == nil {
@@ -84,7 +84,7 @@ func (h *Handler) RandomEnemyWithinArea(a AttackPattern, filter func(t Enemy) bo
 	return enemies[h.Rand.Intn(len(enemies))]
 }
 
-// returns a random gadget within the given area, pass nil for no filter
+// 指定範囲内のランダムなガジェットを返す。フィルター不要の場合はnilを渡す
 func (h *Handler) RandomGadgetWithinArea(a AttackPattern, filter func(t Gadget) bool) Gadget {
 	gadgets := h.GadgetsWithinArea(a, filter)
 	if gadgets == nil {
@@ -93,7 +93,7 @@ func (h *Handler) RandomGadgetWithinArea(a AttackPattern, filter func(t Gadget) 
 	return gadgets[h.Rand.Intn(len(gadgets))]
 }
 
-// returns a list of random enemies within the given area, pass nil for no filter
+// 指定範囲内のランダムな敵のリストを返す。フィルター不要の場合はnilを渡す
 func (h *Handler) RandomEnemiesWithinArea(a AttackPattern, filter func(t Enemy) bool, maxCount int) []Enemy {
 	enemies := h.EnemiesWithinArea(a, filter)
 	if enemies == nil {
@@ -101,16 +101,16 @@ func (h *Handler) RandomEnemiesWithinArea(a AttackPattern, filter func(t Enemy) 
 	}
 	enemyCount := len(enemies)
 
-	// generate random indexes to take from enemies (no duplicates!)
+	// 重複なしのランダムインデックスを生成
 	indexes := h.Rand.Perm(enemyCount)
 
-	// determine length of slice to return
+	// 返却するスライスの長さを決定
 	count := maxCount
 	if enemyCount < maxCount {
 		count = enemyCount
 	}
 
-	// add enemies given by indexes to the result
+	// インデックスに従って敵を結果に追加
 	result := make([]Enemy, 0, count)
 	for i := 0; i < count; i++ {
 		result = append(result, enemies[indexes[i]])
@@ -118,7 +118,7 @@ func (h *Handler) RandomEnemiesWithinArea(a AttackPattern, filter func(t Enemy) 
 	return result
 }
 
-// returns a list of random gadgets within the given area, pass nil for no filter
+// 指定範囲内のランダムなガジェットのリストを返す。フィルター不要の場合はnilを渡す
 func (h *Handler) RandomGadgetsWithinArea(a AttackPattern, filter func(t Gadget) bool, maxCount int) []Gadget {
 	gadgets := h.GadgetsWithinArea(a, filter)
 	if gadgets == nil {
@@ -126,16 +126,16 @@ func (h *Handler) RandomGadgetsWithinArea(a AttackPattern, filter func(t Gadget)
 	}
 	gadgetCount := len(gadgets)
 
-	// generate random indexes to take from gadgets (no duplicates!)
+	// 重複なしのランダムインデックスを生成
 	indexes := h.Rand.Perm(gadgetCount)
 
-	// determine length of slice to return
+	// 返却するスライスの長さを決定
 	count := maxCount
 	if gadgetCount < maxCount {
 		count = gadgetCount
 	}
 
-	// add gadgets given by indexes to the result
+	// インデックスに従ってガジェットを結果に追加
 	result := make([]Gadget, 0, count)
 	for i := 0; i < count; i++ {
 		result = append(result, gadgets[indexes[i]])
@@ -143,7 +143,7 @@ func (h *Handler) RandomGadgetsWithinArea(a AttackPattern, filter func(t Gadget)
 	return result
 }
 
-// closest targets
+// 最近接ターゲット
 
 type enemyTuple struct {
 	enemy Enemy
@@ -195,7 +195,7 @@ func gadgetsWithinAreaSorted(a AttackPattern, filter func(t Gadget) bool, skipAt
 		if v == nil {
 			continue
 		}
-		// check if gadget is enemy camp, abilities don't target allied gadgets
+		// ガジェットが敵陣営かチェック、味方ガジェットはアビリティの対象にならない
 		if !(v.GadgetTyp() > StartGadgetTypEnemy && v.GadgetTyp() < EndGadgetTypEnemy) {
 			continue
 		}
@@ -222,7 +222,7 @@ func gadgetsWithinAreaSorted(a AttackPattern, filter func(t Gadget) bool, skipAt
 	return gadgets
 }
 
-// returns the closest enemy to the given position without any range restrictions; SHOULD NOT be used outside of pkg
+// 指定位置に最も近い敵を返す。距離制限なし。pkg外では使用しないこと
 func (h *Handler) ClosestEnemy(pos geometry.Point) Enemy {
 	enemies := enemiesWithinAreaSorted(NewCircleHitOnTarget(pos, nil, 1), nil, true, h.enemies)
 	if enemies == nil {
@@ -231,7 +231,7 @@ func (h *Handler) ClosestEnemy(pos geometry.Point) Enemy {
 	return enemies[0].enemy
 }
 
-// returns the closest gadget to the given position without any range restrictions; SHOULD NOT be used outside of pkg
+// 指定位置に最も近いガジェットを返す。距離制限なし。pkg外では使用しないこと
 func (h *Handler) ClosestGadget(pos geometry.Point) Gadget {
 	gadgets := gadgetsWithinAreaSorted(NewCircleHitOnTarget(pos, nil, 1), nil, true, h.gadgets)
 	if gadgets == nil {
@@ -240,7 +240,7 @@ func (h *Handler) ClosestGadget(pos geometry.Point) Gadget {
 	return gadgets[0].gadget
 }
 
-// returns the closest enemy within the given area, pass nil for no filter
+// 指定範囲内で最も近い敵を返す。フィルター不要の場合はnilを渡す
 func (h *Handler) ClosestEnemyWithinArea(a AttackPattern, filter func(t Enemy) bool) Enemy {
 	enemies := enemiesWithinAreaSorted(a, filter, false, h.enemies)
 	if enemies == nil {
@@ -249,7 +249,7 @@ func (h *Handler) ClosestEnemyWithinArea(a AttackPattern, filter func(t Enemy) b
 	return enemies[0].enemy
 }
 
-// returns the closest gadget within the given area, pass nil for no filter
+// 指定範囲内で最も近いガジェットを返す。フィルター不要の場合はnilを渡す
 func (h *Handler) ClosestGadgetWithinArea(a AttackPattern, filter func(t Gadget) bool) Gadget {
 	gadgets := gadgetsWithinAreaSorted(a, filter, false, h.gadgets)
 	if gadgets == nil {
@@ -258,7 +258,7 @@ func (h *Handler) ClosestGadgetWithinArea(a AttackPattern, filter func(t Gadget)
 	return gadgets[0].gadget
 }
 
-// returns enemies within the given area, sorted from closest to furthest, pass nil for no filter
+// 指定範囲内の敵を近い順にソートして返す。フィルター不要の場合はnilを渡す
 func (h *Handler) ClosestEnemiesWithinArea(a AttackPattern, filter func(t Enemy) bool) []Enemy {
 	enemies := enemiesWithinAreaSorted(a, filter, false, h.enemies)
 	if enemies == nil {
@@ -272,7 +272,7 @@ func (h *Handler) ClosestEnemiesWithinArea(a AttackPattern, filter func(t Enemy)
 	return result
 }
 
-// returns enemies within the given area, sorted from closest to furthest, pass nil for no filter
+// 指定範囲内のガジェットを近い順にソートして返す。フィルター不要の場合はnilを渡す
 func (h *Handler) ClosestGadgetsWithinArea(a AttackPattern, filter func(t Gadget) bool) []Gadget {
 	gadgets := gadgetsWithinAreaSorted(a, filter, false, h.gadgets)
 	if gadgets == nil {

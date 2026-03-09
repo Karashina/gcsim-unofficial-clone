@@ -48,11 +48,11 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		return &s, nil
 	}
 
-	// add +0.6 reaction damage
+	// 反応ダメージ+0.6を追加
 	char.AddReactBonusMod(character.ReactBonusMod{
 		Base: modifier.NewBase("vv-4pc", -1),
 		Amount: func(ai combat.AttackInfo) (float64, bool) {
-			// check to make sure this is not an amped swirl
+			// 増幅拡散でないことを確認
 			if ai.Amped || ai.Catalyzed {
 				return 0, false
 			}
@@ -79,7 +79,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 				return false
 			}
 
-			// ignore if character not on field
+			// キャラクターがフィールドにいなければ無視
 			if c.Player.Active() != char.Index {
 				return false
 			}
@@ -99,9 +99,9 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 	c.Events.Subscribe(event.OnSwirlHydro, vvfunc(attributes.Hydro, "vvhydro"), fmt.Sprintf("vv-4pc-%v", char.Base.Key.String()))
 	c.Events.Subscribe(event.OnSwirlPyro, vvfunc(attributes.Pyro, "vvpyro"), fmt.Sprintf("vv-4pc-%v", char.Base.Key.String()))
 
-	// Additional event for on damage proc on secondary targets
-	// Got some very unexpected results when trying to modify the above vvfunc to allow for this, so I'm just copying it separately here
-	// Possibly closure related? Not sure
+	// 二次ターゲットへのダメージ発動用の追加イベント
+	// 上記のvvfuncを修正して対応しようとしたが予期せぬ結果が出たため、別途コピーしている
+	// クロージャ関連の問題かもしれない
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		t, ok := args[0].(*enemy.Enemy)
@@ -112,7 +112,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			return false
 		}
 
-		// ignore if character not on field
+		// キャラクターがフィールドにいなければ無視
 		if c.Player.Active() != char.Index {
 			return false
 		}

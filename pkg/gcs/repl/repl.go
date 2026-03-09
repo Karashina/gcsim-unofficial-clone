@@ -33,7 +33,7 @@ func Eval(s string, log *log.Logger) {
 	fmt.Println(gcsl.String())
 
 	if len(res.Errors) != 0 {
-		// don't run the program if there are errors
+		// エラーがある場合はプログラムを実行しない
 		return
 	}
 	fmt.Println("Running program...:")

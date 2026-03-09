@@ -23,16 +23,16 @@ func init() {
 	core.RegisterCharFunc(keys.Tartaglia, NewChar)
 }
 
-// tartaglia specific character implementation
+// タルタリヤ固有のキャラクター実装
 type char struct {
 	*tmpl.Character
 	riptideDuration int
-	eCast           int  // the frame tartaglia casts E to enter melee stance
-	c4Src           int  // used for c4
-	mlBurstUsed     bool // used for c6
+	eCast           int  // タルタリヤが元素スキルを発動して近接スタンスに入ったフレーム
+	c4Src           int  // 4命用
+	mlBurstUsed     bool // 6命用
 }
 
-// Initializes character
+// キャラクターを初期化
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
 	c := char{}
 	c.Character = tmpl.NewWithWrapper(s, w)

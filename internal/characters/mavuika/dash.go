@@ -45,12 +45,12 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 		)
 		c.Core.QueueAttack(ai, ap, 6, 6)
 		c.reduceNightsoulPoints(10)
-		// If dashing from NA while in bike, do not reset NA string
+		// バイク状態で通常攻撃中にダッシュした場合、通常攻撃のコンボをリセットしない
 		if c.Core.Player.CurrentState() == action.NormalAttackState {
 			c.savedNormalCounter = c.NormalCounter
 		}
 
-		// Execute dash CD logic
+		// ダッシュクールダウンのロジックを実行
 		c.ApplyDashCD()
 		return action.Info{
 			Frames:          frames.NewAbilFunc(dashFrames),

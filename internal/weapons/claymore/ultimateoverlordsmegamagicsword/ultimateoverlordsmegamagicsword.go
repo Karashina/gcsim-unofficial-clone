@@ -20,26 +20,26 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// ATK increased by 12/15/18/21/24%. That's not all!
-// The support from all Melusines you've helped in Merusea Village fills you with strength!
-// Based on the number of them you've helped, your ATK is increased by up to an additional 12/15/18/21/24%.
+// 攻撃力が12/15/18/21/24%増加。それだけではない！
+// メリュジーヌの村で助けた全てのメリュジーヌの支援が力を与える！
+// 助けた数に基づき、攻撃力がさらに最大12/15/18/21/24%増加。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	// 6 melusines are enough to cap out the buff
+	// 6体のメリュジーヌでバフが上限に達する
 	melusinesCap := 6
 	melusines, ok := p.Params["melusines"]
 	if !ok {
-		melusines = 6 // default is max buff
+		melusines = 6 // デフォルトは最大バフ
 	} else {
 		melusines = min(melusines, melusinesCap)
 	}
 
-	// floating point division otherwise will either be 0 or 1
+	// 浮動小数点除算でなければ結果は0か1になる
 	additional := max(float64(melusines)/float64(melusinesCap), 0)
 
-	// perm buff
+	// 永続バフ
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.ATKP] = (0.09 + float64(r)*0.03) * (1 + additional)
 	char.AddStatMod(character.StatMod{

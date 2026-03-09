@@ -6,10 +6,10 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// A1 is not implemented:
-// TODO: When a Rain Sword is shattered or when its duration expires, it regenerates the current character's HP based on 6% of Xingqiu's Max HP.
+// 固有天賦1は未実装:
+// TODO: 雨すだれの剣が破壊された時または持続時間が切れた時、行秋の最大HPの6%に基づき現在のキャラクターのHPを回復する。
 
-// Xingqiu gains a 20% Hydro DMG Bonus.
+// 行秋は水元素ダメージボーナスが20%増加する。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

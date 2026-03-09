@@ -37,11 +37,11 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	single := make([]float64, attributes.EndStatType)
 	single[attributes.ATKP] = .18 + .06*float64(r)
 
-	// start checking for enemies in 1s
+	// 1秒後に敵チェックを開始
 	w.src = c.F
 	char.QueueCharTask(w.enemyCheck(char, c, c.F), 60)
 
-	// need to requeue enemy checks once swapping back to the char
+	// キャラクター切り替え時に敵チェックを再キューイング
 	c.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		if c.Player.Active() == char.Index {
 			w.src = c.F
@@ -72,14 +72,14 @@ func (w *Weapon) enemyCheck(char *character.CharWrapper, c *core.Core, src int) 
 		if c.Player.Active() == char.Index {
 			enemies := c.Combat.EnemiesWithinArea(combat.NewCircleHitOnTarget(c.Combat.Player(), nil, 8), nil)
 			change := len(enemies) >= 2
-			// apply changes in 0.8s
+			// 0.8秒後に変更を適用
 			char.QueueCharTask(func() {
 				if c.Player.Active() != char.Index {
 					return
 				}
 				w.useMultiple = change
 			}, 48)
-			// only check for enemies while the char is active
+			// アクティブキャラクターの間のみ敵チェックを実行
 			char.QueueCharTask(w.enemyCheck(char, c, src), 60)
 		}
 	}

@@ -37,7 +37,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// mark this character as a potential moonsign holder for team initialization
+	// チーム初期化のためこのキャラクターをムーンサイン保持候補としてマーク
 	c.AddStatus("moonsignKey", -1, false)
 	c.InitLCallback()
 	c.makeBurstBonus()
@@ -53,7 +53,7 @@ func (c *char) Init() error {
 }
 
 func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
-	// If charging during Shadow Dance (skill active), stamina cost is 0 when Verdant Dew >=1.
+	// Shadow Dance（スキルアクティブ）中の重撃時、翠露≥ 1ならスタミナコストは0。
 	if a != action.ActionCharge || !c.StatusIsActive(skillKey) {
 		return c.Character.ActionStam(a, p)
 	}

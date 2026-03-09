@@ -57,8 +57,8 @@ func (c *char) c1() {
 		return
 	}
 	for _, char := range c.Core.Player.Chars() {
-		// TODO: check if this buff is affected by hitlag on characters or hitlag on escoffier
-		// Currently assuming affected by hitlag on characters
+		// TODO: このバフがキャラクターのヒットラグの影響を受けるか、エスコフィエのヒットラグの影響を受けるか確認
+		// 現在はキャラクターのヒットラグの影響を受けると仮定
 		char.AddAttackMod(character.AttackMod{
 			Base: modifier.NewBaseWithHitlag(c1Key, c1Dur),
 			Amount: func(ae *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
@@ -192,7 +192,7 @@ func (c *char) c6Init() {
 			Durability: 25,
 			Mult:       c6Scaling,
 		}
-		// trigger damage
+		// ダメージを発動
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 4), 0, c.skillTravel, c.makeA4CB())
 
 		c.c6Count--

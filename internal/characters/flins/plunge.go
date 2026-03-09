@@ -45,11 +45,11 @@ func init() {
 	highPlungeFrames[action.ActionSwap] = 63
 }
 
-// Low Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 低空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
-	// Cannot use plunge attacks during Manifest Flame form
+	// 「顯現の炎」形態中は落下攻撃使用不可
 	if c.StatusIsActive(skillKey) {
 		return action.Info{}, errors.New("plunge cannot be used during Manifest Flame form")
 	}
@@ -66,7 +66,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -100,11 +100,11 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// High Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 高空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
-	// Cannot use plunge attacks during Manifest Flame form
+	// 「顯現の炎」形態中は落下攻撃使用不可
 	if c.StatusIsActive(skillKey) {
 		return action.Info{}, errors.New("plunge cannot be used during Manifest Flame form")
 	}
@@ -121,7 +121,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *char) highPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -155,8 +155,8 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// Plunge normal falling attack damage queue generator
-// Standard - Always part of high/low plunge attacks
+// 落下攻撃（通常落下）のダメージキュー生成
+// 標準 - 高空/低空落下攻撃に常に含まれる
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

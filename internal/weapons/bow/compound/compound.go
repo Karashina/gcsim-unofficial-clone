@@ -41,50 +41,45 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	stacks := 0
 	maxStacks := 4
 	const stackKey = "compoundbow-stacks"
-	stackDuration := 360 // frames = 6s * 60 fps
+	stackDuration := 360 // フレーム数 = 6秒 × 60fps
 	const icdKey = "compoundbow-icd"
 
-	cd := 18 // frames = 0.3s * 60fps
+	cd := 18 // フレーム数 = 0.3秒 × 60fps
 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 
-		// Attack belongs to the equipped character
-		if atk.Info.ActorIndex != char.Index {
-			return false
-		}
-
-		// Active character has weapon equipped
+		// 武器装備者からの攻撃かチェック
 		if c.Player.Active() != char.Index {
 			return false
 		}
 
-		// Only apply on normal or charged attacks
+		// 通常攻撃または重撃でのみ適用
 		if (atk.Info.AttackTag != attacks.AttackTagNormal) && (atk.Info.AttackTag != attacks.AttackTagExtra) {
 			return false
 		}
 
-		// Check if cd is up
+		// クールダウン中かチェック
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
 
-		// Reset stacks if they've expired
+		// スタックが期限切れの場合リセット
 		if !char.StatusIsActive(stackKey) {
 			stacks = 0
 		}
 
-		// Checks done, proc weapon passive
-		// Increment stack count
+		// チェック完了、武器パッシブを発動
+		// スタック数を増加
 		if stacks < maxStacks {
 			stacks++
 		}
 
-		// trigger cd
+		// クールダウンを発動
 		char.AddStatus(icdKey, cd, true)
 		char.AddStatus(stackKey, stackDuration, true)
 
-		// buff lasts 6 * 60 = 360 frames
+		// バフ持続時間 6 × 60 = 360フレーム
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("compoundbow", stackDuration),
 			AffectedStat: attributes.NoStat,

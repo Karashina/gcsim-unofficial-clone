@@ -64,7 +64,7 @@ func (c *char) Init() error {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// if in the Nightsoul Blessing, can press E
+	// ナイトソウルの祝福中はスキル発動可能
 	if a == action.ActionSkill && c.nightsoulState.HasBlessing() {
 		return true, action.NoFailure
 	}
@@ -119,7 +119,7 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 
 func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]int) error {
 	if c.nightsoulState.HasBlessing() {
-		// cannot CA, LP, HP in nightsoul blessing
+		// ナイトソウルの加護中は重撃・低空落下・高空落下不可
 		if a == action.ActionCharge {
 			return player.ErrInvalidChargeAction
 		}
@@ -143,7 +143,7 @@ func (c *char) onExitField() {
 	}, "kinich-exit")
 }
 
-// Normalize an angle to be within [-180, 180)
+// 角度を[-180, 180)の範囲に正規化
 func NormalizeAngle180(angle float64) float64 {
 	for angle < -180 {
 		angle += 360
@@ -154,7 +154,7 @@ func NormalizeAngle180(angle float64) float64 {
 	return angle
 }
 
-// Normalize an angle to be within [0, 360)
+// 角度を[0, 360)の範囲に正規化
 func NormalizeAngle360(angle float64) float64 {
 	for angle < 0 {
 		angle += 360

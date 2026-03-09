@@ -61,7 +61,7 @@ func (c *char) Init() error {
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
 	if a == action.ActionAttack && c.nightsoulState.HasBlessing() {
 		if c.AvailableCDCharge[a] <= 0 {
-			// TODO: Implement AttackCD warning
+			// TODO: 攻撃CD警告を実装
 			return false, action.CharacterDeceased
 		}
 	}
@@ -114,7 +114,7 @@ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 
 func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]int) error {
 	if c.nightsoulState.HasBlessing() {
-		// cannot CA in nightsoul blessing
+		// ナイトソウルの祝福中は重撃不可
 		if a == action.ActionCharge {
 			return player.ErrInvalidChargeAction
 		}

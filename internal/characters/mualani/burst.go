@@ -8,7 +8,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
 )
 
-const burstHitmarks = 108 // adjusted to swap frame
+const burstHitmarks = 108 // キャラ交代フレームに調整
 
 var (
 	burstFrames []int
@@ -43,14 +43,14 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5)
 
-	// snapshot at bullet creation
+	// 弾生成時にスナップショット
 	var snap combat.Snapshot
 	stacks := c.a4Stacks
 	c.a4Stacks = 0
 	c.QueueCharTask(func() {
 		snap = c.Snapshot(&ai)
 		c.Core.Tasks.Add(func() {
-			// TODO: verify if snapshot is used or if maxhp is recalced here
+			// TODO: スナップショットが使用されるかHP最大値が再計算されるか確認
 			hp := c.MaxHP()
 			ai.FlatDmg = burst[c.TalentLvlBurst()] * hp
 			if c.Base.Ascension >= 4 {
@@ -67,7 +67,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

@@ -32,7 +32,7 @@ func (c *char) a1() {
 		c.a1Cap = c2A1FlatDmg
 	}
 	c.a1stacks = stacks.NewMultipleRefreshNoRemove(3, c.QueueCharTask, &c.Core.F)
-	// on electro reaction, add buff; 3 stacks independent
+	// 電元素反応時にバフを追加。独立で3スタック
 	c.Core.Events.Subscribe(event.OnElectroCharged, c.a1CB, "clorinde-a1-ec")
 	c.Core.Events.Subscribe(event.OnSuperconduct, c.a1CB, "clorinde-a1-superconduct")
 	c.Core.Events.Subscribe(event.OnAggravate, c.a1CB, "clorinde-a1-aggravate")
@@ -44,7 +44,7 @@ func (c *char) a1() {
 }
 
 func (c *char) a1CB(args ...interface{}) bool {
-	// no requirement who triggers other than that it must be against an enemy
+	// 敵に対して発動する必要があるが、トリガー者の指定はない
 	if _, ok := args[0].(*enemy.Enemy); !ok {
 		return false
 	}
@@ -52,7 +52,7 @@ func (c *char) a1CB(args ...interface{}) bool {
 }
 
 func (c *char) a1CBGadget(...interface{}) bool {
-	// add a stack and refresh the mod for 15s
+	// スタックを追加し　15秒間 mod を更新
 	c.a1stacks.Add(clordineA1BuffDuration)
 	c.AddAttackMod(character.AttackMod{
 		Base:   modifier.NewBaseWithHitlag(clorindeA1BuffKey, clordineA1BuffDuration),
@@ -66,7 +66,7 @@ func (c *char) a1Amount(atk *combat.AttackEvent, t combat.Target) ([]float64, bo
 	switch atk.Info.AttackTag {
 	case attacks.AttackTagNormal:
 		if atk.Info.Element != attributes.Electro {
-			// only app
+			// 通常攻撃のみ適用
 			return nil, false
 		}
 	case attacks.AttackTagElementalBurst:
@@ -79,7 +79,7 @@ func (c *char) a1Amount(atk *combat.AttackEvent, t combat.Target) ([]float64, bo
 	c.Core.Log.NewEvent("a1 adding flat dmg", glog.LogCharacterEvent, c.Index).
 		Write("amt", amt).
 		Write("c2_applied", c.Base.Cons >= 2)
-	// we don't actually change any stats here..
+	// 実際にはステータスを変更していない..
 	return nil, true
 }
 
@@ -104,7 +104,7 @@ func (c *char) a4Init() {
 }
 
 func (c *char) a4(change float64) {
-	// if BOL > 100%, then on BOL change, add 15s buff; 2 stacks each tracked independently
+	// BOLが100%以上の場合、BOL変動時に15秒バフを追加。2スタック、それぞれ独立追跡
 	if c.Base.Ascension < 4 {
 		return
 	}

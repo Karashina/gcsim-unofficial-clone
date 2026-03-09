@@ -79,7 +79,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 		icdCounterAdd()
 
-		// reset stacks if expired
+		// 期限切れの場合はスタックをリセット
 		if !char.StatModIsActive(skillBuff) {
 			w.stacks = 0
 		}

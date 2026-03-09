@@ -42,7 +42,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 2.5), 0, skillHitmark)
 
 	c.QueueCharTask(func() {
-		// add shield
+		// シールドを追加
 		exist := c.Core.Player.Shields.Get(shield.LaylaSkill)
 		if exist == nil {
 			shield := shieldBase[c.TalentLvlSkill()] + shieldPer[c.TalentLvlSkill()]*c.MaxHP()
@@ -55,7 +55,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			shd.Expires = c.Core.F + 12*60
 		}
 
-		// apply cryo & run a task
+		// 氷元素を付与してタスクを実行
 		player, ok := c.Core.Combat.Player().(*avatar.Player)
 		if !ok {
 			panic("target 0 should be Player but is not!!")
@@ -71,7 +71,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionAttack], // earliest cancel is before skillHitmark
+		CanQueueAfter:   skillFrames[action.ActionAttack], // 最速キャンセルはスキルヒットマークより前
 		State:           action.SkillState,
 	}, nil
 }

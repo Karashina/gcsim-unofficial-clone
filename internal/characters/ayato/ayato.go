@@ -76,7 +76,7 @@ func (c *char) AdvanceNormalIndex() {
 	}
 }
 
-// TODO: maybe move infusion out of snapshot?
+// TODO: 元素付与をスナップショットから分離すべきか？
 func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
 	ds := c.Character.Snapshot(ai)
 
@@ -88,11 +88,11 @@ func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
 			return ds
 		}
 		ai.Element = attributes.Hydro
-		// namisen doesn't affect c6
+		// 浪閑は6凸に影響しない
 		if ai.Abil == c6Abil {
 			return ds
 		}
-		// add namisen stack
+		// 浪閑スタックを追加
 		flatdmg := c.MaxHP() * skillpp[c.TalentLvlSkill()] * float64(c.stacks)
 		ai.FlatDmg += flatdmg
 		c.Core.Log.NewEvent("namisen add damage", glog.LogCharacterEvent, c.Index).

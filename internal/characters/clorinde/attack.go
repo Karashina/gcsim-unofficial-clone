@@ -17,7 +17,7 @@ var (
 	attackHitlagHaltFrame = [][]float64{{0.03}, {0.03}, {0.03, 0.03}, {0.02, 0.02, 0.02}, {0.03}}
 	attackHitlagFactor    = [][]float64{{0.01}, {0.01}, {0.01, 0.01}, {0.05, 0.05, 0.05}, {0.05}}
 	attackDefHalt         = [][]bool{{true}, {true}, {true, true}, {true, true, true}, {true}}
-	attackHitboxes        = [][][]float64{{{1.7}}, {{1.9}}, {{2.1}, {2.1}}, {{2, 3.5}, {2, 3}, {2, 3}}, {{2.5}}} // n4 is a box
+	attackHitboxes        = [][][]float64{{{1.7}}, {{1.9}}, {{2.1}, {2.1}}, {{2, 3.5}, {2, 3}, {2, 3}}, {{2.5}}} // N4は矩形
 	attackOffsets         = []float64{1.1, 1.3, 1.2, 1.3, 1.4}
 )
 
@@ -35,7 +35,7 @@ const (
 )
 
 func init() {
-	// Normal attack
+	// 通常攻撃
 	attackFrames = make([][]int, normalHitNum)
 
 	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0][0], 24) // N1 -> CA
@@ -52,7 +52,7 @@ func init() {
 
 	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[4][0], 60)
 
-	// Skill attack
+	// スキル攻撃
 	skillAttackFrames = make([][]int, skillHitNum)
 
 	skillAttackFrames[0] = frames.InitNormalCancelSlice(skillAttackHitmarks[0], 18)
@@ -134,7 +134,7 @@ func (c *char) skillAttack(_ map[string]int) (action.Info, error) {
 	gainBOL := true
 	var ap combat.AttackPattern
 	if c.CurrentHPDebtRatio() < 1 {
-		// TODO: assume this is just a big rectangle center on target
+		// TODO: 大きな矩形でターゲット中心と仮定
 		ap = combat.NewBoxHitOnTarget(t, nil, 2, 14)
 	} else {
 		ai.Abil = fmt.Sprintf("Swift Hunt (Normal shot) %d", c.normalSCounter)
@@ -143,12 +143,12 @@ func (c *char) skillAttack(_ map[string]int) (action.Info, error) {
 		gainBOL = false
 	}
 
-	// TODO: assume no snapshotting on this
+	// TODO: スナップショットなしと仮定
 	c.QueueCharTask(func() {
 		c.Core.QueueAttack(ai, ap, 0, 0, c.particleCB)
 		c.arkheAttack()
 		if gainBOL {
-			c.gainBOLOnAttack() // Bond of Life timing is ping dependent
+			c.gainBOLOnAttack() // 命の契約のタイミングはピング依存
 		}
 	}, skillAttackHitmarks[c.normalSCounter])
 

@@ -29,10 +29,10 @@ func (w *Weapon) Init() error {
 	return nil
 }
 
-// The following effect will trigger every 10s: The equipping character will gain 24%/30%/36%/42%/48% of
-// their Elemental Mastery as bonus ATK for 12s, with nearby party members gaining 30% of this buff for
-// the same duration. Multiple instances of this weapon can allow this buff to stack. This effect will
-// still trigger even if the character is not on the field.
+// 以下の効果は10秒毎に発動する：装備キャラクターの元素熟知の24%/30%/36%/42%/48%を
+// 攻撃力ボーナスとして12秒間獲得し、近くのパーティメンバーはこのバフの30%を
+// 同じ持続時間で獲得する。この武器の複数インスタンスによりバフを重ね掛け可能。この効果は
+// キャラクターがフィールドにいなくても発動する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		core: c,

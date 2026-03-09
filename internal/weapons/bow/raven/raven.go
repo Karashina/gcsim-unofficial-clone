@@ -22,7 +22,7 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Increases DMG against opponents affected by Hydro or Pyro by 12/15/18/21/24%.
+// 水元素または炎元素の影響を受けている敵に対してダメージが12/15/18/21/24%増加する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

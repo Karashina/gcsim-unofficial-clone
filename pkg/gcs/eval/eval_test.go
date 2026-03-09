@@ -43,7 +43,7 @@ func TestType(t *testing.T) {
 }
 
 func TestForceTerminate(t *testing.T) {
-	// test terminate eval early should gracefully exit
+	// evalの早期終了テスト - 正常に終了すること
 	p := parser.New(`
 	for let i = 0; i < 50; i = i + 1 {
 		delay(1);
@@ -79,7 +79,7 @@ func TestForceTerminate(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// confirm that NextAction now returns nil
+	// NextActionがnilを返すことを確認
 	for i := 0; i < 4; i++ {
 		eval.Continue()
 		a, err := eval.NextAction()
@@ -93,7 +93,7 @@ func TestForceTerminate(t *testing.T) {
 }
 
 func TestSleepAsWaitAlias(t *testing.T) {
-	// make sure sleep is evaluated as wait
+	// sleepがwaitとして評価されることを確認
 	p := parser.New("sleep(1);")
 	_, gcsl, err := p.Parse()
 	if err != nil {
@@ -128,7 +128,7 @@ func TestSleepAsWaitAlias(t *testing.T) {
 }
 
 func TestDoneCheck(t *testing.T) {
-	// eval should exit once out of action; NextAction() should return nil
+	// アクション外ではevalが終了し、NextAction()はnilを返すこと
 	p := parser.New(`
 	for let i = 0; i < 4; i = i + 1 {
 		delay(1);
@@ -159,7 +159,7 @@ func TestDoneCheck(t *testing.T) {
 	if count != 4 {
 		t.Errorf("expecting NextAction to be called 4 times, got %v", count)
 	}
-	// confirm that NextAction continues to return nil
+	// NextActionがnilを返し続けることを確認
 	for i := 0; i < 4; i++ {
 		a, err := eval.NextAction()
 		if err != nil {

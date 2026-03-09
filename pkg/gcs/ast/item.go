@@ -2,12 +2,12 @@ package ast
 
 import "fmt"
 
-// Token represents a token or text string returned from the scanner.
+// Token はスキャナから返されるトークンまたはテキスト文字列を表す。
 type Token struct {
-	Typ  TokenType // The type of this item.
-	Pos  Pos       // The starting position, in bytes, of this item in the input string.
-	Val  string    // The value of this item.
-	Line int       // The line number at the start of this item.
+	Typ  TokenType // このアイテムの型。
+	Pos  Pos       // 入力文字列内でのこのアイテムの開始位置（バイト単位）。
+	Val  string    // このアイテムの値。
+	Line int       // このアイテムの開始行番号。
 }
 
 func (t Token) String() string {
@@ -28,16 +28,16 @@ func (t Token) String() string {
 	return fmt.Sprintf("%q", t.Val)
 }
 
-// TokenType identifies the type of lex items.
+// TokenType はトークンの種類を識別する。
 type TokenType int
 
 const (
-	ItemError TokenType = iota // error occurred; value is text of error
+	ItemError TokenType = iota // エラー発生; 値はエラーテキスト
 
 	ItemEOF
-	ItemTerminateLine    // \n to denote end of a line
-	ItemAssign           // equals ('=') introducing an assignment
-	ItemComma            // coma (,) used to break up list of ident
+	ItemTerminateLine    // 行末を示す \n
+	ItemAssign           // 代入を導入する等号 ('=')
+	ItemComma            // 識別子リストを区切るカンマ (',')
 	ItemLeftParen        // '('
 	ItemRightParen       // ')'
 	ItemLeftSquareParen  // '['
@@ -49,60 +49,60 @@ const (
 	ItemMinus            // '-'
 	ItemAsterisk         // '*'
 	ItemForwardSlash     // '/'
-	// following is logic operator
-	ItemLogicOP // used only to delimit logical operation
+	// 以下は論理演算子
+	ItemLogicOP // 論理演算の境界としてのみ使用
 	LogicNot    // !
-	LogicAnd    // && keyword
-	LogicOr     // || keyword
-	// following is comparison operator
-	itemCompareOp        // used only to delimi comparison operators
-	OpEqual              // == keyword
-	OpNotEqual           // != keyword
-	OpGreaterThan        // > keyword
-	OpGreaterThanOrEqual // >= keyword
-	OpLessThan           // < keyword
-	OpLessThanOrEqual    // <= keyword
-	ItemDot              // the cursor, spelled '.'
-	// item types
+	LogicAnd    // && キーワード
+	LogicOr     // || キーワード
+	// 以下は比較演算子
+	itemCompareOp        // 比較演算子の境界としてのみ使用
+	OpEqual              // == キーワード
+	OpNotEqual           // != キーワード
+	OpGreaterThan        // > キーワード
+	OpGreaterThanOrEqual // >= キーワード
+	OpLessThan           // < キーワード
+	OpLessThanOrEqual    // <= キーワード
+	ItemDot              // カーソル '.'
+	// アイテム型
 	ItemTypes
-	ItemField      // alphanumeric identifier starting with '.'
-	ItemIdentifier // alphanumeric identifier not starting with '.'
-	ItemNumber     // simple number
-	ItemBool       // boolean
-	ItemString     // string, including quotes
-	// Keywords appear after all the rest.
-	ItemKeyword        // used only to delimit the keywords
+	ItemField      // '.' で始まる英数字識別子
+	ItemIdentifier // '.' で始まらない英数字識別子
+	ItemNumber     // 単純な数値
+	ItemBool       // ブーリアン
+	ItemString     // 引用符を含む文字列
+	// キーワードは以下の後に続く。
+	ItemKeyword        // キーワードの境界としてのみ使用
 	KeywordLet         // let
 	KeywordWhile       // while
 	KeywordIf          // if
 	KeywordElse        // else
 	KeywordFn          // fn
 	KeywordSwitch      // switch
-	KeywordCase        // case
-	KeywordDefault     // default
+	KeywordCase        // ケース
+	KeywordDefault     // デフォルト
 	KeywordBreak       // break
 	KeywordContinue    // continue
 	KeywordFallthrough // fallthrough
 	KeywordReturn      // return
 	KeywordFor         // for
-	// Keywords after this are specific to Genshin (i.e. not generic scripting keywords)
-	// These are special char related keywords
+	// これ以降のキーワードは原神固有（汎用スクリプトキーワードではない）
+	// キャラクター関連の特殊キーワード
 	KeywordOptions           // options
-	KeywordAdd               // add
-	KeywordChar              // char
+	KeywordAdd               // 追加
+	KeywordChar              // キャラクター
 	KeywordStats             // stats
 	KeywordWeapon            // weapon
 	KeywordSet               // set
 	KeywordLvl               // lvl
 	KeywordRefine            // refine
-	KeywordCons              // cons
+	KeywordCons              // 命ノ星座
 	KeywordTalent            // talent
 	KeywordCount             // count
 	KeywordParams            // params
 	KeywordLabel             // label
 	KeywordUntil             // until
-	KeywordActive            // active
-	KeywordTarget            // target
+	KeywordActive            // アクティブ
+	KeywordTarget            // ターゲット
 	KeywordResist            // resist
 	KeywordEnergy            // energy
 	KeywordParticleThreshold // particle_threshold
@@ -110,7 +110,7 @@ const (
 	KeywordParticleElement   // particle_element
 	KeywordHurt              // hurt
 
-	// Keywords specific to gcsim appears after this
+	// gcsim 固有のキーワードはこれ以降に続く
 	ItemKeys
 	ItemStatKey      // stats: def%, def, etc..
 	ItemElementKey   // elements: pyro, hydro, etc..
@@ -124,7 +124,7 @@ const (
 	_ Precedence = iota
 	Lowest
 	LogicalOr
-	LogicalAnd // TODO: or make one for && and ||?
+	LogicalAnd // TODO: && と || 用に別の優先度を作るべき？
 	Equals
 	LessOrGreater
 	Sum

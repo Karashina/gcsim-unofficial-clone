@@ -13,21 +13,21 @@ func (c *char) a1Setup() {
 		return
 	}
 
-	// count elemental types
+	// 元素タイプを計算
 	partyEleTypes := make(map[attributes.Element]bool)
 	for _, char := range c.Core.Player.Chars() {
 		partyEleTypes[char.Base.Element] = true
 	}
 	count := len(partyEleTypes)
 
-	// atk% buff setup
+	// 攻撃力%バフのセットアップ
 	c.a1Buff = make([]float64, attributes.EndStatType)
 	c.a1Buff[attributes.ATKP] = 0.08 + float64(count-1)*0.04
 }
 
-// Within 10s after using Magic Trick: Astonishing Shift,
-// when there are 1/2/3/4 Elemental Types in the party,
-// all party members' ATK will be increased by 8%/12%/16%/20% respectively.
+// 「魔術・アストニッシングシフト」使用後10秒間、
+// パーティ内の元素タイプが1/2/3/4種類の時、
+// 全パーティメンバーの攻撃力がそれぞれ8%/12%/16%/20%増加する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -43,9 +43,9 @@ func (c *char) a1() {
 	}
 }
 
-// After the Bogglecat Box summoned by Magic Trick: Astonishing Shift performs Elemental Conversion,
-// Lynette's Elemental Burst will deal 15% more DMG.
-// This effect will persist until the Bogglecat Box's duration ends.
+// 「魔術・アストニッシングシフト」で召喚された「ビックリボンボックス」が元素変換を行った後、
+// リネットの元素爆発のダメージが15%増加する。
+// この効果は「ビックリボンボックス」の持続時間終了まで続く。
 func (c *char) a4(duration int) {
 	if c.Base.Ascension < 4 {
 		return

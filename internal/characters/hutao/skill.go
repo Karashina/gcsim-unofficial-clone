@@ -46,18 +46,18 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			return c.ppbuff, true
 		},
 	})
-	//TODO: this applies a1 at the end of paramita without checking for "pp extend" (if that's real)
+	//TODO: a1 は paramita 終了時に適用されるが、"PP延長"のチェックはしていない
 	c.applyA1 = true
 	c.QueueCharTask(c.a1, 540+skillStart)
 
-	// remove some hp
+	// HPを一部削除
 	c.Core.Player.Drain(info.DrainInfo{
 		ActorIndex: c.Index,
 		Abil:       "Paramita Papilio",
 		Amount:     0.30 * c.CurrentHP(),
 	})
 
-	// trigger 0 damage attack; matters because this breaks freeze
+	// 0ダメージ攻撃をトリガー。凍結を解除するために重要
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Paramita (0 dmg)",
@@ -74,7 +74,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionBurst], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionBurst], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -104,17 +104,17 @@ func (c *char) applyBB(a combat.AttackCB) {
 		return
 	}
 	if !trg.StatusIsActive(bbDebuff) {
-		// start ticks
+		// ティックを開始
 		trg.QueueEnemyTask(c.bbtickfunc(c.Core.F, trg), 240)
-		trg.SetTag(bbDebuff, c.Core.F) // to track current bb source
+		trg.SetTag(bbDebuff, c.Core.F) // 現在のbbソースを追跡
 	}
 
-	trg.AddStatus(bbDebuff, 570, true) // lasts 8s + 1.5s
+	trg.AddStatus(bbDebuff, 570, true) // 8秒 + 1.5秒持続
 }
 
 func (c *char) bbtickfunc(src int, trg *enemy.Enemy) func() {
 	return func() {
-		// do nothing if source changed
+		// ソースが変更された場合は何もしない
 		if trg.Tags[bbDebuff] != src {
 			return
 		}
@@ -124,7 +124,7 @@ func (c *char) bbtickfunc(src int, trg *enemy.Enemy) func() {
 		c.Core.Log.NewEvent("Blood Blossom checking for tick", glog.LogCharacterEvent, c.Index).
 			Write("src", src)
 
-		// queue up one damage instance
+		// 1回分のダメージをキューに追加
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       "Blood Blossom",
@@ -136,7 +136,7 @@ func (c *char) bbtickfunc(src int, trg *enemy.Enemy) func() {
 			Durability: 25,
 			Mult:       bb[c.TalentLvlSkill()],
 		}
-		// if cons 2, add flat dmg
+		// 2命ノ星座なら固定ダメージを追加
 		if c.Base.Cons >= 2 {
 			ai.FlatDmg += c.MaxHP() * 0.1
 		}
@@ -148,7 +148,7 @@ func (c *char) bbtickfunc(src int, trg *enemy.Enemy) func() {
 				Write("dur", trg.StatusExpiry(bbDebuff)).
 				Write("src", src)
 		}
-		// queue up next instance
+		// 次のインスタンスをキューに追加
 		trg.QueueEnemyTask(c.bbtickfunc(src, trg), 240)
 	}
 }

@@ -22,7 +22,7 @@ func (c *char) newTwirly() {
 	c.Core.QueueAttack(c.skillai, combat.NewCircleHitOnTarget(c.twirlyPos, nil, radius), 0, 0, c.particleCB())
 
 	c.Twirlysrc = c.Core.F
-	// create a construct
+	// 設置物を生成
 	con := &TurboTwirly{
 		src:    c.Twirlysrc,
 		expiry: c.Twirlysrc + 9999,

@@ -73,8 +73,8 @@ func init() {
 	skillRangedDashFrames[action.ActionJump] = 3
 }
 
-// Cast: AoE strong hydro damage
-// Melee Stance: infuse NA/CA to hydro damage
+// 発動: 範囲強力水元素ダメージ
+// 近接スタンス: 通常攻撃/重撃を水元素ダメージに変換
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(meleeKey) {
 		cdDelay := 11
@@ -177,14 +177,14 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Hydro, c.ParticleDelay)
 }
 
-// Hook to end Tartaglia's melee stance prematurely if he leaves the field
+// タルタリヤがフィールドを離れた場合に近接スタンスを早期終了するフック
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
 		if c.StatusIsActive(meleeKey) {
-			// TODO: need to verify if this is correct
-			// but if childe is currently in melee stance and skill is on CD that means that
-			// the button has lit up yet from original skill press
-			// in which case we need to reset the cooldown first
+			// TODO: これが正しいか検証が必要
+			// タルタリヤが現在近接スタンス中で元素スキルがCD中の場合、
+			// 最初の元素スキル発動からまだボタンが点灯していないことを意味する
+			// その場合、まずクールダウンをリセットする必要がある
 			c.ResetActionCooldown(action.ActionSkill)
 			c.onExitMeleeStance(0)
 		}
@@ -193,8 +193,8 @@ func (c *char) onExitField() {
 }
 
 func (c *char) onExitMeleeStance(delay int) {
-	// Precise skill CD from Risuke:
-	// Aligns with separate table on wiki except the 4 second duration one
+	// Risukeによる正確な元素スキルCD:
+	// wikiの別表と一致（4秒間のものを除く）
 	// https://discord.com/channels/763583452762734592/851428030094114847/899416824117084210
 	// https://media.discordapp.net/attachments/778615842916663357/781978094495727646/unknown-20.png
 

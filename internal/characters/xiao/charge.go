@@ -21,10 +21,10 @@ func init() {
 	chargeFrames[action.ActionSwap] = 43
 }
 
-// Charge attack damage queue generator
-// Very standard - consistent with other characters like Xiangling
-// Note that his CAs share an ICD with his NAs when he is under the effects of his burst
-// TODO: No information available on whether regular CAs follow a similar pattern
+// 重撃のダメージキュー生成
+// 非常に標準的 - 香菱などの他キャラクターと同様
+// Note: 元素爆発中の重撃は通常攻撃とICDを共有する
+// TODO: 通常状態の重撃も同様のパターンかは不明
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,

@@ -11,7 +11,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
-// TestIllugaSkillDealsDamage verifies Skill deals Geo DMG
+// TestIllugaSkillDealsDamage はスキルが岩元素ダメージを与えることを検証する
 func TestIllugaSkillDealsDamage(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Illuga)
@@ -58,7 +58,7 @@ func TestIllugaSkillDealsDamage(t *testing.T) {
 	}
 }
 
-// TestIllugaBurstInitializesNightingaleStacks verifies Burst sets up stacks
+// TestIllugaBurstInitializesNightingaleStacks は元素爆発がスタックをセットアップすることを検証する
 func TestIllugaBurstInitializesNightingaleStacks(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Illuga)
@@ -82,7 +82,7 @@ func TestIllugaBurstInitializesNightingaleStacks(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Before burst: stacks should be 0
+	// 元素爆発前: スタックは0であるべき
 	result, err := c.Player.Chars()[idx].Condition([]string{"nightingale-stacks"})
 	if err != nil {
 		t.Fatalf("nightingale-stacks condition error: %v", err)
@@ -91,7 +91,7 @@ func TestIllugaBurstInitializesNightingaleStacks(t *testing.T) {
 		t.Fatalf("nightingale-stacks should be 0 before burst, got %v", stacks)
 	}
 
-	// Execute burst
+	// 元素爆発を実行
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionBurst, keys.Illuga, p)
 	for !c.Player.CanQueueNextAction() {
@@ -101,7 +101,7 @@ func TestIllugaBurstInitializesNightingaleStacks(t *testing.T) {
 		advanceCoreFrame(c)
 	}
 
-	// After burst: stacks should be initialized (21 base)
+	// 元素爆発後: スタックが初期化されているべき（基本值21）
 	result, _ = c.Player.Chars()[idx].Condition([]string{"nightingale-stacks"})
 	stacks, ok := result.(int)
 	if !ok {
@@ -112,7 +112,7 @@ func TestIllugaBurstInitializesNightingaleStacks(t *testing.T) {
 	}
 }
 
-// TestIllugaOrioleSongCondition verifies Oriole Song status tracking
+// TestIllugaOrioleSongCondition はOriole Songのステータス追跡を検証する
 func TestIllugaOrioleSongCondition(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Illuga)
@@ -136,27 +136,27 @@ func TestIllugaOrioleSongCondition(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Before burst: Oriole Song should be inactive (0)
+	// 元素爆発前: Oriole Songは非アクティブ(0)であるべき
 	result, _ := c.Player.Chars()[idx].Condition([]string{"oriole-song"})
 	if active, ok := result.(int); ok && active != 0 {
 		t.Fatal("Oriole Song should be 0 (inactive) before burst")
 	}
 
-	// Execute burst to activate Oriole Song
+	// 元素爆発を実行してOriole Songを有効化
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionBurst, keys.Illuga, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// After burst: Oriole Song should be active (1)
+	// 元素爆発後: Oriole Songはアクティブ(1)であるべき
 	result, _ = c.Player.Chars()[idx].Condition([]string{"oriole-song"})
 	if active, ok := result.(int); !ok || active != 1 {
 		t.Fatalf("Oriole Song should be 1 (active) after burst, got %v (%T)", result, result)
 	}
 }
 
-// TestIllugaOrioleSongExpires verifies Oriole Song expires after duration
+// TestIllugaOrioleSongExpires はOriole Songが持続時間後に終了することを検証する
 func TestIllugaOrioleSongExpires(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Illuga)
@@ -180,26 +180,26 @@ func TestIllugaOrioleSongExpires(t *testing.T) {
 	c.QueueParticle("system", 1000, attributes.NoElement, 0)
 	advanceCoreFrame(c)
 
-	// Execute burst
+	// 元素爆発を実行
 	p := make(map[string]int)
 	c.Player.Exec(action.ActionBurst, keys.Illuga, p)
 	for !c.Player.CanQueueNextAction() {
 		advanceCoreFrame(c)
 	}
 
-	// Advance 21+ seconds (1255 + 60 frames buffer)
+	// 21秒以上進める（1255 + 60フレームバッファ）
 	for i := 0; i < 1315; i++ {
 		advanceCoreFrame(c)
 	}
 
-	// Oriole Song should have expired (0)
+	// Oriole Songは終了しているべき(0)
 	result, _ := c.Player.Chars()[idx].Condition([]string{"oriole-song"})
 	if active, ok := result.(int); ok && active != 0 {
 		t.Fatal("Oriole Song should be 0 (expired) after its duration")
 	}
 }
 
-// TestIllugaC2Setup verifies C2 initializes correctly
+// TestIllugaC2Setup はC2が正しく初期化されることを検証する
 func TestIllugaC2Setup(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Illuga)
@@ -220,7 +220,7 @@ func TestIllugaC2Setup(t *testing.T) {
 	}
 }
 
-// TestIllugaC6Setup verifies C6 initializes correctly
+// TestIllugaC6Setup はC6が正しく初期化されることを検証する
 func TestIllugaC6Setup(t *testing.T) {
 	c, _ := makeCore(1)
 	prof := defProfile(keys.Illuga)
@@ -241,7 +241,7 @@ func TestIllugaC6Setup(t *testing.T) {
 	}
 }
 
-// TestIllugaAllActionsDoNotPanic verifies all actions don't panic
+// TestIllugaAllActionsDoNotPanic は全アクションがパニックしないことを検証する
 func TestIllugaAllActionsDoNotPanic(t *testing.T) {
 	c, trg := makeCore(1)
 	prof := defProfile(keys.Illuga)

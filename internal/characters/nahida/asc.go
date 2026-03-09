@@ -13,9 +13,9 @@ import (
 const a1BuffKey = "nahida-a1"
 const a4BuffKey = "nahida-a4"
 
-// When unleashing Illusory Heart, the Shrine of Maya will gain the following effects:
-// The Elemental Mastery of the active character within the field will be increased by 25% of the Elemental Mastery of the party member with the highest Elemental Mastery.
-// You can gain a maximum of 250 Elemental Mastery in this manner.
+// 幻心を解き放つとき、マヤの祠殿は以下の効果を得る:
+// フィールド内のアクティブキャラクターの元素熔研が、チーム内で最も元素熔研が高いメンバーの25%分増加する。
+// この方法で得られる元素熔研の最大値は250。
 func (c *char) calcA1Buff() {
 	if c.Base.Ascension < 1 {
 		return
@@ -54,8 +54,9 @@ func (c *char) applyA1(dur int) {
 	}
 }
 
-// Each point of Nahida's Elemental Mastery beyond 200 will grant 0.1% Bonus DMG and 0.03% CRIT Rate to Tri-Karma Purification from All Schemes to Know.
-// A maximum of 80% Bonus DMG and 24% CRIT Rate can be granted to Tri-Karma Purification in this manner.
+// ナヒーダの元素熔研が200を超えるごとに、三浄浄化に0.1%のダメージバフと
+// 0.03%の会心率が付与される。
+// 三浄浄化に付与できる最大のダメージバフは80%、会心率は24%。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

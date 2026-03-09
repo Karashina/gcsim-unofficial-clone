@@ -25,8 +25,8 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// 2-Piece Bonus: Energy Recharge +20%.
-// 4-Piece Bonus: Gaining Elemental Particles or Orbs gives 3 Energy to all party members who have a bow or a catalyst equipped. Can only occur once every 3s.
+// 2セット効果: 元素チャージ効率 +20%
+// 4セット効果: 元素粒子または元素オーブ獲得時、弓または法器を装備した全パーティメンバーにエネルギーを3付与。3秒に1回のみ。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
@@ -44,7 +44,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 	if count >= 4 {
 		const icdKey = "scholar-4pc-icd"
 		icd := 180
-		// TODO: test lmao
+		// TODO: テスト未実施
 		c.Events.Subscribe(event.OnParticleReceived, func(args ...interface{}) bool {
 			if c.Player.Active() != char.Index {
 				return false
@@ -55,7 +55,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			char.AddStatus(icdKey, icd, true)
 
 			for _, this := range c.Player.Chars() {
-				// only for bow and catalyst
+				// 弓と法器のみ対象
 				if this.Weapon.Class == info.WeaponClassBow || this.Weapon.Class == info.WeaponClassCatalyst {
 					this.AddEnergy("scholar-4pc", 3)
 				}

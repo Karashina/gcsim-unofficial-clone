@@ -96,7 +96,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillThrustFrames),
 		AnimationLength: skillThrustFrames[action.InvalidAction],
-		CanQueueAfter:   skillThrustFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillThrustFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -198,10 +198,10 @@ func (c *char) detonateSkill() (action.Info, error) {
 		)
 	}
 
-	// A1
+	// 固有天賦1
 	c.a1()
 
-	// C2
+	// 2凸
 	c.c2()
 
 	c.DeleteStatus(persTimeKey)
@@ -210,7 +210,7 @@ func (c *char) detonateSkill() (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressureFrames[pressureFrameIndex]),
 		AnimationLength: skillPressureFrames[pressureFrameIndex][action.InvalidAction],
-		CanQueueAfter:   skillPressureFrames[pressureFrameIndex][action.ActionJump], // earliest cancel
+		CanQueueAfter:   skillPressureFrames[pressureFrameIndex][action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

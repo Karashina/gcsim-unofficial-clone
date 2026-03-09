@@ -6,17 +6,18 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
-// A1 is implemented in aimed.go:
-// While in the Crowfeather Cover state provided by Tengu Stormcall, Aimed Shot charge times are decreased by 60%.
+// 固有天賦1は aimed.go で実装済み:
+// 天狗召嗚のクロウフェザー保護状態中、狙い撃ちのチャージ時間が60%短縮される。
 
-// not strictly required but in case in future we implement player getting hit
+// 厳密には必要ないが、将来プレイヤーが攻撃を受ける実装をした場合に備えて
 const a4ICDKey = "sara-a4-icd"
 
-// When Tengu Juurai: Ambush hits opponents, Kujou Sara will restore 1.2 Energy to all party members for every 100% Energy Recharge she has. This effect can be triggered once every 3s.
+// 天狗呉雷・待ち伏せが敵に命中すると、九條裟羅の元素チャージ効率100%ごとに
+// チーム全員に1.2エネルギーを回復する。この効果は3秒に1回発動可能。
 //
-// - according to library finding, text description is inaccurate
+// - ライブラリの調査によると、テキスト説明は不正確
 //
-// - it's more like for every 1% of ER, she grants 0.012 flat energy
+// - 実際には元素チャージ効率1%ごとに0.012の固定エネルギーを付与
 func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil

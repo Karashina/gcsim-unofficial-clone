@@ -22,17 +22,18 @@ const aimedEHitmark = 49
 func init() {
 	aimedFrames = make([][]int, 2)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(26)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(96)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
 
-	// Fully-Charged Aimed Shot (Hurricane Arrow)
+	// フルチャージ狙い撃ち（Hurricane Arrow）
+	// フルチャージ狙い撃ち（ハリケーンアロー）
 	aimedEFrames = frames.InitAbilSlice(60)
 	aimedEFrames[action.ActionDash] = aimedEHitmark
 	aimedEFrames[action.ActionJump] = aimedEHitmark
@@ -56,9 +57,11 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	weakspot := p["weakspot"]
 
 	skillActive := c.StatusIsActive(skillKey) && c.hurricaneCount > 0
-	// A1:
-	// When Faruzan is in the Manifest Gale state created by Wind Realm of Nasamjnin,
-	// the amount of time taken to charge a shot is decreased by 60%.
+	// 固有天賦1:
+	// ファルザンが風域の創り出した「風導」状態の時、
+	// 狙い撃ちのチャージ時間が60%減少する。
+	// ファルザンが風域の創り出した「風導」状態の時、
+	// 狙い撃ちのチャージ時間が60%減少する。
 	shortAim := skillActive && c.Base.Ascension >= 1
 	if skillActive {
 		c.hurricaneCount -= 1

@@ -41,7 +41,7 @@ func init() {
 	highPlungeFrames[action.ActionSwap] = 51
 }
 
-// LowPlungeAttack: low plunge handling; optional "collision" arg triggers falling hit.
+// LowPlungeAttack：低空落下攻撃処理、オプションの"collision"引数で落下ヒットをトリガー。
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
@@ -55,7 +55,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -88,7 +88,7 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// HighPlungeAttack: high plunge handling; optional "collision" arg triggers falling hit.
+// HighPlungeAttack：高空落下攻撃処理、オプションの"collision"引数で落下ヒットをトリガー。
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	switch c.Core.Player.Airborne() {
@@ -102,7 +102,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *char) highPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 衝突ヒットの有無
 	}
 
 	if collision > 0 {
@@ -135,7 +135,7 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// plungeCollision: common falling attack queued by low/high plunge when collision>0
+// plungeCollision：低空/高空落下攻撃でcollision>0の時にキューされる共通落下攻撃
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

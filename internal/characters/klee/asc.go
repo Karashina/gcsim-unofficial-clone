@@ -10,8 +10,8 @@ const (
 	a1SparkKey = "a1-spark"
 )
 
-// When Jumpy Dumpty and Normal Attacks deal DMG, Klee has a 50% chance to obtain an Explosive Spark.
-// This Explosive Spark is consumed by the next Charged Attack, which costs no Stamina and deals 50% increased DMG.
+// Jumpy Dumptyと通常攻撃がダメージを与えると、クレーは50%の確率で爆裂火花を獲得する。
+// この爆裂火花は次の重撃で消費され、スタミナ消費なしでダメージが50%増加する。
 func (c *char) makeA1CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 1 {
 		return nil
@@ -33,7 +33,7 @@ func (c *char) makeA1CB() combat.AttackCBFunc {
 
 const a4ICDKey = "klee-a4-icd"
 
-// When Klee's Charged Attack results in a CRIT Hit, all party members gain 2 Elemental Energy.
+// クレーの重撃が会心した場合、パーティ全員が元素エネルギーを2回復する。
 func (c *char) makeA4CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 4 {
 		return nil

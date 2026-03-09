@@ -10,10 +10,9 @@ import (
 
 const a1ICDKey = "sayu-a1-icd"
 
-// When Sayu triggers a Swirl reaction while active, she heals all your
-// characters and nearby allies for 300 HP. She will also heal an additional 1.2
-// HP for every point of Elemental Mastery she has.  This effect can be
-// triggered once every 2s.
+// 早柚が拡散反応を発動した時、全キャラクターと近くの味方を300HP回復する。
+// さらに元素熔研、1ポイントごとに1.2HP追加回復する。
+// この効果は2秒に1回発動可能。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -57,12 +56,12 @@ func (c *char) a1() {
 	c.Core.Events.Subscribe(event.OnSwirlPyro, swirlfunc, "sayu-a1-pyro")
 }
 
-// The Muji-Muji Daruma created by Yoohoo Art: Mujina Flurry gains the following effects:
+// よぶぶきの術・ムジナフルリーが生成したムジムジだるまが以下の効果を得る:
 //
-// - When healing a character, it will also heal characters near that healed character for 20% the amount of HP.
-//   - only relevant in Co-Op
+// - キャラクターを回復する際、回復対象の近くのキャラクターも回復量の20%分回復する
+//   - コープでのみ関連
 //
-// - Increases the AoE of its attack against opponents
+// - 敵への攻撃範囲が拡大される
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

@@ -21,14 +21,14 @@ func init() {
 	skillFrames[action.ActionSwap] = 63
 }
 
-// TODO: currently assuming skill always hits and it hits the earliest possible
-// additional delay is user controlled
+// TODO: 現在スキルが常に命中し、最速で命中すると仮定
+// 追加の遅延はユーザーが制御
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	c.SetCDWithDelay(action.ActionSkill, skillCD, skillCDStart)
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionLowPlunge], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionLowPlunge], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

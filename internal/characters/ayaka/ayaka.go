@@ -20,7 +20,7 @@ func init() {
 type char struct {
 	*tmpl.Character
 	wp             *ReactableWeapon
-	c6CDTimerAvail bool // Flag that controls whether the 0.5 C6 CD timer is available to be started
+	c6CDTimerAvail bool // 6凸CDタイマー（0.5秒）が開始可能かどうかを制御するフラグ
 }
 
 func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
@@ -34,7 +34,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 
 	c.c6CDTimerAvail = false
 
-	// Start with C6 ability active
+	// 6凸能力がアクティブな状態で開始
 	if c.Base.Cons >= 6 {
 		c.c6CDTimerAvail = true
 	}
@@ -45,7 +45,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// Start with C6 ability active
+	// 6凸能力がアクティブな状態で開始
 	if c.Base.Cons >= 6 {
 		c.c6AddBuff()
 	}
@@ -57,9 +57,9 @@ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 	if a == action.ActionDash {
 		f, ok := p["f"]
 		if !ok {
-			return 10 // tap = 36 frames, so under 1 second
+			return 10 // タップ = 36フレーム、つまり1秒未満
 		}
-		// for every 1 second passed, consume extra 15
+		// 1秒経過ごとに追加で15消費
 		extra := f / 60
 		return float64(10 + 15*extra)
 	}

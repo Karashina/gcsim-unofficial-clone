@@ -17,7 +17,7 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 		c.reduceNightsoulPoints(13.3)
 		d, e := c.Character.Dash(p)
 		d.Frames = c.skillNextFrames(d.Frames, 0)
-		d.CanQueueAfter = 1 // can run out of nightsoul and immediately start falling
+		d.CanQueueAfter = 1 // ナイトソウルが尽きると即座に落下開始
 		return d, e
 	}
 	return c.Character.Dash(p)

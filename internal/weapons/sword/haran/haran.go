@@ -31,17 +31,16 @@ const (
 	maxWavespikeStacks = 2
 )
 
-// Obtain 12% All Elemental DMG Bonus. When other nearby party members use
-// Elemental Skills, the character equipping this weapon will gain 1 Wavespike
-// stack. Max 2 stacks. This effect can be triggered once every 0.3s. When the
-// character equipping this weapon uses an Elemental Skill, all stacks of
-// Wavespike will be consumed to gain Rippling Upheaval: each stack of Wavespike
-// consumed will increase Normal Attack DMG by 20% for 8s.
+// 全元素ダメージボーナスが12%増加する。他のパーティメンバーが
+// 元素スキルを使用すると、「波穂」スタックを1つ獲得する。最大2スタック。
+// この効果は0.3秒毎に1回発動可能。この武器を装備したキャラが
+// 元素スキルを使用すると、全「波穂」スタックが消費され「波乱」を獲得:
+// スタック1つにつき通常攻撃ダメージが8秒間20%増加する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	// perm buff
+	// 永続バフ
 	m := make([]float64, attributes.EndStatType)
 	base := 0.09 + float64(r)*0.03
 	m[attributes.PyroP] = base
@@ -62,11 +61,11 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	wavespikeStacks := 0
 
 	nonActiveFn := func() {
-		// once every 0.3s
+		// 0.3秒毎に1回
 		if char.StatusIsActive(icdKey) {
 			return
 		}
-		// add stacks
+		// スタックを追加
 		wavespikeStacks++
 		if wavespikeStacks > maxWavespikeStacks {
 			wavespikeStacks = maxWavespikeStacks
@@ -91,7 +90,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}
 
-	//TODO: this used to be on post. make sure nothing broke here
+	// TODO: 以前はpostだった。問題がないか確認が必要
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			nonActiveFn()

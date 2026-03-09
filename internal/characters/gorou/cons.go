@@ -10,10 +10,10 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// C1:
-// When characters (other than Gorou) within the AoE of Gorou's General's War Banner
-// or General's Glory deal Geo DMG to opponents, the CD of Gorou's Inuzaka All-Round Defense
-// is decreased by 2s. This effect can occur once every 10s.
+// 1命ノ星座:
+// ゴローの「大将旗」またはGeneral's GloryのAoE内で、
+// ゴロー以外のキャラクターが敵に岩元素ダメージを与えると、
+// ゴローの「犬坂鐌繰の昭」のCDが2秒減少する。この効果は10秒に1回のみ発動。
 func (c *char) c1() {
 	icd := -1
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
@@ -27,13 +27,13 @@ func (c *char) c1() {
 		}
 
 		trg := args[0].(combat.Target)
-		// need to check if target hit is inside the field
+		// ターゲットがフィールド内か確認が必要
 		var area combat.AttackPattern
 		if eActive {
 			area = c.eFieldArea
 		} else {
-			// e and q can't be up at the same time
-			// if q is up, then the area needs to be around the current player position
+			// 元素スキルと元素爆発は同時に存在できない
+			// 元素爆発がアクティブなら、範囲は現在のプレイヤー位置周辺
 			area = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 8)
 		}
 		if !trg.IsWithinArea(area) {
@@ -59,16 +59,16 @@ func (c *char) c1() {
 	}, "gorou-c1")
 }
 
-// C2:
-// While General's Glory is in effect, its duration is extended by 1s when a nearby
-// active character obtains an Elemental Shard from a Crystallize reaction.
-// This effect can occur once every 0.1s. Max extension is 3s.
+// 2命ノ星座:
+// General's Gloryが効果中、付近のアクティブキャラが結晶反応で
+// 元素結晶片を取得すると、持続時間が1秒延長される。
+// この効果は0.1秒に1回のみ発動。最大延長は3秒。
 func (c *char) c2() {
 	c.Core.Events.Subscribe(event.OnShielded, func(args ...interface{}) bool {
 		if c.Core.Status.Duration(generalGloryKey) <= 0 {
 			return false
 		}
-		// Check shield
+		// シールドをチェック
 		shd := args[0].(shield.Shield)
 		if shd.Type() != shield.Crystallize {
 			return false
@@ -82,13 +82,14 @@ func (c *char) c2() {
 	}, "gorou-c2")
 }
 
-// C6:
-// For 12s after using Inuzaka All-Round Defense or Juuga: Forward Unto Victory, increases the CRIT DMG of
-// all nearby party members' Geo DMG based on the buff level of the skill's field at the time of use:
-// • "Standing Firm": +10%
-// • "Impregnable": +20%
-// • "Crunch": +40%
-// This effect cannot stack and will take reference from the last instance of the effect that is triggered.
+// 6命ノ星座:
+// 犬坂鐌繰の昭または戦陣の誉を使用してから12秒間、
+// 使用時のスキルフィールドのバフレベルに応じて、
+// 付近の全パーティメンバーの岩元素ダメージの会心ダメージが増加:
+// • 「積石」: +10%
+// • 「集岩」: +20%
+// • 「碎岩」: +40%
+// この効果は重複せず、最後に発動したインスタンスを参照する。
 func (c *char) c6() {
 	for _, char := range c.Core.Player.Chars() {
 		char.AddAttackMod(character.AttackMod{

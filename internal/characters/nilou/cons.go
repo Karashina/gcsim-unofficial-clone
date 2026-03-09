@@ -11,9 +11,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Dance of Haftkarsvar will be enhanced as follows:
-// · Luminous Illusion DMG is increased by 65%.
-// · The Tranquility Aura’s duration is extended by 6s.
+// 七域の舞が以下のように強化される:
+// ・光幻のダメージ65%アップ
+// ・水月のオーラの持続時間が6秒延長
 func (c *char) c1() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DmgP] = 0.65
@@ -29,9 +29,9 @@ func (c *char) c1() {
 	})
 }
 
-// After characters affected by the Golden Chalice’s Bounty deal Hydro DMG to opponents, that opponent’s Hydro RES will be decreased by 35% for 10s.
-// After a triggered Bloom reaction deals DMG to opponents, their Dendro RES will be decreased by 35% for 10s.
-// You need to have unlocked the “Court of Dancing Petals” Talent.
+// 金杯の恭福の影響下のキャラが敵に水元素ダメージを与えた後、その敵の水元素耐性が10秒間35%低下する。
+// 開花反応のダメージが敵に当たった後、その敵の草元素耐性が10秒間35%低下する。
+// 固有天賦「庭園の舞踊」の解放が必要。
 func (c *char) c2() {
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
@@ -67,8 +67,8 @@ func (c *char) c2() {
 	}, "nilou-c2")
 }
 
-// After the third dance step of Dance of Haftkarsvar‘s Pirouette hits opponents, Nilou will gain 15 Elemental Energy,
-// and DMG from her Dance of Abzendegi: Distant Dreams, Listening Spring will be increased by 50% for 8s.
+// 七域の舞のピルエット3歩目が敵に命中した後、ニィロウは元素エネルギーを15獲得し、
+// 元素爆発のダメージが8秒間50%アップする。
 func (c *char) c4() {
 	c.AddEnergy("nilou-c4", 15)
 
@@ -106,10 +106,10 @@ func (c *char) c4cb() combat.AttackCBFunc {
 	}
 }
 
-// For every 1,000 points of Max HP, Nilou’s CRIT Rate and CRIT DMG will increase by 0.6% and 1.2% respectively.
-// The maximum increase in CRIT Rate and CRIT DMG is 30% and 60% respectively.
+// 最大HP1,000ポイントごとに、ニィロウの会心率0.6%と会心ダメージ1.2%がアップする。
+// 最大会心率30%、最大会心ダメージ60%。
 func (c *char) c6() {
-	// cr and cd separately to avoid stack overflow due to NoStat attribute
+	// NoStat属性によるスタックオーバーフローを避けるため、CRとCDを分離
 	mCR := make([]float64, attributes.EndStatType)
 	c.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("nilou-c6-cr", -1),

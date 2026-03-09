@@ -47,7 +47,7 @@ func TestHyperbloom(t *testing.T) {
 		Pattern: combat.NewSingleTargetHit(trg[0].Key()),
 	}, 0)
 
-	// should create a seed, explodes after 5s
+	// 種を生成し、5秒後に爆発するはず
 	for i := 0; i < reactable.DendroCoreDelay+1; i++ {
 		advanceCoreFrame(c)
 	}
@@ -70,7 +70,7 @@ func TestHyperbloom(t *testing.T) {
 		advanceCoreFrame(c)
 	}
 
-	if count != 1 { // target 2 should be too far away
+	if count != 1 { // target 2は遠すぎるはず
 		t.Errorf("expecting 1 instance of hyperbloom dmg, got %v", count)
 	}
 	if c.Combat.GadgetCount() != 0 {
@@ -98,7 +98,7 @@ func TestECHyperbloom(t *testing.T) {
 		return false
 	}, "hyperbloom")
 
-	// create 2 seeds with ec
+	// 感電で種を2つ生成
 	c.QueueAttackEvent(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Hydro,
@@ -114,7 +114,7 @@ func TestECHyperbloom(t *testing.T) {
 		},
 		Pattern: combat.NewSingleTargetHit(trg[0].Key()),
 	}, 0)
-	// reduce aura a bit
+	// 元素量を少し減らす
 	for i := 0; i < 10; i++ {
 		advanceCoreFrame(c)
 	}

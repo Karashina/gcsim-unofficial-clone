@@ -14,7 +14,7 @@ func (c *char) genShield(src string, shieldamt float64) {
 
 	c.shieldExpiry = c.Core.F + c.burstdur
 
-	// add shield
+	// シールドを追加
 	c.Core.Tasks.Add(func() {
 		c.Core.Player.Shields.Add(&shield.Tmpl{
 			ActorIndex: c.Index,
@@ -46,7 +46,7 @@ func (c *char) regenShirld() {
 			return false
 		}
 		c.favoniusfavor--
-		// add shield
+		// シールドを追加
 		c.Core.Tasks.Add(func() {
 			c.Core.Player.Shields.Add(&shield.Tmpl{
 				ActorIndex: c.Index,

@@ -29,15 +29,14 @@ const (
 	buffKey = "skyward-blade"
 )
 
-// CRIT Rate increased by 4%. Gains Skypiercing Might upon using an Elemental
-// Burst: Increases Movement SPD by 10%, increases ATK SPD by 10%, and Normal and
-// Charged hits deal additional DMG equal to 20% of ATK. Skypiercing Might lasts
-// for 12s.
+// 会心率が4%増加する。元素爆発使用時、「天空を貫く力」を得る:
+// 移動速度が10%、攻撃速度が10%増加し、通常攻撃と重撃が
+// 攻撃力の20%の追加ダメージを与える。「天空を貫く力」は12秒間持続する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	// perm buff
+	// 永続バフ
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CR] = 0.03 + float64(r)*0.01
 	char.AddStatMod(character.StatMod{
@@ -64,26 +63,26 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("skyward-blade-%v", char.Base.Key.String()))
 
-	// deals damage proc on normal/charged attacks. i dont know why description in game sucks
+	// 通常/重撃命中時にダメージ発動。ゲーム内の説明がわかりにくい
 	dmgper := .15 + .05*float64(r)
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		dmg := args[2].(float64)
-		// check if char is correct?
+		// キャラクターが正しいかチェック
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
 		if atk.Info.AttackTag != attacks.AttackTagNormal && atk.Info.AttackTag != attacks.AttackTagExtra {
 			return false
 		}
-		// check if buff up
+		// バフが有効かチェック
 		if !char.StatModIsActive(buffKey) {
 			return false
 		}
 		if dmg == 0 {
 			return false
 		}
-		// add a new action that deals % dmg immediately
+		// 即座に%ダメージを与える新しいアクションを追加
 		ai := combat.AttackInfo{
 			ActorIndex: char.Index,
 			Abil:       "Skyward Blade Proc",

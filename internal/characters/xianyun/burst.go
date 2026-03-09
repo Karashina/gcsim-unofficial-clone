@@ -17,22 +17,22 @@ import (
 var burstFrames []int
 
 const (
-	burstHeal    = 4 // First heal is about 4f after hitmark
+	burstHeal    = 4 // 最初の回復はヒットマーク後約4フレーム
 	burstHitmark = 75
 	burstKey     = "xianyun-burst"
-	// 16 seconds duration
+	// 16秒間の持続時間
 	burstDuration  = 16 * 60
 	burstRadius    = 7
 	burstDoTRadius = 4.8
 	burstDoTDelay  = 5
-	// TODO: fragile
-	// used to make sure that only 1 plunge dmg instance consumes an adeptal assistance stack
-	// purely needed because of kazuha a1 right now
+	// TODO: 脆弱な実装
+	// 1回の落下攻撃ダメージで仙助スタックが1つだけ消費されるようにするための処理
+	// 現在は万葉の固有天賦1のためだけに必要
 	lossKey = "xianyun-burst-loss-icd"
 	lossIcd = 3
 )
 
-// TODO: dummy frame data from shenhe
+// TODO: 申鶴のフレームデータを仮使用
 func init() {
 	burstFrames = frames.InitAbilSlice(103) // Q -> J
 	burstFrames[action.ActionAttack] = 101  // Q -> N1
@@ -50,13 +50,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
 
 func (c *char) burstCast() {
-	// initial heal
+	// 初期回復
 	c.QueueCharTask(func() {
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -86,16 +86,16 @@ func (c *char) burstCast() {
 		c.c6()
 
 		for _, char := range c.Core.Player.Chars() {
-			// Due to the mechanism for how other characters check if they can do higher jumps
-			// The other characters need to have the buff status on themselves.
+			// 他のキャラクターが高いジャンプが可能かチェックする仕組みのため、
+			// 他のキャラクター自身にバフステータスを付与する必要がある。
 			char.AddStatus(player.XianyunAirborneBuff, burstDuration, false)
 		}
 
 		c.adeptalAssistStacks = 8
 
-		// TODO: From the frames sheet the heal timings are kind of all over the place
+		// TODO: フレームシートによると回復タイミングがかなりばらついている
 		for i := burstHeal; i <= burstHeal+burstDuration; i += 2.5 * 60 {
-			// Unaffected by hitlag
+			// ヒットラグの影響を受けない
 			c.Core.Tasks.Add(c.burstHealDoT, i)
 		}
 
@@ -105,11 +105,11 @@ func (c *char) burstCast() {
 
 func (c *char) burstPlungeDoTTrigger() {
 	c.Core.Events.Subscribe(event.OnApplyAttack, func(args ...interface{}) bool {
-		// ApplyAttack occurs only once per attack, so we do not need to add an ICD status
+		// ApplyAttack は攻撃ごとに1回しか発生しないため、ICDステータスを追加する必要はない
 		atk := args[0].(*combat.AttackEvent)
 
-		// TODO: fragile
-		// needs to be like this because of raiden q plunge being burst dmg not plunge dmg
+		// TODO: 脆弱な実装
+		// 雷電の元素爆発中の落下攻撃が落下攻撃ダメージではなく元素爆発ダメージになるため、この形にする必要がある
 		if atk.Info.AttackTag != attacks.AttackTagPlunge &&
 			!strings.Contains(atk.Info.Abil, "Low Plunge") &&
 			!strings.Contains(atk.Info.Abil, "High Plunge") {
@@ -117,7 +117,7 @@ func (c *char) burstPlungeDoTTrigger() {
 		}
 
 		if atk.Info.Durability == 0 {
-			// plunge collisions have 0 durability
+			// 落下攻撃の衝突は元素量0
 			return false
 		}
 
@@ -165,7 +165,7 @@ func (c *char) burstPlungeDoTTrigger() {
 				char.DeleteStatus(player.XianyunAirborneBuff)
 			}
 		}
-		// keep a window open for a4 to be able to apply
+		// 固有天賦4が適用できるようにウィンドウを開いたままにする
 		c.AddStatus(a4WindowKey, 1, false)
 		return false
 	}, "xianyun-starwicker-plunge-hook")

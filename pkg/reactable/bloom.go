@@ -17,15 +17,15 @@ import (
 const DendroCoreDelay = 30
 
 func (r *Reactable) TryBloom(a *combat.AttackEvent) bool {
-	// can be hydro bloom, dendro bloom, or quicken bloom
+	// 水開花、草開花、または激化開花の可能性がある
 	if a.Info.Durability < ZeroDur {
 		return false
 	}
 	var consumed reactions.Durability
 	switch a.Info.Element {
 	case attributes.Hydro:
-		// this part is annoying. bloom will happen if any of the dendro like aura is present
-		// so we gotta check for all 3...
+		// この部分はやっかい。草系オーラがいずれか存在すれば開花が発生する
+		// ので、3つ全てをチェックする必要がある...
 		switch {
 		case r.Durability[Dendro] > ZeroDur:
 		case r.Durability[Quicken] > ZeroDur:
@@ -33,7 +33,7 @@ func (r *Reactable) TryBloom(a *combat.AttackEvent) bool {
 		default:
 			return false
 		}
-		// reduce only check for one element so have to call twice to check for quicken as well
+		// reduce は1つの元素しかチェックしないので、激化も確認するために2回呼ぶ必要がある
 		consumed = r.reduce(attributes.Dendro, a.Info.Durability, 0.5)
 		f := r.reduce(attributes.Quicken, a.Info.Durability, 0.5)
 		if f > consumed {
@@ -51,8 +51,8 @@ func (r *Reactable) TryBloom(a *combat.AttackEvent) bool {
 	a.Info.Durability = max(a.Info.Durability, 0)
 	a.Reacted = true
 
-	// Check for Lunar-Bloom: if any party member has LB-Key, emit OnLunarBloom
-	// This is independent of Dendro Core generation
+	// ルナ開花のチェック: パーティメンバーに LB-Key があれば OnLunarBloom を発行
+	// これは草原核生成とは独立している
 	hasLBKey := false
 	for _, char := range r.core.Player.Chars() {
 		if char.StatusIsActive("LB-Key") {
@@ -69,12 +69,11 @@ func (r *Reactable) TryBloom(a *combat.AttackEvent) bool {
 	return true
 }
 
-// this function should only be called after a catalyze reaction (queued to the end of current frame)
-// this reaction will check if any hydro exists and if so trigger a bloom reaction
+// tryQuickenBloom は触媒反応後にのみ呼ばれるべき（現在フレームの末尾にキューされる）
+// この反応は水元素が存在するかチェックし、存在すれば開花反応を発生させる
 func (r *Reactable) tryQuickenBloom(a *combat.AttackEvent) {
 	if r.Durability[Quicken] < ZeroDur {
-		// this should be a sanity check; should not happen realistically unless something wipes off
-		// the quicken immediately (same frame) after catalyze
+		// 健全性チェック；触媒直後（同フレーム）に激化が消されない限り実際には発生しない
 		return
 	}
 	if r.Durability[Hydro] < ZeroDur {
@@ -84,7 +83,7 @@ func (r *Reactable) tryQuickenBloom(a *combat.AttackEvent) {
 	consumed := r.reduce(attributes.Hydro, avail, 2)
 	r.Durability[Quicken] -= consumed
 
-	// Check for Lunar-Bloom in Quicken bloom case as well
+	// 激化開花の場合もルナ開花をチェック
 	hasLBKey := false
 	for _, char := range r.core.Player.Chars() {
 		if char.StatusIsActive("LB-Key") {
@@ -104,12 +103,12 @@ type DendroCore struct {
 	*gadget.Gadget
 	srcFrame  int
 	CharIndex int
-	// If true, this dendro core is a Seed of Deceit (Nefer)
+	// trueの場合、この草原核は詐欺の種（Nefer）である
 	IsSeed bool
 }
 
 func (r *Reactable) addBloomGadget(a *combat.AttackEvent) {
-	// determine if this should be a Seed of Deceit at scheduling time to avoid timing races
+	// タイミング競合を避けるため、スケジューリング時に詐欺の種かどうかを判定する
 	isSeed := false
 	for _, ch := range r.core.Player.Chars() {
 		if ch.StatusIsActive("nefer-seed-convert") {
@@ -117,7 +116,7 @@ func (r *Reactable) addBloomGadget(a *combat.AttackEvent) {
 			break
 		}
 	}
-	// capture isSeed in closure
+	// クロージャ内で isSeed をキャプチャ
 	capturedIsSeed := isSeed
 	r.core.Tasks.Add(func() {
 		t := NewDendroCore(r.core, r.self.Shape(), a, capturedIsSeed)
@@ -146,12 +145,12 @@ func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent, isSe
 		panic("rectangle target hurtbox is not supported for dendro core spawning")
 	}
 
-	// for simplicity, seeds spawn randomly at radius + 0.5
+	// 簡略化のため、種は全体から半径+0.5のランダム位置に生成される
 	r := circ.Radius() + 0.5
 	s.Gadget = gadget.New(c, geometry.CalcRandomPointFromCenter(circ.Pos(), r, r, c.Rand), 2, combat.GadgetTypDendroCore)
 	s.Gadget.Duration = 300 // ??
 
-	// Log creation details for debugging Seed of Deceit behavior
+	// 詐欺の種の動作デバッグ用の作成詳細ログ
 	c.Log.NewEvent(
 		"new dendro core created",
 		glog.LogElementEvent,
@@ -164,7 +163,7 @@ func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent, isSe
 	explode := func(reason string) func() {
 		return func() {
 			s.Core.Tasks.Add(func() {
-				// Log an explode attempt and current IsSeed state
+				// 爆発試行と現在の IsSeed 状態をログ
 				s.Core.Log.NewEvent(
 					"dendro core explode attempt",
 					glog.LogElementEvent,
@@ -173,15 +172,15 @@ func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent, isSe
 					Write("src", s.Src())
 
 				if s.IsSeed {
-					// Seeds of Deceit do not explode
+					// 詐欺の種は爆発しない
 					return
 				}
-				// bloom attack
+				// 開花攻撃
 				ai, snap := NewBloomAttack(char, s, nil)
 				ap := combat.NewCircleHitOnTarget(s, nil, 5)
 				c.QueueAttackWithSnap(ai, snap, ap, 0)
 
-				// self damage
+				// 自傷ダメージ
 				ai.Abil += reactions.SelfDamageSuffix
 				ai.FlatDmg = 0.05 * ai.FlatDmg
 				ap.SkipTargets[targets.TargettablePlayer] = false
@@ -201,7 +200,7 @@ func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent, isSe
 		s.Gadget.OnExpiry = explode("expired")
 		s.Gadget.OnKill = explode("killed")
 	} else {
-		// Seeds of Deceit do not burst or cause reactions on expiry/kill
+		// 詐欺の種は期限切れや消滅時に爆発や反応を起こさない
 		s.Gadget.OnExpiry = nil
 		s.Gadget.OnKill = nil
 	}
@@ -210,7 +209,7 @@ func NewDendroCore(c *core.Core, shp geometry.Shape, a *combat.AttackEvent, isSe
 }
 
 func (s *DendroCore) Tick() {
-	// this is needed since gadget tick
+	// ガジェットのTickに必要
 	s.Gadget.Tick()
 }
 
@@ -226,24 +225,24 @@ func (s *DendroCore) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, b
 	}
 
 	char := s.Core.Player.ByIndex(atk.Info.ActorIndex)
-	// only contact with pyro/electro to trigger burgeon/hyperbloom accordingly
+	// 炎/雷との接触のみが烈開花/超開花をそれぞれ発動する
 	switch atk.Info.Element {
 	case attributes.Electro:
 		if s.IsSeed {
-			// Seeds of Deceit cannot trigger Hyperbloom
+			// 詐欺の種は超開花を発動できない
 			return 0, false
 		}
-		// trigger hyperbloom targets the nearest enemy
-		// it can also do damage to player in small aoe
+		// 超開花は最も近い敵をターゲットにする
+		// 小範囲AoEでプレイヤーにもダメージを与える
 		s.Core.Tasks.Add(func() {
 			ai, snap := NewHyperbloomAttack(char, s)
-			// queue dmg nearest enemy within radius 15
+			// 半径15以内の最も近い敵にダメージをキュー
 			enemy := s.Core.Combat.ClosestEnemyWithinArea(combat.NewCircleHitOnTarget(s.Gadget, nil, 15), nil)
 			if enemy != nil {
 				ap := combat.NewCircleHitOnTarget(enemy, nil, 1)
 				s.Core.QueueAttackWithSnap(ai, snap, ap, 0)
 
-				// also queue self damage
+				// 自傷ダメージもキュー
 				ai.Abil += reactions.SelfDamageSuffix
 				ai.FlatDmg = 0.05 * ai.FlatDmg
 				ap.SkipTargets[targets.TargettablePlayer] = false
@@ -265,17 +264,17 @@ func (s *DendroCore) Attack(atk *combat.AttackEvent, evt glog.Event) (float64, b
 			Write("dendro_core_src", s.Gadget.Src())
 	case attributes.Pyro:
 		if s.IsSeed {
-			// Seeds of Deceit cannot trigger Burgeon
+			// 詐欺の種は烈開花を発動できない
 			return 0, false
 		}
-		// trigger burgeon, aoe dendro damage
-		// self damage
+		// 烈開花を発動、AoE草元素ダメージ
+		// 自傷ダメージ
 		s.Core.Tasks.Add(func() {
 			ai, snap := NewBurgeonAttack(char, s)
 			ap := combat.NewCircleHitOnTarget(s, nil, 5)
 			s.Core.QueueAttackWithSnap(ai, snap, ap, 0)
 
-			// queue self damage
+			// 自傷ダメージをキュー
 			ai.Abil += reactions.SelfDamageSuffix
 			ai.FlatDmg = 0.05 * ai.FlatDmg
 			ap.SkipTargets[targets.TargettablePlayer] = false

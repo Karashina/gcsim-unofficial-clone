@@ -36,7 +36,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	atkPer := 0.06 + float64(r)*0.02  // 8/10/12/14/16 per refine
 	erPer := 0.045 + float64(r)*0.015 // 6/7.5/9/10.5/12 per refine
 
-	// Permanent stat mods that reference w.stacks
+	// スタック参照の永続ステータスmod
 	mATK := make([]float64, attributes.EndStatType)
 	char.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("sacrificersstaff-atk", -1),
@@ -57,9 +57,9 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// On Elemental Skill hit -> add a stack (max 3), stacks last 6s each
+	// 元素スキル命中時 -> スタックを追加（最大3）、各スタックは6秒間持続
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		// args: target, *combat.AttackEvent
+		// 引数: target, *combat.AttackEvent
 		if _, ok := args[0].(*enemy.Enemy); !ok {
 			return false
 		}
@@ -74,7 +74,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if w.stacks < 3 {
 			w.stacks++
 		}
-		// schedule a decrement after 6s (per-stack timer)
+		// 6秒後にスタックを1減少
 		c.Tasks.Add(func() {
 			if w.stacks > 0 {
 				w.stacks--

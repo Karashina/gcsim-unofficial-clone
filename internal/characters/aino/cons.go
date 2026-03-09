@@ -20,10 +20,10 @@ const (
 	c6ExtraBonus = 0.20
 )
 
-// C1 - After Aino uses her Elemental Skill or her Elemental Burst,
-// her Elemental Mastery will be increased by 80 for 15s.
-// Also, he Elemental Mastery of other nearby active party members will be increased by 80 for 15s.
-// The Elemental Mastery-increasing effects of this Constellation do not stack.
+// 1凸 - アイノが元素スキルまたは元素爆発を使用後、
+// 元素熔煙が15秒間80アップ。
+// 近くのアクティブパーティーメンバーの元素熔煙も15秒間80アップ。
+// この元素熔煙アップ効果は重複しない。
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
@@ -47,7 +47,7 @@ func (c *char) c1() {
 }
 
 func (c *char) applyC1Buff() {
-	// Apply to all party members
+	// 全パーティメンバーに適用
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(c1Key, c1Duration),
@@ -66,11 +66,11 @@ func (c *char) c1EMBuff() []float64 {
 	return buff
 }
 
-// C2 - If Aino is off-field while the Focused Hydronic Cooling Zone of her Elemental Burst Precision Hydronic Cooler is active,
-// when your active party member hits a nearby opponent with an attack, the Cool Your Jets Ducky will fire an additional water ball at that opponent,
-// dealing AoE Hydro DMG.
-// It has no Mult but it's FlatDmg is sum of 25% of Aino's ATK and 100% of her Elemental Mastery.
-// AttackTag of this DMG is considered as AttackTagElementalBurst. This effect can be triggered once every 5s.
+// 2凸 - アイノの元素爆発「精密ハイドロニッククーラー」のゾーンがアクティブな間、
+// アイノがフィールド外の時、アクティブメンバーの攻撃が敵に命中すると、
+// アヒルが追加の水球を発射し、水元素範囲ダメージ。
+// 倍率なし、FlatDmgはアイノの攻撃力25%+元素熔煙100%。
+// AttackTagはAttackTagElementalBurstとして扱う。この効果は5秒に1回発動可能。
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
@@ -78,22 +78,22 @@ func (c *char) c2() {
 
 	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 
-		// Check if Aino is off-field
+		// アイノがフィールド外か確認
 		if c.Core.Player.Active() == c.Index {
 			return false
 		}
 
-		// Check if burst is active
+		// 元素爆発がアクティブか確認
 		if !c.StatusIsActive(burstKey) {
 			return false
 		}
 
-		// Check if on ICD
+		// ICD中か確認
 		if c.StatusIsActive(c.c2IcdKey) {
 			return false
 		}
 
-		// Trigger additional water ball
+		// 追加の水球を発射
 		atk := c.Stat(attributes.ATK)
 		em := c.Stat(attributes.EM)
 		flatDmg := 0.25*atk + 1.0*em
@@ -111,12 +111,11 @@ func (c *char) c2() {
 			FlatDmg:    flatDmg,
 		}
 
-		// args[0] is the target (enemy) and args[1] is the attack event
+		// args[0]はターゲット（敵）、args[1]は攻撃イベント
 		tgt := args[0].(combat.Target)
-		// Avoid generating a snapshot synchronously inside an OnEnemyHit event handler.
-		// Synchronous snapshots here can re-enter event handlers and cause unbounded recursion
-		// (see issue: stack overflow during sim runs). Schedule the snapshot+damage 1 frame
-		// later to break the re-entrant call chain.
+		// OnEnemyHitイベントハンドラ内で同期的にスナップショットを生成すると、
+		// イベントハンドラの再帰呼び出しで無限再帰が発生する可能性がある。
+		// 再帰チェーンを断つため、1フレーム後にスケジュールする。
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(tgt, nil, 3), 1, 1)
 
 		c.AddStatus(c.c2IcdKey, 5*60, false)
@@ -126,8 +125,8 @@ func (c *char) c2() {
 	}, "aino-c2")
 }
 
-// C4 - When the Elemental Skill hits an opponent, it will restore 10 Elemental Energy for Aino.
-// Energy can be restored to her in this manner once every 10s.
+// 4凸 - 元素スキルが敵に命中するとアイノの元素エネルギーが10回復する。
+// この方法によるエネルギー回復は10秒に1回のみ。
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
@@ -156,9 +155,9 @@ func (c *char) c4() {
 	}, "aino-c4")
 }
 
-// C6 - For the next 15s after using the Elemental Burst, DMG from nearby active characters' Electro-Charged, Bloom,
-// Lunar-Charged, and Lunar-Bloom reactions is increased by 15%.
-// When the Moonsign is Ascendant, DMG from the aforementioned reactions will be further increased by 20%.
+// 6凸 - 元素爆発使用後15秒間、近くのアクティブキャラの感電、開花、
+// Lunar-Charged、Lunar-Bloom反応のダメージ+15%。
+// ムーンサインが昇順の時、上記反応のダメージがさらに+20%。
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return
@@ -175,7 +174,7 @@ func (c *char) c6() {
 		return false
 	}, "aino-c6")
 
-	// Apply reaction damage bonus for Electro-Charged
+	// 感電の反応ダメージボーナスを適用
 	c.Core.Events.Subscribe(event.OnElectroCharged, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 
@@ -194,7 +193,7 @@ func (c *char) c6() {
 		return false
 	}, "aino-c6-ec")
 
-	// Apply reaction damage bonus for Bloom
+	// 開花の反応ダメージボーナスを適用
 	c.Core.Events.Subscribe(event.OnBloom, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 

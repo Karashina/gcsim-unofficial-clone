@@ -24,7 +24,7 @@ type Weapon struct {
 	c     *core.Core
 	char  *character.CharWrapper
 
-	// Stirring Dawn Breeze tracking
+	// 啓明の微風トラッキング
 	naDmgBonus    float64
 	skillDmgBonus float64
 	burstDmgBonus float64
@@ -49,18 +49,18 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	decayRateScaled := (0.075 + float64(r)*0.025)      // 10/12.5/15/17.5/20%
 	increaseAmountScaled := (0.075 + float64(r)*0.025) // 10/12.5/15/17.5/20%
 
-	// Check for Hexerei: Secret Rite
+	// Hexerei: Secret Riteをチェック
 	hasHexerei := w.countHexereiCharacters() >= 2
 	hexereiIncrease := 0.0
 	if hasHexerei {
 		hexereiIncrease = 0.15 + float64(r)*0.05 // 20/25/30/35/40%
 	}
 
-	// Continuous decay (assume always in-combat)
+	// 常時減衰（常に戦闘中と仮定）
 	c.Tasks.Add(func() {
-		// Decay all bonuses
+		// 全ボーナスを減衰
 		if w.naDmgBonus > 0 {
-			w.naDmgBonus -= decayRateScaled / 60.0 // Per frame decay
+			w.naDmgBonus -= decayRateScaled / 60.0 // フレーム単位の減衰
 			if w.naDmgBonus < 0 {
 				w.naDmgBonus = 0
 			}
@@ -79,14 +79,14 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 	}, 1)
 
-	// On hit: increase corresponding DMG bonus
+	// 命中時: 対応するダメージボーナスを増加
 	c.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
 
-		// ICD check
+		// ICDチェック
 		if c.F < w.lastHitTime+hitICDFrames {
 			return false
 		}
@@ -112,7 +112,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		w.lastHitTime = c.F
 
 		if hasHexerei {
-			// Hexerei mode: increase all bonuses
+			// Hexereiモード: 全ボーナスを増加
 			w.naDmgBonus += hexereiIncrease
 			w.skillDmgBonus += hexereiIncrease
 			w.burstDmgBonus += hexereiIncrease
@@ -132,7 +132,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 				Write("skill_bonus", w.skillDmgBonus).
 				Write("burst_bonus", w.burstDmgBonus)
 		} else {
-			// Normal mode: increase only corresponding bonus
+			// 通常モード: 対応するボーナスのみ増加
 			*bonusPtr += increaseAmountScaled
 			if *bonusPtr > maxBonusScaled {
 				*bonusPtr = maxBonusScaled
@@ -146,7 +146,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("daybreak-hit-%v", char.Base.Key.String()))
 
-	// Apply DMG bonuses
+	// ダメージボーナスを適用
 	char.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("daybreak-dmg", -1),
 		Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {

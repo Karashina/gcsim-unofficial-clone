@@ -13,8 +13,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// C1:
-// The CRIT Rate of Kaeya's Normal and Charge Attacks against opponents affected by Cryo is increased by 15%.
+// 1凸:
+// 氷元素の影響を受けた敵に対するカイアの通常攻撃と重撃の会心率+15%。
 func (c *char) c1() {
 	m := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{
@@ -36,28 +36,28 @@ func (c *char) c1() {
 	})
 }
 
-// C2:
-// Every time Glacial Waltz defeats an opponent during its duration, its duration is increased by 2.5s, up to a maximum of 15s.
+// 2凸:
+// 冰雪の輪の持続中に敵を倒すたびに持続時間が2.5秒延長、最大15秒まで。
 func (c *char) c2() {
 	c.Core.Events.Subscribe(event.OnTargetDied, func(args ...interface{}) bool {
 		_, ok := args[0].(*enemy.Enemy)
-		// ignore if not an enemy
+		// 敵でなければ無視
 		if !ok {
 			return false
 		}
-		// ignore if burst isn't up
+		// 元素爆発が有効でない場合は無視
 		if c.Core.Status.Duration(burstKey) == 0 {
 			return false
 		}
-		// ignore if extension limit reached
+		// 延長上限に達した場合は無視
 		if c.c2ProcCount > 2 {
 			return false
 		}
-		// burst duration steps
-		// 8s
-		// 10.5s (+2.5s from previous)
-		// 13s (+2.5s from previous)
-		// 15s (+2.0s from previous because extension is capped to 15s)
+		// 元素爆発持続時間の延長段階
+		// 8秒
+		// 10.5秒 (前回から+2.5秒)
+		// 13秒 (前回から+2.5秒)
+		// 15秒 (前回から+2.0秒、上限15秒のため)
 		extension := 150
 		if c.c2ProcCount == 2 {
 			extension = 120
@@ -71,11 +71,11 @@ func (c *char) c2() {
 	}, "kaeya-c2")
 }
 
-// C4:
-// Triggers automatically when Kaeya's HP falls below 20%:
-// Creates a shield that absorbs damage equal to 30% of Kaeya's Max HP. Lasts for 20s.
-// This shield absorbs Cryo DMG with 250% efficiency.
-// Can only occur once every 60s.
+// 4凸:
+// カイアのHPが20%を下回ると自動発動:
+// カイアの最大HPの30%のダメージを吸収するシールドを生成。20秒持続。
+// 氷元素ダメージに対して250%の吸収効率。
+// 60秒に1回のみ発動可能。
 func (c *char) c4() {
 	c.Core.Events.Subscribe(event.OnPlayerHPDrain, func(args ...interface{}) bool {
 		di := args[0].(*info.DrainInfo)

@@ -7,7 +7,7 @@ import (
 )
 
 func (p *Parser) parseFnStmt() (ast.Stmt, error) {
-	// fn ident(...deint){ block }
+	// fn ident(...引数){ ブロック }
 	n := p.next()
 	if n.Typ != ast.KeywordFn {
 		return nil, fmt.Errorf("ln %v: expecting fn, got %v", n.Line, n.Val)
@@ -16,7 +16,7 @@ func (p *Parser) parseFnStmt() (ast.Stmt, error) {
 	if n.Typ != ast.ItemIdentifier {
 		return nil, fmt.Errorf("ln %v: expecting identifier after fn, got %v", n.Line, n.Val)
 	}
-	// expecting function body
+	// 関数本体が必要
 	lit, err := p.parseFn()
 	if err != nil {
 		return nil, err
@@ -29,13 +29,13 @@ func (p *Parser) parseFnStmt() (ast.Stmt, error) {
 }
 
 func (p *Parser) parseFnExpr() (ast.Expr, error) {
-	// fn (...ident) { block }
-	// consume the fn
+	// fn (...識別子) { ブロック }
+	// fn を消費
 	n := p.next()
 	if n.Typ != ast.KeywordFn {
 		return nil, fmt.Errorf("ln %v: expecting fn, got %v", n.Line, n.Val)
 	}
-	// expecting function body
+	// 関数本体が必要
 	lit, err := p.parseFn()
 	if err != nil {
 		return nil, err
@@ -47,10 +47,10 @@ func (p *Parser) parseFnExpr() (ast.Expr, error) {
 }
 
 func (p *Parser) parseFn() (*ast.FuncLit, error) {
-	// (...ident){ block }
+	// (...識別子){ ブロック }
 	var err error
 
-	// expect n to be left parent
+	// n は左括弧であることを期待
 	n := p.peek()
 	if n.Typ != ast.ItemLeftParen {
 		return nil, fmt.Errorf("ln%v: expecting ( after identifier, got %v", n.Line, n.Val)
@@ -63,13 +63,13 @@ func (p *Parser) parseFn() (*ast.FuncLit, error) {
 		},
 	}
 
-	// parse the arguments
+	// 引数をパース
 	lit.Args, lit.Signature.ArgsType, err = p.parseFnArgs()
 	if err != nil {
 		return nil, err
 	}
 
-	// check that args are not duplicates
+	// 引数が重複していないかチェック
 	chk := make(map[string]bool)
 	for _, v := range lit.Args {
 		if _, ok := chk[v.Value]; ok {
@@ -78,17 +78,17 @@ func (p *Parser) parseFn() (*ast.FuncLit, error) {
 		chk[v.Value] = true
 	}
 
-	// if next is not left brace then we're expecting typing info
+	// 次が左ブレースでない場合、型情報を期待
 	if l := p.peek(); l.Typ != ast.ItemLeftBrace {
 		lit.Signature.ResultType, err = p.parseTyping()
 		if err != nil {
 			return nil, err
 		}
 	}
-	//TODO: if nil we are assuming number for compatbility reasons
+	//TODO: nilの場合、互換性のため数値型と仮定する
 	if lit.Signature.ResultType == nil {
-		//TODO: the position here is wrong... really shouldn't be the position of the open bracket
-		//TODO: should fix this by adding a current position the parser
+		//TODO: ここの位置情報は正しくない…開き括弧の位置ではないはず
+		//TODO: パーサーに現在位置を追加して修正すべき
 		lit.Signature.ResultType = &ast.NumberType{Pos: n.Pos}
 	}
 
@@ -101,13 +101,13 @@ func (p *Parser) parseFn() (*ast.FuncLit, error) {
 }
 
 func (p *Parser) parseFnArgs() ([]*ast.Ident, []ast.ExprType, error) {
-	// consume (
+	// ( を消費
 	var args []*ast.Ident
 	var argsType []ast.ExprType
 	p.next()
 	for n := p.next(); n.Typ != ast.ItemRightParen; n = p.next() {
 		a := &ast.Ident{}
-		// expecting ident, comma
+		// 識別子かカンマを期待
 		if n.Typ != ast.ItemIdentifier {
 			return nil, nil, fmt.Errorf("ln%v: expecting identifier in param list, got %v", n.Line, n.Val)
 		}
@@ -116,21 +116,21 @@ func (p *Parser) parseFnArgs() ([]*ast.Ident, []ast.ExprType, error) {
 
 		args = append(args, a)
 
-		// check for optional typing
-		// if not present assume number
+		// オプションの型情報をチェック
+		// 存在しない場合は数値型と仮定
 		typ, err := p.parseOptionalType()
 		if err != nil {
 			return nil, nil, err
 		}
-		//TODO: if nil we are assuming number for compatbility reasons
+		//TODO: nilの場合、互換性のため数値型と仮定する
 		if typ == nil {
 			typ = &ast.NumberType{Pos: n.Pos}
 		}
 
 		argsType = append(argsType, typ)
 
-		// if next token is a comma, then there should be another ident after that
-		// otherwise we have a problem
+		// 次のトークンがカンマの場合、その後に別の識別子があるはず
+		// そうでなければエラー
 		if l := p.peek(); l.Typ == ast.ItemComma {
 			p.next() // consume the comma
 			if l = p.peek(); l.Typ != ast.ItemIdentifier {

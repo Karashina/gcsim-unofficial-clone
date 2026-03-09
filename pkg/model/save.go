@@ -11,7 +11,7 @@ func (r *SimulationResult) Save(fpath string, gz bool) error {
 		return err
 	}
 	if gz {
-		// add .gz to end of file
+		// ファイル末尾に.gzを追加
 		f, err := os.OpenFile(fpath+".gz", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o755)
 		if err != nil {
 			return err
@@ -22,7 +22,7 @@ func (r *SimulationResult) Save(fpath string, gz bool) error {
 		err = zw.Close()
 		return err
 	}
-	// else save json
+	// それ以外はJSONとして保存
 	return os.WriteFile(fpath, data, 0o644)
 }
 

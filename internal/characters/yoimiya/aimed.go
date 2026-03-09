@@ -18,33 +18,33 @@ var aimedHitmarks = []int{15, 86, 103, 121, 139}
 func init() {
 	aimedFrames = make([][]int, 5)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(26)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(97)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
 
-	// Fully-Charged Aimed Shot (1 Kindling Arrow)
+	// フルチャージ狙い撃ち（火焰矢1本）
 	aimedFrames[2] = frames.InitAbilSlice(114)
 	aimedFrames[2][action.ActionDash] = aimedHitmarks[2]
 	aimedFrames[2][action.ActionJump] = aimedHitmarks[2]
 
-	// Fully-Charged Aimed Shot (2 Kindling Arrows)
+	// フルチャージ狙い撃ち（火焰矢2本）
 	aimedFrames[3] = frames.InitAbilSlice(132)
 	aimedFrames[3][action.ActionDash] = aimedHitmarks[3]
 	aimedFrames[3][action.ActionJump] = aimedHitmarks[3]
 
-	// Fully-Charged Aimed Shot (3 Kindling Arrows)
+	// フルチャージ狙い撃ち（火焰矢3本）
 	aimedFrames[4] = frames.InitAbilSlice(150)
 	aimedFrames[4][action.ActionDash] = aimedHitmarks[4]
 	aimedFrames[4][action.ActionJump] = aimedHitmarks[4]
 }
 
-// Standard aimed attack
+// 標準的な狙い撃ち攻撃
 func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	travel, ok := p["travel"]
 	if !ok {
@@ -66,14 +66,14 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		return action.Info{}, fmt.Errorf("invalid hold param supplied, got %v", hold)
 	}
 
-	// used to adjust how long it takes for the kindling arrows to hit starting from CA arrow release
-	// does nothing if hold < lv. 2
+	// 火焰矢が命中するまでの時間を調整するためのパラメータ
+	// hold < lv.2 の場合は何もしない
 	kindlingTravel, ok := p["kindling_travel"]
 	if !ok {
 		kindlingTravel = 30
 	}
 
-	// Normal Arrow
+	// 通常の矢
 	ai := combat.AttackInfo{
 		ActorIndex:           c.Index,
 		Abil:                 "Fully-Charged Aimed Shot",
@@ -111,17 +111,17 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		c2CB,
 	)
 
-	// Kindling Arrows
+	// 火焰矢
 	if hold >= attacks.AimParamLv2 {
 		ai.ICDTag = attacks.ICDTagExtraAttack
 		ai.Mult = aimExtra[c.TalentLvlAttack()]
 
 		// TODO:
-		// Kindling Arrows can hit weakspots to proc stuff like Prototype Crescent, but they don't always crit
-		// current assumption is that they never hit a weakspot
+		// 火焰矢は弱点に命中してPrototype Crescent等を発動できるが、常に会心するわけではない
+		// 現在の仮定: 弱点には命中しない
 		ai.HitWeakPoint = false
 
-		// no hitlag
+		// ヒットラグなし
 		ai.HitlagHaltFrames = 0
 		ai.HitlagFactor = 0.01
 		ai.HitlagOnHeadshotOnly = false
@@ -129,7 +129,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 
 		for i := 1; i <= hold-1; i++ {
 			ai.Abil = fmt.Sprintf("Kindling Arrow %v", i)
-			// add a bit of extra delay for kindling arrows
+			// 火焰矢に少し余分な遅延を追加
 			c.Core.QueueAttack(
 				ai,
 				combat.NewCircleHit(

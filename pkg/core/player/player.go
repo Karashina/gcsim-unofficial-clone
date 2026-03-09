@@ -1,9 +1,9 @@
-// Package player contains player related tracking and functionalities:
-// - tracking characters on the team
-// - handling animations state
-// - handling normal attack state
-// - handling character stats and attributes
-// - handling shielding
+// Package player はプレイヤーに関連するトラッキングと機能を含む:
+// - チーム内キャラクターのトラッキング
+// - アニメーション状態の管理
+// - 通常攻撃状態の管理
+// - キャラクターステータスと属性の管理
+// - シールドの管理
 package player
 
 import (
@@ -35,34 +35,34 @@ const (
 
 type Handler struct {
 	Opt
-	// handlers
+	// ハンドラー
 	*animation.AnimationHandler
 	Shields *shield.Handler
 	infusion.Handler
 	Verdant *verdant.Handler
 
-	// tracking
+	// トラッキング
 	chars   []*character.CharWrapper
 	active  int
 	charPos map[keys.Char]int
 
-	// stam
+	// スタミナ
 	Stam            float64
 	LastStamUse     int
 	stamPercentMods []stamPercentMod
 
-	// airborne source
+	// 空中状態のソース
 	airborne AirborneSource
 
-	// swap
+	// 交代
 	SwapCD  int
 	SwapICD int
 
-	// dash: dash fails iff lockout && on CD
+	// ダッシュ: ロックアウト中かつCD中の場合のみダッシュが失敗する
 	DashCDExpirationFrame int
 	DashLockout           bool
 
-	// last action
+	// 最後のアクション
 	LastAction struct {
 		UsedAt int
 		Type   action.Action
@@ -129,7 +129,7 @@ func (m *moonridgeImpl) HasICD() bool {
 }
 
 func (m *moonridgeImpl) AddICD(dur int) {
-	// Add to active character
+	// アクティブキャラクターに追加する
 	if m.h.active >= 0 && m.h.active < len(m.h.chars) {
 		m.h.chars[m.h.active].AddStatus("law-of-new-moon-icd", dur, false)
 	}
@@ -144,13 +144,13 @@ func (h *Handler) swap(to keys.Char) func() {
 		prev := h.active
 		h.active = h.charPos[to]
 
-		// still have remaining frames left on dash CD, save in char for when they go on-field again
+		// ダッシュCDの残りフレームがある場合、再出場時のためキャラに保存する
 		if h.DashCDExpirationFrame > *h.F {
 			h.chars[prev].RemainingDashCD = h.DashCDExpirationFrame - *h.F
 			h.chars[prev].DashLockout = h.DashLockout
 		}
 
-		// set the new DashCDExpirationFrame and reset character remaining back to 0
+		// 新しい DashCDExpirationFrame を設定し、キャラの残りを0にリセットする
 		h.DashCDExpirationFrame = *h.F + h.chars[h.active].RemainingDashCD
 		h.DashLockout = h.chars[h.active].DashLockout
 		h.chars[h.active].RemainingDashCD = 0
@@ -240,8 +240,8 @@ func (h *Handler) DistributeParticle(p character.Particle) {
 }
 
 func (h *Handler) AbilStamCost(i int, a action.Action, p map[string]int) float64 {
-	// stam percent mods are negative
-	// cap it to 100% stam decrease
+	// スタミナ軽減modは負の値
+	// スタミナ軽減は最大100%に制限する
 	r := 1 + h.StamPercentMod(a)
 	if r < 0 {
 		r = 0
@@ -251,7 +251,7 @@ func (h *Handler) AbilStamCost(i int, a action.Action, p map[string]int) float64
 
 func (h *Handler) UseStam(amount float64, a action.Action) {
 	h.Stam -= amount
-	// this really shouldn't happen??
+	// これは本来起きないはず？
 	if h.Stam < 0 {
 		h.Stam = 0
 	}
@@ -267,18 +267,18 @@ func (h *Handler) RestoreStam(v float64) {
 }
 
 func (h *Handler) ApplyHitlag(char int, factor, dur float64) {
-	// make sure we only apply hitlag if this character is on field
+	// このキャラがフィールド上にいる場合のみヒットラグを適用する
 	if char != h.active {
 		return
 	}
 
 	h.chars[char].ApplyHitlag(factor, dur)
 
-	// also extend infusion
-	//TODO: this is a really awkward place to apply this
+	// 元素付与も延長する
+	//TODO: ここで適用するのは非常に不自然
 	h.ExtendInfusion(char, factor, dur)
 
-	// extend the dash cd by the hitlag extension amount
+	// ヒットラグ延長分だけダッシュCDを延長する
 	if h.DashCDExpirationFrame > *h.F {
 		ext := int(math.Ceil(dur * (1 - factor)))
 		h.DashCDExpirationFrame += ext
@@ -296,8 +296,8 @@ func (h *Handler) ApplyHitlag(char int, factor, dur float64) {
 	}
 }
 
-// InitializeTeam will set up resonance event hooks and calculate
-// all character base stats
+// InitializeTeam は元素共鳴のイベントフックをセットアップし、
+// 全キャラクターの基礎ステータスを計算する
 func (h *Handler) InitializeTeam() error {
 	var err error
 	for _, c := range h.chars {
@@ -306,7 +306,7 @@ func (h *Handler) InitializeTeam() error {
 			return err
 		}
 	}
-	// loop again to initialize
+	// 再度ループして初期化する
 	for i := range h.chars {
 		err = h.chars[i].Init()
 		if err != nil {
@@ -316,7 +316,7 @@ func (h *Handler) InitializeTeam() error {
 		for k := range h.chars[i].Equip.Sets {
 			h.chars[i].Equip.Sets[k].Init()
 		}
-		// set each char's starting hp ratio
+		// 各キャラの初期HP割合を設定する
 		switch {
 		case h.chars[i].StartHP > 0 && h.chars[i].StartHPRatio > 0:
 			h.chars[i].SetHPByRatio(float64(h.chars[i].StartHPRatio) / 100.0)
@@ -333,7 +333,7 @@ func (h *Handler) InitializeTeam() error {
 			Write("starting_hp", h.chars[i].CurrentHP())
 	}
 
-	// Determine Moonsign state for the whole party once (nascent/ascendant)
+	// パーティ全体のMoonsign状態を一度だけ決定する（nascent/ascendant）
 	count := 0
 	for _, ch := range h.chars {
 		if ch.StatusIsActive("moonsignKey") {
@@ -353,20 +353,20 @@ func (h *Handler) InitializeTeam() error {
 	h.Log.NewEvent("moonsign party init", glog.LogDebugEvent, -1).
 		Write("count", count)
 
-	// Initialize non-Moonsign character buffs (Ascendant Gleam only)
+	// 非Moonsignキャラクターのバフを初期化する（Ascendant Gleamのみ）
 	h.initNonMoonsignBuffs()
 
 	return nil
 }
 
 func (h *Handler) Tick() {
-	//	- player (stamina, swap, animation, etc...)
-	//		- character
-	//		- shields
-	//		- animation
-	//		- stamina
-	//		- swap
-	// recover stamina
+	//	- プレイヤー（スタミナ、交代、アニメーション等）
+	//		- キャラクター
+	//		- シールド
+	//		- アニメーション
+	//		- スタミナ
+	//		- 交代
+	// スタミナを回復
 	if h.Stam < MaxStam && *h.F-h.LastStamUse > StamCDFrames {
 		h.Stam += 25.0 / 60
 		if h.Stam > MaxStam {
@@ -397,7 +397,7 @@ const (
 
 func (h *Handler) SetAirborne(src AirborneSource) error {
 	if src < Grounded || src >= TerminateAirborne {
-		// do nothing
+		// 何もしない
 		return fmt.Errorf("invalid airborne source: %v", src)
 	}
 	h.airborne = src
@@ -408,40 +408,40 @@ func (h *Handler) Airborne() AirborneSource {
 	return h.airborne
 }
 
-// initNonMoonsignBuffs sets up Lunar Reaction damage buff for non-Moonsign characters
-// when Ascendant Gleam is active (満照状態).
+// initNonMoonsignBuffs は、Ascendant Gleam が有効な場合（満照状態）に、
+// 非Moonsignキャラクター向けの月相反応ダメージバフを設定する。
 func (h *Handler) initNonMoonsignBuffs() {
 	const (
-		buffDuration = 20 * 60 // 20 seconds
+		buffDuration = 20 * 60 // 20秒
 		buffKey      = "non-moonsign-lunar-buff"
 	)
 
 	for _, char := range h.chars {
-		// Skip Moonsign characters (those with moonsignKey)
+		// Moonsignキャラクター（moonsignKeyを持つ）をスキップする
 		if char.StatusIsActive("moonsignKey") {
 			continue
 		}
 
-		// Capture loop variables for closure
+		// クロージャ用にループ変数をキャプチャする
 		currentChar := char
 		currentCharIndex := char.Index
 		currentCharEle := char.Base.Element
 
-		// Subscribe to OnSkill and OnBurst events
+		// OnSkill と OnBurst イベントを購読する
 		subscribeKey := fmt.Sprintf("non-moonsign-buff-%d", currentCharIndex)
 
 		handler := func(args ...interface{}) bool {
-			// Only activate if the triggering character is this specific character
+			// トリガーしたキャラクターがこのキャラクターの場合のみ有効化する
 			if h.active != currentCharIndex {
 				return false
 			}
 
-			// Only activate in Ascendant Gleam state (満照)
+			// Ascendant Gleam 状態（満照）の場合のみ有効化する
 			if !currentChar.MoonsignAscendant {
 				return false
 			}
 
-			// Calculate bonus based on the triggering character's element type and stats
+			// トリガーしたキャラクターの元素タイプとステータスに基づいてボーナスを計算する
 			bonus := h.calculateNonMoonsignBonus(currentCharEle, currentChar)
 
 			h.Log.NewEvent("non-moonsign lunar buff activated", glog.LogCharacterEvent, currentCharIndex).
@@ -449,7 +449,7 @@ func (h *Handler) initNonMoonsignBuffs() {
 				Write("bonus", bonus).
 				Write("trigger_char", currentChar.Base.Key)
 
-			// Apply the buff to all party members
+			// バフを全パーティメンバーに適用する
 			h.applyNonMoonsignBuff(buffKey, buffDuration, bonus)
 
 			return false
@@ -460,14 +460,14 @@ func (h *Handler) initNonMoonsignBuffs() {
 	}
 }
 
-// calculateNonMoonsignBonus calculates the Lunar Reaction damage bonus
-// based on the character's element and current stats.
+// calculateNonMoonsignBonus はキャラクターの元素タイプと現在のステータスに基づいて、
+// 月相反応ダメージボーナスを計算する。
 func (h *Handler) calculateNonMoonsignBonus(ele attributes.Element, char *character.CharWrapper) float64 {
-	maxBonus := 0.36 // 36% maximum bonus
+	maxBonus := 0.36 // 最大ボーナス 36%
 
 	switch ele {
 	case attributes.Pyro, attributes.Electro, attributes.Cryo:
-		// ATK * 0.009, max at 4000 ATK
+		// ATK * 0.009、最大 4000 ATK
 		atk := char.Stat(attributes.ATK)
 		bonus := (atk / 100) * 0.009
 		if bonus > maxBonus {
@@ -476,7 +476,7 @@ func (h *Handler) calculateNonMoonsignBonus(ele attributes.Element, char *charac
 		return bonus
 
 	case attributes.Hydro:
-		// MaxHP * 0.0006, max at 60000 HP
+		// MaxHP * 0.0006、最大 60000 HP
 		maxHP := char.MaxHP()
 		bonus := (maxHP / 1000) * 0.006
 		if bonus > maxBonus {
@@ -485,7 +485,7 @@ func (h *Handler) calculateNonMoonsignBonus(ele attributes.Element, char *charac
 		return bonus
 
 	case attributes.Geo:
-		// DEF * 0.01, max at 3600 DEF
+		// DEF * 0.01、最大 3600 DEF
 		def := char.Stat(attributes.DEF)
 		bonus := (def / 100) * 0.01
 		if bonus > maxBonus {
@@ -494,7 +494,7 @@ func (h *Handler) calculateNonMoonsignBonus(ele attributes.Element, char *charac
 		return bonus
 
 	case attributes.Anemo, attributes.Dendro:
-		// EM * 0.0225, max at 1600 EM
+		// EM * 0.0225、最大 1600 EM
 		em := char.Stat(attributes.EM)
 		bonus := (em / 100) * 0.0225
 		if bonus > maxBonus {
@@ -507,20 +507,20 @@ func (h *Handler) calculateNonMoonsignBonus(ele attributes.Element, char *charac
 	}
 }
 
-// applyNonMoonsignBuff applies the Lunar Reaction damage buff to all party members.
+// applyNonMoonsignBuff は月相反応ダメージバフを全パーティメンバーに適用する。
 func (h *Handler) applyNonMoonsignBuff(buffKey string, duration int, bonus float64) {
 	for _, char := range h.chars {
-		// Remove existing buff if any
+		// 既存のバフがあれば削除する
 		char.DeleteStatus(buffKey)
 
-		// Add new buff status
+		// 新しいバフステータスを追加する
 		char.AddStatus(buffKey, duration, true)
 
-		// Add ElevationMod for Lunar Reaction damage bonus
+		// 月相反応ダメージボーナス用の ElevationMod を追加する
 		char.AddElevationMod(character.ElevationMod{
 			Base: modifier.NewBaseWithHitlag(buffKey, duration),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
-				// Apply to all Lunar Reaction types
+				// 全ての月相反応タイプに適用する
 				if ai.AttackTag == attacks.AttackTagLCDamage ||
 					ai.AttackTag == attacks.AttackTagLBDamage ||
 					ai.AttackTag == attacks.AttackTagLCrsDamage {

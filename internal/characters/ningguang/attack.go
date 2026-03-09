@@ -58,7 +58,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 
 	done := false
 	cb := func(_ combat.AttackCB) {
-		// doesn't gain jades off-field
+		// フィールド外では星璃を獲得しない
 		if c.Core.Player.Active() != c.Index {
 			return
 		}
@@ -66,7 +66,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			return
 		}
 		count := c.jadeCount
-		// if we're at 7 dont increase but also dont reset back to 3
+		// 7個の場合は増加せず、3個にもリセットしない
 		if count != 7 {
 			count++
 			if count > 3 {
@@ -86,7 +86,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}
 
 	nextAttack := attackOptions[c.prevAttack][c.Core.Rand.Intn(2)]
-	if c.Core.Player.CurrentState() == action.DashState { // dash > NA will always be left attack
+	if c.Core.Player.CurrentState() == action.DashState { // ダッシュ→通常攻撃は常に左攻撃になる
 		nextAttack = attackTypeLeft
 	}
 

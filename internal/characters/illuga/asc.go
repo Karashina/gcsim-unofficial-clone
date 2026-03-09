@@ -14,26 +14,26 @@ const (
 	a1Dur     = 20 * 60 // 20s (I-5 fix: was 12s)
 )
 
-// A1: Lightkeeper's Oath
-// When Elemental Skill or Burst is used:
-// - Other party members' Geo DMG: CRIT Rate +5%, CRIT DMG +10%
-// - If Moonsign is Ascendant Gleam, affected party members' EM +50
-// Duration: 20s
+// 固有天賦1: 灯守の誓い
+// 元素スキルまたは元素爆発使用時：
+// - 他のパーティメンバーの岩元素ダメージ：会心率+5%、会心ダメージ+10%
+// - 月相がAscendant Gleamの場合、影響を受けるパーティメンバーの元素熟知+50
+// 持続時間: 20秒
 
 func (c *char) applyLightkeeperOath() {
 	if c.Base.Ascension < 1 {
 		return
 	}
 
-	// Check if Moonsign is Ascendant Gleam
+	// 月相がAscendant Gleamかチェック
 	isAscendant := c.checkAscendantGleam()
 
-	// Base bonuses
+	// 基本ボーナス
 	critRateBonus := 0.05
 	critDmgBonus := 0.10
 	emBonus := 50.0
 
-	// I-6 fix: C6 CRIT bonuses apply always, EM only when Ascendant
+	// I-6修正: 6命の会心ボーナスは常時適用、元素熟知はAscendant時のみ
 	if c.Base.Cons >= 6 {
 		critRateBonus = 0.10 // 10% (vs 5%)
 		critDmgBonus = 0.30  // 30% (vs 10%)
@@ -42,13 +42,13 @@ func (c *char) applyLightkeeperOath() {
 		emBonus = 80.0 // 80 (vs 50)
 	}
 
-	// Apply to all party members (including self for consistency)
+	// 全パーティメンバーに適用（一貫性のため自身も含む）
 	for _, char := range c.Core.Player.Chars() {
 		if char.Index == c.Index {
-			continue // Don't apply to self, only to other party members
+			continue // 自身には適用しない、他のパーティメンバーのみ
 		}
 
-		// Add Geo CRIT bonuses
+		// 岩元素の会心ボーナスを追加
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.CR] = critRateBonus
 		m[attributes.CD] = critDmgBonus
@@ -63,7 +63,7 @@ func (c *char) applyLightkeeperOath() {
 			},
 		})
 
-		// If Ascendant Gleam, add EM bonus
+		// Ascendant Gleamの場合、元素熟知ボーナスを追加
 		if isAscendant {
 			mEM := make([]float64, attributes.EndStatType)
 			mEM[attributes.EM] = emBonus
@@ -85,16 +85,16 @@ func (c *char) applyLightkeeperOath() {
 		Write("is_ascendant", isAscendant)
 }
 
-// A4: Enhanced Nightingale's Song
-// Nightingale's Song bonuses are enhanced based on party composition:
-// Note: Implemented as modifier on Oriole-Song calculations
+// 固有天賦4: 強化されたナイチンゲールの歌
+// パーティ構成に基づいてナイチンゲールの歌のボーナスが強化される：
+// 注: Oriole-Song計算のmodifierとして実装
 
 func (c *char) a4Init() {
 	if c.Base.Ascension < 4 {
 		return
 	}
 
-	// Count Hydro and Geo party members (including self per spec)
+	// 水元素と岩元素のパーティメンバーを数える（仕様に従い自身も含む）
 	c.a4HydroCount = 0
 	c.a4GeoCount = 0
 
@@ -112,9 +112,9 @@ func (c *char) a4Init() {
 		Write("geo_count", c.a4GeoCount)
 }
 
-// getA4GeoBonus returns the A4 Nightingale's Song Geo DMG bonus per hit.
-// When there are 1/2/3 Hydro or Geo characters in the party,
-// increase is equal to 7%/14%/24% of Illuga's EM.
+// getA4GeoBonus は固有天賦4のナイチンゲールの歌の岩元素ダメージボーナスをヒット毎に返す。
+// パーティに水元素または岩元素キャラクターが1/2/3人いる場合、
+// 増加量はイルーガの元素熟知の7%/14%/24%に等しい。
 func (c *char) getA4GeoBonus() float64 {
 	if c.Base.Ascension < 4 {
 		return 0
@@ -130,9 +130,9 @@ func (c *char) getA4GeoBonus() float64 {
 	return a4GeoEM[count-1] * em
 }
 
-// getA4LCrsBonus returns the A4 Nightingale's Song LCrs DMG bonus per hit.
-// When there are 1/2/3 Hydro or Geo characters in the party,
-// increase is equal to 48%/96%/160% of Illuga's EM.
+// getA4LCrsBonus は固有天賦4のナイチンゲールの歌のLCrsダメージボーナスをヒット毎に返す。
+// パーティに水元素または岩元素キャラクターが1/2/3人いる場合、
+// 増加量はイルーガの元素熟知の48%/96%/160%に等しい。
 func (c *char) getA4LCrsBonus() float64 {
 	if c.Base.Ascension < 4 {
 		return 0
@@ -148,8 +148,8 @@ func (c *char) getA4LCrsBonus() float64 {
 	return a4LCrsEM[count-1] * em
 }
 
-// checkAscendantGleam checks if the current Moonsign state is Ascendant Gleam
+// checkAscendantGleam は現在の月相がAscendant Gleamかチェックする
 func (c *char) checkAscendantGleam() bool {
-	// Check party-wide Moonsign status set during initialization
+	// 初期化時に設定されたパーティ全体の月相ステータスをチェック
 	return c.MoonsignAscendant
 }

@@ -8,23 +8,23 @@ import (
 )
 
 func TravelerStoryBuffs(c *character.CharWrapper, p info.CharacterProfile) {
-	// TravelerStoryBuffs applies buffs based on completed story quests
+	// TravelerStoryBuffs はストーリークエストのクリアに基づいてバフを適用する
 	//
 	// base_atk_buff
-	// 		buffs from completing Chapter III: Act I (Sumeru Archon Quest)
-	// 		+3 base atk
+	// 		第三章：第一幕（スメール魔神任務）クリアで獲得するバフ
+	// 		+3 基礎攻撃力
 	// skirk_story_buff
-	// 		buffs from completing Crystallina Chapter: Act I (Skirk's Story Quest)
-	// 		+7 base atk, +15 EM, +50 base HP
+	// 		結晶の章：第一幕（スカーク伝説任務）クリアで獲得するバフ
+	// 		+7 基礎攻撃力, +15 元素熟知, +50 基礎HP
 	//
-	// All buffs default to enabled
+	// 全バフはデフォルトで有効
 	baseAtkBuff, okBaseAtkBuff := p.Params["base_atk_buff"]
 	skirkBuff, okSkirkBuff := p.Params["skirk_story_buff"]
 	if !okBaseAtkBuff {
 		baseAtkBuff = 1
 	}
 	if !okSkirkBuff {
-		skirkBuff = 1 // default to maximum buffs
+		skirkBuff = 1 // デフォルトで最大バフ
 	}
 
 	m := make([]float64, attributes.EndStatType)

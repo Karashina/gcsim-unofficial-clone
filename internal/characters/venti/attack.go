@@ -44,8 +44,8 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		Durability: 25,
 	}
 
-	// Hexerei: while burst eye is active, normal attacks become piercing Anemo Stormwind Arrows
-	// This is a standalone attack passive (not constellation-gated), active whenever hexerei bonus is present.
+	// Hexerei：元素爆発の眼がアクティブ中、通常攻撃が貫通型の風元素ストームウィンドアローになる
+	// これは単独の攻撃パッシブ（命ノ星座不要）で、Hexereiボーナスがある時常時アクティブ。
 	var hexCB combat.AttackCBFunc
 	if c.hexAttackEnabled() {
 		ai.Element = attributes.Anemo

@@ -29,20 +29,20 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	delay := c.checkForSkillEnd()
 
-	// Not in falling state
+	// 落下状態ではない
 	if !c.StatusIsActive(plungeAvailableKey) {
 		return action.Info{}, errors.New("only plunge after skill ends")
 	}
 	c.DeleteStatus(plungeAvailableKey)
 
-	// Decreasing delay due to casting midair
+	// 空中から発動するため遅延を短縮
 	if delay > 0 {
 		delay = 7
 	}
 
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not Wanderer does a collision hit
+		collision = 0 // 放浪者が衝突ヒットを行うかどうか
 	}
 
 	if collision > 0 {
@@ -61,7 +61,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 		Mult:       lowPlunge[c.TalentLvlAttack()],
 	}
 
-	// TODO: check snapshot delay
+	// TODO: スナップショット遅延を確認
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 3),
 		delay+lowPlungeHitmark, delay+lowPlungeHitmark)
 

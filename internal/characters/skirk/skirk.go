@@ -122,7 +122,7 @@ func (c *char) Condition(fields []string) (any, error) {
 }
 
 func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
-	// TODO: Adjust this value based on if windup happened for the NA
+	// TODO: 通常攻撃のウィンドアップ有無に応じてこの値を調整
 	if k == model.AnimationXingqiuN0StartDelay {
 		return 12
 	}
@@ -144,7 +144,7 @@ func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Fail
 }
 
 func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]int) error {
-	// can use charge without attack beforehand unlike most of the other sword users
+	// 他の大多数の片手剣キャラと異なり、事前の攻撃なしで重撃を使用可能
 	if a == action.ActionCharge {
 		return nil
 	}
@@ -178,7 +178,7 @@ func (c *char) ReduceSerpentsSubtlety(src string, e float64) {
 		Write("source", src)
 }
 
-// Consumes SS after a specified delay. Not hitlag affected
+// 指定遅延後にSSを消費。ヒットラグの影響を受けない
 func (c *char) ConsumeSerpentsSubtlety(delay int, src string) {
 	if delay == 0 {
 		c.Core.Log.NewEvent("draining serpent's subtlety", glog.LogEnergyEvent, c.Index).

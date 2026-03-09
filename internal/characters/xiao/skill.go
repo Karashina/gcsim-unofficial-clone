@@ -25,9 +25,9 @@ func init() {
 
 const a4BuffKey = "xiao-a4"
 
-// Skill attack damage queue generator
-// Additionally implements A4
-// Using Lemniscatic Wind Cycling increases the DMG of subsequent uses of Lemniscatic Wind Cycling by 15%. This effect lasts for 7s and has a maximum of 3 stacks. Gaining a new stack refreshes the duration of this effect.
+// 元素スキルのダメージキュー生成
+// 追加で固有天賦4を実装
+// 風輪両立を使用すると、次の風輪両立のダメージが15%増加する。この効果は7秒間持続し、最大3スタック。新しいスタック取得で持続時間がリフレッシュ。
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -41,7 +41,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Mult:       skill[c.TalentLvlSkill()],
 	}
 
-	// Cannot create energy during burst uptime
+	// 元素爆発中は元素エネルギーを生成できない
 	var particleCB combat.AttackCBFunc
 	if !c.StatusIsActive(burstBuffKey) {
 		particleCB = c.makeParticleCB()
@@ -61,12 +61,12 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	)
 
 	if c.Base.Ascension >= 4 {
-		// apply A4 0.25s after cast
+		// 発動から0.25秒後に固有天賦4を適用
 		c.Core.Tasks.Add(c.a4, 15)
 	}
 
-	// C6 handling - can use skill ignoring CD and without draining charges
-	// Can simply return early
+	// 6凸処理 - CDを無視でき、チャージを消費せずにスキル使用可能
+	// 単に早期リターンでOK
 	if c.Base.Cons >= 6 && c.StatusIsActive(c6BuffKey) {
 		c.Core.Log.NewEvent("xiao c6 active, Xiao E used, no charge used, no CD", glog.LogCharacterEvent, c.Index).
 			Write("c6 remaining duration", c.Core.Status.Duration("xiaoc6"))
@@ -77,7 +77,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSkill], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionSkill], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

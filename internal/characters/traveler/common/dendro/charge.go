@@ -15,7 +15,7 @@ var chargeHitmarks = [][]int{{9, 20}, {14, 25}}
 
 func init() {
 	chargeFrames = make([][]int, 2)
-	// Male
+	// 男性
 	chargeFrames[0] = frames.InitAbilSlice(55)                                       // CA -> N1
 	chargeFrames[0][action.ActionSkill] = 37                                         // CA -> E
 	chargeFrames[0][action.ActionBurst] = 36                                         // CA -> Q
@@ -23,7 +23,7 @@ func init() {
 	chargeFrames[0][action.ActionJump] = chargeHitmarks[0][len(chargeHitmarks[0])-1] // CA -> J
 	chargeFrames[0][action.ActionSwap] = 44                                          // CA -> Swap
 
-	// Female
+	// 女性
 	chargeFrames[1] = frames.InitAbilSlice(58)                                       // CA -> N1
 	chargeFrames[1][action.ActionSkill] = 34                                         // CA -> E
 	chargeFrames[1][action.ActionBurst] = 35                                         // CA -> Q

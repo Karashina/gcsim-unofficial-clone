@@ -57,7 +57,7 @@ const (
 	LumineCryo
 	Aether
 	Lumine
-	TravelerDelim // delim
+	TravelerDelim // 区切り文字
 )
 
 var charNames = [EndCharKeys]string{

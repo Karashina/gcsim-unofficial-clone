@@ -29,7 +29,7 @@ const (
 
 	salonMemberKey = "Salon Member"
 
-	// Data can be found here.
+	// データはこちらを参照。
 	// https://docs.google.com/spreadsheets/d/18LP6xlqh1DJhu6H0cvSaw3XLHhhLH6Wi/edit#gid=449781477
 	chevalmarinInitialTick  = 72.3333
 	chevalmarinIntervalMean = 97.5858
@@ -51,11 +51,11 @@ const (
 )
 
 func (c *char) calcSalonTick(tickNum int, initialTick, interval float64) int {
-	// the distribution is left skewed. We approxiamated with boxcox with lambda 0.728
-	// then used the transformation to convert from norm dist to the experimental distribution
+	// 分布は左に歪んでいる。lambda 0.728のBox-Cox変換で近似
+	// その後、正規分布から実験的な分布への変換を使用
 	randOffset := math.Pow(max(c.Core.Rand.NormFloat64()*1.0403+4.073023273, 0.0), (1/0.728)) - 7
 
-	// this limits the offset to [-7, 7]
+	// オフセットを[-7, 7]に制限
 	randOffset = min(randOffset, 7)
 	return int(math.Round(initialTick + float64(tickNum)*interval + randOffset))
 }
@@ -161,8 +161,8 @@ func (c *char) summonSinger(delay int) {
 }
 
 func (c *char) queueSalonAttack(src int, ai combat.AttackInfo, ap combat.AttackPattern, delay int) {
-	// This implementation is to make attack be cancelled if the pets are desummoned to CA or new skill used
-	// TODO: Test if Chevalmarin or Usher projectile disappear on CA/Skill/Timing out, and if Crab body slam is cancelled by CA/Skill/Timing out
+	// 重撃や新しいスキル使用でペットが解除された場合、攻撃がキャンセルされるようにする実装
+	// TODO: 重撃/スキル/時間切れでシュバルマランやウシェの投射物が消えるか、カニの体当たりがキャンセルされるかテスト
 	c.Core.Tasks.Add(func() {
 		if src != c.lastSummonSrc {
 			return
@@ -300,7 +300,7 @@ func (c *char) singerOfManyWaters(src int) func() {
 		if !c.StatusIsActive(skillKey) {
 			return
 		}
-		// heal
+		// 回復
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,
 			Target:  c.Core.Player.Active(),
@@ -309,7 +309,7 @@ func (c *char) singerOfManyWaters(src int) func() {
 			Bonus:   c.Stat(attributes.Heal),
 		})
 
-		// +0.5 to ensure it rounds
+		// +0.5で確実に四捨五入
 		interval := int(singerInterval*(1-c.a4IntervalReduction) + 0.5)
 		c.Core.Tasks.Add(c.singerOfManyWaters(src), interval)
 	}
@@ -341,7 +341,7 @@ func (c *char) consumeAlliesHealth(hpDrainRatio float64) int {
 		alliesWithDrainedHPCounter++
 
 		if c.Core.Player.Active() == i && c.Core.Player.CurrentState() == action.BurstState {
-			// her skill does not drain the HP of active characters that are in burst iframes
+			// スキルは元素爆発の無敵フレーム中のアクティブキャラクターのHPを消費しない
 			continue
 		}
 		hpDrain := char.MaxHP() * hpDrainRatio

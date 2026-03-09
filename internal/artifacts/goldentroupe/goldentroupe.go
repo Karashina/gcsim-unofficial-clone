@@ -48,7 +48,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		Count:    count,
 	}
 
-	// Increases Elemental Skill DMG by 20%.
+	// 元素スキルダメージ+20%
 	if count >= 2 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.DmgP] = 0.2
@@ -63,8 +63,8 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		})
 	}
 
-	// Increases Elemental Skill DMG by 25%. Additionally, when not on the field, Elemental Skill DMG will be further increased by 25%.
-	// This effect will be cleared 2s after taking the field.
+	// 元素スキルダメージ+25%。さらにフィールド外の時、元素スキルダメージがさらに25%増加。
+	// この効果はフィールドに出て2秒後に解除される。
 	if count >= 4 {
 		s.buff = make([]float64, attributes.EndStatType)
 		s.buff[attributes.DmgP] = 0.25

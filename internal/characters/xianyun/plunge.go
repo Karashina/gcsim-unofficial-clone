@@ -26,13 +26,13 @@ const lowPlungeRadius = 3.0
 
 const highPlungeRadius = 3.5
 
-// TODO: missing plunge -> skill
+// TODO: 落下攻撃 -> スキル のフレームデータが未実装
 func init() {
 	driftcloudFrames = make([][]int, 3)
 	// skill (press) -> high plunge -> x
 	driftcloudFrames[0] = frames.InitAbilSlice(65) // max
 	driftcloudFrames[0][action.ActionAttack] = 57
-	driftcloudFrames[0][action.ActionCharge] = 56 - 7 // Windup 7 frames
+	driftcloudFrames[0][action.ActionCharge] = 56 - 7 // ワインドアップ 7フレーム
 	driftcloudFrames[0][action.ActionSkill] = 56
 	driftcloudFrames[0][action.ActionBurst] = 54
 	driftcloudFrames[0][action.ActionDash] = 51
@@ -41,7 +41,7 @@ func init() {
 
 	driftcloudFrames[1] = frames.InitAbilSlice(70) // max
 	driftcloudFrames[1][action.ActionAttack] = 60
-	driftcloudFrames[1][action.ActionCharge] = 61 - 7 // Windup 7 frames
+	driftcloudFrames[1][action.ActionCharge] = 61 - 7 // ワインドアップ 7フレーム
 	driftcloudFrames[1][action.ActionSkill] = 55
 	driftcloudFrames[1][action.ActionBurst] = 61
 	driftcloudFrames[1][action.ActionDash] = 55
@@ -50,7 +50,7 @@ func init() {
 
 	driftcloudFrames[2] = frames.InitAbilSlice(76) // max
 	driftcloudFrames[2][action.ActionAttack] = 66
-	driftcloudFrames[2][action.ActionCharge] = 67 - 7 // Windup 7 frames
+	driftcloudFrames[2][action.ActionCharge] = 67 - 7 // ワインドアップ 7フレーム
 	driftcloudFrames[2][action.ActionSkill] = 64
 	driftcloudFrames[2][action.ActionBurst] = 67
 	driftcloudFrames[2][action.ActionDash] = 63
@@ -60,9 +60,9 @@ func init() {
 	// high_plunge -> x
 	highPlungeFramesXY = frames.InitAbilSlice(68)
 	highPlungeFramesXY[action.ActionAttack] = 59
-	highPlungeFramesXY[action.ActionCharge] = 59 - 5 // Windup 5 frames
+	highPlungeFramesXY[action.ActionCharge] = 59 - 5 // ワインドアップ 5フレーム
 	highPlungeFramesXY[action.ActionSkill] = 59
-	highPlungeFramesXY[action.ActionBurst] = 59 // Assumed to be the same as skill
+	highPlungeFramesXY[action.ActionBurst] = 59 // スキルと同じと仮定
 	highPlungeFramesXY[action.ActionDash] = highPlungeHitmark
 	highPlungeFramesXY[action.ActionWalk] = 67
 	highPlungeFramesXY[action.ActionSwap] = 51
@@ -70,9 +70,9 @@ func init() {
 	// low_plunge -> x
 	lowPlungeFramesXY = frames.InitAbilSlice(65)
 	lowPlungeFramesXY[action.ActionAttack] = 56
-	lowPlungeFramesXY[action.ActionCharge] = 57 - 7 // Windup 7 frames
+	lowPlungeFramesXY[action.ActionCharge] = 57 - 7 // ワインドアップ 7フレーム
 	lowPlungeFramesXY[action.ActionSkill] = 59
-	lowPlungeFramesXY[action.ActionBurst] = 59 // Assumed to be the same as skill
+	lowPlungeFramesXY[action.ActionBurst] = 59 // スキルと同じと仮定
 	lowPlungeFramesXY[action.ActionDash] = lowPlungeHitmark
 	lowPlungeFramesXY[action.ActionSwap] = 48
 }
@@ -80,7 +80,7 @@ func init() {
 func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 
-	// dont need to check airborne for this because she can plunge if she's on the ground anyways
+	// 地上でも落下攻撃が可能なため、空中判定のチェックは不要
 	if c.StatusIsActive(skillStateKey) {
 		return c.driftcloudWave(), nil
 	}
@@ -114,7 +114,7 @@ func (c *char) driftcloudWave() action.Info {
 
 		c.Core.QueueAttackWithSnap(ai, snap, skillArea, 0, c.particleCB(), c.a1cb(), c.c4cb())
 
-		// reset window after leap
+		// 跳躍後にウィンドウをリセット
 		c.DeleteStatus(skillStateKey)
 		c.skillCounter = 0
 		c.skillEnemiesHit = nil
@@ -129,13 +129,13 @@ func (c *char) driftcloudWave() action.Info {
 	}
 }
 
-// Low Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 低空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 
-	// dont need to check airborne for this because she can plunge if she's on the ground anyways
+	// 地上でも落下攻撃が可能なため、空中判定のチェックは不要
 	if c.StatusIsActive(skillStateKey) {
 		return c.driftcloudWave(), nil
 	}
@@ -151,7 +151,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not Xianyun does a collision hit
+		collision = 0 // 閑雲が衝突ヒットを行うかどうか
 	}
 
 	if collision > 0 {
@@ -187,7 +187,7 @@ func (c *char) lowPlungeXY(p map[string]int) action.Info {
 func (c *char) highPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not Xianyun does a collision hit
+		collision = 0 // 閑雲が衝突ヒットを行うかどうか
 	}
 
 	if collision > 0 {
@@ -220,8 +220,8 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// Plunge normal falling attack damage queue generator
-// Standard - Always part of high/low plunge attacks
+// 落下攻撃（通常落下）のダメージキュー生成
+// 標準 - 高空/低空落下攻撃に常に含まれる
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

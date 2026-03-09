@@ -46,7 +46,7 @@ func (w *Weapon) Init() error {
 	return nil
 }
 
-// When there are at least 3 different Elemental Types in your party, Elemental Mastery will be increased by 120.
+// パーティに3種類以上の異なる元素タイプがある場合、元素熟知が120増加する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		refine: p.Refine,

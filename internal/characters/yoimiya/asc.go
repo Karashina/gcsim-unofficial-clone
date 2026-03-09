@@ -10,9 +10,9 @@ import (
 
 const a1Key = "yoimiya-a1"
 
-// During Niwabi Fire-Dance, shots from Yoimiya's Normal Attack will increase
-// her Pyro DMG Bonus by 2% on hit. This effect lasts for 3s and can have a
-// maximum of 10 stacks.
+// 玅扇火舞中、嬵宮の通常攻撃が命中すると、
+// 炎元素ダメージバフが2%上昇する。この効果は3秒間持続し、
+// 最大10スタックまで蓄積可能。
 func (c *char) makeA1CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 1 {
 		return nil
@@ -47,11 +47,10 @@ func (c *char) makeA1CB() combat.AttackCBFunc {
 	}
 }
 
-// Using Ryuukin Saxifrage causes nearby party members (not including Yoimiya)
-// to gain a 10% ATK increase for 15s. Additionally, a further ATK Bonus will be
-// added on based on the number of "Tricks of the Trouble-Maker" stacks Yoimiya
-// possesses when using Ryuukin Saxifrage. Each stack increases this ATK Bonus
-// by 1%.
+// 琉金の雲間草を使用すると、周囲のチームメンバー（嬵宮を除く）の
+// 攻撃力が15秒間10%上昇する。さらに、琉金の雲間草使用時の
+// 「花火丁子童」のスタック数に応じて攻撃力バフが追加される。
+// 各スタックはこの攻撃力バフを1%上昇させる。
 func (c *char) a4() {
 	c.a4Bonus[attributes.ATKP] = 0.1 + float64(c.a1Stacks)*0.01
 	for _, x := range c.Core.Player.Chars() {

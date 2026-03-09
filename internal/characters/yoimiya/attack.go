@@ -78,7 +78,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}
 
 	if c.Base.Cons >= 6 && c.StatusIsActive(skillKey) && c.Core.Rand.Float64() < 0.5 {
-		// trigger attack
+		// 攻撃をトリガー
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       fmt.Sprintf("Kindling (C6) - N%v", c.NormalCounter),
@@ -90,7 +90,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			Durability: 25,
 			Mult:       totalMV * 0.6,
 		}
-		// TODO: frames?
+		// TODO: フレーム？
 		c.Core.QueueAttack(
 			ai,
 			combat.NewBoxHit(

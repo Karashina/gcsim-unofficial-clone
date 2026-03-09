@@ -30,14 +30,14 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 func (w *Weapon) stackCheck() func() {
 	return func() {
-		// if on field and stack < 5, add a stack
+		// フィールドにいてスタックが5未満の場合、スタックを追加
 		if w.char.Index == w.c.Player.Active() {
 			if w.stacks < 5 {
 				w.stacks++
 				w.updateBuff()
 			}
 		}
-		w.char.QueueCharTask(w.stackCheck(), 240) // check again in 4s
+		w.char.QueueCharTask(w.stackCheck(), 240) // 4秒後に再チェック
 	}
 }
 func (w *Weapon) updateBuff() {
@@ -45,10 +45,10 @@ func (w *Weapon) updateBuff() {
 }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Every 4s a character is on the field, they will deal 6% more DMG and take
-	// 3% more DMG. This effect has a maximum of 5 stacks and will not be reset
-	// if the character leaves the field, but will be reduced by 1 stack when the
-	// character takes DMG.
+	// キャラクターがフィールドにいる間4秒毎に、ダメージが6%増加し
+	// 被ダメージも3%増加する。この効果は最大5スタックで、キャラクターが
+	// フィールドを離れてもリセットされないが、ダメージを受けると
+	// 1スタック減少する。
 	w := &Weapon{
 		char: char,
 		c:    c,
@@ -56,13 +56,13 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}
 	r := p.Refine
 
-	// the damage taken/stack reduciton has a 1s internal cooldown
-	// otherwise every 4s it does a check and adds a stack if on field it looks like
-	// verified this in game by checking first sword added, swap off and on, and note that the
-	// next sword animation is 4s despite having been off field for ~1s
+	// 被ダメージ/スタック減少には1秒の内部クールダウンがある
+	// それ以外は4秒毎にチェックし、フィールドにいればスタックを追加する
+	// ゲーム内で確認済み: 最初の剣追加後、交代して戻ると
+	// フィールド外にいた時間が約1秒でも次の剣アニメーションは4秒後
 
 	w.dmg = 0.05 + float64(r)*.01
-	// set initial
+	// 初期値を設定
 	w.stacks = p.Params["stacks"]
 	c.Log.NewEvent(
 		"serpent spine stack check", glog.LogWeaponEvent, char.Index,
@@ -74,11 +74,11 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	}
 	w.updateBuff()
 
-	// start ticker to check for stack increase
+	// スタック増加チェック用のティッカーを開始
 	char.QueueCharTask(w.stackCheck(), 240)
 
-	// add event hook to check for dmg, subject to 1s icd
-	//TODO: taking 3% more damage not implemented
+	// ダメージチェック用のイベントフックを追加（1秒のICDあり）
+	//TODO: 被ダメージ3%増加は未実装
 	const icdKey = "spine-dmgtaken-icd"
 	icd := 60
 	c.Events.Subscribe(event.OnPlayerHPDrain, func(args ...interface{}) bool {

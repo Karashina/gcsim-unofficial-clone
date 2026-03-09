@@ -19,7 +19,7 @@ const normalHitNum = 5
 func init() {
 	attackFrames = make([][]int, normalHitNum)
 
-	// normal cancels (missing Nx -> Aim)
+	// normal cancels (Nx -> Aim が未取得)
 	attackFrames[0] = frames.InitNormalCancelSlice(attackHitmarks[0], 25)
 	attackFrames[1] = frames.InitNormalCancelSlice(attackHitmarks[1], 22)
 	attackFrames[2] = frames.InitNormalCancelSlice(attackHitmarks[2], 38)
@@ -57,7 +57,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		attackHitmarks[c.NormalCounter]+travel,
 	)
 
-	// check for c1
+	// 1凸をチェック
 	if c.Base.Cons >= 1 && !c.StatusIsActive(ozActiveKey) {
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,

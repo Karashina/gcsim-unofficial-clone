@@ -16,9 +16,9 @@ const (
 	c1ICD    = 15 * 60
 )
 
-// Lyney can have 2 Grin-Malkin Hats present at once.
-// Additionally, Prop Arrows will summon 2 Grin-Malkin Hats and grant Lyney 1 extra stack of Prop Surplus.
-// This effect can occur once every 15s.
+// リネは同時に2つのグリンマルキンハットを存在させることができる。
+// さらにマジック弾は2つのグリンマルキンハットを召喚し、リネにマジック余剰スタックを1つ追加で付与する。
+// この効果は15秒に1回発動可能。
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
@@ -26,7 +26,7 @@ func (c *char) c1() {
 	c.maxHatCount = 2
 }
 
-// C1 Prop stack is granted regardless of HP drain
+// 第1命ノ星座のマジック余剰スタックはHP消費に関係なく付与される
 func (c *char) addC1PropStack() func() {
 	return func() {
 		if c.Base.Cons < 1 || c.StatusIsActive(c1ICDKey) {
@@ -45,27 +45,27 @@ func (c *char) c1HatIncrease() int {
 	return addCount
 }
 
-// TODO: proper frames?
+// TODO: 正確なフレーム数?
 const c2Interval = 2 * 60
 
-// When Lyney is on the field, he will gain a stack of Crisp Focus every 2s.
-// This will increase his CRIT DMG by 20%. Max 3 stacks.
-// This effect will be canceled when Lyney leaves the field.
+// リネがフィールド上にいる間、2秒ごとに鮮明のスタックを1つ獲得する。
+// 会心ダメージが20%増加する。最大3スタック。
+// リネがフィールドを離れるとこの効果は解除される。
 func (c *char) c2Setup() {
 	if c.Base.Cons < 2 {
 		return
 	}
 
-	// listen for swap to clear/apply C2
+	// キャラ交代時に第2命ノ星座のクリア/適用をリッスン
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
-		// swapping off lyney means clearing C2
+		// リネから交代する場合は第2命ノ星座をクリア
 		prev := args[0].(int)
 		if prev == c.Index {
 			c.c2Src = -1
 			c.c2Stacks = 0
 			return false
 		}
-		// swapping to lyney means applying C2
+		// リネに交代する場合は第2命ノ星座を適用
 		next := args[1].(int)
 		if next == c.Index {
 			c.c2Src = c.Core.F
@@ -76,7 +76,7 @@ func (c *char) c2Setup() {
 		return false
 	}, "lyney-c2-swap")
 
-	// add buff
+	// バフを追加
 	m := make([]float64, attributes.EndStatType)
 	c.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("lyney-c2", -1),
@@ -90,29 +90,29 @@ func (c *char) c2Setup() {
 
 func (c *char) c2StackCheck(src int) func() {
 	return func() {
-		// don't add stack if src changed via swapping off
+		// 交代によりソースが変更された場合はスタックを追加しない
 		if src != c.c2Src {
 			return
 		}
-		// don't add stack if no longer on-field
-		// sanity check, should be guaranteed via previous check + event subscription
+		// フィールド上にいない場合はスタックを追加しない
+		// 安全チェック（前のチェック+イベント購読により保証されるはず）
 		if c.Index != c.Core.Player.Active() {
 			return
 		}
-		// don't add stack if already at max
-		// no way of losing stacks except swap so no need to queue up stack check if already at max
+		// 既に最大スタックの場合は追加しない
+		// 交代以外でスタックを失う方法はないため、最大時はスタックチェックのキューは不要
 		if c.c2Stacks == 3 {
 			return
 		}
-		// add stack
+		// スタックを追加
 		c.c2Stacks++
 		c.Core.Log.NewEvent("Lyney C2 stack added", glog.LogCharacterEvent, c.Index).Write("c2_stacks", c.c2Stacks)
-		// queue up stack check
+		// スタックチェックをキューに追加
 		c.QueueCharTask(c.c2StackCheck(src), c2Interval)
 	}
 }
 
-// After an opponent is hit by Lyney's Pyro Charged Attack, this opponent's Pyro RES will be decreased by 20% for 6s.
+// リネの炎元素重撃が敵に命中した後、その敵の炎元素耐性が6秒間20%減少する。
 func (c *char) makeC4CB() combat.AttackCBFunc {
 	if c.Base.Cons < 4 {
 		return nil
@@ -130,8 +130,8 @@ func (c *char) makeC4CB() combat.AttackCBFunc {
 	}
 }
 
-// When Lyney fires a Prop Arrow, he will fire a Pyrotechnic Strike: Reprised that will deal 80% of a Pyrotechnic Strike's DMG.
-// This DMG is considered Charged Attack DMG.
+// リネがマジック弾を発射する際、パイロテクニックストライク・再演を発射し、パイロテクニックストライクのダメージの80%を与える。
+// このダメージは重撃ダメージとみなされる。
 func (c *char) c6(c6Travel int) {
 	if c.Base.Cons < 6 {
 		return
@@ -147,7 +147,7 @@ func (c *char) c6(c6Travel int) {
 		Durability: 25,
 		Mult:       propPyrotechnic[c.TalentLvlAttack()] * 0.8,
 	}
-	// TODO: snapshot
+	// TODO: スナップショット
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHit(

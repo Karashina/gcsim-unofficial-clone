@@ -2,9 +2,9 @@ package stats
 
 //go:generate msgp
 
-// NOTE: all maps MUST use a string key. This is a requirement of the MessagePack spec
-//   any string type aliasing must be defined in this module or msgp will not know that the type
-//   is a string
+// 注意: 全てのmapは文字列キーを使用する必要がある。これはMessagePackの仕様要件
+//   文字列型のエイリアスはこのモジュール内で定義する必要があり、そうでないとmsgpが型を
+//   文字列として認識できない
 
 type FieldStatus string
 type ReactionModifier string
@@ -38,7 +38,7 @@ type Result struct {
 }
 
 type CharacterResult struct {
-	// For raw data usage outside of gcsim only
+	// gcsim外の生データ利用向け
 	Name string `json:"name" msg:"name"`
 
 	DamageEvents   []DamageEvent   `json:"damage_events"   msg:"damage_events"`
@@ -47,10 +47,10 @@ type CharacterResult struct {
 	EnergyEvents   []EnergyEvent   `json:"energy_events"   msg:"energy_events"`
 	HealEvents     []HealEvent     `json:"heal_events"     msg:"heal_events"`
 
-	// TODO: Move to Result since only active character can perform actions?
+	// TODO: アクティブキャラクターのみがアクションを実行できるためResultに移動すべき？
 	FailedActions []ActionFailInterval `json:"failed_actions" msg:"failed_actions"`
 
-	EnergyStatus []float64 `json:"energy_status" msg:"energy_status"` // can be completely replaced by EnergyEvents?
+	EnergyStatus []float64 `json:"energy_status" msg:"energy_status"` // EnergyEventsで完全に置き換え可能？
 	HealthStatus []float64 `json:"health_status" msg:"health_status"`
 
 	DamageCumulativeContrib []float64 `json:"damage_cumulative_contrib" msg:"damage_cumulative_contrib"`
@@ -61,7 +61,7 @@ type CharacterResult struct {
 
 type EnemyResult struct {
 	ReactionStatus   []ReactionStatusInterval `json:"reaction_status"   msg:"reaction_status"`
-	ReactionUptime   map[string]int           `json:"reaction_uptime"   msg:"reaction_uptime"` // can calculate from intervals?
+	ReactionUptime   map[string]int           `json:"reaction_uptime"   msg:"reaction_uptime"` // インターバルから計算可能？
 	CumulativeDamage []float64                `json:"cumulative_damage" msg:"cumulative_damage"`
 }
 
@@ -102,10 +102,10 @@ type EnergyEvent struct {
 	FieldStatus FieldStatus `json:"field_status" msg:"field_status"`
 	Gained      float64     `json:"gained"       msg:"gained"`
 	Wasted      float64     `json:"wasted"       msg:"wasted"`
-	Current     float64     `json:"current"      msg:"current"` // this is pre + gained
+	Current     float64     `json:"current"      msg:"current"` // これはpre + gained
 }
 
-// Heal events are stored in the source character
+// 回復イベントはソースキャラクターに格納される
 type HealEvent struct {
 	Frame  int     `json:"frame"  msg:"frame"`
 	Source string  `json:"source" msg:"source"`

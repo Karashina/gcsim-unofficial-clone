@@ -103,7 +103,7 @@ func (s *Server) handleImageRequest(src string) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		// change id to include src
+		// IDにソースを含めるように変更
 		id = src + "/" + id
 		ctx, cancel := context.WithTimeout(r.Context(), s.generateTimeout)
 		defer cancel()
@@ -120,19 +120,19 @@ func (s *Server) handleImageRequest(src string) http.HandlerFunc {
 				s.handleResult(val, w)
 				return
 			}
-			// wait for existing result
+			// 既存の結果を待機
 		case errors.Is(res.Err(), redis.Nil):
 			s.logger.Info("id no result; starting new")
 			s.rdb.Set(ctx, id, "wip", s.generateTimeout)
 			go s.do(id)
 		default:
-			// exception case where something goes wrong with redis
+			// Redisで予期しないエラーが発生した例外ケース
 			s.logger.Info("unexpected get with non nil err", "id", id, "err", res.Err())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		// wip, sub to topic == id and wait for ok or time out
+		// 作業中。トピック==idを購読し、完了またはタイムアウトを待つ
 		ch := pubsub.Channel()
 		select {
 		case <-ctx.Done():
@@ -143,19 +143,19 @@ func (s *Server) handleImageRequest(src string) http.HandlerFunc {
 			requestID := ctx.Value(middleware.RequestIDKey)
 			s.logger.Info("received msg from redis", "request_id", requestID, "msg", msg.Payload)
 			if msg.Payload != "done" {
-				// this is an error message so just skip getting
+				// これはエラーメッセージなので取得をスキップ
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(msg.Payload))
 				return
 			}
-			// key must be available now?
+			// キーはこの時点で利用可能なはず
 			res := s.rdb.Get(ctx, id)
 			if err := res.Err(); err != nil {
 				s.logger.Info("redis get unexpected err", "request_id", requestID, "err", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			// res can't be wip still
+			// resはまだ作成中であるはずがない
 			val := res.Val()
 			if strings.HasPrefix(val, "wip") {
 				s.logger.Info("unexpected res is still wip", "request_id", requestID)

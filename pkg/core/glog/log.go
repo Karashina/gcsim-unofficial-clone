@@ -1,19 +1,19 @@
 package glog
 
-// Event describes one event to be logged
+// Event はログに記録される1つのイベントを表す
 type Event interface {
-	LogSource() Source                            // returns the type of this log event i.e. character, sim, damage, etc...
-	StartFrame() int                              // returns the frame on which this event was started
-	Src() int                                     // returns the index of the character that triggered this event. -1 if it's not a character
-	WriteBuildMsg(keyAndVal ...interface{}) Event // write additional keyAndVal pairs to the event
-	Write(key string, val interface{}) Event      // write additional keyAndVal pairs to the event
+	LogSource() Source                            // このログイベントの種類（キャラクター、シム、ダメージ等）を返す
+	StartFrame() int                              // このイベントが開始したフレームを返す
+	Src() int                                     // このイベントをトリガーしたキャラクターのインデックス。キャラクター以外の場合は-1
+	WriteBuildMsg(keyAndVal ...interface{}) Event // イベントに追加のキーと値のペアを書き込む
+	Write(key string, val interface{}) Event      // イベントに追加のキーと値のペアを書き込む
 	SetEnded(f int) Event
 }
 
-// Logger records LogEvents
+// Logger は LogEvent を記録する
 type Logger interface {
 	// NewEvent(msg string, typ Source, srcChar int, keysAndValues ...interface{}) Event
 	NewEvent(msg string, typ Source, srcChar int) Event
 	NewEventBuildMsg(typ Source, srcChar int, msg ...string) Event
-	Dump() ([]byte, error) // print out all the logged events in array of JSON strings in the ordered they were added
+	Dump() ([]byte, error) // ログされた全イベントを追加順のJSON文字列の配列として出力する
 }

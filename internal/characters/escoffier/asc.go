@@ -27,7 +27,7 @@ func (c *char) a1() {
 	for i := 0; i < ticks; i++ {
 		c.QueueCharTask(c.a1Tick(c.a1Src), a1FirstTick+ceil(a1Interval*float64(i)))
 	}
-	// this status is purely cosmetic and doesn't do anything right now
+	// このステータスは現在装飾的なもので、何も機能しない
 	c.AddStatus(a1key, a1FirstTick+ceil(float64(ticks-1)*a1Interval), true)
 }
 

@@ -55,7 +55,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -88,7 +88,7 @@ func (c *char) exitNightsoul() {
 }
 
 func (c *char) nightsoulPointReduceTask(src int) {
-	// reduce 0.6 point every 6f, which is 6 per second
+	// 6フレームごとに0.6ポイント減少（毎秒6ポイント）
 	const tickInterval = .1
 
 	c.QueueCharTask(func() {

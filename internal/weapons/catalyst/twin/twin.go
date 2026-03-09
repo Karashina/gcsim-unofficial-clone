@@ -25,7 +25,7 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Defeating an opponent increases Movement SPD and ATK by 12/14/16/18/20% for 15s.
+// 敵を倒した時、移動速度と攻撃力が12/14/16/18/20%増加する（15秒間）。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -35,20 +35,20 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	c.Events.Subscribe(event.OnTargetDied, func(args ...interface{}) bool {
 		_, ok := args[0].(*enemy.Enemy)
-		// ignore if not an enemy
+		// 敵でなければ無視
 		if !ok {
 			return false
 		}
 		atk := args[1].(*combat.AttackEvent)
-		// don't proc if someone else defeated the enemy
+		// 別のキャラクターが敵を倒した場合は発動しない
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		// don't proc if off-field
+		// フィールド外では発動しない
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// add buff
+		// バフを追加
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("twinnephrite", 900), // 15s
 			AffectedStat: attributes.ATKP,

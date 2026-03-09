@@ -46,12 +46,12 @@ func (c *char) Init() error {
 }
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
-		// do nothing if previous char wasn't alhaitham
+		// 前のキャラがアルハイゼムでなければ何もしない
 		prev := args[0].(int)
 		if prev != c.Index {
 			return false
 		}
-		c.lastInfusionSrc = -1 // Might prevent undesired behaviour
+		c.lastInfusionSrc = -1 // 意図しない動作を防止
 		if c.mirrorCount > 0 {
 			c.mirrorCount = 0
 			c.Core.Log.NewEvent("Alhaitham left the field, mirror lost", glog.LogCharacterEvent, c.Index)
@@ -64,7 +64,7 @@ func (c *char) onExitField() {
 func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
 	ds := c.Character.Snapshot(ai)
 
-	if c.mirrorCount > 0 { // weapon infusion can't be overriden for haitham
+	if c.mirrorCount > 0 { // アルハイゼムの武器付与は上書き不可
 		switch ai.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagPlunge:

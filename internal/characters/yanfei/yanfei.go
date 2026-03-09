@@ -70,7 +70,7 @@ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 	return c.Character.ActionStam(a, p)
 }
 
-// Hook that clears yanfei burst status and seals when she leaves the field
+// 煙绯がフィールドを離れた時に元素爆発ステータスと朱印を消去するフック
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(_ ...interface{}) bool {
 		c.sealCount = 0

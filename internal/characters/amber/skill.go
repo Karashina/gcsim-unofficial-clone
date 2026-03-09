@@ -7,8 +7,8 @@ import (
 
 var skillFrames []int
 
-const skillStart = 5 // cd start and bunny release frame on tap e
-const bunnyLand = 45 // bunny land/spawn on tap e
+const skillStart = 5 // 単押EのCD開始とバニー解放フレーム
+const bunnyLand = 45 // 単押Eのバニー着地/出現
 
 func init() {
 	skillFrames = frames.InitAbilSlice(33) // E -> E (C1 only)

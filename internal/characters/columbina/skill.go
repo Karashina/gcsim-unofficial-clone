@@ -26,7 +26,7 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// Initial skill damage (AoE Hydro DMG)
+	// 初期スキルダメージ（AoE水元素ダメージ）
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Eternal Tides (E)",
@@ -42,27 +42,27 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5)
 	c.Core.QueueAttack(ai, ap, skillHitmark, skillHitmark, c.particleCB)
 
-	// Set Gravity Ripple active
+	// Gravity Rippleを有効化
 	c.AddStatus(skillKey, gravityRippleDuration, true)
 	c.AddStatus(gravityRippleKey, gravityRippleDuration, true)
 
-	// Reset gravity
+	// 重力をリセット
 	c.gravity = 0
 	c.gravityLC = 0
 	c.gravityLB = 0
 	c.gravityLCrs = 0
 
-	// Start Gravity Ripple ticks
+	// Gravity RippleのTickを開始
 	c.gravityRippleSrc = c.Core.F
 	c.gravityRippleExp = c.Core.F + gravityRippleDuration
 	c.Core.Tasks.Add(c.gravityRippleTick(c.Core.F), gravityRippleInterval)
 
-	// C1: Trigger Gravity Interference effect on skill cast (once per 15s)
+	// 1凸: スキル発動時にGravity Interference効果をトリガー（15sに1回）
 	if c.Base.Cons >= 1 {
 		c.c1OnSkill()
 	}
 
-	// Set cooldown (17s)
+	// クールダウンを設定（17s）
 	c.SetCDWithDelay(action.ActionSkill, 17*60, skillHitmark)
 
 	return action.Info{
@@ -73,7 +73,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// particleCB handles particle generation
+// particleCBは粒子生成を処理
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
@@ -83,7 +83,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 	}
 	c.AddStatus(particleICDKey, 60, false)
 
-	// Average 1.333 particles (0/1/2 with weighted distribution)
+	// 平均1.333個の粒子（0/1/2の重み付き分布）
 	count := 1.0
 	if c.Core.Rand.Float64() < 0.333 {
 		count = 2.0
@@ -91,7 +91,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Hydro, c.ParticleDelay)
 }
 
-// gravityRippleTick handles periodic Gravity Ripple damage
+// gravityRippleTickは定期的なGravity Rippleダメージを処理
 func (c *char) gravityRippleTick(src int) func() {
 	return func() {
 		if c.gravityRippleSrc != src {
@@ -116,14 +116,14 @@ func (c *char) gravityRippleTick(src int) func() {
 		ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6)
 		c.Core.QueueAttack(ai, ap, 0, 0, c.particleCB)
 
-		// Schedule next tick
+		// 次のTickをスケジュール
 		c.Core.Tasks.Add(c.gravityRippleTick(src), gravityRippleInterval)
 	}
 }
 
-// subscribeToLunarReactions subscribes to Lunar reaction events for Gravity accumulation
+// subscribeToLunarReactionsはLunar反応イベントを購読してGravity蓄積を行う
 func (c *char) subscribeToLunarReactions() {
-	// Subscribe to Lunar-Charged
+	// Lunar-Chargedを購読
 	c.Core.Events.Subscribe(event.OnLunarCharged, func(args ...interface{}) bool {
 		if !c.StatusIsActive(gravityRippleKey) {
 			return false
@@ -134,7 +134,7 @@ func (c *char) subscribeToLunarReactions() {
 		return false
 	}, "columbina-gravity-lc")
 
-	// Subscribe to Lunar-Bloom
+	// Lunar-Bloomを購読
 	c.Core.Events.Subscribe(event.OnLunarBloom, func(args ...interface{}) bool {
 		if !c.StatusIsActive(gravityRippleKey) {
 			return false
@@ -145,7 +145,7 @@ func (c *char) subscribeToLunarReactions() {
 		return false
 	}, "columbina-gravity-lb")
 
-	// Subscribe to Lunar-Crystallize
+	// Lunar-Crystallizeを購読
 	c.Core.Events.Subscribe(event.OnLunarCrystallize, func(args ...interface{}) bool {
 		if !c.StatusIsActive(gravityRippleKey) {
 			return false
@@ -156,7 +156,7 @@ func (c *char) subscribeToLunarReactions() {
 		return false
 	}, "columbina-gravity-lcrs")
 
-	// Subscribe to Lunar damage events (when dealing Lunar reaction damage)
+	// Lunarダメージイベントを購読（Lunar反応ダメージ発生時）
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		if !c.StatusIsActive(gravityRippleKey) {
 			return false
@@ -185,23 +185,23 @@ func (c *char) subscribeToLunarReactions() {
 	}, "columbina-gravity-damage")
 }
 
-// accumulateGravity accumulates Gravity from Lunar reactions
+// accumulateGravityはLunar反応からGravityを蓄積する
 func (c *char) accumulateGravity(lunarType string) {
-	// If newMoonOmenKey is active, just refresh it and update the active type
-	// If not, start the accumulation process
+	// newMoonOmenKeyが有効な場合、持続時間を更新しアクティブタイプを更新
+	// 無効の場合は蓄積プロセスを開始
 	if c.StatusIsActive(newMoonOmenKey) {
-		// Just refresh the duration to 120s max
-		// Also update the active type to the new trigger
+		// 持続時間を120s最大まで更新
+		// アクティブタイプを新しいトリガーに更新
 		c.activeGravityType = lunarType
 		c.AddStatus(newMoonOmenKey, 120, false)
 		return
 	}
 
-	// First time trigger or expired
+	// 初回トリガーまたは期限切れ
 	c.activeGravityType = lunarType
 	c.AddStatus(newMoonOmenKey, 120, false)
 
-	// Start the ticker
+	// Tickerを開始
 	interval := 6
 	if c.Base.Cons >= 2 {
 		interval = 4
@@ -211,14 +211,14 @@ func (c *char) accumulateGravity(lunarType string) {
 
 func (c *char) gravityTicker() func() {
 	return func() {
-		// Stop if status expired
+		// ステータスが期限切れの場合は停止
 		if !c.StatusIsActive(newMoonOmenKey) {
 			return
 		}
 
-		// Gravity accumulation
-		// Rate of accumulating Gravity: 2 per 12 frames (Base)
-		// C2: 2 per 9 frames
+		// Gravity蓄積
+		// Gravity蓄積率: 12フレームごとに2（基本）
+		// 2凸: 9フレームごとに2
 		addAmount := 2
 
 		c.gravity += addAmount
@@ -226,7 +226,7 @@ func (c *char) gravityTicker() func() {
 			c.gravity = gravityLimit
 		}
 
-		// Add to specific type bucket
+		// 特定タイプのバケットに追加
 		switch c.activeGravityType {
 		case "lc":
 			c.gravityLC += addAmount
@@ -236,15 +236,15 @@ func (c *char) gravityTicker() func() {
 			c.gravityLCrs += addAmount
 		}
 
-		// Trigger Gravity Interference if limit reached
-		// Note: The status (New Moon's Omen) persists, so accumulation continues after reset/trigger.
+		// 上限に達したらGravity Interferenceをトリガー
+		// 注意: ステータス（New Moon's Omen）は持続するため、リセット/トリガー後も蓄積は継続
 		if c.gravity >= gravityLimit {
 			c.triggerGravityInterference()
 		}
 
-		// Schedule next tick
-		// Base: 2 per 12 frames
-		// C2: 2 per 9 frames
+		// 次のTickをスケジュール
+		// 基本: 12フレームごとに2
+		// 2凸: 9フレームごとに2
 		interval := 12
 		if c.Base.Cons >= 2 {
 			interval = 9
@@ -253,7 +253,7 @@ func (c *char) gravityTicker() func() {
 	}
 }
 
-// triggerGravityInterference triggers Gravity Interference based on dominant Lunar type
+// triggerGravityInterferenceは支配的なLunarタイプに基づいてGravity Interferenceをトリガー
 func (c *char) triggerGravityInterference() {
 	dominantType := c.getDominantLunarType()
 
@@ -261,17 +261,17 @@ func (c *char) triggerGravityInterference() {
 		Write("dominant_type", dominantType).
 		Write("gravity", c.gravity)
 
-	// A1: Gain Lunacy effect
+	// 固有天賦1: Lunacy効果を獲得
 	if c.Base.Ascension >= 1 {
 		c.a1OnGravityInterference()
 	}
 
-	// C2: Gain Lunar Brilliance
+	// 2凸: Lunar Brillianceを獲得
 	if c.Base.Cons >= 2 {
 		c.c2OnGravityInterference(dominantType)
 	}
 
-	// C4: Restore energy and DMG bonus
+	// 4凸: エネルギー回復とダメージボーナス
 	if c.Base.Cons >= 4 {
 		c.c4OnGravityInterference(dominantType)
 	}
@@ -288,7 +288,7 @@ func (c *char) triggerGravityInterference() {
 	c.c1OnGravityInterference()
 
 	if !c.StatusIsActive(c1GravitySkipKey) {
-		// Reset gravity
+		// 重力をリセット
 		c.gravity = 0
 		c.gravityLC = 0
 		c.gravityLB = 0
@@ -298,7 +298,7 @@ func (c *char) triggerGravityInterference() {
 	}
 }
 
-// gravityInterferenceLC deals Electro AoE DMG (considered Lunar-Charged DMG)
+// gravityInterferenceLCは雷元素のAoEダメージを与える（Lunar-Chargedダメージとして扱われる）
 func (c *char) gravityInterferenceLC() {
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
@@ -312,13 +312,13 @@ func (c *char) gravityInterferenceLC() {
 		IgnoreDefPercent: 1,
 	}
 
-	// HP scaling with Lunar-Charged formula
+	// HP係数 + Lunar-Charged計算式
 	em := c.Stat(attributes.EM)
 	baseDmg := c.MaxHP() * gravityInterfLC[c.TalentLvlSkill()] * 3
 	emBonus := (6 * em) / (2000 + em)
 	ai.FlatDmg = baseDmg * (1 + c.LCBaseReactBonus(ai)) * (1 + emBonus + c.LCReactBonus(ai))
 
-	// C4 bonus
+	// 4凸ボーナス
 	if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) {
 		ai.FlatDmg += c.MaxHP() * c4HPBonusLC
 		c.AddStatus(c4IcdKey, 15*60, false)
@@ -333,7 +333,7 @@ func (c *char) gravityInterferenceLC() {
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 8)
 	c.Core.QueueAttackWithSnap(ai, snap, ap, 10)
 
-	// Emit event
+	// イベントを発行
 	enemies := c.Core.Combat.EnemiesWithinArea(ap, nil)
 	if len(enemies) > 0 {
 		ae := &combat.AttackEvent{Info: ai}
@@ -341,7 +341,7 @@ func (c *char) gravityInterferenceLC() {
 	}
 }
 
-// gravityInterferenceLB fires 5 Moondew Sigils dealing Dendro DMG (considered Lunar-Bloom DMG)
+// gravityInterferenceLBは5つのMoondew Sigilを発射し草元素ダメージを与える（Lunar-Bloomダメージとして扱われる）
 func (c *char) gravityInterferenceLB() {
 	for i := 0; i < 5; i++ {
 		delay := 10 + i*6
@@ -358,13 +358,13 @@ func (c *char) gravityInterferenceLB() {
 				IgnoreDefPercent: 1,
 			}
 
-			// HP scaling with Lunar-Bloom formula
+			// HP係数 + Lunar-Bloom計算式
 			em := c.Stat(attributes.EM)
 			baseDmg := c.MaxHP() * gravityInterfLB[c.TalentLvlSkill()]
 			emBonus := (6 * em) / (2000 + em)
 			ai.FlatDmg = baseDmg * (1 + c.LBBaseReactBonus(ai)) * (1 + emBonus + c.LBReactBonus(ai))
 
-			// C4 bonus
+			// 4凸ボーナス
 			if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) {
 				ai.FlatDmg += c.MaxHP() * c4HPBonusLB
 				c.AddStatus(c4IcdKey, 15*60, false)
@@ -387,7 +387,7 @@ func (c *char) gravityInterferenceLB() {
 	}
 }
 
-// gravityInterferenceLCrs deals Geo AoE DMG (considered Lunar-Crystallize DMG)
+// gravityInterferenceLCrsは岩元素のAoEダメージを与える（Lunar-Crystallizeダメージとして扱われる）
 func (c *char) gravityInterferenceLCrs() {
 	ai := combat.AttackInfo{
 		ActorIndex:       c.Index,
@@ -401,13 +401,13 @@ func (c *char) gravityInterferenceLCrs() {
 		IgnoreDefPercent: 1,
 	}
 
-	// HP scaling with Lunar-Crystallize formula
+	// HP係数 + Lunar-Crystallize計算式
 	em := c.Stat(attributes.EM)
 	baseDmg := c.MaxHP() * gravityInterfLCrs[c.TalentLvlSkill()] * 1.6
 	emBonus := (6 * em) / (2000 + em)
 	ai.FlatDmg = baseDmg * (1 + c.LCrsBaseReactBonus(ai)) * (1 + emBonus + c.LCrsReactBonus(ai))
 
-	// C4 bonus
+	// 4凸ボーナス
 	if c.Base.Cons >= 4 && !c.StatusIsActive(c4IcdKey) {
 		ai.FlatDmg += c.MaxHP() * c4HPBonusLCrs
 		c.AddStatus(c4IcdKey, 15*60, false)

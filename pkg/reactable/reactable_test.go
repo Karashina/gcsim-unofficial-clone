@@ -24,13 +24,13 @@ func init() {
 	core.RegisterWeaponFunc(keys.DullBlade, testhelper.NewFakeWeapon)
 }
 
-// make our own core because otherwise we run into problems with circular import
+// 循環インポートの問題を避けるため、独自のcoreを作成する
 func testCore() *core.Core {
 	c, _ := core.New(core.Opt{
 		Seed:  time.Now().Unix(),
 		Debug: true,
 	})
-	// add player (first target)
+	// プレイヤー（最初のターゲット）を追加
 	trg := &testTarget{}
 	trg.Target = target.New(c, geometry.Point{X: 0, Y: 0}, 1)
 	trg.Reactable = &Reactable{}
@@ -38,7 +38,7 @@ func testCore() *core.Core {
 	trg.Reactable.Init(trg, c)
 	c.Combat.SetPlayer(trg)
 
-	// add default character
+	// デフォルトキャラクターを追加
 	p := info.CharacterProfile{}
 	p.Base.Key = keys.TestCharDoNotUse
 	p.Stats = make([]float64, attributes.EndStatType)
@@ -73,7 +73,7 @@ func testCoreWithTrgs(count int) (*core.Core, []*testTarget) {
 	return c, r
 }
 
-//nolint:unparam // dur is always 25 atm but that might change
+//nolint:unparam // durは現在常に25だが、変更される可能性がある
 func makeAOEAttack(ele attributes.Element, dur reactions.Durability) *combat.AttackEvent {
 	return &combat.AttackEvent{
 		Info: combat.AttackInfo{
@@ -106,9 +106,9 @@ func (target *testTarget) Type() targets.TargettableType { return target.typ }
 
 func (target *testTarget) HandleAttack(atk *combat.AttackEvent) float64 {
 	target.Attack(atk, nil)
-	// delay damage event to end of the frame
+	// ダメージイベントをフレーム末尾に遅延させる
 	target.Core.Combat.Tasks.Add(func() {
-		// apply the damage
+		// ダメージを適用
 		target.applyDamage(atk)
 		target.Core.Combat.Events.Emit(event.OnEnemyDamage, target, atk, 1.0, false)
 	}, 0)
@@ -119,7 +119,7 @@ func (target *testTarget) Attack(atk *combat.AttackEvent, evt glog.Event) (float
 	target.last = *atk
 	target.ShatterCheck(atk)
 	if atk.Info.Durability > 0 {
-		// don't care about icd
+		// ICDは考慮しない
 		target.React(atk)
 	}
 	return 0, false
@@ -157,7 +157,7 @@ func TestReduce(t *testing.T) {
 		t.Errorf("expecting nil electro balance, got %v", r.Durability[Electro])
 	}
 
-	// straight up consumption
+	// 単純な消費
 	r.Durability[Pyro] = 20
 	r.Durability[Burning] = 50
 	consumed := r.reduce(attributes.Pyro, 30, 1)
@@ -165,7 +165,7 @@ func TestReduce(t *testing.T) {
 		t.Errorf("expecting consumed to be 30, got %v", consumed)
 	}
 
-	// 2x multiplier, i.e. 1 incoming reduces 2
+	// 2倍の倍率（入力1で2消費）
 	r.Durability[Pyro] = 50
 	consumed = r.reduce(attributes.Pyro, 20, 2)
 	if consumed != 20 {
@@ -191,7 +191,7 @@ func TestTick(t *testing.T) {
 	trg := addTargetToCore(c)
 	trg.src = 1
 
-	// test electro
+	// 雷元素のテスト
 	trg.AttachOrRefill(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Electro,
@@ -206,19 +206,19 @@ func TestTick(t *testing.T) {
 		t.Errorf("expecting %v decay rate, got %v", 1.0/(6*25+420), trg.DecayRate[Electro])
 	}
 
-	// should deplete fully in 570 ticks
+	// 570 Tickで完全に消耗するはず
 	for i := 0; i < 6*50+420; i++ {
 		trg.Tick()
 		// log.Println(target.Durability)
 	}
-	// check all durability should be nil
+	// すべての元素量がゼロであることを確認
 	ok := trg.allNil(t)
 	if !ok {
 		t.FailNow()
 	}
 
-	// test multiple aura
-	trg.Durability[Electro] = 0 // reset from previous test
+	// 複数オーラのテスト
+	trg.Durability[Electro] = 0 // 前のテストからリセット
 	trg.DecayRate[Electro] = 0
 	trg.AttachOrRefill(&combat.AttackEvent{
 		Info: combat.AttackInfo{
@@ -252,7 +252,7 @@ func TestTick(t *testing.T) {
 		t.FailNow()
 	}
 
-	// test refilling
+	// 補充のテスト
 	trg.React(&combat.AttackEvent{
 		Info: combat.AttackInfo{
 			Element:    attributes.Electro,
@@ -262,7 +262,7 @@ func TestTick(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		trg.Tick()
 	}
-	// calculate expected duration
+	// 想定持続時間を計算
 	decay := reactions.Durability(20.0 / (6*25 + 420))
 	left := 20 - 100*decay
 	life := int((left + 40) / decay)
@@ -277,19 +277,19 @@ func TestTick(t *testing.T) {
 	for i := 0; i < life-1; i++ {
 		trg.Tick()
 	}
-	// make sure > 0
+	// 0より大きいことを確認
 	if trg.Durability[Electro] < 0 {
 		t.Errorf("expecting electro not to be 0 yet, got %v", trg.Durability[Electro])
 	}
-	// 1 more tick and should be gone
+	// もう1 Tickで消滅するはず
 	trg.Tick()
 	ok = trg.allNil(t)
 	if !ok {
 		t.FailNow()
 	}
 
-	// test frozen
-	// 50 frozen should last just over 208 frames (i.e. 0 by 209)
+	// 凍結のテスト
+	// 凍結50は208フレームを少し超えて持続するはず（209で0になる）
 	trg.Durability[Frozen] = 50
 	for i := 0; i < 208; i++ {
 		trg.Tick()
@@ -297,27 +297,27 @@ func TestTick(t *testing.T) {
 		// log.Println(trg.DecayRate)
 		// log.Println("------------------------")
 	}
-	// should be > 0 still
+	// まだ0より大きいはず
 	if trg.Durability[Frozen] < 0 {
 		t.Errorf("expecting frozen not to be 0 yet, got %v", trg.Durability[Frozen])
 	}
-	// 1 more tick and should be gone
+	// もう1 Tickで消滅するはず
 	trg.Tick()
 	if trg.Durability[Frozen] > 0 {
 		t.Errorf("expecting frozen to be gone, got %v", trg.Durability[Frozen])
 	}
-	// 105 more frames to full recover
+	// 完全回復まであと105フレーム
 	for i := 0; i < 104; i++ {
 		trg.Tick()
 		// log.Println(trg.Durability)
 		// log.Println(trg.DecayRate)
 		// log.Println("------------------------")
 	}
-	// decay should be > 0 still
+	// 減衰率はまだキャップを超えているはず
 	if trg.DecayRate[Frozen] < frzDecayCap {
 		t.Errorf("expecting frozen decay to > cap, got %v", trg.Durability[Frozen])
 	}
-	// 1 more tick to reset decay
+	// もう1 Tickで減衰率がリセットされるはず
 	trg.Tick()
 	if trg.DecayRate[Frozen] > frzDecayCap {
 		t.Errorf("expecting frozen decay to reset, got %v", trg.Durability[Frozen])

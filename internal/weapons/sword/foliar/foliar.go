@@ -32,10 +32,10 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// CRIT Rate is increased by 4%.
-	// After Normal Attacks deal Elemental DMG, the Foliar Incision effect will be obtained,
-	// increasing DMG dealt by Normal Attacks and Elemental Skills by 120% of Elemental Mastery.
-	// This effect will disappear after 28 DMG instances or 12s. You can obtain Foliar Incision once every 12s.
+	// 会心率が4%増加する。
+	// 通常攻撃が元素ダメージを与えた後、「葉の切り口」効果を獲得し、
+	// 通常攻撃と元素スキルのダメージが元素熟知の120%分増加する。
+	// この効果は28回のダメージまたは12秒後に消滅する。12秒毎に1回獲得可能。
 	w := &Weapon{}
 	r := p.Refine
 
@@ -62,8 +62,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if !(atk.Info.AttackTag == attacks.AttackTagNormal || atk.Info.AttackTag == attacks.AttackTagElementalArt || atk.Info.AttackTag == attacks.AttackTagElementalArtHold) {
 			return false
 		}
-		// The buff is a ping dependent action, we're assuming the first hit won't
-		// have extra damage.
+		// バフはping依存のアクションで、最初のヒットには
+		// 追加ダメージあり。
 		if !char.StatusIsActive(icdKey) && atk.Info.AttackTag == attacks.AttackTagNormal && atk.Info.Element != attributes.Physical {
 			char.AddStatus(buffKey, 720, true)
 			char.AddStatus(icdKey, 720, true)

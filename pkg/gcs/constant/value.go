@@ -29,7 +29,7 @@ func (v ValueTyp) String() string {
 	return "unknown"
 }
 
-// various Obj types
+// 様々なObj型
 type (
 	number struct {
 		ival    int64

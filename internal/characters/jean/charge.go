@@ -21,7 +21,7 @@ func init() {
 	chargeFrames[action.ActionSwap] = 39
 }
 
-// CA has no special interaction with her kit
+// 重撃はジンのキットとの特別な相互作用がない
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

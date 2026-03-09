@@ -53,7 +53,7 @@ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 	return c.Character.ActionStam(a, p)
 }
 
-// Overwriting of remaining actions to account for falling state
+// 落下状態を考慮した残りのアクションのオーバーライド
 
 func (c *char) Walk(p map[string]int) (action.Info, error) {
 	delay := c.checkForSkillEnd()

@@ -20,15 +20,15 @@ var startCharge = aimedHitmarks[0]
 const shadowPierceShotAil = "Shadowpiercing Shot"
 
 func init() {
-	// outside of E status
+	// スキルステータス外
 	aimedFrames = make([][]int, 3)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(26)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(83)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
@@ -46,7 +46,7 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 
 	hold, ok := p["hold"]
 	if !ok {
-		// is this a good default? it's gonna take 6s to do without energy
+		// これは適切なデフォルトか？エネルギーなしだと6秒かかる
 		hold = attacks.AimParamLv2
 	}
 	switch hold {
@@ -162,7 +162,7 @@ func (c *char) ShadowPierce(p map[string]int) (action.Info, error) {
 		deltaPos := c.Core.Combat.Player().Pos().Sub(c.Core.Combat.PrimaryTarget().Pos())
 		dist := deltaPos.Magnitude()
 
-		// simulate piercing. Extends 15 units from player
+		// 貫通をシミュレート。プレイヤーから15ユニット延長
 		ap := combat.NewBoxHit(
 			c.Core.Combat.Player(),
 			c.Core.Combat.PrimaryTarget(),

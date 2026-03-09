@@ -21,34 +21,34 @@ const (
 )
 
 func init() {
-	// Tap E
+	// 元素スキル（単押し）
 	skillPressFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	skillPressFrames[0] = frames.InitAbilSlice(74) // Tap E -> N1
 	skillPressFrames[0][action.ActionBurst] = 76   // Tap E -> Q
 	skillPressFrames[0][action.ActionDash] = 30    // Tap E -> D
 	skillPressFrames[0][action.ActionJump] = 31    // Tap E -> J
 	skillPressFrames[0][action.ActionSwap] = 66    // Tap E -> Swap
 
-	// Female
+	// 女性
 	skillPressFrames[1] = frames.InitAbilSlice(62) // Tap E -> Q
 	skillPressFrames[1][action.ActionAttack] = 61  // Tap E -> N1
 	skillPressFrames[1][action.ActionDash] = 31    // Tap E -> D
 	skillPressFrames[1][action.ActionJump] = 31    // Tap E -> J
 	skillPressFrames[1][action.ActionSwap] = 60    // Tap E -> Swap
 
-	// Short Hold E as base for Hold E frames
-	// "2 tick duration - 2 tick last hitmark"
+	// 長押し元素スキルフレームのベースとして短押しホールドEを使用
+	// 「2ティック持続 - 2ティック最終ヒットマーク」
 	skillHoldDelayFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	skillHoldDelayFrames[0] = frames.InitAbilSlice(98 - 54) // Short Hold E -> N1/Q - Short Hold E -> D
 	skillHoldDelayFrames[0][action.ActionDash] = 0          // Short Hold E -> D - Short Hold E -> D
 	skillHoldDelayFrames[0][action.ActionJump] = 0          // Short Hold E -> J - Short Hold E -> D
 	skillHoldDelayFrames[0][action.ActionSwap] = 89 - 54    // Short Hold E -> Swap - Short Hold E -> D
 
-	// Female
+	// 女性
 	skillHoldDelayFrames[1] = frames.InitAbilSlice(84 - 54) // Short Hold E -> Q - Short Hold E -> D
 	skillHoldDelayFrames[1][action.ActionAttack] = 83 - 54  // Short Hold E -> N1 - Short Hold E -> D
 	skillHoldDelayFrames[1][action.ActionDash] = 0          // Short Hold E -> D - Short Hold E -> D
@@ -82,7 +82,7 @@ func (c *Traveler) SkillPress() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames[c.gender]),
 		AnimationLength: skillPressFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[c.gender][action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillPressFrames[c.gender][action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -126,7 +126,7 @@ func (c *Traveler) SkillHold(holdTicks int) action.Info {
 	aiMaxCutAbs.Abil = "Palm Vortex Max Cutting Absorbed (Hold)"
 	aiMaxCutAbs.Mult = skillMaxCuttingAbsorb[c.TalentLvlSkill()]
 
-	// first tick is at 31f, with 15f between ticks, and an extra 5 frame delay when transitioning from Initial to Max
+	// 最初のティックは31f、以降15f間隔、初期から最大に移行する際に追加5fの遅延
 	firstTick := 31
 	hitmark := firstTick
 	for i := 0; i < holdTicks; i += 1 {
@@ -148,7 +148,7 @@ func (c *Traveler) SkillHold(holdTicks int) action.Info {
 						0,
 					)
 				}
-				// check if absorbed
+				// 元素吸収されたかチェック
 			}, hitmark)
 		} else {
 			c.Core.Tasks.Add(func() {
@@ -162,21 +162,21 @@ func (c *Traveler) SkillHold(holdTicks int) action.Info {
 						0,
 					)
 				}
-				// check if absorbed
+				// 元素吸収されたかチェック
 			}, hitmark)
 		}
 
-		// go to next tick
+		// 次のティックへ
 		hitmark += 15
 		if i == 1 {
 			aiCut.Mult = skillMaxCutting[c.TalentLvlSkill()]
 			aiCut.Abil = "Palm Vortex Max Cutting (Hold)"
 
-			// there is a 5 frame delay when it shifts from initial to max
+			// 初期から最大に切り替わる際に5fの遅延がある
 			hitmark += 5
 		}
 	}
-	// move the hitmark back by 1 tick (15f) then forward by 5f for the Storm damage
+	// Stormダメージのためヒットマークを1ティック(15f)戻し5f進める
 	hitmark = hitmark - 15 + 5
 	aiStorm := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -197,7 +197,7 @@ func (c *Traveler) SkillHold(holdTicks int) action.Info {
 	aiStormAbs.Mult = skillInitialStormAbsorb[c.TalentLvlSkill()]
 
 	var particleCB combat.AttackCBFunc
-	// it does max storm when there are 2 or more ticks
+	// 2ティック以上で最大Stormを実行
 	if holdTicks >= 2 {
 		aiStorm.Mult = skillMaxStorm[c.TalentLvlSkill()]
 		aiStorm.Abil = "Palm Vortex Max Storm (Hold)"
@@ -229,15 +229,15 @@ func (c *Traveler) SkillHold(holdTicks int) action.Info {
 				0,
 			)
 		}
-		// check if absorbed
+		// 元素吸収されたかチェック
 	}, hitmark)
 
-	// starts absorbing after the first tick?
+	// 最初のティック後に元素吸収を開始？
 	c.Core.Tasks.Add(c.absorbCheckE(c.Core.F, 0, hitmark/18), firstTick+1)
 	return action.Info{
 		Frames:          func(next action.Action) int { return skillHoldDelayFrames[c.gender][next] + hitmark },
 		AnimationLength: skillHoldDelayFrames[c.gender][action.InvalidAction] + hitmark,
-		CanQueueAfter:   skillHoldDelayFrames[c.gender][action.ActionDash] + hitmark, // earliest cancel
+		CanQueueAfter:   skillHoldDelayFrames[c.gender][action.ActionDash] + hitmark, // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -291,7 +291,7 @@ func (c *Traveler) absorbCheckE(src, count, maxcount int) func() {
 		case attributes.Hydro:
 			c.eICDTag = attacks.ICDTagElementalArtHydro
 		case attributes.NoElement:
-			// otherwise queue up
+			// それ以外はキューに追加
 			c.Core.Tasks.Add(c.absorbCheckE(src, count+1, maxcount), 18)
 		}
 	}

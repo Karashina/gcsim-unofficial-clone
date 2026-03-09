@@ -18,7 +18,7 @@ func init() {
 	chargeFrames[action.ActionDash] = 26
 }
 
-// ChargeAttack performs charged attack (Physical, lunge forward)
+// ChargeAttack は重撃を実行する（物理、前方突進）
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

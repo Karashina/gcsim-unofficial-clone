@@ -37,7 +37,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	delay := c.checkForSkillEnd()
 
 	if c.StatusIsActive(skillKey) {
-		// Can only occur if delay == 0, so it can be disregarded
+		// delay == 0の場合のみ発生するため、無視可能
 		return c.WindfavoredChargeAttack(p)
 	}
 
@@ -55,7 +55,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charge[c.TalentLvlAttack()],
 	}
 
-	// TODO: check snapshot delay
+	// TODO: スナップショット遅延を確認
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 2.5),
@@ -91,7 +91,7 @@ func (c *char) WindfavoredChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       skillCABonus[c.TalentLvlSkill()] * charge[c.TalentLvlAttack()],
 	}
 
-	// TODO: check snapshot delay
+	// TODO: スナップショット遅延を確認
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 3.5),

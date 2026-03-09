@@ -29,7 +29,7 @@ type Weapon struct {
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 
-// Initiate off-field stacking if off-field at start of the sim
+// シミュレーション開始時にフィールド外ならスタック増加を開始
 func (w *Weapon) Init() error {
 	w.active = w.core.Player.Active() == w.char.Index
 	if !w.active {
@@ -40,12 +40,12 @@ func (w *Weapon) Init() error {
 }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// While the character equipped with this weapon is in the party but not on the field, their DMG
-	// increases by 2% every second up to a max of 20%. When the character is on the field for more than 4s,
-	// the aforementioned DMG buff decreases by 4% per second until it reaches 0%.
+	// 装備キャラクターがパーティにいるがフィールドにいない時、1秒毎にダメージが2%増加し、
+	// 最大で20%まで。フィールドに4秒以上いると、前述のダメージバフが
+	// 1秒毎に4%減少し、0になるまで続く。
 	r := p.Refine
 
-	// max 10 stacks
+	// 最大10スタック
 	w := Weapon{
 		core: c,
 		char: char,
@@ -73,7 +73,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if next == char.Index {
 			w.active = true
 			w.lastActiveChange = c.F
-			w.char.QueueCharTask(w.decStack(char, c.F), 240) // on field for more than 4s, start decreasing stacks
+			w.char.QueueCharTask(w.decStack(char, c.F), 240) // フィールドに4秒以上滞在したらスタック減少開始
 		} else if prev == char.Index {
 			w.active = false
 			w.lastActiveChange = c.F

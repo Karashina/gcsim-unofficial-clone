@@ -48,17 +48,17 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		CanBeDefenseHalted: false,
 	}
 
-	// handle field expiry (a4) on field end via sac greatsword / large amount of cd reduction
-	// need src to invalidate field ticks and a4 task
+	// 祭礁大剣/大量のCD短縮によるフィールド終了時の固有天賦4処理
+	// フィールドティックと固有天賦4タスクを無効化するためにsrcが必要
 	src := c.Core.F
 	c.fieldSrc = c.Core.F
-	// if the field is still up then need to invalidate existing a4 task and do damage before resnapshotting for new a4
-	// need to do this before the new skill area is determined
+	// フィールドがまだ存在する場合、既存の固有天賦4タスクを無効化し、新しい固有天賦4のスナップショット前にダメージを与える
+	// 新しいスキル範囲が決定される前に実行する必要がある
 	if c.Core.Status.Duration(skillFieldKey) > 0 {
-		c.a4(skillHitmark+45, c.Core.F, true) // ~45f from field expiring
+		c.a4(skillHitmark+45, c.Core.F, true) // フィールド消滅まで約45フレーム
 	}
 
-	// handle field damage / skill area
+	// フィールドダメージ/スキル範囲を処理
 	c.skillArea = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1.5}, 8)
 	c.Core.QueueAttack(
 		ai,
@@ -69,13 +69,13 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.makeC4Callback(),
 	)
 
-	// handle field creation
+	// フィールド生成を処理
 	c.QueueCharTask(func() {
 		c.Core.Status.Add(skillFieldKey, 600)
 	}, skillHitmark)
 
-	// handle field ticks
-	// TODO: delay between when frost field start ticking?
+	// フィールドティックを処理
+	// TODO: 霜フィールドのティック開始間の遅延？
 	for i := 0; i <= 600; i += 60 {
 		c.Core.Tasks.Add(func() {
 			if src != c.fieldSrc {
@@ -89,7 +89,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		}, i+skillHitmark)
 	}
 
-	// handle field expiry (a4) on field end via expiry
+	// 期限切れによるフィールド終了時の固有天賦4処理
 	c.a4(655, c.Core.F, false)
 
 	c.SetCDWithDelay(action.ActionSkill, 900, 34)
@@ -97,7 +97,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -118,7 +118,7 @@ func (c *char) onSwapHook() {
 		if c.Core.Status.Duration("chongyunfield") == 0 {
 			return false
 		}
-		// add infusion on swap
+		// 交代時に元素付与を追加
 		dur := int(infuseDur[c.TalentLvlSkill()] * 60)
 		c.Core.Log.NewEvent("chongyun adding infusion on swap", glog.LogCharacterEvent, c.Index).
 			Write("expiry", c.Core.F+dur)
@@ -130,7 +130,7 @@ func (c *char) onSwapHook() {
 
 func (c *char) infuse(active *character.CharWrapper) {
 	dur := int(infuseDur[c.TalentLvlSkill()] * 60)
-	// c2 reduces CD by 15%
+	// 2凸はCDを15%短縮
 	if c.Base.Cons >= 2 {
 		active.AddCooldownMod(character.CooldownMod{
 			Base: modifier.NewBaseWithHitlag("chongyun-c2", dur),
@@ -143,7 +143,7 @@ func (c *char) infuse(active *character.CharWrapper) {
 		})
 	}
 
-	// weapon infuse and A1
+	// 武器元素付与と固有天賦1
 	switch active.Weapon.Class {
 	case info.WeaponClassClaymore, info.WeaponClassSpear, info.WeaponClassSword:
 		c.Core.Player.AddWeaponInfuse(
@@ -156,9 +156,8 @@ func (c *char) infuse(active *character.CharWrapper) {
 		)
 		c.Core.Log.NewEvent("chongyun adding infusion", glog.LogCharacterEvent, c.Index).
 			Write("expiry", c.Core.F+dur)
-		// A1:
-		// Sword, Claymore, or Polearm-wielding characters within the field created by
-		// Spirit Blade: Chonghua's Layered Frost have their Normal ATK SPD increased by 8%.
+		// 固有天賦1:
+		// フィールド内の片手剣・両手剣・長柄武器キャラクターの通常攻撃速度が8%増加する。
 		if c.Base.Ascension >= 1 {
 			m := make([]float64, attributes.EndStatType)
 			m[attributes.AtkSpd] = 0.08

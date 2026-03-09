@@ -34,9 +34,9 @@ func init() {
 	attackSkillTapFrames = frames.InitAbilSlice(39)
 }
 
-// Normal attack damage queue generator
-// relatively standard with no major differences versus other bow characters
-// Has "travel" parameter, used to set the number of frames that the arrow is in the air (default = 10)
+// 通常攻撃のダメージキュー生成
+// 他の弓キャラクターと大きな違いはなく比較的標準的
+// "travel"パラメータあり。矢が空中にいるフレーム数を設定（デフォルト = 10）
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	if c.nightsoulState.HasBlessing() {
 		return c.attackSkillTap(p), nil

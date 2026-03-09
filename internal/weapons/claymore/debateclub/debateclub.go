@@ -24,8 +24,8 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// After using an Elemental Skill, Normal or Charged Attacks, on hit, deal an additional 60/75/90/105/120% ATK DMG in a small area.
-// Effect lasts 15s. DMG can only occur once every 3s.
+// 元素スキル使用後、通常攻撃または重撃が命中すると追加で攻撃力の60/75/90/105/120%の範囲ダメージを与える。
+// 効果は15秒間持続。ダメージは3秒に1回のみ発生。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -35,13 +35,13 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	dmg := 0.45 + float64(r)*0.15
 
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
-		// don't activate if skill not from weapon holder
+		// 武器装備者のスキルでなければ発動しない
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// reset icd
+		// ICDをリセット
 		char.DeleteStatus(icdKey)
-		// add debate club effect
+		// debate club効果を追加
 		char.AddStatus(effectKey, 900, true) // 15s
 		return false
 	}, fmt.Sprintf("debate-club-activation-%v", char.Base.Key.String()))
@@ -49,30 +49,30 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		trg := args[0].(combat.Target)
-		// don't proc if dmg not from weapon holder
+		// 武器装備者からのダメージでなければ発動しない
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		// don't proc if off-field
+		// フィールド外では発動しない
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// don't proc if debate club effect isn't active
+		// 討論クラブの効果がアクティブでなければ発動しない
 		if !char.StatusIsActive(effectKey) {
 			return false
 		}
-		// don't proc if not Normal/Charged Attack
+		// 通常攻撃または重撃でなければ発動しない
 		if atk.Info.AttackTag != attacks.AttackTagNormal && atk.Info.AttackTag != attacks.AttackTagExtra {
 			return false
 		}
-		// don't proc if on icd
+		// ICD中は発動しない
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		// set icd
+		// ICDをセット
 		char.AddStatus(icdKey, 180, true) // 3s
 
-		// queue proc
+		// 発動をキューに追加
 		ai := combat.AttackInfo{
 			ActorIndex: char.Index,
 			Abil:       "Debate Club Proc",

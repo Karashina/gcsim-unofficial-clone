@@ -8,12 +8,11 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// C2:
-// Yoohoo Art: Fuuin Dash gains the following effects:
-// DMG of Fuufuu Whirlwind Kick in Press Mode increased by 3.3%.
-// Every 0.5s in the Fuufuu Windwheel state will increase the DMG of this Fuufuu
-// Whirlwind Kick by 3.3%. The maximum DMG increase possible through this method
-// is 66%.
+// 2凸:
+// よぶぶきの術・風隠急進が以下の効果を得る:
+// 単押しモードのれんこつむじかぜキックのダメージが3.3%上昇する。
+// ふうふう風車状態の0.5秒ごとに、れんこつむじかぜキックの
+// ダメージが3.3%上昇する。この方法での最大ダメージ上昇は66%。
 func (c *char) c2() {
 	m := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{

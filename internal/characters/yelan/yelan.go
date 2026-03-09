@@ -26,10 +26,10 @@ func init() {
 type char struct {
 	*tmpl.Character
 	a4buff       []float64
-	breakthrough bool // tracks breakthrough state
+	breakthrough bool // 突破状態を追跡
 	c2icd        int
 	c6count      int
-	c4count      int // keep track of number of enemies tagged
+	c4count      int // タグ付けされた敵の数を追跡
 	burstWatcher *minazuki.Watcher
 }
 

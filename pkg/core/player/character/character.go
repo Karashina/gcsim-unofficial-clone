@@ -19,7 +19,7 @@ type Character interface {
 	Base
 	HP
 
-	Init() error // init function built into every char to setup any variables etc.
+	Init() error // 各キャラクターに組み込まれた変数設定用の初期化関数
 
 	Attack(p map[string]int) (action.Info, error)
 	Aimed(p map[string]int) (action.Info, error)
@@ -55,12 +55,12 @@ type Character interface {
 	NextNormalCounter() int
 }
 
-// Base contains basic information for a character
+// Base はキャラクターの基本情報を含む
 type Base interface {
 	Data() *model.AvatarData
 }
 
-// HP contains info and helper for dealing with character hp
+// HP はキャラクターHPに関する情報とヘルパーを含む
 type HP interface {
 	CurrentHPRatio() float64
 	CurrentHP() float64
@@ -75,7 +75,7 @@ type HP interface {
 	ModifyHPDebtByAmount(float64)
 	ModifyHPDebtByRatio(float64)
 
-	Heal(*info.HealInfo) (float64, float64) // return actual hp healed and amount of hp debt cleared
+	Heal(*info.HealInfo) (float64, float64) // 実際に回復したHP量と解消されたHP負債量を返す
 	Drain(*info.DrainInfo) float64
 
 	ReceiveHeal(*info.HealInfo, float64) float64
@@ -83,14 +83,14 @@ type HP interface {
 
 type CharWrapper struct {
 	Index int
-	f     *int // current frame
+	f     *int // 現在のフレーム
 	debug bool // debug mode?
 	Character
 	events event.Eventter
 	log    glog.Logger
 	tasks  task.Tasker
 
-	// base characteristics
+	// 基本特性
 	Base              info.CharacterBase
 	Weapon            info.WeaponProfile
 	Talents           info.TalentProfile
@@ -108,38 +108,38 @@ type CharWrapper struct {
 		Sets   map[keys.Set]info.Set
 	}
 
-	// current status
-	ParticleDelay int // character custom particle delay
+	// 現在のステータス
+	ParticleDelay int // キャラクター固有の粒子遅延
 	Energy        float64
 	EnergyMax     float64
-	// needed so that start hp is not influenced by hp mods added during team initialization
+	// チーム初期化時に追加される HP mod の影響を初期 HP に与えないために必要
 	StartHP      int
 	StartHPRatio int
 
-	// normal attack counter
-	NormalHitNum  int // how many hits in a normal combo
+	// 通常攻撃カウンター
+	NormalHitNum  int // 通常攻撃コンボのヒット数
 	NormalCounter int
 
-	// tags
+	// タグ
 	Tags      map[string]int
 	BaseStats [attributes.EndStatType]float64
 
-	// mods
+	// 修飾子
 	mods []modifier.Mod
 
-	// dash cd: keeps track of remaining cd frames for off-field chars
+	// ダッシュ CD: フィールド外キャラの残り CD フレームを追跡
 	RemainingDashCD int
 	DashLockout     bool
 
-	// hitlag stuff
-	TimePassed   int // how many frames have passed since start of sim
-	frozenFrames int // how many frames are we still frozen for
+	// ヒットラグ関連
+	TimePassed   int // シミュレーション開始からの経過フレーム数
+	frozenFrames int // 凍結中の残りフレーム数
 	queue        *task.Handler
 }
 
 func New(
 	p info.CharacterProfile,
-	f *int, // current frame
+	f *int, // 現在のフレーム
 	debug bool, // are we running in debug mode
 	log glog.Logger, // logging, can be nil
 	events event.Eventter, // event emitter
@@ -149,7 +149,7 @@ func New(
 		Base:          p.Base,
 		Weapon:        p.Weapon,
 		Talents:       p.Talents,
-		ParticleDelay: 100, // default particle delay
+		ParticleDelay: 100, // デフォルトの粒子遅延
 		log:           log,
 		events:        events,
 		tasks:         tasker,
@@ -163,12 +163,12 @@ func New(
 	c.BaseStats = *s
 	c.Equip.Sets = make(map[keys.Set]info.Set)
 
-	// set to -1 by default and let each char specify normal/skill/burst cons
+	// デフォルトで -1 に設定し、各キャラが normal/skill/burst の命の座を指定する
 	c.NormalCon = -1
 	c.SkillCon = -1
 	c.BurstCon = -1
 
-	// check talents
+	// 天賦レベルを検証
 	if c.Talents.Attack < 1 || c.Talents.Attack > 10 {
 		return nil, fmt.Errorf("invalid talent lvl: attack - %v", c.Talents.Attack)
 	}
@@ -182,10 +182,10 @@ func New(
 	return c, nil
 }
 
-// HasLCCloudOn checks if the given target currently has an active LC Cloud.
-// This allows character code to check LC Cloud state on any target.
+// HasLCCloudOn は指定されたターゲットに現在アクティブな LC Cloud があるかを確認する。
+// キャラクターコードから任意のターゲットの LC Cloud 状態を確認できる。
 func (c *CharWrapper) HasLCCloudOn(target combat.Target) bool {
-	// Try to get the Reactable interface from the target
+	// ターゲットから Reactable インターフェースの取得を試みる
 	type hasLCCloud interface {
 		HasLCCloud() bool
 	}

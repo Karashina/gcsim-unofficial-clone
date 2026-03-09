@@ -38,7 +38,7 @@ func NewTraveler(s *core.Core, w *character.CharWrapper, p info.CharacterProfile
 
 func (c *Traveler) Init() error {
 	c.a1()
-	// setup number of C1 ticks
+	// 1凸のティック数を設定
 	c.c1TickCount = 15
 	if c.Base.Cons >= 6 {
 		c.c1TickCount = 20

@@ -26,7 +26,7 @@ func (s *Set) Init() error      { return nil }
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
-	// 2 Piece: DEF +30%
+	// 2セット: 防御力 +30%
 	if count >= 2 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.DEFP] = 0.30
@@ -38,8 +38,8 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			},
 		})
 	}
-	// TODO: player dmg isn't correct so no point in implementing this for now
-	// 4 Piece: For each different element present in your own party, the wearer's Elemental RES to that corresponding element is increased by 30%.
+	// TODO: プレイヤーダメージが正確でないため現時点では実装不要
+	// 4セット: パーティ内の異なる元素ごとに、装備者の対応する元素耐性が30%増加。
 	if count >= 4 {
 		c.Log.NewEvent("defenderswill-4pc not implemented", glog.LogArtifactEvent, char.Index)
 	}

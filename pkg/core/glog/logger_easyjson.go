@@ -10,7 +10,7 @@ import (
 	jwriter "github.com/mailru/easyjson/jwriter"
 )
 
-// suppress unused package warning
+// 未使用パッケージの警告を抑制
 var (
 	_ *json.RawMessage
 	_ *jlexer.Lexer

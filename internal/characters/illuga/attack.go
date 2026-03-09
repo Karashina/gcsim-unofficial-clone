@@ -42,7 +42,7 @@ func init() {
 	attackFrames[3][action.ActionCharge] = 76
 }
 
-// Attack performs normal attacks (Physical, based on Thoma's polearm style)
+// Attack は通常攻撃を実行する（物理、トーマの長柄武器スタイル準拠）
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{

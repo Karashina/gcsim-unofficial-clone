@@ -6,7 +6,7 @@ import (
 )
 
 func newLogger(verbose bool) *zap.SugaredLogger {
-	// Start logger
+	// ロガーを初期化
 	zapcfg := zap.NewDevelopmentConfig()
 	zapcfg.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	zapcfg.EncoderConfig.CallerKey = ""

@@ -34,19 +34,19 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 	snap := c.Snapshot(&ai)
 
-	count := 7 // can be 11 at low HP
+	count := 7 // 低HP時は11回になる可能性あり
 	if c.CurrentHPRatio() <= 0.5 {
 		count = 12
 	}
 	interval := 2 * 60 / 7
 
-	// C1: Gyoei Narukami Kariyama Rite's AoE is increased by 50%.
+	// 1凸: 裁雷除悪のAoE範囲が50%増加。
 	r := 4.0
 	if c.Base.Cons >= 1 {
 		r = 6
 	}
 
-	// assume that the target is close enough to make her Q center on it
+	// 元素爆発の中心がターゲットに十分近い前提
 	for i := burstStart; i < count*interval+burstStart; i += interval {
 		c.Core.QueueAttackWithSnap(
 			ai,
@@ -62,7 +62,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionAttack], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionAttack], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

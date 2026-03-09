@@ -55,15 +55,15 @@ func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]i
 	}
 
 	if lastAction.Type == action.ActionCharge && lastAction.Param["early_cancel"] > 0 {
-		// can only early cancel charged attack with Dash or Jump
+		// 重撃はダッシュまたはジャンプでのみ早期キャンセル可能
 		switch a {
-		case action.ActionDash, action.ActionJump: // skips the error in default block
+		case action.ActionDash, action.ActionJump: // デフォルトブロックのエラーをスキップ
 		default:
 			return fmt.Errorf("%v: Cannot early cancel Charged Attack with %v", c.Base.Key, a)
 		}
 	}
 
-	// can use charge without attack beforehand unlike most of the other polearm users
+	// 他の長柄武器キャラと異なり、通常攻撃なしで重撃を使用可能
 	if a == action.ActionCharge {
 		return nil
 	}
@@ -82,7 +82,7 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 }
 
 func (c *char) ReceiveHeal(hi *info.HealInfo, healAmt float64) float64 {
-	// ignore all healing except hers
+	// 自身の回復以外の全ての回復を無視
 	if hi.Caller == c.Index && hi.Message == balemoonRisingHealAbil {
 		return c.Character.ReceiveHeal(hi, healAmt)
 	}

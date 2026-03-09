@@ -33,12 +33,12 @@ func init() {
 	attackFrames[2][action.ActionAttack] = 30
 }
 
-// Normal Attack
-// Performs up to 3 attacks that deal Dendro DMG
+// 通常攻撃
+// 草元素ダメージを与える最大3段攻撃を行う
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	// C6: Check if normal attack should be converted to Lunar-Bloom DMG
+	// 6凸：通常攻撃をLunar-Bloomダメージに変換すべきか確認
 	if c.c6NormalAttackConversion() {
-		// C6 conversion already handled, just return basic action info
+		// 6凸変換は処理済み、基本アクション情報を返すだけ
 		defer c.AdvanceNormalIndex()
 		return action.Info{
 			Frames:          frames.NewAttackFunc(c.Character, attackFrames),

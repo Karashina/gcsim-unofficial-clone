@@ -56,7 +56,7 @@ func NewStat(core *core.Core) (stats.Collector, error) {
 		}
 		interval.HP[normalized] = normalizedHP / float64(len(elements))
 
-		// first instance of this shield type
+		// このシールド種別の最初のインスタンス
 		if _, ok := out.shields[name]; !ok {
 			out.shields[name] = make([]stats.ShieldInterval, 0)
 			out.shields[name] = append(out.shields[name], interval)
@@ -66,17 +66,17 @@ func NewStat(core *core.Core) (stats.Collector, error) {
 		prevIndex := len(out.shields[name]) - 1
 		prevInterval := out.shields[name][prevIndex]
 
-		// shield refreshed before previous expired
+		// 前のシールドが期限切れ前に更新された
 		if prevInterval.End >= interval.Start {
-			// same hp stats, merge intervals
+			// HPステータスが同じ場合、区間をマージ
 			if same(prevInterval.HP, interval.HP) {
-				// TODO: max not necessary here?
+				// TODO: max はここでは不要？
 				prevInterval.End = max(prevInterval.End, interval.End)
 				out.shields[name][prevIndex] = prevInterval
 				return false
 			}
 
-			// diff, end prev interval early
+			// 値が異なる、前の区間を早期終了
 			prevInterval.End = interval.Start
 			out.shields[name][prevIndex] = prevInterval
 		}
@@ -85,7 +85,7 @@ func NewStat(core *core.Core) (stats.Collector, error) {
 		return false
 	}, "stats-shield-log")
 
-	// TODO: Should be replaced with targeted events (IE on shield stats changes + char swap)
+	// TODO: ターゲット指定イベントで置き換えるべき（シールドステータス変更 + キャラ交代時）
 	core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
 		bonus := core.Player.Shields.ShieldBonus()
 
@@ -108,7 +108,7 @@ func NewStat(core *core.Core) (stats.Collector, error) {
 			prevInterval := out.shields[shield.Desc()][prevIndex]
 			if !same(prevInterval.HP, interval.HP) {
 				if prevInterval.Start == interval.Start {
-					// special case where shield gets recomputed on first frame
+					// シールドが最初のフレームで再計算される特殊ケース
 					out.shields[shield.Desc()][prevIndex] = interval
 				} else {
 					prevInterval.End = interval.Start

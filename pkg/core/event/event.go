@@ -3,70 +3,70 @@ package event
 type Event int
 
 const (
-	OnEnemyHit     Event = iota // target, AttackEvent
-	OnPlayerHit                 // char, AttackEvent
-	OnGadgetHit                 // target, AttackEvent
-	OnEnemyDamage               // target, AttackEvent, amount, crit
-	OnGadgetDamage              // target, AttackEvent
+	OnEnemyHit     Event = iota // ターゲット, AttackEvent
+	OnPlayerHit                 // キャラクター, AttackEvent
+	OnGadgetHit                 // ターゲット, AttackEvent
+	OnEnemyDamage               // ターゲット, AttackEvent, ダメージ量, 会心
+	OnGadgetDamage              // ターゲット, AttackEvent
 	OnApplyAttack               // AttackEvent
-	// reaction related
+	// 元素反応関連
 	// OnReactionOccured // target, AttackEvent
 	// OnTransReaction   // target, AttackEvent
 	// OnAmpReaction     // target, AttackEvent
 
-	OnAuraDurabilityAdded    // target, ele, durability
-	OnAuraDurabilityDepleted // target, ele
+	OnAuraDurabilityAdded    // ターゲット, 元素, 元素量
+	OnAuraDurabilityDepleted // ターゲット, 元素
 	// OnReaction               // target, AttackEvent, ReactionType
 	ReactionEventStartDelim
-	OnOverload           // target, AttackEvent
-	OnSuperconduct       // target, AttackEvent
-	OnMelt               // target, AttackEvent
-	OnVaporize           // target, AttackEvent
-	OnFrozen             // target, AttackEvent
-	OnElectroCharged     // target, AttackEvent
-	OnSwirlHydro         // target, AttackEvent
-	OnSwirlCryo          // target, AttackEvent
-	OnSwirlElectro       // target, AttackEvent
-	OnSwirlPyro          // target, AttackEvent
-	OnCrystallizeHydro   // target, AttackEvent
-	OnCrystallizeCryo    // target, AttackEvent
-	OnCrystallizeElectro // target, AttackEvent
-	OnCrystallizePyro    // target, AttackEvent
-	OnAggravate          // target, AttackEvent
-	OnSpread             // target, AttackEvent
-	OnQuicken            // target, AttackEvent
-	OnBloom              // target, AttackEvent
-	OnHyperbloom         // target, AttackEvent
-	OnBurgeon            // target, AttackEvent
-	OnBurning            // target, AttackEvent
-	OnLunarCharged       // target, AttackEvent
-	OnLunarBloom         // target, AttackEvent
-	OnLunarCrystallize   // target, AttackEvent
-	OnShatter            // target, AttackEvent; at the end to simplify all reaction event subs since it's normally not considered as an elemental reaction
+	OnOverload           // ターゲット, AttackEvent
+	OnSuperconduct       // ターゲット, AttackEvent
+	OnMelt               // ターゲット, AttackEvent
+	OnVaporize           // ターゲット, AttackEvent
+	OnFrozen             // ターゲット, AttackEvent
+	OnElectroCharged     // ターゲット, AttackEvent
+	OnSwirlHydro         // ターゲット, AttackEvent
+	OnSwirlCryo          // ターゲット, AttackEvent
+	OnSwirlElectro       // ターゲット, AttackEvent
+	OnSwirlPyro          // ターゲット, AttackEvent
+	OnCrystallizeHydro   // ターゲット, AttackEvent
+	OnCrystallizeCryo    // ターゲット, AttackEvent
+	OnCrystallizeElectro // ターゲット, AttackEvent
+	OnCrystallizePyro    // ターゲット, AttackEvent
+	OnAggravate          // ターゲット, AttackEvent
+	OnSpread             // ターゲット, AttackEvent
+	OnQuicken            // ターゲット, AttackEvent
+	OnBloom              // ターゲット, AttackEvent
+	OnHyperbloom         // ターゲット, AttackEvent
+	OnBurgeon            // ターゲット, AttackEvent
+	OnBurning            // ターゲット, AttackEvent
+	OnLunarCharged       // ターゲット, AttackEvent
+	OnLunarBloom         // ターゲット, AttackEvent
+	OnLunarCrystallize   // ターゲット, AttackEvent
+	OnShatter            // target, AttackEvent; 通常は元素反応とみなされないため、全反応イベントの購読を簡素化するため末尾に配置
 	ReactionEventEndDelim
 	OnDendroCore // Gadget
-	// other stuff
-	OnStamUse           // abil
-	OnShielded          // shield
-	OnShieldBreak       // shield break
+	// その他
+	OnStamUse           // アビリティ
+	OnShielded          // シールド
+	OnShieldBreak       // シールド破壊
 	OnConstructSpawned  // nil
-	OnCharacterSwap     // prev, next
+	OnCharacterSwap     // 前, 次
 	OnParticleReceived  // particle
-	OnEnergyChange      // character_received, pre_energy, energy_change, src (post-energy available in character_received), is_particle (boolean)
+	OnEnergyChange      // character_received, pre_energy, energy_change, src (後のenergyはcharacter_receivedで取得可), is_particle (boolean)
 	OnEnergyBurst       // character_drained, pre_energy, burst_cost
-	OnTargetDied        // target, AttackEvent
-	OnTargetMoved       // target
-	OnCharacterHit      // nil <- this is for when the character is going to get hit but might be shielded from dmg
-	OnCharacterHurt     // amount
-	OnHPDebt            // target character, amount
-	OnHeal              // src char, target character, amount, overheal, amount_before_debt
-	OnPlayerPreHPDrain  // Draininfo to modify
+	OnTargetDied        // ターゲット, AttackEvent
+	OnTargetMoved       // ターゲット
+	OnCharacterHit      // nil <- キャラクターが攻撃を受けるがシールドでダメージを防ぐ可能性がある場合
+	OnCharacterHurt     // ダメージ量
+	OnHPDebt            // 対象キャラクター, 量
+	OnHeal              // 回復元キャラクター, 対象キャラクター, 量, 過剰回復, 負債前の量
+	OnPlayerPreHPDrain  // 変更可能なDrainInfo
 	OnPlayerHPDrain     // DrainInfo
-	OnNightsoulBurst    // target, AttackEvent
-	OnNightsoulGenerate // char, amount
-	OnNightsoulConsume  // char, amount
-	OnVerdantDewGain    // amountGranted, totalCount (party-level Verdant Dew)
-	// ability use
+	OnNightsoulBurst    // ターゲット, AttackEvent
+	OnNightsoulGenerate // キャラクター, 量
+	OnNightsoulConsume  // キャラクター, 量
+	OnVerdantDewGain    // 付与量, 累計カウント (パーティレベルのVerdant Dew)
+	// アビリティ使用
 	OnActionFailed // ActiveCharIndex, action.Action, param, action.ActionFailure
 	OnActionExec   // ActiveCharIndex, action.Action, param
 	OnSkill        // nil
@@ -76,14 +76,14 @@ const (
 	OnPlunge       // nil
 	OnAimShoot     // nil
 	OnDash
-	// sim stuff
+	// シミュレーション関連
 	OnInitialize  // nil
-	OnStateChange // prev, next
+	OnStateChange // 前, 次
 	OnEnemyAdded  // t
 	OnTick
-	OnInfusion             //index, ele, duration
+	OnInfusion             // index, ele, duration
 	OnSimEndedSuccessfully // nil
-	EndEventTypes          // elim
+	EndEventTypes          // 終端
 )
 
 type Handler struct {
@@ -123,7 +123,7 @@ func (h *Handler) Subscribe(e Event, f Hook, key string) {
 		key: key,
 	}
 
-	// check if override first
+	// 上書きがあるか先に確認
 	ind := -1
 	for i, v := range a {
 		if v.key == key {

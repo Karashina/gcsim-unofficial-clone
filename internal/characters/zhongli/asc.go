@@ -1,10 +1,10 @@
 package zhongli
 
-// When the Jade Shield takes DMG, it will Fortify:
+// 玉璋シールドがダメージを受けると、強化される:
 //
-// - Fortified characters have 5% increased Shield Strength.
+// - 強化されたキャラクターはシールド強度が5%上昇する。
 //
-// - Can stack up to 5 times, and lasts until the Jade Shield disappears.
+// - 最大5回まで重ね掛け可能。玉璋シールドが消えるまで持続する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -17,9 +17,9 @@ func (c *char) a1() {
 	})
 }
 
-// Zhongli deals bonus DMG based on his Max HP:
+// 鍾離は最大HPに基づく追加ダメージを与える:
 //
-// - Normal Attack, Charged Attack, and Plunging Attack DMG is increased by 1.39% of Max HP.
+// - 通常攻撃、重撃、落下攻撃のダメージがHP上限の1.39%分増加する。
 func (c *char) a4Attacks() float64 {
 	if c.Base.Ascension < 4 {
 		return 0
@@ -27,9 +27,9 @@ func (c *char) a4Attacks() float64 {
 	return 0.0139 * c.MaxHP()
 }
 
-// Zhongli deals bonus DMG based on his Max HP:
+// 鍾離は最大HPに基づく追加ダメージを与える:
 //
-// - Dominus Lapidis' Stone Stele, resonance, and hold DMG is increased by 1.9% of Max HP.
+// - 地心の岩柱、共鳴、長押しダメージがHP上限の1.9%分増加する。
 func (c *char) a4Skill() float64 {
 	if c.Base.Ascension < 4 {
 		return 0
@@ -37,9 +37,9 @@ func (c *char) a4Skill() float64 {
 	return 0.019 * c.MaxHP()
 }
 
-// Zhongli deals bonus DMG based on his Max HP:
+// 鍾離は最大HPに基づく追加ダメージを与える:
 //
-// - Planet Befall's DMG is increased by 33% of Max HP.
+// - 天星のダメージがHP上限の33%分増加する。
 func (c *char) a4Burst() float64 {
 	if c.Base.Ascension < 4 {
 		return 0

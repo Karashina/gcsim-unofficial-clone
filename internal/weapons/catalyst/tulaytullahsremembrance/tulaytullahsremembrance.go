@@ -36,18 +36,18 @@ const (
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Normal Attack SPD is increased by 10/12.5/15/17.5/20%.
-// After the wielder unleashes an Elemental Skill, Normal Attack DMG will increase by 4.8/6/7.2/8.4/9.6% every second for 14s.
-// After this character hits an opponent with a Normal Attack during this duration, Normal Attack DMG will be increased by 9.6/12/14.4/16.8/19.2%.
-// This increase can be triggered once every 0.3s. The maximum Normal Attack DMG increase per single duration of the overall effect is 48/60/72/84/96%.
-// The effect will be removed when the wielder leaves the field, and using the Elemental Skill again will reset all DMG buffs.
+// 通常攻撃速度が10/12.5/15/17.5/20%増加する。
+// 元素スキル発動後、14秒間毎秒通常攻撃ダメージが4.8/6/7.2/8.4/9.6%増加する。
+// この持続時間中に通常攻撃が敵に命中すると、通常攻撃ダメージが9.6/12/14.4/16.8/19.2%増加する。
+// この増加は0.3秒毎に1回発動可能。単一の効果持続時間あたりの最大通常攻撃ダメージ増加は48/60/72/84/96%。
+// 装備者がフィールドを離れると効果が解除され、元素スキルを再度使用すると全ダメージバフがリセットされる。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{
 		core: c,
 	}
 	r := p.Refine
 
-	// attack speed part
+	// 攻撃速度部分
 	mAtkSpd := make([]float64, attributes.EndStatType)
 	mAtkSpd[attributes.AtkSpd] = 0.075 + float64(r)*0.025
 	char.AddStatMod(character.StatMod{
@@ -61,7 +61,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// normal attack dmg part
+	// 通常攻撃ダメージ部分
 	incDmg := 0.036 + float64(r)*0.012
 	mDmg := make([]float64, attributes.EndStatType)
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
@@ -69,11 +69,11 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		// remove stacks on skill in any case
+		// スキル使用時にスタックをリセット
 		w.stacks = 0
 
-		// gain 1 stack every 1s for 14s after using skill
-		// no need to check for the 14s part, because it will stop when it reaches max stacks anyways
+		// スキル使用後14秒間、1秒毎にスタックを1獲得
+		// 14秒のチェックは不要（最大スタック到達時に停止するため）
 		w.src = c.F
 		char.QueueCharTask(w.incStack(char, c.F), 60)
 
@@ -90,7 +90,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		return false
 	}, fmt.Sprintf("tulaytullahsremembrance-%v", char.Base.Key.String()))
 
-	// gain 2 stacks on normal attack dmg, 0.3s icd
+	// 通常攻撃ダメージ時にスタックを2獲得、0.3秒ICD
 	c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != char.Index {
@@ -130,7 +130,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if !char.StatusIsActive(buffKey) {
 			return false
 		}
-		// remove stacks, invalidate incStack task and remove buff on swap
+		// スタックを削除、incStackタスクを無効化、スワップ時にバフを削除
 		w.stacks = 0
 		w.src = -1
 		char.DeleteStatus(buffKey)

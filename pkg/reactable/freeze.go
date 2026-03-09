@@ -12,13 +12,13 @@ func (r *Reactable) TryFreeze(a *combat.AttackEvent) bool {
 	if a.Info.Durability < ZeroDur {
 		return false
 	}
-	// so if already frozen there are 2 cases:
-	// 1. src exists but no other coexisting -> attach
-	// 2. src does not exist but opposite coexists -> add to freeze durability
+	// 既に凍結している場合、2つのケースがある:
+	// 1. ソースが存在するが他に共存するものがない -> 付着
+	// 2. ソースが存在しないが反対側が共存する -> 凍結元素量に追加
 	var consumed reactions.Durability
 	switch a.Info.Element {
 	case attributes.Hydro:
-		// if cryo exists we'll trigger freeze regardless if frozen already coexists
+		// 氷が存在すれば、凍結が既に共存していても凍結を発動する
 		if r.Durability[Cryo] < ZeroDur {
 			return false
 		}
@@ -33,7 +33,7 @@ func (r *Reactable) TryFreeze(a *combat.AttackEvent) bool {
 		r.Durability[Hydro] -= consumed
 		r.Durability[Hydro] = max(r.Durability[Hydro], 0)
 	default:
-		// should be here
+		// ここにあるべき
 		return false
 	}
 	a.Reacted = true
@@ -50,7 +50,7 @@ func (r *Reactable) PoiseDMGCheck(a *combat.AttackEvent) bool {
 	if a.Info.StrikeType != attacks.StrikeTypeBlunt {
 		return false
 	}
-	// remove frozen durability according to poise dmg
+	// 耐勢ダメージに応じて凍結元素量を削除
 	r.Durability[Frozen] -= reactions.Durability(0.15 * a.Info.PoiseDMG)
 	r.checkFreeze()
 	return true
@@ -63,16 +63,16 @@ func (r *Reactable) ShatterCheck(a *combat.AttackEvent) bool {
 	if a.Info.StrikeType != attacks.StrikeTypeBlunt && a.Info.Element != attributes.Geo {
 		return false
 	}
-	// remove 200 freeze gauge if available
+	// 可能なら凍結ゲージ200を削除
 	r.Durability[Frozen] -= 200
 	r.checkFreeze()
 
 	r.core.Events.Emit(event.OnShatter, r.self, a)
 
-	// 0.2s gcd on shatter attack
+	// 砕氷攻撃の0.2秒GCD
 	if !(r.shatterGCD != -1 && r.core.F < r.shatterGCD) {
 		r.shatterGCD = r.core.F + 0.2*60
-		// trigger shatter attack
+		// 砕氷攻撃を発動
 		ai := combat.AttackInfo{
 			ActorIndex:       a.Info.ActorIndex,
 			DamageSrc:        r.self.Key(),
@@ -88,7 +88,7 @@ func (r *Reactable) ShatterCheck(a *combat.AttackEvent) bool {
 		em := char.Stat(attributes.EM)
 		flatdmg, snap := calcReactionDmg(char, ai, em)
 		ai.FlatDmg = 3.0 * flatdmg
-		// shatter is a self attack
+		// 砕氷は自身への攻撃
 		r.core.QueueAttackWithSnap(
 			ai,
 			snap,
@@ -100,13 +100,13 @@ func (r *Reactable) ShatterCheck(a *combat.AttackEvent) bool {
 	return true
 }
 
-// add to freeze durability and return amount of durability consumed
+// triggerFreeze は凍結元素量に追加し、消費された元素量を返す
 func (r *Reactable) triggerFreeze(a, b reactions.Durability) reactions.Durability {
 	d := min(a, b)
 	if r.FreezeResist >= 1 {
 		return d
 	}
-	// trigger freeze should only addDurability and should not touch decay rate
+	// triggerFreeze は addDurability のみ行い、減衰速度には触れない
 	r.attachOverlap(Frozen, 2*d, ZeroDur)
 	return d
 }
@@ -115,7 +115,7 @@ func (r *Reactable) checkFreeze() {
 	if r.Durability[Frozen] <= ZeroDur {
 		r.Durability[Frozen] = 0
 		r.core.Events.Emit(event.OnAuraDurabilityDepleted, r.self, attributes.Frozen)
-		// trigger another attack here, purely for the purpose of breaking bubbles >.>
+		// バブルを割るためだけにここで別の攻撃を発動する >.>
 		ai := combat.AttackInfo{
 			ActorIndex:  0,
 			DamageSrc:   r.self.Key(),
@@ -128,7 +128,7 @@ func (r *Reactable) checkFreeze() {
 			SourceIsSim: true,
 			DoNotLog:    true,
 		}
-		//TODO: delay attack by 1 frame ok?
+		//TODO: 攻撃を1フレーム遅延させてOKか？
 		r.core.QueueAttack(ai, combat.NewSingleTargetHit(r.self.Key()), -1, 0)
 	}
 }

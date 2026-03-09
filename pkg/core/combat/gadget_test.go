@@ -8,7 +8,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/targets"
 )
 
-//nolint:unparam // all calls currently have y = 0 but that can change
+//nolint:unparam // 現在すべての呼び出しでy = 0だが変更される可能性がある
 func newSimpleCircle(x, y, r float64) *geometry.Circle {
 	return geometry.NewCircle(geometry.Point{X: x, Y: y}, r, geometry.DefaultDirection(), 360)
 }
@@ -17,7 +17,7 @@ func TestGadgetCollision(t *testing.T) {
 	c := newCombatCtrl()
 	const ecount = 2
 	const gcount = 4
-	// 1 player
+	// 1プレイヤー
 	player := &testtarg{
 		typ:   targets.TargettablePlayer,
 		shp:   newSimpleCircle(0, 0, 0.2),
@@ -28,7 +28,7 @@ func TestGadgetCollision(t *testing.T) {
 		},
 	}
 	c.SetPlayer(player)
-	// 2 enemies
+	// 2体の敵
 	for i := 0; i < ecount; i++ {
 		v := &testtarg{
 			typ:   targets.TargettableEnemy,
@@ -41,12 +41,12 @@ func TestGadgetCollision(t *testing.T) {
 		}
 		c.AddEnemy(v)
 	}
-	// gadget should overlap player and first enemy
+	// ガジェットはプレイヤーと最初の敵に重なるべき
 	var cw [targets.TargettableTypeCount]bool
 	cw[targets.TargettableEnemy] = true
 	cw[targets.TargettablePlayer] = true
 	count := 0
-	// make multiple gadgets in the same spot, so we should get gcount * 2 collision total
+	// 同じ場所に複数のガジェットを配置し、合計でgcount * 2の衝突が発生するはず
 	for i := 0; i < gcount; i++ {
 		v := &testtarg{
 			hdlr:        c,
@@ -74,7 +74,7 @@ func TestGadgetLimits(t *testing.T) {
 	c := newCombatCtrl()
 	const ecount = 2
 	const gcount = 20
-	// 1 player
+	// 1プレイヤー
 	player := &testtarg{
 		typ:   targets.TargettablePlayer,
 		shp:   newSimpleCircle(0, 0, 0.2),
@@ -85,7 +85,7 @@ func TestGadgetLimits(t *testing.T) {
 		},
 	}
 	c.SetPlayer(player)
-	// 2 enemies
+	// 2体の敵
 	for i := 0; i < ecount; i++ {
 		v := &testtarg{
 			typ:   targets.TargettableEnemy,
@@ -98,12 +98,12 @@ func TestGadgetLimits(t *testing.T) {
 		}
 		c.AddEnemy(v)
 	}
-	// gadget should overlap player and first enemy
+	// ガジェットはプレイヤーと最初の敵に重なるべき
 	var cw [targets.TargettableTypeCount]bool
 	cw[targets.TargettableEnemy] = true
 	cw[targets.TargettablePlayer] = true
 	count := 0
-	// make multiple gadgets; gadgets should not exceed 2
+	// 複数のガジェットを作成。ガジェットは2を超えてはならない
 	for i := 0; i < gcount; i++ {
 		v := &testtarg{
 			hdlr:        c,
@@ -118,7 +118,7 @@ func TestGadgetLimits(t *testing.T) {
 
 	c.Tick()
 
-	// check how many we got
+	// 数を確認
 	for _, v := range c.gadgets {
 		if v != nil && v.GadgetTyp() == GadgetTypTest {
 			count++
@@ -134,14 +134,14 @@ func BenchmarkCollisionCheck(b *testing.B) {
 	c := newCombatCtrl()
 	const ecount = 2
 	const gcount = 20
-	// 1 player
+	// 1プレイヤー
 	player := &testtarg{
 		typ:   targets.TargettablePlayer,
 		shp:   newSimpleCircle(0, 0, 0.2),
 		alive: true,
 	}
 	c.SetPlayer(player)
-	// 2 enemies
+	// 2体の敵
 	for i := 0; i < ecount; i++ {
 		v := &testtarg{
 			typ:   targets.TargettableEnemy,
@@ -150,11 +150,11 @@ func BenchmarkCollisionCheck(b *testing.B) {
 		}
 		c.AddEnemy(v)
 	}
-	// gadget should overlap player and first enemy
+	// ガジェットはプレイヤーと最初の敵に重なるべき
 	var cw [targets.TargettableTypeCount]bool
 	cw[targets.TargettableEnemy] = true
 	cw[targets.TargettablePlayer] = true
-	// make multiple gadgets in the same spot, so we should get gcount * 2 collision total
+	// 同じ場所に複数のガジェットを配置し、合計でgcount * 2の衝突が発生するはず
 	for i := 0; i < gcount; i++ {
 		v := &testtarg{
 			typ:         targets.TargettableGadget,
@@ -176,7 +176,7 @@ func TestKillGadgetOnCollision(t *testing.T) {
 	c := newCombatCtrl()
 	const ecount = 2
 	const gcount = 4
-	// 1 player
+	// 1プレイヤー
 	player := &testtarg{
 		typ:   targets.TargettablePlayer,
 		shp:   newSimpleCircle(0, 0, 0.2),
@@ -187,7 +187,7 @@ func TestKillGadgetOnCollision(t *testing.T) {
 		},
 	}
 	c.SetPlayer(player)
-	// 2 enemies
+	// 2体の敵
 	for i := 0; i < ecount; i++ {
 		v := &testtarg{
 			typ:   targets.TargettableEnemy,
@@ -200,12 +200,12 @@ func TestKillGadgetOnCollision(t *testing.T) {
 		}
 		c.AddEnemy(v)
 	}
-	// gadget should overlap player and first enemy
+	// ガジェットはプレイヤーと最初の敵に重なるべき
 	var cw [targets.TargettableTypeCount]bool
 	cw[targets.TargettableEnemy] = true
 	cw[targets.TargettablePlayer] = true
 	count := 0
-	// make multiple gadgets in the same spot, so we should get gcount * 2 collision total
+	// 同じ場所に複数のガジェットを配置し、合計でgcount * 2の衝突が発生するはず
 	for i := 0; i < gcount; i++ {
 		v := &testtarg{
 			typ:         targets.TargettableGadget,
@@ -215,7 +215,7 @@ func TestKillGadgetOnCollision(t *testing.T) {
 		}
 		v.onCollision = func(t Target) {
 			count++
-			// kill self
+			// 自身を消滅
 			c.RemoveGadget(v.key)
 		}
 		c.AddGadget(v)
@@ -223,7 +223,7 @@ func TestKillGadgetOnCollision(t *testing.T) {
 
 	c.Tick()
 
-	// only 1 collision per since it should kill self
+	// 自身を消滅させるため1ガジェットあたり1衝突のみ
 	if count < gcount {
 		log.Printf("Expecting %v collisions, got %v\n", gcount, count)
 		t.FailNow()

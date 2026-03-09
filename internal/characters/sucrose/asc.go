@@ -10,8 +10,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When Sucrose triggers a Swirl reaction, all characters in the party with the matching element (excluding Sucrose)
-// have their Elemental Mastery increased by 50 for 8s.
+// スクロースが拡散反応を起こした時、パーティー内の対応する元素を持つ全キャラクター（スクロースを除く）の
+// 元素熔冶が8秒間50上昇する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -30,7 +30,7 @@ func (c *char) a1() {
 			if atk.Info.ActorIndex != c.Index {
 				return false
 			}
-			// do not overwrite mod if same frame
+			// 同一フレームの場合はModを上書きしない
 			if c.Core.F < icd {
 				return false
 			}
@@ -63,10 +63,10 @@ func (c *char) a1() {
 	c.Core.Events.Subscribe(event.OnSwirlPyro, swirlfunc(attributes.Pyro), "sucrose-a1-pyro")
 }
 
-// When Astable Anemohypostasis Creation - 6308 or Forbidden Creation - Isomer 75 / Type II hits an opponent,
-// increases all party members' (excluding Sucrose) Elemental Mastery by an amount equal to 20% of Sucrose's Elemental Mastery for 8s.
+// 風霊作成・六三〇八または禁・結禅原理の雑化式で敵に命中した時、
+// パーティー全員（スクロースを除く）の元素熔冶がスクロースの元素熔冶の20%分加算される。8秒間持続。
 //
-// - called inside of an attack callback in skill.go and burst.go
+// - skill.go と burst.go の攻撃コールバック内で呼び出される
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

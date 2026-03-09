@@ -23,7 +23,7 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Defeating an opponent restores 8/10/12/14/16% HP.
+// 敵を倒した時、HPが8/10/12/14/16%回復する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -31,20 +31,20 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	healPercentage := 0.06 + float64(r)*0.02
 	c.Events.Subscribe(event.OnTargetDied, func(args ...interface{}) bool {
 		_, ok := args[0].(*enemy.Enemy)
-		// ignore if not an enemy
+		// 敵でなければ無視
 		if !ok {
 			return false
 		}
 		atk := args[1].(*combat.AttackEvent)
-		// don't proc if someone else defeated the enemy
+		// 別のキャラクターが敵を倒した場合は発動しない
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		// don't proc if off-field
+		// フィールド外では発動しない
 		if c.Player.Active() != char.Index {
 			return false
 		}
-		// heal char
+		// キャラクターを回復
 		c.Player.Heal(info.HealInfo{
 			Type:    info.HealTypePercent,
 			Message: "Recurve Bow (Proc)",

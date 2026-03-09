@@ -12,9 +12,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/simulator"
 )
 
-// Additional runtime option to optimize substats according to KQM standards
+// KQM基準に従ってサブステータスを最適化する追加ランタイムオプション
 func RunSubstatOptim(simopt simulator.Options, verbose bool, additionalOptions string) {
-	// Each optimizer run should not be saving anything out for the GZIP
+	// 各オプティマイザー実行はGZIPに何も保存すべきではない
 	simopt.GZIPResult = false
 
 	optionsMap := map[string]float64{
@@ -30,7 +30,7 @@ func RunSubstatOptim(simopt simulator.Options, verbose bool, additionalOptions s
 		optionsMap["verbose"] = 1
 	}
 
-	// Parse and set all special sim options
+	// 特殊シミュレーションオプションをパースして設定
 	var sugarLog *zap.SugaredLogger
 	if additionalOptions != "" {
 		optionsMap, err := parseOptimizerCfg(additionalOptions, optionsMap)
@@ -42,7 +42,7 @@ func RunSubstatOptim(simopt simulator.Options, verbose bool, additionalOptions s
 		sugarLog = newLogger(optionsMap["verbose"] == 1)
 	}
 
-	// Parse config
+	// 設定をパース
 	cfg, err := simulator.ReadConfig(simopt.ConfigPath)
 	if err != nil {
 		sugarLog.Error(err)
@@ -51,15 +51,14 @@ func RunSubstatOptim(simopt simulator.Options, verbose bool, additionalOptions s
 
 	clean, err := removeSubstatLines(cfg)
 	if errors.Is(err, errInvalidStats) {
-		// Provide detailed diagnostics to help identify which character(s) are missing
-		// valid main stat rows (flower HP). This will list character names that
-		// have no matching mainstat line (hp=4780 or hp=3571).
+		// どのキャラクターに有効なメインステータス行（花HP）が欠けているか特定するための詳細な診断情報を提供。
+		// 対応するメインステータス行（hp=4780またはhp=3571）がないキャラクター名をリスト表示する。
 		charMatches := regexpLineCharname.FindAllStringSubmatch(cfg, -1)
 		mainMatches := regexpLineMainstat.FindAllString(cfg, -1)
 
 		hasMain := make(map[string]bool)
 		for _, mm := range mainMatches {
-			// Attempt to extract the character name from the main stat line
+			// メインステータス行からキャラクター名の抽出を試みる
 			sub := regexpLineCharname.FindStringSubmatch(mm)
 			if len(sub) > 1 {
 				hasMain[sub[1]] = true
@@ -80,7 +79,7 @@ func RunSubstatOptim(simopt simulator.Options, verbose bool, additionalOptions s
 			sugarLog.Panicf("Error: Could not identify valid main artifact stat rows for the following characters (missing flower HP main stat lines): %v\n5* flowers must have 4780 HP, and 4* flowers must have 3571 HP.", missing)
 		}
 
-		// Fallback generic message
+		// フォールバックの汎用メッセージ
 		sugarLog.Panic("Error: Could not identify valid main artifact stat rows for all characters based on flower HP values.\n5* flowers must have 4780 HP, and 4* flowers must have 3571 HP.")
 		os.Exit(1)
 	}
@@ -100,10 +99,10 @@ func RunSubstatOptim(simopt simulator.Options, verbose bool, additionalOptions s
 	optimizer.Run(cfg, simopt, simcfg, gcsl)
 	output := optimizer.PrettyPrint(clean, optimizer.details)
 
-	// Sticks optimized substat string into config and output
+	// 最適化されたサブステータス文字列を設定に挿入して出力
 	if simopt.ResultSaveToPath != "" {
 		output = strings.TrimSpace(output) + "\n"
-		// try creating file to write to
+		// 書き込み先ファイルの作成を試行
 		err = os.WriteFile(simopt.ResultSaveToPath, []byte(output), 0o644)
 		if err != nil {
 			log.Panic(err)

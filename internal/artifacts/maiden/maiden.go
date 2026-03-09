@@ -26,8 +26,8 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// 2 piece: Character Healing Effectiveness +15%
-// 4 piece: Using an Elemental Skill or Burst increases healing received by all party members by 20% for 10s.
+// 2セット: キャラクター与える治療効果 +15%
+// 4セット: 元素スキルまたは元素爆発を使用すると、パーティ全員の受ける治療効果が10秒間20%増加。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
@@ -47,7 +47,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			if c.Player.Active() != char.Index {
 				return false
 			}
-			// Applies to all characters, so no filters needed
+			// 全キャラクターに適用されるためフィルタ不要
 			for _, x := range c.Player.Chars() {
 				this := x
 				this.AddHealBonusMod(character.HealBonusMod{

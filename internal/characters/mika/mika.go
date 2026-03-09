@@ -49,8 +49,8 @@ func (c *char) Init() error {
 		c.maxDetectorStacks++
 	}
 
-	// The Soulwind state of Starfrost Swirl can decrease the healing interval between instances caused by Skyfeather Song's Eagleplume state.
-	// This decrease percentage is equal to the ATK SPD increase provided by Soulwind.
+	// 星霜の旋の極寒の風状態は、星翼の歌の鷲羽状態による回復間隔を短縮できる。
+	// この短縮割合は、極寒の風が提供する攻撃速度上昇と同じ。
 	if c.Base.Cons >= 1 {
 		c.healIcd = int(float64(c.healIcd) * (1.0 - atkSpdBuff[c.TalentLvlSkill()]))
 	}

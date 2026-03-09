@@ -54,7 +54,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 func (c *char) Init() error {
 	for _, other := range c.Core.Player.Chars() {
 		if other.Index == c.Index {
-			// skip Xilonen herself
+			// Xilonen自身はスキップ
 			continue
 		}
 		switch ele := other.Base.Element; ele {
@@ -98,7 +98,7 @@ func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]i
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if a1 window is active is on-field
+	// 固有天賦1のウィンドウがアクティブかつフィールド上かチェック
 	if a == action.ActionSkill && c.StatusIsActive(skilRecastCD) {
 		return false, action.NoFailure
 	}

@@ -11,9 +11,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
-// Test moonsign party initialization for 0/1/2+ moonsignKey holders.
+// moonsignKey保持者0/1/2+人のパーティ初期化をテストする。
 func TestMoonsignPartyInit(t *testing.T) {
-	// 0 holders: use TestCharDoNotUse for all slots
+	// 0人: 全スロットをTestCharDoNotUseで埋める
 	c0, _ := makeCore(0)
 	pTest := defProfile(keys.TestCharDoNotUse)
 	for i := 0; i < 4; i++ {
@@ -31,7 +31,7 @@ func TestMoonsignPartyInit(t *testing.T) {
 		}
 	}
 
-	// 1 holder: add one Nefer and three test chars
+	// 1人: Nefer1人とテストキャラ3人を追加
 	c1, _ := makeCore(0)
 	pNefer := defProfile(keys.Nefer)
 	_, err := c1.AddChar(pNefer)
@@ -53,7 +53,7 @@ func TestMoonsignPartyInit(t *testing.T) {
 		}
 	}
 
-	// 2+ holders: add two moonsign chars (Nefer, Lauma) and two test chars
+	// 2人以上: moonsignキャラ2人（Nefer, Lauma）とテストキャラ2人を追加
 	c2, _ := makeCore(0)
 	pLauma := defProfile(keys.Lauma)
 	_, err = c2.AddChar(pNefer)

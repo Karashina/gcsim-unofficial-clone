@@ -13,21 +13,21 @@ const eof = -1
 
 type stateFn func(*Lexer) stateFn
 
-// Lexer holds the state of the scanner.
+// Lexer はスキャナの状態を保持する。
 type Lexer struct {
-	input        string     // the string being scanned
-	pos          Pos        // current position in the input
-	start        Pos        // start position of this item
-	width        Pos        // width of last rune read from input
-	items        chan Token // channel of scanned items
-	line         int        // 1+number of newlines seen
-	startLine    int        // start line of this item
+	input        string     // スキャン対象の文字列
+	pos          Pos        // 入力内の現在位置
+	start        Pos        // このアイテムの開始位置
+	width        Pos        // 最後に読んだルーンの幅
+	items        chan Token // スキャン済みアイテムのチャネル
+	line         int        // 検出した改行数+1
+	startLine    int        // このアイテムの開始行
 	parenDepth   int
 	sqParenDepth int
 	braceDepth   int
 }
 
-// next returns the next rune in the input.
+// next は入力内の次のルーンを返す。
 func (l *Lexer) next() rune {
 	if int(l.pos) >= len(l.input) {
 		l.width = 0
@@ -42,23 +42,23 @@ func (l *Lexer) next() rune {
 	return r
 }
 
-// peek returns but does not consume the next rune in the input.
+// peek は入力内の次のルーンを返すが、消費しない。
 func (l *Lexer) peek() rune {
 	r := l.next()
 	l.backup()
 	return r
 }
 
-// backup steps back one rune. Can only be called once per call of next.
+// backup はルーンを1つ戻す。next の呼び出しごとに1回だけ呼べる。
 func (l *Lexer) backup() {
 	l.pos -= l.width
-	// Correct newline count.
+	// 改行カウントを修正する。
 	if l.width == 1 && l.input[l.pos] == '\n' {
 		l.line--
 	}
 }
 
-// emit passes an item back to the client.
+// emit はアイテムをクライアントに返す。
 func (l *Lexer) emit(t TokenType) {
 	l.items <- Token{
 		Typ:  t,
@@ -70,14 +70,14 @@ func (l *Lexer) emit(t TokenType) {
 	l.startLine = l.line
 }
 
-// ignore skips over the pending input before this point.
+// ignore はこの時点までの保留中の入力をスキップする。
 func (l *Lexer) ignore() {
 	// l.line += strings.Count(l.input[l.start:l.pos], "\n")
 	l.start = l.pos
 	l.startLine = l.line
 }
 
-// accept consumes the next rune if it's from the valid set.
+// accept は次のルーンが有効な文字セットに含まれていれば消費する。
 func (l *Lexer) accept(valid string) bool {
 	if strings.ContainsRune(valid, l.next()) {
 		return true
@@ -86,15 +86,15 @@ func (l *Lexer) accept(valid string) bool {
 	return false
 }
 
-// acceptRun consumes a run of runes from the valid set.
+// acceptRun は有効な文字セットからルーンの連続を消費する。
 func (l *Lexer) acceptRun(valid string) {
 	for strings.ContainsRune(valid, l.next()) {
 	}
 	l.backup()
 }
 
-// errorf returns an error token and terminates the scan by passing
-// back a nil pointer that will be the next state, terminating l.nextItem.
+// errorf はエラートークンを返し、次の状態として nil ポインタを返すことで
+// スキャンを終了し、l.nextItem を終了させる。
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
 	l.items <- Token{
 		Typ:  ItemError,
@@ -105,13 +105,13 @@ func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
 	return nil
 }
 
-// nextItem returns the next item from the input.
-// Called by the parser, not in the lexing goroutine.
+// NextItem は入力から次のアイテムを返す。
+// パーサーから呼ばれ、字句解析ゴルーチンからは呼ばれない。
 func (l *Lexer) NextItem() Token {
 	return <-l.items
 }
 
-// lex creates a new scanner for the input string.
+// NewLexer は入力文字列に対する新しいスキャナを作成する。
 func NewLexer(input string) *Lexer {
 	l := &Lexer{
 		input:     input,
@@ -123,7 +123,7 @@ func NewLexer(input string) *Lexer {
 	return l
 }
 
-// run runs the state machine for the lexer.
+// run はレキサーのステートマシンを実行する。
 func (l *Lexer) run() {
 	for state := lexText; state != nil; {
 		state = state(l)
@@ -131,11 +131,11 @@ func (l *Lexer) run() {
 	close(l.items)
 }
 
-// lexText scans until an opening action delimiter, "{{".
+// lexText は開始アクション区切り文字 "{{" までスキャンする。
 func lexText(l *Lexer) stateFn {
-	// Either number, quoted string, or identifier.
-	// Spaces separate arguments; runs of spaces turn into itemSpace.
-	// Pipe symbols separate and are emitted.
+	// 数値、クォート文字列、または識別子のいずれか。
+	// スペースは引数を区切り、連続するスペースは itemSpace になる。
+	// パイプ記号は区切りとして発行される。
 	// n := l.peek()
 	// log.Printf("lexText next is %c\n", n)
 	switch r := l.next(); {
@@ -164,20 +164,20 @@ func lexText(l *Lexer) stateFn {
 	case r == '*':
 		l.emit(ItemAsterisk)
 	case r == '+':
-		// //check if next item is a number or not; if number lexNumber
-		// //otherwise it's a + sign
+		// //次のアイテムが数値かどうか確認し、数値なら lexNumber
+		// //そうでなければ + 記号
 		// n := l.next()
 		// if isNumeric(n) {
-		// 	//back up twice
+		// 	//2つ戻る
 		// 	l.backup()
 		// 	l.backup()
 		// 	return lexNumber
 		// }
-		// //otherwise it's a plus sign
+		// //そうでなければプラス記号
 		// l.backup()
 		l.emit(ItemPlus)
 	case r == '/':
-		// check if next is another / or not; if / then lexComment
+		// 次が / かどうか確認し、/ なら lexComment
 		n := l.next()
 		if n == '/' {
 			l.ignore()
@@ -186,27 +186,27 @@ func lexText(l *Lexer) stateFn {
 		l.backup()
 		l.emit(ItemForwardSlash)
 	case r == '.':
-		// special look-ahead for ".field" so we don't break l.backup().
+		// ".field" のための特別な先読み。l.backup() を壊さないようにする。
 		if l.pos < Pos(len(l.input)) {
 			r := l.input[l.pos]
 			if r < '0' || '9' < r {
 				return lexField
 			}
 		}
-		fallthrough // '.' can start a number.
+		fallthrough // '.' は数値の開始になりうる。
 	case ('0' <= r && r <= '9'):
 		l.backup()
 		return lexNumber
 	case r == '-':
-		// if next item is a number then lex number
+		// 次のアイテムが数値なら数値を解析
 		// n := l.next()
 		// if isNumeric(n) {
-		// 	// backup twice
+		// 	// 2つ戻る
 		// 	l.backup()
 		// 	l.backup()
 		// 	return lexNumber
 		// }
-		// // other wise it's a - sign
+		// // そうでなければ - 記号
 		// l.backup()
 		l.emit(ItemMinus)
 	case r == '>':
@@ -291,17 +291,17 @@ Loop:
 			l.backup()
 			break Loop
 		default:
-			// absorb
+			// 吸収する
 		}
 	}
 	// l.emit(itemComment)
 	return lexText
 }
 
-// lexField scans a field: .Alphanumeric.
-// The . has been scanned.
+// lexField はフィールドをスキャンする: .Alphanumeric。
+// . は既にスキャン済み。
 func lexField(l *Lexer) stateFn {
-	if l.atTerminator() { // Nothing interesting follows -> "." or "$".
+	if l.atTerminator() { // 興味深いものが続かない -> "." または "$"。
 		l.emit(ItemDot)
 		return lexText
 	}
@@ -339,13 +339,13 @@ Loop:
 	return lexText
 }
 
-// lexIdentifier scans an alphanumeric.
+// lexIdentifier は英数字をスキャンする。
 func lexIdentifier(l *Lexer) stateFn {
 Loop:
 	for {
 		switch r := l.next(); {
 		case isAlphaNumeric(r):
-			// absorb.
+			// 吸収する。
 		default:
 			l.backup()
 			word := l.input[l.start:l.pos]
@@ -385,7 +385,7 @@ func checkIdentifier(word string) TokenType {
 }
 
 func lexNumber(l *Lexer) stateFn {
-	// Optional leading sign.
+	// オプションの先頭符号。
 	l.accept("+-")
 
 	digits := "0123456789"
@@ -399,25 +399,24 @@ func lexNumber(l *Lexer) stateFn {
 	return lexText
 }
 
-// isSpace reports whether r is a space character.
+// isSpace は r が空白文字かどうかを報告する。
 func isSpace(r rune) bool {
 	return r == ' ' || r == '\t' || r == '\n' || r == '\r'
 }
 
-// isAlphaNumeric reports whether r is an alphabetic, digit, or underscore.
+// isAlphaNumeric は r がアルファベット、数字、またはアンダースコアかどうかを報告する。
 func isAlphaNumeric(r rune) bool {
 	return r == '_' || r == '-' || unicode.IsLetter(r) || unicode.IsDigit(r) || r == '%'
 }
 
-// is Numeric reports whether r is a digit
+// isNumeric は r が数字かどうかを報告する
 // func isNumeric(r rune) bool {
 // 	return unicode.IsDigit(r)
 // }
 
-// atTerminator reports whether the input is at valid termination character to
-// appear after an identifier. Breaks .X.Y into two pieces. Also catches cases
-// like "$x+2" not being acceptable without a space, in case we decide one
-// day to implement arithmetic.
+// atTerminator は入力が識別子の後に続く有効な終端文字かどうかを報告する。
+// .X.Y を2つに分割する。また "$x+2" のようにスペースなしでは
+// 受け入れられないケースも捕捉する（将来算術演算を実装する場合に備えて）。
 func (l *Lexer) atTerminator() bool {
 	r := l.peek()
 	if isSpace(r) {

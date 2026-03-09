@@ -9,11 +9,10 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// C4: The vortex created by Wind Realm of Nasamjnin will restore Energy to
-// Faruzan based on the number of opponents hit: If it hits 1 opponent, it
-// will restore 2 Energy for Faruzan. Each additional opponent hit will
-// restore 0.5 more Energy for Faruzan.
-// A maximum of 4 Energy can be restored to her per vortex.
+// 4凸: 風域の渦巻きが敵に命中した数に応じてエネルギーを回復:
+// 1体の敵に命中するとエネルギー2回復。
+// 追加の敵ごとにさらに0.5回復。
+// 1回の渦巻きで最大4エネルギーまで回復可能。
 func (c *char) makeC4Callback() func(combat.AttackCB) {
 	if c.Base.Cons < 4 {
 		return nil
@@ -32,11 +31,10 @@ func (c *char) makeC4Callback() func(combat.AttackCB) {
 	}
 }
 
-// C6: Characters affected by The Wind's Secret Ways' Prayerful Wind's Gift
-// have 40% bonus CRIT DMG when they deal Anemo DMG. When your own active
-// character deals DMG while affected by Prayerful Wind's Gift, they will fire
-// another Hurricane Arrow at opponents. This effect can be triggered once
-// every 2.5s.
+// 6凸: 「祝福の風」の効果を受けたキャラクターが風元素ダメージを与えると
+// 会心ダメージ+40%。「祝福の風」の効果中にアクティブキャラが
+// ダメージを与えると、ハリケーンアローを追加発射する。
+// この効果は2.5秒に1回トリガー可能。
 func (c *char) c6Buff(char *character.CharWrapper) {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CD] = 0.4

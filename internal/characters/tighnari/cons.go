@@ -10,7 +10,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Tighnari's Charged Attack CRIT Rate is increased by 15%.
+// Tighnariの重撃の会心率が15%上昇する。
 func (c *char) c1() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.CR] = 0.15
@@ -25,8 +25,8 @@ func (c *char) c1() {
 	})
 }
 
-// When there are opponents within the Vijnana-Khanda Field created by Vijnana-Phala Mine, Tighnari gains 20% Dendro DMG Bonus.
-// The effect will last up to 6s if the field's duration ends or if it no longer has opponents within it.
+// 識罪縄用素の草雷フィールド内に敵がいる時、Tighnariの草元素ダメージが20%上昇する。
+// フィールドの持続時間が終了するか、フィールド内に敵がいなくなった場合、効果は最大6秒間持続する。
 func (c *char) c2() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DendroP] = .2
@@ -46,9 +46,9 @@ func (c *char) c2() {
 	}
 }
 
-// When Fashioner's Tanglevine Shaft is unleashed, all nearby party members gain 60 Elemental Mastery for 8s.
-// TODO: If the Fashioner's Tanglevine Shaft triggers a Burning, Bloom, Quicken, or Spread reaction, their Elemental Mastery
-// will be further increased by 60. This latter case will also refresh the buff state's duration.
+// 織用素翠の祠矢が放たれた時、近くのパーティメンバー全員の元素熔通が8秒間60上昇する。
+// TODO: 織用素翠の祠矢が燃焼・開花・激化・拡散反応を起こした場合、
+// 元素熔通がさらに60上昇する。この場合、バフの持続時間も更新される。
 func (c *char) c4() {
 	c.Core.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
 		if c.Core.Player.Active() != c.Index {

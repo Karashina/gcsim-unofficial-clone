@@ -38,7 +38,7 @@ func init() {
 	attackFrames[3][action.ActionCharge] = 36                             // N4 -> CA
 
 	attackFrames[4] = frames.InitNormalCancelSlice(attackHitmarks[3], 62) // N5 -> N1
-	attackFrames[4][action.ActionCharge] = 500                            //TODO: this action is illegal; need better way to handle it
+	attackFrames[4][action.ActionCharge] = 500                            //TODO: このアクションは不正; より良い処理方法が必要
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
@@ -70,7 +70,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 			attackHitboxes[c.NormalCounter][1],
 		)
 	}
-	// we don't need to use char queue here since each hit is single hit
+	// 各ヒットはシングルヒットなのでcharキューを使う必要はない
 	c.Core.QueueAttack(ai, ap, attackHitmarks[c.NormalCounter], attackHitmarks[c.NormalCounter])
 
 	defer c.AdvanceNormalIndex()

@@ -22,8 +22,8 @@ func (s *WeightedStreamStats) Add(x float64, w int) {
 	}
 	s.wSum += uint(w)
 
-	// online weighted sample frequency variance w/ Bessel's correction
-	// based on West's "Updating Mean and Variance Estimates: An Improved Method" 1979
+	// オンライン重み付き標本頻度分散（Besselの補正付き）
+	// West (1979) "Updating Mean and Variance Estimates: An Improved Method" に基づく
 	delta := x - s.mean
 	s.mean += delta * (float64(w) / float64(s.wSum))
 	s.vM2 += float64(w) * delta * (x - s.mean)

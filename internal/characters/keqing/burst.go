@@ -20,15 +20,15 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// first hit 56 frame
-	// first tick 82 frame
-	// last tick 162
-	// last hit 197
+	// 初撃 56フレーム
+	// 最初のTick 82フレーム
+	// 最後のTick 162
+	// 最後のヒット 197
 
-	// trigger a4
+	// 固有天賦2を発動
 	c.a4()
 
-	// initial
+	// 初期
 	ai := combat.AttackInfo{
 		Abil:       "Starward Sword (Initial)",
 		ActorIndex: c.Index,
@@ -43,14 +43,14 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 8)
 	c.Core.QueueAttack(ai, ap, burstHitmark, burstHitmark)
 
-	// 8 hits
+	// 8ヒット
 	ai.Abil = "Starward Sword (Consecutive Slash)"
 	ai.Mult = burstDot[c.TalentLvlBurst()]
 	for i := 82; i < 162; i += 11 {
 		c.Core.QueueAttack(ai, ap, i, i)
 	}
 
-	// final
+	// フィニッシュ
 	ai.Abil = "Starward Sword (Last Attack)"
 	ai.Mult = burstFinal[c.TalentLvlBurst()]
 	c.Core.QueueAttack(ai, ap, 197, 197)
@@ -65,7 +65,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

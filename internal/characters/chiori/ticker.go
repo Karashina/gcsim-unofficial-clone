@@ -10,7 +10,7 @@ func (c *char) kill(t *ticker) {
 	}
 }
 
-// generic ticker for dolls to use
+// 人形用の汎用ティッカー
 type ticker struct {
 	c     *core.Core
 	alive bool
@@ -24,7 +24,7 @@ type ticker struct {
 
 type queuer func(cb func(), delay int)
 
-// kill stops any existing ticker from ticking
+// kill は既存のティッカーの動作を停止する
 func (g *ticker) kill() {
 	g.alive = false
 	g.cb = nil
@@ -35,9 +35,9 @@ func (g *ticker) kill() {
 }
 
 func newTicker(c *core.Core, life int, q queuer) *ticker {
-	// note we don't check if life <= 0 here
-	// if life is <= 0 then this will cause gadget to kill itself
-	// the next time tasks are checked
+	// life <= 0 かどうかはチェックしない
+	// life が <= 0 の場合、次のタスクチェック時に
+	// ガジェットが自己破壊する
 	g := &ticker{
 		alive:  true,
 		c:      c,
@@ -56,15 +56,15 @@ func newTicker(c *core.Core, life int, q queuer) *ticker {
 }
 
 func (g *ticker) tick() {
-	// do nothing if gadget is dead
+	// ガジェットが死んでいる場合は何もしない
 	if !g.alive {
 		return
 	}
-	// execute cb
+	// コールバックを実行
 	if g.cb != nil {
 		g.cb()
 	}
-	// queue next action
+	// 次のアクションをキューに入れる
 	if g.interval > 0 {
 		g.queuer(g.tick, g.interval)
 	}

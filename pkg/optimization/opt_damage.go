@@ -7,14 +7,15 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/info"
 )
 
-// Calculate per-character per-substat "gradients" at initial state using finite differences
-// We use ignore_burst_energy mode to remove noise from energy, and the custom damage collector
-// is used to remove noise from random crit. This allows us to run a very small 25 iterations per gradient calculation
+// 有限差分法を使用して、初期状態でのキャラクターごと・サブステータスごとの「勾配」を計算
+// ignore_burst_energyモードでエネルギーからのノイズを除去し、カスタムダメージコレクターで
+// ランダム会心のノイズを除去する。これにより、勾配計算ごとに非常に少ない
+// 25イテレーションで実行できる
 //
-// TODO: Add setting which allows the user to increase the number of iterations (for cases
-// with inherent randomness like Widsith or random delays)
+// TODO: ユーザーがイテレーション数を増やせる設定を追加する（流浪の楽章やランダム遅延など
+// 本質的なランダム性があるケース向け）
 //
-// TODO: Automatically increase iteration count when stddev is very high?
+// TODO: 標準偏差が非常に高い場合に自動的にイテレーション数を増やす？
 func (stats *SubstatOptimizerDetails) optimizeNonERSubstats() []string {
 	var (
 		opDebug   []string
@@ -34,15 +35,15 @@ func (stats *SubstatOptimizerDetails) optimizeNonERSubstats() []string {
 	return opDebug
 }
 
-// This calculation starts all the relevant substats at maximum allocated liquid.
-// This reduces the chances of hitting a local maximum of stacking atk%/hp%/def%
-// It uses a gradient to determine which substat would cause the least damage loss
-// when removing. This continues until we are within the total liquid limits
-// Initially substats are removed 5 or 2 at a time to speed up the computations
+// この計算は、全ての関連サブステータスを最大割り当てから開始する。
+// これにより、攻撃力%/HP%/防御力%を積み上げる局所的最大値に引っかかる可能性を減らす。
+// 勾配を使用して、1つ除去した時にダメージ損失が最小となるサブステータスを決定する。
+// 合計が液体制限内に収まるまで続ける。
+// 初期は計算を高速化するために5または2ずつ削除する。
 //
-// TODO: Allow the user to specify the removal rate?
+// TODO: ユーザーが削除速度を指定できるようにする？
 //
-// TODO: Multistart gradient descent/ascent from 0 allocated liquid and compare?
+// TODO: 0割り当てからのマルチスタート勾配降下/上昇と比較？
 func (stats *SubstatOptimizerDetails) optimizeNonErSubstatsForChar(
 	idxChar int,
 	char info.CharacterProfile,
@@ -50,7 +51,7 @@ func (stats *SubstatOptimizerDetails) optimizeNonErSubstatsForChar(
 	var opDebug []string
 	opDebug = append(opDebug, fmt.Sprintf("%v", char.Base.Key))
 
-	// Reset favonius char crit rate
+	// 西風武器持ちキャラの会心率をリセット
 	if stats.charWithFavonius[idxChar] {
 		stats.charProfilesCopy[idxChar].Stats[attributes.CR] -= FavCritRateBias * stats.substatValues[attributes.CR] * stats.charSubstatRarityMod[idxChar]
 	}
@@ -58,7 +59,7 @@ func (stats *SubstatOptimizerDetails) optimizeNonErSubstatsForChar(
 	var relevantSubstats []attributes.Stat
 	relevantSubstats = append(relevantSubstats, stats.charRelevantSubstats[idxChar]...)
 
-	// start from max liquid in all relevant substats
+	// 全ての関連サブステータスを最大液体から開始
 	for _, substat := range relevantSubstats {
 		stats.charProfilesCopy[idxChar].Stats[substat] +=
 			float64(stats.charSubstatLimits[idxChar][substat]-stats.charSubstatFinal[idxChar][substat]) *
@@ -73,7 +74,7 @@ func (stats *SubstatOptimizerDetails) optimizeNonErSubstatsForChar(
 		amount := -1
 		switch {
 		case totalSubs-stats.charTotalLiquidSubstats[idxChar] >= 15:
-			amount = -20 // will get clamped to either 10/8 depending on the substat limit
+			amount = -20 // サブステータス上限に応じて10/8にクランプされる
 		case totalSubs-stats.charTotalLiquidSubstats[idxChar] >= 8:
 			amount = -5
 		case totalSubs-stats.charTotalLiquidSubstats[idxChar] >= 4:
@@ -81,14 +82,14 @@ func (stats *SubstatOptimizerDetails) optimizeNonErSubstatsForChar(
 		}
 		substatGradients := stats.calculateSubstatGradientsForChar(idxChar, relevantSubstats, amount)
 
-		// loops multiple gradients while totalSubs-stats.totalLiquidSubstats >= 25
-		// this should be most correct because the first 5 to 6 substats have 0 effect on dps
+		// totalSubs-stats.totalLiquidSubstats >= 25 の間、複数の勾配をループする
+		// 最初の5～6個のサブステータスはDPSに0の影響しかないため、これが最も正確
 		for ok := true; ok; ok = totalSubs-stats.charTotalLiquidSubstats[idxChar] >= 25 {
 			allocDebug := stats.allocateSomeSubstatGradientsForChar(idxChar, char, substatGradients, relevantSubstats, amount)
 			totalSubs = stats.getCharSubstatTotal(idxChar)
 			opDebug = append(opDebug, allocDebug...)
 
-			// filter out substats that are at minimum
+			// 最小値のサブステータスをフィルター
 			newRelevantSubstats := []attributes.Stat{}
 			newSubstatGrad := []float64{}
 			removedGrad := -100000000.0
@@ -100,8 +101,8 @@ func (stats *SubstatOptimizerDetails) optimizeNonErSubstatsForChar(
 					removedGrad = max(removedGrad, substatGradients[idxSub])
 				}
 			}
-			// only update the charRelevantSubstats when the gradient of the removed substats is very small
-			// this is used later in the opt_allstats
+			// 削除されたサブステータスの勾配が非常に小さい場合のみcharRelevantSubstatsを更新
+			// これは後でopt_allstatsで使用される
 			if stats.getCharSubstatTotal(idxChar)-stats.charTotalLiquidSubstats[idxChar] >= 15 ||
 				removedGrad >= -100 {
 				stats.charRelevantSubstats[idxChar] = nil

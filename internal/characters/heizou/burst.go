@@ -25,15 +25,15 @@ const burstHitmark = 34
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.burstTaggedCount = 0
 	burstCB := func(a combat.AttackCB) {
-		// check if enemy
+		// 敵かチェック
 		if a.Target.Type() != targets.TargettableEnemy {
 			return
 		}
-		// max 4 tagged
+		// 最大4体までタグ付け
 		if c.burstTaggedCount == 4 {
 			return
 		}
-		// check for element and queue attack
+		// 元素を確認して攻撃をキューに追加
 		c.burstTaggedCount++
 		if c.Base.Cons >= 4 {
 			c.c4(c.burstTaggedCount)
@@ -52,7 +52,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Mult:       0,
 		NoImpulse:  true,
 	}
-	// should only hit enemies
+	// 敵のみに命中するべき
 	ap := combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 6)
 	ap.SkipTargets[targets.TargettableGadget] = true
 	c.Core.QueueAttack(auraCheck, ap, burstHitmark, burstHitmark, burstCB)
@@ -68,8 +68,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Durability: 25,
 		Mult:       burst[c.TalentLvlBurst()],
 	}
-	//TODO: does heizou burst snapshot?
-	//TODO: heizou burst travel time parameter
+	//TODO: 平蔵の元素爆発はスナップショットするか？
+	//TODO: 平蔵の元素爆発の弾道時間パラメータ
 	c.Core.QueueAttack(
 		ai,
 		combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 6),
@@ -77,7 +77,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstHitmark,
 	)
 
-	//TODO: Check CD with or without delay, check energy consume frame
+	//TODO: CDの遅延の有無、エネルギー消費フレームを確認
 	c.SetCD(action.ActionBurst, 12*60)
 	c.ConsumeEnergy(3)
 	return action.Info{
@@ -88,17 +88,17 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// When Vacuum Slugger hits opponents affected by Hydro/Pyro/Cryo/Electro,
-// these opponents will be afflicted with Windmuster Iris.
-// This Windmuster Iris will explode after a moment and dissipate,
-// dealing AoE DMG of the corresponding aforementioned elemental type.
+// 徑座开闘が水/炎/氷/雷元素の影響を受けた敵に命中すると、
+// 敵に「風の患い」が付与される。
+// 「風の患い」は少し後に爆発して消滅し、
+// 対応する元素の範囲ダメージを与える。
 func (c *char) irisDmg(t combat.Target) {
 	x, ok := t.(combat.TargetWithAura)
 	if !ok {
-		//TODO: check if this is correct? should we be doing nothing here?
+		//TODO: これで正しいか確認が必要。何もしないで良いのか？
 		return
 	}
-	//TODO: does burst iris snapshot
+	//TODO: 元素爆発の風の患いはスナップショットするか
 	aiAbs := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Windmuster Iris",
@@ -126,5 +126,5 @@ func (c *char) irisDmg(t combat.Target) {
 		return
 	}
 
-	c.Core.QueueAttack(aiAbs, combat.NewCircleHitOnTarget(t, nil, 2.5), 0, 40) // if any of this is wrong blame Koli
+	c.Core.QueueAttack(aiAbs, combat.NewCircleHitOnTarget(t, nil, 2.5), 0, 40) // この値が間違っていたらKoliのせい
 }

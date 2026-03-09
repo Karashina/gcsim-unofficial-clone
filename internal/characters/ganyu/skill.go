@@ -31,9 +31,9 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	snap := c.Snapshot(&ai)
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 4)
-	// flower damage immediately
+	// 花のダメージは即時
 	c.Core.QueueAttackWithSnap(ai, snap, ap, 13, c.makeParticleCB())
-	// flower explosion is after 6 seconds
+	// 花の爆発は6秒後
 	c.Core.QueueAttackWithSnap(ai, snap, ap, 373, c.makeParticleCB())
 
 	if c.Base.Cons == 6 {
@@ -45,7 +45,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

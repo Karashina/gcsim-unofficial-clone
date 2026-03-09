@@ -27,16 +27,15 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// A part of the "Millennial Movement" that wanders amidst the winds.
-// Increases ATK by 16%, and when Normal or Charged Attacks hit opponents,
-// the character gains a Sigil of Whispers. This effect can be triggered once
-// every 0.3s. When you possess 4 Sigils of Whispers, all of them will be
-// consumed and all nearby party members will obtain the "Millennial
-// Movement: Banner-Hymn" effect for 12s. "Millennial Movement: Banner-Hymn"
-// increases Normal ATK SPD by 12% and increases ATK by 20%. Once this effect
-// is triggered, you will not gain Sigils of Whispers for 20s. Of the many
-// effects of the "Millennial Movement," buffs of the same type will not
-// stack.
+// 風の中を彷徨う「千年の大楽章」の一部。
+// 攻撃力が16%増加し、通常攻撃または重撃が敵に命中すると
+// 囁きの印を獲得する。この効果は0.3秒に1回発動可能。
+// 囁きの印を4つ所持すると、全て消費され近くの全パーティメンバーが
+// 「千年の大楽章・旗振りの歌」効果を12秒間獲得する。
+// 「千年の大楽章・旗振りの歌」は通常攻撃速度を12%、攻撃力を20%増加させる。
+// この効果が発動すると、20秒間囁きの印を獲得できない。
+// 「千年の大楽章」の多くの効果のうち、
+// 同じタイプのバフは重ね掛け不可。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

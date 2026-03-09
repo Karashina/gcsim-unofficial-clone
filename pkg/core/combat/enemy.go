@@ -25,22 +25,22 @@ type DefMod struct {
 
 type Enemy interface {
 	Target
-	// hp related
+	// HP関連
 	MaxHP() float64
 	HP() float64
-	// hitlag related
+	// ヒットラグ関連
 	ApplyHitlag(factor, dur float64)
 	QueueEnemyTask(f func(), delay int)
-	// modifier related
-	// add
+	// 修飾子関連
+	// 追加
 	AddStatus(key string, dur int, hitlag bool)
 	AddResistMod(mod ResistMod)
 	AddDefMod(mod DefMod)
-	// delete
+	// 削除
 	DeleteStatus(key string)
 	DeleteResistMod(key string)
 	DeleteDefMod(key string)
-	// active
+	// アクティブ
 	StatusIsActive(key string) bool
 	ResistModIsActive(key string) bool
 	DefModIsActive(key string) bool

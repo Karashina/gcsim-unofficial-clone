@@ -23,7 +23,7 @@ var (
 	skillMultiplier = []float64{
 		0,                   // 0 hits
 		1,                   // 1 hits
-		1.05000000074505806, // 2 hits
+		1.05000000074505806, // 2ヒット
 		1.10000000149011612, // 3 hits etc
 		1.15000000596046448,
 		1.20000000298023224,
@@ -35,7 +35,7 @@ var (
 		2,
 	}
 	hitscans = [][]float64{
-		// width, angle, x offset, y offset
+		// 幅、角度、Xオフセット、Yオフセット
 		{0.9, 0, 0, 0},
 		{0.25, 7.911, 0, 0},
 		{0.25, -1.826, 0, 0},
@@ -56,7 +56,7 @@ const (
 	skillPressCDStart = 11
 
 	skillHoldCDStart     = 41
-	skillMaxHoldDuration = 241 // add 1f to account for hold being set to 1 for activation
+	skillMaxHoldDuration = 241 // 長押し有効化時に1が設定されることを考慮して1fを追加
 
 	bulletBoxLength = 11.5
 
@@ -67,10 +67,10 @@ const (
 func init() {
 	skillFrames = make([][][]int, 2)
 
-	// press
+	// 単押し
 	skillFrames[0] = make([][]int, 2)
 
-	// normal
+	// 通常
 	skillFrames[0][0] = frames.InitAbilSlice(40) // E -> E/Q
 	skillFrames[0][0][action.ActionAttack] = 38
 	skillFrames[0][0][action.ActionDash] = 24
@@ -78,7 +78,7 @@ func init() {
 	skillFrames[0][0][action.ActionWalk] = 35
 	skillFrames[0][0][action.ActionSwap] = 38
 
-	// >= 3 shrapnel
+	// 3個以上の榴弾
 	skillFrames[0][1] = frames.InitAbilSlice(41) // E -> E/Q
 	skillFrames[0][1][action.ActionAttack] = 40
 	skillFrames[0][1][action.ActionDash] = 26
@@ -86,10 +86,10 @@ func init() {
 	skillFrames[0][1][action.ActionWalk] = 39
 	skillFrames[0][1][action.ActionSwap] = 40
 
-	// hold
+	// 長押し
 	skillFrames[1] = make([][]int, 2)
 
-	// normal
+	// 通常
 	skillFrames[1][0] = frames.InitAbilSlice(71) // E -> E/Q
 	skillFrames[1][0][action.ActionAttack] = 70
 	skillFrames[1][0][action.ActionDash] = 54
@@ -97,7 +97,7 @@ func init() {
 	skillFrames[1][0][action.ActionWalk] = 65
 	skillFrames[1][0][action.ActionSwap] = 69
 
-	// >= 3 shrapnel
+	// 3個以上の榴弾
 	skillFrames[1][1] = frames.InitAbilSlice(73) // E -> E/Q
 	skillFrames[1][1][action.ActionDash] = 56
 	skillFrames[1][1][action.ActionJump] = 56
@@ -106,28 +106,28 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// frame related setup
+	// フレーム関連の設定
 	holdIndex := 0
 	shrapnelIndex := 0
-	firingTime := skillPressCDStart // assume tap as default
+	firingTime := skillPressCDStart // デフォルトで単押しと仮定
 
-	// check hold
-	// hold is added to minimum hold length
+	// 長押しをチェック
+	// 長押し時間は最小長押し時間に加算される
 	hold := max(p["hold"], 0)
 	if hold > 0 {
-		// use hold skill frames
+		// 長押しスキルフレームを使用
 		holdIndex = 1
-		// cap hold to max hold duration over minimum hold
+		// 最小長押しを超えた最大長押し時間でキャップ
 		if hold > skillMaxHoldDuration {
 			hold = skillMaxHoldDuration
 		}
-		// subtract 1 to account for needing to supply > 0 to indicate hold
+		// 長押しを示すために>0を供給する必要があるため1を引く
 		hold -= 1
-		// calc firingTime
+		// firingTimeを計算
 		firingTime = skillHoldCDStart + hold
 
-		// crystal pulling related
-		// At 0.2, tap is converted to hold, and the suction begins
+		// 結晶引き寄せ関連
+		// 0.2で単押しが長押しに変換され、吸引が開始
 		firingTimeF := c.Core.F + firingTime
 		for i := 12; i < firingTime; i += 30 {
 			c.pullCrystals(firingTimeF, i)
@@ -154,18 +154,18 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			}
 			c.Core.Log.NewEvent(fmt.Sprintf("firing %v crystal shrapnel", c.shrapnel), glog.LogCharacterEvent, c.Index)
 
-			// snap and add buffs
+			// スナップショットしてバフを追加
 			snap := c.Snapshot(&ai)
 			c.addShrapnelBuffs(&snap, c.shrapnel)
 
-			// Looks for enemies in the path of each bullet
-			// Initially trims enemies to check by scanning only the hit zone
+			// 各弾丸の軌道上の敵を検索
+			// まず命中ゾーンのみをスキャンしてチェック対象を絞り込み
 			shots := 5 + min(c.shrapnel, 3)*2
 			for _, t := range c.Core.Combat.EnemiesWithinArea(
 				combat.NewBoxHitOnTarget(c.Core.Combat.Player(), geometry.Point{X: -0.20568, Y: -0.043841}, 4.0722, 11.5461),
 				nil,
 			) {
-				// Tallies up the hits
+				// ヒット数を集計
 				hits := 0
 				for i := 0; i < shots; i++ {
 					if ok, _ := t.AttackWillLand(
@@ -179,7 +179,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 					}
 				}
 				c.Core.Log.NewEvent(fmt.Sprintf("target %v hit %v times", t.Key(), hits), glog.LogCharacterEvent, c.Index)
-				// Applies damage based on the hits
+				// ヒット数に基づいてダメージを適用
 				ai.Mult = skillshotgun[c.TalentLvlSkill()] * skillMultiplier[hits]
 				c.Core.QueueAttackWithSnap(
 					ai,
@@ -192,15 +192,15 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			}
 			c.surgingBlade(c.shrapnel)
 
-			// trigger A1 and C1 on firing
+			// 発射時に固有天賦1と1凸を発動
 			c.a1()
 			c.c1(c.shrapnel)
 
-			// remove the shrapnel after firing
+			// 発射後にShrapnelを除去
 			if c.Base.Cons < 6 {
 				c.shrapnel = 0
 			} else {
-				c.shrapnel = max(c.shrapnel-3, 0) // C6 keeps any more than the three
+				c.shrapnel = max(c.shrapnel-3, 0) // 6凸は3を超える分を保持
 			}
 		},
 		firingTime,
@@ -232,10 +232,10 @@ func (c *char) particleCB(a combat.AttackCB) {
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Geo, c.ParticleDelay)
 }
 
-// add the buffs by modifying snap
-// needs to be done this way so that excess calculated during firing is also used for that firing's surgingBlade
+// snapを変更してバフを追加
+// 発射時に計算された余剰分がその発射のsurgingBladeにも使用されるためこの方法が必要
 func (c *char) addShrapnelBuffs(snap *combat.Snapshot, count int) {
-	// Calculate buffs based on excess shrapnel
+	// 余剰Shrapnelに基づくバフを計算
 	excess := float64(max(count-3, 0))
 
 	dmg := 0.15 * excess
@@ -253,14 +253,14 @@ func (c *char) addShrapnelBuffs(snap *combat.Snapshot, count int) {
 	c.Core.Log.NewEvent("adding shrapnel buffs", glog.LogCharacterEvent, c.Index).Write("dmg%", dmg).Write("cr", cr).Write("cd", cd)
 }
 
-// shrapnelGain adds Shrapnel Stacks when a Crystallise Shield is picked up.
-// Stacks should last 300s but this is way too long to bother
-// When a character in the party obtains an Elemental Shard created from the Crystallize reaction,
-// Navia will gain 1 Crystal Shrapnel charge. Navia can hold up to 6 charges of Crystal Shrapnel at once.
-// Each time Crystal Shrapnel gain is triggered, the duration of the Shards you have already will be reset.
+// Shrapnelスタックを結晶化シールド拾得時に追加。
+// スタックは300秒持続だが長すぎるので省略。
+// パーティメンバーが結晶化反応で生成された元素の欠片を獲得すると、
+// ナヴィアはCrystal Shrapnelを1スタック獲得。最大6スタック保持可能。
+// Crystal Shrapnel獲得時、既存の欠片の持続時間がリセットされる。
 func (c *char) shrapnelGain() {
 	c.Core.Events.Subscribe(event.OnShielded, func(args ...interface{}) bool {
-		// Check shield
+		// シールドをチェック
 		shd := args[0].(shield.Shield)
 		if shd.Type() != shield.Crystallize {
 			return false
@@ -290,18 +290,18 @@ func (c *char) surgingBlade(count int) {
 		Mult:       skillblade[c.TalentLvlSkill()],
 	}
 
-	// determine attack pos
+	// 攻撃位置を決定
 	player := c.Core.Combat.Player()
-	// shotgun area
+	// ショットガン範囲
 	e := c.Core.Combat.ClosestEnemyWithinArea(combat.NewBoxHitOnTarget(c.Core.Combat.Player(), geometry.Point{X: -0.20568, Y: -0.043841}, 4.0722, 11.5461), nil)
-	// pos is at player + Y: 3.6 by default
+	// デフォルト位置はプレイヤー + Y: 3.6
 	pos := geometry.CalcOffsetPoint(player.Pos(), geometry.Point{Y: 3.6}, player.Direction())
 	if e != nil {
-		// enemy in shotgun area: use their pos
+		// ショットガン範囲に敵がいる: 敵の位置を使用
 		pos = e.Pos()
 	}
 
-	// aligned cd trigger is delayed and only once it's triggered the aligned attack task should be queued
+	// アラインドCDトリガーは遅延され、トリガー後にアラインド攻撃タスクをキューすべき
 	c.QueueCharTask(func() {
 		c.AddStatus(arkheICDKey, 7*60, true)
 		c.QueueCharTask(func() {
@@ -317,29 +317,29 @@ func (c *char) surgingBlade(count int) {
 	}, 28)
 }
 
-// pull crystals to Navia. This has a range of 12m from datamine, so
-// check every every 30f.
+// ナヴィアに結晶を引き寄せる。データマインによると範囲12mのため、
+// 30fごとにチェック。
 func (c *char) pullCrystals(firingTimeF, i int) {
 	c.Core.Tasks.Add(func() {
 		for _, g := range c.Core.Combat.Gadgets() {
 			cs, ok := g.(*reactable.CrystallizeShard)
-			// skip if not a shard
+			// 欠片でない場合はスキップ
 			if !ok {
 				continue
 			}
-			// If shard is out of 12m range, skip
+			// 欠片が12m範囲外ならスキップ
 			if !cs.IsWithinArea(combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 12)) {
 				continue
 			}
 
-			// approximate sucking in as 0.4m per frame (~8m distance took 20f to arrive at gorou)
+			// 吸引速度を1フレームあたり約0.4mと見積もり（約8mの距離で五郎に到20fかかった）
 			distance := cs.Pos().Distance(c.Core.Combat.Player().Pos())
 			travel := int(math.Ceil(distance / 0.4))
-			// if the crystal won't arrive before the shot is fired, skip
+			// 結晶が発射前に到着しない場合はスキップ
 			if c.Core.F+travel >= firingTimeF {
 				continue
 			}
-			// special check to account for edge case if shard just spawned and will arrive before it can be picked up
+			// 結晶が生成直後で拾える前に到着するエッジケースのための特別チェック
 			if c.Core.F+travel < cs.EarliestPickup {
 				continue
 			}

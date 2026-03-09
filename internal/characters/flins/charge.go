@@ -18,10 +18,10 @@ func init() {
 	chargeFrames[action.ActionAttack] = 59
 }
 
-// Charged Attack - part of Pocztowy Demonspear
+// 重撃 - Pocztowy Demonspearの一部
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	if c.StatusIsActive(skillKey) {
-		return c.chargeE() // go to Electro-infused charge attack during Manifest Flame form
+		return c.chargeE() // 「顯現の炎」形態中は雷元素付与重撃へ
 	}
 
 	ai := combat.AttackInfo{
@@ -54,7 +54,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// Charged Attack during Manifest Flame form (Electro-infused)
+// 「顯現の炎」形態中の重撃（雷元素付与）
 // Ancient Rite: Arcane Light
 func (c *char) chargeE() (action.Info, error) {
 	ai := combat.AttackInfo{

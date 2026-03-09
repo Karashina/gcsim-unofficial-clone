@@ -28,18 +28,18 @@ func NewSubstatOptimizer(optionsMap map[string]float64, sugarLog *zap.SugaredLog
 	return &o
 }
 
-// Substat Optimization strategy is very simplistic right now:
-// This is not fully optimal - see other comments in code
-// 1) User sets team, weapons, artifact sets/main stats, and rotation
-// 2) Given those, for each character, sim picks ER substat value that functionally maximizes DPS Mean/SD,
-// subject to a penalty on high ER values
-//   - Strategy is to just do a dumb grid search over ER substat values for each character
-//   - ER substat values are set in increments of 2 to make the search easier
+// サブステータス最適化の戦略は現時点では非常にシンプル:
+// これは完全に最適ではない - コード内の他のコメントを参照
+// 1) ユーザーがチーム、武器、聖遺物セット/メインステータス、ローテーションを設定
+// 2) それらを前提に、各キャラクターについて、DPS平均/標準偏差を実質的に最大化するERサブステータス値を選択する
+// （高ER値にはペナルティが課される）
+//   - 戦略は各キャラクターのERサブステータス値に対する単純なグリッドサーチ
+//   - ERサブステータス値は探索を容易にするため2刻みで設定
 //
-// 3) Given ER values, we then optimize the other substats by doing a "gradient descent" (but not really) method
+// 3) ER値が決まったら、"勾配降下法"（実際にはそうではない）で他のサブステータスを最適化する
 func (o *SubstatOptimizer) Run(cfg string, simopt simulator.Options, simcfg *info.ActionList, gcsl ast.Node) {
 	simcfg.Settings.Iterations = int(o.optionsMap["sim_iter"])
-	// disable stats collection since optimizer has no use for it
+	// 最適化では統計情報の収集は不要なので無効化する
 	simcfg.Settings.CollectStats = []string{""}
 
 	o.details = NewSubstatOptimizerDetails(
@@ -62,7 +62,7 @@ func (o *SubstatOptimizer) Run(cfg string, simopt simulator.Options, simcfg *inf
 		o.details.charProfilesCopy[i] = o.details.charProfilesERBaseline[i].Clone()
 	}
 
-	// TODO: Maybe add a configuration to only calculate ER?
+	// TODO: ERのみ計算する設定を追加すべきかもしれない？
 	o.details.optimizeERSubstats()
 
 	o.logger.Info("Calculating optimal DMG substat distribution...")
@@ -80,8 +80,8 @@ func (o *SubstatOptimizer) Run(cfg string, simopt simulator.Options, simcfg *inf
 	}
 }
 
-// Final output
-// This doesn't take much time relatively speaking, so just always do the processing...
+// 最終出力
+// 相対的にそれほど時間はかからないので、常に処理を実行する...
 func (o *SubstatOptimizer) PrettyPrint(output string, statsFinal *SubstatOptimizerDetails) string {
 	charNames := make(map[keys.Char]string)
 	o.logger.Info("Final config substat strings:")
@@ -153,7 +153,7 @@ func NewSubstatOptimizerDetails(
 	s.substatValues = make([]float64, attributes.EndStatType)
 	s.mainstatValues = make([]float64, attributes.EndStatType)
 
-	// TODO: Is this actually the best way to set these values or am I missing something..?
+	// TODO: この値の設定方法は本当に最善なのか、何か見落としがあるのでは..？
 	s.substatValues[attributes.ATKP] = 0.0496
 	s.substatValues[attributes.CR] = 0.0331
 	s.substatValues[attributes.CD] = 0.0662
@@ -184,10 +184,10 @@ func NewSubstatOptimizerDetails(
 	s.mainstatValues[attributes.PhyP] = 0.583
 	s.mainstatValues[attributes.Heal] = 0.359
 
-	s.mainstatTol = 0.005       // current main stat tolerance is 0.5%
-	s.fourstarMod = 0.746514762 // The average coefficient to convert 5* main stats to 4* main stats
+	s.mainstatTol = 0.005       // 現在のメインステータス許容誤差は0.5%
+	s.fourstarMod = 0.746514762 // 5★メインステータスを4★に変換する平均係数
 
-	// Final output array that holds [character][substat_count]
+	// [キャラクター][サブステータス数] を保持する最終出力配列
 	s.charSubstatFinal = make([][]int, len(simcfg.Characters))
 	for i := range simcfg.Characters {
 		s.charSubstatFinal[i] = make([]int, attributes.EndStatType)
@@ -198,16 +198,16 @@ func NewSubstatOptimizerDetails(
 	s.charProfilesInitial = make([]info.CharacterProfile, len(simcfg.Characters))
 	s.charTotalLiquidSubstats = make([]int, len(simcfg.Characters))
 
-	// Need to make an exception in energy calcs for these characters for optimization purposes
+	// 最適化のため、これらのキャラクターのエネルギー計算で例外処理が必要
 	s.charWithFavonius = make([]bool, len(simcfg.Characters))
-	// Give all characters max ER to set initial state
+	// 初期状態を設定するため全キャラクターに最大ERを付与
 	s.charProfilesERBaseline = make([]info.CharacterProfile, len(simcfg.Characters))
 	s.charProfilesCopy = make([]info.CharacterProfile, len(simcfg.Characters))
 	s.gcsl = gcsl
 
 	s.charRelevantSubstats = make([][]attributes.Stat, len(simcfg.Characters))
 	for i := range simcfg.Characters {
-		// ER is omitted because there is a dedicated ER step.
+		// ERは専用のERステップがあるため省略する。
 		s.charRelevantSubstats[i] = []attributes.Stat{
 			attributes.HPP,
 			attributes.HP,
@@ -224,7 +224,7 @@ func NewSubstatOptimizerDetails(
 	return &s
 }
 
-// returns -1 if the stat is too low, 0 if in tolerance, 1 if the stat is too high
+// ステータスが低すぎる場合は-1、許容範囲内なら0、高すぎる場合は1を返す
 func (stats *SubstatOptimizerDetails) isMainStatInTolerance(idxChar, idxStat, fourStarCount, fiveStarCount int) int {
 	lower := stats.mainstatValues[idxStat] * (1 - stats.mainstatTol) * (float64(fiveStarCount) + stats.fourstarMod*float64(fourStarCount))
 	upper := stats.mainstatValues[idxStat] * (1 + stats.mainstatTol) * (float64(fiveStarCount) + stats.fourstarMod*float64(fourStarCount))
@@ -239,11 +239,11 @@ func (stats *SubstatOptimizerDetails) isMainStatInTolerance(idxChar, idxStat, fo
 	}
 }
 
-// when used with possibleMainstatCount[i][0] * 4value + possibleMainstatCount[i][0] * 5value, this array will be in increasing order
+// possibleMainstatCount[i][0] * 4★値 + possibleMainstatCount[i][1] * 5★値 で使用する場合、この配列は昇順になる
 var possibleMainstatCount = [][]int{{1, 0}, {0, 1}, {2, 0}, {1, 1}, {0, 2}, {3, 0}, {2, 1}, {1, 2}, {0, 3}}
 
-// Obtain substat count limits based on main stats and also determine 4* set status
-// TODO: Make the sets fit the requirements of sands/circlet/goblet stats to prevent 2x DMG% or 2x Crit or 2x ER
+// メインステータスに基づいてサブステータス数の上限を取得し、4★セットの状態も判定する
+// TODO: 時計/冠/杯のステータス要件にセットを適合させ、DMG%やCritやERの重複を防止する
 func (stats *SubstatOptimizerDetails) setStatLimits() {
 	for i := range stats.simcfg.Characters {
 		stats.setStatLimitsPerChar(i)
@@ -277,16 +277,15 @@ func (stats *SubstatOptimizerDetails) setStatLimitsPerChar(i int) {
 		stats.optimizer.logger.Warn(char.Base.Key, " has ", fourStarMainsCount+fiveStarMainsCount, "x mainstats but expected 5")
 	}
 
-	// TODO: replace 2 with a user configurable reduction per 4*
+	// TODO: 2を4★ごとのユーザー設定可能な削減値に置き換える
 	stats.charTotalLiquidSubstats[i] = max(stats.totalLiquidSubstats-2*fourStarCount, 0)
 
-	// the overall rarity multiplier goes down by 0.04 per four star
+	// 全体のレアリティ倍率は4★1つにつき0.04ずつ低下する
 	stats.charSubstatRarityMod[i] = 1.0 - 0.04*float64(fourStarCount)
 }
 
-// Returns (# of 4* mains, # of 5* mains) for the given stat. If the amount does not fit,
-// this function will return a (x,y) such that x and y give a maximum stat value that
-// is less than the value of the stat of the character
+// 指定されたステータスに対する（4★メイン数, 5★メイン数）を返す。合計が適合しない場合、
+// この関数はxとyがキャラクターのステータス値を超えない最大値となる(x,y)を返す
 func (stats *SubstatOptimizerDetails) setStatLimitsPerCharMainStat(i, idxStat int, checkFourStars bool) (int, int) {
 	stat := stats.mainstatValues[idxStat]
 	char := &stats.simcfg.Characters[i]
@@ -300,26 +299,25 @@ func (stats *SubstatOptimizerDetails) setStatLimitsPerCharMainStat(i, idxStat in
 
 	var main4, main5 int
 
-	// count[0] is # of 4* mains
-	// count[1] is # of 5* mains
+	// count[0] は4★メインの数
+	// count[1] は5★メインの数
 	for _, count := range possibleMainstatCount {
 		if !checkFourStars && count[0] > 0 {
 			continue
 		}
 		inTol := stats.isMainStatInTolerance(i, idxStat, count[0], count[1])
 		if inTol == 0 {
-			// Currently the max limit per substat is not adjusted for 4* mains
+			// 現在、サブステータスごとの上限は4★メインに対して調整されていない
 			stats.charSubstatLimits[i][idxStat] = stats.indivSubstatLiquidCap - (stats.fixedSubstatCount * (count[0] + count[1]))
 			return count[0], count[1]
 		}
 
-		// The possibleMainstatCount array is in increasing order.
-		// Since the stat on the character is too low, we can exit the loop early
+		// possibleMainstatCount 配列は昇順である。
+		// キャラクターのステータスが低すぎるため、ループを早期終了できる
 		if inTol < 0 {
 			break
 		}
-		// update such that main4 and main5 give a maximum stat value that
-		// is less than the value of the stat of the character
+		// main4 と main5 がキャラクターのステータス値を超えない最大値となるよう更新する
 		main4 = count[0]
 		main5 = count[1]
 	}
@@ -335,7 +333,7 @@ func (stats *SubstatOptimizerDetails) setStatLimitsPerCharMainStat(i, idxStat in
 	return main4, main5
 }
 
-// Helper function to pretty print substat counts. Stolen from similar function that takes in the float array
+// サブステータス数を見やすく出力するヘルパー関数。float配列を受け取る類似関数から流用
 func PrettyPrintStatsCounts(statsCounts []int) string {
 	var sb strings.Builder
 	sb.WriteString("Liquid Substat Counts: ")

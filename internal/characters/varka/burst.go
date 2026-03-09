@@ -21,7 +21,7 @@ func init() {
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	lvl := c.TalentLvlBurst()
 
-	// 1st Hit: converts to Other element if eligible, otherwise Anemo
+	// 1打目: 該当する場合は他元素に変換、それ以外は風元素
 	ele1 := attributes.Anemo
 	if c.hasOtherEle {
 		ele1 = c.otherElement
@@ -48,7 +48,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstHitmark1, burstHitmark1,
 	)
 
-	// 2nd Hit: always Anemo
+	// 2打目: 常に風元素
 	ai2 := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               "Northwind Avatar: 2nd Hit",
@@ -70,9 +70,9 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstHitmark2, burstHitmark2,
 	)
 
-	// CD 15s, Energy cost 60
+	// CD 15秒、エネルギーコスト 60
 	c.SetCD(action.ActionBurst, 15*60)
-	c.ConsumeEnergy(3) // frame delay for energy drain
+	c.ConsumeEnergy(3) // エネルギー消費のフレーム遅延
 
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),

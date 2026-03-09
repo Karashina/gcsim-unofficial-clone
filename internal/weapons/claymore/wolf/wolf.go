@@ -26,13 +26,13 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Increases ATK by 20%. On hit, attacks against opponents with less than 30%
-	// HP increase all party members' ATK by 40% for 12s. Can only occur once
-	// every 30s.
+	// 攻撃力が20%増加。命中時、HPが30%未満の敵への攻撃で
+	// 全パーティメンバーの攻撃力が12秒間40%増加。30秒に1回のみ
+	// 発動可能。
 	w := &Weapon{}
 	r := p.Refine
 
-	// flat atk% increase
+	// 固定攻撃力%増加
 	val := make([]float64, attributes.EndStatType)
 	val[attributes.ATKP] = 0.15 + 0.05*float64(r)
 	char.AddStatMod(character.StatMod{
@@ -43,7 +43,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		},
 	})
 
-	// under hp increase
+	// HP閾値以下での攻撃力増加
 	bonus := make([]float64, attributes.EndStatType)
 	bonus[attributes.ATKP] = 0.3 + 0.1*float64(r)
 	const icdKey = "wolf-gravestone-icd"

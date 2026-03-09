@@ -27,7 +27,7 @@ func (c *char) passive() {
 func (c *char) a1OnKill() {
 	c.Core.Events.Subscribe(event.OnTargetDied, func(args ...interface{}) bool {
 		e, ok := args[0].(*enemy.Enemy)
-		// ignore if not an enemy
+		// 敵でなければ無視
 		if !ok {
 			return false
 		}
@@ -35,7 +35,7 @@ func (c *char) a1OnKill() {
 		if !e.StatusIsActive(directiveKey) {
 			return false
 		}
-		// always max level debt
+		// 常に最大レベルの負債
 		newDebt := directiveScaling[len(directiveScaling)-1] * c.MaxHP()
 		if c.StatusIsActive(directiveLimitKey) {
 			newDebt = min(c.skillDebtMax-c.skillDebt, newDebt)
@@ -78,5 +78,5 @@ func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
-	// Resistances are not implemented
+	// 耐性は未実装
 }

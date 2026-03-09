@@ -30,7 +30,7 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// 0 for base dmg, 1 for 1x bonus, 2 for max bonus
+	// 0=基礎ダメージ, 1=1倍ボーナス, 2=最大ボーナス
 	counter := p["counter"]
 	if counter >= 2 {
 		counter = 2
@@ -60,7 +60,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.makeParticleCB(counter),
 	)
 
-	// add shield
+	// シールドを追加
 	c.Core.Player.Shields.Add(&shield.Tmpl{
 		ActorIndex: c.Index,
 		Target:     c.Index,
@@ -69,7 +69,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		Name:       "Beidou Skill",
 		HP:         shieldPer[c.TalentLvlSkill()]*c.MaxHP() + shieldBase[c.TalentLvlSkill()],
 		Ele:        attributes.Electro,
-		Expires:    c.Core.F + skillHitmark, // last until hitmark
+		Expires:    c.Core.F + skillHitmark, // ヒットマークまで持続
 	})
 
 	c.SetCDWithDelay(action.ActionSkill, 450, 4)
@@ -77,7 +77,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -92,7 +92,7 @@ func (c *char) makeParticleCB(counter int) combat.AttackCBFunc {
 		}
 		c.AddStatus(particleICDKey, 0.4*60, true)
 
-		// 2 if no hit, 3 if 1 hit, 4 if perfect
+		// ヒットなし=2, 1ヒット=3, 完全カウンター=4
 		c.Core.QueueParticle(c.Base.Key.String(), 2+float64(counter), attributes.Electro, c.ParticleDelay)
 	}
 }

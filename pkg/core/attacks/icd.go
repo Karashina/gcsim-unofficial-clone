@@ -37,7 +37,7 @@ const (
 	ICDTagSwirlElectro
 	ICDTagBurningDamage
 	ICDTagBloomDamage
-	ICDTagBountifulCoreDamage // special tag for nilou
+	ICDTagBountifulCoreDamage // ニィロウ用の特別タグ
 	ICDTagBurgeonDamage
 	ICDTagHyperbloomDamage
 	ICDTagLCDamage
@@ -46,7 +46,7 @@ const (
 	EndDefaultICDTags
 )
 
-// group dictate both the sequence and the reset timer
+// グループはシーケンスとリセットタイマーの両方を決定
 type ICDGroup int // same ICD group shares the same timer
 
 const (
@@ -94,8 +94,8 @@ func init() {
 	ICDGroupDamageSequence[ICDGroupPoleExtraAttack] = []float64{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupDamageSequence[ICDGroupReactionA] = []float64{1, 1, 0, 0, 0, 0, 0, 0, 0, 0}
 	ICDGroupDamageSequence[ICDGroupReactionB] = []float64{1, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	// actual data: {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0}
-	// however there seems to be no limit to the amount of burning dmg a target can take
+	// 実際のデータ: {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0}
+	// ただし、ターゲットが受ける燃焼ダメージの量に制限はないようである
 	ICDGroupDamageSequence[ICDGroupBurning] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupTravelerDewdrop] = []float64{1, 1, 1, 1, 1, 1, 1, 1}
 	ICDGroupDamageSequence[ICDGroupTravelerBurst] = []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}

@@ -56,10 +56,10 @@ func (b *Favonius) NewWeapon(c *core.Core, char *character.CharWrapper, p info.W
 		}
 		c.Log.NewEvent("favonius proc'd", glog.LogWeaponEvent, char.Index)
 
-		//TODO: used to be 80
+		//TODO: 以前は80だった
 		c.QueueParticle("favonius-"+char.Base.Key.String(), 3, attributes.NoElement, char.ParticleDelay)
 
-		// adds a modifier to track icd; this should be fine since it's per char and not global
+		// ICDを追跡するためにモディファイアを追加。キャラごとでグローバルではないため問題なし
 		char.AddStatus(icdKey, cd, true)
 
 		return false

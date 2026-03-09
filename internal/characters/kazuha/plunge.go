@@ -15,8 +15,8 @@ import (
 var plungePressFrames []int
 var plungeHoldFrames []int
 
-// a1 is 1 frame before this
-// collision is 6 frame before this
+// 固有天賦1はこの1フレーム前
+// 衝突判定はこの6フレーム前
 const plungePressHitmark = 36
 const plungeHoldHitmark = 41
 
@@ -33,7 +33,7 @@ const lowPlungeRadius = 3.0
 const highPlungePoiseDMG = 150.0
 const highPlungeRadius = 5.0
 
-// TODO: missing plunge -> skill
+// TODO: plunge -> skill が未取得
 func init() {
 	// skill (press) -> high plunge -> x
 	plungePressFrames = frames.InitAbilSlice(55) // max
@@ -43,7 +43,7 @@ func init() {
 
 	// skill (hold) -> high plunge -> x
 	plungeHoldFrames = frames.InitAbilSlice(61) // max
-	plungeHoldFrames[action.ActionSkill] = 60   // uses burst frames
+	plungeHoldFrames[action.ActionSkill] = 60   // 元素爆発フレームを使用
 	plungeHoldFrames[action.ActionBurst] = 60
 	plungeHoldFrames[action.ActionDash] = 48
 	plungeHoldFrames[action.ActionJump] = 55
@@ -68,9 +68,9 @@ func init() {
 	highPlungeFrames[action.ActionSwap] = 55
 }
 
-// Low Plunge attack damage queue generator
-// Use the "collision" optional argument if you want to do a falling hit on the way down
-// Default = 0
+// 低空落下攻撃のダメージキュー生成
+// 落下中の攻撃判定を行いたい場合は "collision" オプション引数を使用
+// デフォルト = 0
 func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 	defer c.Core.Player.SetAirborne(player.Grounded)
 	if c.Core.Player.LastAction.Type == action.ActionSkill {
@@ -88,7 +88,7 @@ func (c *char) LowPlungeAttack(p map[string]int) (action.Info, error) {
 func (c *char) lowPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 落下衝突判定の有無
 	}
 
 	if collision > 0 {
@@ -137,7 +137,7 @@ func (c *char) HighPlungeAttack(p map[string]int) (action.Info, error) {
 }
 
 func (c *char) skillPlunge(p map[string]int) (action.Info, error) {
-	// last action must be skill without glide cancel
+	// 最後のアクションは滑空キャンセルなしのスキルである必要がある
 	if c.Core.Player.LastAction.Param["glide_cancel"] != 0 {
 		return action.Info{}, errors.New("only plunge after skill without glide cancel")
 	}
@@ -146,22 +146,22 @@ func (c *char) skillPlunge(p map[string]int) (action.Info, error) {
 		State: action.PlungeAttackState,
 	}
 
-	//TODO: is this accurate?? these should be the hitmarks
+	//TODO: これは正確？これらがヒットマークであるべき
 	var hitmark int
 	if c.Core.Player.LastAction.Param["hold"] == 0 {
 		hitmark = plungePressHitmark
 		act.Frames = frames.NewAbilFunc(plungePressFrames)
 		act.AnimationLength = plungePressFrames[action.InvalidAction]
-		act.CanQueueAfter = plungePressFrames[action.ActionDash] // earliest cancel
+		act.CanQueueAfter = plungePressFrames[action.ActionDash] // 最速キャンセル
 	} else {
 		hitmark = plungeHoldHitmark
 		act.Frames = frames.NewAbilFunc(plungeHoldFrames)
 		act.AnimationLength = plungeHoldFrames[action.InvalidAction]
-		act.CanQueueAfter = plungeHoldFrames[action.ActionDash] // earliest cancel
+		act.CanQueueAfter = plungeHoldFrames[action.ActionDash] // 最速キャンセル
 	}
 	collisionParam, ok := p["collision"]
 	if !ok {
-		collisionParam = 0 // Whether or not collision hit
+		collisionParam = 0 // 落下衝突判定の有無
 	}
 
 	if collisionParam > 0 {
@@ -180,7 +180,7 @@ func (c *char) skillPlunge(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 1), hitmark-6, hitmark-6)
 	}
 
-	// aoe dmg
+	// 範囲ダメージ
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
 		Abil:           "High Plunge",
@@ -202,7 +202,7 @@ func (c *char) skillPlunge(p map[string]int) (action.Info, error) {
 		hitmark,
 	)
 
-	// a1 if applies
+	// 固有天賦1を適用（該当する場合）
 	if c.a1Absorb != attributes.NoElement {
 		ai := combat.AttackInfo{
 			ActorIndex:     c.Index,
@@ -233,7 +233,7 @@ func (c *char) skillPlunge(p map[string]int) (action.Info, error) {
 func (c *char) highPlungeXY(p map[string]int) action.Info {
 	collision, ok := p["collision"]
 	if !ok {
-		collision = 0 // Whether or not collision hit
+		collision = 0 // 落下衝突判定の有無
 	}
 
 	if collision > 0 {
@@ -267,8 +267,8 @@ func (c *char) highPlungeXY(p map[string]int) action.Info {
 	}
 }
 
-// Plunge normal falling attack damage queue generator
-// Standard - Always part of high/low plunge attacks
+// 落下攻撃（通常落下）のダメージキュー生成
+// 標準 - 高空/低空落下攻撃に常に含まれる
 func (c *char) plungeCollision(delay int) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,

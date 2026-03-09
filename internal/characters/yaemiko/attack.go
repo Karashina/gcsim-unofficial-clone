@@ -48,7 +48,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		Mult:       attack[c.NormalCounter][c.TalentLvlAttack()],
 	}
 
-	// TODO: does it snapshot?
+	// TODO: スナップショットされる？
 	c.Core.QueueAttack(
 		ai,
 		combat.NewBoxHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 2, 8),

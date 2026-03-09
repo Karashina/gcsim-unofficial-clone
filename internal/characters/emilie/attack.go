@@ -25,7 +25,7 @@ var (
 	}
 	attackHitboxes = [][]float64{
 		{2},
-		{1.6, 3}, // box
+		{1.6, 3}, // 矩形
 		{2.5},
 		{3},
 	}
@@ -50,7 +50,7 @@ func init() {
 
 	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3], 71) // N4 -> Walk
 	attackFrames[3][action.ActionAttack] = 70
-	attackFrames[3][action.ActionCharge] = 500 // TODO: this action is illegal; need better way to handle it
+	attackFrames[3][action.ActionCharge] = 500 // TODO: このアクションは不正。より良い処理方法が必要
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {

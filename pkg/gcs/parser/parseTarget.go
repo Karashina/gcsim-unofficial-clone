@@ -19,7 +19,7 @@ func parseTarget(p *Parser) (parseFn, error) {
 		switch n.Typ {
 		case ast.ItemIdentifier:
 			switch n.Val {
-			case "pos": // pos will end up defaulting to 0,0 if not set
+			case "pos": // 未設定の場合、posはデフォルトで0,0になる
 				// pos=1.00,2,00
 				if _, err := p.consume(ast.ItemAssign); err != nil {
 					return nil, err
@@ -80,7 +80,7 @@ func parseTarget(p *Parser) (parseFn, error) {
 				r.Level, err = itemNumberToInt(n)
 			}
 		case ast.ItemStatKey:
-			// should be hp
+			// hpであるべき
 			if ast.StatKeys[n.Val] != attributes.HP {
 				return nil, fmt.Errorf("<target> bad token at line %v - %v: %v", n.Line, n.Pos, n)
 			}
@@ -94,7 +94,7 @@ func parseTarget(p *Parser) (parseFn, error) {
 				r.Modified = true
 			}
 		case ast.KeywordResist:
-			// this sets all resistance
+			// 全耐性を設定
 			if _, err := p.consume(ast.ItemAssign); err != nil {
 				return nil, err
 			}
@@ -118,7 +118,7 @@ func parseTarget(p *Parser) (parseFn, error) {
 				return nil, err
 			}
 			r.ParticleDropThreshold = amt
-			r.ParticleDrops = nil // separate particle system
+			r.ParticleDrops = nil // 独立した粒子システム
 			r.ParticleElement = attributes.NoElement
 			r.Modified = true
 		case ast.KeywordParticleDropCount:
@@ -172,16 +172,16 @@ func (p *Parser) acceptOptionalTargetParams() (enemy.TargetParams, error) {
 		Particles:    true,
 	}
 
-	// check for params
+	// パラメータを確認
 	n := p.next()
 	if n.Typ != ast.ItemLeftSquareParen {
 		p.backup()
 		return result, nil
 	}
 
-	// loop until we hit square paren
+	// 角括弧に到達するまでループ
 	for {
-		// we're expecting ident = int
+		// 識別子 = 整数 の形式が期待される
 		i, err := p.consume(ast.ItemIdentifier)
 		if err != nil {
 			return result, err
@@ -212,7 +212,7 @@ func (p *Parser) acceptOptionalTargetParams() (enemy.TargetParams, error) {
 		case ast.ItemRightSquareParen:
 			return result, nil
 		case ast.ItemComma:
-			// do nothing, keep going
+			// 何もせず続行
 		default:
 			return result, fmt.Errorf("ln%v: <action param> bad token %v", n.Line, n)
 		}

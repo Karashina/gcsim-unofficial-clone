@@ -40,11 +40,11 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// ATK is increased by 16/20/24/28/32%. When current HP increases or decreases,
-// Normal Attack DMG will be increased by 16/20/24/28/32%
-// and Charged Attack DMG will be increased by 14/17.5/21/24.5/28% for 4s. Max 3 stacks.
-// This effect can be triggered once every 0.3s.
-// When the wielder has 3 stacks, ATK SPD will be increased by 8/10/12/14/16%.
+// 攻撃力が16/20/24/28/32%増加する。現在HPが増加または減少した時、
+// 通常攻撃ダメージが16/20/24/28/32%増加し、
+// 重撃ダメージが14/17.5/21/24.5/28%増加する（4秒間）。最大3スタック。
+// この効果は0.3秒毎に1回発動可能。
+// 3スタック時、攻撃速度が8/10/12/14/16%増加する。
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{

@@ -36,7 +36,7 @@ func init() {
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.Core.Tasks.Add(func() {
 		c.a1CDReset()
-		// atk spd
+		// 攻撃速度
 		val := make([]float64, attributes.EndStatType)
 		val[attributes.AtkSpd] = burstATKSpeed[c.TalentLvlBurst()]
 		c.AddStatMod(character.StatMod{
@@ -123,7 +123,7 @@ func (c *char) onSwapClearBurst() {
 		if !c.StatusIsActive(burstBuffKey) {
 			return false
 		}
-		// i prob don't need to check for who prev is here
+		// ここでは前のキャラクターの確認は不要かもしれない
 		prev := args[0].(int)
 		if prev == c.Index {
 			c.DeleteStatus(burstBuffKey)

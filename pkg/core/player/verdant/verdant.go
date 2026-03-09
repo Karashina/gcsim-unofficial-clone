@@ -13,7 +13,7 @@ type MoonridgeInjector interface {
 	AddICD(dur int)
 }
 
-// Verdant Dew charging system
+// Verdant Dew チャージシステム
 type Handler struct {
 	f      *int
 	events event.Eventter
@@ -45,7 +45,7 @@ func New(f *int, events event.Eventter, tasks task.Tasker, log glog.Logger, inje
 		injector: injector,
 	}
 
-	// subscribe to Lunar Bloom events
+	// Lunar Bloom イベントをサブスクライブ
 	if events != nil {
 		events.Subscribe(event.OnLunarBloom, h.onLunarBloom, "verdant-on-lunarbloom")
 	}
@@ -54,8 +54,8 @@ func New(f *int, events event.Eventter, tasks task.Tasker, log glog.Logger, inje
 }
 
 func (h *Handler) onLunarBloom(args ...interface{}) bool {
-	// args: target, *AttackEvent
-	// we don't need attacker here, just start/reset charging for the party
+	// 引数: target, *AttackEvent
+	// ここでは攻撃者は不要、パーティのチャージを開始/リセットするだけ
 	h.StartCharge(h.baseDur)
 	h.tryAddMoonridge()
 	return false
@@ -87,7 +87,7 @@ func (h *Handler) tryAddMoonridge() {
 	}
 }
 
-// StartCharge begins or resets the charging timer
+// StartCharge はチャージタイマーを開始またはリセットする
 func (h *Handler) StartCharge(dur int) {
 	if h.f == nil {
 		return
@@ -98,30 +98,30 @@ func (h *Handler) StartCharge(dur int) {
 	h.expiryFrame = *h.f + dur
 	h.charging = true
 
-	// start ticking loop once per frame while charging
+	// チャージ中は毎フレーム 1 回のティックループを開始
 	if h.tasks != nil && !h.tickScheduled {
 		h.tickScheduled = true
 		var tick func()
 		tick = func() {
-			// stop if not charging or f is nil
+			// チャージ中でないか f が nil なら停止
 			if h.f == nil {
 				h.tickScheduled = false
 				return
 			}
-			// if current frame >= expiryFrame, stop charging and don't schedule further
+			// 現在のフレーム >= expiryFrame なら、チャージを停止し以降をスケジュールしない
 			if *h.f >= h.expiryFrame {
 				h.charging = false
 				h.tickScheduled = false
 				return
 			}
 
-			// accumulate verdant part per frame
+			// フレームごとに verdant part を蓄積
 			add := 6.0 * (1.0 + h.gainBonus)
 			h.verdantPart += add
 			if h.verdantPart > 450 {
 				h.verdantPart = 450
 			}
-			// update dew count based on thresholds of 150
+			// 150 の閾値に基づいて dew カウントを更新
 			newCount := int(h.verdantPart) / 150
 			if newCount > 3 {
 				newCount = 3
@@ -139,17 +139,17 @@ func (h *Handler) StartCharge(dur int) {
 				}
 			}
 
-			// schedule next frame
+			// 次のフレームをスケジュール
 			h.tasks.Add(tick, 6)
 		}
 
-		// schedule first tick next frame
+		// 最初のティックを次のフレームにスケジュール
 		h.tasks.Add(tick, 1)
 	}
 }
 
-// SetGainBonus sets the verdant gain bonus used when accumulating per frame.
-// bonus is fractional (0.2 = +20%).
+// SetGainBonus はフレームごとの蓄積時に使用されるVerdant得量ボーナスを設定する。
+// bonus は小数値（0.2 = +20%）。
 func (h *Handler) SetGainBonus(b float64) {
 	h.gainBonus = b
 }
@@ -168,11 +168,11 @@ func (h *Handler) RemainingFrames() int {
 	return rem
 }
 
-// GetPart returns current verdantPart (0..450)
+// GetPart は現在の verdantPart（0..450）を返す
 func (h *Handler) GetPart() float64 { return h.verdantPart }
 
-// Consume consumes up to n Verdant Dew, removing 150 verdantPart per dew consumed.
-// returns actual consumed count
+// Consume は最大 n 個の Verdant Dew を消費し、消費ごとに verdantPart を150減らす。
+// 実際に消費された数を返す。
 func (h *Handler) Consume(n int) int {
 	if n <= 0 {
 		return 0
@@ -192,7 +192,7 @@ func (h *Handler) Consume(n int) int {
 
 	satisfied := 0
 
-	// Consume from verdantPart first to allow passive recharging
+	// パッシブなリチャージを許可するため、まず verdantPart から消費
 	fromVerdant := toConsume
 	if fromVerdant > vCount {
 		fromVerdant = vCount
@@ -205,7 +205,7 @@ func (h *Handler) Consume(n int) int {
 		satisfied += fromVerdant
 	}
 
-	// Consume remaining from moonridgePart
+	// 残りを moonridgePart から消費
 	remaining := toConsume - satisfied
 	if remaining > 0 {
 		h.moonridgePart -= float64(remaining * 150)
@@ -215,7 +215,7 @@ func (h *Handler) Consume(n int) int {
 		satisfied += remaining
 	}
 
-	// update verdant count cache
+	// verdant カウントキャッシュを更新
 	h.count = int(h.verdantPart) / 150
 	return toConsume
 }

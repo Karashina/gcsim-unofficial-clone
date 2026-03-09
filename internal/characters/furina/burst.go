@@ -22,8 +22,8 @@ const (
 	burstDur                = 18.2 * 60
 	burstKey                = "furina-burst"
 	fanfareDebounceKey      = "furina-fanfare-debounce"
-	fanfareDrainToGainDelay = 6                                // estimation
-	fanfareDebounceDur      = 30 + fanfareDrainToGainDelay - 1 // estimation
+	fanfareDrainToGainDelay = 6                                // 推定値
+	fanfareDebounceDur      = 30 + fanfareDrainToGainDelay - 1 // 推定値
 )
 
 func init() {
@@ -50,25 +50,25 @@ func (c *char) addFanfareFunc(amt float64) func() {
 }
 
 func (c *char) queueFanfareGain(amt float64) {
-	// determine delay between hp drain and actual fanfare change based on debounce status being up or not
+	// デバウンスステータスの有無に基づいてHP消費とファンファーレ変更の遅延を決定
 	var delay int
 	if !c.StatusIsActive(fanfareDebounceKey) {
-		// leave a 1f window open for drains of other chars in same frame to queue fanfare gain until debounce status is added
-		// use a char bool to make sure only 1 debounce status add task is queued at a time
+		// デバウンスステータスが追加されるまで、同フレームの他キャラのHP消費がファンファーレ獲得をキューできるよ1フレームの猶予を残す
+		// 一度に1つのデバウンスステータス追加タスクのみキューされるようにcharのboolを使用
 		if !c.fanfareDebounceTaskQueued {
 			c.fanfareDebounceTaskQueued = true
 			c.Core.Tasks.Add(func() {
-				c.AddStatus(fanfareDebounceKey, fanfareDebounceDur, false) // TODO: unsure about hitlag
+				c.AddStatus(fanfareDebounceKey, fanfareDebounceDur, false) // TODO: ヒットラグについて不明
 				c.fanfareDebounceTaskQueued = false
 			}, 1)
 		}
-		// fanfare gain from drain has a delay even after drain is confirmed via server
+		// HP消費からのファンファーレ獲得はサーバーで消費が確認された後でも遅延がある
 		delay = fanfareDrainToGainDelay
 	} else {
-		// fanfare gain from drain has to be delayed until debounce status is gone
+		// HP消費からのファンファーレ獲得はデバウンスステータスが終了するまで遅延する必要がある
 		delay = c.StatusDuration(fanfareDebounceKey)
 	}
-	// queue fanfare change
+	// ファンファーレ変更をキュー
 	c.Core.Tasks.Add(c.addFanfareFunc(amt), delay)
 }
 
@@ -175,7 +175,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			c.curFanfare = 150
 		}
 		c.AddStatus(burstKey, burstDur, true)
-	}, 95) // This is before the hitmark, so Furina burst damage will benefit from C1. This was tested and confirmed
+	}, 95) // これはヒットマーク前なので、フリーナの元素爆発ダメージは1凸の恩恵を受ける。テスト済み・確認済み
 
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5), burstHitmark, burstHitmark)
 
@@ -185,7 +185,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

@@ -1,6 +1,6 @@
 package ast
 
-// common val strings
+// 共通の値文字列
 const (
 	TrueVal     = "true"
 	FalseVal    = "false"

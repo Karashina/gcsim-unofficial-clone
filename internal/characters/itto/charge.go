@@ -20,18 +20,18 @@ var (
 func init() {
 	chargeFrames = make([][]int, EndSlashType)
 
-	// ActionCharge frames are different per each slash
-	// the frames for CA1/CA2 -> CAF, CA0 -> CA0 are handled in ActionInfo.Frames
+	// ActionChargeフレームはスラッシュごとに異なる
+	// CA1/CA2 -> CAF, CA0 -> CA0 のフレームは ActionInfo.Frames で処理
 
 	// CA0 -> x
-	chargeFrames[SaichiSlash] = frames.InitAbilSlice(131) // NA/CA1/CAF frames
+	chargeFrames[SaichiSlash] = frames.InitAbilSlice(131) // 通常攻撃/CA1/CAFフレーム
 	chargeFrames[SaichiSlash][action.ActionDash] = chargeHitmarks[SaichiSlash]
 	chargeFrames[SaichiSlash][action.ActionJump] = chargeHitmarks[SaichiSlash]
 	chargeFrames[SaichiSlash][action.ActionSwap] = 130
 
 	// CA1 -> x
-	chargeFrames[LeftSlash] = frames.InitAbilSlice(104) // NA frames
-	chargeFrames[LeftSlash][action.ActionCharge] = 57   // CA2 frames
+	chargeFrames[LeftSlash] = frames.InitAbilSlice(104) // 通常攻撃フレーム
+	chargeFrames[LeftSlash][action.ActionCharge] = 57   // CA2フレーム
 	chargeFrames[LeftSlash][action.ActionSkill] = chargeHitmarks[LeftSlash]
 	chargeFrames[LeftSlash][action.ActionBurst] = chargeHitmarks[LeftSlash]
 	chargeFrames[LeftSlash][action.ActionDash] = chargeHitmarks[LeftSlash]
@@ -39,8 +39,8 @@ func init() {
 	chargeFrames[LeftSlash][action.ActionSwap] = chargeHitmarks[LeftSlash]
 
 	// CA2 -> x
-	chargeFrames[RightSlash] = frames.InitAbilSlice(77) // NA frames
-	chargeFrames[RightSlash][action.ActionCharge] = 29  // CA1 frames
+	chargeFrames[RightSlash] = frames.InitAbilSlice(77) // 通常攻撃フレーム
+	chargeFrames[RightSlash][action.ActionCharge] = 29  // CA1フレーム
 	chargeFrames[RightSlash][action.ActionSkill] = chargeHitmarks[RightSlash]
 	chargeFrames[RightSlash][action.ActionBurst] = chargeHitmarks[RightSlash]
 	chargeFrames[RightSlash][action.ActionDash] = chargeHitmarks[RightSlash]
@@ -48,7 +48,7 @@ func init() {
 	chargeFrames[RightSlash][action.ActionSwap] = chargeHitmarks[RightSlash]
 
 	// CAF -> x
-	chargeFrames[FinalSlash] = frames.InitAbilSlice(109) // NA/CA0 frames
+	chargeFrames[FinalSlash] = frames.InitAbilSlice(109) // 通常攻撃/CA0フレーム
 	chargeFrames[FinalSlash][action.ActionSkill] = 76
 	chargeFrames[FinalSlash][action.ActionBurst] = 76
 	chargeFrames[FinalSlash][action.ActionDash] = chargeHitmarks[FinalSlash]
@@ -75,7 +75,7 @@ var slashName = []string{
 }
 
 func (s SlashType) String(abil bool) string {
-	// strip Left / Right for abil name purposes
+	// スキル名のために Left / Right を除去
 	if abil && (s == LeftSlash || s == RightSlash) {
 		return "Arataki Kesagiri Combo Slash"
 	}
@@ -84,7 +84,7 @@ func (s SlashType) String(abil bool) string {
 
 func (s SlashType) Next(stacks int, c6Proc bool) SlashType {
 	switch s {
-	// loops CA1/CA2 until stacks=1
+	// stacks=1になるまでCA1/CA2をループ
 	case LeftSlash:
 		if stacks == 1 && !c6Proc {
 			return FinalSlash
@@ -96,7 +96,7 @@ func (s SlashType) Next(stacks int, c6Proc bool) SlashType {
 		}
 		return LeftSlash
 
-	// idle/CA0/CAF -> charge (based on stacks)
+	// idle/CA0/CAF -> 重撃（スタックに基づく）
 	default:
 		switch {
 		case stacks == 1 && !c6Proc:
@@ -112,7 +112,7 @@ func (s SlashType) Next(stacks int, c6Proc bool) SlashType {
 
 func (c *char) windupFrames(prevSlash, curSlash SlashType) int {
 	switch c.Core.Player.CurrentState() {
-	// attack -> x
+	// 通常攻撃 -> x
 	case action.NormalAttackState:
 		switch curSlash {
 		// NA -> CA0
@@ -158,7 +158,7 @@ func (c *char) windupFrames(prevSlash, curSlash SlashType) int {
 			}
 		}
 
-	// skill -> x
+	// スキル -> x
 	case action.SkillState:
 		switch curSlash {
 		// E -> CA0
@@ -169,13 +169,13 @@ func (c *char) windupFrames(prevSlash, curSlash SlashType) int {
 			return 17
 		}
 
-	// low/high plunge -> x
+	// 低空/高空落下攻撃 -> x
 	case action.PlungeAttackState:
 		switch curSlash {
-		// plunge -> CA0
+		// 落下攻撃 -> CA0
 		case SaichiSlash:
 			return 11
-		// plunge -> CA1/CAF
+		// 落下攻撃 -> CA1/CAF
 		case LeftSlash, FinalSlash:
 			return 10
 		}
@@ -193,7 +193,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		StrikeType:         attacks.StrikeTypeBlunt,
 		Element:            attributes.Physical,
 		Durability:         25,
-		HitlagHaltFrames:   0.10 * 60, // defaults to CA0/CAF hitlag
+		HitlagHaltFrames:   0.10 * 60, // デフォルトはCA0/CAFのヒットラグ
 		HitlagFactor:       0.01,
 		CanBeDefenseHalted: true,
 	}
@@ -202,10 +202,10 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	stacks := c.Tags[strStackKey]
 	c.slashState = prevSlash.Next(stacks, c.c6Proc)
 
-	// figure out how many frames we need to skip
+	// スキップするフレーム数を算出
 	windup := c.windupFrames(prevSlash, c.slashState)
 
-	// handle hitlag and talent%
+	// ヒットラグと天賦%を処理
 	ai.Abil = c.slashState.String(true)
 	c.Core.Log.NewEvent("performing CA", glog.LogCharacterEvent, c.Index).
 		Write("slash", c.slashState.String(false)).
@@ -218,7 +218,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	case LeftSlash, RightSlash:
 		ai.PoiseDMG = 81.7
 		ai.Mult = akCombo[c.TalentLvlAttack()]
-		haltFrames := 0.03 // consumed stacks >= 3
+		haltFrames := 0.03 // 消費スタック >= 3
 		switch c.stacksConsumed {
 		case 0:
 			ai.PoiseDMG = 143.4
@@ -232,12 +232,12 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		ai.Mult = akFinal[c.TalentLvlAttack()]
 	}
 
-	// apply a4
+	// A4を適用
 	if c.slashState != SaichiSlash {
 		c.a4(&ai)
 	}
 
-	// to index hitbox
+	// ヒットボックスのインデックス用
 	burstIndex := 0
 	if c.StatusIsActive(burstBuffKey) {
 		burstIndex = 1
@@ -255,19 +255,19 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 			chargeHitboxes[burstIndex][c.slashState][1],
 		)
 	}
-	// TODO: hitmark is not getting adjusted for atk speed
-	// TODO: Does Itto CA snapshot at the start of CA? (rn assuming he does)
+	// TODO: ヒットマークが攻撃速度で調整されていない
+	// TODO: 一斗の重撃は重撃開始時にスナップショットされるか？（現在は開始時と仮定）
 	c.Core.QueueAttack(ai, ap, 0, chargeHitmarks[c.slashState]-windup)
 
-	// C6: has a 50% chance to not consume stacks of Superlative Superstrength.
+	// 6凸: 50%の確率で怒髪衝天スタックを消費しない。
 	if !c.c6Proc {
 		c.addStrStack("charge", -1)
 	}
 
-	// increase atkspd
+	// 攻撃速度を増加
 	c.a1Update(c.slashState)
 
-	// required for the frames func
+	// フレーム関数に必要
 	curSlash := c.slashState
 	c.c6Proc = c.Base.Cons >= 6 && c.Core.Rand.Float64() < 0.5
 	atkspd := c.Stat(attributes.AtkSpd)
@@ -279,7 +279,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 			if next == action.ActionCharge {
 				nextSlash := curSlash.Next(c.Tags[strStackKey], c.c6Proc)
 				switch nextSlash {
-				// handle CA1/CA2 -> CAF frames
+				// CA1/CA2 -> CAF フレームを処理
 				case FinalSlash:
 					switch curSlash {
 					case LeftSlash: // CA1 -> CAF
@@ -287,7 +287,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 					case RightSlash: // CA2 -> CAF
 						f = 32
 					}
-				// handle CA0 -> CA0 frames
+				// CA0 -> CA0 フレームを処理
 				case SaichiSlash:
 					if curSlash == SaichiSlash {
 						f = 500

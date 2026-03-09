@@ -1,10 +1,10 @@
-// Package core provides core functionality for a simulation:
-//   - combat
-//   - tasks
-//   - event handling
-//   - logging
-//   - constructs (really should be just generic objects?)
-//   - status
+// パッケージ core はシミュレーションの中核機能を提供する:
+//   - 戦闘
+//   - タスク
+//   - イベント処理
+//   - ログ
+//   - 設置物（本来は汎用オブジェクトにすべき？）
+//   - ステータス
 package core
 
 import (
@@ -28,24 +28,24 @@ type Core struct {
 	Flags Flags
 	Seed  int64
 	Rand  *rand.Rand
-	// various functionalities of core
-	Log        glog.Logger    // we use an interface here so that we can pass in a nil logger for all except 1 run
-	Events     *event.Handler // track events: subscribe/unsubscribe/emit
+	// core の各機能
+	Log        glog.Logger    // 1回を除く全実行でnilロガーを渡せるようインターフェースを使用
+	Events     *event.Handler // イベント管理: 購読/解除/発行
 	Status     *status.Handler
 	Tasks      *task.Handler
 	Combat     *combat.Handler
 	Constructs *construct.Handler
 	Player     *player.Handler
-	// Global singleton for LC Cloud: only one Reactable can hold the cloud at a time
+	// LCクラウドのグローバルシングルトン: 一度に1つのReactableだけがクラウドを保持可能
 	ActiveLCCloud interface{}
 }
 
 type Flags struct {
-	LogDebug          bool // Used to determine logging level
-	DamageMode        bool // for hp mode
-	DefHalt           bool // for hitlag
-	EnableHitlag      bool // hitlag enabled
-	IgnoreBurstEnergy bool // for ignoring energy when using burst
+	LogDebug          bool // ログレベルの判定に使用
+	DamageMode        bool // HPモード用
+	DefHalt           bool // ヒットラグ用
+	EnableHitlag      bool // ヒットラグ有効化
+	IgnoreBurstEnergy bool // 元素爆発使用時のエネルギー消費無視用
 	Custom            map[string]float64
 }
 
@@ -124,12 +124,12 @@ func New(opt Opt) (*Core, error) {
 
 func (c *Core) Init() error {
 	var err error
-	// setup list
-	//	- resonance
-	//	- on hit energy
-	//	- base stats
-	//	- char inits
-	//	- init call backs
+	// セットアップ順序
+	//	- 元素共鳴
+	//	- 命中時エネルギー
+	//	- 基礎ステータス
+	//	- キャラクター初期化
+	//	- 初期化コールバック
 	c.SetupOnNormalHitEnergy()
 	err = c.Player.InitializeTeam()
 	if err != nil {
@@ -140,17 +140,17 @@ func (c *Core) Init() error {
 }
 
 func (c *Core) Tick() error {
-	// things to tick:
-	//	- targets
-	//	- constructs
-	//	- player (stamina, swap, animation, etc...)
-	//		- character
-	//		- shields
-	//		- animation
-	//		- stamina
-	//		- swap
-	//	- tasks
-	//TODO: check for errors here?
+	// Tick処理対象:
+	//	- ターゲット
+	//	- 設置物
+	//	- プレイヤー（スタミナ, 交代, アニメーション等…）
+	//		- キャラクター
+	//		- シールド
+	//		- アニメーション
+	//		- スタミナ
+	//		- 交代
+	//	- タスク
+	//TODO: ここでエラーをチェックすべき？
 	c.Combat.Tick()
 	c.Constructs.Tick()
 	c.Player.Tick()
@@ -161,7 +161,7 @@ func (c *Core) Tick() error {
 func (c *Core) AddChar(p info.CharacterProfile) (int, error) {
 	var err error
 
-	// initialize character
+	// キャラクターを初期化
 	char, err := character.New(p, &c.F, c.Flags.LogDebug, c.Log, c.Events, c.Tasks)
 	if err != nil {
 		return -1, err
@@ -177,7 +177,7 @@ func (c *Core) AddChar(p info.CharacterProfile) (int, error) {
 	}
 	index := c.Player.AddChar(char)
 
-	// get starting hp
+	// 初期HPを取得
 	char.StartHP = -1
 	if hp, ok := p.Params["start_hp"]; ok {
 		char.StartHP = hp
@@ -187,17 +187,17 @@ func (c *Core) AddChar(p info.CharacterProfile) (int, error) {
 		char.StartHPRatio = hpRatio
 	}
 
-	// set the energy
+	// エネルギーを設定
 	char.Energy = char.EnergyMax
 	if e, ok := p.Params["start_energy"]; ok {
 		char.Energy = float64(e)
-		// some sanity check in case user decide to set energy = 10000000
+		// ユーザーが energy = 10000000 に設定した場合のサニティチェック
 		if char.Energy > char.EnergyMax {
 			char.Energy = char.EnergyMax
 		}
 	}
 
-	// initialize weapon
+	// 武器を初期化
 	wf, ok := weaponMap[p.Weapon.Key]
 	if !ok {
 		return -1, fmt.Errorf("unrecognized weapon %v for character %v", p.Weapon.Key, p.Base.Key.String())
@@ -208,7 +208,7 @@ func (c *Core) AddChar(p info.CharacterProfile) (int, error) {
 	}
 	char.SetWeapon(weap)
 
-	// set bonus
+	// セットボーナスを設定
 	total := 0
 	for key, count := range p.Sets {
 		total += count
@@ -223,7 +223,7 @@ func (c *Core) AddChar(p info.CharacterProfile) (int, error) {
 			return -1, fmt.Errorf("character %v has unrecognized artifact: %v", p.Base.Key.String(), key)
 		}
 	}
-	//TODO: this should be handled by parser
+	//TODO: これはパーサーで処理すべき
 	if total > 5 {
 		return -1, fmt.Errorf("total set count cannot exceed 5, got %v", total)
 	}

@@ -15,15 +15,15 @@ const (
 	c6Status    = "kirara-c6"
 )
 
-// C2 is not implemented, co-op only
-// When Kirara is in the Urgent Neko Parcel state of Meow-teor Kick, she will grant other party members she crashes into Critical Transport Shields.
-// The DMG absorption of Critical Transport Shield is 40% of the maximum absorption Meow-teor Kick's normal Shields of Safe Transport
-// are capable of, and will absorb Dendro DMG with 250% effectiveness.
-// Critical Transport Shields last 12s and can be triggered once on each character every 10s.
+// 2凸は未実装、マルチ専用
+// キララが緋球玄縄のUrgent Neko Parcel状態の時、衝突した他のパーティメンバーに緊急輸送シールドを付与する。
+// 緊急輸送シールドのダメージ吸収量は緋球玄縄の安全輸送シールドの最大吸収量の40%で、
+// 草元素ダメージを250%の効率で吸収する。
+// 緊急輸送シールドは12秒間持続し、各キャラクターに対して10秒に1回発動可能。
 
-// After active character(s) protected by Shields of Safe Transport or Critical Transport Shields hit opponents with Normal, Charged, or Plunging Attacks,
-// Kirara will perform a coordinated attack with them using Small Cat Grass Cardamoms, dealing 200% of her ATK as Dendro DMG. DMG dealt this way is
-// considered Elemental Burst DMG. This effect can be triggered once every 3.8s. This CD is shared between all party members.
+// 安全輸送シールドまたは緊急輸送シールドで保護されたアクティブキャラの通常攻撃・重撃・落下攻撃が敵に命中すると、
+// キララが小型Cat Grass Cardamomで協力攻撃を行い、攻撃力200%の草元素ダメージを与える。
+// このダメージは元素爆発ダメージとみなされる。この効果は3.8秒に1回発動可能。このCDはパーティ全員で共有。
 func (c *char) c4() {
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		if c.StatusIsActive(c4IcdStatus) {
@@ -44,7 +44,7 @@ func (c *char) c4() {
 		}
 		t := args[0].(combat.Target)
 
-		// TODO: snapshot? damage delay?
+		// TODO: スナップショット？ダメージ遅延？
 		ai := combat.AttackInfo{
 			ActorIndex:         c.Index,
 			Abil:               "Steed of Skanda",
@@ -63,7 +63,7 @@ func (c *char) c4() {
 	}, "kirara-c4")
 }
 
-// All nearby party members will gain 12% All Elemental DMG Bonus within 15s after Kirara uses her Elemental Skill or Burst.
+// キララが元素スキルまたは元素爆発を使用後15秒間、近くのパーティ全員の全元素ダメージ+12%。
 func (c *char) c6() {
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatMod(character.StatMod{

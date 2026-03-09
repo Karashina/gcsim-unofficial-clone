@@ -13,7 +13,7 @@ import (
 var burstFrames []int
 
 const (
-	initialHeal = 51 // depends on ping
+	initialHeal = 51 // pingに依存
 	healKey     = "eagleplume"
 	healIcdKey  = "eagleplume-icd"
 )
@@ -26,7 +26,7 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// initial heal
+	// 初期回復
 	c.QueueCharTask(func() {
 		heal := burstHealFirstF[c.TalentLvlBurst()] + burstHealFirstP[c.TalentLvlBurst()]*c.MaxHP()
 		c.Core.Player.Heal(info.HealInfo{
@@ -49,7 +49,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -79,8 +79,8 @@ func (c *char) onBurstHeal() {
 			Bonus:   c.Stat(attributes.Heal),
 		})
 
-		// When Mika's own Skyfeather Song's Eagleplume state heals party members, this will restore 3 Energy to Mika.
-		// This form of Energy restoration can occur 5 times during the Eagleplume state created by 1 use of Skyfeather Song.
+		// ミカ自身の星翼の歌の鷲羽状態がパーティメンバーを回復した時、ミカの元素エネルギーが3回復する。
+		// このエネルギー回復は、1回の星翼の歌で生成された鷲羽状態中に5回まで発動可能。
 		if c.Base.Cons >= 4 && c.c4Count > 0 {
 			c.AddEnergy("mika-c4", 3)
 			c.c4Count--

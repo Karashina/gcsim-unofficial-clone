@@ -11,8 +11,8 @@ import (
 
 const a1Key = "gaming-a1"
 
-// After Bestial Ascent's Plunging Attack: Charmed Cloudstrider hits an opponent,
-// Gaming will regain 1.5% of his Max HP once every 0.2s for 0.8s.
+// 百獣郡舞の落下攻撃・祥雲の幸矢が敵に命中した後、
+// 嘉明は0.2秒ごとにHP上限の1.5%を0.8秒間回復する。
 func (c *char) makeA1CB() combat.AttackCBFunc {
 	if c.Base.Ascension < 1 {
 		return nil
@@ -45,8 +45,8 @@ func (c *char) a1Heal() {
 	c.QueueCharTask(c.a1Heal, 0.2*60)
 }
 
-// When Gaming has less than 50% HP, he will receive a 20% Incoming Healing Bonus.
-// When Gaming has 50% HP or more, Plunging Attack: Charmed Cloudstrider will deal 20% more DMG.
+// 嘉明のHPが50%未満の場合、受ける治療効果+20%。
+// 嘉明のHPが50%以上の場合、落下攻撃・祥雲の幸矢のダメージ+20%。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

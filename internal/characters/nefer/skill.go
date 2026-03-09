@@ -27,10 +27,10 @@ func init() {
 	skillFrames = frames.InitAbilSlice(31)
 }
 
-// Elemental Skill: AoE Dendro + Shadow Dance status; grants charges. In Shadow Dance, Verdant Dew enables Phantasm Performance.
+// 元素スキル：範囲草元素 + Shadow Dance状態、チャージを付与。Shadow Dance中、翠露が幻影公演を可能にする。
 func (c *char) Skill(p map[string]int) (action.Info, error) {
 
-	// Skill DMG has both ATK and EM scaling
+	// スキルダメージはATKとEMの両方のスケーリングあり
 	c.QueueCharTask(func() {
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
@@ -53,22 +53,22 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		)
 
 		if c.Base.Cons >= 2 {
-			// Enter Shadow Dance state
-			c.AddStatus(skillKey, 15*60, true) // 15s duration
+			// Shadow Dance状態に入る
+			c.AddStatus(skillKey, 15*60, true) // 15秒の持続時間
 		} else {
-			c.AddStatus(skillKey, 10*60, true) // 10s duration
+			c.AddStatus(skillKey, 10*60, true) // 10秒の持続時間
 		}
 
-		// If Moonsign Ascendant: convert existing Dendro Cores to Seeds of Deceit and set 15s conversion window
-		// Log moonsign state for debugging
+		// ムーンサインAscendantの場合：既存の草元素コアを欺きの種に変換し、15秒の変換ウィンドウを設定
+		// デバッグ用にムーンサイン状態をログ
 		c.Core.Log.NewEvent("nefer skill moonsign state", glog.LogDebugEvent, c.Index).
 			Write("moonsign_nascent", c.MoonsignNascent).
 			Write("moonsign_ascendant", c.MoonsignAscendant)
 
 		if c.MoonsignAscendant {
-			// set status window
+			// ステータスウィンドウを設定
 			c.AddStatus("nefer-seed-convert", 15*60, true)
-			// convert existing dendro cores
+			// 既存の草元素コアを変換
 			gad := c.Core.Combat.Gadgets()
 			c.Core.Log.NewEvent("nefer skill found gadgets", glog.LogDebugEvent, c.Index).
 				Write("count", len(gad))
@@ -76,19 +76,19 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 				if g == nil {
 					continue
 				}
-				// log gadget basic info
+				// ガジェットの基本情報をログ
 				c.Core.Log.NewEvent("nefer skill gadget info", glog.LogDebugEvent, c.Index).
 					Write("gadget_src", g.Src()).
 					Write("gadget_typ", g.GadgetTyp())
 				if g.GadgetTyp() == combat.GadgetTypDendroCore {
-					// type assert to reactable.DendroCore and mark as seed
+					// reactable.DendroCoreに型アサーションして種としてマーク
 					if dc, ok := g.(*reactable.DendroCore); ok {
 						dc.IsSeed = true
-						// disable explosions and reaction triggers
+						// 爆発と反応トリガーを無効化
 						dc.Gadget.OnExpiry = nil
 						dc.Gadget.OnKill = nil
 
-						// Log conversion for debugging
+						// デバッグ用に変換をログ
 						c.Core.Log.NewEvent(
 							"nefer converted dendro core to seed",
 							glog.LogElementEvent,
@@ -96,7 +96,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 						).Write("gadget_src", g.Src()).
 							Write("is_seed", dc.IsSeed)
 					} else {
-						// Log unexpected concrete type to help debug why assertion may fail
+						// アサーションが失敗した理由をデバッグするために予期しない具象型をログ
 						c.Core.Log.NewEvent(
 							"nefer conversion type mismatch",
 							glog.LogElementEvent,
@@ -108,9 +108,9 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 			}
 		}
 
-		// C2: Gain 2 stacks of Veil of Falsehood when using Elemental Skill
+		// 2凸：元素スキル使用時に偽りのヴェールを2スタック獲得
 		if c.Base.Cons >= 2 && c.Base.Ascension >= 1 {
-			// Add up to 2 stacks, capped at 5
+			// 最大2スタック追加、上限5
 			c.a1count = min(5.0, c.a1count+2)
 		}
 	}, skillHitmark)

@@ -85,8 +85,8 @@ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 func (c *char) getSourcewaterDroplets() []*sourcewaterdroplet.Gadget {
 	player := c.Core.Combat.Player()
 
-	// TODO: this is an approximation based on an ongoing KQM ticket (faster-neuvi-balls)
-	// The fan is bigger than the 60 degrees in the ticket to account for the 10 degree camera tilt.
+	// TODO: これはKQMチケット(faster-neuvi-balls)に基づく近似値
+	// カメラ傾斜10度を考慮して、チケットの60度よりファンを大きくしている。
 	segment := combat.NewCircleHitOnTargetFanAngle(player, nil, 14, 80)
 	rect := combat.NewBoxHitOnTarget(player, geometry.Point{Y: -7}, 8, 18)
 
@@ -136,10 +136,10 @@ func (c *char) Condition(fields []string) (any, error) {
 	}
 }
 
-// used for early CA cancel swap cd calculation
+// 重撃早期キャンセル時のスワップCD計算用
 func (c *char) onSwap() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
-		// do nothing if next char isn't neuvillette
+		// 次のキャラがヌヴィレットでなければ何もしない
 		next := args[1].(int)
 		if next != c.Index {
 			return false

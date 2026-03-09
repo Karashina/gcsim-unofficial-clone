@@ -16,7 +16,7 @@ type Traveler struct {
 	burstPos                   geometry.Point
 	burstRadius                float64
 	burstOverflowingLotuslight int
-	skillC1                    bool // this variable also ensures that C1 only restores energy once per cast
+	skillC1                    bool // この変数は1凸が1回のキャストでエネルギーを一度だけ回復することも保証する
 	burstTransfig              attributes.Element
 	gender                     int
 }

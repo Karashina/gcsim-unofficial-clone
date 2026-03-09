@@ -26,7 +26,7 @@ var particleIDToElement = []attributes.Element{
 }
 
 func (e *Enemy) HandleAttack(atk *combat.AttackEvent) float64 {
-	// at this point attack will land
+	// この時点で攻撃が命中する
 	e.Core.Combat.Events.Emit(event.OnEnemyHit, e, atk)
 
 	var amp string
@@ -56,13 +56,13 @@ func (e *Enemy) HandleAttack(atk *combat.AttackEvent) float64 {
 
 	dmg, crit = e.attack(atk, evt)
 
-	// delay damage event to end of the frame
+	// ダメージイベントをフレーム末まで遅延させる
 	e.Core.Combat.Tasks.Add(func() {
-		// apply the damage
+		// ダメージを適用
 		actualDmg := e.applyDamage(atk, dmg)
 		e.Core.Combat.TotalDamage += actualDmg
 		e.Core.Combat.Events.Emit(event.OnEnemyDamage, e, atk, actualDmg, crit)
-		// callbacks
+		// コールバック
 		cb := combat.AttackCB{
 			Target:      e,
 			AttackEvent: atk,
@@ -74,9 +74,9 @@ func (e *Enemy) HandleAttack(atk *combat.AttackEvent) float64 {
 		}
 	}, 0)
 
-	// this works because string in golang is a slice underneath, so the &amp points to the slice info
-	// that's why when the underlying string in amp changes (has to be reallocated) the pointer doesn't
-	// change since it's just pointing to the slice "header"
+	// これがGolangで動作するのは、stringが内部的にスライスであり、&ampはスライス情報を
+	// 指しているため。ampの内部文字列が変更（再割り当て）されてもポインタは
+	// スライス「ヘッダ」を指しているので変わらない
 	if atk.Info.Amped {
 		amp = string(atk.Info.AmpType)
 	}
@@ -87,33 +87,33 @@ func (e *Enemy) HandleAttack(atk *combat.AttackEvent) float64 {
 }
 
 func (e *Enemy) attack(atk *combat.AttackEvent, evt glog.Event) (float64, bool) {
-	// if target is frozen prior to attack landing, set impulse to 0
-	// let the break freeze attack to trigger actual impulse
+	// 攻撃着弾前にターゲットが凍結されている場合、インパルスを0に設定
+	// 解凍攻撃が実際のインパルスをトリガーさせる
 	if e.Durability[reactable.Frozen] > reactable.ZeroDur {
 		atk.Info.NoImpulse = true
 	}
 
-	// check poise dmg and then shatter first
+	// まず耐久値ダメージと粉砕をチェック
 	e.PoiseDMGCheck(atk)
 	e.ShatterCheck(atk)
 
 	checkBurningICD := func() {
-		// special global ICD for Burning DMG
+		// 燃焼ダメージのグローバルICDの特殊処理
 		if atk.Info.ICDTag != attacks.ICDTagBurningDamage {
 			return
 		}
-		// checks for ICD on all the other characters as well
+		// 他のキャラクターにも燃焼ダメージのICDをチェック
 		for i := 0; i < len(e.Core.Player.Chars()); i++ {
 			if i == atk.Info.ActorIndex {
 				continue
 			}
-			// burning durability wiped out to 0 if any of the other char still on icd re burning dmg
+			// 他キャラがまだ燃焼ダメージICD中なら元素耐久をゼロにする
 			atk.Info.Durability *= reactions.Durability(e.WillApplyEle(atk.Info.ICDTag, atk.Info.ICDGroup, i))
 		}
 	}
-	// check tags
+	// タグをチェック
 	if atk.Info.Durability > 0 {
-		// check for ICD first
+		// まずICDをチェック
 		atk.Info.Durability *= reactions.Durability(e.WillApplyEle(atk.Info.ICDTag, atk.Info.ICDGroup, atk.Info.ActorIndex))
 		checkBurningICD()
 		if atk.Info.Durability > 0 && atk.Info.Element != attributes.Physical {
@@ -139,7 +139,7 @@ func (e *Enemy) attack(atk *combat.AttackEvent, evt glog.Event) (float64, bool) 
 
 	damage, isCrit := e.calc(atk, evt)
 
-	// check for hitlag
+	// ヒットラグをチェック
 	if e.Core.Combat.EnableHitlag {
 		willapply := true
 		if atk.Info.HitlagOnHeadshotOnly {
@@ -151,14 +151,14 @@ func (e *Enemy) attack(atk *combat.AttackEvent, evt glog.Event) (float64, bool) 
 		}
 		dur = math.Ceil(dur)
 		if willapply && dur > 0 {
-			// apply hit lag to enemy
+			// 敵にヒットラグを適用
 			e.ApplyHitlag(atk.Info.HitlagFactor, dur)
-			// also apply hitlag to reactable
+			// リアクタブルにもヒットラグを適用
 			// e.Reactable.ApplyHitlag(atk.Info.HitlagFactor, dur)
 		}
 	}
 
-	// check for particle drops
+	// 粒子ドロップをチェック
 	count, element := e.tryHPDropParticle()
 	if count > 0 {
 		e.Core.Log.NewEvent("particle hp threshold triggered", glog.LogEnemyEvent, atk.Info.ActorIndex)
@@ -170,7 +170,7 @@ func (e *Enemy) attack(atk *combat.AttackEvent, evt glog.Event) (float64, bool) 
 					Ele:    element,
 				})
 			},
-			100, // TODO: should be subject to global delay maybe??
+			100, // TODO: グローバルディレイの影響を受けるべきか？
 		)
 	}
 
@@ -178,7 +178,7 @@ func (e *Enemy) attack(atk *combat.AttackEvent, evt glog.Event) (float64, bool) 
 }
 
 func (e *Enemy) tryHPDropParticle() (float64, attributes.Element) {
-	// use particle drops from the enemy profile
+	// 敵プロファイルから粒子ドロップを使用
 	if e.prof.ParticleDrops != nil {
 		if e.particleDropIndex >= len(e.prof.ParticleDrops) {
 			return 0, attributes.NoElement
@@ -188,7 +188,7 @@ func (e *Enemy) tryHPDropParticle() (float64, attributes.Element) {
 			return 0, attributes.NoElement
 		}
 		e.particleDropIndex++
-		// 22010017: 1 particle geo
+		// 22010017: 岩元素粒子1個
 		diff := info.DropId - 22010000
 		if diff < 0 || diff >= 100 {
 			return 0, attributes.NoElement
@@ -201,7 +201,7 @@ func (e *Enemy) tryHPDropParticle() (float64, attributes.Element) {
 		return float64(count), element
 	}
 
-	// use particle drops from gcsl
+	// gcslから粒子ドロップを使用
 	if e.prof.ParticleDropThreshold <= 0 {
 		return 0, attributes.NoElement
 	}
@@ -209,29 +209,29 @@ func (e *Enemy) tryHPDropParticle() (float64, attributes.Element) {
 	if next <= e.lastParticleDrop {
 		return 0, attributes.NoElement
 	}
-	// check the count too
+	// カウントもチェック
 	count := next - e.lastParticleDrop
 	e.lastParticleDrop = next
 	return e.prof.ParticleDropCount * float64(count), e.prof.ParticleElement
 }
 
 func (e *Enemy) applyDamage(atk *combat.AttackEvent, damage float64) float64 {
-	// record dmg
-	// do not let hp become negative because this function can be called multiple times in same frame
-	actualDmg := min(damage, e.hp) // do not let dmg be greater than remaining enemy hp
+	// ダメージを記録
+	// HPが負にならないようにする（同一フレームで複数回呼ばれる可能性があるため）
+	actualDmg := min(damage, e.hp) // ダメージが残りHPを超えないようにする
 	e.hp -= actualDmg
-	e.damageTaken += actualDmg //TODO: do we actually need this?
+	e.damageTaken += actualDmg //TODO: 実際にこれが必要か？
 
-	// check if target is dead
+	// ターゲットが死亡したかチェック
 	if e.Core.Flags.DamageMode && e.hp <= 0 {
 		e.Kill()
 		e.Core.Events.Emit(event.OnTargetDied, e, atk)
 		return actualDmg
 	}
 
-	// apply auras
+	// オーラを適用
 	if atk.Info.Durability > 0 && !atk.Reacted && atk.Info.Element != attributes.Physical {
-		// check for ICD first
+		// まずICDをチェック
 		existing := e.Reactable.ActiveAuraString()
 		applied := atk.Info.Durability
 		e.AttachOrRefill(atk)
@@ -250,8 +250,8 @@ func (e *Enemy) applyDamage(atk *combat.AttackEvent, damage float64) float64 {
 				Write("after", e.Reactable.ActiveAuraString())
 		}
 	}
-	// just return damage without considering enemy hp here for both:
-	// - damage mode if target not dead (otherwise would have entered the death if statement)
-	// - duration mode (no concept of killing blow)
+	// 敵のHPを考慮せずダメージを返す:
+	// - ダメージモードでターゲットが未死亡の場合（そうでなければ死亡のif文に入っている）
+	// - 持続時間モード（トドメの概念なし）
 	return damage
 }

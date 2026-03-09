@@ -23,7 +23,7 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// Using an Elemental Burst grants a 12% increase in ATK and Movement SPD for 15s.
+// 元素爆発使用時、攻撃力と移動速度が15秒間12%増加する。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -31,7 +31,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	val := make([]float64, attributes.EndStatType)
 	val[attributes.ATKP] = 0.09 + 0.03*float64(r)
 
-	//TODO: this used to be on post. make sure nothing broke here
+	// TODO: 以前はpostだった。問題がないか確認が必要
 	c.Events.Subscribe(event.OnBurst, func(args ...interface{}) bool {
 		if c.Player.Active() != char.Index {
 			return false

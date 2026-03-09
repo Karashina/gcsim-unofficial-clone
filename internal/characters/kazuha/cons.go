@@ -10,26 +10,26 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// C2:
-// The Autumn Whirlwind field created by Kazuha Slash has the following effects:
-// - Increases Kaedehara Kazuha's own Elemental Mastery by 200 for its duration.
-// - Increases the Elemental Mastery of characters within the field by 200.
-// The Elemental Mastery-increasing effects of this Constellation do not stack.
+// 2凸:
+// 千早振るが生成する秋の旋風フィールドは以下の効果を持つ:
+// - 万葉の狂風と千早振る自身の元素熟知+200。
+// - フィールド内のキャラクターの元素熟知+200。
+// この元素熟知増加効果は重複しない。
 func (c *char) c2(src int) func() {
 	return func() {
-		// don't tick if src changed
+		// srcが変更されていたらティックしない
 		if c.qFieldSrc != src {
 			c.Core.Log.NewEvent("kazuha q src check ignored, src diff", glog.LogCharacterEvent, c.Index).
 				Write("src", src).
 				Write("new src", c.qFieldSrc)
 			return
 		}
-		// don't tick if Q isn't up anymore
+		// 元素爆発が終了していたらティックしない
 		if c.Core.Status.Duration(burstStatus) == 0 {
 			return
 		}
 
-		// check again in 0.5s
+		// 0.5秒後に再チェック
 		c.Core.Tasks.Add(c.c2(src), 30)
 
 		ap := combat.NewCircleHitOnTarget(c.qAbsorbCheckLocation.Shape.Pos(), nil, 9)
@@ -37,10 +37,10 @@ func (c *char) c2(src int) func() {
 			return
 		}
 
-		// apply buff if in burst area
+		// 元素爆発範囲内ならバフを適用
 		c.Core.Log.NewEvent("kazuha-c2 ticking", glog.LogCharacterEvent, -1)
 
-		// apply C2 buff to active char for 1s
+		// アクティブキャラに2凸バフを1秒間適用
 		active := c.Core.Player.ActiveChar()
 		active.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag("kazuha-c2", 60), // 1s
@@ -50,7 +50,7 @@ func (c *char) c2(src int) func() {
 			},
 		})
 
-		// apply C2 buff to Kazuha (even if off-field) for 1s
+		// 万葉の狂風にも（フィールド外でも）バフを1秒間適用
 		if active.Base.Key != c.Base.Key {
 			c.AddStatMod(character.StatMod{
 				Base:         modifier.NewBaseWithHitlag("kazuha-c2", 60), // 1s
@@ -63,13 +63,12 @@ func (c *char) c2(src int) func() {
 	}
 }
 
-// C6
-// After using Chihayaburu or Kazuha Slash, Kaedehara Kazuha gains an Anemo
-// Infusion for 5s. Additionally, each point of Elemental Mastery will
-// increase the DMG dealt by Kaedehara Kazuha's Normal, Charged, and Plunging
-// Attacks by 0.2%.
+// 6凸
+// 万葉の狂風または千早振るを使用後、風元素付与を5秒間得る。
+// さらに元素熟知1あたり、通常攻撃・重撃・落下攻撃の
+// ダメージが0.2%増加する。
 func (c *char) c6() {
-	// add anemo infusion
+	// 風元素付与を追加
 	c.Core.Player.AddWeaponInfuse(
 		c.Index,
 		"kazuha-c6-infusion",
@@ -80,18 +79,18 @@ func (c *char) c6() {
 	)
 	c.Core.Events.Emit(event.OnInfusion, c.Index, attributes.Anemo, 60*5)
 
-	// add em based buff
+	// 元素熟知ベースのバフを追加
 	m := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBaseWithHitlag("kazuha-c6-dmgup", 60*5), // 5s
 		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-			// skip if not normal/charged/plunge
+			// 通常攻撃/重撃/落下攻撃以外はスキップ
 			if atk.Info.AttackTag != attacks.AttackTagNormal &&
 				atk.Info.AttackTag != attacks.AttackTagExtra &&
 				atk.Info.AttackTag != attacks.AttackTagPlunge {
 				return nil, false
 			}
-			// apply buff
+			// バフを適用
 			m[attributes.DmgP] = 0.002 * c.Stat(attributes.EM)
 			return m, true
 		},

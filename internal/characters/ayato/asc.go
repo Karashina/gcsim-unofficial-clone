@@ -4,9 +4,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
-// Kamisato Art: Kyouka has the following properties:
+// 神里流・鏡花には以下の特性がある:
 //
-// - After it is used, Kamisato Ayato will gain 2 Namisen stacks.
+// - 使用後、神里綾人は波闃のスタックを2獲得する。
 func (c *char) a1OnSkill() {
 	if c.Base.Ascension < 1 {
 		return
@@ -15,9 +15,9 @@ func (c *char) a1OnSkill() {
 	c.Core.Log.NewEvent("ayato a1 proc'd", glog.LogCharacterEvent, c.Index)
 }
 
-// Kamisato Art: Kyouka has the following properties:
+// 神里流・鏡花には以下の特性がある:
 //
-// - When the water illusion explodes, Ayato will gain a Namisen effect equal to the maximum number of stacks possible.
+// - 水分身が爆発すると、綾人は最大スタック数に等しい波闃効果を獲得する。
 func (c *char) a1OnExplosion() {
 	if c.Base.Ascension < 1 {
 		return
@@ -27,7 +27,7 @@ func (c *char) a1OnExplosion() {
 		Write("stacks", c.stacks)
 }
 
-// If Kamisato Ayato is not on the field and his Energy is less than 40, he will regenerate 2 Energy for himself every second.
+// 神里綾人がフィールド上にいないかつ元素エネルギーが40未満の場合、毎秒元素エネルギーを2回復する。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

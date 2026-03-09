@@ -7,7 +7,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/geometry"
 )
 
-// Reduces Starfell Sword's CD by 2s.
+// 星落としの剣のCTを2秒短縮する。
 func (c *Traveler) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -15,7 +15,7 @@ func (c *Traveler) a1() {
 	c.skillCD -= 2 * 60
 }
 
-// The final hit of a Normal Attack combo triggers a collapse, dealing 60% of ATK as AoE Geo DMG.
+// 通常攻撃コンボの最終段が崩落をトリガーし、攻撃力の60%の岩元素範囲ダメージを与える。
 func (c *Traveler) a4() {
 	if c.Base.Ascension < 4 || c.NormalCounter != c.NormalHitNum-1 {
 		return

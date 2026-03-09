@@ -29,7 +29,7 @@ func init() {
 	burstFrames[action.ActionSwap] = 98     // Q -> Swap
 }
 
-// Burst attack damage queue generator
+// 元素爆発のダメージキュー生成
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -52,7 +52,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		burstHitmark,
 	)
 
-	// duration is 12 second (extended by c2 by 6s)
+	// 持続時間は12秒（2凸で6秒延長）
 	count := 6
 	burstDuration := 12 * 60
 	if c.Base.Cons >= 2 {
@@ -74,7 +74,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 	ap := combat.NewCircleHitOnTarget(burstPos, nil, 7)
 
-	// DoT snapshot before A1
+	// 固有天賦1前にDoTスナップショット
 	c.Core.Tasks.Add(func() {
 		snap := c.Snapshot(&ai)
 		for i := 0; i < count; i++ {
@@ -88,11 +88,11 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	buffDuration := 36 // 0.6s
 	for i := burstStart; i < burstStart+burstDuration; i += 18 {
 		c.Core.Tasks.Add(func() {
-			// A1 & C2 buff tick
+			// 固有天賦1 & 2凸バフティック
 			if c.Core.Combat.Player().IsWithinArea(burstArea) {
 				active := c.Core.Player.ActiveChar()
-				// A1:
-				// An active character within the field created by Divine Maiden's Deliverance gains 15% Cryo DMG Bonus.
+				// 固有天賦1:
+				// 神女遭まいのフィールド内のアクティブキャラクターは氷元素ダメージが15%上昇する。
 				if c.Base.Ascension >= 1 {
 					active.AddStatMod(character.StatMod{
 						Base:         modifier.NewBaseWithHitlag("shenhe-a1", buffDuration),
@@ -106,7 +106,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 					c.c2(active, buffDuration)
 				}
 			}
-			// Q debuff tick
+			// Qデバフティック
 			for _, e := range c.Core.Combat.EnemiesWithinArea(burstArea, nil) {
 				e.AddResistMod(combat.ResistMod{
 					Base:  modifier.NewBaseWithHitlag("shenhe-burst-shred-cryo", buffDuration),
@@ -127,7 +127,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

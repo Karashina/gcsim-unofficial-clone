@@ -14,7 +14,7 @@ func init() {
 	core.RegisterWeaponFunc(keys.TravelersHandySword, NewWeapon)
 }
 
-// Each Elemental Orb or Particle collected restores 1/1.25/1.5/1.75/2% HP.
+// 元素オーブまたは元素粒子を取得すると、HPを1/1.25/1.5/1.75/2%回復する。
 type Weapon struct {
 	Index int
 }
@@ -27,7 +27,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	r := p.Refine
 
 	c.Events.Subscribe(event.OnParticleReceived, func(args ...interface{}) bool {
-		// ignore if character not on field
+		// キャラクターがフィールドにいなければ無視
 		if c.Player.Active() != char.Index {
 			return false
 		}

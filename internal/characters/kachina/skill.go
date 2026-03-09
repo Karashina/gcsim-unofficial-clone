@@ -36,7 +36,7 @@ func (c *char) skillPress() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -49,7 +49,7 @@ func (c *char) skillHold() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames),
 		AnimationLength: skillHoldFrames[action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillHoldFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -79,7 +79,7 @@ func (c *char) rideTwirly() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }

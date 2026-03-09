@@ -37,17 +37,17 @@ const (
 
 func (c *char) c2() {
 	c.c2buff = make([]float64, attributes.EndStatType)
-	// we use OnPlayerHit here because he just has to get hit but triggers even if shielded
+	// OnPlayerHitを使用：被弾するだけで発動し、シールド中でもトリガーされる
 	c.Core.Events.Subscribe(event.OnPlayerHit, func(args ...interface{}) bool {
 		char := args[0].(int)
-		// don't trigger if diluc was not hit
+		// ディルック以外が被弾した場合はトリガーしない
 		if char != c.Index {
 			return false
 		}
 		if c.StatusIsActive(c2ICDKey) {
 			return false
 		}
-		// if buff no longer active, reset stack back to 0
+		// バフが終了していた場合、スタックを0にリセット
 		if !c.StatModIsActive(c2BuffKey) {
 			c.c2stack = 0
 		}
@@ -74,7 +74,7 @@ func (c *char) c4() {
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBaseWithHitlag(c4BuffKey, 120),
 		Amount: func(atk *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
-			// should only affect skill dmg
+			// 元素スキルダメージのみに適用
 			if atk.Info.AttackTag != attacks.AttackTagElementalArt {
 				return nil, false
 			}

@@ -49,7 +49,7 @@ func init() {
 func (c *char) legalEvalFindDroplets() int {
 	droplets := c.getSourcewaterDroplets()
 
-	// TODO: If droplets time out before the "droplet check" it doesn't count.
+	// TODO: 雫のチェック前にタイムアウトした場合はカウントされない。
 	indices := c.Core.Combat.Rand.Perm(len(droplets))
 	orbs := 0
 	for _, ind := range indices {
@@ -68,7 +68,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	if c.chargeEarlyCancelled {
 		return action.Info{}, fmt.Errorf("%v: Cannot early cancel Charged Attack: Equitable Judgement with Charged Attack", c.CharWrapper.Base.Key)
 	}
-	// there is a windup out of dash/jump/walk/swap. Otherwise it is rolled into the Q/E/CA/NA -> CA frames
+	// ダッシュ/ジャンプ/歩行/スワップからのワインドアップがある。それ以外はQ/E/CA/NA -> CA フレームに含まれる
 	windup := 0
 	switch c.Core.Player.CurrentState() {
 	case action.Idle, action.DashState, action.JumpState, action.WalkState, action.SwapState:
@@ -85,7 +85,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 func (c *char) chargeAttackJudgement(p map[string]int, windup int) (action.Info, error) {
 	c.chargeJudgeDur = 0
 	c.tickAnimLength = getChargeJudgementHitmarkDelay(1)
-	// current framework doesn't really support actions getting shorter, so the legal eval is set to 0, but it may increase later
+	// 現在のフレームワークはアクションの短縮をサポートしていないため、法律評価は0に設定されるが、後で増加する可能性がある
 	chargeLegalEvalLeft := 0
 
 	c.QueueCharTask(func() {
@@ -121,14 +121,14 @@ func (c *char) chargeAttackJudgement(p map[string]int, windup int) (action.Info,
 
 		c.Core.Player.SwapCD = math.MaxInt16
 
-		// cannot use hitlag affected queue because the logic just does not work then
-		// -> can't account for possible hitlag delaying the update of the anim length (sim moves on to next action, but ticks continue)
+		// ヒットラグ影響キューは使用不可。ロジックが正しく動作しないため
+		// → ヒットラグによるアニメーション長更新の遅延を考慮できない（シムは次のアクションに移行するがティックは継続する）
 
-		// start counting at 1 for correct number of ticks when supplying ticks param
+		// ticks パラメータ指定時に正しいティック数のため1からカウント開始
 		c.Core.Tasks.Add(c.chargeJudgementTick(c.chargeJudgeStartF, 1, ticks, false), chargeLegalEvalLeft+getChargeJudgementHitmarkDelay(1))
 
-		// TODO: drain timing affected by ping?
-		// He drains 5 times in 3s, on frame 40, 70, 100, 130, 160
+		// TODO: HP消費タイミングはpingの影響を受けるか？
+		// 3秒間で5回消費、フレーム40, 70, 100, 130, 160
 		c.QueueCharTask(c.consumeHp(c.chargeJudgeStartF), chargeLegalEvalLeft+40)
 	}, windup+3)
 
@@ -136,11 +136,11 @@ func (c *char) chargeAttackJudgement(p map[string]int, windup int) (action.Info,
 		Frames: func(next action.Action) int {
 			return windup + 3 + chargeLegalEvalLeft + c.tickAnimLength + endLag[next]
 		},
-		AnimationLength: 1200, // there is no upper limit on the duration of the CA
+		AnimationLength: 1200, // 重撃の持続時間に上限はない
 		CanQueueAfter:   windup + 3 + endLag[action.ActionDash],
 		State:           action.ChargeAttackState,
 		OnRemoved: func(next action.AnimationState) {
-			// need to calculate correct swap cd in case of early cancel
+			// 早期キャンセル時の正確なスワップCDを計算する必要がある
 			switch next {
 			case action.SkillState, action.BurstState, action.DashState, action.JumpState:
 				c.Core.Player.SwapCD = max(player.SwapCDFrames-(c.Core.F-c.lastSwap), 0)
@@ -150,10 +150,10 @@ func (c *char) chargeAttackJudgement(p map[string]int, windup int) (action.Info,
 }
 
 func (c *char) chargeAttackShort(windup int) (action.Info, error) {
-	// By releasing too fast it is possible to absorb 3 orbs but not do a big CA
+	// リリースが速すぎると3つのオーブを吸収しても大重撃が発動しない
 	c.QueueCharTask(func() {
 		c.legalEvalFindDroplets()
-		// If there is not enough stamina to CA, nothing happens and he floats back down
+		// 重撃に必要なスタミナが不足している場合、何も起こらず浮き下がる
 		r := 1 + c.Core.Player.StamPercentMod(action.ActionCharge)
 		if r < 0 {
 			r = 0
@@ -172,7 +172,7 @@ func (c *char) chargeAttackShort(windup int) (action.Info, error) {
 				Mult:       charge[c.TalentLvlAttack()],
 			}
 			ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 3, 8)
-			// TODO: Not sure of snapshot timing
+			// TODO: スナップショットのタイミングが不明
 			c.Core.QueueAttack(
 				ai,
 				ap,
@@ -191,7 +191,7 @@ func (c *char) chargeAttackShort(windup int) (action.Info, error) {
 }
 
 func (c *char) judgementWave() {
-	// calculated every hit since canqueueafter is after the first tick, so configs can change the primary target/entity positions while the CA happens
+	// 毎ヒット計算する。canqueueafterが最初のティック後のため、重撃中にプライマリターゲット/エンティティ位置が変更される可能性がある
 	ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), nil, 3.5, 15)
 	if c.Base.Ascension >= 1 {
 		c.chargeAi.FlatDmg = chargeJudgement[c.TalentLvlAttack()] * c.MaxHP() * a1Multipliers[c.countA1()]
@@ -204,8 +204,8 @@ func (c *char) judgementWave() {
 }
 
 func getChargeJudgementHitmarkDelay(tick int) int {
-	// first tick happens 6f after start, second tick is 22f after first, then other frames are 25f after, then last tick is when the judgement wave ends.
-	// TODO: check this is the case for c6
+	// 最初のティックは開始6f後、2番目は最初から22f後、以降は25f後、最後のティックは審判の波が終了する時点。
+	// TODO: 6凸の場合もこの通りか確認
 	switch tick {
 	case 1:
 		return 6
@@ -221,27 +221,27 @@ func (c *char) chargeJudgementTick(src, tick, maxTick int, last bool) func() {
 		if c.chargeJudgeStartF != src {
 			return
 		}
-		// no longer in CA anim -> no tick
+		// 重撃アニメーション外 → ティックなし
 		if c.Core.F > c.chargeJudgeStartF+c.chargeJudgeDur {
 			return
 		}
 
-		// last tick -> check for C6 extension
+		// 最後のティック → 6凸の延長を確認
 		if last {
-			// C6 did not extend CA -> proc wave, stop queuing ticks and set correct swap cd to account for endLag
+			// 6凸が重撃を延長しなかった → 波を発動し、ティックキューを停止してendLag分のスワップCDを設定
 			if c.Core.F == c.chargeJudgeStartF+c.chargeJudgeDur {
 				c.judgementWave()
-				// no need to check for lastFrame here because a full CA definitely takes longer than 60f
+				// フル重撃は確実に60f以上かかるため、ここでlastFrameチェックは不要
 				c.Core.Player.SwapCD = endLag[action.ActionSwap]
 			} else {
-				// C6 extended the CA between when this tick was queued and when this tick was executed
-				// -> allow the other non last queued task to execute by extend anim length to include that task
+				// このティックのキュー時と実行時の間に6凸が重撃を延長した
+				// → 他の非最終キュータスクを実行できるようアニメーション長を延長
 				c.tickAnimLength = c.tickAnimLengthC6Extend
 			}
 			return
 		}
 
-		// tick param supplied and hit the limit -> proc wave, enable early cancel flag for next action check and stop queuing ticks
+		// tick パラメータ指定済みで上限に到達 → 波を発動し、次のアクションチェック用の早期キャンセルフラグを有効化してティックキューを停止
 		if tick == maxTick {
 			c.judgementWave()
 			c.chargeEarlyCancelled = true
@@ -250,25 +250,25 @@ func (c *char) chargeJudgementTick(src, tick, maxTick int, last bool) func() {
 
 		c.judgementWave()
 
-		// next tick handling
+		// 次のTick処理
 		if maxTick == -1 || tick < maxTick {
 			tickDelay := getChargeJudgementHitmarkDelay(tick + 1)
-			// calc new animation length to be up until next tick happens
+			// 次のティック発生までの新しいアニメーション長を計算
 			nextTickAnimLength := c.Core.F - c.chargeJudgeStartF + tickDelay
 
-			// always queue up non-final tick that will be executed in case C6 was proc'd
+			// 6凸が発動した場合に実行される非最終ティックを常にキューに追加
 			c.Core.Tasks.Add(c.chargeJudgementTick(src, tick+1, maxTick, false), tickDelay)
 
-			// queue up last tick if next tick would happen after CA duration ends
+			// 次のティックがCA持続時間終了後に発生する場合、最終ティックをキューに追加
 			if nextTickAnimLength > c.chargeJudgeDur {
-				// queue up final tick to happen at end of CA duration
+				// CA持続時間の終了時に最終ティックをキューに追加
 				c.Core.Tasks.Add(c.chargeJudgementTick(src, tick+1, maxTick, true), c.chargeJudgeDur-c.tickAnimLength)
-				// update tickAnimLength to be equal to entire CA duration at the end
+				// tickAnimLengthを最終的にCA持続時間全体と等しくする
 				c.tickAnimLength = c.chargeJudgeDur
-				// if C6 is triggered, then tickAnimLength will be wrong so this var holds the actual tickAnimLength if ticks continued normally beyond the original final tick
+				// 6凸が発動した場合tickAnimLengthが不正確になるため、元の最終ティック以降もティックが通常通り継続した場合の実際のtickAnimLengthをこの変数で保持
 				c.tickAnimLengthC6Extend = nextTickAnimLength
 			} else {
-				// next tick happens within CA duration -> update tickAnimLength as usual
+				// 次のティックがCA持続時間内に発生 → 通常通りtickAnimLengthを更新
 				c.tickAnimLength = nextTickAnimLength
 			}
 		}
@@ -298,8 +298,8 @@ func (c *char) consumeHp(src int) func() {
 
 func (c *char) consumeDroplet(g *sourcewaterdroplet.Gadget) {
 	g.Kill()
-	// TODO: adjust healing delay by ping amount
-	// the healing is slightly delayed by 5f
+	// TODO: ping量に応じてヒーリング遅延を調整
+	// ヒーリングは5fの僅かな遅延がある
 	c.QueueCharTask(func() {
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,

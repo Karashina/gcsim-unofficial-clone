@@ -60,7 +60,7 @@ func (i *Handler) WeaponInfuseIsActive(char int, key string) bool {
 	if i.infusion[char].Key != key {
 		return false
 	}
-	// check expiry
+	// 有効期限をチェック
 	if i.infusion[char].Expiry < float64(*i.f) && i.infusion[char].Expiry > -1 {
 		return false
 	}

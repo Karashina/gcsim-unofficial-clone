@@ -1,7 +1,7 @@
 package shortcut
 
-// NormalizeSetName resolves a set shortcut name to its canonical form.
-// If the name is not found in the shortcut map, it is returned as-is.
+// NormalizeSetNameはセットのショートカット名を正式名に解決する。
+// 名前がショートカットマップに見つからない場合はそのまま返す。
 func NormalizeSetName(name string) string {
 	if key, ok := SetNameToKey[name]; ok {
 		return key.String()
@@ -9,8 +9,8 @@ func NormalizeSetName(name string) string {
 	return name
 }
 
-// NormalizeWeaponName resolves a weapon shortcut name to its canonical form.
-// If the name is not found in the shortcut map, it is returned as-is.
+// NormalizeWeaponNameは武器のショートカット名を正式名に解決する。
+// 名前がショートカットマップに見つからない場合はそのまま返す。
 func NormalizeWeaponName(name string) string {
 	if key, ok := WeaponNameToKey[name]; ok {
 		return key.String()
@@ -18,8 +18,7 @@ func NormalizeWeaponName(name string) string {
 	return name
 }
 
-// NormalizeName resolves a shortcut name to its canonical form by trying
-// set names first, then weapon names. Returns the input as-is if not found.
+// NormalizeNameはセット名、次に武器名の順でショートカット名を正式名に解決する。見つからない場合は入力をそのまま返す。
 func NormalizeName(name string) string {
 	if key, ok := SetNameToKey[name]; ok {
 		return key.String()

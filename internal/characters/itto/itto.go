@@ -55,9 +55,9 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	c.a1()               // A1 setup
-	c.onExitField()      // burst-exit hook
-	c.resetChargeState() // post-charge hook
+	c.a1()               // A1パッシブ設定
+	c.onExitField()      // 元素爆発終了フック
+	c.resetChargeState() // 重撃後リセットフック
 
 	if c.Base.Cons >= 2 {
 		for _, char := range c.Core.Player.Chars() {
@@ -71,7 +71,7 @@ func (c *char) Init() error {
 	}
 	if c.Base.Cons >= 6 {
 		c.c6()
-		c.c6Proc = c.Base.Cons >= 6 && c.Core.Rand.Float64() < 0.5 // setup c6 proc
+		c.c6Proc = c.Base.Cons >= 6 && c.Core.Rand.Float64() < 0.5 // 6凸判定を設定
 	}
 
 	return nil
@@ -79,7 +79,7 @@ func (c *char) Init() error {
 
 func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 	if a == action.ActionCharge {
-		// CA in Q state don't consume stamina
+		// 元素爆発状態の重撃はスタミナを消費しない
 		if c.Tags[strStackKey] > 0 {
 			return 0
 		}
@@ -88,11 +88,11 @@ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
 	return c.Character.ActionStam(a, p)
 }
 
-// Itto Geo infusion can't be overridden, so it must be a snapshot modification rather than a weapon infuse
+// 一斗の岩元素付与は上書き不可のため、武器注入ではなくスナップショット修正で実装する
 func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
 	ds := c.Character.Snapshot(ai)
 	if c.StatModIsActive(burstBuffKey) {
-		// apply infusion to attacks only
+		// 攻撃にのみ元素付与を適用
 		switch ai.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagPlunge:
@@ -119,7 +119,7 @@ func (c *char) resetChargeState() {
 	}, "itto-ca-counter-reset")
 }
 
-// used to increment/decrement the amount of Superlative Strength stacks
+// 怒髪衝天スタックの増減に使用
 func (c *char) addStrStack(src string, inc int) {
 	old := c.Tags[strStackKey]
 	v := old + inc

@@ -11,11 +11,11 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// C1 (original): Fires 2 additional arrows per Aimed Shot, each dealing 33% of the original arrow's DMG.
-// C1 (hexerei addition, witch's challenge required):
+// 1凸（オリジナル）：狙い撃ち1矢につき追加で2本の矢を発射し、それぞれオリジナルの矢の33%のダメージを与える。
+// 1凸（Hexerei追加、魔女の試練必要）：
 //
-//	Stormwind Arrows also fire 2 split tracking arrows, each dealing 20% of the original arrow's DMG.
-//	This effect can trigger once per 0.25s (15 frames).
+//	ストームウィンドアローも追尾型の分裂矢を2本発射し、それぞれオリジナルの矢の20%のダメージを与える。
+//	この効果は0.25秒（15フレーム）に1回発動可能。
 func (c *char) c1(ai combat.AttackInfo, hitmark, travel int) {
 	ai.Abil += " (C1)"
 	ai.Mult /= 3.0
@@ -35,9 +35,9 @@ func (c *char) c1(ai combat.AttackInfo, hitmark, travel int) {
 	}
 }
 
-// makeC1StormwindSplitCB returns an AttackCBFunc that fires 2 extra tracking arrows
-// at 20% of the Stormwind Arrow's DMG on hit.
-// Requires: C1, hexerei mode, burst eye active. ICD: 0.25s (15 frames).
+// makeC1StormwindSplitCBはストームウィンドアローのダメージの20%で
+// 命中時に追加の追尾矢を2本発射するAttackCBFuncを返す。
+// 必要条件：1凸、Hexereiモード、元素爆発の眼がアクティブ。ICD：0.25秒（15フレーム）。
 func (c *char) makeC1StormwindSplitCB() combat.AttackCBFunc {
 	return func(a combat.AttackCB) {
 		if c.Base.Cons < 1 {
@@ -46,11 +46,11 @@ func (c *char) makeC1StormwindSplitCB() combat.AttackCBFunc {
 		if !c.isHexerei || !c.hasHexBonus {
 			return
 		}
-		if c.Core.F-c.lastStormwindSplit < 15 { // 0.25s ICD
+		if c.Core.F-c.lastStormwindSplit < 15 { // 0.25秒ICD
 			return
 		}
 		c.lastStormwindSplit = c.Core.F
-		// Derive split mult from the actual hit's AttackEvent
+		// 実際のヒットのAttackEventから分裂倍率を導出
 		splitMult := a.AttackEvent.Info.Mult * 0.20
 		splitAI := a.AttackEvent.Info
 		splitAI.Abil += " (C1 Split)"
@@ -72,10 +72,10 @@ func (c *char) makeC1StormwindSplitCB() combat.AttackCBFunc {
 	}
 }
 
-// C2 (original): Skyward Sonnet decreases opponents' Anemo RES and Physical RES by 12% for 10s.
-// C2 (hexerei addition): Press Skyward Sonnet deals 300% of original damage (hexerei only).
+// 2凸（オリジナル）：「高天の歌」が敵の風元素耐性と物理耐性を12%低下させる（10秒間）。
+// 2凸（Hexerei追加）：単押し「高天の歌」がオリジナルの300%のダメージを与える（Hexereiのみ）。
 //
-//	The 300% multiplier is applied in skill.go when hexerei is active.
+//	300%倍率はHexereiがアクティブな時にskill.goで適用される。
 func (c *char) c2(a combat.AttackCB) {
 	if c.Base.Cons < 2 {
 		return
@@ -96,10 +96,10 @@ func (c *char) c2(a combat.AttackCB) {
 	})
 }
 
-// C4 (original): When Venti picks up an Elemental Orb or Particle, he receives Anemo DMG +25% for 10s.
-// C4 (hexerei addition): After Venti uses Skyward Sonnet or Wind's Grand Ode, Venti and other
+// 4凸（オリジナル）：Ventiが元素オーブまたは粒子を取得すると、10秒間風元素ダメージ+25%を得る。
+// 4凸（Hexerei追加）：Ventiが「高天の歌」または「風神の詩」を使用後、Ventiと他の
 //
-//	active party members gain Anemo DMG +25% for 10s (hexerei only, initialized in venti.go Init).
+//	アクティブパーティメンバーが10秒間風元素ダメージ+25%を得る（Hexereiのみ、venti.go Initで初期化）。
 func (c *char) c4Old() {
 	c4bonus := make([]float64, attributes.EndStatType)
 	c4bonus[attributes.AnemoP] = 0.25
@@ -135,10 +135,10 @@ func (c *char) c4New() {
 	}
 }
 
-// C6: (Unlocked by completing Witch's Challenge)
-// Targets hit by Wind's Grand Ode have their Anemo RES decreased by 20%.
-// If Elemental Absorption occurred, that element's RES is also decreased by 20%.
-// Additionally, Venti's CRIT DMG against these enemies is increased by 100%.
+// 6凸：（魔女の試練を完了すると解放）
+// 「風神の詩」に命中した敵の風元素耐性が20%低下する。
+// 元素変化が発生した場合、その元素の耐性も同様に20%低下する。
+// さらに、これらの敵に対するVentiの会心ダメージが100%増加する。
 func (c *char) c6(ele attributes.Element) func(a combat.AttackCB) {
 	return func(a combat.AttackCB) {
 		e, ok := a.Target.(*enemy.Enemy)
@@ -153,8 +153,8 @@ func (c *char) c6(ele attributes.Element) func(a combat.AttackCB) {
 	}
 }
 
-// c6AttackModInit adds a persistent AttackMod giving Venti +100% CRIT DMG against enemies
-// that have the Anemo RES debuff applied by c6 (hexerei addition only).
+// c6AttackModInitはVentiに永続AttackModを追加し、
+// c6で風元素耐性デバフが適用された敵に対して+100%会心ダメージを与える（Hexereiのみ）。
 func (c *char) c6AttackModInit() {
 	if !c.isHexerei {
 		return
@@ -170,7 +170,7 @@ func (c *char) c6AttackModInit() {
 			if !ok {
 				return nil, false
 			}
-			// Check if target was hit by burst (has anemo res debuff)
+			// ターゲットが元素爆発に命中したか確認（風元素耐性デバフがあるか）
 			if !e.StatusIsActive("venti-c6-anemo") {
 				return nil, false
 			}
@@ -183,28 +183,28 @@ func (c *char) c6AttackModInit() {
 	})
 }
 
-// hexAttackEnabled returns true when the hexerei normal attack passive should be active.
-// Requires: hexerei mode, 2+ hexerei party members, and burst eye active.
-// This effect is unlocked by completing the Witch's Challenge (hexerei flag), not constellation-gated.
+// hexAttackEnabledはHexerei通常攻撃パッシブがアクティブになるべき時にtrueを返す。
+// 必要条件：Hexereiモード、2人以上のHexereiパーティメンバー、元素爆発の眼がアクティブ。
+// この効果は魔女の試練（Hexereiフラグ）を完了すると解放され、命ノ星座は不要。
 func (c *char) hexAttackEnabled() bool {
 	return c.isHexerei && c.hasHexBonus && c.Core.F < c.burstEnd
 }
 
-// makeHexNormalCB returns an AttackCBFunc that extends the burst eye duration and
-// reduces burst CD on normal attack hits (hexerei passive).
+// makeHexNormalCBは元素爆発の眼の持続時間を延長し、
+// 通常攻撃命中時に元素爆発 CDを短縮するAttackCBFuncを返す（Hexereiパッシブ）。
 func (c *char) makeHexNormalCB() combat.AttackCBFunc {
 	return func(a combat.AttackCB) {
 		if c.normalHexCount >= 2 {
 			return
 		}
-		if c.Core.F-c.lastHexTrigger < 6 { // 0.1s ICD = 6 frames
+		if c.Core.F-c.lastHexTrigger < 6 { // 0.1秒ICD = 6フレーム
 			return
 		}
 		c.lastHexTrigger = c.Core.F
 		c.normalHexCount++
-		// Extend burst eye duration by 1s (60 frames)
+		// 元素爆発の眼の持続時間を1秒（60フレーム）延長
 		c.burstEnd += 60
-		// Reduce burst CD by 0.5s (30 frames)
+		// 元素爆発CDを0.5秒（30フレーム）短縮
 		c.ReduceActionCooldown(action.ActionBurst, 30)
 	}
 }

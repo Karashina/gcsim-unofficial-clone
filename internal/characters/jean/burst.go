@@ -23,7 +23,7 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// p is the number of times enemy enters or exits the field
+	// pは敵がフィールドに出入りする回数
 	enter := p["enter"]
 	if enter < 1 {
 		enter = 1
@@ -46,25 +46,25 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 	snap := c.Snapshot(&ai)
 
-	// initial hit at 15f after burst start
+	// 元素爆発開始後15フレームに初期ヒット
 	c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6), burstStart+15)
 
-	// field status
+	// フィールドステータス
 	c.Core.Status.Add("jean-q", 600+burstStart)
 
-	// handle user specified amount of In/Out damage
-	// TODO: make this work with movement?
+	// ユーザー指定のIn/Outダメージ量を処理
+	// TODO: 移動に対応させる？
 	ai.Abil = "Dandelion Breeze (In/Out)"
 	ai.Mult = burstEnter[c.TalentLvlBurst()]
-	// first enter is on burst start
+	// 最初の進入は元素爆発開始時
 	for i := 0; i < enter; i++ {
 		c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 6), burstStart+i*delay)
 	}
 
-	// handle In/Out damage on field expiry
+	// フィールド消滅時のIn/Outダメージを処理
 	c.Core.QueueAttackWithSnap(ai, snap, combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 6), 600+burstStart)
 
-	// heal on burst start
+	// 元素爆発開始時に回復
 	hpplus := snap.Stats[attributes.Heal]
 	atk := snap.Stats.TotalATK()
 	heal := burstInitialHealFlat[c.TalentLvlBurst()] + atk*burstInitialHealPer[c.TalentLvlBurst()]
@@ -85,7 +85,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		panic("target 0 should be Player but is not!!")
 	}
 
-	// attack self
+	// 自身に攻撃
 	selfSwirl := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Dandelion Breeze (Self Swirl)",
@@ -93,18 +93,18 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Durability: 25,
 	}
 
-	// C4 also applies once right before burst start
+	// 4凸は元素爆発開始直前にも１回適用
 	if c.Base.Cons >= 4 {
 		c.Core.Tasks.Add(func() {
 			c.c4()
 		}, burstStart-1)
 	}
 	c.burstArea = combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 6)
-	// duration is ~10.6s, first tick starts at frame 100, + 60 each
+	// 持続時間は約10.6秒、最初のティックはフレーム100から開始、以降60フレームごと
 	for i := 100; i <= 600+burstStart; i += 60 {
 		c.Core.Tasks.Add(func() {
 			if c.Core.Combat.Player().IsWithinArea(c.burstArea) {
-				// heal
+				// 回復
 				c.Core.Player.Heal(info.HealInfo{
 					Caller:  c.Index,
 					Target:  c.Core.Player.Active(),
@@ -113,7 +113,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 					Bonus:   hpplus,
 				})
 
-				// self swirl
+				// 自己拡散
 				ae := combat.AttackEvent{
 					Info:        selfSwirl,
 					Pattern:     combat.NewSingleTargetHit(0),
@@ -122,7 +122,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				c.Core.Log.NewEvent("jean self swirling", glog.LogCharacterEvent, c.Index)
 				self.ReactWithSelf(&ae)
 			}
-			// C4
+			// 4凸
 			if c.Base.Cons >= 4 {
 				c.c4()
 			}
@@ -130,7 +130,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 	c.ConsumeEnergy(41)
 	c.SetCDWithDelay(action.ActionBurst, 1200, 38)
-	// A4
+	// 固有天賦2
 	c.Core.Tasks.Add(func() {
 		c.a4()
 	}, burstStart+1)
@@ -138,7 +138,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

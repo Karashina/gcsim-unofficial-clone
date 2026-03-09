@@ -8,15 +8,15 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// After recasting Stellar Restoration while a Lightning Stiletto is present, Keqing's weapon gains an Electro Infusion for 5s.
+// 雷楔が存在する間に星辰帰位を再発動すると、刻晴の武器に5秒間雷元素付与を獲得する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
-	// starts on E Recast start
-	// should actually be 5.6s
-	// should barely cover EE N1 Q N1 E 2N1C / 5N1C N1
-	// very susceptible to break
+	// スキル再発動時に開始
+	// 実際は5.6秒
+	// EE N1 Q N1 E 2N1C / 5N1C N1 をぎりぎりカバーする程度
+	// 非常に途切れやすい
 	dur := 5*60 + 20
 	c.AddStatus("keqinginfuse", dur, true)
 	c.Core.Player.AddWeaponInfuse(
@@ -31,7 +31,7 @@ func (c *char) a1() {
 
 }
 
-// When casting Starward Sword, Keqing's CRIT Rate is increased by 15%, and her Energy Recharge is increased by 15%. This effect lasts for 8s.
+// 天街巡遊を発動すると、刻晴の会心率が15%、元素チャージ効率が15%上昇する。この効果は8秒間持続する。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

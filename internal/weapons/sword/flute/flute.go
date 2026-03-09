@@ -17,9 +17,9 @@ func init() {
 	core.RegisterWeaponFunc(keys.TheFlute, NewWeapon)
 }
 
-// Normal or Charged Attacks grant a Harmonic on hits. Gaining 5 Harmonics triggers the
-// power of music and deals 100% ATK DMG to surrounding opponents. Harmonics last up to 30s,
-// and a maximum of 1 can be gained every 0.5s.
+// 通常攻撃または重撃が命中時、「調和」を獲得する。5つの調和を獲得すると
+// 音楽の力が発動し、周囲の敵に攻撃力の100%のダメージを与える。調和は最夰30秒間持続し、
+// 0.5秒毎に最大1個獲得可能。
 type Weapon struct {
 	Index int
 }
@@ -52,16 +52,16 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		char.AddStatus(icdKey, 30, true) // every 0.5s
+		char.AddStatus(icdKey, 30, true) // 0.5秒毎
 		if !char.StatusIsActive(durationKey) {
 			stacks = 0
 		}
 		stacks++
-		// stacks lasts 30s
+		// スタックは30秒持続
 		char.AddStatus(durationKey, 1800, true)
 
 		if stacks == 5 {
-			// trigger dmg at 5 stacks
+			// 5スタックでダメージ発動
 			stacks = 0
 			char.DeleteStatus(durationKey)
 

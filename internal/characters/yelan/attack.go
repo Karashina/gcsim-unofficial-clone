@@ -25,9 +25,9 @@ func init() {
 	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][1], 67)
 }
 
-// Normal attack damage queue generator
-// relatively standard with no major differences versus other bow characters
-// Has "travel" parameter, used to set the number of frames that the arrow is in the air (default = 10)
+// 通常攻撃のダメージキュー生成
+// 他の弓キャラクターと大きな違いはなく比較的標準的
+// "travel"パラメータあり。矢が空中にいるフレーム数を設定（デフォルト = 10）
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	travel, ok := p["travel"]
 	if !ok {
@@ -35,7 +35,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 	}
 
 	if c.Base.Cons >= 6 && c.Core.Status.Duration(c6Status) > 0 {
-		// c6 is default ICD group for some odd reason
+		// 6凸は何故かデフォルトICDグループ
 		ai := combat.AttackInfo{
 			ActorIndex: c.Index,
 			Abil:       "Breakthrough Barb",
@@ -51,7 +51,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		for i := range attack[c.NormalCounter] {
 			c.c6count++
 			if c.c6count >= 5 {
-				c.Core.Status.Delete(c6Status) // delete status after 5 arrows
+				c.Core.Status.Delete(c6Status) // 5矢後にステータスを削除
 			}
 			c.Core.QueueAttack(
 				ai,

@@ -96,12 +96,12 @@ func (s *Set) pc4() {
 	})
 
 	s.c.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		// If attack does not belong to the equipped character then ignore
+		// 装備キャラクターの攻撃でなければ無視
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != s.char.Index {
 			return false
 		}
-		// If this is not a normal attack or elemental burst then ignore
+		// 通常攻撃または元素爆発でなければ無視
 		if atk.Info.AttackTag != attacks.AttackTagNormal && atk.Info.AttackTag != attacks.AttackTagElementalBurst {
 			return false
 		}

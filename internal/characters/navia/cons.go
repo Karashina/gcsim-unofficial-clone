@@ -13,10 +13,9 @@ import (
 
 const c2IcdKey = "navia-c2-icd"
 
-// Each stack of Crystal Shrapnel consumed when Navia uses Ceremonial Crystalshot will
-// restore 3 Energy to her and decrease the CD of As the Sunlit Sky's Singing Salute by 1s.
-// Up to 9 Energy can be gained this way, and the CD of "As the Sunlit Sky's Singing Salute"
-// can be decreased by up to 3s.
+// セレモニアルクリスタルショット使用時に消費したCrystal Shrapnelのスタック毎に
+// ナヴィアのエネルギーを3回復し、As the Sunlit Sky's Singing SaluteのCDを1秒短縮。
+// エネルギーは最大9回復、CDは最大3秒短縮可能。
 func (c *char) c1(shrapnel int) {
 	if c.Base.Cons < 1 {
 		return
@@ -26,12 +25,12 @@ func (c *char) c1(shrapnel int) {
 	c.AddEnergy("navia-c1-energy", float64(count*3))
 }
 
-// Each stack of Crystal Shrapnel consumed will increase the CRIT Rate of this
-// Ceremonial Crystalshot instance by 12%. CRIT Rate can be increased by up to 36% in this way.
-// In addition, when Ceremonial Crystalshot hits an opponent, one Cannon Fire Support shot from
-// As the Sunlit Sky's Singing Salute will strike near the location of the hit.
-// Up to one instance of Cannon Fire Support can be triggered each time Ceremonial Crystalshot is used,
-// and DMG dealt by said Cannon Fire Support this way is considered Elemental Burst DMG.
+// 消費したCrystal Shrapnelのスタック毎に、セレモニアルクリスタルショットの
+// 会心率が12%増加。会心率は最大36%まで増加可能。
+// また、セレモニアルクリスタルショットが敵に命中すると、
+// As the Sunlit Sky's Singing Saluteの砲撃支援1発が命中地点付近に着弾。
+// セレモニアルクリスタルショット使用毎に最大1回発動可能。
+// この砲撃支援のダメージは元素爆発ダメージ扱い。
 func (c *char) c2() combat.AttackCBFunc {
 	if c.Base.Cons < 2 {
 		return nil
@@ -68,8 +67,8 @@ func (c *char) c2() combat.AttackCBFunc {
 	}
 }
 
-// When As the Sunlit Sky's Singing Salute hits an opponent,
-// that opponent's Geo RES will be decreased by 20% for 8s.
+// As the Sunlit Sky's Singing Saluteが敵に命中すると、
+// その敵の岩元素耐性が8秒間20%低下する。
 func (c *char) c4() combat.AttackCBFunc {
 	if c.Base.Cons < 4 {
 		return nil

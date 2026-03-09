@@ -16,8 +16,8 @@ func init() {
 	// skill (press) -> x
 	skillPressFrames = frames.InitAbilSlice(98)
 	skillPressFrames[action.ActionAttack] = 22
-	skillPressFrames[action.ActionAim] = 22   // assumed
-	skillPressFrames[action.ActionSkill] = 22 // uses burst frames
+	skillPressFrames[action.ActionAim] = 22   // 推定値
+	skillPressFrames[action.ActionSkill] = 22 // 元素爆発フレームを使用
 	skillPressFrames[action.ActionBurst] = 22
 	skillPressFrames[action.ActionDash] = 22
 	skillPressFrames[action.ActionJump] = 22
@@ -44,7 +44,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	act := action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 
@@ -66,11 +66,11 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		act = action.Info{
 			Frames:          frames.NewAbilFunc(skillHoldFrames),
 			AnimationLength: skillHoldFrames[action.InvalidAction],
-			CanQueueAfter:   skillHoldFrames[action.ActionHighPlunge], // earliest cancel
+			CanQueueAfter:   skillHoldFrames[action.ActionHighPlunge], // 最速キャンセル
 			State:           action.SkillState,
 		}
 	} else if c.Base.Cons >= 2 && c.isHexerei {
-		// C2 hexerei addition: press Skyward Sonnet deals 300% of original damage
+		// 2凸 Hexerei追加：単押し「高天の歌」がオリジナルの300%のダメージを与える
 		ai.Mult *= 3.0
 	}
 
@@ -78,7 +78,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	c.SetCDWithDelay(action.ActionSkill, cd, cdstart)
 
-	// C4 (Hexerei): Venti + team gain Anemo DMG +25% for 10s after using skill
+	// 4凸（Hexerei）：Venti + チームがスキル使用後10秒間風元素ダメージ+25%
 	if c.Base.Cons >= 4 {
 		c.c4New()
 	}

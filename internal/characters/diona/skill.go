@@ -16,8 +16,8 @@ var (
 )
 
 const (
-	skillPressHitmark = 5  // release
-	skillHoldHitmark  = 29 // release
+	skillPressHitmark = 5  // 解放
+	skillHoldHitmark  = 29 // 解放
 )
 
 func init() {
@@ -70,7 +70,7 @@ func (c *char) skillPress(travel int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -82,7 +82,7 @@ func (c *char) skillHold(travel int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames),
 		AnimationLength: skillHoldFrames[action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[action.ActionJump], // earliest cancel
+		CanQueueAfter:   skillHoldFrames[action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -90,30 +90,30 @@ func (c *char) skillHold(travel int) (action.Info, error) {
 func (c *char) pawsPewPew(f, travel, pawCount int) {
 	bonus := 1.0
 	if pawCount == 5 {
-		bonus = 1.75 // bonus if firing off 5
+		bonus = 1.75 // 5発時のボーナス
 	}
 	shdHp := (pawShieldPer[c.TalentLvlSkill()]*c.MaxHP() + pawShieldFlat[c.TalentLvlSkill()]) * bonus
 	if c.Base.Cons >= 2 {
 		shdHp *= 1.15
 	}
-	// call back to generate shield on hit
-	// note that each paw should only be able to trigger callback once (if hit multi target)
-	// and that subsequent shield generation should increase duation only
-	// TODO: need to look into maybe additional paw hits actually create "new" shields?
+	// 命中時にシールドを生成するコールバック
+	// 各爪は1回のみコールバックを発動可能（複数ターゲットに命中した場合）
+	// 後続のシールド生成は持続時間の延長のみ
+	// TODO: 追加の爪攻撃が実際に「新しい」シールドを生成するか要調査
 	pawCB := func(done bool) combat.AttackCBFunc {
 		return func(_ combat.AttackCB) {
 			if done {
 				return
 			}
-			// make sure this is only triggered once
+			// 1回のみ発動するようにする
 			done = true
 
-			// check if shield already exists, if so then just update duration
+			// シールドが既に存在する場合は持続時間のみ更新
 			dur := int(pawDur[c.TalentLvlSkill()] * 60)
 			exist := c.Core.Player.Shields.Get(shield.DionaSkill)
 			var shd *shield.Tmpl
 			if exist != nil {
-				// update
+				// 更新
 				shd, _ = exist.(*shield.Tmpl)
 				shd.Expires += dur
 			} else {
@@ -128,7 +128,7 @@ func (c *char) pawsPewPew(f, travel, pawCount int) {
 					Expires:    c.Core.F + dur, // 15 sec
 				}
 			}
-			// TODO: check that this is actually properly extending duration
+			// TODO: 持続時間が正しく延長されているか要確認
 			c.Core.Player.Shields.Add(shd)
 		}
 	}

@@ -8,24 +8,23 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
-// A1 is implemented in aimed.go and skill.go:
-// When Faruzan is in the Manifest Gale state created by Wind Realm of Nasamjnin,
-// the amount of time taken to charge a shot is decreased by 60%,
-// and she can apply The Wind's Secret Ways' Perfidious Wind's Bale to opponents
-// who are hit by the vortex created by Pressurized Collapse.
+// 固有天賦1は aimed.go と skill.go で実装:
+// ファルザンが風域の創り出した「風導」状態の時、
+// 狙い撃ちのチャージ時間が60%減少し、
+// 結圧崩壊の渦巻きに当たった敵に秘羽の虎風の効果を付与できる。
 
 const (
 	a4Key    = "faruzan-a4"
 	a4ICDKey = "faruzan-a4-icd"
 )
 
-// When characters affected by The Wind's Secret Ways' Prayerful Wind's Gift
-// deal Anemo DMG using Normal, Charged, Plunging Attacks, Elemental Skills, or
-// Elemental Bursts to opponents, they will gain the Hurricane Guard effect:
-// This DMG will be increased based on 32% of Faruzan's Base ATK. 1 instance of
-// Hurricane Guard can occur once every 0.8s. This DMG Bonus will be cleared
-// after Prayerful Wind's Benefit expires or after the effect is triggered
-// once.
+// 「祝福の風」の効果を受けたキャラクターが通常攻撃、重撃、落下攻撃、
+// 元素スキル、元素爆発で敵に風元素ダメージを与えると、
+// 「ハリケーンガード」効果を得る:
+// このダメージはファルザンの基礎攻撃力の32%に基づいて増加する。
+// ハリケーンガードは0.8秒に1回発生可能。
+// このダメージボーナスは「祝福の風」の効果終了時または
+// 1回発動後に解除される。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

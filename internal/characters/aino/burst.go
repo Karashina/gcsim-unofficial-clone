@@ -11,9 +11,9 @@ import (
 var burstFrames []int
 
 const (
-	burstDuration       = 14 * 60 // 14 seconds
-	burstTickInterval   = 90      // 90 frames (default)
-	burstTickIntervalA1 = 42      // 42 frames (when Moonsign is Ascendant)
+	burstDuration       = 14 * 60 // 14秒
+	burstTickInterval   = 90      // 90フレーム（デフォルト）
+	burstTickIntervalA1 = 42      // 42フレーム（ムーンサインが昇順の時）
 	burstKey            = "aino-burst"
 )
 
@@ -24,7 +24,7 @@ func init() {
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.burstSrc = c.Core.F
 
-	// Determine interval based on A1 passive
+	// 固有天賦1に基づき間隔を決定
 	interval := burstTickInterval
 	radius := 3.0
 	if c.MoonsignAscendant {
@@ -33,7 +33,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 
 	c.QueueCharTask(func() {
-		// Schedule water ball attacks
+		// 水球攻撃をスケジュール
 		numTicks := burstDuration / interval
 		for i := 0; i < numTicks; i++ {
 			c.Core.Tasks.Add(c.burstTick(c.burstSrc, radius), interval*i)
@@ -42,7 +42,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c.AddStatus(burstKey, burstDuration, false)
 
-	c.SetCD(action.ActionBurst, 13.5*60) // 13.5s cooldown
+	c.SetCD(action.ActionBurst, 13.5*60) // CD 13.5秒
 	c.ConsumeEnergy(7)
 
 	return action.Info{

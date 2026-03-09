@@ -14,7 +14,7 @@ const (
 	c6IcdKey = "ineffa-c6-icd"
 )
 
-// C1: Adds reaction bonus mod for all characters
+// C1: 全キャラクターに反応ボーナス修正を追加
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
@@ -30,7 +30,7 @@ func (c *char) c1() {
 	}
 }
 
-// C2: Generates shield and triggers dummy attack
+// C2: シールドを生成しダミー攻撃を発動
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
@@ -44,7 +44,7 @@ func (c *char) c2() {
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 99), 0, 0)
 }
 
-// C4: Adds energy on LC damage, with ICD
+// C4: LCダメージ時にエネルギーを回復（ICDあり）
 func (c *char) c4() {
 	if c.Base.Cons < 4 {
 		return
@@ -63,7 +63,7 @@ func (c *char) c4() {
 	}, "ineffa-c4")
 }
 
-// C6: Triggers dummy attack if C1 buff is active and LC triggers, with ICD
+// C6: C1バフがアクティブかLC発動時にダミー攻撃を発動（ICDあり）
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		return

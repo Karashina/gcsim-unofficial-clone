@@ -20,14 +20,14 @@ const (
 func init() {
 	skillFrames = frames.InitAbilSlice(34)
 	skillFrames[action.ActionAttack] = 22
-	skillFrames[action.ActionAim] = 22 // uses attack frames
+	skillFrames[action.ActionAim] = 22 // 攻撃フレームを使用
 	skillFrames[action.ActionBurst] = 23
 	skillFrames[action.ActionJump] = 32
 	skillFrames[action.ActionSwap] = 31
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	c.AddStatus(skillKey, 600+skillStart, true) // activate for 10
+	c.AddStatus(skillKey, 600+skillStart, true) // 10秒間有効化
 	if !c.StatusIsActive(a1Key) {
 		c.a1Stacks = 0
 	}
@@ -37,7 +37,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionAttack], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionAttack], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

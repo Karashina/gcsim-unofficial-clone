@@ -19,15 +19,15 @@ func ToBool(v Value) bool {
 }
 
 func ntob(v *number) bool {
-	// check int 0
+	// intの0を確認
 	if !v.isFloat && v.ival == 0 {
 		return false
 	}
-	// check float 0
+	// floatの0を確認
 	if v.isFloat && v.fval == 0 {
 		return false
 	}
-	// otherwise true
+	// それ以外はtrue
 	return true
 }
 
@@ -150,7 +150,7 @@ func UnaryOp(op ast.Token, right Value) (Value, error) {
 }
 
 func BinaryOp(op ast.Token, left, right Value) (Value, error) {
-	// String comparison (== and != only)
+	// 文字列比較（==と!=のみ）
 	if ls, ok := left.(*strval); ok {
 		rs, ok := right.(*strval)
 		if !ok {

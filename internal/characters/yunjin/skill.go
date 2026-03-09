@@ -21,20 +21,20 @@ const particleICDKey = "yunjin-particle-icd"
 func init() {
 	skillFrames = make([][]int, 3)
 
-	// Tap E
+	// 元素スキル（単押し）
 	skillFrames[0] = frames.InitAbilSlice(62) // Tap E -> N1/Q
 	skillFrames[0][action.ActionDash] = 49    // Tap E -> D
 	skillFrames[0][action.ActionJump] = 48    // Tap E -> J
 	skillFrames[0][action.ActionSwap] = 59    // Tap E -> Swap
 
-	// Hold E Lv. 1
+	// 長押しE Lv.1
 	skillFrames[1] = frames.InitAbilSlice(97) // Hold E Lv. 1 -> Q
 	skillFrames[1][action.ActionAttack] = 96  // Hold E Lv. 1 -> N1
 	skillFrames[1][action.ActionDash] = 85    // Hold E Lv. 1 -> D
 	skillFrames[1][action.ActionJump] = 85    // Hold E Lv. 1 -> J
 	skillFrames[1][action.ActionSwap] = 95    // Hold E Lv. 1 -> Swap
 
-	// Hold E Lv. 2
+	// 長押しE Lv.2
 	skillFrames[2] = frames.InitAbilSlice(141) // Hold E Lv. 2 -> Q
 	skillFrames[2][action.ActionAttack] = 140  // Hold E Lv. 2 -> N1
 	skillFrames[2][action.ActionDash] = 129    // Hold E Lv. 2 -> D
@@ -42,12 +42,12 @@ func init() {
 	skillFrames[2][action.ActionSwap] = 138    // Hold E Lv. 2 -> Swap
 }
 
-// Skill - modelled after Beidou E
-// Has two parameters:
-// perfect = 1 if you are doing a perfect counter
-// hold = 1 or 2 for regular charging up to level 1 or 2
+// 元素スキル - 北斗のスキルをモデルにしている
+// 2つのパラメータを持つ：
+// perfect = 1 パーフェクトカウンター実行時
+// hold = 1 または 2 通常のチャージレベル1または2
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// Hold parameter gets used in action frames to get earliest possible release frame
+	// Holdパラメータはアクションフレームで最速のリリースフレームを取得するために使用
 	chargeLevel := p["hold"]
 	if chargeLevel > 2 {
 		chargeLevel = 2
@@ -81,7 +81,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		ai.HitlagHaltFrames = 0.06 * 60
 		count = 2
 	case 1:
-		// 2 or 3, 1:1 ratio
+		// 2または3、1:1の比率
 		if c.Core.Rand.Float64() < 0.5 {
 			count = 2
 		} else {
@@ -106,7 +106,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.makeParticleCB(count),
 	)
 
-	// Add shield until skill unleashed (treated as frame when attack hits)
+	// スキル発動までシールドを追加（攻撃命中フレームとして扱う）
 	c.Core.Player.Shields.Add(&shield.Tmpl{
 		ActorIndex: c.Index,
 		Target:     c.Index,
@@ -119,7 +119,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	})
 
 	if c.Base.Cons >= 1 {
-		// 18% doesn't result in a whole number - 442.8 frames. We round up
+		// 18%は整数にならない - 442.8フレーム。切り上げ
 		c.SetCDWithDelay(action.ActionSkill, 443, skillCDStarts[animIdx])
 	} else {
 		c.SetCDWithDelay(action.ActionSkill, 9*60, skillCDStarts[animIdx])
@@ -128,7 +128,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames[animIdx]),
 		AnimationLength: skillFrames[animIdx][action.InvalidAction],
-		CanQueueAfter:   skillFrames[animIdx][action.ActionJump], // earliest cancel
+		CanQueueAfter:   skillFrames[animIdx][action.ActionJump], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

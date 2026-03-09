@@ -19,13 +19,13 @@ var (
 func init() {
 	burstFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	burstFrames[0] = frames.InitAbilSlice(78) // Q -> E/D/Walk
 	burstFrames[0][action.ActionAttack] = 76  // Q -> N1
 	burstFrames[0][action.ActionJump] = 77    // Q -> J
 	burstFrames[0][action.ActionSwap] = 76    // Q -> Swap
 
-	// Female
+	// 女性
 	burstFrames[1] = frames.InitAbilSlice(78) // Q -> Walk
 	burstFrames[1][action.ActionAttack] = 77  // Q -> N1
 	burstFrames[1][action.ActionSkill] = 77   // Q -> E
@@ -50,7 +50,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 
 	burstTicks := 8 // 4s duration * 0.5s tick
 	burstSpeed := 1.5
-	// The Movement SPD of Rising Waters' bubble will be decreased by 30%, and its duration increased by 3s.
+	// 充溢の水球の移動速度が30%減少し、持続時間が3秒延長される。
 	if c.Base.Cons >= 2 {
 		burstTicks = 14 // 7s duration * 0.5s tick
 		burstSpeed = 1.05
@@ -61,7 +61,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	initialDirection := c.Core.Combat.Player().Direction()
 	for i := 0; i < burstTicks; i++ {
 		nextPos := geometry.CalcOffsetPoint(initialPos.Add(geometry.Point{X: 0.5, Y: 0.5}), geometry.Point{Y: burstSpeed * float64(i)}, initialDirection)
-		// TODO: Trigger the 0.15m AoE attack for every enemy within 2.5m (estimation) of the calculated pos to emulate the burst triggering its 0.15m AoE attack on collision.
+		// TODO: バーストが衝突時に0.15m範囲攻撃をトリガーするのをエミュレートするため、計算された位置から2.5m（推定）以内の全敵に対して0.15m範囲攻撃をトリガーする。
 		c.Core.QueueAttackWithSnap(ai,
 			snap,
 			combat.NewCircleHit(c.Core.Combat.Player(), nextPos, nil, 0.15),
@@ -75,7 +75,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames[c.gender]),
 		AnimationLength: burstFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   burstFrames[c.gender][action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[c.gender][action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

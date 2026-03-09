@@ -10,7 +10,7 @@ import (
 
 var chargeFrames []int
 
-// hitmark frame, includes CA windup
+// ヒットマークフレーム（重撃の溜め時間を含む）
 const chargeHitmark = 48
 
 func init() {
@@ -24,8 +24,8 @@ func init() {
 	chargeFrames[action.ActionSwap] = 62
 }
 
-// Standard charge attack
-// CA has no travel time
+// 標準的な重撃
+// 重撃には飛行時間がない
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -40,7 +40,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}
 	ai.FlatDmg = c.burstDmgBonus(ai.AttackTag)
 
-	// skip CA windup if we're in NA animation
+	// 通常攻撃アニメーション中の場合は重撃溜め時間をスキップ
 	windup := 0
 	if c.Core.Player.CurrentState() == action.NormalAttackState {
 		windup = 14

@@ -64,23 +64,23 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	burstInitialDirection := c.Core.Combat.Player().Direction()
 	burstInitialPos := c.Core.Combat.PrimaryTarget().Pos()
-	// 8 mines total, explode in groups
-	// 5 groups of mines
-	// basically:
-	// - cut circle into 8 slices
-	// - start exploding mine at the top
-	// - keep exploding 2 mines (1 on each half) until hitting bottom mine
-	// - explode bottom mine last (closest to player)
+	// 地雷は合計8個、グループごとに爆発
+	// 5グループの地雷
+	// 基本的に:
+	// - 円を8つのスライスに分割
+	// - 上部の地雷から爆発開始
+	// - 各半分と1つずつ2つの地雷を爆発させ、下部の地雷に到達するまで続ける
+	// - 下部の地雷が最後に爆発（プレイヤーに最も近い）
 	mineGroups := 5
 	mineCounts := []int{1, 2, 2, 2, 1}
 	mineSteps := [][]float64{{0}, {45, 315}, {90, 270}, {135, 225}, {180}}
 	mineDelays := []int{24, 33, 42, 51, 60}
 	for i := 0; i < mineGroups; i++ {
 		for j := 0; j < mineCounts[i]; j++ {
-			// every shell has its own direction
+			// 各爆弾はそれぞれ独自の方向を持つ
 			direction := geometry.DegreesToDirection(mineSteps[i][j]).Rotate(burstInitialDirection)
 
-			// can't use combat attack pattern func because can't easily supply direction
+			// 方向を簡単に指定できないため combat の攻撃パターン関数を使用できない
 			mineAp := combat.AttackPattern{
 				Shape: geometry.NewCircle(burstInitialPos, 6, direction, 60),
 			}
@@ -95,7 +95,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

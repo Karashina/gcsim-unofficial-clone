@@ -34,7 +34,7 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
 }
 
 func (c *char) Init() error {
-	// mark this character as a potential moonsign holder for team initialization
+	// チーム初期化のためこのキャラクターをムーンサイン保持候補としてマーク
 	c.AddStatus("moonsignKey", -1, false)
 	c.InitLCallback()
 	c.a0()
@@ -61,22 +61,22 @@ func (c *char) AnimationStartDelay(k model.AnimationDelayKey) int {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// Allow special skill/burst variants when their custom statuses are active.
+	// スキル/元素爆発のカスタムステータスがアクティブな場合、特殊バリアントを許可する。
 	if a == action.ActionSkill && c.StatusIsActive(skillKey) {
 		if c.StatusIsActive(northlandCdKey) {
-			// Northland Spearstorm is on its own CD and cannot be used yet.
+			// 北地の槍嵐は独自のCDを持ち、まだ使用できない。
 			return false, action.SkillCD
 		}
-		// Skill variant allowed even if normal skill CD is active.
+		// 通常の元素スキルCDがアクティブでもスキルバリアントを許可。
 		return true, action.NoFailure
 	}
 
 	if a == action.ActionBurst && c.StatusIsActive(northlandKey) {
 		if !c.Core.Flags.IgnoreBurstEnergy && c.Energy < 30 {
-			// Thunderous Symphony requires 30 energy unless IgnoreBurstEnergy is set.
+			// 雷鳴の交響曲にIgnoreBurstEnergyが設定されていない限り30エネルギーが必要。
 			return false, action.InsufficientEnergy
 		}
-		// Burst variant allowed even if normal burst CD is active.
+		// 通常の元素爆発CDがアクティブでも元素爆発バリアントを許可。
 		return true, action.NoFailure
 	}
 

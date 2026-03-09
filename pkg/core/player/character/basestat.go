@@ -36,14 +36,14 @@ func (c *CharWrapper) UpdateBaseStats() error {
 		c.BaseStats[i] += v
 	}
 
-	// misc data
+	// その他データ
 	c.Base.Rarity = info.ConvertRarity(data.Rarity)
 	c.Weapon.Class = info.ConvertWeaponClass(data.WeaponClass)
 	c.CharZone = info.ConvertRegion(data.Region)
 	c.CharBody = info.ConvertBodyType(data.Body)
 	c.Base.Element = info.ConvertProtoElement(data.Element)
 
-	// log stats
+	// ステータスをログ出力
 	c.log.NewEvent(
 		"stat calc done for "+c.Base.Key.String(),
 		glog.LogCharacterEvent, c.Index,
@@ -68,7 +68,7 @@ func AvatarAsc(maxLvl int, data *model.AvatarData) int {
 	return 0
 }
 
-// TODO: this code should eventually be refactor into attributes service
+// TODO: このコードは最終的にattributesサービスにリファクタリングすべき
 func AvatarBaseStat(char info.CharacterBase, data *model.AvatarData) ([]float64, error) {
 	res := make([]float64, attributes.EndStatType)
 
@@ -82,12 +82,12 @@ func AvatarBaseStat(char info.CharacterBase, data *model.AvatarData) ([]float64,
 	res[attributes.BaseHP] = data.Stats.BaseHp * model.AvatarGrowCurveByLvl[lvl][data.Stats.HpCurve]
 	res[attributes.BaseATK] = data.Stats.BaseAtk * model.AvatarGrowCurveByLvl[lvl][data.Stats.AtkCurve]
 	res[attributes.BaseDEF] = data.Stats.BaseDef * model.AvatarGrowCurveByLvl[lvl][data.Stats.DefCruve]
-	// default er/cr/cd
+	// デフォルトの元素チャージ効率/会心率/会心ダメージ
 	res[attributes.ER] += 1
 	res[attributes.CD] += 0.5
 	res[attributes.CR] += 0.05
 
-	// calculate promotion bonus
+	// 突破ボーナスを計算
 	ind := -1
 	for i, v := range data.Stats.PromoData {
 		if char.MaxLevel >= int(v.MaxLevel) {
@@ -113,14 +113,14 @@ func WeaponBaseStat(weap info.WeaponProfile, data *model.WeaponData) ([]float64,
 	if lvl > 89 {
 		lvl = 89
 	}
-	// base props
+	// 基本プロパティ
 	for _, v := range data.BaseStats.BaseProps {
 		s := info.ConvertProtoStat(v.PropType)
-		//TODO: should this be cumulative?
+		//TODO: これは累積であるべきか？
 		res[s] = v.InitialValue * model.WeaponGrowCurveByLvl[lvl][v.Curve]
 	}
 
-	// calculate promotion bonus
+	// 突破ボーナスを計算
 	ind := -1
 	for i, v := range data.BaseStats.PromoData {
 		if weap.MaxLevel >= int(v.MaxLevel) {

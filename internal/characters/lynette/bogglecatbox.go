@@ -30,7 +30,7 @@ func (c *char) newBogglecatBox(vividTravel int) *BogglecatBox {
 		player.Direction(),
 	)
 
-	// TODO: double check estimation of hitbox
+	// TODO: ヒットボックスの見積もりを再確認
 	b.Gadget = gadget.New(c.Core, b.pos, 1, combat.GadgetTypBogglecatBox)
 	b.char = c
 	b.vividTravel = vividTravel
@@ -38,7 +38,7 @@ func (c *char) newBogglecatBox(vividTravel int) *BogglecatBox {
 	b.Duration = burstDuration
 	b.char.AddStatus(burstKey, b.Duration, false)
 
-	// initial hit
+	// 初撃
 	initialAI := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Magic Trick: Astonishing Shift",
@@ -52,7 +52,7 @@ func (c *char) newBogglecatBox(vividTravel int) *BogglecatBox {
 	}
 	c.Core.QueueAttack(initialAI, combat.NewCircleHitOnTarget(player, geometry.Point{Y: 1.5}, 4.5), burstHitmark-burstSpawn, burstHitmark-burstSpawn)
 
-	// bogglecat ticks
+	// ボグルキャットのティック
 	bogglecatAI := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Bogglecat Box",
@@ -64,12 +64,12 @@ func (c *char) newBogglecatBox(vividTravel int) *BogglecatBox {
 		Durability: 25,
 		Mult:       bogglecat[c.TalentLvlBurst()],
 	}
-	// queue up ticks
+	// Tickをキューに追加
 	for t := burstFirstTick - burstSpawn; t <= b.Duration; t += burstTickInterval {
 		c.Core.QueueAttack(bogglecatAI, combat.NewCircleHitOnTarget(b.pos, nil, 6), t, t)
 	}
 
-	// check for absorb every 0.3s besides absorbing on being hit
+	// 被撃時の吸収に加え、0.3秒ごとに元素吸収をチェック
 	b.OnThinkInterval = b.absorbCheck
 	b.ThinkInterval = 0.3 * 60
 
@@ -91,7 +91,7 @@ func (b *BogglecatBox) HandleAttack(atk *combat.AttackEvent) float64 {
 		return 0
 	}
 
-	// only allow contact with cryo/pyro/hydro/electro
+	// 氷/炎/水/雷元素のみ接触可能
 	switch atk.Info.Element {
 	case attributes.Cryo:
 	case attributes.Pyro:
@@ -109,36 +109,36 @@ func (b *BogglecatBox) HandleAttack(atk *combat.AttackEvent) float64 {
 func (b *BogglecatBox) absorbRoutine(absorbedElement attributes.Element) {
 	b.Core.Log.NewEvent(fmt.Sprintf("lynette bogglecat box came into contact with %s", absorbedElement.String()), glog.LogCharacterEvent, b.char.Index)
 
-	// vivid shots
+	// ヴィヴィッドショット
 	vividShotAI := combat.AttackInfo{
 		ActorIndex: b.char.Index,
 		Abil:       "Vivid Shot",
 		AttackTag:  attacks.AttackTagElementalBurst,
-		// should be ElementalBurstMix, but it just needs to be different from all the other icd tags used by the char so no need to add extra icd tag
+		// ElementalBurstMixであるべきだが、キャラが使用する他のICDタグと異なればよいので追加ICDタグは不要
 		ICDTag:     attacks.ICDTagElementalBurstAnemo,
 		ICDGroup:   attacks.ICDGroupDefault,
 		StrikeType: attacks.StrikeTypePierce,
-		Element:    absorbedElement, // take element from absorbed element
+		Element:    absorbedElement, // 吸収した元素を使用
 		Durability: 25,
 		Mult:       vivid[b.char.TalentLvlBurst()],
 	}
-	// queue up vivid shots
+	// ヴィヴィッドショットをキューに追加
 	for t := burstVividInterval; t <= b.Duration; t += burstVividInterval {
 		b.Core.Tasks.Add(func() {
-			// target random enemy within 15m of burst pos
+			// 元素爆発位置から15m以内のランダムな敵をターゲット
 			enemy := b.Core.Combat.RandomEnemyWithinArea(combat.NewCircleHitOnTarget(b.pos, nil, 15), nil)
-			// queue up 1 or 2 (C2) vivid shots
+			// 1または2（第2命ノ星座）のヴィヴィッドショットをキューに追加
 			for i := 0; i < b.char.vividCount; i++ {
-				// TODO: snapshot correct here?
+				// TODO: スナップショットはここで正しい？
 				b.Core.QueueAttack(vividShotAI, combat.NewCircleHitOnTarget(enemy, nil, 1), 0, b.vividTravel)
 			}
 		}, t)
 	}
 
-	// apply A4
+	// 固有天賦2を適用
 	b.char.a4(b.Duration)
 
-	// remove the gadget, because it should not be hitable after contact
+	// 接触後は被弾対象でないためガジェットを削除
 	b.Kill()
 }
 

@@ -21,12 +21,12 @@ var (
 func init() {
 	burstFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	burstFrames[0] = frames.InitAbilSlice(49) // Q -> N1
 	burstFrames[0][action.ActionSkill] = 48   // Q -> E, Eh
 	burstFrames[0][action.ActionSwap] = 47
 
-	// Female
+	// 女性
 	burstFrames[1] = frames.InitAbilSlice(49) // Q -> N1
 	burstFrames[1][action.ActionSkill] = 48   // Q -> E, Eh
 	burstFrames[1][action.ActionSwap] = 47
@@ -63,7 +63,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames[c.gender]),
 		AnimationLength: burstFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   burstFrames[c.gender][action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[c.gender][action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

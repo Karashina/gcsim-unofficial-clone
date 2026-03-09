@@ -36,7 +36,7 @@ func (c *char) c1() {
 		4,
 		4,
 	)
-	// TODO: Attack Delay on C1?
+	// TODO: C1の攻撃ディレイは？
 	c.Core.QueueAttack(ai, ap, 3, 3)
 }
 
@@ -66,7 +66,7 @@ func (c *char) c2OnBurstExtinction() {
 	if c.Base.Cons < 2 {
 		return
 	}
-	// delay buff to the end of burst. c1 hits from burst don't benefit from c2
+	// 元素爆発終了までバフを遅延。C1の元素爆発ヒットはC2の恩恵を受けない
 	c.QueueCharTask(func() {
 		c.AddStatMod(character.StatMod{
 			Base:         modifier.NewBase(c2Key, 12.5*60),
@@ -132,7 +132,7 @@ func (c *char) c6OnBurstRuin() {
 	count := c.c6Stacks.Count(filter)
 	c.c6Stacks.Clear()
 	for range count {
-		// TODO: Record Attack Delay on C6?
+		// TODO: C6の攻撃ディレイを記録する？
 		c.Core.QueueAttack(ai, ap, 0.2*60, 0.2*60)
 	}
 }
@@ -193,5 +193,5 @@ func (c *char) c6Init() {
 	}
 	c.c6Stacks = NewRingQueue[int](3)
 
-	// TODO: OnCharacterHurt?
+	// TODO: OnCharacterHurtを使うべき？
 }

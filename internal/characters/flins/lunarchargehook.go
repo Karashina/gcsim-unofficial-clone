@@ -9,14 +9,14 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
-// Lunar Charged damage ("DMG considered as Lunar-Charged DMG") handler for Flins
+// Flinsのルナチャージダメージ（「ルナチャージダメージとみなされる」）ハンドラー
 func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 	n := args[0].(combat.Target)
 	ae := args[1].(*combat.AttackEvent)
 
 	switch ae.Info.Abil {
 
-	// Ancient Ritual: Cometh the Night: Middle Phase Lunar-Charged DMG
+	// Ancient Ritual: Cometh the Night: 中間フェーズ ルナチャージダメージ
 	case "Flins QMid Dummy":
 		atk := combat.AttackInfo{
 			ActorIndex:       c.Index,
@@ -43,7 +43,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
-		// Ancient Ritual: Cometh the Night: Final Phase Lunar-Charged DMG
+		// Ancient Ritual: Cometh the Night: 最終フェーズ ルナチャージダメージ
 	case "Flins QFin Dummy":
 		atk := combat.AttackInfo{
 			ActorIndex:       c.Index,
@@ -70,7 +70,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
-	// Ancient Ritual: Cometh the Night: Thunderous Symphony DMG
+	// Ancient Ritual: Cometh the Night: 雷鸣交響ダメージ
 	case "Flins TS Dummy":
 		atk := combat.AttackInfo{
 			ActorIndex:       c.Index,
@@ -97,7 +97,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
-	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
+	// Ancient Ritual: Cometh the Night: 雷鳴交響追加ダメージ
 	case "Flins TSADD Dummy":
 		atk := combat.AttackInfo{
 			ActorIndex:       c.Index,
@@ -124,7 +124,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 		c.Core.Events.Emit(event.OnLunarCharged, n, ae)
 		return false
 
-	// Ancient Ritual: Cometh the Night: Thunderous Symphony Additional DMG
+	// Ancient Ritual: Cometh the Night: 雷鳴交響追加ダメージ
 	case "Flins C2 Dummy":
 		atk := combat.AttackInfo{
 			ActorIndex:       c.Index,
@@ -154,7 +154,7 @@ func (c *char) onSpecialLunarChargedFlins(args ...interface{}) bool {
 	return false
 }
 
-// Register Flins's special Lunar Charged callback
+// Flinsの特殊ルナチャージコールバックを登録
 func (c *char) InitLCallback() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.onSpecialLunarChargedFlins, "lc-flins-special")
 }

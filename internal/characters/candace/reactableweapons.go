@@ -39,7 +39,7 @@ func (p *ReactableWeapon) weaponreact(atk *combat.AttackEvent) (float64, bool) {
 	if atk.Info.Abil != "Weapon Infusion" {
 		return 0, false
 	}
-	if atk.Info.Durability < 0.00000000001 { //ZeroDur
+	if atk.Info.Durability < 0.00000000001 { // ゼロ持続時間
 		return 0, false
 	}
 	override := false
@@ -94,7 +94,7 @@ func (p *ReactableWeapon) weaponreact(atk *combat.AttackEvent) (float64, bool) {
 			p.Durability[reactable.Anemo] = atk.Info.Durability
 			p.DecayRate[reactable.Anemo] = 0
 		case attributes.Geo:
-			p.Durability[reactable.Geo] = 0 // Geo infusion cannot be used for reaction
+			p.Durability[reactable.Geo] = 0 // 岩元素付与は元素反応に使用できない
 			p.DecayRate[reactable.Geo] = 0
 		case attributes.Dendro:
 			p.Durability[reactable.Dendro] = atk.Info.Durability

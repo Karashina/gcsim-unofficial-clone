@@ -32,9 +32,9 @@ func init() {
 	burstFrames[action.ActionSwap] = 93
 }
 
-// On the orders of the President of the Spina di Rosula, call for a magnificent Rosula Dorata Salute.
-// Unleashes a massive cannon bombardment on opponents in front of her, dealing AoE Geo DMG and
-// providing Cannon Fire Support for a duration afterward, periodically dealing Geo DMG to nearby opponents.
+// 薔薇の会会長の命令により、壮大なRosula Dorata Saluteを発動。
+// 前方の敵に大規模な砲撃を行い、岩元素範囲ダメージを与え、
+// 一定時間砲撃支援を提供し、定期的に付近の敵に岩元素ダメージを与える。
 func (c *char) Burst(_ map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -73,7 +73,7 @@ func (c *char) Burst(_ map[string]int) (action.Info, error) {
 		for i := 0; i <= burstDuration; i += nextTick {
 			tick++
 			c.Core.Tasks.Add(func() {
-				// queue attack
+				// 攻撃をキューに追加
 				c.Core.QueueAttack(
 					ai,
 					combat.NewCircleHitOnTarget(c.calcCannonPos(), nil, 3),
@@ -83,7 +83,7 @@ func (c *char) Burst(_ map[string]int) (action.Info, error) {
 					c.c4(),
 				)
 			}, i)
-			// if tick 2, 5, 8, 11, 14 was queued then the next tick is in 48f instead of 42f
+			// tick 2, 5, 8, 11, 14 がキューされた場合、次のティックは42fではなく48f後
 			if tick%3 == 2 {
 				nextTick = 48
 			} else {
@@ -97,13 +97,13 @@ func (c *char) Burst(_ map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
 
-// When cannon attacks hit opponents, Navia will gain 1 stack of Crystal Shrapnel.
-// This effect can be triggered up to once every 2.4s.
+// 砲撃が敵に命中すると、ナヴィアはCrystal Shrapnelを1スタック獲得。
+// この効果は2.4秒ごとに1回まで発動可能。
 func (c *char) burstCB() combat.AttackCBFunc {
 	return func(a combat.AttackCB) {
 		if a.Target.Type() != targets.TargettableEnemy {
@@ -120,22 +120,22 @@ func (c *char) burstCB() combat.AttackCBFunc {
 	}
 }
 
-// Targets a random enemy if there is an enemy present, if not, it targets a random spot
+// 敵がいればランダムな敵を、いなければランダムな地点をターゲットする
 func (c *char) calcCannonPos() geometry.Point {
-	player := c.Core.Combat.Player() // gadget is attached to player
+	player := c.Core.Combat.Player() // ガジェットはプレイヤーに付属
 
-	// look for random enemy within 10m radius from player pos
+	// プレイヤー位置から10m半径内のランダムな敵を検索
 	enemy := c.Core.Combat.RandomEnemyWithinArea(
 		combat.NewCircleHitOnTarget(c.Core.Combat.Player().Pos(), nil, 10),
 		nil,
 	)
 
-	// enemy found: choose random point between 0 and 1.2m from their pos
+	// 敵が見つかった: 敵の位置から0～1.2mのランダムな点を選択
 	if enemy != nil {
 		return geometry.CalcRandomPointFromCenter(enemy.Pos(), 0, 1.2, c.Core.Rand)
 	}
 
-	// no enemy: targeting is randomly between 1m and 6m from player pos + Y: 4
+	// 敵なし: プレイヤー位置 + Y:4 から1m～6mのランダムな地点をターゲット
 	return geometry.CalcRandomPointFromCenter(
 		geometry.CalcOffsetPoint(
 			player.Pos(),

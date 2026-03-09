@@ -5,7 +5,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/shield"
 )
 
-// Characters shielded by Icy Paws have their Movement SPD increased by 10% and their Stamina Consumption decreased by 10%.
+// 猫爪シールドの保護を受けたキャラクターは移動速度が10%上昇し、スタミナ消費が10%減少する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -18,5 +18,5 @@ func (c *char) a1() {
 	})
 }
 
-// A4 is not implemented:
-// TODO: Opponents who enter the AoE of Signature Mix have 10% decreased ATK for 15s.
+// 固有天賦2は未実装:
+// TODO: シグネチャーミックスのAoEに入った敵は15秒間攻撃力が10%減少する。

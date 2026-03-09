@@ -19,17 +19,17 @@ var aimedHitmarks = []int{15, 74, 103}
 func init() {
 	aimedFrames = make([][]int, 3)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(25)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot Lv. 1 (Fully-Charged Aimed Shot)
+	// フルチャージ狙い撃ちLv.1（フルチャージ狙い撃ち）
 	aimedFrames[1] = frames.InitAbilSlice(85)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
 
-	// Fully-Charged Aimed Shot Lv. 2 (Frostflake Arrow + Frostflake Arrow Bloom)
+	// フルチャージ狙い撃ちLv.2（霜華の矢 + 霜華満開）
 	aimedFrames[2] = frames.InitAbilSlice(113)
 	aimedFrames[2][action.ActionDash] = aimedHitmarks[2]
 	aimedFrames[2][action.ActionJump] = aimedHitmarks[2]
@@ -73,29 +73,29 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 		ai.Element = attributes.Physical
 		ai.Mult = aim[c.TalentLvlAttack()]
 	}
-	// TODO: not sure if this works as intended
+	// TODO: これが意図通りに動作するか不明
 	skip := 0
 	if c.Core.Status.Duration(c6Key) > 0 && hold == attacks.AimParamLv2 {
 		c.Core.Status.Delete(c6Key)
 		c.Core.Log.NewEvent(c6Key+" proc used", glog.LogCharacterEvent, c.Index).
 			Write("char", c.Index)
-		// skip aimed charge time
+		// 狙い撃ちチャージ時間をスキップ
 		skip = 83
 	}
 
-	// snapshot delay and handles A1
+	// スナップショットの遅延と固有天賦1の処理
 	if hold == attacks.AimParamLv2 {
 		c.Core.Tasks.Add(func() {
-			// make sure Frostflake Arrow and Bloom have the correct values
+			// Frostflake ArrowとBloomの値が正しいことを確認
 			ai.Abil = "Frostflake Arrow"
 			ai.Element = attributes.Cryo
 			ai.Mult = ffa[c.TalentLvlAttack()]
 
 			snap := c.Snapshot(&ai)
-			// A1:
-			// After firing a Frostflake Arrow, the CRIT Rate of subsequent Frostflake Arrows
-			// and their resulting bloom effects is increased by 20% for 5s.
-			// - doesn't apply to the first aimed shot
+			// 固有天賦1:
+			// 霄花矢を発射した後、後続の霄花矢とその眾花の会心率が
+			// 5秒間にわたり20%上昇する。
+			// - 最初の狙い撃ちには適用されない
 			if c.Base.Ascension >= 1 && c.Core.F < c.a1Expiry {
 				old := snap.Stats[attributes.CR]
 				snap.Stats[attributes.CR] += .20
@@ -127,11 +127,11 @@ func (c *char) Aimed(p map[string]int) (action.Info, error) {
 				ai,
 				snap,
 				combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 5),
-				travel+18, // bloom always hits 18f after the arrow
+				travel+18, // Bloomは常に矢から18フレーム後に命中
 				c1cb,
 			)
 
-			// first shot/bloom do not benefit from a1
+			// 最初の射撃/ブルームはA1の恩恵を受けない
 			c.a1Expiry = c.Core.F + 60*5
 		}, aimedHitmarks[hold]-skip)
 	} else {

@@ -12,7 +12,7 @@ var burstFrames []int
 
 const (
 	burstHitmark        = 92
-	burstSnapshotTiming = burstHitmark - 1 // TODO: snapshot timing?
+	burstSnapshotTiming = burstHitmark - 1 // TODO: スナップショットタイミング?
 	burstEnergyFrame    = 10
 )
 
@@ -23,8 +23,8 @@ func init() {
 	burstFrames[action.ActionSwap] = 99
 }
 
-// Twin swords leave their sheaths as Chiori slices with the clean cuts
-// of a master tailor, dealing AoE Geo DMG based on her ATK and DEF.
+// 双剣が鞘から離れ、千織が一流の仕立屋のように綺麗な斬撃で斜る。
+// 攻撃力と防御力に基づく岩元素範囲ダメージを与える。
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -42,14 +42,14 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.Core.Tasks.Add(func() {
 		snap := c.Snapshot(&ai)
 
-		// flat dmg for def scaling portion
+		// 防御力スケーリング部分の固定ダメージ
 		ai.FlatDmg = snap.Stats.TotalDEF()
 		ai.FlatDmg *= burstDefScaling[c.TalentLvlBurst()]
 
-		// c2 should be called slightly before the actual dmg happens
+		// 2凸は実際のダメージ発生の少し前に呼ぶ必要がある
 		c.c2()
 
-		// TODO: hitbox, blame chiori mains if wrong
+		// TODO: ヒットボックス、chiori mainsが間違っていたら彼らのせい
 		c.Core.QueueAttackWithSnap(
 			ai,
 			snap,

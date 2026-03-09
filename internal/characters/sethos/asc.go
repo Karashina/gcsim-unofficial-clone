@@ -8,13 +8,13 @@ import (
 
 const a1Key = "sethos-a1"
 
-// returns the amount of time to save, and the amount of energy considered
+// 短縮する時間量と消費するエネルギー量を返す
 func (c *char) a1Calc() (int, float64) {
 	if c.Base.Ascension < 1 {
 		return 0, 0
 	}
 	energy := min(c.Energy, 20)
-	// floor or round the skip?
+	// skipは切り捨てか四捨五入か？
 	return int(0.285 * energy * 60), energy
 }
 
@@ -38,7 +38,7 @@ func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
 	}
-	// buff stays active until a4 is proc'd
+	// バフは固有天賦4が発動するまで有効
 	c.AddStatus(a4Key, -1, true)
 	c.a4Count = 0
 }
@@ -61,7 +61,7 @@ func (c *char) makeA4cb() combat.AttackCBFunc {
 		}
 		done = true
 		if c.a4Count == 0 {
-			// overwrite the expiry of the a4 buff to be 5s after
+			// 固有天賦4バフの有効期限を5秒後に上書き
 			c.AddStatus(a4Key, 5*60, true)
 			c.startA4Icd()
 		}

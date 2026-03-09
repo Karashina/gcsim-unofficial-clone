@@ -18,7 +18,7 @@ import (
 )
 
 func (e *Eval) initSysFuncs(env *Env) {
-	// std funcs
+	// 標準関数
 	e.addSysFunc("f", e.f, env)
 	e.addSysFunc("rand", e.rand, env)
 	e.addSysFunc("randnorm", e.randnorm, env)
@@ -29,7 +29,7 @@ func (e *Eval) initSysFuncs(env *Env) {
 	e.addSysFunc("type", e.typeval, env)
 	e.addSysFunc("execute_action", e.executeAction, env)
 
-	// player/enemy
+	// プレイヤー/敵
 	e.addSysFunc("set_target_pos", e.setTargetPos, env)
 	e.addSysFunc("set_player_pos", e.setPlayerPos, env)
 	e.addSysFunc("set_default_target", e.setDefaultTarget, env)
@@ -39,14 +39,14 @@ func (e *Eval) initSysFuncs(env *Env) {
 	e.addSysFunc("is_target_dead", e.isTargetDead, env)
 	e.addSysFunc("pick_up_crystallize", e.pickUpCrystallize, env)
 
-	// math
+	// 数学関数
 	e.addSysFunc("sin", e.sin, env)
 	e.addSysFunc("cos", e.cos, env)
 	e.addSysFunc("asin", e.asin, env)
 	e.addSysFunc("acos", e.acos, env)
 	e.addSysFunc("is_even", e.isEven, env)
 
-	// events
+	// イベント
 	e.addSysFunc("set_on_tick", e.setOnTick, env)
 }
 
@@ -59,7 +59,7 @@ func (e *Eval) addSysFunc(name string, f func(c *ast.CallExpr, env *Env) (Obj, e
 }
 
 func (e *Eval) print(c *ast.CallExpr, env *Env) (Obj, error) {
-	// concat all args
+	// 全引数を連結する
 	var sb strings.Builder
 	for _, arg := range c.Args {
 		val, err := e.evalExpr(arg, env)
@@ -99,7 +99,7 @@ func (e *Eval) randnorm(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) wait(c *ast.CallExpr, env *Env) (Obj, error) {
-	// wait(number goes in here)
+	// wait(ここに数値を指定)
 	objs, err := e.validateArguments(c, env, typNum)
 	if err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func (e *Eval) wait(c *ast.CallExpr, env *Env) (Obj, error) {
 
 	f := ntoi(objs[0].(*number))
 	if f < 0 {
-		// do nothing if less or equal to 0
+		// 0以下の場合は何もしない
 		return &null{}, nil
 	}
 
@@ -115,7 +115,7 @@ func (e *Eval) wait(c *ast.CallExpr, env *Env) (Obj, error) {
 		Action: action.ActionWait,
 		Param:  map[string]int{"f": int(f)},
 	})
-	// block until sim is done with the action; unless we're done
+	// シミュレーションがアクションを完了するまでブロックする（終了済みでない限り）
 	err = e.waitForNext()
 	if err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ func (e *Eval) wait(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) delay(c *ast.CallExpr, env *Env) (Obj, error) {
-	// delay(number goes in here)
+	// delay(ここに数値を指定)
 	objs, err := e.validateArguments(c, env, typNum)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (e *Eval) delay(c *ast.CallExpr, env *Env) (Obj, error) {
 
 	f := ntoi(objs[0].(*number))
 	if f < 0 {
-		// do nothing if less or equal to 0
+		// 0以下の場合は何もしない
 		return &null{}, nil
 	}
 
@@ -141,7 +141,7 @@ func (e *Eval) delay(c *ast.CallExpr, env *Env) (Obj, error) {
 		Action: action.ActionDelay,
 		Param:  map[string]int{"f": int(f)},
 	})
-	// block until sim is done with the action; unless we're done
+	// シミュレーションがアクションを完了するまでブロックする（終了済みでない限り）
 	err = e.waitForNext()
 	if err != nil {
 		return nil, err
@@ -151,7 +151,7 @@ func (e *Eval) delay(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) typeval(c *ast.CallExpr, env *Env) (Obj, error) {
-	// type(var)
+	// type(変数)
 	err := validateNumberParams(c, 1)
 	if err != nil {
 		return nil, err
@@ -165,7 +165,7 @@ func (e *Eval) typeval(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) setPlayerPos(c *ast.CallExpr, env *Env) (Obj, error) {
-	// set_player_pos(x, y)
+	// set_player_pos(x座標, y座標)
 	objs, err := e.validateArguments(c, env, typNum, typNum)
 	if err != nil {
 		return nil, err
@@ -180,7 +180,7 @@ func (e *Eval) setPlayerPos(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) setParticleDelay(c *ast.CallExpr, env *Env) (Obj, error) {
-	// set_particle_delay("character", x);
+	// set_particle_delay("キャラクター", x);
 	objs, err := e.validateArguments(c, env, typStr, typNum)
 	if err != nil {
 		return nil, err
@@ -188,7 +188,7 @@ func (e *Eval) setParticleDelay(c *ast.CallExpr, env *Env) (Obj, error) {
 	name := objs[0].(*strval)
 	delay := ntoi(objs[1].(*number))
 
-	// check name exists on team
+	// 名前がチームに存在するか確認
 	ck, ok := shortcut.CharNameToKey[name.str]
 	if !ok {
 		return nil, fmt.Errorf("set_particle_delay first argument %v is not a valid character", name.str)
@@ -203,9 +203,9 @@ func (e *Eval) setParticleDelay(c *ast.CallExpr, env *Env) (Obj, error) {
 	return &null{}, nil
 }
 
-// Set SwapICD to any integer, to simulate booking. May be any non-negative integer.
+// SwapICD を任意の整数に設定する。予約のシミュレーション用。非負の整数を指定可能。
 func (e *Eval) setSwapICD(c *ast.CallExpr, env *Env) (Obj, error) {
-	// set_swap_icd(f)
+	// set_swap_icd(フレーム数)
 	objs, err := e.validateArguments(c, env, typNum)
 	if err != nil {
 		return nil, err
@@ -221,14 +221,14 @@ func (e *Eval) setSwapICD(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) setDefaultTarget(c *ast.CallExpr, env *Env) (Obj, error) {
-	// set_default_target(index)
+	// set_default_target(インデックス)
 	objs, err := e.validateArguments(c, env, typNum)
 	if err != nil {
 		return nil, err
 	}
 	idx := int(ntoi(objs[0].(*number)))
 
-	// check if index is in range
+	// インデックスが範囲内かチェック
 	if idx < 1 || idx > e.Core.Combat.EnemyCount() {
 		return nil, fmt.Errorf("index for set_default_target is invalid, should be between %v and %v, got %v", 1, e.Core.Combat.EnemyCount(), idx)
 	}
@@ -240,7 +240,7 @@ func (e *Eval) setDefaultTarget(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) setTargetPos(c *ast.CallExpr, env *Env) (Obj, error) {
-	// set_target_pos(1,x,y)
+	// set_target_pos(インデックス, x座標, y座標)
 	objs, err := e.validateArguments(c, env, typNum, typNum, typNum)
 	if err != nil {
 		return nil, err
@@ -249,7 +249,7 @@ func (e *Eval) setTargetPos(c *ast.CallExpr, env *Env) (Obj, error) {
 	x := ntof(objs[1].(*number))
 	y := ntof(objs[2].(*number))
 
-	// check if index is in range
+	// インデックスが範囲内かチェック
 	if idx < 1 || idx > e.Core.Combat.EnemyCount() {
 		return nil, fmt.Errorf("index for set_default_target is invalid, should be between %v and %v, got %v", 1, e.Core.Combat.EnemyCount(), idx)
 	}
@@ -261,7 +261,7 @@ func (e *Eval) setTargetPos(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) killTarget(c *ast.CallExpr, env *Env) (Obj, error) {
-	// kill_target(1)
+	// kill_target(インデックス)
 	if !e.Core.Combat.DamageMode {
 		return nil, errors.New("damage mode is not activated")
 	}
@@ -272,7 +272,7 @@ func (e *Eval) killTarget(c *ast.CallExpr, env *Env) (Obj, error) {
 	}
 	idx := int(ntoi(objs[0].(*number)))
 
-	// check if index is in range
+	// インデックスが範囲内かチェック
 	if idx < 1 || idx > e.Core.Combat.EnemyCount() {
 		return nil, fmt.Errorf("index for kill_target is invalid, should be between %v and %v, got %v", 1, e.Core.Combat.EnemyCount(), idx)
 	}
@@ -283,7 +283,7 @@ func (e *Eval) killTarget(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) isTargetDead(c *ast.CallExpr, env *Env) (Obj, error) {
-	// is_target_dead(1)
+	// is_target_dead(インデックス)
 	if !e.Core.Combat.DamageMode {
 		return nil, errors.New("damage mode is not activated")
 	}
@@ -294,7 +294,7 @@ func (e *Eval) isTargetDead(c *ast.CallExpr, env *Env) (Obj, error) {
 	}
 	idx := int(ntoi(objs[0].(*number)))
 
-	// check if index is in range
+	// インデックスが範囲内かチェック
 	if idx < 1 || idx > e.Core.Combat.EnemyCount() {
 		return nil, fmt.Errorf("index for is_target_dead is invalid, should be between %v and %v, got %v", 1, e.Core.Combat.EnemyCount(), idx)
 	}
@@ -303,14 +303,14 @@ func (e *Eval) isTargetDead(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) pickUpCrystallize(c *ast.CallExpr, env *Env) (Obj, error) {
-	// pick_up_crystallize("element");
+	// pick_up_crystallize("元素名")
 	objs, err := e.validateArguments(c, env, typStr)
 	if err != nil {
 		return nil, err
 	}
 	name := objs[0].(*strval)
 
-	// check if element is vaild
+	// 元素が有効かチェック
 	pickupEle := attributes.StringToEle(name.str)
 	if pickupEle == attributes.UnknownElement && name.str != "any" {
 		return nil, fmt.Errorf("pick_up_crystallize argument element %v is not a valid element", name.str)
@@ -319,15 +319,15 @@ func (e *Eval) pickUpCrystallize(c *ast.CallExpr, env *Env) (Obj, error) {
 	var count int64
 	for _, g := range e.Core.Combat.Gadgets() {
 		shard, ok := g.(*reactable.CrystallizeShard)
-		// skip if no shard
+		// 結晶がなければスキップ
 		if !ok {
 			continue
 		}
-		// skip if shard not specified element
+		// 結晶片が指定された元素でなければスキップ
 		if pickupEle != attributes.UnknownElement && shard.Shield.Ele != pickupEle {
 			continue
 		}
-		// try to pick up shard and stop if succeeded
+		// 結晶片の拾得を試み、成功したら終了
 		if shard.AddShieldKillShard() {
 			count = 1
 			break
@@ -340,7 +340,7 @@ func (e *Eval) pickUpCrystallize(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) isEven(c *ast.CallExpr, env *Env) (Obj, error) {
-	// is_even(number goes in here)
+	// is_even(ここに数値を指定)
 	objs, err := e.validateArguments(c, env, typNum)
 	if err != nil {
 		return nil, err
@@ -350,7 +350,7 @@ func (e *Eval) isEven(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) sin(c *ast.CallExpr, env *Env) (Obj, error) {
-	// sin(number goes in here)
+	// sin(ここに数値を指定)
 	objs, err := e.validateArguments(c, env, typNum)
 	if err != nil {
 		return nil, err
@@ -364,7 +364,7 @@ func (e *Eval) sin(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) cos(c *ast.CallExpr, env *Env) (Obj, error) {
-	// cos(number goes in here)
+	// cos(ここに数値を指定)
 	objs, err := e.validateArguments(c, env, typNum)
 	if err != nil {
 		return nil, err
@@ -378,7 +378,7 @@ func (e *Eval) cos(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) asin(c *ast.CallExpr, env *Env) (Obj, error) {
-	// asin(number goes in here)
+	// asin(ここに数値を指定)
 	objs, err := e.validateArguments(c, env, typNum)
 	if err != nil {
 		return nil, err
@@ -392,7 +392,7 @@ func (e *Eval) asin(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) acos(c *ast.CallExpr, env *Env) (Obj, error) {
-	// acos(number goes in here)
+	// acos(ここに数値を指定)
 	objs, err := e.validateArguments(c, env, typNum)
 	if err != nil {
 		return nil, err
@@ -406,7 +406,7 @@ func (e *Eval) acos(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) setOnTick(c *ast.CallExpr, env *Env) (Obj, error) {
-	// set_on_tick(func)
+	// set_on_tick(関数)
 	objs, err := e.validateArguments(c, env, typFun)
 	if err != nil {
 		return nil, err
@@ -416,7 +416,7 @@ func (e *Eval) setOnTick(c *ast.CallExpr, env *Env) (Obj, error) {
 	e.Core.Events.Subscribe(event.OnTick, func(args ...interface{}) bool {
 		_, err := e.evalNode(fn.Body, env)
 		if err != nil {
-			// handle the error
+			// エラーを処理する
 			e.err = err
 		}
 
@@ -426,7 +426,7 @@ func (e *Eval) setOnTick(c *ast.CallExpr, env *Env) (Obj, error) {
 }
 
 func (e *Eval) executeAction(c *ast.CallExpr, env *Env) (Obj, error) {
-	// execute_action(char, action, params)
+	// execute_action(キャラクター, アクション, パラメータ)
 	objs, err := e.validateArguments(c, env, typNum, typNum, typMap)
 	if err != nil {
 		return nil, err
@@ -435,7 +435,7 @@ func (e *Eval) executeAction(c *ast.CallExpr, env *Env) (Obj, error) {
 	ac := objs[1].(*number)
 	p := objs[2].(*mapval)
 
-	// convert map
+	// マップを変換する
 	params := make(map[string]int)
 	for k, v := range p.fields {
 		if v.Typ() != typNum {
@@ -450,7 +450,7 @@ func (e *Eval) executeAction(c *ast.CallExpr, env *Env) (Obj, error) {
 		return nil, fmt.Errorf("can't execute action: %v is not on this team", charKey)
 	}
 
-	// if char is not on field then we need to send an implicit swap
+	// キャラがフィールドにいなければ暗黙のスワップを送信する必要がある
 	if charKey != e.Core.Player.ActiveChar().Base.Key {
 		e.sendWork(&action.Eval{
 			Char:   charKey,

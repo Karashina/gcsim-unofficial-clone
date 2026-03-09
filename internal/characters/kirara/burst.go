@@ -26,7 +26,7 @@ func init() {
 	burstFrames[action.ActionSwap] = 57
 }
 
-// Has one parameter, "hits" determines the number of cardamoms that hit the enemy
+// パラメータ1つ："hits" は敵に命中するカルダモンの数を決定する
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	boxAi := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -42,8 +42,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c.cardamoms = 6
 	if c.Base.Cons >= 1 {
-		// Every 8,000 Max HP Kirara possesses will cause her to create 1 extra Cat Grass Cardamom when she uses Secret Art: Surprise Dispatch.
-		// A maximum of 4 extra can be created this way.
+		// キララのHP上限8,000ごとに秘技・緋球天眼通使用時に追加のCat Grass Cardamomを1個生成する。
+		// 最大4個まで追加可能。
 		bonus := int(c.MaxHP() / 8000)
 		if bonus > 4 {
 			bonus = 4
@@ -82,7 +82,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c.minePattern = combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 2)
 
-	// box
+	// 箱
 	player := c.Core.Combat.Player()
 	boxPos := geometry.CalcOffsetPoint(player.Pos(), geometry.Point{Y: 3}, player.Direction())
 	c.QueueCharTask(func() {
@@ -90,7 +90,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(boxAi, combat.NewCircleHitOnTarget(boxPos, nil, 6), 0, 0)
 	}, boxHitmark)
 
-	// mine hits
+	// 地雷ヒット
 	c.QueueCharTask(func() {
 		for i := 0; i < minehits; i++ {
 			c.Core.QueueAttackWithSnap(mineAi, c.mineSnap, c.minePattern, 0)
@@ -101,7 +101,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}
 	}, mineHitmark)
 
-	// mine expires
+	// 地雷期限切れ
 	c.QueueCharTask(func() {
 		for i := 0; i < c.cardamoms; i++ {
 			c.Core.QueueAttackWithSnap(mineAi, c.mineSnap, c.minePattern, i*9*2)

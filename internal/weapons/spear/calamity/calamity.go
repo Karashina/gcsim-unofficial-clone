@@ -56,17 +56,16 @@ func (w *Weapon) checkBuffExpiry(src int) func() {
 }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// Gain 12% All Elemental DMG Bonus. Obtain Consummation for 20s after using
-	// an Elemental Skill, causing ATK to increase by 3.2% per second. This ATK
-	// increase has a maximum of 6 stacks. When the character equipped with this
-	// weapon is not on the field, Consummation's ATK increase is doubled.
+	// 全元素ダメージボーナス12%増加。元素スキル使用後、20秒間Consummationを獲得し、
+	// 攻撃力が1秒あたり3.2%増加する。この攻撃力増加は最大6スタック。
+	// 武器装備キャラクターがフィールドにいない時、Consummationの攻撃力増加は2倍になる。
 	w := &Weapon{
 		char: char,
 		c:    c,
 	}
 	r := p.Refine
 
-	// fixed elemental dmg bonus
+	// 固定元素ダメージボーナス
 	dmg := .09 + float64(r)*.03
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.PyroP] = dmg
@@ -88,8 +87,8 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	buffDuration := 1200 // 20s * 60
 	w.icd = 60           // 1s * 60
 
-	// atk increase per stack after using skill
-	// double bonus if not on field
+	// スキル使用後のスタックあたりの攻撃力増加
+	// フィールド外の場合ボーナスが2倍
 	atkbonus := .024 + float64(r)*.008
 	skillPressBonus := make([]float64, attributes.EndStatType)
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
@@ -97,7 +96,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			return false
 		}
 
-		// asummes that stacks are not reset on refreshing calamity buff
+		// Calamityバフ更新時にスタックがリセットされないと想定
 		w.lastBuffGain = c.F
 		char.QueueCharTask(w.checkBuffExpiry(c.F), buffDuration)
 		char.QueueCharTask(w.incStacks(), w.icd)

@@ -22,7 +22,7 @@ const (
 	particleICDKey = "clorinde-particle-icd"
 
 	skillDashHitmark = 11
-	skillHealFrame   = 6 // no ping
+	skillHealFrame   = 6 // ping考慮なし
 	tolerance        = 0.0000001
 	skillStart       = 6
 	skillCD          = 16 * 60
@@ -32,7 +32,7 @@ func init() {
 	skillFrames = frames.InitAbilSlice(33) // E -> Q
 	skillFrames[action.ActionAttack] = 31
 	skillFrames[action.ActionSkill] = 32
-	skillFrames[action.ActionDash] = skillStart // ability doesn't start if dash is done before CD
+	skillFrames[action.ActionDash] = skillStart // CD前にダッシュすると能力が発動しない
 	skillFrames[action.ActionJump] = 25
 	skillFrames[action.ActionSwap] = 25
 	skillFrames[action.ActionWalk] = 32
@@ -47,8 +47,8 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// first press activates skill state
-	// sequential presses pew pew stuff
+	// 最初の押下でスキル状態を有効化
+	// 続く押下で攻撃を実行
 	if c.StatusIsActive(skillStateKey) {
 		return c.skillDash(p)
 	}
@@ -67,7 +67,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 func (c *char) skillDash(p map[string]int) (action.Info, error) {
 	c.normalSCounter = 0
 
-	// depending on BOL lvl it does either 1 hit or 3 hit
+	// BOLレベルによっ1ヒットまたは3ヒット
 	ratio := c.CurrentHPDebtRatio()
 	switch {
 	case ratio >= 1:
@@ -97,7 +97,7 @@ func (c *char) skillDashNoBOL(_ map[string]int) (action.Info, error) {
 		HitlagFactor:   0.01,
 		IgnoreInfusion: true,
 	}
-	// TODO: what's the size of this??
+	// TODO: このサイズは？
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 0.6)
 	c.Core.QueueAttack(ai, ap, skillDashHitmark, skillDashHitmark, c.particleCB)
 
@@ -124,7 +124,7 @@ func (c *char) skillDashFullBOL(_ map[string]int) (action.Info, error) {
 			HitlagFactor:   0.01,
 			IgnoreInfusion: true,
 		}
-		// TODO: what's the size of this??
+		// TODO: このサイズは？
 		ap := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 0.8)
 		c.Core.QueueAttack(ai, ap, skillDashHitmark, skillDashHitmark, c.particleCB)
 	}
@@ -163,7 +163,7 @@ func (c *char) skillDashRegular(_ map[string]int) (action.Info, error) {
 		HitlagFactor:   0.01,
 		IgnoreInfusion: true,
 	}
-	// TODO: what's the size of this??
+	// TODO: このサイズは？
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.PrimaryTarget(), nil, 0.8)
 	c.Core.QueueAttack(ai, ap, skillDashHitmark, skillDashHitmark, c.particleCB)
 

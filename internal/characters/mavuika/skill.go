@@ -246,7 +246,7 @@ func (c *char) skillPress() action.Info {
 	return c.getSkillCastActionInfo(skillFrames)
 }
 
-// Recasting E while on bike, occurs with Sac or Burst allowing E to come off of cd
+// バイク状態で元素スキルを再使用。祭礼武器や元素爆発でスキルのクールダウンが終了した場合に発生
 func (c *char) skillBikeRefresh() action.Info {
 	ai := combat.AttackInfo{
 		ActorIndex:     c.Index,
@@ -273,11 +273,11 @@ func (c *char) skillBikeRefresh() action.Info {
 	return c.getSkillCastActionInfo(skillBikeRefreshFrames)
 }
 
-// Recast can occur earlier out of Plunge, this extends a normal skill use to match total frames
+// 再発動は落下攻撃からより早く発生可能。通常のスキル使用に合わせて総フレーム数を延長
 func (c *char) getSkillCastActionInfo(f []int) action.Info {
 	plungeFrames := 0
 
-	// If using skill out of plunge, extend animation for non-recast skill
+	// 落下攻撃からスキルを使用する場合、再発動以外のスキルのアニメーションを延長
 	if c.Core.Player.CurrentState() == action.PlungeAttackState {
 		switch c.armamentState {
 		case bike:

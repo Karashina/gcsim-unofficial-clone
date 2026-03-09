@@ -9,8 +9,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When the Musou Isshin state applied by Secret Art: Musou Shinsetsu expires
-// all nearby party members (excluding the Raiden Shogun) gain 30% bonus ATK for 10s.
+// 祕伝一刀知成状態終了時、周囲の全パーティメンバー（雷電将軍除く）の攻撃力+30%、10秒間。
 func (c *char) c4() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.ATKP] = 0.3

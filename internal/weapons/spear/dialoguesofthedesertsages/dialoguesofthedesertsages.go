@@ -27,8 +27,8 @@ const (
 	icd       = 10 * 60
 )
 
-// When the wielder performs healing, restore 8/10/12/14/16 Energy.
-// This effect can be triggered once every 10s and can occur even when the character is not on the field.
+// 装備者が回復を行った時、エネルギーを8/10/12/14/16回復する。
+// この効果は10秒毎に1回発動可能で、キャラクターがフィールドにいなくても発動できる。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

@@ -99,7 +99,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charge[c.TalentLvlAttack()],
 	}
 
-	// skip CA windup if we're in NA/CA animation
+	// 通常攻撃/重撃アニメーション中の場合、重撃の準備モーションをスキップ
 	windup := 0
 	switch c.Core.Player.CurrentState() {
 	case action.NormalAttackState, action.ChargeAttackState:

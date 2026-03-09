@@ -32,7 +32,7 @@ func init() {
 	burstFrames[action.ActionSwap] = 283
 }
 
-// Burst attack damage queue generator
+// 元素爆発のダメージキュー生成
 func (c *char) Burst(p map[string]int) (action.Info, error) {
 	c.QueueCharTask(func() {
 		c.AddStatus(burstKey, burstDuration, true)
@@ -109,7 +109,7 @@ func (c *char) explosiveFirework() {
 	qPos := c.Core.Combat.Player().Pos()
 	c.Core.QueueAttack(explodeAI, combat.NewCircleHitOnTarget(qPos, nil, 6), 6, 6)
 
-	// kill existing hat if reached limit
+	// 上限に達した場合、既存のハットを破壊
 	if len(c.hats) == c.maxHatCount {
 		c.hats[0].Kill()
 	}

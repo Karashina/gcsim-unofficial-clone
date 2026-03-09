@@ -7,8 +7,8 @@ import (
 	"github.com/aclements/go-moremath/stats"
 )
 
-// If the count is smaller than ss.Count, nothing will happen.
-// Otherwise, 0s will be added to ss until ss.Count is equal to count.
+// カウントがss.Countより小さい場合は何も起こらない。
+// それ以外の場合、ss.Countがcountと等しくなるまで0がssに追加される。
 func PadStreamStatToCount(ss *stats.StreamStats, count uint) {
 	if count < ss.Count {
 		return
@@ -53,7 +53,7 @@ func ToOverviewStats(input *stats.Sample) *model.OverviewStats {
 		Q3:   Ptr(input.Quantile(0.75)),
 	}
 
-	// Scott's normal reference rule
+	// Scottの正規参照ルール
 	h := (3.49 * std) / (math.Pow(float64(len(input.Xs)), 1.0/3.0))
 	if h == 0.0 || maxval == minval {
 		hist := make([]uint32, 1)
@@ -74,7 +74,7 @@ func ToOverviewStats(input *stats.Sample) *model.OverviewStats {
 	return &out
 }
 
-// taken from go-moremath. Need to reimplement for proto type compatibility
+// go-moremathから取得。protoの型互換性のため再実装が必要
 type LinearHist struct {
 	min, max  float64
 	delta     float64 // 1/bin width (to avoid division in hot path)
@@ -82,8 +82,8 @@ type LinearHist struct {
 	bins      []uint32
 }
 
-// NewLinearHist returns an empty histogram with nbins uniformly-sized
-// bins spanning [min, max].
+// NewLinearHistは均一サイズのnbins個のビンを持つ空のヒストグラムを返す。
+// ビンは[min, max]の範囲にまたがる。
 func NewLinearHist(minval, maxval float64, nbins int) *LinearHist {
 	delta := float64(nbins) / (maxval - minval)
 	return &LinearHist{minval, maxval, delta, 0, 0, make([]uint32, nbins)}
@@ -116,11 +116,11 @@ func Ptr[T any](v T) *T {
 	return &v
 }
 
-// util for metadata and damage agg
+// メタデータとダメージ集計のユーティリティ
 
 const FloatEqDelta = 0.00001
 
-// given a pre-sorted slice of values, returns the indexes of the percentiles
+// 事前ソートされた値のスライスを受け取り、パーセンタイルのインデックスを返す
 func GetPercentileIndexes[T any](a []T) (int, int) {
 	l := len(a)
 	if l == 1 {
@@ -132,7 +132,7 @@ func GetPercentileIndexes[T any](a []T) (int, int) {
 	return (l - 1) / 2, (l-1)/2 + 1
 }
 
-// given a pre-sorted slice of values, returns the median element
+// 事前ソートされた値のスライスを受け取り、中央値の要素を返す
 func Median[T any](a []T) T {
 	l := len(a)
 
@@ -140,7 +140,7 @@ func Median[T any](a []T) T {
 		var empty T
 		return empty
 	}
-	// if length of array is even, median is between a[l/2] and a[l/2+1]
-	// since need an element that was used, a[l/2] is close enough
+	// 配列の長さが偶数の場合、中央値はa[l/2]とa[l/2+1]の間
+	// 使用された要素が必要なため、a[l/2]で十分近い
 	return a[l/2]
 }

@@ -23,11 +23,11 @@ type Weapon struct {
 
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 
-// For every party member from Natlan
-// or who has a different Elemental Type from the equipping character,
-// the equipping character gains 4.8% increased ATK.
-// When there are no less than 3 of the aforementioned characters,
-// the equipping character gains 24 Elemental Mastery.
+// パーティメンバーのうち、ナタ出身または装備キャラクターと
+// 異なる元素タイプのキャラクター1人につき、
+// 装備キャラクターの攻撃力が4.8%増加する。
+// 上記のキャラクターが3人以上の場合、
+// 装備キャラクターの元素熟知が24増加する。
 func (w *Weapon) Init() error {
 	stacks := 0
 	for _, char := range w.c.Player.Chars() {

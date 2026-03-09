@@ -44,9 +44,8 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		})
 	}
 	// 11:51 AM] Episodde｜ShimenawaChildePeddler: Basically I found out that the fox set energy tax have around a 10 frame delay.
-	// so I was testing if you can evade the fox set 15 energy tax by casting burst within those 10 frame after using an elemental
-	// skill (not on hit). Turn out it work with childe :Childejoy:
-	// The finding is now in #energy-drain-effects-have-a-delay if you want to take a closer look
+	// 元素スキル使用後の10フレーム以内に元素爆発を使用してエネルギー消費15を回避できるかテスト。タルタリヤで可能
+	// この発見は #energy-drain-effects-have-a-delay に記載されている
 	if count >= 4 {
 		const icdKey = "shim-4pc-icd"
 		icd := 600 // 10s * 60
@@ -65,7 +64,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			}
 			char.AddStatus(icdKey, icd, true)
 
-			// consume 15 energy, increased normal/charge/plunge dmg by 50%
+			// エネルギーを15消費、通常攻撃/重撃/落下攻撃ダメージを50%増加
 			c.Tasks.Add(func() {
 				char.AddEnergy("shim-4pc", -15)
 			}, 10)

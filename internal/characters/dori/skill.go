@@ -17,7 +17,7 @@ const (
 	particleICDKey = "dori-particle-icd"
 )
 
-var skillSalesHitmarks = []int{46, 59, 59} // counted starting from skill hitmark
+var skillSalesHitmarks = []int{46, 59, 59} // スキルヒットマークからのカウント
 
 func init() {
 	skillFrames = frames.InitAbilSlice(44) // E -> Q
@@ -76,7 +76,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

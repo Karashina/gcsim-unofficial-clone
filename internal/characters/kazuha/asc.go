@@ -10,10 +10,12 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// If Chihayaburu comes into contact with Hydro/Pyro/Cryo/Electro when cast, this Chihayaburu will absorb that element and if Plunging Attack: Midare Ranzan is used before the effect expires, it will deal an additional 200% ATK of the absorbed elemental type as DMG. This will be considered Plunging Attack DMG.
-// Elemental Absorption may only occur once per use of Chihayaburu.
+// 万葉の狂風発動時に水/炎/氷/雷元素に接触すると、その元素を吸収し、
+// 流乱武花落下攻撃が効果終了前に使用されると、
+// 吸収した元素の攻撃力200%の追加ダメージを与える。これは落下攻撃ダメージとみなされる。
+// 元素吸収は万葉の狂風の使用ごとに1回のみ発生可能。
 //
-// - checks for ascension level in skill.go to avoid queuing this up only to fail the ascension level check
+// - スキル発動失敗を避けるため、突破レベルチェックは skill.go で実施
 func (c *char) absorbCheckA1(src, count, maxcount int) func() {
 	return func() {
 		if count == maxcount {
@@ -27,14 +29,14 @@ func (c *char) absorbCheckA1(src, count, maxcount int) func() {
 			)
 			return
 		}
-		// otherwise queue up
+		// それ以外はキューに追加
 		c.Core.Tasks.Add(c.absorbCheckA1(src, count+1, maxcount), 6)
 	}
 }
 
-// Upon triggering a Swirl reaction, Kaedehara Kazuha will grant all party members a 0.04%
-// Elemental DMG Bonus to the element absorbed by Swirl for every point of Elemental Mastery
-// he has for 8s. Bonuses for different elements obtained through this method can co-exist.
+// 拡散反応トリガー時、吸収した元素の元素ダメージボーナス+0.04%を
+// 全パーティメンバーに8秒間付与する（元素熟知1あたり）。
+// 異なる元素のボーナスは共存可能。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -53,13 +55,13 @@ func (c *char) a4() {
 			if atk.Info.ActorIndex != c.Index {
 				return false
 			}
-			// do not overwrite mod if same frame
+			// 同一フレームではモディファイアーを上書きしない
 			if c.Core.F < icd {
 				return false
 			}
 			icd = c.Core.F + 1
 
-			// recalc em
+			// 元素熟知を再計算
 			dmg := 0.0004 * c.NonExtraStat(attributes.EM)
 
 			for _, char := range c.Core.Player.Chars() {

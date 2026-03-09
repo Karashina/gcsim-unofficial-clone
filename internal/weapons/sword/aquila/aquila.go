@@ -25,15 +25,14 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// ATK is increased by 20%. Triggers on taking DMG: the soul of the Falcon of the
-// West awakens, holding the banner of resistance aloft, regenerating HP equal to
-// 100% of ATK and dealing 200% of ATK as DMG to surrounding opponents. This
-// effect can only occur once every 15s.
+// 攻撃力が20%増加する。ダメージを受けた時に発動: 西風の鷹の魂が目覚め、
+// 攻撃力の100%に相当するHPを回復し、周囲の敵に攻撃力の200%のダメージを与える。
+// この効果は15秒毎に1回のみ発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	// perm buff
+	// 永続バフ
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.ATKP] = .15 + .05*float64(r)
 	char.AddStatMod(character.StatMod{
@@ -62,7 +61,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		char.AddStatus(icdKey, 900, true) // 15 sec
+		char.AddStatus(icdKey, 900, true) // 15秒
 		ai := combat.AttackInfo{
 			ActorIndex: char.Index,
 			Abil:       "Aquila Favonia",

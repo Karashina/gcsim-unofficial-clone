@@ -42,7 +42,7 @@ func ConfigureTarget(profile *info.EnemyProfile, name string, params TargetParam
 	if params.HpMultiplier != 0 {
 		enemyInfo.HP *= params.HpMultiplier
 	} else {
-		enemyInfo.HP *= 2.5 // default abyss multiplier
+		enemyInfo.HP *= 2.5 // デフォルト深境螺旋倍率
 	}
 	if !params.Particles {
 		enemyInfo.ParticleDropThreshold = profile.ParticleDropThreshold
@@ -65,7 +65,7 @@ func getMonsterInfo(name string) (info.EnemyProfile, error) {
 		return info.EnemyProfile{}, fmt.Errorf("invalid target name `%v`", name)
 	}
 
-	// clone hp drops
+	// HPドロップをクローン
 	hpDrops := make([]*model.MonsterHPDrop, 0, len(result.BaseStats.HpDrop))
 	for i := range result.BaseStats.HpDrop {
 		hpDrop := result.BaseStats.HpDrop[i]

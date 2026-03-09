@@ -27,11 +27,11 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// bubble deal 0 dmg hydro app
-	// add bubble status, when bubble status disappears trigger omen dmg the frame after
-	// bubble status bursts either -> takes dmg no freeze OR freeze and freeze disappears
+	// 泡は0ダメージの水元素付着を行う
+	// 泡ステータスを付与し、泡ステータスが消えた次のフレームで星異ダメージを発動
+	// 泡ステータスは次のいずれかで破裂 → 凍結なしでダメージを受ける、または凍結が解除される
 
-	// apply first non damage after 1.7 seconds
+	// 1.7秒後に最初のダメージなし攻撃を適用
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Illusory Bubble (Initial)",
@@ -48,15 +48,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		if !ok {
 			return
 		}
-		// bubble is applied to each target on a per target basis
-		// lasts 8 seconds if not popped normally
-		t.AddStatus(bubbleKey, 481, true) // 1 frame extra so we don't run into problems breaking
+		// 泡は各ターゲットに個別に適用される
+		// 通常破裂しない場合8秒間持続
+		t.AddStatus(bubbleKey, 481, true) // 破裂処理の問題を避けるため1フレーム余分に追加
 		c.Core.Log.NewEvent("mona bubble on target", glog.LogCharacterEvent, c.Index).
 			Write("char", c.Index)
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10), -1, burstHitmark, cb)
 
-	// queue a 0 damage attack to break bubble after 8 sec if bubble not broken yet
+	// 8秒後にまだ泡が割れていなければ0ダメージ攻撃をキューに追加して泡を割る
 	aiBreak := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Illusory Bubble (Break)",
@@ -76,7 +76,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionJump], // earliest cancel is before burstHitmark
+		CanQueueAfter:   burstFrames[action.ActionJump], // 最早キャンセルは元素爆発ヒットマーク前
 		State:           action.BurstState,
 	}, nil
 }
@@ -92,7 +92,7 @@ func (c *char) burstDamageBonus() {
 				if !ok {
 					return nil, false
 				}
-				// ok only if either bubble or omen is present
+				// 泡または星異のどちらかが存在する場合のみ有効
 				if x.StatusIsActive(bubbleKey) || x.StatusIsActive(omenKey) {
 					return m, true
 				}
@@ -102,16 +102,16 @@ func (c *char) burstDamageBonus() {
 	}
 }
 
-// bubble bursts when hit by an attack either while not frozen, or when the attack breaks freeze
-// i.e. impulse > 0
+// 泡は凍結されていない状態で攻撃を受けるか、攻撃が凍結を解除したときに破裂する
+// すなわち impulse > 0
 func (c *char) burstHook() {
-	// hook on to OnDamage; leave this always active
-	// since freeze will trigger an attack, this should be ok
-	// TODO: this implementation would currently cause bubble to break immediately on the first EC tick.
-	// According to: https://docs.google.com/document/d/1pXlgCaYEpoizMIP9-QKlSkQbmRicWfrEoxb9USWD1Ro/edit#
-	// only 2nd ec tick should break
+	// OnDamage にフックする。常にアクティブのまま維持
+	// 凍結が攻撃をトリガーするため、これで問題ない
+	// TODO: この実装では現在、最初の感電Tickで泡がすぐに割れてしまう。
+	// 参照: https://docs.google.com/document/d/1pXlgCaYEpoizMIP9-QKlSkQbmRicWfrEoxb9USWD1Ro/edit#
+	// 2回目の感電Tickでのみ割れるべき
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
-		// ignore if target doesn't have debuff
+		// ターゲットにデバフがなければ無視
 		t, ok := args[0].(*enemy.Enemy)
 		if !ok {
 			return false
@@ -119,17 +119,17 @@ func (c *char) burstHook() {
 		if !t.StatusIsActive(bubbleKey) {
 			return false
 		}
-		// always break if it's due to time up
+		// 時間切れの場合は常に破裂
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.AttackTag == attacks.AttackTagMonaBubbleBreak {
 			c.triggerBubbleBurst(t)
 			return false
 		}
-		// dont break if no impulse
+		// impulseがなければ割らない
 		if atk.Info.NoImpulse {
 			return false
 		}
-		// otherwise break on damage
+		// それ以外はダメージで破裂
 		c.triggerBubbleBurst(t)
 
 		return false
@@ -137,12 +137,12 @@ func (c *char) burstHook() {
 }
 
 func (c *char) triggerBubbleBurst(t *enemy.Enemy) {
-	// remove bubble tag
+	// 泡タグを削除
 	t.DeleteStatus(bubbleKey)
-	// add omen debuff
+	// 星異デバフを付与
 	dur := int(omenDuration[c.TalentLvlBurst()] * 60)
 	t.AddStatus(omenKey, dur, true)
-	// trigger dmg
+	// ダメージを発動
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Illusory Bubble (Explosion)",

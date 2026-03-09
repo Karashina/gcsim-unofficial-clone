@@ -30,16 +30,16 @@ func init() {
 	burstFrames[action.ActionSwap] = 76    // Q -> Swap
 }
 
-// Burst - This function only handles initial damage and status setting
-// Damage bonus modification is handled in a separate function based on status
-// The might of Watatsumi descends, dealing Hydro DMG to surrounding opponents, before robing Kokomi in a Ceremonial Garment made from the flowing waters of Sangonomiya.
-// Ceremonial Garment:
-// - Sangonomiya Kokomi's Normal Attack, Charged Attack and Bake-Kurage DMG are increased based on her Max HP.
-// - When her Normal and Charged Attacks hit opponents, Kokomi will restore HP for all nearby party members, and the amount restored is based on her Max HP.
-// - Increases Sangonomiya Kokomi's resistance to interruption and allows her to move on the water's surface.
-// These effects will be cleared once Sangonomiya Kokomi leaves the field.
+// 元素爆発 - この関数は初回ダメージとステータス設定のみ処理
+// ダメージボーナスの修正はステータスに基づき別関数で処理
+// 海祇の力が降臨し、周囲の敵に水元素ダメージを与えた後、心海に珊瑚宮の流水から作られた「儀来羽衣」を纏わせる。
+// 儀来羽衣:
+// - 珊瑚宮心海の通常攻撃・重撃・化海月のダメージがHP上限に基づき増加。
+// - 通常攻撃・重撃が敵に命中すると、付近の全パーティメンバーのHPを回復（HP上限に基づく）。
+// - 中断耐性が増加し、水面を歩行可能になる。
+// これらの効果は珊瑚宮心海がフィールドを離れると解除される。
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// TODO: Snapshot timing is not yet known. Assume it's dynamic for now
+	// TODO: スナップショットのタイミングは不明。現時点ではダイナミックと仮定
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Nereid's Ascension",
@@ -57,14 +57,14 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	c.Core.Status.Add(burstKey, 10*60)
 
-	// update jellyfish flat damage
+	// クラゲの固定ダメージを更新
 	c.skillFlatDmg = c.burstDmgBonus(attacks.AttackTagElementalArt)
 
 	if c.Base.Ascension >= 1 {
 		c.Core.Tasks.Add(c.a1, 46)
 	}
 
-	// C4 attack speed buff
+	// 4凸の攻撃速度バフ
 	if c.Base.Cons >= 4 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.AtkSpd] = 0.1
@@ -77,7 +77,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		})
 	}
 
-	// Cannot be prefed particles
+	// 先行粒子受取不可
 	c.ConsumeEnergy(57)
 	c.SetCDWithDelay(action.ActionBurst, 18*60, 46)
 
@@ -89,7 +89,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// Helper function for determining whether burst damage bonus should apply
+// 元素爆発ダメージボーナスが適用されるか判定するヘルパー関数
 func (c *char) burstDmgBonus(a attacks.AttackTag) float64 {
 	if c.Core.Status.Duration("kokomiburst") == 0 {
 		return 0
@@ -106,11 +106,11 @@ func (c *char) burstDmgBonus(a attacks.AttackTag) float64 {
 	}
 }
 
-// - implements burst healing, C2 and C6 handling
+// - 元素爆発の回復、2凸・6凸の処理を実装
 //
-// When her Normal and Charged Attacks hit opponents,
-// Kokomi will restore HP for all nearby party members,
-// and the amount restored is based on her Max HP.
+// 通常攻撃・重撃が敵に命中すると、
+// 心海は付近の全パーティメンバーのHPを回復する。
+// 回復量はHP上限に基づく。
 func (c *char) makeBurstHealCB() combat.AttackCBFunc {
 	done := false
 	return func(a combat.AttackCB) {
@@ -129,9 +129,8 @@ func (c *char) makeBurstHealCB() combat.AttackCBFunc {
 		for _, char := range c.Core.Player.Chars() {
 			src := heal
 
-			// C2 handling
-			// Sangonomiya Kokomi gains the following Healing Bonuses with regard to characters with 50% or less HP via the following methods:
-			// Nereid's Ascension Normal and Charged Attacks: 0.6% of Kokomi's Max HP.
+			// 2凸: HP50%以下のキャラクターに対する回復ボーナス
+			// 海人の羽衣の通常攻撃・重撃: 心海のHP上限の0.6%分。
 			if c.Base.Cons >= 2 && char.CurrentHPRatio() <= 0.5 {
 				bonus := 0.006 * c.MaxHP()
 				src += bonus
@@ -153,11 +152,11 @@ func (c *char) makeBurstHealCB() combat.AttackCBFunc {
 	}
 }
 
-// Clears Kokomi burst when she leaves the field
+// 心海がフィールドを離れると元素爆発を解除する
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
 		prev := args[0].(int)
-		// update jellyfish flat damage. regardless if burst is active or not
+		// 海月の固定ダメージを更新（爆発がアクティブかどうかに関わらず）
 		if prev == c.Index {
 			c.swapEarlyF = c.Core.F
 			c.skillFlatDmg = c.burstDmgBonus(attacks.AttackTagElementalArt)

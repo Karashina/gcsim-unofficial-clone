@@ -52,7 +52,7 @@ func Eval(c *core.Core, fields []string) (any, error) {
 	case "airborne":
 		return c.Player.Airborne() != player.Grounded, nil
 	default:
-		// check if it's a char name; if so check char custom eval func
+		// キャラ名かどうか確認。該当する場合はキャラのカスタムeval関数を確認
 		name := fields[0]
 		if key, ok := shortcut.CharNameToKey[name]; ok {
 			return evalCharacter(c, key, fields)

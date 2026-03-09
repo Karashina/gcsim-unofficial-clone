@@ -27,11 +27,11 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 
 	r := p.Refine
 
-	// Base burst damage bonus by refine level
+	// 精錬ランク別の基礎爆発ダメージボーナス
 	baseBonus := []float64{0.20, 0.25, 0.30, 0.35, 0.40}
-	// Additional bonus when energy <= 40
+	// エネルギー <= 40 時の追加ボーナス
 	bonus40 := []float64{0.16, 0.20, 0.24, 0.28, 0.32}
-	// Additional bonus when energy <= 60 (but > 40)
+	// エネルギー <= 60 時の追加ボーナス（40より大きい場合）
 	bonus60 := []float64{0.28, 0.35, 0.42, 0.49, 0.56}
 
 	m := make([]float64, attributes.EndStatType)

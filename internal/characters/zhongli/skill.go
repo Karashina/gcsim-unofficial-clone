@@ -48,13 +48,13 @@ func (c *char) skillPress() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
 
 func (c *char) skillHold(createStele bool) action.Info {
-	// hold does dmg
+	// 長押しはダメージを与える
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Stone Stele (Hold)",
@@ -70,14 +70,14 @@ func (c *char) skillHold(createStele bool) action.Info {
 	}
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 10), 0, skillHoldHitmark)
 
-	// create a stele if less than zhongli's max stele count and desired by player
+	// 鍾離の最大岩柱数未満かつプレイヤーが望む場合に岩柱を生成
 	if (c.steleCount < c.maxStele) && createStele {
 		c.Core.Tasks.Add(func() {
-			c.newStele(1860) // 31 seconds
+			c.newStele(1860) // 31秒
 		}, skillHoldHitmark)
 	}
 
-	// make a shield - enemy debuff arrows appear 3-5 frames after the damage number shows up in game
+	// シールドを生成 - 敵のデバフ矢印はゲーム内でダメージ数値が表示された3-5フレーム後に出現
 	c.Core.Tasks.Add(func() {
 		c.addJadeShield()
 	}, skillHoldHitmark)
@@ -87,7 +87,7 @@ func (c *char) skillHold(createStele bool) action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames),
 		AnimationLength: skillHoldFrames[action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillHoldFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }

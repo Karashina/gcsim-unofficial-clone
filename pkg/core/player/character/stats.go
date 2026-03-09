@@ -12,7 +12,7 @@ func (c *CharWrapper) Stats() ([attributes.EndStatType]float64, []interface{}) {
 	var sb strings.Builder
 	var debugDetails []interface{}
 
-	// grab char stats
+	// キャラクターステータスを取得
 
 	var stats [attributes.EndStatType]float64
 	copy(stats[:], c.BaseStats[:attributes.EndStatType])
@@ -83,11 +83,11 @@ func (c *CharWrapper) Stat(s attributes.Stat) float64 {
 		if !ok {
 			continue
 		}
-		// ignore this mod if stat type doesnt match
+		// ステータスタイプが一致しない場合はこの修飾子を無視
 		if m.AffectedStat != attributes.NoStat && m.AffectedStat != s {
 			continue
 		}
-		// check expiry
+		// 有効期限をチェック
 		if m.Expiry() > *c.f || m.Expiry() == -1 {
 			if amt, ok := m.Amount(); ok {
 				val += amt[s]
@@ -105,15 +105,15 @@ func (c *CharWrapper) NonExtraStat(s attributes.Stat) float64 {
 		if !ok {
 			continue
 		}
-		// ignore this mod if stat type doesnt match
+		// ステータスタイプが一致しない場合はこの修飾子を無視
 		if m.AffectedStat != attributes.NoStat && m.AffectedStat != s {
 			continue
 		}
-		// is extra stat
+		// 追加ステータスかどうか
 		if m.Extra {
 			continue
 		}
-		// check expiry
+		// 有効期限をチェック
 		if m.Expiry() > *c.f || m.Expiry() == -1 {
 			if amt, ok := m.Amount(); ok {
 				val += amt[s]
@@ -135,15 +135,15 @@ func (c *CharWrapper) SelectStat(nonExtra bool, stat ...attributes.Stat) attribu
 		if !ok {
 			continue
 		}
-		// ignore this mod if stat type doesnt match
+		// ステータスタイプが一致しない場合はこの修飾子を無視
 		if m.AffectedStat != attributes.NoStat && !slices.Contains(stat, m.AffectedStat) {
 			continue
 		}
-		// skip if extra stat
+		// 追加ステータスならスキップ
 		if nonExtra && m.Extra {
 			continue
 		}
-		// check expiry
+		// 有効期限をチェック
 		if m.Expiry() > *c.f || m.Expiry() == -1 {
 			if amt, ok := m.Amount(); ok {
 				for _, k := range stat {

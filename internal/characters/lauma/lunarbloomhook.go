@@ -8,7 +8,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 )
 
-// Special Lunar Bloom damage handler for Lauma
+// Lauma専用のLunar Bloomダメージハンドラー
 func (c *char) onLunarBloomLaumaSpecial(args ...interface{}) bool {
 	ae := args[1].(*combat.AttackEvent)
 
@@ -18,7 +18,7 @@ func (c *char) onLunarBloomLaumaSpecial(args ...interface{}) bool {
 	return false
 }
 
-// Register Ineffa's special Lunar Charged callback
+// Lauma専用のLunar Chargedコールバックを登録
 func (c *char) InitLCallback() {
 	c.Core.Events.Subscribe(event.OnEnemyHit, c.onLunarBloomLaumaSpecial, "lc-lauma-special")
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Increases the flame range of Guoba by 20%.
+// グゥオパァーの炎範囲を20%拡大する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -17,7 +17,7 @@ func (c *char) a1() {
 	c.guobaFlameRange *= 1.2
 }
 
-// When Guoba Attack's effect ends, Guoba leaves a chili pepper on the spot where it disappeared. Picking up a chili pepper increases ATK by 10% for 10s.
+// グゥオパァー出撃の効果終了時、グゥオパァーは消えた場所に唐辛子を残す。唐辛子を拾うと攻撃力が10%上昇する（10秒間）。
 func (c *char) a4(a4Delay int) {
 	if c.Base.Ascension < 4 {
 		return
@@ -25,7 +25,7 @@ func (c *char) a4(a4Delay int) {
 
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.ATKP] = 0.10
-	// pick up chili pepper on active char after a user-specified delay relative to guoba expiry
+	// グゥオパァー消滅後、ユーザー指定の遅延でアクティブキャラが唐辛子を拾う
 	c.Core.Tasks.Add(func() {
 		active := c.Core.Player.ActiveChar()
 		active.AddStatMod(character.StatMod{

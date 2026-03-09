@@ -45,7 +45,7 @@ func TestConstantFolding(t *testing.T) {
 		}
 		// prettyPrint(res)
 		actual := prog.String()
-		// strip \n
+		// \n を除去
 		actual = strings.TrimSuffix(actual, "\n")
 		if actual != test.expected {
 			t.Errorf("expected=%q, got %q", test.expected, actual)

@@ -12,7 +12,7 @@ func (c *Traveler) a4Init() {
 		return
 	}
 	fReactionHook := func(args ...interface{}) bool {
-		// Attack must be from active character
+		// 攻撃はアクティブキャラクターからでなければならない
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != c.Core.Player.Active() {
 			return false

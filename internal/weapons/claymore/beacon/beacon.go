@@ -26,10 +26,10 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// After the character's Elemental Skill hits an opponent, their ATK will be increased by 20% for 8s.
-	// After the character takes DMG, their ATK will be increased by 20% for 8s.
-	// The 2 aforementioned effects can be triggered even when the character is not on the field.
-	// Additionally, when not protected by a shield, the character's Max HP will be increased by 32%.
+	// キャラクターの元素スキルが敵に命中した後、攻撃力が8秒間20%増加する。
+	// キャラクターがダメージを受けた後、攻撃力が8秒間20%増加する。
+	// 上記2つの効果はキャラクターがフィールドにいなくても発動可能。
+	// さらに、シールドで保護されていない場合、キャラクターの最大HPが32%増加する。
 
 	w := &Weapon{}
 	r := p.Refine

@@ -13,14 +13,14 @@ import (
 
 var (
 	attackFrames          [][]int
-	attackHitmarks        = []int{11, 10, 7, 35}              // Updated from verification data
+	attackHitmarks        = []int{11, 10, 7, 35}              // 検証データから更新
 	attackHitlagHaltFrame = []float64{0.03, 0.03, 0.00, 0.06} // N1: 0.03, N2: 0.03, N3-1: 0.00, N4: 0.06
 	attackHitlagFactor    = []float64{0.01, 0.01, 0.01, 0.01}
 	attackDefHalt         = []bool{true, true, true, true}
 	attackHitboxes        = [][]float64{{1.8, 2.5}, {1.8}, {2.0}, {1.8, 2.5}}
 	attackOffsets         = []float64{0.5, 0.5, 0.5, 0.5}
-	attackN3Hitmark2      = 29   // N3 second hit
-	attackN3HitlagHalt2   = 0.04 // N3 second hit hitlag
+	attackN3Hitmark2      = 29   // N3 2段目
+	attackN3HitlagHalt2   = 0.04 // N3 2段目のヒットラグ
 )
 
 const normalHitNum = 4
@@ -44,20 +44,20 @@ func init() {
 	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3], 65) // N4 -> Walk
 	attackFrames[3][action.ActionAttack] = 65                             // N4 -> N1
 	attackFrames[3][action.ActionDash] = 37                               // N4 -> D
-	attackFrames[3][action.ActionCharge] = 500                            // Can't charge cancel N4
+	attackFrames[3][action.ActionCharge] = 500                            // N4は重撃キャンセル不可
 }
 
 func (c *char) Attack(p map[string]int) (action.Info, error) {
-	// If we're in Essential Transmutation, the Normal Attack is overridden
-	// to perform "Transmutation: Denial of Darkness" (3-hit single-target).
-	// This mirrors the in-game behavior where E alters the Normal Attack.
+	// Essential Transmutation中は通常攻撃が上書きされ、
+	// "変容: 暗黒の否定"（3ヒット単体）を実行する。
+	// これはゲーム内で元素スキルが通常攻撃を変更する挙動を再現している。
 	if c.StatusIsActive(essentialTransmutationKey) {
 		return c.skillDenialOfDarkness(nil)
 	}
 
-	// GU: 1U (Durability: 25)
-	// ICD Tag: Normal Attack (ICDTagNormalAttack)
-	// ICD Group: Standard (ICDGroupDefault)
+	// 元素量: 1U (元素耐性: 25)
+	// ICDタグ: 通常攻撃 (ICDTagNormalAttack)
+	// ICDグループ: 標準 (ICDGroupDefault)
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
@@ -75,14 +75,14 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 
 	var ap combat.AttackPattern
 	if c.NormalCounter == 1 {
-		// N2 is a circle
+		// N2は円形判定
 		ap = combat.NewCircleHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: attackOffsets[c.NormalCounter]},
 			attackHitboxes[c.NormalCounter][0],
 		)
 	} else {
-		// Other attacks are fan-shaped
+		// その他の攻撃は扇形判定
 		ap = combat.NewBoxHitOnTarget(
 			c.Core.Combat.Player(),
 			geometry.Point{Y: attackOffsets[c.NormalCounter]},
@@ -91,7 +91,7 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
 		)
 	}
 
-	// N3 hits twice
+	// N3は2ヒット
 	if c.NormalCounter == 2 {
 		c.Core.QueueAttack(ai, ap, attackHitmarks[c.NormalCounter], attackHitmarks[c.NormalCounter])
 		ai.Abil = fmt.Sprintf("Normal %v (2nd Hit)", c.NormalCounter)

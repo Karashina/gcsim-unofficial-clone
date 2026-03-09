@@ -23,7 +23,7 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// first zap has no icd and hits everyone
+	// 最初の電撃はICDなしで全員に命中
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Lightning Rose (Initial)",
@@ -35,11 +35,11 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		Durability: 0,
 		Mult:       0.1,
 	}
-	// based on discussion with nosi; turns out this does not apply def shred
+	// nosiとの議論により、これは防御低下を適用しないことが判明
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7), burstHitmark, burstHitmark)
 
-	// duration is 15 seconds, tick every .5 sec
-	// 30 zaps once every 30 frame, starting at 119
+	// 持続時間15秒、0.5秒ごとにTick
+	// 30フレームごとに30回電撃、119フレーム目から開始
 	ai = combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Lightning Rose (Tick)",
@@ -57,12 +57,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		snap = c.Snapshot(&ai)
 	}, burstHitmark-1)
 
-	firstTick := 119 // first tick at 119
+	firstTick := 119 // 最初のティックは119フレーム目
 	burstArea := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 7)
 	for i := 0; i < 15*60; i += 30 {
 		progress := i + firstTick
 		c.Core.Tasks.Add(func() {
-			// logic below c4 is fairly simple: 1 discharge to a random enemy in the area
+			// 4凸未満のロジックは単純: 範囲内のランダムな敵に1回放電
 			if c.Base.Cons < 4 {
 				enemy := c.Core.Combat.RandomEnemyWithinArea(burstArea, nil)
 				if enemy == nil {
@@ -78,10 +78,10 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				return
 			}
 
-			// at C4 and above:
+			// 4凸以上:
 			// - https://library.keqingmains.com/evidence/characters/electro/lisa#c4-plasma-eruption
-			// - spawn up to 3 attacks based on enemy + gadget count
-			// - priority: enemy > gadget
+			// - 敵+ガジェットの数に基づき最大3回攻撃を生成
+			// - 優先度: 敵 > ガジェット
 			discharge := func(pos geometry.Point) {
 				c.Core.QueueAttackWithSnap(
 					ai,
@@ -111,10 +111,10 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			case 2:
 				threshold := 0.15
 				if progress == firstTick {
-					// first arc: 60% chance 1, 40% chance 2
+					// 最初の放電: 60%の確率で1回、40%の確率で2回
 					threshold = 0.6
 				}
-				// rest: 15% chance 1, 85% chance 2
+				// 残り: 15%の確率で1回、85%の確率で2回
 				if c.Core.Rand.Float64() < threshold {
 					dischargeCount = 1
 				} else {
@@ -122,7 +122,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				}
 			default: // 3 or more entities
 				if progress == firstTick {
-					// first arc: 55% 1, 45% 2
+					// 初回: 55%で1回、45%で2回
 					if c.Core.Rand.Float64() < 0.55 {
 						dischargeCount = 1
 					} else {
@@ -137,7 +137,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				rand := c.Core.Rand.Float64()
 				switch c.previousDischargeCount {
 				case 1:
-					// after a 1: 20% 1, 50% 2, 30% 3
+					// 1回の後: 20%で1回、50%で2回、30%で3回
 					switch {
 					case rand < 0.2:
 						dischargeCount = 1
@@ -147,7 +147,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 						dischargeCount = 3
 					}
 				case 2:
-					// after a 2: 25% 1, 50% 2, 25% 3
+					// 2回の後: 25%で1回、50%で2回、25%で3回
 					switch {
 					case rand < 0.25:
 						dischargeCount = 1
@@ -157,7 +157,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 						dischargeCount = 3
 					}
 				case 3:
-					// after a 3: next is 50% 1, 50% 2, 0% 3
+					// 3回の後: 50%で1回、50%で2回、0%で3回
 					if rand < 0.5 {
 						dischargeCount = 1
 					} else {
@@ -170,7 +170,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 				return
 			}
 
-			// target up to 3 enemies
+			// 最大3体の敵をターゲット
 			for i := 0; i < dischargeCount; i++ {
 				if i < enemyCount {
 					discharge(enemies[i].Pos())
@@ -178,7 +178,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			}
 			dischargeCount -= enemyCount
 
-			// if less than 3 enemies were targeted, then check for gadgets
+			// 3体未満の敵がターゲットされた場合、ガジェットをチェック
 			for i := 0; i < dischargeCount; i++ {
 				if i < gadgetCount {
 					discharge(gadgets[i].Pos())
@@ -187,13 +187,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}, progress)
 	}
 
-	// add a status for this just in case someone cares
+	// 念のためステータスを追加
 	c.Core.Tasks.Add(func() {
 		c.Core.Status.Add("lisaburst", 119+900)
 	}, burstHitmark)
 
-	// burst cd starts 53 frames after executed
-	// energy usually consumed after 63 frames
+	// 元素爆発のCDは実行後53フレームで開始
+	// エネルギーは通常63フレーム後に消費
 	c.ConsumeEnergy(63)
 	// c.CD[def.BurstCD] = c.Core.F + 1200
 	c.SetCDWithDelay(action.ActionBurst, 1200, 53)
@@ -201,7 +201,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

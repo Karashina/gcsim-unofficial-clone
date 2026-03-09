@@ -28,18 +28,18 @@ func (w *Weapon) Init() error      { return nil }
 const (
 	icdKey  = "swordofnarzissenkreuz-icd"
 	icd     = 12 * 60
-	hitmark = 0.1 * 60 // rough estimate
+	hitmark = 0.1 * 60 // 概算値
 )
 
-// When the equipping character does not have an Arkhe: When Normal Attacks, Charged Attacks, or Plunging Attacks strike,
-// a Pneuma or Ousia energy blast will be unleashed, dealing 160/200/240/280/320% of ATK as DMG. This effect can be triggered once every 12s.
-// The energy blast type is determined by the current type of the Sword of Narzissenkreuz.
+// 装備キャラがアルケーを持たない場合: 通常攻撃、重撃、または落下攻撃が命中した時、
+// プネウマまたはウーシアのエネルギーブラストが放たれ、攻撃力の160/200/240/280/320%のダメージを与える。
+// この効果は12秒毎に1回発動可能。エネルギーブラストのタイプは Sword of Narzissenkreuz の現在のタイプによる。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
 
-	// TODO: arkhe does not influence anything at the moment
-	// 0 for Pneuma, 1 for Ousia
+	// TODO: アルケーは現時点で何も影響しない
+	// 0: プネウマ、 1: ウーシア
 	arkhe, ok := p.Params["arkhe"]
 	if !ok {
 		arkhe = 1
@@ -53,7 +53,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	c.Log.NewEvent("swordofnarzissenkreuz arkhe", glog.LogWeaponEvent, char.Index).
 		Write("arkhe", arkhe)
 
-	// no event sub if char has arkhe
+	// キャラがアルケーを持つ場合はイベント登録しない
 	if char.HasArkhe {
 		return w, nil
 	}
@@ -70,7 +70,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		}
 		trg := args[0].(combat.Target)
 
-		// only proc on normal, charge and plunging dmg
+		// 通常攻撃、重撃、落下攻撃のダメージ時のみ発動
 		switch atk.Info.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagExtra:
@@ -95,7 +95,7 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 			Durability: 100,
 			Mult:       mult,
 		}
-		// hitmark timing is affected by hitlag
+		// ヒットマークのタイミングはヒットラグの影響を受ける
 		char.QueueCharTask(func() {
 			c.QueueAttack(ai, combat.NewCircleHitOnTarget(trg, nil, 3), 0, 0)
 		}, hitmark)

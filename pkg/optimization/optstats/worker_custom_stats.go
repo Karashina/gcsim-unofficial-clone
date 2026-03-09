@@ -23,9 +23,9 @@ type JobCustomStats[T any] struct {
 	Cstat   NewStatsFuncCustomStats[T]
 }
 
-// New creates a new Pool. Jobs can be sent to new pool by sending to p.QueueCh
-// Closing p.StopCh will cause the pool to stop executing any queued jobs and currently working
-// workers will no longer send back responses
+// Newは新しいPoolを作成する。p.QueueChに送信することでジョブを投入できる。
+// p.StopChを閉じると、プールはキュー内のジョブの実行を停止し、
+// 実行中のワーカーはレスポンスを返さなくなる
 func WorkerNewWithCustomStats[T any](maxWorker int, respCh chan stats.Result, errCh chan error, customCh chan T) *PoolCustomStats[T] {
 	p := &PoolCustomStats[T]{
 		respCh:   respCh,
@@ -34,7 +34,7 @@ func WorkerNewWithCustomStats[T any](maxWorker int, respCh chan stats.Result, er
 		QueueCh:  make(chan JobCustomStats[T]),
 		StopCh:   make(chan bool),
 	}
-	// create workers
+	// ワーカーを作成
 	for i := 0; i < maxWorker; i++ {
 		go p.worker()
 	}

@@ -8,12 +8,12 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// A1 is not implemented:
-// TODO: Counterattacking with Tidecaller at the precise moment when the character is hit grants the maximum DMG Bonus.
+// 固有天賦1は未実装:
+// TODO: 踏潮の攻撃が攻撃を受けた瞬間にカウンターを行うと、最大ダメージボーナスを獲得する。
 
-// Gain the following effects for 10s after unleashing Tidecaller with its maximum DMG Bonus:
-// - DMG dealt by Normal and Charged Attacks is increased by 15%. ATK SPD of Normal and Charged Attacks is increased by 15%.
-// TODO: - Greatly reduced delay before unleashing Charged Attacks.
+// 踏潮の最大ダメージボーナスで発動後10秒間、以下の効果を獲得:
+// - 通常攻撃と重撃のダメージが15%増加。通常攻撃と重撃の攻撃速度が15%増加。
+// TODO: - 重撃の発動前の遅延が大幅に短縮。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

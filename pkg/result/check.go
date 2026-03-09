@@ -4,7 +4,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/keys"
 )
 
-// adding a character to this list will make the "incomplete warning" appear on the viewer
+// このリストにキャラクターを追加すると、ビューアーに「不完全な警告」が表示される
 var incompleteCharacters = []keys.Char{
 	keys.TestCharDoNotUse,
 }

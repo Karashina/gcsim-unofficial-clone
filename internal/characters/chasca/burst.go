@@ -103,12 +103,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 
 	frames := frames.NewAbilFunc(burstFramesGrounded)
 	if c.nightsoulState.HasBlessing() {
-		// if we Q while in the air, we need to add the frames of fall down
-		// TODO: set fall down animation to be "idle/skill" instead of burst?
+		// 空中で元素爆発を使用した場合、落下フレームを追加する必要がある
+		// TODO: 落下アニメーションを元素爆発ではなく「待機/スキル」に設定する？
 		return action.Info{
 			Frames:          c.skillNextFrames(frames, 0),
 			AnimationLength: burstFramesNS[action.InvalidAction],
-			CanQueueAfter:   burstNSFall, // can't start falling until frame 102
+			CanQueueAfter:   burstNSFall, // フレーム102まで落下開始不可
 			State:           action.BurstState,
 		}, nil
 	}
@@ -116,7 +116,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames,
 		AnimationLength: burstFramesGrounded[action.InvalidAction],
-		CanQueueAfter:   burstFramesGrounded[action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFramesGrounded[action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }

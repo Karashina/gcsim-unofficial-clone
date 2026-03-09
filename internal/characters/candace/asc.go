@@ -8,13 +8,13 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// A1 is not implemented:
-// TODO: If Candace is hit by an attack in the Hold duration of Sacred Rite: Heron's Sanctum, that skill will finish charging instantly.
+// 固有天賦1は未実装:
+// TODO: Candaceが聖典・蒼鵞の康護の長押し中に攻撃を受けた場合、そのスキルは即座にチャージが完了する。
 
 const a4Key = "candace-a4"
 
-// Characters affected by the Prayer of the Crimson Crown caused by Sacred Rite: Wagtail's Tide will deal 0.5% increased DMG
-// to opponents for every 1,000 points of Candace's Max HP when they deal Elemental DMG with their Normal Attacks.
+// 聖儀・英鵛の潮が与える紅冠の祝福の影響を受けたキャラクターは、キャンディスのHP上限1,000ごとに
+// 通常攻撃で元素ダメージを与える時、敵に対するダメージが0.5%増加する。
 func (c *char) a4(char *character.CharWrapper) {
 	if c.Base.Ascension < 4 {
 		return

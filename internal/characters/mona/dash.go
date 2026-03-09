@@ -19,7 +19,7 @@ func init() {
 	dashFrames[action.ActionSkill] = 35   // D -> E
 	dashFrames[action.ActionBurst] = 21   // D -> Q
 	dashFrames[action.ActionDash] = 30    // D -> D
-	dashFrames[action.ActionJump] = 500   // D -> J, TODO: this action is illegal; need better way to handle it
+	dashFrames[action.ActionJump] = 500   // D -> J, TODO: このアクションは不正。より適切な処理方法が必要
 	dashFrames[action.ActionSwap] = 34    // D -> Swap
 }
 
@@ -28,7 +28,7 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 	if !ok {
 		f = 0
 	}
-	// no dmg attack at end of dash
+	// ダッシュ終了時にダメージなし攻撃
 	ai := combat.AttackInfo{
 		Abil:       "Dash",
 		ActorIndex: c.Index,
@@ -46,21 +46,21 @@ func (c *char) Dash(p map[string]int) (action.Info, error) {
 		dashHitmark+f,
 	)
 
-	// A1
+	// 固有天賦1
 	if c.Base.Ascension >= 1 {
 		c.Core.Tasks.Add(c.a1, 120)
 	}
-	// C6
+	// 6凸
 	if c.Base.Cons >= 6 {
-		// reset c6 stacks in case we dash again before using a CA
+		// 重撃を使用する前に再度ダッシュした場合に備えて6凸スタックをリセット
 		c.c6Stacks = 0
-		// need to keep track of src in case of Mona Dash Dash, where the second dash starts between two c6 ticks
-		// without a src check the second Dash would gain a stack before 1s is up and a second one at 1s
+		// モナのダッシュダッシュ時に、2回目のダッシュが6凸ティック間に始まる場合のsrc追跡が必要
+		// srcチェックがないと２回目のダッシュが1秒経過前にスタックを獲得し、1秒時点でさらにもう1つ獲得する
 		c.c6Src = c.Core.F
 		c.Core.Tasks.Add(c.c6(c.Core.F), 60)
 	}
 
-	// handle stamina usage, avoid default dash implementation since dont want CD
+	// スタミナ消費を処理。CDが不要なためデフォルトのダッシュ実装を使わない
 	c.QueueDashStaminaConsumption(p)
 
 	return action.Info{

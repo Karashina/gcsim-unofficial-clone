@@ -20,8 +20,8 @@ func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
 	}
-	// "After Kinich lands from Canopy Hunter: Riding High's mid-air swing,
-	// his Movement SPD will increase by 30% for 6s." is not implemented
+	// "KinichがCanopy Hunter: Riding Highの空中スイングから着地した後、
+	// 移動速度が6秒間30%上昇する。"は未実装
 	m := make([]float64, attributes.EndStatType)
 	c.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBase("kinich-c1", -1),

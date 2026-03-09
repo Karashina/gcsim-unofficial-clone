@@ -19,26 +19,26 @@ var bikeChargeFrames []int
 var bikeChargeFinalFrames []int
 var bikeHittableEntityList []HittableEntity
 
-// Minimum CA time before CAF anim is 50f
+// 重撃フィニッシュアニメーション前の最小重撃時間は50f
 var bikeChargeAttackMinimumDuration = 50
 var bikeChargeAttackStartupHitmark = 35
 
-// Maximum CA time before CAF anim is 375f
+// 重撃フィニッシュアニメーション前の最大重撃時間は375f
 var bikeChargeAttackMaximumDuration = 375
 var bikeChargeFinalHitmark = 45
 
-// TODO: Replicate frames 35-46 of the CA more accurately
+// TODO: 重撃の35-46フレームをより正確に再現する
 // var bikeSpinInitialFrames = 11
 // var bikeSpinInitialAngularVelocity = float64(-180 / 11)
-// spin velocity varies by current angle
-var bikeSpinQuadrantAngularVelocity = []float64{-90 / 9, -90 / 7, -90 / 15, -90 / 14} // Quadrant 4, 3, 2, 1
-var bikeSpinQuadrantFrames = []int{9, 7, 15, 14}                                      // Quadrant 4, 3, 2, 1
+// スピン速度は現在の角度に応じて変化
+var bikeSpinQuadrantAngularVelocity = []float64{-90 / 9, -90 / 7, -90 / 15, -90 / 14} // 象限 4, 3, 2, 1
+var bikeSpinQuadrantFrames = []int{9, 7, 15, 14} // 象限 4, 3, 2, 1
 
 const chargeHitmark = 40
-const bikeChargeAttackICD = 42         // Minimum time between CA hits
-const bikeChargeAttackSpinFrames = 45  // One revolution every ~45f
-const bikeChargeAttackHitboxRadius = 3 // Placeholder
-const bikeChargeAttackSpinOffset = 4.0 // Estimated center of hitbox from Mav origin
+const bikeChargeAttackICD = 42         // 重撃ヒット間の最小時間
+const bikeChargeAttackSpinFrames = 45  // 1回転約~45f
+const bikeChargeAttackHitboxRadius = 3 // プレースホルダー
+const bikeChargeAttackSpinOffset = 4.0 // マヴイカの原点からヒットボックス中心までの推定距離
 
 func init() {
 	chargeFrames = frames.InitAbilSlice(48)
@@ -48,7 +48,7 @@ func init() {
 	chargeFrames[action.ActionSwap] = 50
 	chargeFrames[action.ActionWalk] = 60
 
-	// These static counts are rarely used. Zero values will cancel on the dynamic hitmark. Actions not listed will queue into CAF
+	// これらの静的カウントはほとんど使用されない。ゼロ値は動的ヒットマークでキャンセルされる。未記載のアクションは重撃フィニッシュにキューされる
 	bikeChargeFrames = frames.InitAbilSlice(bikeChargeAttackMinimumDuration + bikeChargeFinalHitmark)
 	bikeChargeFrames[action.ActionCharge] = 0
 	bikeChargeFrames[action.ActionBurst] = 0
@@ -66,7 +66,7 @@ func init() {
 	bikeChargeFinalFrames[action.ActionSkill] = bikeChargeFinalHitmark
 }
 
-// Charge state struct
+// 重撃状態の構造体
 type ChargeState struct {
 	StartFrame      int
 	cAtkFrames      int
@@ -78,8 +78,8 @@ type ChargeState struct {
 
 type HittableEntity struct {
 	Entity     combat.Target
-	isOneTick  bool   // Does entity get destroyed after a single maxHitCount?
-	CollFrames [2]int // Frames of the CA spin on which collision happens
+	isOneTick  bool   // 1回のmaxHitCountでエンティティが破壊されるか？
+	CollFrames [2]int // 衝突が発生する重撃スピンのフレーム
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
@@ -121,16 +121,16 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// This starts the CA, then goes to a loop handler for duration calc
+// 重撃を開始し、持続時間計算のためのループハンドラーに進む
 func (c *char) BikeCharge(p map[string]int) (action.Info, error) {
-	// Parameters for tuning CA
+	// 重撃調整用パラメータ
 	durationCA := p["hold"]
 	final := p["final"]
 	bufferedFrames, ok := p["buffered"]
 	if ok {
-		bufferedFrames = min(bufferedFrames, 15) // Number of frames the CA input is buffered, maximum of 15f
+		bufferedFrames = min(bufferedFrames, 15) // 重撃入力がバッファされるフレーム数、最大15f
 	} else {
-		bufferedFrames = 15 // Assume max buffered frames by default
+		bufferedFrames = 15 // デフォルトで最大バッファフレームを仮定
 	}
 
 	bikeHittableEntities, hitboxError := c.BuildBikeChargeAttackHittableTargetList()
@@ -139,7 +139,7 @@ func (c *char) BikeCharge(p map[string]int) (action.Info, error) {
 		return action.Info{}, hitboxError
 	}
 
-	// Check if a continuing CA or new
+	// 継続重撃か新規かを確認
 	skippedWindupFrames := 0
 	if c.Core.Player.CurrentState() != action.ChargeAttackState || c.caState.StartFrame == 0 {
 		c.caState = ChargeState{}
@@ -151,23 +151,23 @@ func (c *char) BikeCharge(p map[string]int) (action.Info, error) {
 		}
 		c.bikeChargeAttackHook()
 		skippedWindupFrames = c.GetSkippedWindupFrames(bufferedFrames)
-		c.caState.skippedWindupF = skippedWindupFrames // Used for syncing CA frames on CA hook
+		c.caState.skippedWindupF = skippedWindupFrames // 重撃フックで重撃フレームを同期するために使用
 	}
 
 	c.caState.srcFrame = c.Core.F
 	src := c.caState.srcFrame
 	nightSoulDuration := c.GetRemainingNightSoulDuration()
-	isForceFinalHit := false // Used when exceeding CA duration, forces CAF
+	isForceFinalHit := false // 重撃持続時間超過時に重撃フィニッシュを強制
 
 	if final == 1 {
 		return c.BikeChargeAttackFinal(0, skippedWindupFrames)
 	}
 
-	// Do not allow starting with a partial CA hold
+	// 部分的な重撃ホールドでの開始を許可しない
 	if durationCA > 0 && c.caState.cAtkFrames > 0 {
-		// Cap duration to lowest of 1 spin, remaining NS, or max CA time
+		// 持続時間を1スピン、残りナイトソウル、最大重撃時間の最小値に制限
 		durationCA = min(durationCA, bikeChargeAttackSpinFrames, nightSoulDuration, bikeChargeAttackMaximumDuration-c.caState.cAtkFrames)
-		// Hold CA logic
+		// 重撃ホールドロジック
 		c.HoldBikeChargeAttack(durationCA, skippedWindupFrames, bikeHittableEntities)
 	} else {
 		hasValidTarget, ai, err := c.HasValidTargetCheck(bikeHittableEntities)
@@ -177,7 +177,7 @@ func (c *char) BikeCharge(p map[string]int) (action.Info, error) {
 		durationCA = c.CountBikeChargeAttack(1, skippedWindupFrames, bikeHittableEntities, nightSoulDuration)
 	}
 
-	// Add any existing CA frames
+	// 既存の重撃フレームを加算
 	c.caState.cAtkFrames += durationCA
 	durationCA -= skippedWindupFrames
 
@@ -189,8 +189,8 @@ func (c *char) BikeCharge(p map[string]int) (action.Info, error) {
 		return c.BikeChargeAttackFinal(durationCA, skippedWindupFrames)
 	}
 
-	// Start queue CAF for invalid actions
-	// Check if bike angle is in spot where CAF has delay, 15f window (used for CAF queue)
+	// 無効アクション用の重撃フィニッシュキューを開始
+	// バイクの角度が重撃フィニッシュに遅延がある位置か確認、15fウィンドウ（重撃フィニッシュキュー用）
 	currentBikeSpinFrame := c.caState.cAtkFrames % bikeChargeAttackSpinFrames
 	newMinSpinDuration := GetCAFDelay(currentBikeSpinFrame)
 
@@ -224,7 +224,7 @@ func (c *char) BikeCharge(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// For given CA length, calculate hits on each target in hittable list
+// 指定された重撃長に対して、ヒット可能リスト内の各ターゲットへのヒットを計算
 func (c *char) HoldBikeChargeAttack(cAtkFrames, skippedWindupFrames int, hittableEntities []HittableEntity) {
 	for i := 0; i < len(hittableEntities); i++ {
 		t := hittableEntities[i]
@@ -236,7 +236,7 @@ func (c *char) HoldBikeChargeAttack(cAtkFrames, skippedWindupFrames int, hittabl
 			continue
 		}
 
-		// First 11f of CA are a bit inaccurate, should start further left and sweep faster
+		// 重撃の最初の11fはやや不正確。本来はもっと左から開始し、より速くスイープすべき
 		hitFrames := c.CalculateValidCollisionFrames(cAtkFrames, t.CollFrames, lastHitFrame)
 
 		if len(hitFrames) > 0 {
@@ -254,9 +254,9 @@ func (c *char) HoldBikeChargeAttack(cAtkFrames, skippedWindupFrames int, hittabl
 	}
 }
 
-// For given maxHitCount count, calculate maxHitCount timings on targets and return CA duration
+// 指定されたmaxHitCountに対して、ターゲットへのヒットタイミングを計算し重撃持続時間を返す
 func (c *char) CountBikeChargeAttack(maxHitCount, skippedWindupFrames int, hittableEntities []HittableEntity, nsDur int) int {
-	// Return remaining CA time between nightsoul duration (account for skipped windup) and max CA duration for attempting hit
+	// ナイトソウル残り時間（スキップされたワインドアップを考慮）と最大重撃時間の間の残り重撃時間を返す
 	dur := min(nsDur+skippedWindupFrames, bikeChargeAttackMaximumDuration-c.caState.cAtkFrames)
 	hitCounter := 0
 
@@ -273,7 +273,7 @@ func (c *char) CountBikeChargeAttack(maxHitCount, skippedWindupFrames int, hitta
 			continue
 		}
 
-		// First 11f of CA are a bit inaccurate, should start further left and sweep faster
+		// 重撃の最初の11fはやや不正確。本来はもっと左から開始し、より速くスイープすべき
 		hitFrames := c.CalculateValidCollisionFrames(dur, t.CollFrames, lastHitFrame)
 
 		if len(hitFrames) > 0 {
@@ -307,7 +307,7 @@ func (c *char) CountBikeChargeAttack(maxHitCount, skippedWindupFrames int, hitta
 				newLastHitFrame = f
 			}
 		}
-		// Used when the CA started between hits (Usually for secondary+ targets)
+		// 重撃がヒット間に開始された場合に使用（通常2番目以降のターゲット向け）
 		if newLastHitFrame >= 0 {
 			c.caState.LastHit[enemyID] += newLastHitFrame + (c.caState.cAtkFrames - lastHitFrame)
 		}
@@ -315,15 +315,15 @@ func (c *char) CountBikeChargeAttack(maxHitCount, skippedWindupFrames int, hitta
 	return dur
 }
 
-// CAF occurs after reaching maximum CA duration, exiting NS, or letting go of CA
+// 重撃フィニッシュは最大重撃持続時間到達、ナイトソウル終了、または重撃解除時に発生
 func (c *char) BikeChargeAttackFinal(caFrames, skippedWindupFrames int) (action.Info, error) {
 	bikeChargeAttackElapsedTime := c.caState.cAtkFrames + caFrames
 	var newMinSpinDuration int
 	if bikeChargeAttackElapsedTime > 0 {
-		// Check if bike angle is in spot where CAF has delay, 20f window
+		// バイクの角度が重撃フィニッシュに遅延がある位置か確認、20fウィンドウ
 		currentBikeSpinFrame := bikeChargeAttackElapsedTime % bikeChargeAttackSpinFrames
 		newMinSpinDuration = GetCAFDelay(currentBikeSpinFrame)
-	} else { // If new CA, include frames leading up to earliest Final CA
+	} else { // 新規重撃の場合、最早の重撃フィニッシュまでのフレームを含む
 		newMinSpinDuration = bikeChargeAttackMinimumDuration
 	}
 	caFrames += newMinSpinDuration
@@ -338,17 +338,17 @@ func (c *char) BikeChargeAttackFinal(caFrames, skippedWindupFrames int) (action.
 
 	src := c.caState.srcFrame
 	c.QueueCharTask(func() {
-		// char must be active
+		// キャラクターがフィールド上にいる必要がある
 		if c.Core.Player.Active() != c.Index {
 			return
 		}
 
-		// Check that CAF matches original CA
+		// 重撃フィニッシュが元の重撃と一致するか確認
 		if c.caState.srcFrame != src {
 			return
 		}
 
-		// Mavuika must be on the bike
+		// マヴイカがバイクに乗っている必要がある
 		if c.armamentState != bike {
 			return
 		}
@@ -387,13 +387,13 @@ func (c *char) BikeChargeAttackFinal(caFrames, skippedWindupFrames int) (action.
 			0,
 		)
 
-		// Reset c.caState upon finisher landing
+		// フィニッシャー着地時にc.caStateをリセット
 		c.caState = ChargeState{}
 	}, adjustedBikeChargeFinalHitmark)
 
 	nightSoulDuration := c.GetRemainingNightSoulDuration()
 	if nightSoulDuration <= adjustedBikeChargeFinalHitmark {
-		// Exiting at hitmark to account for dash cancel
+		// ダッシュキャンセルを考慮してヒットマークで退出
 		c.QueueCharTask(func() {
 			c.exitBike()
 		}, adjustedBikeChargeFinalHitmark)
@@ -403,7 +403,7 @@ func (c *char) BikeChargeAttackFinal(caFrames, skippedWindupFrames int) (action.
 		}, nightSoulDuration)
 	}
 
-	// Unsubscribe to CA hook at start of CAF motion
+	// 重撃フィニッシュモーション開始時に重撃フックを解除
 	c.Core.Tasks.Add(func() {
 		c.bikeChargeAttackUnhook()
 	}, caFrames)
@@ -441,13 +441,13 @@ func (c *char) GetBikeChargeAttackAttackInfo() combat.AttackInfo {
 func (c *char) GetSkippedWindupFrames(bufferedFrames int) int {
 	x := c.Core.Player.CurrentState()
 	var skippedWindupFrames int
-	// TODO: Refactor this when handling initial CA frames in separate function for unique velocity
-	// Currently the angle/hitbox tracking uses raw CA frames to determine position
-	// Subtracting this at the wrong time can cause hits to get out of sync
+	// TODO: 初期重撃フレームを固有速度用の別関数で処理する際にリファクタリング
+	// 現在、角度/ヒットボックス追跡は生の重撃フレームを使用して位置を決定
+	// 誤ったタイミングでこれを減算するとヒットが同期から外れる可能性がある
 	switch {
 	case x == action.DashState:
 		skippedWindupFrames = 15
-		// In rare instances this doesn't proc in-game, but with the sim frames it should always happen
+		// ゲーム内では稀に発動しないが、シムのフレームでは常に発生するはず
 		c.Core.Events.Emit(event.OnStateChange, action.NormalAttackState, action.NormalAttackState)
 		return skippedWindupFrames
 	case x == action.NormalAttackState || x == action.ChargeAttackState && c.caState.StartFrame == c.Core.F:
@@ -458,7 +458,7 @@ func (c *char) GetSkippedWindupFrames(bufferedFrames int) int {
 		} else {
 			skippedWindupFrames = 15
 		}
-	// Skill recast is called from skill Hold and Recast, recast has forced n0 frames
+	// スキル再発動はスキルホールドと再発動から呼ばれる。再発動には強制的なn0フレームがある
 	case x == action.SkillState && c.StatusIsActive(skillRecastCDKey):
 		if c.StatusDuration(skillRecastCDKey) > 45 {
 			skippedWindupFrames = 13
@@ -469,14 +469,14 @@ func (c *char) GetSkippedWindupFrames(bufferedFrames int) int {
 		skippedWindupFrames = 13
 	}
 	skippedWindupFrames = min(skippedWindupFrames, bufferedFrames)
-	// If the full windup is not skipped, mav's ca windup will proc n0 abilities like Yelan/XQ
+	// ワインドアップが完全にスキップされない場合、マヴイカの重撃ワインドアップがYelan/XQ等のn0アビリティを発動する
 	if skippedWindupFrames < 15 {
 		c.Core.Events.Emit(event.OnStateChange, action.NormalAttackState, action.NormalAttackState)
 	}
 	return skippedWindupFrames
 }
 
-// CA NightSoul consumption is 11/s, with skill.go function reducing this every 6f
+// 重撃のナイトソウル消費は11/s。skill.goの関数が6fごとに減少させる
 func (c *char) GetRemainingNightSoulDuration() int {
 	curPoints := c.nightsoulState.Points()
 	framesSinceLastNSReduce := (c.Core.F - c.nightsoulSrc) % 6
@@ -491,7 +491,7 @@ func (c *char) GetRemainingNightSoulDuration() int {
 	return nsDur
 }
 
-// 20f window during spin where CAF cannot start
+// スピン中に重撃フィニッシュを開始できなや20fのウィンドウ
 func GetCAFDelay(currentBikeSpinFrame int) int {
 	newMinSpinDuration := 0
 
@@ -515,7 +515,7 @@ func (c *char) buildValidTargetList() ([]HittableEntity, error) {
 		if v == nil {
 			continue
 		}
-		// Calculate start and ending frames for collision
+		// 衝突の開始フレームと終了フレームを計算
 		collisionFrames := [2]int{-1, -1}
 		var facingDirection float64
 		if c.caState.cAtkFrames == 0 {
@@ -550,8 +550,8 @@ func (c *char) buildValidGadgetList() []HittableEntity {
 		}
 		switch g.GadgetTyp() {
 		case combat.GadgetTypDendroCore, combat.GadgetTypBogglecatBox:
-			// Calculate start and ending frames for collision
-			// Can ignore hitbox shape errors since these gadgets have circular hitboxes
+			// 衝突の開始フレームと終了フレームを計算
+			// これらのガジェットは円形ヒットボックスを持つため、ヒットボックス形状エラーは無視できる
 			hittableGadget, isHittable, _ := c.IsGadgetHittable(g)
 			if isHittable {
 				hittableGadgets = append(hittableGadgets, hittableGadget)
@@ -607,20 +607,20 @@ func (c *char) HasValidTargetCheck(bikeHittableEntities []HittableEntity) (bool,
 	return true, action.Info{}, nil
 }
 
-// Currently used for dendro cores spawning, other movements/additions should not happen mid-CA anim
+// 現在は草原核のスポーンに使用。その他の移動や追加は重撃アニメーション中に発生すべきではない
 func (c *char) bikeChargeAttackHook() {
 	c.Core.Events.Subscribe(event.OnDendroCore, func(args ...interface{}) bool {
-		// Ignore if not in bike state
+		// バイク状態でない場合は無視
 		if c.armamentState != bike && !c.nightsoulState.HasBlessing() {
 			return false
 		}
-		// If in bike state, add gadget to target list if it can be hit
+		// バイク状態の場合、ヒット可能ならガジェットをターゲットリストに追加
 		g, ok := args[0].(combat.Gadget)
 		if !ok {
 			return false
 		}
 		if g.GadgetTyp() == combat.GadgetTypDendroCore {
-			// Might not be necessary to add to list?
+			// リストへの追加は不要かもしれない？
 			hittableGadget, isHittable, _ := c.IsGadgetHittable(g)
 			if isHittable {
 				remainingCADuration := c.caState.cAtkFrames - (c.Core.F - c.caState.StartFrame)
@@ -633,7 +633,7 @@ func (c *char) bikeChargeAttackHook() {
 						}, f)
 					}
 				}
-				// Frame doesn't really matter as long as > 0
+				// フレームは0より大きければ正確な値でなくても問題ない
 				c.caState.LastHit[g.Key()] += c.Core.F
 			}
 		}
@@ -654,12 +654,12 @@ func (*char) GetHittableEntityList() []HittableEntity {
 	return bikeHittableEntityList
 }
 
-// Iterate through CA frames, starting at hitmark
+// 重撃フレームを反復し、ヒットマークから開始
 func (c *char) CalculateValidCollisionFrames(durationCA int, collisionFrames [2]int, lastHitFrame int) []int {
 	validFrames := []int{}
-	currentFrame := bikeChargeAttackStartupHitmark // Spin hitbox starts on frame 35 of CA anim (full windup)	var timeSinceStart int
+	currentFrame := bikeChargeAttackStartupHitmark // スピンヒットボックスは重撃アニメーションの35f目から開始（フルワインドアップ）	var timeSinceStart int
 
-	// Check if CA is continuing from previous action, adjust current cycle
+	// 重撃が前のアクションから継続している場合、現在のサイクルを調整
 	timeSinceStart := c.Core.F - (c.caState.StartFrame - c.caState.skippedWindupF)
 	timeSinceLastHit := timeSinceStart - lastHitFrame
 	if timeSinceStart >= currentFrame {
@@ -668,15 +668,15 @@ func (c *char) CalculateValidCollisionFrames(durationCA int, collisionFrames [2]
 			currentFrame += bikeChargeAttackICD - timeSinceLastHit
 		}
 	}
-	totalFrames := currentFrame                // Track the total frames elapsed
-	currentFrame %= bikeChargeAttackSpinFrames // Start current frame within spin cycle
+	totalFrames := currentFrame                // 経過した総フレーム数を追跡
+	currentFrame %= bikeChargeAttackSpinFrames // スピンサイクル内で現在のフレームを開始
 
 	collisionStart := collisionFrames[0]
 	collisionEnd := collisionFrames[1]
 
 	for totalFrames <= (durationCA + c.caState.cAtkFrames) {
 		checkValidFrame := -1
-		// If the frame is outside the collision range, shift forward
+		// フレームが衝突範囲外の場合、前方にシフト
 		if collisionStart <= collisionEnd {
 			if currentFrame > collisionEnd {
 				currentFrame -= bikeChargeAttackSpinFrames
@@ -698,12 +698,12 @@ func (c *char) CalculateValidCollisionFrames(durationCA int, collisionFrames [2]
 				checkValidFrame = totalFrames - timeSinceStart
 			}
 		} else {
-			// Handle wrapping cases where collisionEnd is before collisionStart
+			// collisionEndがcollisionStartより前のラップケースを処理
 			if currentFrame >= collisionStart || currentFrame <= collisionEnd {
 				checkValidFrame = totalFrames - timeSinceStart
 			}
 		}
-		// For initial CA hit calculations, account for skipped windup frames
+		// 初回重撃ヒット計算では、スキップされたワインドアップフレームを考慮
 		if c.Core.F == c.caState.StartFrame {
 			checkValidFrame += c.caState.skippedWindupF
 		}
@@ -712,7 +712,7 @@ func (c *char) CalculateValidCollisionFrames(durationCA int, collisionFrames [2]
 			validFrames = append(validFrames, checkValidFrame)
 		}
 
-		// Move forward by cooldownFrames, wrapping within spin animation length
+		// クールダウンフレーム分前進し、スピンアニメーション長内でラップ
 		totalFrames += bikeChargeAttackICD
 		currentFrame = (currentFrame + bikeChargeAttackICD) % bikeChargeAttackSpinFrames
 	}
@@ -720,8 +720,8 @@ func (c *char) CalculateValidCollisionFrames(durationCA int, collisionFrames [2]
 	return validFrames
 }
 
-// Calculate start and end frames for each spin during which target is within Mav hitbox
-// Return false if target is not circle or has no overlap
+// 各スピン中にターゲットがマヴイカのヒットボックス内にある開始フレームと終了フレームを計算
+// ターゲットが円形でないか重なりがない場合はfalseを返す
 func (c *char) BikeHitboxIntersectionAngles(v combat.Target, f []int, offsetAngle float64) (bool, error) {
 	enemyShape := v.Shape()
 	var enemyRadius float64
@@ -738,12 +738,12 @@ func (c *char) BikeHitboxIntersectionAngles(v combat.Target, f []int, offsetAngl
 	posDifference := v.Pos().Sub(c.Core.Combat.Player().Pos())
 	enemyDistance := posDifference.Magnitude() // Dt
 
-	// Check if no overlap
+	// 重なりがないか確認
 	if enemyDistance+enemyRadius <= bikeInnerRadius || enemyDistance-enemyRadius >= bikeOuterRadius {
 		return false, nil
 	}
 
-	// Target is always within hitbox range for the entire rotation
+	// ターゲットが回転全体で常にヒットボックス範囲内にある
 	if enemyRadius-enemyDistance > bikeInnerRadius {
 		f[0] = 0
 		f[1] = bikeChargeAttackSpinFrames
@@ -807,10 +807,10 @@ func (c *char) ConvertAngleToFrame(theta float64) int {
 	}
 
 	if accumulatedFrames > 0 {
-		accumulatedFrames-- // Account for spin frame count starting at 0
+		accumulatedFrames-- // スピンフレームカウントが0から始まることを考慮
 	}
 
-	// Calculate frame within quadrant
+	// 象限内のフレームを計算
 	quadrantStartAngle := float64(quadrant) * 90.0
 	frameOffset := float64(bikeSpinQuadrantFrames[spinQuadrant]) + (theta-quadrantStartAngle)/bikeSpinQuadrantAngularVelocity[spinQuadrant]
 

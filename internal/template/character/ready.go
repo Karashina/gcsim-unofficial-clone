@@ -6,7 +6,7 @@ import (
 )
 
 func (c *Character) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// for dash and charge need to check for stam usage as well
+	// ダッシュと重撃はスタミナ使用量もチェックする必要がある
 
 	switch a {
 	case action.ActionBurst:

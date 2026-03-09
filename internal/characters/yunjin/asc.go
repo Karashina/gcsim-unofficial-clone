@@ -5,10 +5,10 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 )
 
-// A1 is not implemented:
-// TODO: Using Opening Flourish at the precise moment when Yun Jin is attacked will unleash its Level 2 Charged (Hold) form.
+// 固有天賦1は未実装:
+// TODO: 雲菫が攻撃された正確な瞬間に開花を使用すると、レベル2チャージ（長押し）形式を発動する。
 
-// count elemental types
+// 元素タイプを計算
 func (c *char) a4Init() {
 	if c.Base.Ascension < 4 {
 		return
@@ -24,8 +24,8 @@ func (c *char) a4Init() {
 		Write("party_elements", c.partyElementalTypes)
 }
 
-// The Normal Attack DMG Bonus granted by Flying Cloud Flag Formation is further increased by
-// 2.5%/5%/7.5%/11.5% of Yun Jin's DEF when the party contains characters of 1/2/3/4 Elemental Types, respectively.
+// 飛雲旗陣の通常攻撃ダメージバフが、パーティに含まれる元素タイプ
+// 1/2/3/4種類ごとに雲菫の防御力の2.5%/5%/7.5%/11.5%さらに増加する。
 func (c *char) a4() float64 {
 	if c.Base.Ascension < 4 {
 		return 0

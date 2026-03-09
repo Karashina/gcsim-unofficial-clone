@@ -17,7 +17,7 @@ const (
 	burstFirstRefresh = 142
 	burstRefreshRate  = 146
 	burstShieldExpiry = 152
-	// subject to change
+	// 変更の可能性あり
 	burstTickRelease = 21
 	burstTickTravel  = 8
 )
@@ -32,12 +32,12 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// no heal on first shield
+	// 最初のシールドでは回復しない
 	c.Core.Tasks.Add(func() {
 		c.summonSeamlessShield()
 	}, burstFirstShield)
 
-	// refresh shield 5 times
+	// シールドを5回更新
 	for i := 0; i <= 4; i += 1 {
 		c.Core.Tasks.Add(func() {
 			c.summonSeamlessShield()
@@ -55,13 +55,13 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
 
 func (c *char) summonSeamlessShield() {
-	// add shield
+	// シールドを追加
 	exist := c.Core.Player.Shields.Get(shield.BaizhuBurst)
 	shieldamt := (burstShieldPP[c.TalentLvlBurst()]*c.MaxHP() + burstShieldFlat[c.TalentLvlBurst()])
 	if exist != nil {
@@ -71,7 +71,7 @@ func (c *char) summonSeamlessShield() {
 }
 
 func (c *char) summonSeamlessShieldHealing() {
-	// Seamless Shield Healing
+	// 継ぎ目なきシールドの回復
 	c.Core.Player.Heal(info.HealInfo{
 		Caller:  c.Index,
 		Target:  c.Core.Player.Active(),

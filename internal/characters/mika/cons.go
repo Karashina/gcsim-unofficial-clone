@@ -7,9 +7,9 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When Starfrost Swirl's Flowfrost Arrow first hits an opponent, or its Rimestar Flare hits an opponent,
-// 1 Detector stack from Passive Talent "Suppressive Barrage" will be generated.
-// You must have unlocked the Passive Talent "Suppressive Barrage" first.
+// 星霜の旋の霜流れの矢が初めて敵に命中した時、または霜星弾が敵に命中した時、
+// 固有天賦「索敵弾幕」のディテクタースタックが1つ生成される。
+// 固有天賦「索敵弾幕」のアンロックが必要。
 func (c *char) c2() func(combat.AttackCB) {
 	if c.Base.Cons < 2 || c.Base.Ascension < 1 {
 		return nil
@@ -26,9 +26,9 @@ func (c *char) c2() func(combat.AttackCB) {
 	}
 }
 
-// The maximum number of Detector stacks that Starfrost Swirl's Soulwind can gain is increased by 1.
-// You need to have unlocked the Passive Talent "Suppressive Barrage" first.
-// Additionally, active characters affected by Soulwind will deal 60% more Physical CRIT DMG.
+// 星霜の旋の極寒の風が獲得できるディテクタースタックの最大数が1つ増加する。
+// 固有天賦「索敵弾幕」のアンロックが必要。
+// さらに、極寒の風の効果を受けたアクティブキャラクターの物理会心ダメージが60%増加する。
 func (c *char) c6(char *character.CharWrapper) {
 	char.AddAttackMod(character.AttackMod{
 		Base: modifier.NewBaseWithHitlag("mika-c6", skillBuffDuration),

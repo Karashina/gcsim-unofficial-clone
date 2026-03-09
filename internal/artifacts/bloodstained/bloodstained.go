@@ -32,7 +32,7 @@ func (s *Set) Init() error      { return nil }
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
-	// 2 Piece: Physical DMG Bonus +25%
+	// 2セット: 物理ダメージボーナス +25%
 	if count >= 2 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.PhyP] = 0.25
@@ -45,8 +45,8 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 		})
 	}
 
-	// 4 Piece: After defeating an opponent, increases Charged Attack DMG by 50%, and reduces its Stamina cost to 0 for 10s.
-	// Also triggers with wild animals such as boars, squirrels and frogs.
+	// 4セット: 敵を撃破後、重撃ダメージ50%増加、スタミナ消費0になる（10秒間）。
+	// 猪、リス、カエルなどの野生動物にも発動する。
 	if count < 4 {
 		return &s, nil
 	}
@@ -55,21 +55,21 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 	m[attributes.DmgP] = 0.50
 	c.Events.Subscribe(event.OnTargetDied, func(args ...interface{}) bool {
 		_, ok := args[0].(*enemy.Enemy)
-		// ignore if not an enemy
+		// 敵でなければ無視
 		if !ok {
 			return false
 		}
 		atk := args[1].(*combat.AttackEvent)
-		// don't proc if someone else defeated the enemy
+		// 別のキャラクターが敵を倒した場合は発動しない
 		if atk.Info.ActorIndex != char.Index {
 			return false
 		}
-		// don't proc if off-field
+		// フィールド外では発動しない
 		if c.Player.Active() != char.Index {
 			return false
 		}
 
-		// charged attack dmg% part
+		// 重撃ダメージ%部分
 		char.AddAttackMod(character.AttackMod{
 			Base: modifier.NewBaseWithHitlag("bloodstained-4pc-dmg%", 600),
 			Amount: func(atk *combat.AttackEvent, t combat.Target) ([]float64, bool) {
@@ -80,8 +80,8 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			},
 		})
 
-		// charged attack stamina part
-		// TODO: should this be affected by hitlag? (stam percent mod)
+		// 重撃スタミナ部分
+		// TODO: ヒットラグの影響を受けるべきか？（スタミナ割合Mod）
 		c.Player.AddStamPercentMod("bloodstained-4pc-stamina", 600, func(a action.Action) (float64, bool) {
 			if a == action.ActionCharge {
 				return -1, false

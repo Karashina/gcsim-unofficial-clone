@@ -27,7 +27,7 @@ func (s *Set) Init() error      { return nil }
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 
-	// 2 Piece: ATK +18%
+	// 2セット: 攻撃力 +18%
 	if count >= 2 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.ATKP] = 0.18
@@ -39,7 +39,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 			},
 		})
 	}
-	// 4 Piece: Increases Charged Attack CRIT Rate by 30%.
+	// 4セット: 重撃の会心率が30%増加。
 	if count >= 4 {
 		m := make([]float64, attributes.EndStatType)
 		m[attributes.CR] = 0.30

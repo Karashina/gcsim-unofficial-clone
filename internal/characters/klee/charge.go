@@ -56,7 +56,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}
 
 	c.Core.Tasks.Add(func() {
-		// apply and clear spark
+		// 火花を適用して消去
 		snap := c.Snapshot(&ai)
 		if c.StatusIsActive(a1SparkKey) {
 			snap.Stats[attributes.DmgP] += .50
@@ -77,7 +77,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          func(next action.Action) int { return chargeFrames[next] - windup },
 		AnimationLength: chargeFrames[action.InvalidAction] - windup,
-		CanQueueAfter:   chargeFrames[action.ActionJump] - windup, // earliest cancel
+		CanQueueAfter:   chargeFrames[action.ActionJump] - windup, // 最速キャンセル
 		State:           action.ChargeAttackState,
 	}, nil
 }

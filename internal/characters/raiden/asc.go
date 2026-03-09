@@ -8,8 +8,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// When nearby party members gain Elemental Orbs or Particles, Chakra Desiderata gains 2 Resolve stacks.
-// This effect can occur once every 3s.
+// 近くのパーティメンバーが元素オーブまたは粒子を獲得すると、詘の光の愿力スタックが2増加。
+// 3秒に1回のみ発動。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -19,7 +19,7 @@ func (c *char) a1() {
 		if particleICD > c.Core.F {
 			return false
 		}
-		particleICD = c.Core.F + 180 // once every 3 seconds
+		particleICD = c.Core.F + 180 // 3秒に1回
 		previous := c.stacks
 		c.stacks += 2
 		if c.stacks > 60 {
@@ -33,9 +33,9 @@ func (c *char) a1() {
 	}, "raiden-particle-stacks")
 }
 
-// Each 1% above 100% Energy Recharge that the Raiden Shogun possesses grants her:
+// 雷電将軍の元素チャージ効率が100%を超え1%ごとに:
 //
-// - 0.6% greater Energy restoration from Musou Isshin
+// - 夢想の一太刀からのエネルギー回復量+0.6%
 func (c *char) a4Energy(er float64) float64 {
 	if c.Base.Ascension < 4 {
 		return 0
@@ -48,9 +48,9 @@ func (c *char) a4Energy(er float64) float64 {
 	return increase
 }
 
-// Each 1% above 100% Energy Recharge that the Raiden Shogun possesses grants her:
+// 雷電将軍の元素チャージ効率が100%を超え1%ごとに:
 //
-// - 0.4% Electro DMG Bonus.
+// - 雷元素ダメージボーナス+0.4%。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

@@ -37,12 +37,12 @@ func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error      { return nil }
 
-// 2pc - Increases Elemental Mastery by 80.
-// 4pc - The equipping character's Bloom, Hyperbloom, and Burgeon reaction DMG are increased by 40%. Additionally, after the equipping
+// 2セット - 元素熟知+80
+// 4セット - 装備キャラのBloom、Hyperbloom、Burgeon反応ダメージが40%増加。さらに、装備
 //
-//	character triggers Bloom, Hyperbloom, or Burgeon, they will gain another 25% bonus to the effect mentioned prior. Each stack
-//	of this lasts 10s. Max 4 stacks simultaneously. This effect can only be triggered once per second. The character who equips
-//	this can still trigger its effects when not on the field.
+//	キャラがBloom、Hyperbloom、Burgeonを発動すると、上記効果にさらに25%のボーナス。各スタックは
+//	10秒間持続。最大4スタック同時発動可能。この効果は1秒に1回のみ発動。装備キャラが
+//	フィールド上にいなくても効果を発動可能。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{Count: count}
 

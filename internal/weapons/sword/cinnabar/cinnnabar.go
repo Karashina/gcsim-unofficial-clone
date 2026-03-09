@@ -29,9 +29,8 @@ const (
 	durationKey = "cinnabar-buff-active"
 )
 
-// Elemental Skill DMG is increased by 40% of DEF. The effect will be triggered
-// no more than once every 1.5s and will be cleared 0.1s after the Elemental
-// Skill deals DMG.
+// 元素スキルのダメージが防御力の40%分増加する。この効果は1.5秒毎に
+// 1回のみ発動し、元素スキルがダメージを与えた0.1秒後にクリアされる。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine
@@ -45,17 +44,16 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 		if atk.Info.AttackTag != attacks.AttackTagElementalArt && atk.Info.AttackTag != attacks.AttackTagElementalArtHold {
 			return false
 		}
-		// don't do anything if we're in icd period
+		// ICD期間中は何もしない
 		if char.StatusIsActive(icdKey) {
 			return false
 		}
-		// otherwise if this is first time proc'ing, set the duration and queue
-		// task to set icd
+		// 初回発動時は持続時間を設定しICDタスクをキューに追加
 		if !char.StatusIsActive(durationKey) {
-			//TODO: we're assuming icd starts after the effect
+			// TODO: ICDは効果後に開始すると仮定
 			char.QueueCharTask(func() {
-				char.AddStatus(icdKey, 90, false) // icd lasts for 1.5s
-			}, 6) // icd starts 6 frames after
+				char.AddStatus(icdKey, 90, false) // ICDは1.5秒間
+			}, 6) // ICDは6フレーム後に開始
 			char.AddStatus(durationKey, 6, false)
 		}
 		damageAdd := char.TotalDef(false) * defPer

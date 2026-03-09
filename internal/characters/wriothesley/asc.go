@@ -23,42 +23,42 @@ func (c *char) a1Ready() bool {
 	return c.CurrentHPRatio() < 0.6 && !c.StatusIsActive(a1ICDKey)
 }
 
-// When Wriothesley's HP is less than 60%, he will obtain a Gracious Rebuke. The next Charged Attack of his
-// Normal Attack: Forceful Fists of Frost will be enhanced to become Rebuke: Vaulting Fist. It will not consume
-// Stamina, deal 50% increased DMG, and will restore HP for Wriothesley after hitting equal to 30% of his Max HP.
-// You can gain a Gracious Rebuke this way once every 5s.
+// リオセスリのHPが60%未満の時、「重裁の嘃き」を獲得する。次の通常攻撃：極寒の拳の重撃が
+// 「重裁の嘃き：飛蹴」に強化される。スタミナを消費せず、ダメージが50%増加し、
+// 命中後にリオセスリのHPをHP上限の30%分回復する。
+// この方法で「重裁の嘃き」を5秒に1回獲得可能。
 func (c *char) a1(ai *combat.AttackInfo, snap *combat.Snapshot) combat.AttackCBFunc {
 	if !c.a1Ready() {
 		return nil
 	}
 
-	// add status that is removed on consumption
+	// 消費時に削除されるステータスを追加
 	c.AddStatus(a1Status, -1, false)
 
-	// adjust ai
+	// AIを調整
 	ai.Abil = "Rebuke: Vaulting Fist"
 	ai.HitlagFactor = 0.03
 	ai.HitlagHaltFrames = 0.12 * 60
 
-	// 50% increased DMG
+	// ダメージ50%増加
 	dmg := 0.5
 	snap.Stats[attributes.DmgP] += dmg
 	c.Core.Log.NewEvent("adding a1", glog.LogCharacterEvent, c.Index).Write("dmg%", dmg)
 
-	// return callback to heal, remove A1 and apply 5s cd
+	// コールバックで回復、固有天賦1を削除、5秒CDを適用
 	return func(a combat.AttackCB) {
 		if a.Target.Type() != targets.TargettableEnemy {
 			return
 		}
-		// do not proc if a1 not active
+		// 固有天賦1がアクティブでない場合は発動しない
 		if !c.StatusIsActive(a1Status) {
 			return
 		}
-		// remove A1 and apply CD
+		// 固有天賦1を削除しCDを適用
 		c.DeleteStatus(a1Status)
 		c.AddStatus(a1ICDKey, a1ICD, true)
 
-		// heal
+		// 回復
 		c.Core.Player.Heal(info.HealInfo{
 			Caller:  c.Index,
 			Target:  c.Index,
@@ -69,8 +69,8 @@ func (c *char) a1(ai *combat.AttackInfo, snap *combat.Snapshot) combat.AttackCBF
 	}
 }
 
-// When Wriothesley's current HP increases or decreases, if he is in the Chilling Penalty state conferred by Icefang Rush,
-// Chilling Penalty will gain one stack of Prosecution Edict. Max 5 stacks. Each stack will increase Wriothesley's ATK by 6%.
+// リオセスリの現在HPが増減した際、「氷牙の突進」による「氷牙の罰」状態の場合、
+// 「弾劾の勅令」スタックを1つ獲得する。最大5スタック。各スタックでリオセスリの攻撃力が6%増加。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -108,7 +108,7 @@ func (c *char) a4() {
 		if amount <= 0 {
 			return false
 		}
-		// do not trigger if at max hp already
+		// 既にHP最大の場合は発動しない
 		if math.Abs(amount-overheal) <= 1e-9 {
 			return false
 		}

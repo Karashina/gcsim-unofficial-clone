@@ -11,17 +11,17 @@ import (
 )
 
 // C1 - "Come, Friend, Let Us Dance Beneath the Moon's Soft Glow"
-// Grants 1 FWA charge immediately upon entering Sturm und Drang, and Lyrical Libation effect
-// Handled in enterSturmUndDrang (immediate charge grant + c1LyricalKey status)
-// The 200% DMG mult is handled in skill.go fourWindsAscension and charge.go azureDevour
+// S&D突入時にFWAチャージを1つ即座に付与し、Lyrical Libation効果を付与
+// enterSturmUndDrangで処理（即時チャージ付与 + c1LyricalKeyステータス）
+// 200%ダメージ倍率はskill.goのfourWindsAscensionとcharge.goのazureDevourで処理
 
 // C2 - "When Dawn Breaks, Our Journey Shall Take Flight"
-// Additional Anemo strike equal to 800% ATK on FWA or Azure Devour
-// Handled in skill.go c2Strike and c2Init
+// FWAまたはAzure Devour時にATKの800%に等しい追加風元素攻撃
+// skill.goのc2Strikeとc2Initで処理
 
 // C4 - "For None May Take From Us Our Freedom of Song"
-// When Varka triggers a Swirl reaction, all nearby party members gain
-// 20% Anemo DMG Bonus and the corresponding Elemental DMG Bonus for 10s.
+// ヴァルカが拡散反応を発動すると、周囲のパーティメンバー全員が
+// 10秒間、風元素ダメージボーナス20%と対応する元素ダメージボーナスを獲得する。
 func (c *char) c4Init() {
 	swirlMap := map[event.Event]attributes.Stat{
 		event.OnSwirlHydro:   attributes.HydroP,
@@ -34,12 +34,12 @@ func (c *char) c4Init() {
 		eleStat := eleStat // capture for closure
 		c.Core.Events.Subscribe(ev, func(args ...interface{}) bool {
 			atk := args[1].(*combat.AttackEvent)
-			// Only triggers when Varka triggers the Swirl
+			// ヴァルカが拡散を発動した時のみトリガー
 			if atk.Info.ActorIndex != c.Index {
 				return false
 			}
 
-			// Apply to all party members
+			// 全パーティメンバーに適用
 			for _, char := range c.Core.Player.Chars() {
 				m := make([]float64, attributes.EndStatType)
 				m[attributes.AnemoP] = 0.20
@@ -60,10 +60,10 @@ func (c *char) c4Init() {
 }
 
 // C6 - "Beloved Mondstadt, Steadfast You Shall Shine"
-// FWA→Azure chain, Azure→FWA chain without charge consumption
-// The window statuses (c6FWAWindowKey, c6AzureWindowKey) are set in:
-//   - skill.go fourWindsAscension() → sets c6FWAWindowKey
-//   - charge.go azureDevour() → sets c6AzureWindowKey
-// and consumed in fourWindsAscension and azureDevour respectively
+// FWA→Azureチェーン、Azure→FWAチェーンをチャージ消費なしで実行
+// ウィンドウステータス（c6FWAWindowKey, c6AzureWindowKey）は以下で設定:
+//   - skill.go fourWindsAscension() → c6FWAWindowKeyを設定
+//   - charge.go azureDevour() → c6AzureWindowKeyを設定
+// fourWindsAscensionとazureDevourでそれぞれ消費される
 //
-// C6 CRIT DMG from A4 stacks is handled in asc.go a4Apply()
+// C6のA4スタックからの会心ダメージはasc.go a4Apply()で処理

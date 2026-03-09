@@ -29,8 +29,8 @@ const (
 )
 
 func init() {
-	// skill (press) -> x
-	skillPressFrames = frames.InitAbilSlice(38) // walk
+	// スキル（単押し） -> x
+	skillPressFrames = frames.InitAbilSlice(38) // 歩行
 	skillPressFrames[action.ActionAttack] = 27
 	skillPressFrames[action.ActionSkill] = 27
 	skillPressFrames[action.ActionBurst] = 27
@@ -38,11 +38,11 @@ func init() {
 	skillPressFrames[action.ActionJump] = 21
 	skillPressFrames[action.ActionSwap] = 27
 
-	// skill (hold) -> x
-	// TODO: skill (hold) -> skill (hold) is 52 frames.
-	skillHoldFrames = frames.InitAbilSlice(78) // walk
+	// スキル（長押し） -> x
+	// TODO: スキル（長押し） -> スキル（長押し）は52フレーム
+	skillHoldFrames = frames.InitAbilSlice(78) // 歩行
 	skillHoldFrames[action.ActionAttack] = 45
-	skillHoldFrames[action.ActionSkill] = 45 // assume skill (press)
+	skillHoldFrames[action.ActionSkill] = 45 // スキル（単押し）と仮定
 	skillHoldFrames[action.ActionBurst] = 45
 	skillHoldFrames[action.ActionDash] = 38
 	skillHoldFrames[action.ActionJump] = 39
@@ -97,7 +97,7 @@ func (c *char) skillPress() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillPressFrames),
 		AnimationLength: skillPressFrames[action.InvalidAction],
-		CanQueueAfter:   skillPressFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillPressFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -111,7 +111,7 @@ func (c *char) makePressParticleCB() combat.AttackCBFunc {
 		if done {
 			return
 		}
-		// Skill actually moves you in game - actual catch is anywhere from 90-110 frames, take 100 as an average
+		// スキルがゲーム内で実際にキャラを移動させる - キャッチは90-110フレームの範囲、平均100として扱う
 		c.Core.QueueParticle(c.Base.Key.String(), 3, attributes.Cryo, c.ParticleDelay)
 	}
 }
@@ -149,7 +149,7 @@ func (c *char) skillHold() action.Info {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillHoldFrames),
 		AnimationLength: skillHoldFrames[action.InvalidAction],
-		CanQueueAfter:   skillHoldFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillHoldFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}
 }
@@ -162,18 +162,18 @@ func (c *char) holdParticleCB(a combat.AttackCB) {
 		return
 	}
 	c.AddStatus(holdParticleICDKey, 0.5*60, true)
-	// Particle spawn timing is a bit later than press E
+	// 粒子の生成タイミングは単押しEより少し遅い
 	c.Core.QueueParticle(c.Base.Key.String(), 4, attributes.Cryo, c.ParticleDelay)
 }
 
-// A4:
-// After Shenhe uses Spring Spirit Summoning, she will grant all nearby party members the following effects:
+// 固有天賦2:
+// 申鶴が仕組みの春神を使用後、近くのパーティーメンバー全員に以下の効果を付与する:
 //
-// - Press: Elemental Skill and Elemental Burst DMG increased by 15% for 10s.
+// - 短押し: 元素スキルと元素爆発のダメージが10秒間15%増加。
 func (c *char) skillPressBuff() {
 	for _, char := range c.Core.Player.Chars() {
-		char.AddStatus(quillKey, 10*60, true) // 10 sec duration
-		char.SetTag(quillKey, 5)              // 5 quill on press
+		char.AddStatus(quillKey, 10*60, true) // 10秒間の持続時間
+		char.SetTag(quillKey, 5)              // 単押し時は氷翎5回
 		char.AddAttackMod(character.AttackMod{
 			Base: modifier.NewBaseWithHitlag("shenhe-a4-press", 10*60),
 			Amount: func(a *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
@@ -190,14 +190,14 @@ func (c *char) skillPressBuff() {
 	}
 }
 
-// A4:
-// After Shenhe uses Spring Spirit Summoning, she will grant all nearby party members the following effects:
+// 固有天賦2:
+// 申鶴が仕組みの春神を使用後、近くのパーティーメンバー全員に以下の効果を付与する:
 //
-// - Hold: Normal, Charged, and Plunging Attack DMG increased by 15% for 15s.
+// - 長押し: 通常攻撃、重撃、落下攻撃のダメージが15秒間15%増加。
 func (c *char) skillHoldBuff() {
 	for _, char := range c.Core.Player.Chars() {
-		char.AddStatus(quillKey, 15*60, true) // 15 sec duration
-		char.SetTag(quillKey, 7)              // 5 quill on hold
+		char.AddStatus(quillKey, 15*60, true) // 15秒間の持続時間
+		char.SetTag(quillKey, 7)              // 長押し時は氷翎5回
 		char.AddAttackMod(character.AttackMod{
 			Base: modifier.NewBaseWithHitlag("shenhe-a4-hold", 15*60),
 			Amount: func(a *combat.AttackEvent, _ combat.Target) ([]float64, bool) {
@@ -243,7 +243,7 @@ func (c *char) quillDamageMod() {
 
 		if char.Tags[quillKey] > 0 {
 			amt := skillpp[c.TalentLvlSkill()] * c.TotalAtk()
-			if consumeStack { // c6
+			if consumeStack { // 6凸
 				char.Tags[quillKey]--
 			}
 

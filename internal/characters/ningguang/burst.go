@@ -44,7 +44,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	}
 	ap := combat.NewCircleHit(c.Core.Combat.Player(), c.Core.Combat.PrimaryTarget(), nil, 0.5)
 
-	// fires 6 normally
+	// 通常は6発発射
 	jade, ok := p["jade"]
 	if !ok {
 		jade = 6
@@ -52,7 +52,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	for i := 0; i < jade; i++ {
 		c.Core.QueueAttack(ai, ap, 0, burstHitmarks[i]+travel)
 	}
-	// if jade screen is active add 6 jades
+	// 璇璣屏がアクティブなら6個の宝石を追加
 	if c.Core.Constructs.Destroy(c.lastScreen) {
 		screen, ok := p["screen"]
 		if !ok {
@@ -60,7 +60,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}
 		ai.Abil = "Starshatter (Jade Screen Gems)"
 		for i := 0; i < screen; i++ {
-			c.Core.QueueAttackWithSnap(ai, c.skillSnapshot, ap, burstHitmarks[len(burstHitmarks)-1]+30+travel) // TODO: figure out jade screen hitmarks
+			c.Core.QueueAttackWithSnap(ai, c.skillSnapshot, ap, burstHitmarks[len(burstHitmarks)-1]+30+travel) // TODO: 璇璣屏のヒットマークを調査
 		}
 	}
 

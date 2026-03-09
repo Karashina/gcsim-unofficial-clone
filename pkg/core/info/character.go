@@ -28,7 +28,7 @@ type RandomSubstats struct {
 }
 
 func (r RandomSubstats) Validate() error {
-	//TODO: support more than just 5 stars
+	//TODO: 5つ星以外もサポートする
 	if r.Rarity != 5 {
 		return fmt.Errorf("unsupported rarity: %v", r.Rarity)
 	}
@@ -41,7 +41,7 @@ func (r RandomSubstats) Validate() error {
 	if r.Circlet == attributes.NoStat {
 		return errors.New("circlet main stat not specified")
 	}
-	// main stat have to be valid
+	// メインステータスは有効でなければならない
 	switch r.Sand {
 	case attributes.HPP:
 	case attributes.ATKP:

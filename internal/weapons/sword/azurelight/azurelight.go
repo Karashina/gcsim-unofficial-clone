@@ -35,12 +35,12 @@ func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) 
 	cd := 0.30 + 0.10*float64(refine)
 
 	c.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
-		// don't proc if someone else used a skill
+		// 他のキャラがスキルを使った場合は発動しない
 		if c.Player.Active() != char.Index {
 			return false
 		}
 
-		// add buff
+		// バフを追加
 		char.AddStatMod(character.StatMod{
 			Base:         modifier.NewBaseWithHitlag(buffKey, 12*60),
 			AffectedStat: attributes.NoStat,

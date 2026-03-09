@@ -29,11 +29,10 @@ func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
-	// ATK is increased by 12%. When the equipping character is off-field, ATK
-	// is increased by an additional 12%. When initiating healing, the equipping
-	// character and healed character(s) will obtain the "Chanson de Baies"
-	// effect, increasing their ATK by 32% for 3s. This effect can be triggered
-	// even if the equipping character is off-field.
+	// 攻撃力が12%増加する。装備キャラクターがフィールド外の時、攻撃力が
+	// さらに12%増加する。回復を発動した時、装備キャラクターと回復対象は
+	// 「Chanson de Baies」効果を獲得し、攻撃力が3秒間32%増加する。
+	// この効果は装備キャラクターがフィールド外でも発動できる。
 	w := &Weapon{
 		char: char,
 		c:    c,

@@ -14,7 +14,7 @@ const particleICDKey = "zhongli-particle-icd"
 
 func (c *char) newStele(dur int) {
 	flat := c.a4Skill()
-	// deal damage when created
+	// 生成時にダメージを与える
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Stone Stele (Initial)",
@@ -32,7 +32,7 @@ func (c *char) newStele(dur int) {
 	stelePos := geometry.CalcOffsetPoint(c.Core.Combat.Player().Pos(), geometry.Point{Y: 3}, steleDir)
 	c.Core.QueueAttack(ai, combat.NewCircleHitOnTarget(stelePos, nil, 2), 0, 0, c.particleCB())
 
-	// create a construct
+	// 設置物を生成
 	con := &stoneStele{
 		src:    c.Core.F,
 		expiry: c.Core.F + dur,
@@ -56,7 +56,7 @@ func (c *char) newStele(dur int) {
 		Write("cur_count", c.steleCount).
 		Write("next_tick", c.Core.F+120)
 
-	// Snapshot buffs for resonance ticks
+	// 共鳴Tick用のバフスナップショット
 	aiSnap := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Stone Stele (Tick)",
@@ -93,7 +93,7 @@ func (c *char) resonance(src int) func() {
 			Write("src", src).
 			Write("char", c.Index)
 
-		// Use snapshot for damage
+		// スナップショットをダメージに使用
 		ae := c.steleSnapshot
 
 		boxOffset := geometry.Point{Y: -4}
@@ -107,14 +107,14 @@ func (c *char) resonance(src int) func() {
 
 		particleCB := c.particleCB()
 		for _, s := range steles {
-			// skip other stele
+			// 他の岩柱をスキップ
 			if s.Key() != src {
 				continue
 			}
 			steleDir := s.Direction()
 			stelePos := s.Pos()
 
-			// get all constructs except for the steles within radius 8 of each stele for resonance purposes
+			// 共鳴のため、各岩柱の半径8以内にある岩柱以外の全設置物を取得
 			var resonanceConstructs []construct.Construct
 			for _, con := range others {
 				if con.Pos().Sub(stelePos).MagnitudeSquared() > boxSizeSquared {
@@ -123,11 +123,11 @@ func (c *char) resonance(src int) func() {
 				resonanceConstructs = append(resonanceConstructs, con)
 			}
 
-			// queue stele attack
+			// 岩柱攻撃をキュー
 			steleAttackPos := geometry.CalcOffsetPoint(stelePos, boxOffset, steleDir)
 			c.Core.QueueAttackWithSnap(ai, snap, combat.NewBoxHitOnTarget(steleAttackPos, nil, boxSize, boxSize), 0, particleCB)
 
-			// queue resonance attacks
+			// 共鳴攻撃をキュー
 			for _, con := range resonanceConstructs {
 				resonanceAttackPos := geometry.CalcOffsetPoint(con.Pos(), boxOffset, con.Direction())
 				c.Core.QueueAttackWithSnap(ai, snap, combat.NewBoxHitOnTarget(resonanceAttackPos, nil, boxSize, boxSize), 0, particleCB)
@@ -147,7 +147,7 @@ func (c *char) particleCB() combat.AttackCBFunc {
 		}
 		c.AddStatus(particleICDKey, 1.5*60, true)
 		if c.Core.Rand.Float64() < 0.5 {
-			c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Geo, c.ParticleDelay) // TODO: this used to be +20
+			c.Core.QueueParticle(c.Base.Key.String(), 1, attributes.Geo, c.ParticleDelay) // TODO: 以前は+20だった
 		}
 	}
 }

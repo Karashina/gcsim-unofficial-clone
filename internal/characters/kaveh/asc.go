@@ -22,7 +22,7 @@ func (c *char) a1() {
 	}
 	c.Core.Events.Subscribe(event.OnPlayerHit, func(args ...interface{}) bool {
 		char := args[0].(int)
-		// don't trigger if kaveh was not hit
+		// カヴェに命中しなければ発動しない
 		if char != c.Index {
 			return false
 		}

@@ -23,8 +23,8 @@ type Weapon struct {
 func (w *Weapon) SetIndex(idx int) { w.Index = idx }
 func (w *Weapon) Init() error      { return nil }
 
-// After the wielder is healed, ATK will be increased by 24/30/36/42/48% for 8s.
-// This can be triggered even when the character is not on the field.
+// 装備者が回復を受けた後、攻撃力が8秒間24/30/36/42/48%増加。
+// キャラクターがフィールドにいなくても発動可能。
 func NewWeapon(c *core.Core, char *character.CharWrapper, p info.WeaponProfile) (info.Weapon, error) {
 	w := &Weapon{}
 	r := p.Refine

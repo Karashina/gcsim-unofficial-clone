@@ -33,7 +33,7 @@ func (b *Bunny) HandleAttack(atk *combat.AttackEvent) float64 {
 	b.PoiseDMGCheck(atk)
 	b.ShatterCheck(atk)
 
-	//TODO: Check if sucrose E or faruzan E on Bunny is 25 dur or 50 dur
+	//TODO: スクロースEまたはファルザンEがバニーに対して25元素量か50元素量かを確認
 
 	if atk.Info.Durability > 0 {
 		atk.Info.Durability *= reactions.Durability(b.WillApplyEle(atk.Info.ICDTag, atk.Info.ICDGroup, atk.Info.ActorIndex))
@@ -58,9 +58,9 @@ func (b *Bunny) HandleAttack(atk *combat.AttackEvent) float64 {
 		}
 	}
 
-	// apply damage delay is only there to make sure aura gets applied at the end of current frame
-	// however because we can only hold cryo, we'll only call this if atk is cryo and there
-	// is durability left
+	// ダメージ遅延は現在のフレームの最後に元素オーラが付与されるようにするためのもの
+	// ただし氷のみ保持可能なため、攻撃が氷で
+	// 元素量の残りがある場合のみ呼び出す
 	if atk.Info.Element != attributes.Cryo {
 		return 0
 	}
@@ -77,7 +77,7 @@ func (b *Bunny) HandleAttack(atk *combat.AttackEvent) float64 {
 }
 
 func (b *Bunny) attachEle(atk *combat.AttackEvent) {
-	// check for ICD first
+	// まずICDをチェック
 	existing := b.Reactable.ActiveAuraString()
 	applied := atk.Info.Durability
 	b.AttachOrRefill(atk)
@@ -98,14 +98,14 @@ func (b *Bunny) attachEle(atk *combat.AttackEvent) {
 }
 
 func (b *Bunny) React(a *combat.AttackEvent) {
-	// only check the ones possible
+	// 可能なものだけチェック
 	switch a.Info.Element {
 	case attributes.Electro:
 		b.TryFrozenSuperconduct(a)
 		b.TrySuperconduct(a)
 	case attributes.Pyro:
 		b.TryMelt(a)
-	// Cryo cannot react because the only allowed aura is Cryo.
+	// 許可されるオーラが氷のみのため、氷は反応できない。
 	// case attributes.Cryo:
 	case attributes.Hydro:
 		b.TryFreeze(a)
@@ -120,7 +120,7 @@ func (b *Bunny) React(a *combat.AttackEvent) {
 }
 
 func (b *Bunny) Tick() {
-	// this is needed since gadget tick
+	// ガジェットのTickに必要
 	b.Gadget.Tick()
 	b.Reactable.Tick()
 }
@@ -128,9 +128,9 @@ func (b *Bunny) Tick() {
 func (c *char) makeBunny() *Bunny {
 	b := &Bunny{}
 
-	// Bunny is offset 1.3-1.5m in the Y direction for Tap E.
-	// TODO: Implement hold E for different distances
-	// TODO: Implement collision check for moving Baron Bunny off enemies and players
+	// バニーは単押しEでY方向に1.3～1.5mオフセットされる。
+	// TODO: 長押しEの異なる距離を実装する
+	// TODO: バロンバニーが敵やプレイヤーから離れる際の衝突判定を実装する
 	player := c.Core.Combat.Player()
 	bunnyPos := geometry.CalcOffsetPoint(
 		player.Pos(),
@@ -173,12 +173,12 @@ func (c *char) makeBunny() *Bunny {
 }
 
 func (b *Bunny) explode() {
-	// Explode
+	// 爆発
 	b.char.Core.Log.NewEvent("amber exploding bunny", glog.LogCharacterEvent, b.char.Index).
 		Write("src", b.Gadget.Src())
 	b.char.Core.QueueAttackEvent(b.ae, 1)
 
-	// remove self from list of bunnies
+	// バニーリストから自身を削除
 	for i := 0; i < len(b.char.bunnies); i++ {
 		if b.char.bunnies[i] == b {
 			b.char.bunnies = append(b.char.bunnies[:i], b.char.bunnies[i+1:]...)
@@ -201,17 +201,17 @@ func (c *char) makeParticleCB() combat.AttackCBFunc {
 }
 
 func (c *char) manualExplode() {
-	// do nothing if there are no bunnies
+	// バニーがいない場合は何もしない
 	if len(c.bunnies) == 0 {
 		c.Core.Log.NewEvent("Did not find any Bunnies", glog.LogCharacterEvent, c.Index)
 		return
 	}
-	// only explode the first bunny
+	// 最初のバニーのみ爆発させる
 	c.bunnies[0].ae.Info.Abil = manualExplosionAbil
 	c.bunnies[0].Kill()
 }
 
-// explode all bunnies on overload
+// 過負荷で全バニーを爆発させる
 func (c *char) overloadExplode() {
 	c.Core.Events.Subscribe(event.OnOverload, func(args ...interface{}) bool {
 		target := args[0].(*enemy.Enemy)
@@ -219,7 +219,7 @@ func (c *char) overloadExplode() {
 		if len(c.bunnies) == 0 {
 			return false
 		}
-		//TODO: only amber trigger?
+		//TODO: アンバーのみトリガー？
 		if atk.Info.ActorIndex != c.Index {
 			return false
 		}
@@ -229,7 +229,7 @@ func (c *char) overloadExplode() {
 		}
 
 		for _, v := range c.bunnies {
-			// OL is a radius 3 hit on the target
+			// 過負荷はターゲットに半径3のヒット
 
 			if v.IsWithinArea(combat.NewCircleHitOnTarget(target.Pos(), nil, 3)) {
 				v.ae.Info.Abil = manualExplosionAbil

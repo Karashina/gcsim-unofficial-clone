@@ -44,23 +44,23 @@ func init() {
 	skillFrames[1][action.ActionSwap] = 36
 
 	// skill (3rd) -> x
-	// TODO: missing counts for skill -> skill
+	// TODO: スキル→スキルのカウントが不足
 	skillFrames[2] = frames.InitAbilSlice(66)
 	skillFrames[2][action.ActionAttack] = 58
-	skillFrames[2][action.ActionSkill] = 57 // uses burst frames
+	skillFrames[2][action.ActionSkill] = 57 // 元素爆発フレームを使用
 	skillFrames[2][action.ActionBurst] = 57
 	skillFrames[2][action.ActionDash] = 47
 	skillFrames[2][action.ActionJump] = 48
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// reset counter
+	// カウンターをリセット
 	if !c.StatusIsActive(eWindowKey) {
 		c.eCounter = 0
 	}
 
-	// C6: After casting Searing Onslaught, the next 2 Normal Attacks within the
-	// next 6s will have their DMG and ATK SPD increased by 30%.
+	// 6凸: 逆焔の刃発動後、6秒以内の次の通常攻撃2回のダメージと
+	// 攻撃速度が30%アップ
 	if c.Base.Cons >= 6 {
 		c.c6Count = 0
 		m := make([]float64, attributes.EndStatType)
@@ -98,10 +98,10 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 
 	hitmark := skillHitmarks[c.eCounter]
 
-	// actual skill cd starts immediately on first cast
-	// times out after 4 seconds of not using
-	// every hit applies pyro
-	// apply attack speed
+	// 実際のスキルCDは初回発動時にすぐ開始
+	// 4秒間未使用でタイムアウト
+	// 毎ヒット炎元素を付与
+	// 攻撃速度を適用
 	ai := combat.AttackInfo{
 		ActorIndex:         c.Index,
 		Abil:               fmt.Sprintf("Searing Onslaught %v", c.eCounter),
@@ -133,26 +133,26 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}
 	c.Core.QueueAttack(ai, ap, hitmark, hitmark, c.particleCB)
 
-	// add a timer to activate c4
+	// 4凸を発動するタイマーを追加
 	if c.Base.Cons >= 4 {
 		c.Core.Tasks.Add(func() {
 			c.c4()
-		}, hitmark+120) // 2seconds after cast
+		}, hitmark+120) // 発動2秒後
 	}
 
-	// allow skill to be used again if 4s hasn't passed since last use
+	// 前回使用から4秒以内であれば再使用可能にする
 	c.AddStatus(eWindowKey, 4*60, true)
 
-	// store skill counter so we can determine which frames to return
+	// 返すフレームを決定するためにスキルカウンターを保存
 	idx := c.eCounter
 	c.eCounter++
 	switch c.eCounter {
 	case 1:
-		// TODO: cd delay?
-		// set cd on first use
+		// TODO: CDの遅延はあるか？
+		// 初回使用時にCDを設定
 		c.SetCD(action.ActionSkill, 10*60)
 	case 3:
-		// reset window since we're at 3rd use
+		// 3回目の使用なのでウィンドウをリセット
 		c.DeleteStatus(eWindowKey)
 		c.eCounter = 0
 	}
@@ -160,7 +160,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames[idx]),
 		AnimationLength: skillFrames[idx][action.InvalidAction],
-		CanQueueAfter:   skillFrames[idx][action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[idx][action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }

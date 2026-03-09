@@ -34,24 +34,24 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charge[c.TalentLvlAttack()],
 	}
 
-	// skip CA windup if we're in NA animation
+	// 通常攻撃アニメーション中の場合は重撃溜め時間をスキップ
 	windup := 0
 	if c.Core.Player.CurrentState() == action.NormalAttackState {
 		windup = 14
 	}
 
-	// starts at recorded hitmark and +1.65m in target direction
-	// moves at 11m/s, one attack every 0.15s (9f), so it moves at 11 * 0.15 = 1.65m per attack
-	// gets gated by special damage sequence (once every 0.5s)
+	// 記録されたヒットマークから開始し、ターゲット方向に+1.65m
+	// 11m/sで移動、0.15秒（9フレーム）ごとに1回攻撃、つまり1攻撃あたり11 * 0.15 = 1.65m移動
+	// 特殊ダメージシーケンスにより制限（0.5秒ごとに1回）
 	initialPos := c.Core.Combat.Player().Pos()
 	initialDirection := c.Core.Combat.Player().Direction()
 	for i := 0; i < 5; i++ {
 		nextPos := geometry.CalcOffsetPoint(initialPos, geometry.Point{Y: 1.65 * float64(i+1)}, initialDirection)
 		c.Core.QueueAttack(
 			ai,
-			// direction should stay the same because primary target pos can't change during this loop
+			// このループ中にプライマリターゲットの位置は変更できないため方向は同じはず
 			combat.NewBoxHit(c.Core.Combat.Player(), nextPos, nil, 2, 2),
-			0, // TODO: check snapshot delay
+			0, // TODO: スナップショット遅延を確認
 			chargeHitmark+(i*9)-windup,
 		)
 	}
@@ -59,7 +59,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          func(next action.Action) int { return chargeFrames[next] - windup },
 		AnimationLength: chargeFrames[action.InvalidAction] - windup,
-		CanQueueAfter:   chargeFrames[action.ActionDash] - windup, // earliest cancel is before hitmark
+		CanQueueAfter:   chargeFrames[action.ActionDash] - windup, // 最速キャンセルはヒットマークより前
 		State:           action.ChargeAttackState,
 	}, nil
 }

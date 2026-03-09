@@ -16,10 +16,10 @@ func init() {
 	core.RegisterWeaponFunc(keys.KeyOfKhajNisut, NewWeapon)
 }
 
-// HP increased by 20%. When an Elemental Skill hits opponents, you gain the Grand Hymn effect for 20s.
-// This effect increases the equipping character’s Elemental Mastery by 0.12% of their Max HP. This effect can trigger once every 0.3s.
-// Max 3 stacks. When this effect gains 3 stacks, or when the third stack’s duration is refreshed, the Elemental Mastery
-// of all nearby party members will be increased by 0.2% of the equipping character’s max HP for 20s.
+// HPが20%増加する。元素スキルが敵に命中した時、20秒間「大聖詠」効果を得る。
+// この効果は装備キャラの最大HPの0.12%分の元素熟知を増加させる。0.3秒毎に1回発動可能。
+// 最大3スタック。3スタック時、または3スタック目の持続時間が更新された時、
+// 近くのパーティメンバー全員の元素熟知が装備キャラの最大HPの0.2%分増20秒間増加する。
 type Weapon struct {
 	stacks int
 	Index  int

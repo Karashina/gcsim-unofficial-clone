@@ -37,10 +37,10 @@ func init() {
 
 	attackFrames[3] = frames.InitNormalCancelSlice(attackHitmarks[3][0], 57)
 	attackFrames[3][action.ActionDash] = 37
-	attackFrames[3][action.ActionCharge] = 500 // Illegal action; needs better handling
+	attackFrames[3][action.ActionCharge] = 500 // 不正なアクション; より良い処理が必要
 }
 
-// Normal attack implementation
+// 通常攻撃の実装
 func (c *char) Attack(p map[string]int) (action.Info, error) {
 	for i, mult := range attack[c.NormalCounter] {
 		ai := combat.AttackInfo{

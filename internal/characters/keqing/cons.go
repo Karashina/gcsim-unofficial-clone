@@ -12,9 +12,9 @@ import (
 
 const c2ICDKey = "keqing-c2-icd"
 
-// When Keqing's Normal and Charged Attacks hit opponents affected by Electro,
-// they have a 50% chance of producing an Elemental Particle.
-// This effect can only occur once every 5s.
+// 刻晴の通常攻撃と重撃が雷元素の影響を受けた敵に命中すると、
+// 50%の確率で元素粒子を生成する。
+// この効果は5秒ごとに1回のみ発動。
 func (c *char) makeC2CB() combat.AttackCBFunc {
 	if c.Base.Cons < 2 {
 		return nil
@@ -42,7 +42,7 @@ func (c *char) makeC2CB() combat.AttackCBFunc {
 }
 
 func (c *char) c4() {
-	//nolint:unparam // ignoring for now, event refactor should get rid of bool return of event sub
+	//nolint:unparam // 一時的に無視、イベントリファクタリングでイベントサブのbool戻り値は不要になる
 	cb := func(args ...interface{}) bool {
 		atk := args[1].(*combat.AttackEvent)
 		if atk.Info.ActorIndex != c.Index {

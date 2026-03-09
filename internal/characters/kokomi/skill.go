@@ -25,16 +25,16 @@ func init() {
 	skillFrames[action.ActionJump] = 29
 }
 
-// Skill handling - Handles primary damage instance
-// Deals Hydro DMG to surrounding opponents and heal nearby active characters once every 2s. This healing is based on Kokomi's Max HP.
+// 元素スキル処理 - 初回ダメージインスタンスを処理
+// 周囲の敵に水元素ダメージを与え、2秒ごとに付近のアクティブキャラクターを回復する。回復量は心海のHP上限に基づく。
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// skill duration is ~12.5s
-	// Plus 1 to avoid same frame issues with skill ticks
+	// スキル持続時間は約12.5秒
+	// +1で同一フレーム問題を回避
 	c.Core.Status.Add("kokomiskill", 12*60+30+1)
 
 	d := c.createSkillSnapshot()
 
-	// You get 1 tick immediately, then 1 tick every 2 seconds for a total of 7 ticks
+	// 即座に1Tick、その後2秒ごとに1Tickで合計7Tick
 	c.swapEarlyF = -1
 	c.skillLastUsed = c.Core.F
 	c.skillFlatDmg = c.burstDmgBonus(d.Info.AttackTag)
@@ -65,7 +65,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 	}
 }
 
-// Helper function since this needs to be created both on skill use and burst use
+// スキル使用時と爆発使用時の両方で作成が必要なためヘルパー関数化
 func (c *char) createSkillSnapshot() *combat.AttackEvent {
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
@@ -89,27 +89,26 @@ func (c *char) createSkillSnapshot() *combat.AttackEvent {
 	return &ae
 }
 
-// Helper function that handles damage, healing, and particle components of every tick of her E
+// 元素スキルの各Tickでダメージ・回復・粒子を処理するヘルパー関数
 func (c *char) skillTick(d *combat.AttackEvent) {
-	// check if skill has burst bonus snapshot
-	// snapshot is between 1st and 2nd tick
+	// スキルに爆発ボーナスのスナップショットがあるか確認
+	// スナップショットは1Tick目と2Tick目の間
 	if c.swapEarlyF > c.skillLastUsed && c.swapEarlyF < c.skillLastUsed+100 {
 		d.Info.FlatDmg = c.skillFlatDmg
 	} else {
 		d.Info.FlatDmg = c.burstDmgBonus(d.Info.AttackTag)
 	}
 
-	// handle damage
+	// ダメージ処理
 	c.Core.QueueAttackEvent(d, 0)
 
-	// handle healing
+	// 回復処理
 	if c.Core.Combat.Player().IsWithinArea(d.Pattern) {
 		maxhp := d.Snapshot.Stats.MaxHP()
 		src := skillHealPct[c.TalentLvlSkill()]*maxhp + skillHealFlat[c.TalentLvlSkill()]
 
-		// C2 handling
-		// Sangonomiya Kokomi gains the following Healing Bonuses with regard to characters with 50% or less HP via the following methods:
-		// Kurage's Oath Bake-Kurage: 4.5% of Kokomi's Max HP.
+		// 2凸: HP50%以下のキャラクターに対する化海月の回復ボーナス
+		// 化海月: 心海のHP上限の4.5%分。
 		if c.Base.Cons >= 2 {
 			active := c.Core.Player.ActiveChar()
 			if active.CurrentHPRatio() <= 0.5 {
@@ -130,8 +129,8 @@ func (c *char) skillTick(d *combat.AttackEvent) {
 	}
 }
 
-// Handles repeating skill damage ticks. Split into a separate function as you can only have 1 jellyfish on field at once
-// Skill snapshots, so inputs into the function are the originating snapshot
+// 繰り返しスキルダメージTickを処理。フィールド上に海月は1体のみのため別関数に分離
+// スキルはスナップショットするので、元のスナップショットを入力として受け取る
 func (c *char) skillTickTask(originalSnapshot *combat.AttackEvent, src int) func() {
 	return func() {
 		c.Core.Log.NewEvent("Skill Tick Debug", glog.LogCharacterEvent, c.Index).
@@ -142,7 +141,7 @@ func (c *char) skillTickTask(originalSnapshot *combat.AttackEvent, src int) func
 			return
 		}
 
-		// Basically stops "old" casts of E from working, and also stops further ticks from that source
+		// 古いスキル発動からのTickを停止し、そのソースからの追加Tickも防止
 		if c.skillLastUsed > src {
 			return
 		}

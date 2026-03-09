@@ -10,8 +10,8 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Implements Xiao C2:
-// When in the party and not on the field, Xiao's Energy Recharge is increased by 25%
+// 魉の2凸を実装:
+// パーティにいるがフィールドにいない時、元素チャージ効率+25%
 func (c *char) c2() {
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.ER] = 0.25
@@ -27,11 +27,11 @@ func (c *char) c2() {
 	})
 }
 
-// Implements Xiao C4:
-// When Xiao's HP falls below 50%, he gains a 100% DEF Bonus.
+// 魉の4凸を実装:
+// HPが50%以下の時、防御力+100%。
 func (c *char) c4() {
-	//TODO: in game this is actually a check every 0.3s. if hp is < 50% then buff is active until
-	// the next time check takes places
+	//TODO: ゲーム内では実際には0.3秒ごとのチェック。HPが50%未満ならバフ有効、
+	// 次のチェックまで継続
 	m := make([]float64, attributes.EndStatType)
 	m[attributes.DEFP] = 1
 	c.AddStatMod(character.StatMod{
@@ -48,9 +48,10 @@ func (c *char) c4() {
 
 const c6BuffKey = "xiao-c6"
 
-// Implements Xiao C6:
-// While under the effect of Bane of All Evil, hitting at least 2 opponents with Xiao's Plunge Attack will immediately grant him 1 charge of Lemniscatic Wind Cycling, and for the next 1s, he may use Lemniscatic Wind Cycling while ignoring its CD.
-// Adds an OnDamage event checker - if we record two or more instances of plunge damage, then activate C6
+// 魉の6凸を実装:
+// 「妞降」の効果中、落下攻撃で2体以上の敵に命中すると、即座に風輪両立のチャージを1得る。
+// その後1秒間、CDを無視して風輪両立を使用可能。
+// OnDamage イベントチェッカーを追加 - 落下攻撃ダメージが2回以上記録されたらC6を発動
 func (c *char) c6cb() combat.AttackCBFunc {
 	if c.Base.Cons < 6 {
 		return nil
@@ -69,7 +70,7 @@ func (c *char) c6cb() combat.AttackCBFunc {
 		c.c6Count++
 		if c.c6Count == 2 {
 			c.ResetActionCooldown(action.ActionSkill)
-			// 1.2s to cover 3 consecutive skills
+			// 連続3回のスキルをカバーするために1.2秒
 			c.AddStatus(c6BuffKey, 72, true)
 			c.Core.Log.NewEvent("Xiao C6 activated", glog.LogCharacterEvent, c.Index).
 				Write("new E charges", c.Tags["eCharge"]).

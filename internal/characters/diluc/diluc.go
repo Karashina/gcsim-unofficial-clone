@@ -67,19 +67,19 @@ func (c *char) Init() error {
 }
 
 func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
-	// check if it is possible to use next skill
+	// 次のスキルが使用可能かチェック
 	if a == action.ActionSkill && c.StatusIsActive(eWindowKey) {
 		return true, action.NoFailure
 	}
 	return c.Character.ActionReady(a, p)
 }
 
-// pyro infuse can't be overwritter
+// 炎元素付与は上書きされない
 func (c *char) Snapshot(ai *combat.AttackInfo) combat.Snapshot {
 	ds := c.Character.Snapshot(ai)
 
 	if c.StatusIsActive(burstBuffKey) {
-		// infusion to attacks only
+		// 攻撃にのみ付与
 		switch ai.AttackTag {
 		case attacks.AttackTagNormal:
 		case attacks.AttackTagPlunge:

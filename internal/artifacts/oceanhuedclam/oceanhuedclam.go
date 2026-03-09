@@ -30,23 +30,22 @@ type Set struct {
 func (s *Set) SetIndex(idx int) { s.Index = idx }
 func (s *Set) GetCount() int    { return s.Count }
 func (s *Set) Init() error {
-	// Shows which character currently has an active OHC proc. -1 = Non-active
+	// 現在OHC発動中のキャラクター。-1 = 非アクティブ
 	s.core.Flags.Custom["OHCActiveChar"] = -1
 	return nil
 }
 
-// 2-Piece Bonus: Healing Bonus +15%
-// 4-Piece Bonus: When the character equipping this artifact set heals a character in the party,
-// a Sea-Dyed Foam will appear for 3 seconds, accumulating the amount of HP recovered from healing (including overflow healing).
-// At the end of the duration, the Sea-Dyed Foam will explode, dealing DMG to nearby opponents based on 90% of the accumulated
-// healing.
+// 2セット効果: 与える治療効果 +15%
+// 4セット効果: この聖遺物セットを装備したキャラがパーティメンバーを回復すると、
+// 海染の泡が3秒間出現し、回復量（超過回復含む）を蓄積。
+// 持続時間終了時、海染の泡が爆発し、蓄積された回復量の90%に基づくダメージを周囲の敵に与える。
 
-// (This DMG is calculated similarly to Reactions such as Electro-Charged, and Superconduct, but it is not affected by
-// Elemental Mastery, Character Levels, or Reaction DMG Bonuses).
+// （このダメージは感電、超伝導等の反応と同様に計算されるが、
+// 元素熟知、キャラクターレベル、反応ダメージボーナスの影響を受けない）。
 //
-//		Only one Sea-Dyed Foam can be produced every 3.5 seconds. Each Sea-Dyed Foam can accumulate up to 30,000 HP (including
-//	 overflow healing). There can be no more than one Sea-Dyed Foam active at any given time.
-//		This effect can still be triggered even when the character who is using this artifact set is not on the field.
+//		海染の泡は3.5秒に1個のみ生成可能。各海染の泡は最大30,000HPまで蓄積可能
+//	 （超過回復含む）。同時に存在できる海染の泡は1個まで。
+//		この効果は装備キャラがフィールド上にいなくても発動可能。
 func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[string]int) (info.Set, error) {
 	s := Set{
 		core:  c,
@@ -67,7 +66,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 	if count >= 4 {
 		bubbleICDExpiry := 0
 
-		// On Heal subscription to start accumulating the healing
+		// 回復イベント登録で回復量の蓄積を開始
 		c.Events.Subscribe(event.OnHeal, func(args ...interface{}) bool {
 			src := args[0].(*info.HealInfo)
 			healAmt := args[4].(float64)
@@ -76,7 +75,7 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 				return false
 			}
 
-			// OHC must either be inactive or this equipped character has to have an OHC bubble active
+			// OHCが非アクティブ、またはこの装備キャラのOHCバブルがアクティブである必要がある
 			if c.Flags.Custom["OHCActiveChar"] != -1 && c.Flags.Custom["OHCActiveChar"] != float64(char.Index) {
 				return false
 			}
@@ -86,16 +85,16 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 				s.bubbleHealStacks = 30000
 			}
 
-			// Activate bubble if this character's bubble is off CD, and add the bubble pop task
+			// このキャラのバブルCDが明けていればバブルを有効化し、バブル破裂タスクを追加
 			if bubbleICDExpiry < c.F {
 				s.bubbleDurationExpiry = c.F + 3*60
 				bubbleICDExpiry = c.F + 3.5*60
 
 				c.Flags.Custom["OHCActiveChar"] = float64(char.Index)
 
-				// Bubble pop task
+				// バブル破裂タスク
 				c.Tasks.Add(func() {
-					// Bubble is physical damage. This is handled in the reaction damage function, so it is not affected by physical dmg bonus/enemy defense
+					// 泡は物理ダメージ。反応ダメージ関数で処理されるため、物理ダメージボーナスや敵の防御の影響を受けない
 					// d := c.Snapshot(
 					// 	"OHC Damage",
 					// 	core.AttackTagNone,
@@ -122,10 +121,10 @@ func NewSet(c *core.Core, char *character.CharWrapper, count int, param map[stri
 						IgnoreDefPercent: 1,
 						FlatDmg:          s.bubbleHealStacks * .9,
 					}
-					// snapshot -1 since we don't need stats
+					// ステータス不要のため-1でスナップショット
 					c.QueueAttack(atk, combat.NewCircleHitOnTarget(c.Combat.Player(), nil, 6), -1, 1)
 
-					// Reset
+					// リセット
 					c.Flags.Custom["OHCActiveChar"] = -1
 					s.bubbleHealStacks = 0
 				}, 3*60)

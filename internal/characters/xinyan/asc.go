@@ -8,11 +8,11 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// Decreases the number of opponents Sweeping Fervor must hit to trigger each level of shielding.
+// 情熱伝導が各レベルのシールドを発動するために必要な敵の数を減少させる。
 //
-// - Shield Level 2: Lead-In requirement reduced to 1 opponent hit.
+// - シールドレベル2: 導入の必要数が敵1体に減少。
 //
-// - Shield Level 3: Rave requirement reduced to 2 opponents hit or more.
+// - シールドレベル3: 熱狂の必要数が敵2体以上に減少。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
@@ -21,7 +21,7 @@ func (c *char) a1() {
 	c.shieldLevel3Requirement -= 1
 }
 
-// Characters shielded by Sweeping Fervor deal 15% increased Physical DMG.
+// 情熱伝導のシールドで保護されたキャラクターの物理ダメージが15%増加する。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return

@@ -22,12 +22,12 @@ const aimedBarbHitmark = 32
 func init() {
 	aimedFrames = make([][]int, 2)
 
-	// Aimed Shot
+	// 狙い撃ち
 	aimedFrames[0] = frames.InitAbilSlice(25)
 	aimedFrames[0][action.ActionDash] = aimedHitmarks[0]
 	aimedFrames[0][action.ActionJump] = aimedHitmarks[0]
 
-	// Fully-Charged Aimed Shot
+	// フルチャージ狙い撃ち
 	aimedFrames[1] = frames.InitAbilSlice(96)
 	aimedFrames[1][action.ActionDash] = aimedHitmarks[1]
 	aimedFrames[1][action.ActionJump] = aimedHitmarks[1]
@@ -38,7 +38,7 @@ func init() {
 	aimedBarbFrames[action.ActionJump] = aimedBarbHitmark
 }
 
-// Aimed charge attack damage queue generator
+// 狙い撃ち重撃のダメージキュー生成
 func (c *char) Aimed(p map[string]int) (action.Info, error) {
 	hold, ok := p["hold"]
 	if !ok {

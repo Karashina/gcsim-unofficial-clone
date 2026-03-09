@@ -15,34 +15,34 @@ func (r *Reactable) TryOverload(a *combat.AttackEvent) bool {
 	var consumed reactions.Durability
 	switch a.Info.Element {
 	case attributes.Electro:
-		// must have pyro; pyro cant coexist (for now) so ok to ignore count?
+		// 炎が必要；炎は共存できない（今のところ）ので数を無視してOK？
 		if r.Durability[Pyro] < ZeroDur && r.Durability[Burning] < ZeroDur {
 			return false
 		}
-		// reduce; either gone or left; don't care how much actually reacted
+		// 元素量を減少；なくなるか残るか；実際に反応した量は気にしない
 		consumed = r.reduce(attributes.Pyro, a.Info.Durability, 1)
 		r.burningCheck()
 	case attributes.Pyro:
-		// must have electro; gotta be careful with ec?
+		// 雷が必要；感電反応に注意？
 		if r.Durability[Electro] < ZeroDur {
 			return false
 		}
 		consumed = r.reduce(attributes.Electro, a.Info.Durability, 1)
 	default:
-		// should be here
+		// ここにあるべき
 		return false
 	}
 	a.Info.Durability -= consumed
 	a.Info.Durability = max(a.Info.Durability, 0)
 	a.Reacted = true
 
-	// trigger event before attack is queued. this gives time for other actions to modify it
+	// 攻撃がキューされる前にイベントを発動。他のアクションが修正する時間を与える
 	r.core.Events.Emit(event.OnOverload, r.self, a)
 
-	// 0.1s gcd on overload attack
+	// 過負荷攻撃の0.1秒GCD
 	if !(r.overloadGCD != -1 && r.core.F < r.overloadGCD) {
 		r.overloadGCD = r.core.F + 0.1*60
-		// trigger an overload attack
+		// 過負荷攻撃を発動
 		atk := combat.AttackInfo{
 			ActorIndex:       a.Info.ActorIndex,
 			DamageSrc:        r.self.Key(),

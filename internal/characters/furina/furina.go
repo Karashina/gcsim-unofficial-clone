@@ -96,7 +96,7 @@ func (c *char) Condition(fields []string) (any, error) {
 }
 
 func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]int) error {
-	// can use charge without attack beforehand unlike most of the other sword users
+	// 他の片手剣キャラとは異なり、攻撃を先行入力せずに重撃を使用可能
 	if a == action.ActionCharge {
 		return nil
 	}

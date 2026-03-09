@@ -14,8 +14,8 @@ const c2Key = "gaming-c2"
 const c4Key = "gaming-c4"
 const c6Key = "gaming-c6"
 
-// When the Suanni Man Chai from Suanni's Gilded Dance meets back up with Gaming,
-// it will heal 15% of Gaming's HP.
+// 獣神金舞の獣神マンチャイが嘉明のもとに戻ったとき、
+// 嘉明のHPの15%を回復する。
 func (c *char) c1() {
 	if c.Base.Cons < 1 {
 		return
@@ -31,8 +31,8 @@ func (c *char) c1() {
 	})
 }
 
-// When Gaming receives healing and this instance of healing overflows,
-// his ATK will be increased by 20% for 5s.
+// 嘉明が治療を受けた際、その治療が超過回復した場合、
+// 攻撃力+20%、5秒間。
 func (c *char) c2() {
 	if c.Base.Cons < 2 {
 		return
@@ -64,8 +64,8 @@ func (c *char) c2() {
 	}, c2Key+"-on-heal")
 }
 
-// When Bestial Ascent's Plunging Attack: Charmed Cloudstrider hits an opponent,
-// it will restore 2 Energy to Gaming. This effect can be triggered once every 0.2s.
+// 百獣郡舞の落下攻撃・祥雲の幸矢が敵に命中すると、
+// 嘉明の元素エネルギーを2回復。この効果は0.2秒ごとに1回発動可能。
 func (c *char) makeC4CB() combat.AttackCBFunc {
 	if c.Base.Cons < 4 {
 		return nil
@@ -82,8 +82,8 @@ func (c *char) makeC4CB() combat.AttackCBFunc {
 	}
 }
 
-// Bestial Ascent's Plunging Attack: Charmed Cloudstrider CRIT Rate increased by 20% and CRIT DMG increased by 40%,
-// and its attack radius will be increased.
+// 百獣郡舞の落下攻撃・祥雲の幸矢の会心率+20%、会心ダメージ+40%、
+// 攻撃範囲が拡大される。
 func (c *char) c6() {
 	if c.Base.Cons < 6 {
 		c.specialPlungeRadius = 4

@@ -7,7 +7,7 @@ import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/modifier"
 )
 
-// A0: Adds base reaction bonus mod for all characters
+// A0: 全キャラクターに基本反応ボーナスモディファイアを追加
 func (c *char) a0() {
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatus("LC-Key", -1, false)
@@ -21,14 +21,14 @@ func (c *char) a0() {
 	}
 }
 
-// A1
-// When the moonsign is Moonsign: Ascendant Gleam, Lunar-Charged reactions triggered by Flins will deal an additional 20% DMG.
+// 固有天賦1
+// ムーンサインが「ムーンサイン: 昇詼の輝き」の場合、Flinsが発動するルナチャージ反応のダメージが追加で20%増加する。
 func (c *char) a1() {
 	if c.Base.Ascension < 1 {
 		return
 	}
 	if c.MoonsignAscendant {
-		// Moonsign: Ascendant Gleam
+		// ムーンサイン: 昇詼の輝き
 		c.AddLCReactBonusMod(character.LCReactBonusMod{
 			Base: modifier.NewBase("Symphony of Winter (A1)", -1),
 			Amount: func(ai combat.AttackInfo) (float64, bool) {
@@ -38,9 +38,9 @@ func (c *char) a1() {
 	}
 }
 
-// A4
-// Flins's Elemental Mastery is increased by 8% of his ATK. The maximum increase obtainable this way is 160.
-// C4 changes this: Flins's Elemental Mastery is increased by 10% of his ATK. The maximum increase obtainable this way is 220.
+// 固有天賦2
+// Flinsの元素熟知が攻撃力の8%分増加する。この方法で得られる最大増加量は160。
+// 4命ノ星座で変更: Flinsの元素熟知が攻撃力の10%分増加する。この方法で得られる最大増加量は220。
 func (c *char) a4() {
 	if c.Base.Ascension < 4 {
 		return
@@ -52,10 +52,10 @@ func (c *char) a4() {
 		Amount: func() ([]float64, bool) {
 			m := make([]float64, attributes.EndStatType)
 			if c.Base.Cons >= 4 {
-				// C4: 10% of ATK, max 220
+				// 4命ノ星座: 攻撃力の10%, 最大220
 				m[attributes.EM] = min(220, c.TotalAtk()*0.10)
 			} else {
-				// Base A4: 8% of ATK, max 160
+				// 基本固有天賢4: 攻撃力の8%, 最大160
 				m[attributes.EM] = min(160, c.TotalAtk()*0.08)
 			}
 			return m, true

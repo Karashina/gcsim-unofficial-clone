@@ -47,9 +47,9 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		c.a1OnExplosion()
 	}, delay)
 
-	// start skill buff on cast
+	// 発動時にスキルバフを開始
 	c.AddStatus(skillBuffKey, 6*60, true)
-	// figure out atk buff
+	// 攻撃バフを算出
 	if c.Base.Cons >= 6 {
 		c.c6Ready = true
 	}
@@ -58,7 +58,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillFrames),
 		AnimationLength: skillFrames[action.InvalidAction],
-		CanQueueAfter:   skillFrames[action.ActionDash], // earliest cancel
+		CanQueueAfter:   skillFrames[action.ActionDash], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -76,7 +76,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 	if c.Core.Rand.Float64() < 0.5 {
 		count = 2
 	}
-	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Hydro, c.ParticleDelay) // TODO: this used to be 80 for particle delay
+	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Hydro, c.ParticleDelay) // TODO: 以前は粒子遅延80だった
 }
 
 func (c *char) skillStacks(ac combat.AttackCB) {
@@ -89,15 +89,15 @@ func (c *char) skillStacks(ac combat.AttackCB) {
 
 func (c *char) onExitField() {
 	c.Core.Events.Subscribe(event.OnCharacterSwap, func(args ...interface{}) bool {
-		// do nothing if previous char wasn't ayato
+		// 前のキャラが綾人でなければ何もしない
 		prev := args[0].(int)
 		if prev != c.Index {
 			return false
 		}
-		// clear skill status on field exit
+		// フィールド退場時にスキルステータスをクリア
 		c.stacks = 0
 		c.DeleteStatus(skillBuffKey)
-		// queue up a4
+		// 固有天賣2をキュー
 		c.Core.Tasks.Add(c.a4, 60)
 		return false
 	}, "ayato-exit")

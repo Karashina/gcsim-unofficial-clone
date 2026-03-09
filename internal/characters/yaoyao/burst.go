@@ -28,9 +28,9 @@ func init() {
 }
 
 func (c *char) Burst(p map[string]int) (action.Info, error) {
-	// add cooldown to sim
+	// シミュレーションにクールダウンを追加
 	c.SetCD(action.ActionBurst, 20*60)
-	// use up energy
+	// エネルギーを消費
 	c.ConsumeEnergy(7)
 
 	burstAI := combat.AttackInfo{
@@ -64,7 +64,7 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames),
 		AnimationLength: burstFrames[action.InvalidAction],
-		CanQueueAfter:   burstFrames[action.ActionSwap], // earliest cancel
+		CanQueueAfter:   burstFrames[action.ActionSwap], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -92,7 +92,7 @@ func (c *char) onExitField() {
 
 func (c *char) removeBurst() {
 	c.DeleteStatus(burstKey)
-	// remove all jumping yuegui
+	// ジャンプ中の全ての月桂を削除
 	for i, yg := range c.yueguiJumping {
 		if yg != nil {
 			yg.Kill()

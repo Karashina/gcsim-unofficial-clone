@@ -43,19 +43,19 @@ func (s *Simulation) CharacterDetails() []*model.Character {
 		out[i] = char
 	}
 
-	// grab a snapshot for each char
+	// 各キャラクターのスナップショットを取得
 	for i, c := range s.C.Player.Chars() {
 		snap := c.Snapshot(&combat.AttackInfo{
 			Abil:      "stats-check",
 			AttackTag: attacks.AttackTagNone,
 		})
 
-		// Store base stats before calculation
+		// 計算前に基礎ステータスを保存
 		out[i].BaseHP = snap.Stats[attributes.BaseHP]
 		out[i].BaseATK = snap.Stats[attributes.BaseATK]
 		out[i].BaseDEF = snap.Stats[attributes.BaseDEF]
 
-		// Calculate and store final stats at simulation start
+		// シミュレーション開始時に最終ステータスを計算・保存
 		out[i].FinalHP = snap.Stats.MaxHP()
 		out[i].FinalATK = snap.Stats.TotalATK()
 		out[i].FinalDEF = snap.Stats.TotalDEF()
@@ -64,7 +64,7 @@ func (s *Simulation) CharacterDetails() []*model.Character {
 		out[i].FinalCD = snap.Stats[attributes.CD]
 		out[i].FinalER = snap.Stats[attributes.ER]
 
-		// convert all atk%, def% and hp% into flat amounts by tacking on base
+		// 全ての攻撃力%、防御力%、HP%を基礎値を加えて実数に変換
 		snap.Stats[attributes.HP] = snap.Stats.MaxHP()
 		snap.Stats[attributes.DEF] = snap.Stats.TotalDEF()
 		snap.Stats[attributes.ATK] = snap.Stats.TotalATK()

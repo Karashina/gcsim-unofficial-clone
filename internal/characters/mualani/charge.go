@@ -14,7 +14,7 @@ var chargeFrames []int
 const shortChargeHitmark = 71
 
 func init() {
-	chargeFrames = frames.InitAbilSlice(100) // walk
+	chargeFrames = frames.InitAbilSlice(100) // 歩行
 	chargeFrames[action.ActionAttack] = 73
 	chargeFrames[action.ActionCharge] = 85
 	chargeFrames[action.ActionSkill] = 72
@@ -25,7 +25,7 @@ func init() {
 }
 
 func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
-	// there is a windup out of dash/jump/walk/swap. Otherwise it is rolled into the Q/E/CA/NA -> CA frames
+	// ダッシュ/ジャンプ/歩行/交代からの開始にはウィンドアップがある。それ以外はQ/E/CA/NA -> CAフレームに含まれる
 	windup := 0
 	switch c.Core.Player.CurrentState() {
 	case action.Idle, action.DashState, action.JumpState, action.WalkState, action.SwapState:
@@ -43,7 +43,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		Mult:       charge[c.TalentLvlAttack()],
 	}
 	ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), geometry.Point{Y: 1}, 3.5)
-	// TODO: Not sure of snapshot timing
+	// TODO: スナップショットのタイミングが不明
 	c.Core.QueueAttack(
 		ai,
 		ap,

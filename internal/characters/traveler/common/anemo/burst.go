@@ -15,14 +15,14 @@ var burstFrames [][]int
 func init() {
 	burstFrames = make([][]int, 2)
 
-	// Male
+	// 男性
 	burstFrames[0] = frames.InitAbilSlice(110) // Q -> N1
 	burstFrames[0][action.ActionSkill] = 109   // Q -> E
 	burstFrames[0][action.ActionDash] = 96     // Q -> D
 	burstFrames[0][action.ActionJump] = 96     // Q -> J
 	burstFrames[0][action.ActionSwap] = 100    // Q -> Swap
 
-	// Female
+	// 女性
 	burstFrames[1] = frames.InitAbilSlice(105) // Q -> N1
 	burstFrames[1][action.ActionSkill] = 104   // Q -> E
 	burstFrames[1][action.ActionDash] = 90     // Q -> D
@@ -31,8 +31,8 @@ func init() {
 }
 
 func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
-	// first hit at 94, then 30 frames between hits. 9 anemo hits total
-	// yes the game description scams you on the duration
+	// 最初のヒットは94f、以降30f間隔。風元素9ヒット合計
+	// ゲーム内の説明は持続時間について不正確
 	duration := burstHitmarks[c.gender] + 30*8
 
 	c.Core.Status.Add("amcburst", duration)
@@ -87,7 +87,7 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 				}
 				c.Core.QueueAttackWithSnap(aiAbs, snapAbs, apAbs, 0, cbAbs)
 			}
-			// check if infused
+			// 元素吸収されたかチェック
 		}, 94+30*i)
 	}
 
@@ -96,11 +96,11 @@ func (c *Traveler) Burst(p map[string]int) (action.Info, error) {
 	c.SetCD(action.ActionBurst, 15*60)
 	c.ConsumeEnergy(3)
 
-	// TODO: Fill these out later
+	// TODO: 後で記入する
 	return action.Info{
 		Frames:          frames.NewAbilFunc(burstFrames[c.gender]),
 		AnimationLength: burstFrames[c.gender][action.InvalidAction],
-		CanQueueAfter:   burstFrames[c.gender][action.ActionDash], // earliest cancel
+		CanQueueAfter:   burstFrames[c.gender][action.ActionDash], // 最速キャンセル
 		State:           action.BurstState,
 	}, nil
 }
@@ -121,7 +121,7 @@ func (c *Traveler) absorbCheckQ(src, count, maxcount int) func() {
 		case attributes.Hydro:
 			c.qICDTag = attacks.ICDTagElementalBurstHydro
 		case attributes.NoElement:
-			// otherwise queue up
+			// それ以外はキューに追加
 			c.Core.Tasks.Add(c.absorbCheckQ(src, count+1, maxcount), 18)
 		}
 	}

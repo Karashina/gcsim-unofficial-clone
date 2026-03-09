@@ -31,7 +31,7 @@ type ChargeState struct {
 }
 
 func init() {
-	// dash/jump/swap cancels are in frames func
+	// ダッシュ/ジャンプ/交代キャンセルはframes funcに含まれる
 	// charge -> x
 	chargeFrames = frames.InitAbilSlice(108) // CA
 	chargeFrames[action.ActionAttack] = 106
@@ -80,7 +80,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 	}
 	hitmark := chargeHitmarks[hitIndex]
 
-	var spinFrames, transFrames int // transition frames for spin -> final
+	var spinFrames, transFrames int // スピンからフィニッシュへの遷移フレーム
 	if c.caState.StartF != 0 && final {
 		transFrames = chargeFinalDelay[(c.caState.Counter-1)%chargeHitNum]
 	} else if !final {
@@ -140,7 +140,7 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
 		}, windup)
 	}
 
-	// FIXME: doing 0f attack from action queue results in applied(anim) hitlag being 1f short. wrap it in c.Core.Tasks.Add(func() { ... }, 0) for now
+	// FIXME: アクションキューからの0fの攻撃はapplied(anim)ヒットラグが1fの不足になる。現時点ではc.Core.Tasks.Add(func() { ... }, 0)でラップ
 	act.QueueAction(func() {
 		c.Core.Tasks.Add(func() { c.queueChargeAttack(hitIndex) }, 0)
 	}, windup+hitmark)

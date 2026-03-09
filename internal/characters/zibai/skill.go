@@ -27,18 +27,18 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// If already in Lunar Phase Shift mode and have enough radiance, use Spirit Steed's Stride
+	// 既に月相転移モード中で十分な輝度がある場合、神馬駆けを使用
 	if c.lunarPhaseShiftActive && c.phaseShiftRadiance >= spiritSteedRadianceCost {
 		return c.spiritSteedStride(p)
 	}
 
-	// Enter Lunar Phase Shift mode
+	// 月相転移モードに入る
 	c.enterLunarPhaseShift()
 
 	c.Core.Log.NewEvent("Zibai enters Lunar Phase Shift mode", glog.LogCharacterEvent, c.Index).
 		Write("duration", lunarPhaseShiftDuration)
 
-	// Set cooldown (18s)
+	// クールダウンを設定（18秒）
 	c.SetCDWithDelay(action.ActionSkill, 18*60, skillHitmark)
 
 	return action.Info{
@@ -49,16 +49,16 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// enterLunarPhaseShift activates the Lunar Phase Shift mode
+// enterLunarPhaseShift は月相転移モードを発動する
 func (c *char) enterLunarPhaseShift() {
 	c.lunarPhaseShiftActive = true
 	src := c.Core.F
 	c.lunarPhaseShiftSrc = src
 
-	// C1: Immediately gain 100 Phase Shift Radiance
+	// 1凸: 即座に月相転移輝度100を獲得
 	if c.Base.Cons >= 1 {
 		c.phaseShiftRadiance = 100
-		c.c1FirstStride = true // First stride gets bonus
+		c.c1FirstStride = true // 初回ストライドにボーナス
 	} else {
 		c.phaseShiftRadiance = 0
 	}
@@ -66,19 +66,19 @@ func (c *char) enterLunarPhaseShift() {
 	c.spiritSteedUsages = 0
 	c.AddStatus(skillKey, lunarPhaseShiftDuration, true)
 
-	// Start periodic radiance gain from methods
+	// メソッドから定期的な輝度獲得を開始
 	c.startRadianceAccumulation(src)
 
-	// Schedule mode exit (with source check so burst extension can invalidate)
+	// モード終了をスケジュール（元素爆発延長が無効化できるようにソースチェック付き）
 	c.QueueCharTask(func() {
 		if c.lunarPhaseShiftSrc != src {
-			return // invalidated by extension
+			return // 延長により無効化
 		}
 		c.exitLunarPhaseShift()
 	}, lunarPhaseShiftDuration)
 }
 
-// exitLunarPhaseShift deactivates the Lunar Phase Shift mode
+// exitLunarPhaseShift は月相転移モードを終了する
 func (c *char) exitLunarPhaseShift() {
 	if !c.lunarPhaseShiftActive {
 		return
@@ -88,7 +88,7 @@ func (c *char) exitLunarPhaseShift() {
 	c.phaseShiftRadiance = 0
 	c.spiritSteedUsages = 0
 	c.c1FirstStride = false
-	// Reset saved normal counter if C4 is not active
+	// 4凸がない場合、保存された通常攻撃カウンターをリセット
 	if c.Base.Cons < 4 {
 		c.savedNormalCounter = 0
 	}
@@ -99,14 +99,14 @@ func (c *char) exitLunarPhaseShift() {
 	c.Core.Log.NewEvent("Zibai exits Lunar Phase Shift mode", glog.LogCharacterEvent, c.Index)
 }
 
-// extendLunarPhaseShift extends the duration of Lunar Phase Shift by specified frames
+// extendLunarPhaseShift は月相転移の持続時間を指定フレーム分延長する
 func (c *char) extendLunarPhaseShift(extensionFrames int) {
 	if !c.lunarPhaseShiftActive {
 		return
 	}
 	c.ExtendStatus(skillKey, extensionFrames)
 
-	// Reschedule exit task: update source to invalidate old exit, then queue new one
+	// 終了タスクを再スケジュール: 古い終了を無効化するためにソースを更新し、新しいタスクをキューに追加
 	src := c.Core.F
 	c.lunarPhaseShiftSrc = src
 	c.startRadianceAccumulation(src)
@@ -114,7 +114,7 @@ func (c *char) extendLunarPhaseShift(extensionFrames int) {
 	remaining := c.StatusDuration(skillKey)
 	c.QueueCharTask(func() {
 		if c.lunarPhaseShiftSrc != src {
-			return // invalidated by another extension
+			return // 別の延長により無効化
 		}
 		c.exitLunarPhaseShift()
 	}, remaining)
@@ -124,19 +124,19 @@ func (c *char) extendLunarPhaseShift(extensionFrames int) {
 		Write("remaining_frames", remaining)
 }
 
-// spiritSteedStride performs the Spirit Steed's Stride attack
+// spiritSteedStride は神馬駆け攻撃を実行する
 func (c *char) spiritSteedStride(p map[string]int) (action.Info, error) {
-	// C6: Consume all radiance for bonus damage
+	// 6凸: 全輝度を消費してボーナスダメージ
 	consumedRadiance := c.phaseShiftRadiance
 	var c6BonusPct float64 = 0
 
 	if c.Base.Cons >= 6 && consumedRadiance > 70 {
-		// 1.6% per point above 70
+		// 70を超えた1ポイントにつき1.6%
 		c6BonusPct = float64(consumedRadiance-70) * 0.016
 		c.applyC6ElevationBuff(c6BonusPct)
 	}
 
-	// Consume radiance (C6 consumes all, otherwise 70)
+	// 輝度を消費（6凸は全消費、それ以外は70）
 	if c.Base.Cons >= 6 {
 		c.phaseShiftRadiance = 0
 	} else {
@@ -145,7 +145,7 @@ func (c *char) spiritSteedStride(p map[string]int) (action.Info, error) {
 	c.spiritSteedUsages++
 	c.DeleteStatus(radianceLCrsICDKey)
 
-	// 1st Hit DMG
+	// 1段目ダメージ
 	ai1 := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Spirit Steed's Stride 1-Hit",
@@ -165,7 +165,7 @@ func (c *char) spiritSteedStride(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttack(ai1, ap1, 0, 0, c.spiritSteedOnHitCB)
 	}, spiritSteedHitmark1)
 
-	// Calculate 2nd hit multiplier with bonuses
+	// 2段目ヒットの倍率をボーナス込みで計算
 	secondHitMult := 1.6 * spiritSteedStride_2[c.TalentLvlSkill()]
 
 	ai2 := combat.AttackInfo{
@@ -180,22 +180,22 @@ func (c *char) spiritSteedStride(p map[string]int) (action.Info, error) {
 		IgnoreDefPercent: 1,
 	}
 
-	// C1: First Spirit Steed's Stride 2nd-hit is increased by 220%
+	// 1凸: 初回神馬駆けの2段目が220%増加
 	c1bonus := 0.0
 	if c.c1FirstStride {
 		c1bonus = 2.2
 		c.c1FirstStride = false
 	}
 
-	// HP scaling with Lunar-Crystallize formula
+	// Lunar-Crystallize式による防御力スケーリング
 	em := c.Stat(attributes.EM)
 	baseDmg := c.TotalDef(false) * secondHitMult
 	emBonus := (6 * em) / (2000 + em)
 	ai2.FlatDmg = baseDmg * (1 + c.LCrsBaseReactBonus(ai2) + c1bonus) * (1 + emBonus + c.LCrsReactBonus(ai2))
 
-	// A1: Selenic Descent effect - increases 2nd hit by 60% DEF
-	// C2: When Moonsign is Ascendant Gleam, A1 is further increased by 550% DEF
-	// (Additional flat damage, handled in asc.go)
+	// 固有天賦1: Selenic Descent効果 - 2段目を防御力の60%分増加
+	// 2凸: 月相がAscendant Gleamの時、固有天賦1がさらに防御力の550%増加
+	// （追加固定ダメージ、asc.goで処理）
 	if c.StatusIsActive(selenicDescentKey) {
 		if c.Base.Cons >= 2 && c.isMoonsignAscendant() {
 			ai2.FlatDmg += 5.5 * c.TotalDef(false)
@@ -220,11 +220,11 @@ func (c *char) spiritSteedStride(p map[string]int) (action.Info, error) {
 		Write("usages", c.spiritSteedUsages).
 		Write("c6_bonus_pct", c6BonusPct)
 
-	// Spec: Exit Lunar Phase Shift after 4 uses (C0) or max uses (C1: 5)
+	// 仕様: 4回使用（無凸）または最大使用回数（1凸: 5回）後に月相転移を終了
 	if c.spiritSteedUsages >= c.maxSpiritSteedUsages {
 		c.QueueCharTask(func() {
 			c.exitLunarPhaseShift()
-		}, spiritSteedHitmark2+1) // Exit after 2nd hit lands
+		}, spiritSteedHitmark2+1) // 2段目の着弾後に終了
 	}
 
 	return action.Info{
@@ -235,12 +235,12 @@ func (c *char) spiritSteedStride(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// spiritSteedOnHitCB callback for Spirit Steed's Stride hit
+// spiritSteedOnHitCB は神馬駆けの命中時コールバック
 func (c *char) spiritSteedOnHitCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return
 	}
-	// C4: Gain Scattermoon Splendor effect
+	// 4凸: Scattermoon Splendor効果を獲得
 	if c.Base.Cons >= 4 {
 		c.c4ScattermoonUsed = true
 	}
@@ -260,9 +260,9 @@ func (c *char) initRadianceHandlers() {
 	}, "zibai-radiance-lcrs")
 }
 
-// startRadianceAccumulation starts periodic radiance accumulation
+// startRadianceAccumulation は定期的な輝度蓄積を開始する
 func (c *char) startRadianceAccumulation(src int) {
-	// Gain radiance over time
+	// 時間経過で輝度を獲得
 	c.QueueCharTask(func() {
 		if c.lunarPhaseShiftSrc != src {
 			return
@@ -275,7 +275,7 @@ func (c *char) startRadianceAccumulation(src int) {
 	}, radianceTickInterval)
 }
 
-// particleCB handles particle generation
+// particleCBは粒子生成を処理
 func (c *char) particleCB(a combat.AttackCB) {
 	if a.Target.Type() != targets.TargettableEnemy {
 		return

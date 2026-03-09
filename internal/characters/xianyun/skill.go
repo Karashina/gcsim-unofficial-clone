@@ -19,7 +19,7 @@ const (
 
 	skillStateKey = "cloud-transmogrification"
 
-	// TODO: Find skill hitbox. Currently assuming the skill hitbox is the same size as the plunge collision hitbox
+	// TODO: スキルの判定範囲を調査。現在は落下攻撃の衝突判定と同じサイズと仮定
 	skillRadius = 1.5
 
 	particleCount  = 5
@@ -63,7 +63,7 @@ func init() {
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// Check for first leap
+	// 最初の跳躍を確認
 	if !c.StatusIsActive(skillStateKey) || c.skillCounter == 3 { // Didn't plunge after the previous triple skill
 		c.skillCounter = 0
 		if c.StatusIsActive(c6Key) {
@@ -78,11 +78,11 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 		}
 		c.skillEnemiesHit = nil
 	}
-	//C2: After using White Clouds at Dawn, Xianyun's ATK will be increased by 20% for 15s.
+	// 2凸: 白雲の暁を使用後、閑雲の攻撃力が15秒間20%上昇する。
 	c.c2buff()
 
-	// This should only hit enemies once at most
-	// During each Cloud Transmogrification state Xianyun enters, Skyladder may be used up to 3 times and only 1 instance of Skyladder DMG can be dealt to any one opponent.
+	// 各敵に対して最大1回のみヒットする
+	// 閑雲が雲変化状態に入るたびに、天梯は最大3回使用でき、各敵に対して1回分の天梯ダメージのみ与えられる。
 	ai := combat.AttackInfo{
 		ActorIndex: c.Index,
 		Abil:       "Skyladder",
@@ -119,7 +119,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
 	return action.Info{
 		Frames:          frames.NewAbilFunc(skillLeapFrames[c.skillCounter]),
 		AnimationLength: skillLeapFrames[c.skillCounter][action.InvalidAction],
-		CanQueueAfter:   skillLeapFrames[c.skillCounter][action.ActionHighPlunge], // earliest cancel
+		CanQueueAfter:   skillLeapFrames[c.skillCounter][action.ActionHighPlunge], // 最速キャンセル
 		State:           action.SkillState,
 	}, nil
 }
@@ -129,13 +129,13 @@ func (c *char) cooldownReduce(src int) func() {
 		if c.skillSrc != src {
 			return
 		}
-		// If Xianyun does not use Driftcloud Wave while in this state, the next CD of White Clouds at Dawn will be decreased by 3s.
+		// この状態中に鶴雲波を使用しなかった場合、白雲の暁の次のCDが3秒短縮される。
 		c.ReduceActionCooldown(action.ActionSkill, 3*60)
 	}
 }
 
 func (c *char) particleCB() func(combat.AttackCB) {
-	// Particles are not produced if the skill was from c6
+	// 6凸由来のスキルの場合、粒子は生成されない
 	if c.skillWasC6 {
 		return nil
 	}
