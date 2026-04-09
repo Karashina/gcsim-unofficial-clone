@@ -16,16 +16,16 @@ import (
 // Lunar-Crystallize's Base DMG by 0.7%, up to a maximum of 14%.
 // Additionally, when Zibai is in the party, the party's Moonsign will increase by 1 level.
 func (c *char) a0Init() {
-	// Grant LCrs-Key to all party members (enables Lunar-Crystallize)
+	// 全パーティメンバーにLCrsキーを付与（Lunar-Crystallizeを有効化）
 	for _, char := range c.Core.Player.Chars() {
 		char.AddStatus("LCrs-key", -1, true)
 	}
 	// Grant moonsignKey to Zibai (increases party Moonsign level by 1)
 	// This is counted during party initialization to determine Moonsign state
 	c.AddStatus("moonsignKey", -1, true)
-	// Add Lunar-Crystallize Base DMG bonus based on DEF
-	// STUB: This should modify the Lunar-Crystallize reaction damage calculation
-	// Every 100 DEF = 0.7% bonus, max 14% (2000 DEF)
+	// 防御力に基づくLunar-Crystallize基礎ダメージボーナスを追加
+	// STUB: Lunar-Crystallize反応ダメージ計算を修正する必要あり
+	// 防御力100ごとに0.7%ボーナス、最大14%（防御力2000）
 	c.AddLCrsBaseReactBonusMod(character.LCrsBaseReactBonusMod{
 		Base: modifier.NewBase("the-coursing-sun-and-moon-a0", -1),
 		Amount: func(ai combat.AttackInfo) (float64, bool) {
@@ -46,7 +46,7 @@ func (c *char) a1Init() {
 	}
 	const selenicDescentDuration = 4 * 60 // 4 seconds
 
-	// Subscribe to Skill cast
+	// 元素スキル発動を購読
 	c.Core.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
 		if c.Core.Player.Active() != c.Index {
 			return false
@@ -55,13 +55,13 @@ func (c *char) a1Init() {
 		return false
 	}, "zibai-a1-skill")
 
-	// Subscribe to Lunar-Crystallize reaction damage from party members
+	// パーティメンバーのLunar-Crystallize反応ダメージを購読
 	c.Core.Events.Subscribe(event.OnEnemyDamage, func(args ...interface{}) bool {
 		ae, ok := args[1].(*combat.AttackEvent)
 		if !ok {
 			return false
 		}
-		// Only trigger on Lunar-Crystallize reaction damage
+		// Lunar-Crystallize反応ダメージのみトリガー
 		if ae.Info.Abil != string(reactions.LunarCrystallize) {
 			return false
 		}
@@ -70,7 +70,7 @@ func (c *char) a1Init() {
 	}, "zibai-a1-lcrs")
 }
 
-// applySelenicDescent applies the Selenic Descent buff
+// applySelenicDescent はSelenic Descentバフを適用する
 func (c *char) applySelenicDescent(duration int) {
 	c.AddStatus(selenicDescentKey, duration, true)
 
@@ -91,7 +91,7 @@ func (c *char) a4Init() {
 
 	for _, char := range c.Core.Player.Chars() {
 		if char.Index == c.Index {
-			continue // Skip self
+			continue // 自分をスキップ
 		}
 		switch char.Base.Element {
 		case attributes.Geo:
