@@ -416,4 +416,6 @@ var WeaponNameToKey = map[string]keys.Weapon{
 	"thedaybreakchronicles":           keys.TheDaybreakChronicles,
 	"daybreakchronicles":              keys.TheDaybreakChronicles,
 	"daybreak":                        keys.TheDaybreakChronicles,
+	"goldenfrostboundoath":            keys.GoldenFrostboundOath,
+	"frostboundoath":                  keys.GoldenFrostboundOath,
 }
