@@ -25,7 +25,7 @@ func (c *char) c1Init() {
 // the DMG dealt by the 2nd hit of Spirit Steed's Stride is further increased by 550% of Zibai's DEF.
 // You must first unlock Ascension 1.
 func (c *char) c2Init() {
-	// Add LCrs reaction bonus for all party members when in Lunar Phase Shift
+	// 月相転移中、全パーティメンバーにLCrs反応ボーナスを追加
 	for _, char := range c.Core.Player.Chars() {
 		char.AddLCrsReactBonusMod(character.LCrsReactBonusMod{
 			Base: modifier.NewBase("zibai-c2-lcrs-bonus", -1),
@@ -47,8 +47,8 @@ func (c *char) c2Init() {
 // The next time she uses Normal Attacks, the additional attack from her 4th hit will deal 250% of
 // the original damage as Lunar-Crystallize Reaction DMG.
 func (c *char) c4Init() {
-	// Scattermoon Splendor is handled in spiritSteedOnHitCB and queueN4AdditionalHit
-	// Normal Attack sequence not resetting is handled in attack.go via savedNormalCounter
+	// Scattermoon SplendorはspiritSteedOnHitCBとqueueN4AdditionalHitで処理
+	// 通常攻撃シーケンスのリセット無効化はattack.goのsavedNormalCounterで処理
 
 	c.Core.Log.NewEvent("Zibai C4 active: Scattermoon Splendor and Normal Attack persistence enabled", glog.LogCharacterEvent, c.Index)
 }
@@ -60,19 +60,19 @@ func (c *char) c4Init() {
 // Reaction DMG dealt by Zibai within the next 3s by 1.6% for every point consumed above 70.
 // This effect cannot stack.
 func (c *char) c6Init() {
-	// 50% radiance gain increase is handled in addPhaseShiftRadiance
-	// Consume all radiance and elevation buff is handled in spiritSteedStride
+	// 50%輝度獲得増加はaddPhaseShiftRadianceで処理
+	// 全輝度消費とelevationバフはspiritSteedStrideで処理
 
 	c.Core.Log.NewEvent("Zibai C6 active: Enhanced radiance gain and elevation buff", glog.LogCharacterEvent, c.Index)
 }
 
-// applyC6ElevationBuff applies the C6 elevation damage buff
+// applyC6ElevationBuff は6凸のelevダメージバフを適用する
 func (c *char) applyC6ElevationBuff(bonusPct float64) {
 	const c6Duration = 3 * 60 // 3 seconds
 
 	c.AddStatus(c6ElevationBuffKey, c6Duration, true)
 
-	// Add elevation mod for Spirit Steed and LCrs damage
+	// 神馬駆けとLCrsダメージ用のelev modを追加
 	c.AddElevationMod(character.ElevationMod{
 		Base: modifier.NewBaseWithHitlag(c6ElevationBuffKey, c6Duration),
 		Amount: func(ai combat.AttackInfo) (float64, bool) {

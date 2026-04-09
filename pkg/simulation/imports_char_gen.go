@@ -63,6 +63,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/lanyan"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/lauma"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/layla"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/linnea"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/lisa"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/lynette"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/characters/lyney"

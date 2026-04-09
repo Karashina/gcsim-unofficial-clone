@@ -81,6 +81,7 @@ import (
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/favonius"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/firstgreatmagic"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/flowerwreathedfeathers"
+	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/goldenfrostboundoath"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/hamayumi"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/heartstrings"
 	_ "github.com/Karashina/gcsim-unofficial-clone/internal/weapons/bow/huntersbow"
