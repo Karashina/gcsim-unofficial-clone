@@ -10,7 +10,7 @@ import (
 
 var burstFrames []int
 
-const burstHitmark = 60
+const burstHitmark = 96 // Q->回復: 96f (初期回復ヒットマーク)
 
 func init() {
 	burstFrames = frames.InitAbilSlice(70)
@@ -25,12 +25,12 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			Write("form", c.lumiForm)
 	} else {
 		// ルミを召喚してスーパーパワーフォームに入る
-		c.summonLumi(lumiFormSuper)
+		c.summonLumi(lumiFormSuper, lumiFirstTickFromQ)
 		c.Core.Log.NewEvent("Linnea summons Lumi via Burst in Super Power Form",
 			glog.LogCharacterEvent, c.Index)
 	}
 
-	// 初期回復
+	// 初期回復 (Q->回復: 96f)
 	c.QueueCharTask(func() {
 		heal := burstHealFlat[c.TalentLvlBurst()] + burstHealPer[c.TalentLvlBurst()]*c.TotalDef(false)
 		c.Core.Player.Heal(info.HealInfo{
@@ -40,15 +40,15 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 			Src:     heal,
 			Bonus:   c.Stat(attributes.Heal),
 		})
-	}, burstHitmark)
+	}, burstInitHealDelay)
 
-	// 継続回復を開始（12秒間、2秒間隔で6ティック）
+	// 継続回復を開始 (Q->継続回復開始: 158f, 回復間隔: 60f, 回復回数: 12回)
 	burstSrc := c.Core.F
 	c.AddStatus(burstHealKey, burstHealDuration, true)
 
-	for i := 1; i <= 6; i++ {
+	for i := 0; i < burstHealTicks; i++ {
 		tick := i
-		delay := burstHitmark + tick*burstHealTickRate
+		delay := burstContHealStart + tick*burstHealTickRate
 		c.QueueCharTask(func() {
 			// 回復状態がまだアクティブか確認
 			if !c.StatusIsActive(burstHealKey) {
@@ -67,8 +67,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
 		}, delay)
 	}
 
-	// クールダウンとエネルギー消費
-	c.SetCDWithDelay(action.ActionBurst, burstCD, burstHitmark)
+	// クールダウン (CT開始: 2f) とエネルギー消費 (4f)
+	c.SetCDWithDelay(action.ActionBurst, burstCD, burstCDDelay)
 	c.ConsumeEnergy(4)
 
 	return action.Info{

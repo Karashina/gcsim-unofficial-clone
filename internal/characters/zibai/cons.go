@@ -25,7 +25,6 @@ func (c *char) c1Init() {
 // the DMG dealt by the 2nd hit of Spirit Steed's Stride is further increased by 550% of Zibai's DEF.
 // You must first unlock Ascension 1.
 func (c *char) c2Init() {
-	// 月相転移中、全パーティメンバーにLCrs反応ボーナスを追加
 	for _, char := range c.Core.Player.Chars() {
 		char.AddLCrsReactBonusMod(character.LCrsReactBonusMod{
 			Base: modifier.NewBase("zibai-c2-lcrs-bonus", -1),
@@ -60,8 +59,6 @@ func (c *char) c4Init() {
 // Reaction DMG dealt by Zibai within the next 3s by 1.6% for every point consumed above 70.
 // This effect cannot stack.
 func (c *char) c6Init() {
-	// 50%輝度獲得増加はaddPhaseShiftRadianceで処理
-	// 全輝度消費とelevationバフはspiritSteedStrideで処理
 
 	c.Core.Log.NewEvent("Zibai C6 active: Enhanced radiance gain and elevation buff", glog.LogCharacterEvent, c.Index)
 }
@@ -72,7 +69,6 @@ func (c *char) applyC6ElevationBuff(bonusPct float64) {
 
 	c.AddStatus(c6ElevationBuffKey, c6Duration, true)
 
-	// 神馬駆けとLCrsダメージ用のelev modを追加
 	c.AddElevationMod(character.ElevationMod{
 		Base: modifier.NewBaseWithHitlag(c6ElevationBuffKey, c6Duration),
 		Amount: func(ai combat.AttackInfo) (float64, bool) {

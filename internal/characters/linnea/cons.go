@@ -12,23 +12,36 @@ import (
 
 // c1Init は1凸を初期化する:
 // 元素スキル使用時とLunar-Crystallize反応時に「Field Catalog」スタックを6獲得（最大18）。
-// ルミのLCrsダメージ時、1スタック消費して防御力75%分のダメージを追加。
+// 近くのパーティメンバーのLCrsダメージ時、1スタック消費して防御力75%分のダメージを追加（LCrsFlatBonusMod）。
 // ミリオントンクラッシュでは最大5スタック消費し、各スタックあたり防御力150%分のダメージを追加。
 func (c *char) c1Init() {
-	// 元素スキル使用時にField Catalogスタック追加
-	c.Core.Events.Subscribe(event.OnSkill, func(args ...interface{}) bool {
-		if c.Core.Player.Active() != c.Index {
+	// Subscribe to base Moondrift Harmony: first moondrift projectile hit (AttackTagLCrsDamage + abil "lunar-crystallize")
+	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+		ae, ok := args[1].(*combat.AttackEvent)
+		if !ok {
 			return false
 		}
-		c.addFieldCatalogStacks(6)
+		if ae.Info.AttackTag != attacks.AttackTagLCrsDamage {
+			return false
+		}
+		if ae.Info.Abil != "lunar-crystallize" {
+			return false
+		}
+		c.onMoondriftHarmony()
 		return false
-	}, "linnea-c1-skill-stacks")
+	}, "linnea-moondrift-harmony")
 
-	// Lunar-Crystallize反応時にField Catalogスタック追加
-	c.Core.Events.Subscribe(event.OnLunarCrystallize, func(args ...interface{}) bool {
-		c.addFieldCatalogStacks(6)
-		return false
-	}, "linnea-c1-lcrs-stacks")
+	// Add LCrsFlatBonusMod to all party members.
+	// When any party member (including Linnea herself) deals LCrs DMG,
+	// consume 1 Field Catalog stack to add DEF×75% flat damage (C6: 2 stacks, DEF×112.5%).
+	for _, char := range c.Core.Player.Chars() {
+		char.AddLCrsFlatBonusMod(character.LCrsFlatBonusMod{
+			Base: modifier.NewBase("linnea-c1-lcrs-flat", -1),
+			Amount: func(atk combat.AttackInfo) (float64, bool) {
+				return c.c1LCrsDamageBonus(), false
+			},
+		})
+	}
 
 	c.Core.Log.NewEvent("Linnea C1 active: Field Catalog system initialized", glog.LogCharacterEvent, c.Index)
 }
@@ -38,8 +51,8 @@ func (c *char) c1OnSkillUse() {
 	c.addFieldCatalogStacks(6)
 }
 
-// c1OnMoondriftHarmony はMoondrift Harmony発動時のC1処理
-func (c *char) c1OnMoondriftHarmony() {
+// c1OnHarmony はMoondrift Harmony発動時のC1処理
+func (c *char) c1OnHarmony() {
 	c.addFieldCatalogStacks(6)
 }
 
@@ -69,14 +82,14 @@ func (c *char) c1LCrsDamageBonus() float64 {
 	consume := 1
 	bonusMult := 0.75
 	if c.Base.Cons >= 6 {
-		// C6: 2スタック消費で150%防御力ボーナス
+		// C6: consume twice (2 stacks), DMG boosted to 150% of original (DEF*75%*1.5 = DEF*112.5%)
 		consume = 2
-		bonusMult = 1.50
+		bonusMult = 1.125
 	}
 	if c.fieldCatalogStacks < consume {
 		consume = c.fieldCatalogStacks
 		if c.Base.Cons >= 6 && consume < 2 {
-			bonusMult = 0.75 // 1スタックしかない場合は通常倍率
+			bonusMult = 0.75 // not enough stacks for full C6: fall back to base rate
 		}
 	}
 
@@ -101,8 +114,9 @@ func (c *char) c1MillionTonCrushBonus() float64 {
 	maxConsume := 5
 	bonusPerStack := 1.50
 	if c.Base.Cons >= 6 {
-		// C6: 2倍消費で各スタック150%追加
+		// C6: consume twice (up to 10 stacks), DMG boosted to 150% of original (DEF*150%*1.5 = DEF*225% per pair)
 		maxConsume = 10
+		bonusPerStack = 2.25
 	}
 
 	consume := min(maxConsume, c.fieldCatalogStacks)
@@ -112,7 +126,6 @@ func (c *char) c1MillionTonCrushBonus() float64 {
 		if effectiveStacks == 0 {
 			effectiveStacks = 1
 		}
-		bonusPerStack = 1.50
 	}
 
 	c.fieldCatalogStacks -= consume
@@ -132,12 +145,33 @@ func (c *char) c1MillionTonCrushBonus() float64 {
 // ミリオントンクラッシュの会心ダメージが150%増加。
 // Moonsign: Ascendant の場合、HOHとMTCもMoondrift Harmonyを発動する。
 func (c *char) c2Init() {
+	// C2 Ascendant Gleam: HOH/MTC trigger Moondrift Harmony (C1/C2/C4 effects)
+	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
+		if !c.MoonsignAscendant {
+			return false
+		}
+		ae, ok := args[1].(*combat.AttackEvent)
+		if !ok {
+			return false
+		}
+		if ae.Info.ActorIndex != c.Index {
+			return false
+		}
+		abil := ae.Info.Abil
+		if abil != "Lumi Heavy Overdrive Hammer (Lunar-Crystallize)" &&
+			abil != "Lumi Million Ton Crush (Lunar-Crystallize)" {
+			return false
+		}
+		c.onMoondriftHarmony()
+		return false
+	}, "linnea-ascendant-harmony")
+
 	c.Core.Log.NewEvent("Linnea C2 active: Moondrift CRIT DMG bonus initialized", glog.LogCharacterEvent, c.Index)
 }
 
-// c2OnMoondriftHarmony はMoondrift Harmony発動時のC2処理
+// c2OnHarmony はMoondrift Harmony発動時のC2処理
 // 水元素または岩元素のパーティメンバーに会心ダメージ+40%を付与（8秒）
-func (c *char) c2OnMoondriftHarmony() {
+func (c *char) c2OnHarmony() {
 	const c2Duration = 8 * 60
 
 	for _, char := range c.Core.Player.Chars() {
@@ -170,8 +204,8 @@ func (c *char) c4Init() {
 	c.Core.Log.NewEvent("Linnea C4 active: DEF buff on Moondrift Harmony", glog.LogCharacterEvent, c.Index)
 }
 
-// c4OnMoondriftHarmony はMoondrift Harmony発動時のC4処理
-func (c *char) c4OnMoondriftHarmony() {
+// c4OnHarmony はMoondrift Harmony発動時のC4処理
+func (c *char) c4OnHarmony() {
 	const c4Duration = 5 * 60
 
 	defMod := make([]float64, attributes.EndStatType)
@@ -186,18 +220,18 @@ func (c *char) c4OnMoondriftHarmony() {
 		},
 	})
 
-	// アクティブキャラにもDEF+25%（リンネアがアクティブの場合は重複しない）
+	// アクティブキャラにもDEF+25%（リンネアがアクティブの場合は重ね掛け）
 	activeIdx := c.Core.Player.Active()
-	if activeIdx != c.Index {
-		activeChar := c.Core.Player.ByIndex(activeIdx)
-		activeChar.AddStatMod(character.StatMod{
-			Base:         modifier.NewBaseWithHitlag(c4DefKey, c4Duration),
-			AffectedStat: attributes.DEFP,
-			Amount: func() ([]float64, bool) {
-				return defMod, true
-			},
-		})
-	}
+	activeChar := c.Core.Player.ByIndex(activeIdx)
+	activeDefMod := make([]float64, attributes.EndStatType)
+	activeDefMod[attributes.DEFP] = 0.25
+	activeChar.AddStatMod(character.StatMod{
+		Base:         modifier.NewBaseWithHitlag(c4DefActiveKey, c4Duration),
+		AffectedStat: attributes.DEFP,
+		Amount: func() ([]float64, bool) {
+			return activeDefMod, true
+		},
+	})
 
 	c.Core.Log.NewEvent("Linnea C4: DEF +25% applied", glog.LogCharacterEvent, c.Index).
 		Write("duration", c4Duration)
@@ -218,9 +252,7 @@ func (c *char) c6Init() {
 			if ai.AttackTag != attacks.AttackTagLCrsDamage {
 				return 0, false
 			}
-			if ai.ActorIndex != c.Index {
-				return 0, false
-			}
+			// C6: applies to all nearby party members' LCrs DMG
 			return 0.25, false
 		},
 	})
