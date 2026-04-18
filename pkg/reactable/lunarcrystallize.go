@@ -178,7 +178,7 @@ func calcLunarCrystallizeDmg(char *character.CharWrapper, atk combat.AttackInfo,
 	}
 	base := 0.96 * reactionLvlBase[lvl] * (1 + char.LCrsBaseReactBonus(atk))
 	bonus := (6 * em) / (2000 + em) // R-7 fix: was 16*em
-	return base * (1 + bonus + char.LCrsReactBonus(atk)) * (1 + char.ElevationBonus(atk))
+	return base*(1+bonus+char.LCrsReactBonus(atk))*(1+char.ElevationBonus(atk)) + char.LCrsFlatBonus(atk)
 }
 
 // calcLunarCrystallizeDmgCRIT calculates Lunar-Crystallize damage with crit
@@ -193,7 +193,7 @@ func calcLunarCrystallizeDmgCRIT(char *character.CharWrapper, atk combat.AttackI
 	base := 0.96 * reactionLvlBase[lvl] * (1 + char.LCrsBaseReactBonus(atk))
 	bonus := (6 * em) / (2000 + em) // R-7 fix: was 16*em
 	cd := char.Stat(attributes.CD)
-	return base * (1 + bonus + char.LCrsReactBonus(atk)) * (1 + cd) * (1 + char.ElevationBonus(atk))
+	return base*(1+bonus+char.LCrsReactBonus(atk))*(1+cd)*(1+char.ElevationBonus(atk)) + char.LCrsFlatBonus(atk)
 }
 
 // calcLCrsDamage calculates the final Lunar-Crystallize damage based on contributors

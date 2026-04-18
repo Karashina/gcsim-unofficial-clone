@@ -14,23 +14,23 @@ var skillFrames []int
 var skillMashFrames []int
 
 const (
-	skillHitmark     = 25
-	skillMashHitmark = 35
+	skillHitmark     = 17  // tE->D: 17 (CD開始フレーム)
+	skillMashHitmark = 111 // mE->hitmark: 111 (ミリオントンクラッシュヒットマーク)
 )
 
 func init() {
-	skillFrames = frames.InitAbilSlice(35)
-	skillMashFrames = frames.InitAbilSlice(55)
+	skillFrames = frames.InitAbilSlice(17)     // tE->D: 17
+	skillMashFrames = frames.InitAbilSlice(97) // mE->D: 97
 }
 
 func (c *char) Skill(p map[string]int) (action.Info, error) {
-	// mash=1: ルミがスーパーパワーフォーム中にアルティメットパワーフォームへ移行
-	if p["mash"] == 1 && c.lumiActive && c.lumiForm == lumiFormSuper {
+	// mash=1: アルティメットパワーフォームへ移行
+	if p["mash"] == 1 {
 		return c.skillMash(p)
 	}
 
 	// 通常発動: ルミを召喚してスーパーパワーフォームに入る
-	c.summonLumi(lumiFormSuper)
+	c.summonLumi(lumiFormSuper, lumiFirstTickFromE)
 
 	// C1: Field Catalogスタックを追加
 	if c.Base.Cons >= 1 {
@@ -97,19 +97,22 @@ func (c *char) skillMash(p map[string]int) (action.Info, error) {
 		c.Core.QueueAttackWithSnap(ai, snap, ap, 0, c.particleCB)
 	}, skillMashHitmark)
 
-	// Moonsign: Ascendant Gleamの場合、Moondrift Harmonyを発動
-	if c.MoonsignAscendant {
-		c.QueueCharTask(func() {
-			c.triggerMoondriftHarmony()
-		}, skillMashHitmark+1)
-	}
-
 	// スタンダードパワーフォームに移行
 	c.lumiForm = lumiFormStandard
 	c.lumiComboIdx = 0
-	// ティックレートをスタンダードに変更
-	c.lumiTickSrc = c.Core.F
-	c.startLumiTicks(c.lumiTickSrc)
+	// 初回ティック: mE hitmark(111) + hitmark->PPP1(132) = 243f 後
+	src := c.Core.F
+	c.lumiTickSrc = src
+	c.QueueCharTask(func() {
+		if c.lumiTickSrc != src {
+			return
+		}
+		if !c.lumiActive {
+			return
+		}
+		c.lumiAttackTick()
+		c.startLumiTicks(src)
+	}, lumiStdFirstTickAfterMash)
 
 	c.Core.Log.NewEvent("Lumi uses Million Ton Crush, switching to Standard Form",
 		glog.LogCharacterEvent, c.Index)
@@ -122,8 +125,8 @@ func (c *char) skillMash(p map[string]int) (action.Info, error) {
 	}, nil
 }
 
-// summonLumi はルミを召喚する
-func (c *char) summonLumi(form lumiForm) {
+// summonLumi はルミを召喚する。initialDelay は最初の攻撃ティックまでの遅延フレーム数
+func (c *char) summonLumi(form lumiForm, initialDelay int) {
 	c.lumiActive = true
 	c.lumiSrc = c.Core.F
 	c.lumiForm = form
@@ -131,14 +134,24 @@ func (c *char) summonLumi(form lumiForm) {
 
 	c.AddStatus(lumiKey, lumiDuration, true)
 
-	// ルミの定期攻撃を開始
-	c.lumiTickSrc = c.Core.F
-	c.startLumiTicks(c.lumiTickSrc)
+	// 初回ティックは initialDelay 後、以降は通常の間隔で継続する
+	src := c.Core.F
+	c.lumiTickSrc = src
+	c.QueueCharTask(func() {
+		if c.lumiTickSrc != src {
+			return
+		}
+		if !c.lumiActive {
+			return
+		}
+		c.lumiAttackTick()
+		c.startLumiTicks(src)
+	}, initialDelay)
 
 	// 持続時間終了時にルミを退場させる
-	src := c.lumiSrc
+	lumiSrc := c.lumiSrc
 	c.QueueCharTask(func() {
-		if c.lumiSrc != src {
+		if c.lumiSrc != lumiSrc {
 			return // リセットにより無効化
 		}
 		c.dismissLumi()
@@ -183,10 +196,7 @@ func (c *char) resetLumiDuration() {
 
 // startLumiTicks はルミの定期攻撃ティックを開始する
 func (c *char) startLumiTicks(src int) {
-	tickRate := lumiSuperTickRate
-	if c.lumiForm == lumiFormStandard {
-		tickRate = lumiStandardTickRate
-	}
+	tickRate := c.nextLumiTickRate()
 
 	c.QueueCharTask(func() {
 		if c.lumiTickSrc != src {
@@ -201,6 +211,27 @@ func (c *char) startLumiTicks(src int) {
 		// 次のティックをスケジュール
 		c.startLumiTicks(src)
 	}, tickRate)
+}
+
+// nextLumiTickRate は次の攻撃ティックまでの間隔を返す
+// comboIdxは直前のlumiAttackTickで更新済みの値を参照する
+func (c *char) nextLumiTickRate() int {
+	if c.lumiForm == lumiFormStandard {
+		return lumiStandardTickRate
+	}
+	// Moondrifts有りの場合、コンボ位置に応じた可変間隔
+	if c.MoonsignAscendant {
+		switch c.lumiComboIdx {
+		case 0:
+			// HOH実行後 → 次PPP: 61f
+			return lumiSuperHOHToPPP
+		case 2:
+			// 2回目PPP実行後 → 次HOH: 109f
+			return lumiSuperPPPToHOH
+		}
+	}
+	// PPP→PPP (Moondriftsなし or 1回目PPP後): 141f
+	return lumiSuperTickRate
 }
 
 // lumiAttackTick はルミの1回の攻撃ティックを実行する
@@ -226,9 +257,6 @@ func (c *char) lumiSuperFormAttack() {
 		// ヘビーオーバードライブハンマー（Lunar-Crystallize反応ダメージ）
 		c.lumiHeavyOverdriveHammer()
 		c.lumiComboIdx = 0
-
-		// Moonsign: Ascendant Gleamの場合、Moondrift Harmonyを発動
-		c.triggerMoondriftHarmony()
 	} else {
 		// パウンドパウンドパンメラー（2ヒット岩元素ダメージ）
 		c.lumiPoundPoundPummeler()
@@ -260,7 +288,7 @@ func (c *char) lumiPoundPoundPummeler() {
 			Mult:       skillPoundPound[c.TalentLvlSkill()],
 		}
 
-		delay := i * 10 // 2ヒットの間隔
+		delay := i * 21 // ポコポコハンマーヒット間: 21f
 		ap := combat.NewCircleHitOnTarget(c.Core.Combat.Player(), nil, 5)
 		c.QueueCharTask(func() {
 			c.Core.QueueAttack(ai, ap, 0, 0, c.particleCB)
@@ -290,6 +318,7 @@ func (c *char) lumiHeavyOverdriveHammer() {
 	emBonus := (6 * em) / (2000 + em)
 	ai.FlatDmg = baseDmg * (1 + c.LCrsBaseReactBonus(ai)) * (1 + emBonus + c.LCrsReactBonus(ai))
 	ai.FlatDmg *= (1 + c.ElevationBonus(ai))
+	ai.FlatDmg += c.LCrsFlatBonus(ai)
 
 	snap := combat.Snapshot{CharLvl: c.Base.Level}
 	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
@@ -307,7 +336,7 @@ func (c *char) particleCB(a combat.AttackCB) {
 	if c.StatusIsActive(particleICDKey) {
 		return
 	}
-	c.AddStatus(particleICDKey, 2*60, true)
+	c.AddStatus(particleICDKey, 9*60, true)
 
 	count := 3.0
 	c.Core.QueueParticle(c.Base.Key.String(), count, attributes.Geo, c.ParticleDelay)

@@ -87,7 +87,7 @@ func (c *char) applyLightkeeperOath() {
 
 // A4: Enhanced Nightingale's Song
 // Nightingale's Song bonuses are enhanced based on party composition:
-// Note: Implemented as modifier on Oriole-Song calculations
+// Note: Implemented as LCrsFlatBonusMod on Illuga; also used in Oriole-Song calculations
 
 func (c *char) a4Init() {
 	if c.Base.Ascension < 4 {
@@ -106,6 +106,15 @@ func (c *char) a4Init() {
 			c.a4GeoCount++
 		}
 	}
+
+	// Add permanent LCrsFlatBonusMod to self.
+	// Applies to Illuga's own LCrs DMG contributions (moondrift precalc + non-moondrift direct hits).
+	c.AddLCrsFlatBonusMod(character.LCrsFlatBonusMod{
+		Base: modifier.NewBase("illuga-a4-lcrs-flat", -1),
+		Amount: func(atk combat.AttackInfo) (float64, bool) {
+			return c.getA4LCrsBonus(), false
+		},
+	})
 
 	c.Core.Log.NewEvent("Illuga A4: Party composition counted", glog.LogCharacterEvent, c.Index).
 		Write("hydro_count", c.a4HydroCount).

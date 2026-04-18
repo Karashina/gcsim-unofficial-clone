@@ -3,7 +3,6 @@ package linnea
 import (
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/attributes"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/combat"
-	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/event"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/glog"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/core/player/character"
 	"github.com/Karashina/gcsim-unofficial-clone/pkg/enemy"
@@ -35,49 +34,40 @@ func (c *char) a0Init() {
 }
 
 // a1Init は固有天賦1「実地観察ノート」を初期化する
-// ルミがフィールドにいる間、ルミ付近の敵の岩元素耐性が15%減少する。
+// ルミがフィールドにいる間、すべての敵の岩元素耐性が15%減少する。
 // Moonsign: Ascendant Gleam: さらに15%減少（合計30%）。
 func (c *char) a1Init() {
 	if c.Base.Ascension < 1 {
 		return
 	}
+	c.a1Tick()
+}
 
-	// ルミがアクティブな間、定期的に岩元素耐性ダウンを適用する
-	c.Core.Events.Subscribe(event.OnEnemyHit, func(args ...interface{}) bool {
-		if !c.lumiActive {
-			return false
-		}
-		ae, ok := args[1].(*combat.AttackEvent)
-		if !ok {
-			return false
-		}
-		// リンネアの攻撃のみ（ルミの攻撃 = リンネアのActorIndex）
-		if ae.Info.ActorIndex != c.Index {
-			return false
-		}
-
-		t, ok := args[0].(*enemy.Enemy)
-		if !ok {
-			return false
-		}
-
-		// 基本の岩耐性-15%
-		t.AddResistMod(combat.ResistMod{
-			Base:  modifier.NewBaseWithHitlag(a1GeoResKey, 3*60),
-			Ele:   attributes.Geo,
-			Value: -0.15,
-		})
-
-		// Ascendant Gleam: さらに-15%
-		if c.MoonsignAscendant {
-			t.AddResistMod(combat.ResistMod{
-				Base:  modifier.NewBaseWithHitlag(a1GeoResAscendKey, 3*60),
+// a1Tick は60fごとに全敵へ岩元素耐性ダウンを適用する（hitlag非依存）
+func (c *char) a1Tick() {
+	if c.lumiActive {
+		for _, t := range c.Core.Combat.Enemies() {
+			e, ok := t.(*enemy.Enemy)
+			if !ok {
+				continue
+			}
+			// 基本の岩耐性-15%（90fで期限切れ → 60f毎のRefreshで常時維持）
+			e.AddResistMod(combat.ResistMod{
+				Base:  modifier.NewBase(a1GeoResKey, 90),
 				Ele:   attributes.Geo,
 				Value: -0.15,
 			})
+			// Ascendant Gleam: さらに-15%
+			if c.MoonsignAscendant {
+				e.AddResistMod(combat.ResistMod{
+					Base:  modifier.NewBase(a1GeoResAscendKey, 90),
+					Ele:   attributes.Geo,
+					Value: -0.15,
+				})
+			}
 		}
-		return false
-	}, "linnea-a1-geo-res")
+	}
+	c.QueueCharTask(c.a1Tick, 60)
 }
 
 // a4Init は固有天賦4「万物博物図鑑」を初期化する
@@ -90,30 +80,30 @@ func (c *char) a4Init() {
 		return
 	}
 
-	// 5% DEF による EM増加を各パーティメンバーに動的に適用
+	// 各パーティメンバーに StatMod を付与し、Amount内でアクティブキャラを動的判定
 	for _, char := range c.Core.Player.Chars() {
 		idx := char.Index
-		isMoonsign := char.StatusIsActive("moonsignKey")
-
-		if isMoonsign {
-			// Moonsignキャラ: そのキャラのEM増加
-			emMod := make([]float64, attributes.EndStatType)
-			char.AddStatMod(character.StatMod{
-				Base:         modifier.NewBase("linnea-a4-em", -1),
-				AffectedStat: attributes.EM,
-				Amount: func() ([]float64, bool) {
-					// アクティブキャラの場合のみ適用
-					if c.Core.Player.Active() != idx {
-						return nil, false
-					}
-					emMod[attributes.EM] = c.TotalDef(false) * 0.05
-					return emMod, true
-				},
-			})
-		}
+		emMod := make([]float64, attributes.EndStatType)
+		char.AddStatMod(character.StatMod{
+			Base:         modifier.NewBase("linnea-a4-em", -1),
+			AffectedStat: attributes.EM,
+			Amount: func() ([]float64, bool) {
+				// アクティブキャラでなければ適用しない
+				if c.Core.Player.Active() != idx {
+					return nil, false
+				}
+				// アクティブキャラがMoonsignかどうかを動的判定
+				activeChar := c.Core.Player.ByIndex(idx)
+				if !activeChar.StatusIsActive("moonsignKey") {
+					return nil, false
+				}
+				emMod[attributes.EM] = c.TotalDef(false) * 0.05
+				return emMod, true
+			},
+		})
 	}
 
-	// 非Moonsignキャラがアクティブの場合、リンネア自身のEM増加
+	// リンネア自身: 非Moonsignキャラがアクティブの場合にEM増加
 	emModSelf := make([]float64, attributes.EndStatType)
 	c.AddStatMod(character.StatMod{
 		Base:         modifier.NewBase("linnea-a4-em-self", -1),
