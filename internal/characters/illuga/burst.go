@@ -161,7 +161,11 @@ func (c *char) subscribeNightingaleStackConsumption() {
 		if atk.Info.AttackTag == attacks.AttackTagLCrsDamage {
 			// LCrs hits use burstLCrsBonusEM multiplier
 			flatDmg = burstLCrsBonusEM[c.TalentLvlBurst()] * illugaEM
-			flatDmg += c.getA4LCrsBonus() // A4 LCrs enhancement
+			// A4 flat bonus: applied via LCrsFlatBonusMod in calcLunarCrystallizeDmg for moondrift
+			// (Abil "lunar-crystallize"); apply here only for non-moondrift LCrs direct hits.
+			if atk.Info.Abil != "lunar-crystallize" {
+				flatDmg += c.LCrsFlatBonus(atk.Info)
+			}
 		} else {
 			// Geo hits use burstGeoBonusEM multiplier
 			flatDmg = burstGeoBonusEM[c.TalentLvlBurst()] * illugaEM
