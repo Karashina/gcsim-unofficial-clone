@@ -414,6 +414,7 @@ func (c *char) gravityInterferenceLCrs() {
 	}
 
 	ai.FlatDmg *= (1 + c.ElevationBonus(ai))
+	ai.FlatDmg += c.LCrsFlatBonus(ai)
 
 	snap := combat.Snapshot{CharLvl: c.Base.Level}
 	snap.Stats[attributes.CR] = c.Stat(attributes.CR)
