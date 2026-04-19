@@ -35,7 +35,7 @@ tools/
 scripts/
 cmd/
 docs/
-.github/work-logs/*.md
+**/*.md
 Taskfile.yml
 
 # Authentication and user management
@@ -55,9 +55,6 @@ data/
 *.db-wal
 
 # Other shenanigans
-.github/copilot-instructions.md
-newchar.md
-newweapons.md
 /webui-src
 /artifacts
 /.bg5m
