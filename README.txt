@@ -1,4 +1,4 @@
-﻿# gcsim-unofficial-clone
+# gcsim-unofficial-clone
 このリポジトリは個人運用のgcsim非公式クローンです。
 本家gcsimとは関係ありません。
 ## 利用者向け案内
