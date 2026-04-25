@@ -61,3 +61,4 @@ data/
 .cloudflare.env
 serve_data.json.gz
 serve_sample.json.gz
+/.claude
